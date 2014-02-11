@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=@LIB_INSTALL_DIR@
+includedir=${prefix}/include
+
+Name: security-containers
+Description: Security Containers Package
+Version: @PACKAGE_VERSION@
+Libs: -L${libdir} -lsecurity-containers-client
+Cflags: -I${includedir}/security-containers

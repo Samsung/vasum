@@ -1,0 +1,21 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# CMake/Makefile files
+*.cmake
+CMakeCache.txt
+CMakeFiles
+Makefile
+
+# Others
+security-containers.pc
