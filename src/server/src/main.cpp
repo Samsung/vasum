@@ -25,14 +25,63 @@
 
 
 #include <iostream>
+#include <getopt.h>             // For getopt
 
-#include <sc-server.hpp>
-
-int main(int argc, const char *argv[])
+int main(int argc, char *argv[])
 {
-    std::cout << "SC FTW!" << std::endl;
-    std::cout << argc << std::endl;
-    for (int i = 0; i < argc; ++i){
-        std::cout << argv[i] << std::endl;
+    int optIndex = 0;
+
+    const option longOptions[] = {
+        {"help",    no_argument, 0, 'h'},
+        {"version", no_argument, 0, 'v'},
+        {0, 0, 0, 0}
+    };
+
+    for (;;) {
+        int opt = getopt_long(argc, argv,
+                              "hv", // ':' after arg is the parameter
+                              longOptions,
+                              &optIndex);
+        if (opt == -1) {
+            break;
+        }
+
+        // If option comes with a parameter,
+        // the param is stored in optarg global variable by getopt_long.
+        switch (opt) {
+        case 0:
+            // A flag was set
+            break;
+
+        case '?':
+            // No such command.
+            // getopt_long already printed an error message to stderr.
+            return 1;
+
+        case 'v':
+            std::cout << "Security Containers Server v. 0.1.0" << std::endl;
+            return 0;
+
+        case 'h':
+            std::cout << "Security Containers Server v. 0.1.0          \n"
+                      << "    Options:                                 \n"
+                      << "        -h,--help     print this help        \n"
+                      << "        -v,--version  show applcation version"
+                      << std::endl;
+            return 0;
+
+        default:
+            break;
+        }
+    }
+
+    // Print unknown remaining command line arguments
+    if (optind < argc) {
+        std::cerr << "Unknown options: ";
+        while (optind < argc) {
+            std::cerr << argv[optind++] << " ";
+        }
+        std::cerr << std::endl;
+        return 1;
     }
 }
