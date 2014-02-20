@@ -20,6 +20,9 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.6.2)
 PROJECT(security-containers)
 
+## pkgconfig ###################################################################
+INCLUDE(FindPkgConfig)
+
 ## File names ##################################################################
 SET(SERVER_CODENAME "${PROJECT_NAME}-server")
 SET(CLIENT_CODENAME "${PROJECT_NAME}-client")

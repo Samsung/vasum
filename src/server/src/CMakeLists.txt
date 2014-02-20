@@ -21,6 +21,14 @@ MESSAGE ("Generating makefile for the Server...")
 FILE(GLOB_RECURSE project_SRCS *.cpp *.cxx *.cc *.C *.c *.h *.hpp)
 MESSAGE("Files: " ${project_SRCS})
 
+## Setup target ################################################################
 SET(SERVER_CODENAME "${PROJECT_NAME}-server")
-ADD_EXECUTABLE(${SERVER_CODENAME} main.cpp)
+ADD_EXECUTABLE(${SERVER_CODENAME} ${project_SRCS} )
+
+## Link libraries ##############################################################
+PKG_CHECK_MODULES(SERVER_DEPS REQUIRED libvirt)
+INCLUDE_DIRECTORIES(SYSTEM ${SERVER_DEPS_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(${SERVER_CODENAME} ${SERVER_DEPS_LIBRARIES})
+
+## Install #####################################################################
 INSTALL(TARGETS ${SERVER_CODENAME} DESTINATION bin)

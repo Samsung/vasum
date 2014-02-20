@@ -6,6 +6,8 @@ License:       Apache-2.0
 Group:         Security/Other
 Summary:       Daemon for managing containers
 BuildRequires: cmake
+BuildRequires: libvirt
+BuildRequires: libvirt-devel
 
 %description
 This package provides a daemon used to manage containers - start, stop and switch
