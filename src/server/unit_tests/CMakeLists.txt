@@ -19,7 +19,8 @@
 
 MESSAGE ("Generating makefile for the Server unit tests...")
 FILE(GLOB_RECURSE project_SRCS *.cpp)
-FILE(GLOB src_SRCS ${SERVER_FOLDER}/src/scs-container.cpp)
+FILE(GLOB src_SRCS ${SERVER_FOLDER}/src/scs-container.cpp
+                   ${SERVER_FOLDER}/src/scs-configuration.cpp)
 
 MESSAGE("Files: " ${project_SRCS} ${src_SRCS})
 
@@ -32,7 +33,7 @@ FIND_PACKAGE (Boost COMPONENTS unit_test_framework REQUIRED)
 MESSAGE ("Include dirs of boost: " ${Boost_INCLUDE_DIRS} )
 MESSAGE ("Libs of boost:         " ${Boost_LIBRARIES} )
 
-PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED libvirt)
+PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED libvirt json)
 
 INCLUDE_DIRECTORIES(SYSTEM ${UT_SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES})

@@ -26,6 +26,7 @@
 #ifndef SECURITY_CONTAINERS_SERVER_CONTAINER_HPP
 #define SECURITY_CONTAINERS_SERVER_CONTAINER_HPP
 
+#include "scs-container-config.hpp"
 #include <string>
 #include <libvirt/libvirt.h>
 
@@ -42,6 +43,8 @@ public:
     void stop();
 
 private:
+    ContainerConfig mConfig;   // container configuration
+
     virConnectPtr mVir = NULL; // pointer to the connection with libvirt
     virDomainPtr  mDom = NULL; // pointer to the domain
 

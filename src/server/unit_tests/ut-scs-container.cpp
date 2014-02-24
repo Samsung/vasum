@@ -23,10 +23,10 @@
  * @brief   Unit tests of the Container class
  */
 
+#include "scs-container.hpp"
+
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-
-#include <scs-container.hpp>
 
 using namespace security_containers;
 

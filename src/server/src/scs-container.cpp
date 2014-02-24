@@ -22,11 +22,10 @@
  * @brief   Implementation of class for managing one container
  */
 
+#include "scs-container.hpp"
+#include "scs-exception.hpp"
+#include "scs-log.hpp"
 #include <assert.h>
-
-#include <scs-container.hpp>
-#include <scs-exception.hpp>
-#include <scs-log.hpp>
 
 using namespace security_containers;
 

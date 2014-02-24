@@ -17,24 +17,33 @@
  */
 
 /**
- * @file    scs-log.hpp
- * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Logging macros
+ * @file    scs-container-config.hpp
+ * @author  Michal Witanowski (m.witanowski@samsung.com)
+ * @brief   Declaration of the class for storing container configuration
  */
 
 
-#ifndef SECURITY_CONTAINERS_SERVER_LOG_HPP
-#define SECURITY_CONTAINERS_SERVER_LOG_HPP
+#ifndef SECURITY_CONTAINERS_SERVER_CONTAINER_CONFIG_HPP
+#define SECURITY_CONTAINERS_SERVER_CONTAINER_CONFIG_HPP
 
-#include <iostream>
+#include "scs-configuration.hpp"
+#include <string>
 
-#define LOGE(...) std::cerr << "[DS] " << __FILE__ << ":" << __LINE__ << " " \
-                            << __VA_ARGS__ << std::endl
+namespace security_containers {
 
-#define LOGD(...) std::cout << "[DS] " << __FILE__ << ":" << __LINE__ << " " \
-                            << __VA_ARGS__ << std::endl
+struct ContainerConfig : public ConfigurationBase
+{
+    // it's just an example
+    int memory;
+    std::string rootDir;
 
-#define LOGW(...) std::cout << "[DS] " << __FILE__ << ":" << __LINE__ << " " \
-                            << __VA_ARGS__ << std::endl
+    CONFIG_REGISTER
+    {
+        CONFIG_VALUE(memory)
+        CONFIG_VALUE(rootDir)
+    }
+};
 
-#endif // SECURITY_CONTAINERS_SERVER_LOG_HPP
+}
+
+#endif // SECURITY_CONTAINERS_SERVER_CONTAINER_CONFIG_HPP

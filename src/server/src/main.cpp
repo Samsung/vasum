@@ -23,12 +23,11 @@
  * @brief   Main file for the Security Containers Daemon
  */
 
+#include "scs-container.hpp"  // TODO: Delete
 
 #include <iostream>
 #include <getopt.h>  // For getopt
 #include <unistd.h>  // For sleep
-
-#include <scs-container.hpp>  // TODO: Delete
 
 using namespace security_containers;
 

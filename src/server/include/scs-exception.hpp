@@ -55,6 +55,15 @@ struct DomainOperationException: public ServerException {
         ServerException(mess) {};
 };
 
+/**
+ * @brief Error occured during a config file parsing,
+ * e.g. syntax error
+ */
+struct ConfigException: public ServerException {
+    ConfigException(const std::string& mess = "Security Containers Configuration Exception"):
+        ServerException(mess) {};
+};
+
 }
 
 #endif // SECURITY_CONTAINERS_SERVER_EXCEPTION_HPP
