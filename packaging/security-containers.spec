@@ -62,3 +62,20 @@ Development package including the header files for the client library
 %defattr(644,root,root,644)
 %attr(644,root,root) %{_includedir}/security-containers/security-containers-client.h
 %attr(644,root,root) %{_libdir}/pkgconfig/security-containers.pc
+
+
+## Test Package ################################################################
+%package unit-tests
+Summary:          Security Containers Unit Tests
+Group:            Development/Libraries
+Requires:         security-containers = %{version}-%{release}
+Requires:         security-containers-client = %{version}-%{release}
+Requires:         boost-test
+BuildRequires:    boost-devel
+
+%description unit-tests
+Unit tests for both: server and client.
+
+%files unit-tests
+%defattr(644,root,root,644)
+%attr(755,root,root) %{_bindir}/security-containers-server-unit-tests

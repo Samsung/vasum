@@ -30,26 +30,7 @@
 
 #include <scs-container.hpp>  // TODO: Delete
 
-
 using namespace security_containers;
-
-// TODO: Delete when unit tests introduced.
-void test()
-{
-    Container c;
-    c.define();
-    c.start();
-    sleep(1);
-    c.start();
-    sleep(1);
-    c.stop();
-    sleep(1);
-    c.start();
-    sleep(1);
-    c.stop();
-    sleep(1);
-    c.undefine();
-}
 
 
 int main(int argc, char* argv[])
@@ -109,6 +90,4 @@ int main(int argc, char* argv[])
         std::cerr << std::endl;
         return 1;
     }
-
-    test();
 }
