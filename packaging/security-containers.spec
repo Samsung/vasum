@@ -13,12 +13,13 @@ BuildRequires: libjson-devel
 
 %description
 This package provides a daemon used to manage containers - start, stop and switch
-between them. A proccess from inside a container can request a switch of context
-(display, inputdevices) to the other container.
+between them. A process from inside a container can request a switch of context
+(display, input devices) to the other container.
 
 %files
 %attr(755,root,root) %{_bindir}/security-containers-server
 %config %attr(644,root,root) /etc/security-containers/config/.daemon.json
+%config %attr(400,root,root) /etc/security-containers/config/libvirt-config/*.xml
 
 %prep
 %setup -q
@@ -31,8 +32,7 @@ make %{?jobs:-j%jobs}
 
 %install
 %make_install
-mkdir -p %{buildroot}/etc/security-containers
-mkdir -p %{buildroot}/etc/security-containers/config
+mkdir -p %{buildroot}/etc/security-containers/config/libvirt-config/
 
 %clean
 rm -rf %{buildroot}

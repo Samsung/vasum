@@ -64,3 +64,6 @@ INSTALL(FILES       ${CMAKE_BINARY_DIR}/security-containers.pc
 
 INSTALL(FILES       ${SERVER_FOLDER}/config/.daemon.json
         DESTINATION /etc/security-containers/config/)
+
+INSTALL(FILES       ${SERVER_FOLDER}/config/libvirt-config/xminimal.xml
+        DESTINATION /etc/security-containers/config/libvirt-config)
