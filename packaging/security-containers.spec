@@ -12,6 +12,7 @@ BuildRequires: libvirt
 BuildRequires: libvirt-devel
 BuildRequires: libjson
 BuildRequires: libjson-devel
+BuildRequires: pkgconfig(glib-2.0)
 
 %description
 This package provides a daemon used to manage containers - start, stop and switch
@@ -103,3 +104,4 @@ Unit tests for both: server and client.
 %config %attr(644,root,root) /etc/security-containers/config/tests/ut-scs-container-manager/*.conf
 %config %attr(644,root,root) /etc/security-containers/config/tests/ut-scs-container-manager/containers/*.conf
 %config %attr(644,root,root) /etc/security-containers/config/tests/ut-scs-container-manager/libvirt-config/*.xml
+%config %attr(644,root,root) /etc/security-containers/config/tests/ut-dbus-connection/*.conf
