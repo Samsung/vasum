@@ -27,6 +27,7 @@
 #define SECURITY_CONTAINERS_SERVER_CONTAINER_HPP
 
 #include "scs-container-config.hpp"
+
 #include <string>
 #include <libvirt/libvirt.h>
 
@@ -35,20 +36,63 @@ namespace security_containers {
 class Container {
 
 public:
-    Container();
+    Container(const std::string& configXML);
     virtual ~Container();
-    void define(const char* configXML = NULL);
-    void undefine();
+
+    /**
+     * Boot the container
+     */
     void start();
+
+    /**
+     * Forcefully stop the container.
+     */
     void stop();
+
+    /**
+     * Gracefully shutdown the domain.
+     * This method will NOT block untill domain is shut down,
+     * because some configurations may ignore this.
+     */
+    void shutdown();
+
+    /**
+     * @return Is the process started?
+     */
+    bool isRunning();
+
+    /**
+     * Check if the container is stopped. It's NOT equivalent to !isRunning,
+     * because it checks different internal libvirt's states. There are other states,
+     * (e.g. paused) when the container isn't runnig nor stopped.
+     *
+     * @return Is the process stopped?
+     */
+    bool isStopped();
+
+    /**
+     * Suspends an active domain, the process is frozen
+     * without further access to CPU resources and I/O,
+     * but the memory used by the domain
+     * at the hypervisor level will stay allocated
+     */
+    void suspend();
+
+    /**
+     * Resume the container after suspension.
+     */
+    void resume();
+
+    /**
+     * @return Is the container in a paused state?
+     */
+    bool isPaused();
 
 private:
     ContainerConfig mConfig;   // container configuration
 
     virConnectPtr mVir = NULL; // pointer to the connection with libvirt
     virDomainPtr  mDom = NULL; // pointer to the domain
-
-    bool mIsRunning = false; // is the domain now running
 
     // TODO: This is a temporary sollution.
     const std::string mDefaultConfigXML = "<domain type=\"lxc\">\
@@ -62,9 +106,14 @@ private:
                                          <console type=\"pty\"/>\
                                          </devices>\
                                          </domain>";
-    void connect();
-    void disconnect();
 
+    void connect();    // fill mVir
+    void disconnect(); // release mVir
+    void define(const std::string& configXML); // containers can't share the same libvirt configuration
+    void undefine();
+
+    int  getState();   // get the libvirt's domain state
+    bool isPMSuspended(); // the cotainer suspended by the power manager
 };
 }
 #endif // SECURITY_CONTAINERS_SERVER_CONTAINER_HPP

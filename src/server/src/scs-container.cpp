@@ -25,24 +25,39 @@
 #include "scs-container.hpp"
 #include "scs-exception.hpp"
 #include "scs-log.hpp"
+
 #include <assert.h>
+#include <string>
 
-using namespace security_containers;
+namespace security_containers {
 
-Container::Container()
+Container::Container(const std::string& configXML)
 {
     connect();
+    define(configXML);
 }
 
 
 Container::~Container()
 {
+    // Try to shutdown
+    try {
+        resume();
+        shutdown();
+    } catch (ServerException& e) {}
+
+    // Destroy the container
+    try {
+        stop();
+        undefine();
+    } catch (ServerException& e) {
+        LOGE("Failed to destroy the container!");
+    }
     disconnect();
 }
 
 
-void
-Container::connect()
+void Container::connect()
 {
     assert(mVir == NULL);
 
@@ -54,8 +69,7 @@ Container::connect()
 };
 
 
-void
-Container::disconnect()
+void Container::disconnect()
 {
     if (mVir == NULL) {
         return;
@@ -68,13 +82,12 @@ Container::disconnect()
 };
 
 
-void
-Container::start()
+void Container::start()
 {
     assert(mVir != NULL);
     assert(mDom != NULL);
 
-    if (mIsRunning) {
+    if (isRunning()) {
         return;
     }
 
@@ -87,20 +100,18 @@ Container::start()
         LOGE("Failed to start the container");
         throw DomainOperationException();
     }
-
-    mIsRunning = true;
 };
 
 
-void
-Container::stop()
+void Container::stop()
 {
     assert(mVir != NULL);
     assert(mDom != NULL);
 
-    if (!mIsRunning) {
+    if (!isRunning()) {
         return;
     }
+
     // Forceful termination of the guest
     u_int flags = VIR_DOMAIN_DESTROY_DEFAULT;
 
@@ -108,18 +119,45 @@ Container::stop()
         LOGE("Error during domain stopping");
         throw DomainOperationException();
     }
-
-    mIsRunning = false;
 };
 
 
-void
-Container::define(const char* configXML)
+void Container::shutdown()
+{
+    assert(mVir != NULL);
+    assert(mDom != NULL);
+
+    if (!isRunning()) {
+        return;
+    }
+
+    if (virDomainShutdown(mDom) < 0) {
+        LOGE("Error during domain shutdown");
+        throw DomainOperationException();
+    }
+}
+
+
+bool Container::isRunning()
+{
+    return getState() == VIR_DOMAIN_RUNNING;
+}
+
+
+bool Container::isStopped()
+{
+    int state = getState();
+    return state == VIR_DOMAIN_SHUTDOWN ||
+           state == VIR_DOMAIN_SHUTOFF ||
+           state == VIR_DOMAIN_CRASHED;
+}
+
+void Container::define(const std::string& configXML)
 {
     assert(mVir != NULL);
 
-    if (configXML) {
-        mDom = virDomainDefineXML(mVir, configXML);
+    if (!configXML.empty()) {
+        mDom = virDomainDefineXML(mVir, configXML.c_str());
     } else {
         mDom = virDomainDefineXML(mVir, mDefaultConfigXML.c_str());
     }
@@ -131,8 +169,7 @@ Container::define(const char* configXML)
 };
 
 
-void
-Container::undefine()
+void Container::undefine()
 {
     assert(mVir != NULL);
     assert(mDom != NULL);
@@ -152,3 +189,65 @@ Container::undefine()
 
     mDom = NULL;
 };
+
+
+void Container::suspend()
+{
+    assert(mVir != NULL);
+    assert(mDom != NULL);
+
+    if (isPaused()) {
+        return;
+    }
+
+    if (isPMSuspended() || virDomainSuspend(mDom) < 0) {
+        LOGE("Error during domain suspension");
+        throw DomainOperationException();
+    }
+}
+
+
+void Container::resume()
+{
+    assert(mVir != NULL);
+    assert(mDom != NULL);
+
+    if (!isPaused()) {
+        return;
+    }
+
+    if (isPMSuspended() || virDomainResume(mDom) < 0) {
+        LOGE("Error during domain resumming");
+        throw DomainOperationException();
+    }
+}
+
+
+bool Container::isPaused()
+{
+    return getState() == VIR_DOMAIN_PAUSED;
+}
+
+
+bool Container::isPMSuspended()
+{
+    return getState() == VIR_DOMAIN_PMSUSPENDED;
+}
+
+
+int Container::getState()
+{
+    assert(mVir != NULL);
+    assert(mDom != NULL);
+
+    int state;
+
+    if (virDomainGetState(mDom, &state, NULL, 0)) {
+        LOGE("Error during getting domain's state");
+        throw DomainOperationException();
+    }
+
+    return state;
+}
+
+} // namespace security_containers

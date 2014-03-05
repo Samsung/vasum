@@ -24,21 +24,92 @@
  */
 
 #include "scs-container.hpp"
+#include "scs-exception.hpp"
+
+#include <memory>
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-using namespace security_containers;
 
 BOOST_AUTO_TEST_SUITE(ContainerSuite)
 
-BOOST_AUTO_TEST_CASE(SimpleTest)
+using namespace security_containers;
+
+const std::string testConfigXML =
+    "<domain type=\"lxc\">                  \
+        <name>cnsl</name>                   \
+        <memory>102400</memory>             \
+        <on_poweroff>destroy</on_poweroff>  \
+        <os>                                \
+            <type>exe</type>                \
+            <init>/bin/sh</init>            \
+        </os>                               \
+        <devices>                           \
+            <console type=\"pty\"/>         \
+        </devices>                          \
+    </domain>";
+
+
+BOOST_AUTO_TEST_CASE(ConstructorTest)
 {
-    Container c;
-    c.define();
-    c.start();
-    c.stop();
-    c.undefine();
+    BOOST_CHECK_THROW(Container c1("<><TRASHXML>"), ServerException);
+    BOOST_CHECK_NO_THROW(Container c2(testConfigXML));
+}
+
+BOOST_AUTO_TEST_CASE(DestructorTest)
+{
+    std::unique_ptr<Container> c(new Container(testConfigXML));
+    BOOST_REQUIRE_NO_THROW(c.reset());
+}
+
+BOOST_AUTO_TEST_CASE(StartTest)
+{
+    Container c(testConfigXML);
+    BOOST_REQUIRE_NO_THROW(c.start());
+    BOOST_CHECK(c.isRunning());
+}
+
+BOOST_AUTO_TEST_CASE(StopTest)
+{
+    Container c(testConfigXML);
+    BOOST_REQUIRE_NO_THROW(c.start());
+    BOOST_CHECK(c.isRunning());
+    BOOST_REQUIRE_NO_THROW(c.stop())
+    BOOST_CHECK(!c.isRunning());
+    BOOST_CHECK(c.isStopped());
+}
+
+BOOST_AUTO_TEST_CASE(ShutdownTest)
+{
+    Container c(testConfigXML);
+    BOOST_REQUIRE_NO_THROW(c.start())
+    BOOST_CHECK(c.isRunning());
+    BOOST_REQUIRE_NO_THROW(c.shutdown())
+    // TODO: For this simple configuration, the shutdown signal is ignored
+    // BOOST_CHECK(!c.isRunning());
+    // BOOST_CHECK(c.isStopped());
+}
+
+BOOST_AUTO_TEST_CASE(SuspendTest)
+{
+    Container c(testConfigXML);
+    BOOST_REQUIRE_NO_THROW(c.start())
+    BOOST_CHECK(c.isRunning());
+    BOOST_REQUIRE_NO_THROW(c.suspend())
+    BOOST_CHECK(!c.isRunning());
+    BOOST_CHECK(c.isPaused());
+}
+
+BOOST_AUTO_TEST_CASE(ResumeTest)
+{
+    Container c(testConfigXML);
+    BOOST_REQUIRE_NO_THROW(c.start());
+    BOOST_REQUIRE_NO_THROW(c.suspend())
+    BOOST_CHECK(c.isPaused());
+    BOOST_REQUIRE_NO_THROW(c.resume());
+    BOOST_CHECK(!c.isPaused());
+    BOOST_CHECK(c.isRunning());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
