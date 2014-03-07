@@ -20,6 +20,7 @@
 MESSAGE ("Generating makefile for the Server unit tests...")
 FILE(GLOB_RECURSE project_SRCS *.cpp)
 FILE(GLOB src_SRCS ${SERVER_FOLDER}/src/scs-container.cpp
+                   ${SERVER_FOLDER}/src/scs-container-manager.cpp
                    ${SERVER_FOLDER}/src/scs-configuration.cpp)
 
 MESSAGE("Files: " ${project_SRCS} ${src_SRCS})
@@ -40,3 +41,9 @@ TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_
 
 ## Install #####################################################################
 INSTALL(TARGETS ${UT_SERVER_CODENAME} DESTINATION bin)
+
+INSTALL(FILES       ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/test-daemon.conf
+        DESTINATION /etc/security-containers/config/tests/ut-scs-container-manager/)
+
+INSTALL(FILES       ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/libvirt-config/console.xml
+        DESTINATION /etc/security-containers/config/tests/ut-scs-container-manager/libvirt-config/)

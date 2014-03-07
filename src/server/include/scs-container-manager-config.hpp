@@ -17,38 +17,41 @@
  */
 
 /**
- * @file    scs-container-config.hpp
- * @author  Michal Witanowski (m.witanowski@samsung.com)
- * @brief   Declaration of the class for storing container configuration
+ * @file    scs-container-manager-config.hpp
+ * @author  Jan Olszak (j.olszak@samsung.com)
+ * @brief   Declaration of the class for storing container manager configuration
  */
 
 
-#ifndef SECURITY_CONTAINERS_SERVER_CONTAINER_CONFIG_HPP
-#define SECURITY_CONTAINERS_SERVER_CONTAINER_CONFIG_HPP
+#ifndef SECURITY_CONTAINERS_SERVER_CONTAINER_MANAGER_CONFIG_HPP
+#define SECURITY_CONTAINERS_SERVER_CONTAINER_MANAGER_CONFIG_HPP
 
 #include "scs-configuration.hpp"
 #include <string>
+#include <vector>
 
 namespace security_containers {
 
-struct ContainerConfig : public ConfigurationBase {
+const std::string CONTAINER_MANAGER_CONFIG_PATH = "/etc/security-containers/config/.daemon.json";
+
+struct ContainerManagerConfig : public ConfigurationBase {
     /**
-     * Privilege of the container.
-     * The smaller the value the more important the container
+     * Directory with the libvirt's configuration files
      */
-    int privilege;
+    std::string libvirtConfigDir;
 
     /**
-     * String id of the container
+     * List of containers that we manage.
+     * Appropriate files have to be inside config file
      */
-    std::string id;
+    std::vector<std::string> containerIds;
 
     CONFIG_REGISTER {
-        CONFIG_VALUE(privilege)
-        CONFIG_VALUE(id)
+        CONFIG_VALUE(libvirtConfigDir)
+        CONFIG_VALUE(containerIds)
     }
 };
 
 }
 
-#endif // SECURITY_CONTAINERS_SERVER_CONTAINER_CONFIG_HPP
+#endif // SECURITY_CONTAINERS_SERVER_CONTAINER_MANAGER_CONFIG_HPP

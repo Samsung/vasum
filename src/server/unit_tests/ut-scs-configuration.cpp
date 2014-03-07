@@ -174,15 +174,9 @@ BOOST_AUTO_TEST_CASE(ToStringTest)
 {
     TestConfig testConfig;
     BOOST_REQUIRE_NO_THROW(testConfig.parseStr(json_test_string));
-
-    std::cout << "Input:" << std::endl << json_test_string << std::endl;
-
-    std::string out;
-    BOOST_REQUIRE_NO_THROW(out = testConfig.toString());
-    std::cout << std::endl << "Output:" << std::endl << out << std::endl;
+    BOOST_REQUIRE_NO_THROW(testConfig.toString());
 
     // parse output again and check if both objects match
-    std::cout << "Validating output..." << std::endl;
     TestConfig outputConfig;
     BOOST_REQUIRE_NO_THROW(outputConfig.parseStr(json_test_string));
     BOOST_CHECK(outputConfig == testConfig);

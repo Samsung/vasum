@@ -110,3 +110,5 @@ Unit tests for both: server and client.
 %{script_dir}/sc_test_parser.py
 %{_bindir}/sc_tests_all
 %{_bindir}/sc_test_launch
+%config %attr(644,root,root) /etc/security-containers/config/tests/ut-scs-container-manager/test-daemon.conf
+%config %attr(644,root,root) /etc/security-containers/config/tests/ut-scs-container-manager/libvirt-config/*.xml
