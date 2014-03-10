@@ -1,9 +1,6 @@
 Documentation.
 
-Generate documentation by executing command:
-
-    doxygen doc/doxygen.cfg
-
+Generate documentation by executing command generate_documentation.sh from doc directory.
 Documentation will be generated in doc/html directory.
 There is also GUI tool named doxywizard.
 
