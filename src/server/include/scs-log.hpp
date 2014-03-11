@@ -27,14 +27,19 @@
 #define SECURITY_CONTAINERS_SERVER_LOG_HPP
 
 #include <iostream>
+#include <string.h>
 
-#define LOGE(...) std::cerr << "[DS] " << __FILE__ << ":" << __LINE__ << " " \
-                            << __VA_ARGS__ << std::endl
+#define BASE_FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#define LOGD(...) std::cout << "[DS] " << __FILE__ << ":" << __LINE__ << " " \
-                            << __VA_ARGS__ << std::endl
+#define LOG_LEVEL(level, ...) \
+    std::cout << "[" << level << "] " << BASE_FILE << ":" << __LINE__ << " " \
+              << __VA_ARGS__ << std::endl
 
-#define LOGW(...) std::cout << "[DS] " << __FILE__ << ":" << __LINE__ << " " \
-                            << __VA_ARGS__ << std::endl
+#define LOGE(...) LOG_LEVEL("ERROR", __VA_ARGS__)
+#define LOGW(...) LOG_LEVEL("WARN ", __VA_ARGS__)
+#define LOGI(...) LOG_LEVEL("INFO ", __VA_ARGS__)
+#define LOGD(...) LOG_LEVEL("DEBUG", __VA_ARGS__)
+#define LOGT(...) LOG_LEVEL("TRACE", __VA_ARGS__)
+
 
 #endif // SECURITY_CONTAINERS_SERVER_LOG_HPP
