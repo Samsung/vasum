@@ -25,8 +25,17 @@ between them. A process from inside a container can request a switch of context
 %setup -q
 
 %build
+%{!?build_type:%define build_type "RELEASE"}
+
+%if %{build_type} == "DEBUG"
+    # workaround for a bug in build.conf
+    %global optflags %(echo %{optflags} | sed 's/-Wp,-D_FORTIFY_SOURCE=2//')
+    export CFLAGS="%{optflags}"
+    export CXXFLAGS="%{optflags}"
+%endif
+
 %cmake . -DVERSION=%{version} \
-         -DCMAKE_BUILD_TYPE=%{?build_type:%build_type}%{!?build_type:RELEASE}
+         -DCMAKE_BUILD_TYPE=%{build_type}
 make -k %{?jobs:-j%jobs}
 
 %install

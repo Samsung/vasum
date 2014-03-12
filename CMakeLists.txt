@@ -35,13 +35,13 @@ CONFIGURE_FILE(security-containers.pc.in security-containers.pc @ONLY)
 ## Compiler flags, depending on the build type #################################
 MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 SET(CMAKE_C_FLAGS_PROFILING    "-g -O0 -pg")
-SET(CMAKE_CXX_FLAGS_PROFILING  "-g -std=c++0x -O0 -pg")
+SET(CMAKE_CXX_FLAGS_PROFILING  "-g -std=c++11 -O0 -pg")
 SET(CMAKE_C_FLAGS_DEBUG        "-g -O0 -ggdb")
-SET(CMAKE_CXX_FLAGS_DEBUG      "-g -std=c++0x -O0 -ggdb")
-SET(CMAKE_C_FLAGS_RELEASE      "-g -O2")
-SET(CMAKE_CXX_FLAGS_RELEASE    "-g -std=c++0x -O2")
+SET(CMAKE_CXX_FLAGS_DEBUG      "-g -std=c++11 -O0 -ggdb")
+SET(CMAKE_C_FLAGS_RELEASE      "-g -O2 -DNDEBUG")
+SET(CMAKE_CXX_FLAGS_RELEASE    "-g -std=c++11 -O2 -DNDEBUG")
 SET(CMAKE_C_FLAGS_CCOV         "-g -O2 --coverage")
-SET(CMAKE_CXX_FLAGS_CCOV       "-g -std=c++0x -O2 --coverage")
+SET(CMAKE_CXX_FLAGS_CCOV       "-g -std=c++11 -O2 --coverage")
 
 ADD_DEFINITIONS("-fPIC")   # Position Independent Code
 ADD_DEFINITIONS("-Werror") # Make all warnings into errors
