@@ -16,13 +16,16 @@
  *  limitations under the License
  */
 
-
 /**
- * @file    ut-main.cpp
- * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Main file for the Security Containers Daemon unit tests
+ * @file    ut.hpp
+ * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
+ * @brief   Common unit tests include file
  */
 
+#ifndef SECURITY_CONTAINERS_UT_HPP
+#define SECURITY_CONTAINERS_UT_HPP
 
-#define BOOST_TEST_MODULE Main
-#include "ut.hpp"
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+
+#endif //SECURITY_CONTAINERS_UT_HPP

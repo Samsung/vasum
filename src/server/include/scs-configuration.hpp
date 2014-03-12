@@ -62,7 +62,7 @@ enum class ConfigProcessMode : int
                                     writeSubObj(obj, name, #name);
 
 /**
-    @breief Override this abstract class to enable reading/writing a class members from/to JSON
+    @brief Override this abstract class to enable reading/writing a class members from/to JSON
     format. Use the macros above to define config class. For example:
 
     struct Foo : public ConfigurationBase
@@ -97,7 +97,7 @@ public:
     /**
      * Parse config object from a string.
      * This method throws ConfigException when fails.
-     * @param   string      JSON string to be parsed
+     * @param   str      JSON string to be parsed
      */
     void parseStr(const std::string& str);
 
@@ -118,7 +118,7 @@ public:
     /**
      * Write cofig object to a file (in JSON format).
      * This method throws ConfigException when fails.
-     * @return  path        Target file path
+     * @param  path        Target file path
      */
     void saveToFile(const std::string& path) const;
 

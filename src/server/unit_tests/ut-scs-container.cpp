@@ -23,13 +23,11 @@
  * @brief   Unit tests of the Container class
  */
 
+#include "ut.hpp"
 #include "scs-container.hpp"
 #include "scs-exception.hpp"
 
 #include <memory>
-
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
 
 
 BOOST_AUTO_TEST_SUITE(ContainerSuite)

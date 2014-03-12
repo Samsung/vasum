@@ -66,7 +66,7 @@ void Container::connect()
         LOGE("Failed to open connection to lxc://");
         throw ConnectionException();
     }
-};
+}
 
 
 void Container::disconnect()
@@ -79,7 +79,7 @@ void Container::disconnect()
         LOGE("Error during unconnecting from libvirt");
     };
     mVir = NULL;
-};
+}
 
 
 void Container::start()
@@ -100,7 +100,7 @@ void Container::start()
         LOGE("Failed to start the container");
         throw DomainOperationException();
     }
-};
+}
 
 
 void Container::stop()
@@ -119,7 +119,7 @@ void Container::stop()
         LOGE("Error during domain stopping");
         throw DomainOperationException();
     }
-};
+}
 
 
 void Container::shutdown()
@@ -166,7 +166,7 @@ void Container::define(const std::string& configXML)
         LOGE("Error during domain defining");
         throw DomainOperationException();
     }
-};
+}
 
 
 void Container::undefine()
@@ -188,7 +188,7 @@ void Container::undefine()
     }
 
     mDom = NULL;
-};
+}
 
 
 void Container::suspend()

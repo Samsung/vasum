@@ -18,7 +18,7 @@ between them. A process from inside a container can request a switch of context
 
 %files
 %attr(755,root,root) %{_bindir}/security-containers-server
-%config %attr(644,root,root) /etc/security-containers/config/.daemon.json
+%config %attr(644,root,root) /etc/security-containers/config/daemon.json
 %config %attr(400,root,root) /etc/security-containers/config/libvirt-config/*.xml
 
 %prep
@@ -26,9 +26,8 @@ between them. A process from inside a container can request a switch of context
 
 %build
 %cmake . -DVERSION=%{version} \
-         -DCMAKE_BUILD_TYPE=%{?build_type:%build_type}%{!?build_type:RELEASE} \
-         -DCMAKE_VERBOSE_MAKEFILE=ON
-make %{?jobs:-j%jobs}
+         -DCMAKE_BUILD_TYPE=%{?build_type:%build_type}%{!?build_type:RELEASE}
+make -k %{?jobs:-j%jobs}
 
 %install
 %make_install

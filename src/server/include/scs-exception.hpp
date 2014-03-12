@@ -35,7 +35,7 @@ namespace security_containers {
  */
 struct ServerException: public std::runtime_error {
     ServerException(const std::string& mess = "Security Containers Server Exception"):
-        std::runtime_error(mess) {};
+        std::runtime_error(mess) {}
 };
 
 /**
@@ -43,7 +43,7 @@ struct ServerException: public std::runtime_error {
  */
 struct ConnectionException: public ServerException {
     ConnectionException(const std::string& mess = "Security Containers Connection Exception"):
-        ServerException(mess) {};
+        ServerException(mess) {}
 };
 
 /**
@@ -52,7 +52,7 @@ struct ConnectionException: public ServerException {
  */
 struct DomainOperationException: public ServerException {
     DomainOperationException(const std::string& mess = "Security Containers Domain Operation Exception"):
-        ServerException(mess) {};
+        ServerException(mess) {}
 };
 
 /**
@@ -61,7 +61,7 @@ struct DomainOperationException: public ServerException {
  */
 struct ConfigException: public ServerException {
     ConfigException(const std::string& mess = "Security Containers Configuration Exception"):
-        ServerException(mess) {};
+        ServerException(mess) {}
 };
 
 }

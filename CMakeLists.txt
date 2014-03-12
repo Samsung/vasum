@@ -33,6 +33,7 @@ CONFIGURE_FILE(security-containers.pc.in security-containers.pc @ONLY)
 
 
 ## Compiler flags, depending on the build type #################################
+MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 SET(CMAKE_C_FLAGS_PROFILING    "-g -O0 -pg")
 SET(CMAKE_CXX_FLAGS_PROFILING  "-g -std=c++0x -O0 -pg")
 SET(CMAKE_C_FLAGS_DEBUG        "-g -O0 -ggdb")
@@ -43,9 +44,11 @@ SET(CMAKE_C_FLAGS_CCOV         "-g -O2 --coverage")
 SET(CMAKE_CXX_FLAGS_CCOV       "-g -std=c++0x -O2 --coverage")
 
 ADD_DEFINITIONS("-fPIC")   # Position Independent Code
-ADD_DEFINITIONS("-Werror") # Make all warnings into errors.
+ADD_DEFINITIONS("-Werror") # Make all warnings into errors
 ADD_DEFINITIONS("-Wall")   # Generate all warnings
 ADD_DEFINITIONS("-Wextra") # Generate even more extra warnings
+ADD_DEFINITIONS("-pedantic") # Be pedantic
+ADD_DEFINITIONS("-pedantic-errors") # Make pedantic warnings into errors
 
 
 ## Subdirectories ##############################################################
@@ -62,7 +65,7 @@ INSTALL(FILES       ${CLIENT_FOLDER}/include/security-containers-client.h
 INSTALL(FILES       ${CMAKE_BINARY_DIR}/security-containers.pc
         DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
 
-INSTALL(FILES       ${SERVER_FOLDER}/config/.daemon.json
+INSTALL(FILES       ${SERVER_FOLDER}/config/daemon.json
         DESTINATION /etc/security-containers/config/)
 
 INSTALL(FILES       ${SERVER_FOLDER}/config/libvirt-config/xminimal.xml
