@@ -23,64 +23,55 @@
  * @brief   Main file for the Security Containers Daemon
  */
 
+#include <boost/program_options.hpp>
 #include <iostream>
-#include <getopt.h>  // For getopt
+
+namespace po = boost::program_options;
+
+namespace {
+    const std::string PROGRAM_NAME_AND_VERSION =
+            "Security Containers Server " PROGRAM_VERSION;
+}
 
 int main(int argc, char* argv[])
 {
-    int optIndex = 0;
+    po::options_description desc("Allowed options");
 
-    const option longOptions[] = {
-        {"help",    no_argument, 0, 'h'},
-        {"version", no_argument, 0, 'v'},
-        {0, 0, 0, 0}
-    };
+    desc.add_options()
+        ("help,h", "print this help")
+        ("version,v", "show application version")
+    ;
 
-    for (;;) {
-        int opt = getopt_long(argc, argv,
-                              "hv", // ':' after arg is the parameter
-                              longOptions,
-                              &optIndex);
-        if (opt == -1) {
-            break;
+    po::variables_map vm;
+    po::basic_parsed_options< char > parsed =
+        po::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
+
+    std::vector<std::string> unrecognized_options =
+        po::collect_unrecognized(parsed.options, po::include_positional);
+
+    if (!unrecognized_options.empty()) {
+        std::cout << "Unrecognized options: ";
+
+        for (auto& uo: unrecognized_options) {
+            std::cout << ' ' << uo;
         }
 
-        // If option comes with a parameter,
-        // the param is stored in optarg global variable by getopt_long.
-        switch (opt) {
-        case 0:
-            // A flag was set
-            break;
+        std::cout << std::endl << std::endl;
+        std::cout << desc << std::endl;
 
-        case '?':
-            // No such command.
-            // getopt_long already printed an error message to stderr.
-            return 1;
-
-        case 'v':
-            std::cout << "Security Containers Server v. 0.1.0" << std::endl;
-            return 0;
-
-        case 'h':
-            std::cout << "Security Containers Server v. 0.1.0          \n"
-                      << "    Options:                                 \n"
-                      << "        -h,--help     print this help        \n"
-                      << "        -v,--version  show applcation version"
-                      << std::endl;
-            return 0;
-
-        default:
-            break;
-        }
-    }
-
-    // Print unknown remaining command line arguments
-    if (optind < argc) {
-        std::cerr << "Unknown options: ";
-        while (optind < argc) {
-            std::cerr << argv[optind++] << " ";
-        }
-        std::cerr << std::endl;
         return 1;
     }
+
+    po::store(parsed, vm);
+    po::notify(vm);
+
+    if (vm.count("help")) {
+        std::cout << desc << std::endl;
+        return 0;
+    } else if (vm.count("version")) {
+        std::cout << PROGRAM_NAME_AND_VERSION << std::endl;
+        return 0;
+    }
+
+    return 0;
 }

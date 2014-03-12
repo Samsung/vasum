@@ -49,6 +49,7 @@ ADD_DEFINITIONS("-Wall")   # Generate all warnings
 ADD_DEFINITIONS("-Wextra") # Generate even more extra warnings
 ADD_DEFINITIONS("-pedantic") # Be pedantic
 ADD_DEFINITIONS("-pedantic-errors") # Make pedantic warnings into errors
+ADD_DEFINITIONS(-DPROGRAM_VERSION="${VERSION}")
 
 
 ## Subdirectories ##############################################################

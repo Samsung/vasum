@@ -26,9 +26,13 @@ SET(SERVER_CODENAME "${PROJECT_NAME}-server")
 ADD_EXECUTABLE(${SERVER_CODENAME} ${project_SRCS} )
 
 ## Link libraries ##############################################################
+FIND_PACKAGE (Boost COMPONENTS program_options REQUIRED)
+MESSAGE ("Include dirs of boost: " ${Boost_INCLUDE_DIRS} )
+MESSAGE ("Libs of boost:         " ${Boost_LIBRARIES} )
+
 PKG_CHECK_MODULES(SERVER_DEPS REQUIRED libvirt json)
-INCLUDE_DIRECTORIES(SYSTEM ${SERVER_DEPS_INCLUDE_DIRS})
-TARGET_LINK_LIBRARIES(${SERVER_CODENAME} ${SERVER_DEPS_LIBRARIES})
+INCLUDE_DIRECTORIES(SYSTEM ${SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(${SERVER_CODENAME} ${SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES})
 
 ## Install #####################################################################
 INSTALL(TARGETS ${SERVER_CODENAME} DESTINATION bin)
