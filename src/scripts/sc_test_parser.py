@@ -17,6 +17,8 @@ ENDC = "\033[0m"
 
 
 class Logger(object):
+    __failedTests = []
+
     # Create summary of test providing DOM object with parsed XML
     def info(self, msg):
         print BOLD + msg + ENDC
@@ -32,13 +34,14 @@ class Logger(object):
 
 
     __indentChar = "    "
-    def testCaseSummary(self, testName, testResult, recLevel):
-        msg = self.__indentChar * recLevel + BOLD + "{:<50}".format(testName + ":")
+    def testCaseSummary(self, testSuite, testName, testResult, recLevel):
+        msg = self.__indentChar * recLevel + BOLD + "{:<50}".format(testName)
 
         if testResult == "passed":
             msg += GREEN
         else:
             msg += RED
+            self.__failedTests.append(testSuite + "/" + testName)
 
         print msg + testResult + ENDC
 
@@ -51,16 +54,16 @@ class Logger(object):
             if child.nodeName == "TestSuite":
                 self.testSuiteSummary(child, recLevel=recLevel + 1)
             elif child.nodeName == "TestCase":
-                self.testCaseSummary(child.attributes["name"].value,
+                self.testCaseSummary(suite.attributes["name"].value,
+                                     child.attributes["name"].value,
                                      child.attributes["result"].value,
                                      recLevel=recLevel + 1)
 
         if summarize:
             self.infoTitle(indPrefix + suite.attributes["name"].value + " summary:")
-            self.info(indPrefix + "Passed tests:  " + suite.attributes["test_cases_passed"].value)
-            self.info(indPrefix + "Failed tests:  " + suite.attributes["test_cases_failed"].value)
-            self.info(indPrefix + "Skipped tests: " + suite.attributes["test_cases_skipped"].value +
-                      "\n")
+            self.info(indPrefix + "Passed tests: " + suite.attributes["test_cases_passed"].value)
+            self.info(indPrefix + "Failed tests: " + suite.attributes["test_cases_failed"].value +
+                      '\n')
 
     def XMLSummary(self, dom):
         self.info("\n=========== SUMMARY ===========\n")
@@ -69,6 +72,15 @@ class Logger(object):
             for child in result.childNodes:
                 if child.nodeName == "TestSuite":
                     self.testSuiteSummary(child, summarize=True)
+
+    def failedTestSummary(self, bin):
+        if not self.__failedTests:
+            return
+
+        commandPrefix = "sc_test_launch " + bin + " -t "
+        self.infoTitle("Some tests failed. Use following command(s) to launch them explicitly:")
+        for test in self.__failedTests:
+            self.error(self.__indentChar + commandPrefix + test)
 
 
 

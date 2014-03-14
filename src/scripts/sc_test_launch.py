@@ -15,14 +15,16 @@ _defLaunchArgs = ["--report_format=XML",
 log = Logger()
 
 def _checkIfBinExists(binary):
+    # Check if binary is accessible through PATH env and with no additional paths
     paths = [s + "/" for s in os.environ["PATH"].split(os.pathsep)]
-    exists = any([os.path.isfile(path + binary) and os.access(path + binary, os.X_OK)
+    paths.append('')
+    existsInPaths = any([os.path.isfile(path + binary) and os.access(path + binary, os.X_OK)
                   for path in paths])
 
-    if not exists:
+    if not existsInPaths:
         log.error(binary + " NOT FOUND.")
 
-    return exists
+    return existsInPaths
 
 
 
@@ -36,7 +38,7 @@ def launchTest(cmd=[], externalToolCmd=[], parsing=True):
     if externalToolCmd and not _checkIfBinExists(externalToolCmd[0]):
         return
 
-    log.info("Starting " + cmd[0] + "...")
+    log.info("Starting " + cmd[0] + " ...")
 
     if parsing:
         parser = Parser()
@@ -48,6 +50,7 @@ def launchTest(cmd=[], externalToolCmd=[], parsing=True):
         if testResult != "":
             domResult = minidom.parseString(testResult)
             log.XMLSummary(domResult)
+            log.failedTestSummary(cmd[0])
     else:
         # Launching process without coloring does not require report in XML form
         # Avoid providing --report_format=XML, redirect std* by default to system's std*
