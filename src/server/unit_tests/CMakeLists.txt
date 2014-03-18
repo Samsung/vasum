@@ -19,7 +19,7 @@
 
 MESSAGE ("Generating makefile for the Server unit tests...")
 FILE(GLOB_RECURSE project_SRCS *.cpp)
-FILE(GLOB src_SRCS ${SERVER_FOLDER}/src/scs-container.cpp
+FILE(GLOB src_SRCS ${SERVER_FOLDER}/src/scs-container-admin.cpp
                    ${SERVER_FOLDER}/src/scs-container-manager.cpp
                    ${SERVER_FOLDER}/src/scs-configuration.cpp)
 

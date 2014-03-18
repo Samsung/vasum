@@ -23,7 +23,7 @@
  */
 
 #include "scs-container-manager.hpp"
-#include "scs-container.hpp"
+#include "scs-container-admin.hpp"
 #include "scs-exception.hpp"
 #include "scs-log.hpp"
 #include "scs-utils.hpp"

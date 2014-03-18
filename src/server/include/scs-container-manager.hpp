@@ -26,7 +26,7 @@
 #ifndef SECURITY_CONTAINERS_SERVER_CONTAINER_MANAGER_HPP
 #define SECURITY_CONTAINERS_SERVER_CONTAINER_MANAGER_HPP
 
-#include "scs-container.hpp"
+#include "scs-container-admin.hpp"
 #include "scs-container-manager-config.hpp"
 
 #include <string>

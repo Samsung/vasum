@@ -22,7 +22,7 @@
  * @brief   Implementation of class for managing one container
  */
 
-#include "scs-container.hpp"
+#include "scs-container-admin.hpp"
 #include "scs-exception.hpp"
 #include "scs-log.hpp"
 
