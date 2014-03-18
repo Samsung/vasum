@@ -29,8 +29,8 @@
 namespace po = boost::program_options;
 
 namespace {
-    const std::string PROGRAM_NAME_AND_VERSION =
-            "Security Containers Server " PROGRAM_VERSION;
+const std::string PROGRAM_NAME_AND_VERSION =
+    "Security Containers Server " PROGRAM_VERSION;
 }
 
 int main(int argc, char* argv[])
@@ -38,8 +38,8 @@ int main(int argc, char* argv[])
     po::options_description desc("Allowed options");
 
     desc.add_options()
-        ("help,h", "print this help")
-        ("version,v", "show application version")
+    ("help,h", "print this help")
+    ("version,v", "show application version")
     ;
 
     po::variables_map vm;
@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     if (!unrecognized_options.empty()) {
         std::cout << "Unrecognized options: ";
 
-        for (auto& uo: unrecognized_options) {
+        for (auto& uo : unrecognized_options) {
             std::cout << ' ' << uo;
         }
 

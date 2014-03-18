@@ -1,6 +1,18 @@
-Documentation.
+# Documentation
 
-Generate documentation by executing command generate_documentation.sh from doc directory.
-Documentation will be generated in doc/html directory.
+Generate documentation by executing command generate_documentation.sh
+from doc directory. Documentation will be generated in doc/html directory.
 There is also GUI tool named doxywizard.
 
+    cd ./doc
+    ./generate_documentation.sh
+
+
+# Code formatting
+
+We use astyle for code formatting.
+Get the latest version from http://sourceforge.net/projects/astyle/files/astyle/
+(at least v2.04). You can find the options file in the root of the project.
+For example to format all .cpp and .hpp files run in the project directory:
+
+    astyle --options=./astylerc --recursive ./*.cpp ./*.hpp

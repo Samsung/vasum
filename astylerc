@@ -1,0 +1,14 @@
+style=stroustrup
+suffix=none
+indent=spaces=4
+indent-col1-comments
+min-conditional-indent=2
+max-instatement-indent=40
+pad-oper
+pad-header
+unpad-paren
+align-pointer=type
+align-reference=type
+add-brackets
+keep-one-line-statements
+convert-tabs

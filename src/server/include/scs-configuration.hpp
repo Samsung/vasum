@@ -34,8 +34,7 @@
 
 namespace security_containers {
 
-enum class ConfigProcessMode : int
-{
+enum class ConfigProcessMode : int {
     Read,
     Write
 };
@@ -89,8 +88,7 @@ enum class ConfigProcessMode : int
     // use parsed object:
     std::cout << config.bar;
 */
-class ConfigurationBase
-{
+class ConfigurationBase {
 public:
     virtual ~ConfigurationBase() {}
 
@@ -163,7 +161,7 @@ protected:
         }
         int len = json_object_array_length(array);
         val.resize(len);
-        for (int i = 0; i<len; ++i) {
+        for (int i = 0; i < len; ++i) {
             val[i] = getValueFromJsonObj<T>(json_object_array_get_idx(array, i));
         }
     }
@@ -223,7 +221,7 @@ protected:
 
         int len = json_object_array_length(obj);
         val.resize(len);
-        for (int i = 0; i<len; ++i) {
+        for (int i = 0; i < len; ++i) {
             json_object* arrayObj = json_object_array_get_idx(obj, i);
             val[i].process(arrayObj, ConfigProcessMode::Read);
         }

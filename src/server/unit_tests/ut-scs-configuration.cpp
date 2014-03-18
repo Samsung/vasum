@@ -30,15 +30,12 @@ using namespace security_containers;
 
 BOOST_AUTO_TEST_SUITE(ConfigSuite)
 
-struct TestConfig : public ConfigurationBase
-{
+struct TestConfig : public ConfigurationBase {
     // subtree class
-    struct SubConfig : public ConfigurationBase
-    {
+    struct SubConfig : public ConfigurationBase {
         int intVal;
 
-        CONFIG_REGISTER
-        {
+        CONFIG_REGISTER {
             CONFIG_VALUE(intVal)
         }
 
@@ -60,8 +57,7 @@ struct TestConfig : public ConfigurationBase
     SubConfig subObj;
     std::vector<SubConfig> subVector;
 
-    CONFIG_REGISTER
-    {
+    CONFIG_REGISTER {
         CONFIG_VALUE(intVal)
         CONFIG_VALUE(stringVal)
         CONFIG_VALUE(floatVal)
