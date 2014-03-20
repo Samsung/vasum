@@ -26,7 +26,7 @@
 #ifndef SECURITY_CONTAINERS_SERVER_CONTAINER_MANAGER_HPP
 #define SECURITY_CONTAINERS_SERVER_CONTAINER_MANAGER_HPP
 
-#include "scs-container-admin.hpp"
+#include "scs-container.hpp"
 #include "scs-container-manager-config.hpp"
 
 #include <string>
@@ -39,7 +39,7 @@ namespace security_containers {
 class ContainerManager final {
 
 public:
-    ContainerManager(const std::string& configFilePath);
+    ContainerManager(const std::string& managerConfigPath);
     ~ContainerManager();
 
     /**
@@ -72,8 +72,9 @@ public:
 
 private:
     ContainerManagerConfig mConfig;
+    // TODO: secure this pointer from exceptions (e.g. in constructor)
     virConnectPtr mVir = NULL; // pointer to the connection with libvirt
-    std::unordered_map<std::string, Container> mContainers; // map of containers, id is the key
+    std::unordered_map<std::string, std::unique_ptr<Container>> mContainers; // map of containers, id is the key
 
     void connect();
     void disconnect();

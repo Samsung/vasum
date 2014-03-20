@@ -71,8 +71,11 @@ INSTALL(FILES       ${CLIENT_FOLDER}/include/security-containers-client.h
 INSTALL(FILES       ${CMAKE_BINARY_DIR}/security-containers.pc
         DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
 
-INSTALL(FILES       ${SERVER_FOLDER}/config/daemon.json
+INSTALL(FILES       ${SERVER_FOLDER}/config/daemon.conf
         DESTINATION /etc/security-containers/config/)
+
+INSTALL(FILES       ${SERVER_FOLDER}/config/containers/xminimal.conf
+        DESTINATION /etc/security-containers/config/containers)
 
 INSTALL(FILES       ${SERVER_FOLDER}/config/libvirt-config/xminimal.xml
         DESTINATION /etc/security-containers/config/libvirt-config)

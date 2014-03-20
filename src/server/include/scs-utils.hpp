@@ -25,6 +25,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 
 namespace security_containers {
@@ -61,6 +62,43 @@ template <class ...Paths> std::string createFilePath(const Paths& ... paths)
     }
 
     return retPath;
+}
+
+namespace {
+
+inline void removeDuplicateSlashes(std::string& path)
+{
+    auto it = std::unique(path.begin(), path.end(),
+                          [](char a, char b) {
+                              return (a == '/' && a == b);
+                          });
+    path.erase(it, path.end());
+}
+
+inline void removeTrailingSlash(std::string& path)
+{
+    if (path.size() > 1 && *(path.end() - 1) == '/') {
+        path.pop_back();
+    }
+}
+
+} // anonymous namespace
+
+/*
+ * Gets the dir name of a file path, analogous to dirname(1)
+ */
+inline std::string dirName(std::string path)
+{
+    removeDuplicateSlashes(path);
+    removeTrailingSlash(path);
+    path.erase(std::find(path.rbegin(), path.rend(), '/').base(), path.end());
+    removeTrailingSlash(path);
+
+    if (path.empty()) {
+        return ".";
+    }
+
+    return path;
 }
 
 } // namespace security_containers

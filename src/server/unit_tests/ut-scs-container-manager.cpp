@@ -35,30 +35,42 @@ BOOST_AUTO_TEST_SUITE(ContainerManagerSuite)
 
 using namespace security_containers;
 
-const std::string daemonConfigPath = "/etc/security-containers/config/tests/ut-scs-container-manager/test-daemon.conf";
+const std::string TEST_CONFIG_PATH = "/etc/security-containers/config/tests/ut-scs-container-manager/test-daemon.conf";
+const std::string BUGGY_CONFIG_PATH = "/etc/security-containers/config/tests/ut-scs-container-manager/buggy-daemon.conf";
+const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/missing-daemon.conf";
 
 
 BOOST_AUTO_TEST_CASE(ConstructorTest)
 {
-    BOOST_REQUIRE_NO_THROW(ContainerManager cm(daemonConfigPath););
+    BOOST_REQUIRE_NO_THROW(ContainerManager cm(TEST_CONFIG_PATH););
 }
 
 BOOST_AUTO_TEST_CASE(DestructorTest)
 {
-    std::unique_ptr<ContainerManager> cm(new ContainerManager(daemonConfigPath));
+    std::unique_ptr<ContainerManager> cm(new ContainerManager(TEST_CONFIG_PATH));
     BOOST_REQUIRE_NO_THROW(cm.reset());
+}
+
+BOOST_AUTO_TEST_CASE(BuggyConfigTest)
+{
+    BOOST_REQUIRE_THROW(ContainerManager cm(BUGGY_CONFIG_PATH), ConfigException);
+}
+
+BOOST_AUTO_TEST_CASE(MissingConfigTest)
+{
+    BOOST_REQUIRE_THROW(ContainerManager cm(MISSING_CONFIG_PATH), ConfigException);
 }
 
 BOOST_AUTO_TEST_CASE(StartAllTest)
 {
-    ContainerManager cm(daemonConfigPath);
+    ContainerManager cm(TEST_CONFIG_PATH);
     BOOST_REQUIRE_NO_THROW(cm.startAll());
     BOOST_CHECK(!cm.getRunningContainerId().empty());
 }
 
 BOOST_AUTO_TEST_CASE(StopAllTest)
 {
-    ContainerManager cm(daemonConfigPath);
+    ContainerManager cm(TEST_CONFIG_PATH);
     BOOST_REQUIRE_NO_THROW(cm.startAll());
     BOOST_REQUIRE_NO_THROW(cm.stopAll());
     BOOST_CHECK(cm.getRunningContainerId().empty());
@@ -67,7 +79,7 @@ BOOST_AUTO_TEST_CASE(StopAllTest)
 
 BOOST_AUTO_TEST_CASE(FocusTest)
 {
-    ContainerManager cm(daemonConfigPath);
+    ContainerManager cm(TEST_CONFIG_PATH);
     BOOST_REQUIRE_NO_THROW(cm.startAll());
     BOOST_REQUIRE_NO_THROW(cm.focus("console"));
     BOOST_CHECK(!cm.getSuspendedContainerIds().empty());

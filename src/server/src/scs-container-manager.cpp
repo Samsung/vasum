@@ -25,26 +25,33 @@
 #include "scs-container-manager.hpp"
 #include "scs-container-admin.hpp"
 #include "scs-exception.hpp"
-#include "scs-log.hpp"
 #include "scs-utils.hpp"
+#include "scs-log.hpp"
 
 #include <assert.h>
 #include <string>
-#include <fstream>
-#include <streambuf>
 
 namespace security_containers {
 
-ContainerManager::ContainerManager(const std::string& configFilePath)
+ContainerManager::ContainerManager(const std::string& managerConfigPath)
 {
-    mConfig.parseFile(configFilePath);
+    mConfig.parseFile(managerConfigPath);
     connect();
-    for (auto& containerId : mConfig.containerIds) {
-        std::string libvirtConfigPath = createFilePath(mConfig.libvirtConfigDir, containerId, ".xml");
-        std::ifstream t(libvirtConfigPath);
-        std::string libvirtConfig((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-        LOGT("Creating Container " << libvirtConfigPath);
-        mContainers.emplace(containerId, libvirtConfig);
+
+    for (auto& containerConfig : mConfig.containerConfigs) {
+        std::string containerConfigPath;
+
+        if (containerConfig[0] == '/') {
+            containerConfigPath = containerConfig;
+        } else {
+            std::string baseConfigPath = dirName(managerConfigPath);
+            containerConfigPath = createFilePath(baseConfigPath, "/", containerConfig);
+        }
+
+        LOGT("Creating Container " << containerConfigPath);
+        std::unique_ptr<Container> c(new Container(containerConfigPath));
+        std::string id = c->getAdmin().getId();
+        mContainers.emplace(id, std::move(c));
     }
 }
 
@@ -63,16 +70,16 @@ ContainerManager::~ContainerManager()
 void ContainerManager::focus(const std::string& containerId)
 {
     for (auto& container : mContainers) {
-        container.second.suspend();
+        container.second->getAdmin().suspend();
     }
-    mContainers.at(containerId).resume();
+    mContainers.at(containerId)->getAdmin().resume();
 }
 
 
 void ContainerManager::startAll()
 {
     for (auto& container : mContainers) {
-        container.second.start();
+        container.second->getAdmin().start();
     }
 }
 
@@ -80,7 +87,7 @@ void ContainerManager::startAll()
 void ContainerManager::stopAll()
 {
     for (auto& container : mContainers) {
-        container.second.stop();
+        container.second->getAdmin().stop();
     }
 }
 
@@ -88,7 +95,7 @@ void ContainerManager::stopAll()
 std::string ContainerManager::getRunningContainerId()
 {
     for (auto& container : mContainers) {
-        if (container.second.isRunning()) {
+        if (container.second->getAdmin().isRunning()) {
             return container.first;
         }
     }
@@ -100,7 +107,7 @@ std::vector<std::string> ContainerManager::getSuspendedContainerIds()
 {
     std::vector<std::string> retContainerIds;
     for (auto& container : mContainers) {
-        if (container.second.isPaused()) {
+        if (container.second->getAdmin().isPaused()) {
             retContainerIds.push_back(container.first);
         }
     }

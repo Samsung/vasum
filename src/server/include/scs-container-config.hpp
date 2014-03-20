@@ -39,13 +39,14 @@ struct ContainerConfig : public ConfigurationBase {
     int privilege;
 
     /**
-     * String id of the container
+     * Container's libvirt (XML) config file.
+     * Location can be relative to the Container's config file.
      */
-    std::string id;
+    std::string config;
 
     CONFIG_REGISTER {
         CONFIG_VALUE(privilege)
-        CONFIG_VALUE(id)
+        CONFIG_VALUE(config)
     }
 };
 

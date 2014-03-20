@@ -18,9 +18,9 @@
 
 
 /**
- * @file    ut-scs-container.cpp
+ * @file    ut-scs-container-admin.cpp
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Unit tests of the Container class
+ * @brief   Unit tests of the ContainerAdmin class
  */
 
 #include "ut.hpp"
@@ -28,86 +28,86 @@
 #include "scs-exception.hpp"
 
 #include <memory>
+#include <string>
 
 
-BOOST_AUTO_TEST_SUITE(ContainerSuite)
+BOOST_AUTO_TEST_SUITE(ContainerAdminSuite)
 
 using namespace security_containers;
 
-const std::string testConfigXML =
-    "<domain type=\"lxc\">                  \
-        <name>cnsl</name>                   \
-        <memory>102400</memory>             \
-        <on_poweroff>destroy</on_poweroff>  \
-        <os>                                \
-            <type>exe</type>                \
-            <init>/bin/sh</init>            \
-        </os>                               \
-        <devices>                           \
-            <console type=\"pty\"/>         \
-        </devices>                          \
-    </domain>";
+const std::string TEST_CONFIG_PATH = "/etc/security-containers/config/tests/ut-scs-container-manager/libvirt-config/test.xml";
+const std::string BUGGY_CONFIG_PATH = "/etc/security-containers/config/tests/ut-scs-container-manager/libvirt-config/buggy.xml";
+const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/missing.xml";
 
 
 BOOST_AUTO_TEST_CASE(ConstructorTest)
 {
-    BOOST_CHECK_THROW(Container c1("<><TRASHXML>"), ServerException);
-    BOOST_CHECK_NO_THROW(Container c2(testConfigXML));
+    BOOST_REQUIRE_NO_THROW(ContainerAdmin ca(TEST_CONFIG_PATH));
 }
 
 BOOST_AUTO_TEST_CASE(DestructorTest)
 {
-    std::unique_ptr<Container> c(new Container(testConfigXML));
-    BOOST_REQUIRE_NO_THROW(c.reset());
+    std::unique_ptr<ContainerAdmin> ca(new ContainerAdmin(TEST_CONFIG_PATH));
+    BOOST_REQUIRE_NO_THROW(ca.reset());
+}
+
+BOOST_AUTO_TEST_CASE(BuggyConfigTest)
+{
+    BOOST_REQUIRE_THROW(ContainerAdmin ca(BUGGY_CONFIG_PATH), ServerException);
+}
+
+BOOST_AUTO_TEST_CASE(MissingConfigTest)
+{
+    BOOST_REQUIRE_THROW(ContainerAdmin ca(MISSING_CONFIG_PATH), ConfigException);
 }
 
 BOOST_AUTO_TEST_CASE(StartTest)
 {
-    Container c(testConfigXML);
-    BOOST_REQUIRE_NO_THROW(c.start());
-    BOOST_CHECK(c.isRunning());
+    ContainerAdmin ca(TEST_CONFIG_PATH);
+    BOOST_REQUIRE_NO_THROW(ca.start());
+    BOOST_CHECK(ca.isRunning());
 }
 
 BOOST_AUTO_TEST_CASE(StopTest)
 {
-    Container c(testConfigXML);
-    BOOST_REQUIRE_NO_THROW(c.start());
-    BOOST_CHECK(c.isRunning());
-    BOOST_REQUIRE_NO_THROW(c.stop())
-    BOOST_CHECK(!c.isRunning());
-    BOOST_CHECK(c.isStopped());
+    ContainerAdmin ca(TEST_CONFIG_PATH);
+    BOOST_REQUIRE_NO_THROW(ca.start());
+    BOOST_CHECK(ca.isRunning());
+    BOOST_REQUIRE_NO_THROW(ca.stop())
+    BOOST_CHECK(!ca.isRunning());
+    BOOST_CHECK(ca.isStopped());
 }
 
 BOOST_AUTO_TEST_CASE(ShutdownTest)
 {
-    Container c(testConfigXML);
-    BOOST_REQUIRE_NO_THROW(c.start())
-    BOOST_CHECK(c.isRunning());
-    BOOST_REQUIRE_NO_THROW(c.shutdown())
+    ContainerAdmin ca(TEST_CONFIG_PATH);
+    BOOST_REQUIRE_NO_THROW(ca.start())
+    BOOST_CHECK(ca.isRunning());
+    BOOST_REQUIRE_NO_THROW(ca.shutdown())
     // TODO: For this simple configuration, the shutdown signal is ignored
-    // BOOST_CHECK(!c.isRunning());
-    // BOOST_CHECK(c.isStopped());
+    // BOOST_CHECK(!ca.isRunning());
+    // BOOST_CHECK(ca.isStopped());
 }
 
 BOOST_AUTO_TEST_CASE(SuspendTest)
 {
-    Container c(testConfigXML);
-    BOOST_REQUIRE_NO_THROW(c.start())
-    BOOST_CHECK(c.isRunning());
-    BOOST_REQUIRE_NO_THROW(c.suspend())
-    BOOST_CHECK(!c.isRunning());
-    BOOST_CHECK(c.isPaused());
+    ContainerAdmin ca(TEST_CONFIG_PATH);
+    BOOST_REQUIRE_NO_THROW(ca.start())
+    BOOST_CHECK(ca.isRunning());
+    BOOST_REQUIRE_NO_THROW(ca.suspend())
+    BOOST_CHECK(!ca.isRunning());
+    BOOST_CHECK(ca.isPaused());
 }
 
 BOOST_AUTO_TEST_CASE(ResumeTest)
 {
-    Container c(testConfigXML);
-    BOOST_REQUIRE_NO_THROW(c.start());
-    BOOST_REQUIRE_NO_THROW(c.suspend())
-    BOOST_CHECK(c.isPaused());
-    BOOST_REQUIRE_NO_THROW(c.resume());
-    BOOST_CHECK(!c.isPaused());
-    BOOST_CHECK(c.isRunning());
+    ContainerAdmin ca(TEST_CONFIG_PATH);
+    BOOST_REQUIRE_NO_THROW(ca.start());
+    BOOST_REQUIRE_NO_THROW(ca.suspend())
+    BOOST_CHECK(ca.isPaused());
+    BOOST_REQUIRE_NO_THROW(ca.resume());
+    BOOST_CHECK(!ca.isPaused());
+    BOOST_CHECK(ca.isRunning());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

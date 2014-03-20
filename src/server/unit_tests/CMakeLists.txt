@@ -20,6 +20,7 @@
 MESSAGE ("Generating makefile for the Server unit tests...")
 FILE(GLOB_RECURSE project_SRCS *.cpp)
 FILE(GLOB src_SRCS ${SERVER_FOLDER}/src/scs-container-admin.cpp
+                   ${SERVER_FOLDER}/src/scs-container.cpp
                    ${SERVER_FOLDER}/src/scs-container-manager.cpp
                    ${SERVER_FOLDER}/src/scs-configuration.cpp)
 
@@ -42,8 +43,13 @@ TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_
 ## Install #####################################################################
 INSTALL(TARGETS ${UT_SERVER_CODENAME} DESTINATION bin)
 
-INSTALL(FILES       ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/test-daemon.conf
-        DESTINATION /etc/security-containers/config/tests/ut-scs-container-manager/)
+FILE(GLOB manager_CONF         ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/*.conf)
+FILE(GLOB container_CONF       ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/containers/*.conf)
+FILE(GLOB containeradmin_CONF  ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/libvirt-config/*.xml)
 
-INSTALL(FILES       ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/libvirt-config/console.xml
-        DESTINATION /etc/security-containers/config/tests/ut-scs-container-manager/libvirt-config/)
+INSTALL(FILES        ${manager_CONF}
+        DESTINATION  /etc/security-containers/config/tests/ut-scs-container-manager/)
+INSTALL(FILES        ${container_CONF}
+        DESTINATION  /etc/security-containers/config/tests/ut-scs-container-manager/containers/)
+INSTALL(FILES        ${containeradmin_CONF}
+        DESTINATION  /etc/security-containers/config/tests/ut-scs-container-manager/libvirt-config/)

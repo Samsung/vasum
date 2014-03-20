@@ -32,23 +32,17 @@
 
 namespace security_containers {
 
-const std::string CONTAINER_MANAGER_CONFIG_PATH = "/etc/security-containers/config/.daemon.json";
+const std::string CONTAINER_MANAGER_CONFIG_PATH = "/etc/security-containers/config/daemon.conf";
 
 struct ContainerManagerConfig : public ConfigurationBase {
     /**
-     * Directory with the libvirt's configuration files
+     * List of containers' configs that we manage.
+     * File paths can be relative to the ContainerManager config file.
      */
-    std::string libvirtConfigDir;
-
-    /**
-     * List of containers that we manage.
-     * Appropriate files have to be inside config file
-     */
-    std::vector<std::string> containerIds;
+    std::vector<std::string> containerConfigs;
 
     CONFIG_REGISTER {
-        CONFIG_VALUE(libvirtConfigDir)
-        CONFIG_VALUE(containerIds)
+        CONFIG_VALUE(containerConfigs)
     }
 };
 

@@ -59,4 +59,57 @@ BOOST_AUTO_TEST_CASE(CreateFilePathTest)
     BOOST_CHECK_EQUAL("a/b/.txt", createFilePath("a", "/b/", "/.txt"));
 }
 
+BOOST_AUTO_TEST_CASE(DirNameTest)
+{
+    BOOST_CHECK_EQUAL(".", dirName(""));
+    BOOST_CHECK_EQUAL(".", dirName("."));
+    BOOST_CHECK_EQUAL(".", dirName("./"));
+    BOOST_CHECK_EQUAL(".", dirName(".///"));
+    BOOST_CHECK_EQUAL("/", dirName("/"));
+    BOOST_CHECK_EQUAL("/", dirName("///"));
+
+    BOOST_CHECK_EQUAL("/", dirName("/level1"));
+    BOOST_CHECK_EQUAL("/", dirName("/level1/"));
+    BOOST_CHECK_EQUAL("/level1", dirName("/level1/level2"));
+    BOOST_CHECK_EQUAL("/level1", dirName("/level1/level2/"));
+    BOOST_CHECK_EQUAL("/level1/level2", dirName("/level1/level2/level3"));
+    BOOST_CHECK_EQUAL("/level1/level2", dirName("/level1/level2/level3/"));
+
+    BOOST_CHECK_EQUAL(".", dirName("level1"));
+    BOOST_CHECK_EQUAL(".", dirName("level1/"));
+    BOOST_CHECK_EQUAL("level1", dirName("level1/level2"));
+    BOOST_CHECK_EQUAL("level1", dirName("level1/level2"));
+    BOOST_CHECK_EQUAL("level1", dirName("level1/level2/"));
+    BOOST_CHECK_EQUAL("level1/level2", dirName("level1/level2/level3"));
+    BOOST_CHECK_EQUAL("level1/level2", dirName("level1/level2/level3/"));
+
+    BOOST_CHECK_EQUAL(".", dirName("./level1"));
+    BOOST_CHECK_EQUAL(".", dirName("./level1/"));
+    BOOST_CHECK_EQUAL("./level1", dirName("./level1/level2"));
+    BOOST_CHECK_EQUAL("./level1", dirName("./level1/level2/"));
+    BOOST_CHECK_EQUAL("./level1/level2", dirName("./level1/level2/level3"));
+    BOOST_CHECK_EQUAL("./level1/level2", dirName("./level1/level2/level3/"));
+
+    BOOST_CHECK_EQUAL(".", dirName(".."));
+    BOOST_CHECK_EQUAL(".", dirName("../"));
+    BOOST_CHECK_EQUAL("..", dirName("../level1"));
+    BOOST_CHECK_EQUAL("..", dirName("../level1/"));
+    BOOST_CHECK_EQUAL("../level1", dirName("../level1/level2"));
+    BOOST_CHECK_EQUAL("../level1", dirName("../level1/level2/"));
+
+    BOOST_CHECK_EQUAL("/", dirName("/.."));
+    BOOST_CHECK_EQUAL("/", dirName("/../"));
+    BOOST_CHECK_EQUAL("/level1", dirName("/level1/.."));
+    BOOST_CHECK_EQUAL("/level1", dirName("/level1/../"));
+    BOOST_CHECK_EQUAL("/level1/..", dirName("/level1/../level2"));
+    BOOST_CHECK_EQUAL("/level1/..", dirName("/level1/../level2/"));
+
+    BOOST_CHECK_EQUAL("/", dirName("///.."));
+    BOOST_CHECK_EQUAL("/", dirName("//..///"));
+    BOOST_CHECK_EQUAL("/level1", dirName("//level1//.."));
+    BOOST_CHECK_EQUAL("/level1", dirName("//level1//..///"));
+    BOOST_CHECK_EQUAL("/level1/..", dirName("//level1////..//level2"));
+    BOOST_CHECK_EQUAL("/level1/..", dirName("////level1//..////level2///"));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -17,9 +17,9 @@
  */
 
 /**
- * @file    scs-container.cpp
+ * @file    scs-container-admin.cpp
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Implementation of class for managing one container
+ * @brief   Implementation of class for administrating one container
  */
 
 #include "scs-container-admin.hpp"
@@ -28,17 +28,25 @@
 
 #include <assert.h>
 #include <string>
+#include <fstream>
+#include <streambuf>
 
 namespace security_containers {
 
-Container::Container(const std::string& configXML)
+ContainerAdmin::ContainerAdmin(const std::string& libvirtConfigPath)
 {
     connect();
-    define(configXML);
+    std::ifstream t(libvirtConfigPath);
+    if (!t.is_open()) {
+        LOGE("libvirt config file is missing");
+        throw ConfigException();
+    }
+    std::string libvirtConfig((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+    define(libvirtConfig);
 }
 
 
-Container::~Container()
+ContainerAdmin::~ContainerAdmin()
 {
     // Try to shutdown
     try {
@@ -57,7 +65,7 @@ Container::~Container()
 }
 
 
-void Container::connect()
+void ContainerAdmin::connect()
 {
     assert(mVir == NULL);
 
@@ -69,7 +77,7 @@ void Container::connect()
 }
 
 
-void Container::disconnect()
+void ContainerAdmin::disconnect()
 {
     if (mVir == NULL) {
         return;
@@ -82,7 +90,22 @@ void Container::disconnect()
 }
 
 
-void Container::start()
+std::string ContainerAdmin::getId()
+{
+    assert(mVir != NULL);
+    assert(mDom != NULL);
+
+    const char* id;
+    if ((id = virDomainGetName(mDom)) == NULL) {
+        LOGE("Failed to get container's id");
+        throw DomainOperationException();
+    }
+
+    return id;
+}
+
+
+void ContainerAdmin::start()
 {
     assert(mVir != NULL);
     assert(mDom != NULL);
@@ -103,7 +126,7 @@ void Container::start()
 }
 
 
-void Container::stop()
+void ContainerAdmin::stop()
 {
     assert(mVir != NULL);
     assert(mDom != NULL);
@@ -122,7 +145,7 @@ void Container::stop()
 }
 
 
-void Container::shutdown()
+void ContainerAdmin::shutdown()
 {
     assert(mVir != NULL);
     assert(mDom != NULL);
@@ -138,13 +161,13 @@ void Container::shutdown()
 }
 
 
-bool Container::isRunning()
+bool ContainerAdmin::isRunning()
 {
     return getState() == VIR_DOMAIN_RUNNING;
 }
 
 
-bool Container::isStopped()
+bool ContainerAdmin::isStopped()
 {
     int state = getState();
     return state == VIR_DOMAIN_SHUTDOWN ||
@@ -152,7 +175,7 @@ bool Container::isStopped()
            state == VIR_DOMAIN_CRASHED;
 }
 
-void Container::define(const std::string& configXML)
+void ContainerAdmin::define(const std::string& configXML)
 {
     assert(mVir != NULL);
 
@@ -169,7 +192,7 @@ void Container::define(const std::string& configXML)
 }
 
 
-void Container::undefine()
+void ContainerAdmin::undefine()
 {
     assert(mVir != NULL);
     assert(mDom != NULL);
@@ -191,7 +214,7 @@ void Container::undefine()
 }
 
 
-void Container::suspend()
+void ContainerAdmin::suspend()
 {
     assert(mVir != NULL);
     assert(mDom != NULL);
@@ -207,7 +230,7 @@ void Container::suspend()
 }
 
 
-void Container::resume()
+void ContainerAdmin::resume()
 {
     assert(mVir != NULL);
     assert(mDom != NULL);
@@ -223,19 +246,19 @@ void Container::resume()
 }
 
 
-bool Container::isPaused()
+bool ContainerAdmin::isPaused()
 {
     return getState() == VIR_DOMAIN_PAUSED;
 }
 
 
-bool Container::isPMSuspended()
+bool ContainerAdmin::isPMSuspended()
 {
     return getState() == VIR_DOMAIN_PMSUSPENDED;
 }
 
 
-int Container::getState()
+int ContainerAdmin::getState()
 {
     assert(mVir != NULL);
     assert(mDom != NULL);

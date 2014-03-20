@@ -17,27 +17,30 @@
  */
 
 /**
- * @file    scs-container.hpp
+ * @file    scs-container-admin.hpp
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Declaration of the class for managing one container
+ * @brief   Declaration of the class for administrating one container
  */
 
 
-#ifndef SECURITY_CONTAINERS_SERVER_CONTAINER_HPP
-#define SECURITY_CONTAINERS_SERVER_CONTAINER_HPP
-
-#include "scs-container-config.hpp"
+#ifndef SECURITY_CONTAINERS_SERVER_CONTAINER_ADMIN_HPP
+#define SECURITY_CONTAINERS_SERVER_CONTAINER_ADMIN_HPP
 
 #include <string>
 #include <libvirt/libvirt.h>
 
 namespace security_containers {
 
-class Container {
+class ContainerAdmin {
 
 public:
-    Container(const std::string& configXML);
-    virtual ~Container();
+    ContainerAdmin(const std::string& libvirtConfigPath);
+    virtual ~ContainerAdmin();
+
+    /**
+     * Get the container id
+     */
+    std::string getId();
 
     /**
      * Boot the container
@@ -89,8 +92,7 @@ public:
     bool isPaused();
 
 private:
-    ContainerConfig mConfig;   // container configuration
-
+    // TODO: secure those pointers from exceptions (e.g. in constructor)
     virConnectPtr mVir = NULL; // pointer to the connection with libvirt
     virDomainPtr  mDom = NULL; // pointer to the domain
 
@@ -116,4 +118,4 @@ private:
     bool isPMSuspended(); // the cotainer suspended by the power manager
 };
 }
-#endif // SECURITY_CONTAINERS_SERVER_CONTAINER_HPP
+#endif // SECURITY_CONTAINERS_SERVER_CONTAINER_ADMIN_HPP
