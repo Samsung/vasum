@@ -77,7 +77,7 @@ class Logger(object):
         if not self.__failedTests:
             return
 
-        commandPrefix = "sc_test_launch " + bin + " -t "
+        commandPrefix = "sc_launch_test.py " + bin + " -t "
         self.infoTitle("Some tests failed. Use following command(s) to launch them explicitly:")
         for test in self.__failedTests:
             self.error(self.__indentChar + commandPrefix + test)

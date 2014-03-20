@@ -17,14 +17,12 @@
 # @author Jan Olszak (j.olszak@samsung.com)
 #
 
-MESSAGE ("Generating makefile for the Server unit tests...")
+MESSAGE(STATUS "Generating makefile for the Server unit tests...")
 FILE(GLOB_RECURSE project_SRCS *.cpp)
 FILE(GLOB src_SRCS ${SERVER_FOLDER}/src/scs-container-admin.cpp
                    ${SERVER_FOLDER}/src/scs-container.cpp
                    ${SERVER_FOLDER}/src/scs-container-manager.cpp
                    ${SERVER_FOLDER}/src/scs-configuration.cpp)
-
-MESSAGE("Files: " ${project_SRCS} ${src_SRCS})
 
 ## Setup target ################################################################
 SET(UT_SERVER_CODENAME "${PROJECT_NAME}-server-unit-tests")
@@ -32,8 +30,6 @@ ADD_EXECUTABLE(${UT_SERVER_CODENAME} ${project_SRCS} ${src_SRCS})
 
 ## Link libraries ##############################################################
 FIND_PACKAGE (Boost COMPONENTS unit_test_framework REQUIRED)
-MESSAGE ("Include dirs of boost: " ${Boost_INCLUDE_DIRS} )
-MESSAGE ("Libs of boost:         " ${Boost_LIBRARIES} )
 
 PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED libvirt json)
 
@@ -48,8 +44,8 @@ FILE(GLOB container_CONF       ${SERVER_FOLDER}/unit_tests/config/ut-scs-contain
 FILE(GLOB containeradmin_CONF  ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/libvirt-config/*.xml)
 
 INSTALL(FILES        ${manager_CONF}
-        DESTINATION  /etc/security-containers/config/tests/ut-scs-container-manager/)
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/ut-scs-container-manager)
 INSTALL(FILES        ${container_CONF}
-        DESTINATION  /etc/security-containers/config/tests/ut-scs-container-manager/containers/)
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/ut-scs-container-manager/containers)
 INSTALL(FILES        ${containeradmin_CONF}
-        DESTINATION  /etc/security-containers/config/tests/ut-scs-container-manager/libvirt-config/)
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/ut-scs-container-manager/libvirt-config)

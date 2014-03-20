@@ -17,9 +17,8 @@
 # @author Jan Olszak (j.olszak@samsung.com)
 #
 
-MESSAGE ("Generating makefile for the Server...")
+MESSAGE(STATUS "Generating makefile for the Server...")
 FILE(GLOB_RECURSE project_SRCS *.cpp *.cxx *.cc *.C *.c *.h *.hpp)
-MESSAGE("Files: " ${project_SRCS})
 
 ## Setup target ################################################################
 SET(SERVER_CODENAME "${PROJECT_NAME}-server")
@@ -27,8 +26,6 @@ ADD_EXECUTABLE(${SERVER_CODENAME} ${project_SRCS} )
 
 ## Link libraries ##############################################################
 FIND_PACKAGE (Boost COMPONENTS program_options REQUIRED)
-MESSAGE ("Include dirs of boost: " ${Boost_INCLUDE_DIRS} )
-MESSAGE ("Libs of boost:         " ${Boost_LIBRARIES} )
 
 PKG_CHECK_MODULES(SERVER_DEPS REQUIRED libvirt json)
 INCLUDE_DIRECTORIES(SYSTEM ${SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})

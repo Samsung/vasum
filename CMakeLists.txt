@@ -23,6 +23,9 @@ PROJECT(security-containers)
 ## pkgconfig ###################################################################
 INCLUDE(FindPkgConfig)
 
+## default CMAKE_INSTALL_* variables ###########################################
+INCLUDE(GNUInstallDirs)
+
 ## File names ##################################################################
 SET(SERVER_CODENAME "${PROJECT_NAME}-server")
 SET(CLIENT_CODENAME "${PROJECT_NAME}-client")
@@ -33,7 +36,11 @@ CONFIGURE_FILE(security-containers.pc.in security-containers.pc @ONLY)
 
 
 ## Compiler flags, depending on the build type #################################
+IF(NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE "DEBUG")
+ENDIF(NOT CMAKE_BUILD_TYPE)
 MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
 SET(CMAKE_C_FLAGS_PROFILING    "-g -O0 -pg")
 SET(CMAKE_CXX_FLAGS_PROFILING  "-g -std=c++11 -O0 -pg")
 SET(CMAKE_C_FLAGS_DEBUG        "-g -O0 -ggdb")
@@ -56,26 +63,39 @@ ADD_DEFINITIONS(-DPROGRAM_VERSION="${VERSION}")
 SET(CLIENT_FOLDER ${PROJECT_SOURCE_DIR}/src/client)
 SET(SERVER_FOLDER ${PROJECT_SOURCE_DIR}/src/server)
 
+IF(NOT DEFINED SYSCONF_INSTALL_DIR)
+    SET(SYSCONF_INSTALL_DIR "/etc")
+ENDIF(NOT DEFINED SYSCONF_INSTALL_DIR)
+
+IF(NOT DEFINED LIB_INSTALL_DIR)
+    SET(LIB_INSTALL_DIR "${CMAKE_INSTALL_FULL_LIBDIR}")
+ENDIF(NOT DEFINED LIB_INSTALL_DIR)
+
+IF(NOT DEFINED INCLUDE_INSTALL_DIR)
+    SET(INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
+ENDIF(NOT DEFINED INCLUDE_INSTALL_DIR)
+
 IF(NOT DEFINED SCRIPT_INSTALL_DIR)
-    SET(SCRIPT_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/sbin)
+    SET(SCRIPT_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/sbin")
 ENDIF(NOT DEFINED SCRIPT_INSTALL_DIR)
+
+SET(SC_CONFIG_INSTALL_DIR ${SYSCONF_INSTALL_DIR}/security-containers/config)
 
 ADD_SUBDIRECTORY(src)
 
 
 ## Installations ###############################################################
-# FILE(MAKE_DIRECTORY /usr/include/security-containers)
 INSTALL(FILES       ${CLIENT_FOLDER}/include/security-containers-client.h
-        DESTINATION /usr/include/security-containers)
+        DESTINATION ${INCLUDE_INSTALL_DIR}/security-containers)
 
 INSTALL(FILES       ${CMAKE_BINARY_DIR}/security-containers.pc
         DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
 
 INSTALL(FILES       ${SERVER_FOLDER}/config/daemon.conf
-        DESTINATION /etc/security-containers/config/)
+        DESTINATION ${SC_CONFIG_INSTALL_DIR})
 
 INSTALL(FILES       ${SERVER_FOLDER}/config/containers/xminimal.conf
-        DESTINATION /etc/security-containers/config/containers)
+        DESTINATION ${SC_CONFIG_INSTALL_DIR}/containers)
 
 INSTALL(FILES       ${SERVER_FOLDER}/config/libvirt-config/xminimal.xml
-        DESTINATION /etc/security-containers/config/libvirt-config)
+        DESTINATION ${SC_CONFIG_INSTALL_DIR}/libvirt-config)

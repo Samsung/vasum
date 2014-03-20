@@ -20,7 +20,8 @@ between them. A process from inside a container can request a switch of context
 
 %files
 %attr(755,root,root) %{_bindir}/security-containers-server
-%config %attr(644,root,root) /etc/security-containers/config/daemon.json
+%config %attr(644,root,root) /etc/security-containers/config/daemon.conf
+%config %attr(644,root,root) /etc/security-containers/config/containers/xminimal.conf
 %config %attr(400,root,root) /etc/security-containers/config/libvirt-config/*.xml
 
 %prep
@@ -32,8 +33,8 @@ between them. A process from inside a container can request a switch of context
 %if %{build_type} == "DEBUG"
     # workaround for a bug in build.conf
     %global optflags %(echo %{optflags} | sed 's/-Wp,-D_FORTIFY_SOURCE=2//')
-    export CFLAGS="%{optflags}"
-    export CXXFLAGS="%{optflags}"
+    export CFLAGS=""
+    export CXXFLAGS=""
 %endif
 
 %cmake . -DVERSION=%{version} \
@@ -99,5 +100,6 @@ Unit tests for both: server and client.
 %attr(755,root,root) %{script_dir}/sc_all_tests.py
 %attr(755,root,root) %{script_dir}/sc_launch_test.py
 %{script_dir}/sc_test_parser.py
-%config %attr(644,root,root) /etc/security-containers/config/tests/ut-scs-container-manager/test-daemon.conf
+%config %attr(644,root,root) /etc/security-containers/config/tests/ut-scs-container-manager/*.conf
+%config %attr(644,root,root) /etc/security-containers/config/tests/ut-scs-container-manager/containers/*.conf
 %config %attr(644,root,root) /etc/security-containers/config/tests/ut-scs-container-manager/libvirt-config/*.xml

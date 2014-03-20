@@ -17,9 +17,8 @@
 # @author Jan Olszak (j.olszak@samsung.com)
 #
 
-MESSAGE ("Generating makefile for the Client...")
-FILE (GLOB_RECURSE project_SRCS *.cpp *.cxx *.cc *.C *.c *.h *.hpp)
-MESSAGE ("Files:  ${project_SRCS}")
+MESSAGE(STATUS "Generating makefile for the Client...")
+FILE(GLOB_RECURSE project_SRCS *.cpp *.cxx *.cc *.C *.c *.h *.hpp)
 
 ADD_LIBRARY(${CLIENT_CODENAME} SHARED ${project_SRCS})
 INSTALL(TARGETS     ${CLIENT_CODENAME}
