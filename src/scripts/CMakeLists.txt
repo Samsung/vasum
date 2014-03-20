@@ -14,9 +14,10 @@
 #
 #
 # @file   CMakeLists.txt
-# @author Jan Olszak (j.olszak@samsung.com)
+# @author Lukasz Kostyra (l.kostyra@samsung.com)
 #
 
-ADD_SUBDIRECTORY(client)
-ADD_SUBDIRECTORY(server)
-ADD_SUBDIRECTORY(scripts)
+MESSAGE(STATUS "Installing scripts to " ${SCRIPT_INSTALL_DIR})
+FILE(GLOB_RECURSE scripts *.py)
+
+INSTALL(PROGRAMS ${scripts} DESTINATION ${SCRIPT_INSTALL_DIR})
