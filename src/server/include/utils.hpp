@@ -17,7 +17,7 @@
  */
 
 /**
- * @file    scs-utils.hpp
+ * @file    utils.hpp
  * @author  Jan Olszak (j.olszak@samsung.com)
  * @brief   Utility function declaration
  */
@@ -29,6 +29,7 @@
 
 
 namespace security_containers {
+namespace utils {
 
 template <class ...Paths> std::string createFilePath(const Paths& ... paths)
 {
@@ -101,4 +102,5 @@ inline std::string dirName(std::string path)
     return path;
 }
 
+} // namespace utils
 } // namespace security_containers

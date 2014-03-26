@@ -25,8 +25,8 @@
 #include "scs-container-manager.hpp"
 #include "scs-container-admin.hpp"
 #include "scs-exception.hpp"
-#include "scs-utils.hpp"
-#include "scs-log.hpp"
+#include "utils.hpp"
+#include "log.hpp"
 
 #include <assert.h>
 #include <string>
@@ -44,8 +44,8 @@ ContainerManager::ContainerManager(const std::string& managerConfigPath)
         if (containerConfig[0] == '/') {
             containerConfigPath = containerConfig;
         } else {
-            std::string baseConfigPath = dirName(managerConfigPath);
-            containerConfigPath = createFilePath(baseConfigPath, "/", containerConfig);
+            std::string baseConfigPath = utils::dirName(managerConfigPath);
+            containerConfigPath = utils::createFilePath(baseConfigPath, "/", containerConfig);
         }
 
         LOGT("Creating Container " << containerConfigPath);

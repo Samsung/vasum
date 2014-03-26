@@ -25,20 +25,24 @@
 #include "ut.hpp"
 #include "dbus-connection.hpp"
 #include "dbus-exception.hpp"
-#include "glib-loop.hpp"
-#include "scoped-daemon.hpp"
-#include "file-wait.hpp"
-#include "latch.hpp"
-#include "dbus-server-test.hpp"
-#include "dbus-client-test.hpp"
+#include "utils-scoped-daemon.hpp"
+#include "utils-glib-loop.hpp"
+#include "utils-file-wait.hpp"
+#include "utils-latch.hpp"
+#include "dbus-test-server.hpp"
+#include "dbus-test-client.hpp"
 #include "dbus-test-common.hpp"
-#include "scs-log.hpp"
+#include "log.hpp"
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 
 
 BOOST_AUTO_TEST_SUITE(DbusSuite)
+
+using namespace security_containers;
+using namespace security_containers::utils;
+using namespace security_containers::dbus;
 
 namespace {
 
@@ -254,8 +258,8 @@ BOOST_AUTO_TEST_CASE(DbusApiTest)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
-    DbusServerTest server;
-    DbusClientTest client;
+    DbusTestServer server;
+    DbusTestClient client;
 
     BOOST_CHECK_NO_THROW(client.noop());
     BOOST_CHECK_EQUAL("Processed: arg", client.process("arg"));
@@ -267,10 +271,10 @@ BOOST_AUTO_TEST_CASE(DbusApiNameAcquiredTest)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
-    DbusServerTest server;
-    DbusClientTest client;
+    DbusTestServer server;
+    DbusTestClient client;
 
-    BOOST_CHECK_THROW(DbusServerTest(), DbusConnectException);
+    BOOST_CHECK_THROW(DbusTestServer(), DbusConnectException);
     BOOST_CHECK_NO_THROW(client.noop());
 }
 
@@ -280,9 +284,9 @@ BOOST_AUTO_TEST_CASE(DbusApiConnectionLost1Test)
     ScopedGlibLoop loop;
     Latch disconnected;
 
-    DbusServerTest server;
+    DbusTestServer server;
     server.setDisconnectCallback([&] {disconnected.set();});
-    DbusClientTest client;
+    DbusTestClient client;
 
     BOOST_CHECK_NO_THROW(client.noop());
     daemon.stop();
@@ -294,8 +298,8 @@ BOOST_AUTO_TEST_CASE(DbusApiConnectionLost2Test)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
-    DbusServerTest server;
-    DbusClientTest client;
+    DbusTestServer server;
+    DbusTestClient client;
 
     BOOST_CHECK_NO_THROW(client.noop());
     daemon.stop();

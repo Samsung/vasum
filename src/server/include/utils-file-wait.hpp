@@ -16,25 +16,25 @@
  *  limitations under the License
  */
 
-
 /**
- * @file    ut-scs-log.cpp
- * @author  Lukasz Kostyra (l.kostyra@samsung.com)
- * @brief   Unit tests for security-containers logging system
+ * @file    utils-file-wait.hpp
+ * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
+ * @brief   Wait for file utility function
  */
 
-#include "ut.hpp"
-#include "scs-log.hpp"
+#ifndef UTILS_FILE_WAIT_HPP
+#define UTILS_FILE_WAIT_HPP
 
-BOOST_AUTO_TEST_SUITE(LogSuite)
+#include <string>
 
-BOOST_AUTO_TEST_CASE(DumpAllLogTypes)
-{
-    LOGE("Logging an error message.");
-    LOGW("Logging a warning.");
-    LOGI("Logging some information.");
-    LOGD("Logging debug information.");
-    LOGT("Logging trace information.");
-}
+namespace security_containers {
+namespace utils {
 
-BOOST_AUTO_TEST_SUITE_END()
+//TODO It is used in unit tests now, but it is unclear
+//     whether the same solution will be used in daemon.
+void waitForFile(const std::string& filename, const unsigned int timeoutMs);
+
+} // namespace utils
+} // namespace security_containers
+
+#endif // UTILS_FILE_WAIT_HPP

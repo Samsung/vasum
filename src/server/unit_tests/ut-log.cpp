@@ -16,36 +16,25 @@
  *  limitations under the License
  */
 
-/**
- * @file    dbus-client-test.hpp
- * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Example dbus api client
- */
-
-#ifndef DBUS_CLIENT_TEST_HPP
-#define DBUS_CLIENT_TEST_HPP
-
-#include <string>
-#include <memory>
-
-class DbusConnection;
-typedef std::shared_ptr<DbusConnection> DbusConnectionPtr;//TODO include dbus-connection-iface.h
 
 /**
- * Simple dbus client for test purposes.
- * Class used to test all possible kinds of dbus calls.
+ * @file    ut-log.cpp
+ * @author  Lukasz Kostyra (l.kostyra@samsung.com)
+ * @brief   Unit tests for security-containers logging system
  */
-class DbusClientTest {
-public:
-    DbusClientTest();
 
-    // interface methods
-    void noop();
-    std::string process(const std::string& arg);
-    void throwException(int arg);
+#include "ut.hpp"
+#include "log.hpp"
 
-private:
-    DbusConnectionPtr mConnection;
-};
+BOOST_AUTO_TEST_SUITE(LogSuite)
 
-#endif //DBUS_CLIENT_TEST_HPP
+BOOST_AUTO_TEST_CASE(DumpAllLogTypes)
+{
+    LOGE("Logging an error message.");
+    LOGW("Logging a warning.");
+    LOGI("Logging some information.");
+    LOGD("Logging debug information.");
+    LOGT("Logging trace information.");
+}
+
+BOOST_AUTO_TEST_SUITE_END()

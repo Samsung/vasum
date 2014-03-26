@@ -24,7 +24,10 @@
 
 #include "dbus-connection.hpp"
 #include "dbus-exception.hpp"
-#include "scs-log.hpp"
+#include "log.hpp"
+
+namespace security_containers {
+namespace dbus {
 
 namespace {
 
@@ -318,3 +321,6 @@ GVariant* DbusConnection::callMethod(const std::string& busName,
     }
     return result;
 }
+
+} // namespace dbus
+} // namespace security_containers

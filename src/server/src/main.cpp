@@ -23,21 +23,18 @@
  * @brief   Main file for the Security Containers Daemon
  */
 
-#include "glib-loop.hpp"
-#include "latch.hpp"
-#include "scs-log.hpp"
+#include "utils-glib-loop.hpp"
+#include "utils-latch.hpp"
+#include "log.hpp"
 #include <boost/program_options.hpp>
 #include <iostream>
 #include <signal.h>
 
-namespace po = boost::program_options;
+namespace security_containers {
 
 namespace {
 
-const std::string PROGRAM_NAME_AND_VERSION =
-    "Security Containers Server " PROGRAM_VERSION;
-
-Latch signalLatch;
+utils::Latch signalLatch;
 
 void signalHandler(int sig)
 {
@@ -52,7 +49,7 @@ void runDaemon()
 
     LOGI("Starting daemon...");
     {
-        ScopedGlibLoop loop;
+        utils::ScopedGlibLoop loop;
         //TODO bootstrap
         LOGI("Daemon started");
         signalLatch.wait();
@@ -62,6 +59,17 @@ void runDaemon()
 }
 
 } // namespace
+
+} // namespace security_containers
+
+namespace {
+
+const std::string PROGRAM_NAME_AND_VERSION =
+    "Security Containers Server " PROGRAM_VERSION;
+
+} // namespace
+
+namespace po = boost::program_options;
 
 int main(int argc, char* argv[])
 {
@@ -103,7 +111,8 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    runDaemon();
+    security_containers::runDaemon();
 
     return 0;
 }
+

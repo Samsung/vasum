@@ -27,6 +27,8 @@
 
 #include <string>
 
+namespace security_containers {
+
 const std::string DBUS_SOCKET_FILE       = "/tmp/container_socket";
 const std::string DBUS_ADDRESS           = "unix:path=" + DBUS_SOCKET_FILE;
 
@@ -50,5 +52,7 @@ const std::string TESTAPI_DEFINITION =
     "    </method>"
     "  </interface>"
     "</node>";
+
+} // namespace security_containers
 
 #endif //DBUS_TEST_COMMON_HPP

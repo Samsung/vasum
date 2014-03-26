@@ -24,9 +24,9 @@ FILE(GLOB src_SRCS ${SERVER_FOLDER}/src/scs-container-admin.cpp
                    ${SERVER_FOLDER}/src/scs-container-manager.cpp
                    ${SERVER_FOLDER}/src/scs-configuration.cpp
                    ${SERVER_FOLDER}/src/dbus-connection.cpp
-                   ${SERVER_FOLDER}/src/glib-loop.cpp
-                   ${SERVER_FOLDER}/src/file-wait.cpp
-                   ${SERVER_FOLDER}/src/latch.cpp)
+                   ${SERVER_FOLDER}/src/utils-glib-loop.cpp
+                   ${SERVER_FOLDER}/src/utils-file-wait.cpp
+                   ${SERVER_FOLDER}/src/utils-latch.cpp)
 
 ## Setup target ################################################################
 SET(UT_SERVER_CODENAME "${PROJECT_NAME}-server-unit-tests")

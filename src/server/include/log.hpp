@@ -17,18 +17,29 @@
  */
 
 /**
- * @file    file-wait.hpp
- * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Wait for file utility function
+ * @file    log.hpp
+ * @author  Jan Olszak (j.olszak@samsung.com)
+ * @brief   Logging macros
  */
 
-#ifndef FILE_WAIT_HPP
-#define FILE_WAIT_HPP
 
-#include <string>
+#ifndef LOG_HPP
+#define LOG_HPP
 
-//TODO It is used in unit tests now, but it is unclear
-//     whether the same solution will be used in daemon.
-void waitForFile(const std::string& filename, const unsigned int timeoutMs);
+#include <iostream>
+#include <string.h>
 
-#endif // FILE_WAIT_HPP
+#define BASE_FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
+#define LOG_LEVEL(level, ...) \
+    std::cout << "[" << level << "] " << BASE_FILE << ":" << __LINE__ << " " \
+              << __VA_ARGS__ << std::endl
+
+#define LOGE(...) LOG_LEVEL("ERROR", __VA_ARGS__)
+#define LOGW(...) LOG_LEVEL("WARN ", __VA_ARGS__)
+#define LOGI(...) LOG_LEVEL("INFO ", __VA_ARGS__)
+#define LOGD(...) LOG_LEVEL("DEBUG", __VA_ARGS__)
+#define LOGT(...) LOG_LEVEL("TRACE", __VA_ARGS__)
+
+
+#endif // LOG_HPP

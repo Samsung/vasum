@@ -23,7 +23,7 @@
  */
 
 #include "scs-exception.hpp"
-#include "scs-log.hpp"
+#include "log.hpp"
 #include "scs-configuration.hpp"
 #include <string.h>
 #include <fstream>

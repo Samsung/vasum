@@ -17,32 +17,44 @@
  */
 
 /**
- * @file    file-wait.cpp
+ * @file    utils-glib-loop.hpp
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Wait for file utility function
+ * @brief   C++ wrapper of glib main loop
  */
 
-#include "file-wait.hpp"
-#include "scs-log.hpp"
-#include <sys/stat.h>
-#include <unistd.h>
-#include <stdexcept>
+#ifndef UTILS_GLIB_LOOP_HPP
+#define UTILS_GLIB_LOOP_HPP
 
-const unsigned int GRANULARITY = 10;
+#include <thread>
+#include <memory>
 
-void waitForFile(const std::string& filename, const unsigned int timeoutMs)
-{
-    //TODO this is a temporary solution, use inotify instead of sleep
-    struct stat s;
-    unsigned int loops = 0;
-    while (stat(filename.c_str(), &s) == -1) {
-        if (errno != ENOENT) {
-            throw std::runtime_error("file access error: " + filename);
-        }
-        ++ loops;
-        if (loops * GRANULARITY > timeoutMs) {
-            throw std::runtime_error("timeout");
-        }
-        usleep(GRANULARITY * 1000);
-    }
-}
+struct _GMainLoop;
+typedef struct _GMainLoop GMainLoop;
+
+namespace security_containers {
+namespace utils {
+
+/**
+ * Glib loop controller. Loop is running in separate thread.
+ */
+class ScopedGlibLoop {
+public:
+    /**
+     * Starts a loop in separate thread.
+     */
+    ScopedGlibLoop();
+
+    /**
+     * Stops loop and waits for a thread.
+     */
+    ~ScopedGlibLoop();
+
+private:
+    std::unique_ptr<GMainLoop, void(*)(GMainLoop*)> mLoop;
+    std::thread mLoopThread;
+};
+
+} // namespace utils
+} // namespace security_containers
+
+#endif //UTILS_GLIB_LOOP_HPP

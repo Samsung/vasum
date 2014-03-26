@@ -17,43 +17,38 @@
  */
 
 /**
- * @file    dbus-exception.hpp
+ * @file    utils-file-wait.cpp
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Dbus exceptions
+ * @brief   Wait for file utility function
  */
 
-
-#ifndef DBUS_EXCEPTION_HPP
-#define DBUS_EXCEPTION_HPP
-
+#include "utils-file-wait.hpp"
+#include "log.hpp"
+#include <sys/stat.h>
+#include <unistd.h>
 #include <stdexcept>
 
 namespace security_containers {
-namespace dbus {
+namespace utils {
 
-/**
- * Base class for dbus exceptions
- */
-struct DbusException: public std::runtime_error {
-    using std::runtime_error::runtime_error;
-};
+const unsigned int GRANULARITY = 10;
 
-/**
- * Dbus connection failed exception
- */
-struct DbusConnectException: public DbusException {
-    using DbusException::DbusException;
-};
+void waitForFile(const std::string& filename, const unsigned int timeoutMs)
+{
+    //TODO this is a temporary solution, use inotify instead of sleep
+    struct stat s;
+    unsigned int loops = 0;
+    while (stat(filename.c_str(), &s) == -1) {
+        if (errno != ENOENT) {
+            throw std::runtime_error("file access error: " + filename);
+        }
+        ++ loops;
+        if (loops * GRANULARITY > timeoutMs) {
+            throw std::runtime_error("timeout");
+        }
+        usleep(GRANULARITY * 1000);
+    }
+}
 
-/**
- * Dbus operation failed exception
- * TODO split to more specific exceptions
- */
-struct DbusOperationException: public DbusException {
-    using DbusException::DbusException;
-};
-
-} // namespace dbus
+} // namespace utils
 } // namespace security_containers
-
-#endif // DBUS_EXCEPTION_HPP

@@ -17,17 +17,20 @@
  */
 
 /**
- * @file    scoped-daemon.cpp
+ * @file    utils-scoped-daemon.cpp
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
  * @brief   Starts external daemon in constructor, stops it in destructor
  */
 
-#include "scoped-daemon.hpp"
-#include "scs-log.hpp"
+#include "utils-scoped-daemon.hpp"
+#include "log.hpp"
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/prctl.h>
 #include <stdexcept>
+
+namespace security_containers {
+namespace utils {
 
 /*
  * Scoped Daemon - sequence diagram.
@@ -152,3 +155,6 @@ void ScopedDaemon::stop()
     }
     mPid = -1;
 }
+
+} // namespace utils
+} // namespace security_containers

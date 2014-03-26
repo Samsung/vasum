@@ -17,16 +17,19 @@
  */
 
 /**
- * @file    latch.hpp
+ * @file    utils-latch.hpp
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
  * @brief   Synchronization latch
  */
 
-#ifndef LATCH_HPP
-#define LATCH_HPP
+#ifndef UTILS_LATCH_HPP
+#define UTILS_LATCH_HPP
 
 #include <mutex>
 #include <condition_variable>
+
+namespace security_containers {
+namespace utils {
 
 /**
  * A synchronization aid that allows one thread to wait until
@@ -64,4 +67,7 @@ private:
     int mCount;
 };
 
-#endif // LATCH_HPP
+} // namespace utils
+} // namespace security_containers
+
+#endif // UTILS_LATCH_HPP

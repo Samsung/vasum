@@ -30,6 +30,9 @@
 #include <functional>
 #include <gio/gio.h>
 
+namespace security_containers {
+namespace dbus {
+
 /**
  * An interface used to set a result to a method call.
  */
@@ -152,5 +155,7 @@ private:
                              gpointer userData);
 };
 
+} // namespace dbus
+} // namespace security_containers
 
 #endif //DBUS_CONNECTION_HPP

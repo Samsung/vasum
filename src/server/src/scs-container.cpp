@@ -23,8 +23,8 @@
  */
 
 #include "scs-container.hpp"
-#include "scs-utils.hpp"
-#include "scs-log.hpp"
+#include "utils.hpp"
+#include "log.hpp"
 
 #include <assert.h>
 #include <string>
@@ -39,8 +39,8 @@ Container::Container(const std::string& containerConfigPath)
     if (mConfig.config[0] == '/') {
         libvirtConfigPath = mConfig.config;
     } else {
-        std::string baseConfigPath = dirName(containerConfigPath);
-        libvirtConfigPath = createFilePath(baseConfigPath, "/", mConfig.config);
+        std::string baseConfigPath = utils::dirName(containerConfigPath);
+        libvirtConfigPath = utils::createFilePath(baseConfigPath, "/", mConfig.config);
     }
 
     LOGT("Creating Container Admin " << libvirtConfigPath);

@@ -17,38 +17,46 @@
  */
 
 /**
- * @file    glib-loop.hpp
+ * @file    utils-scoped-daemon.hpp
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   C++ wrapper of glib main loop
+ * @brief   Starts external daemon in constructor, stops it in destructor
  */
 
-#ifndef GLIB_LOOP_HPP
-#define GLIB_LOOP_HPP
+#ifndef UTILS_SCOPED_DAEMON_HPP
+#define UTILS_SCOPED_DAEMON_HPP
 
-#include <thread>
-#include <memory>
+#include <sys/types.h>
 
-struct _GMainLoop;
-typedef struct _GMainLoop GMainLoop;
+namespace security_containers {
+namespace utils {
 
 /**
- * Glib loop controller. Loop is running in separate thread.
+ * External daemon launcher helper.
  */
-class ScopedGlibLoop {
+class ScopedDaemon {
 public:
     /**
-     * Starts a loop in separate thread.
+     * Starts a daemon.
+     * @param path daemon path
+     * @param argv arguments passed to the daemon
+     * @param useLauncher use additional launcher process
      */
-    ScopedGlibLoop();
+    ScopedDaemon(const char* path, const char* const argv[], const bool useLauncher = true);
 
     /**
-     * Stops loop and waits for a thread.
+     * Stops a daemon if it is not stopped already.
      */
-    ~ScopedGlibLoop();
+    ~ScopedDaemon();
 
+    /**
+     * Stops a daemon by sending SIGTERM and waits for a process.
+     */
+    void stop();
 private:
-    std::unique_ptr<GMainLoop, void(*)(GMainLoop*)> mLoop;
-    std::thread mLoopThread;
+    pid_t mPid;
 };
 
-#endif //GLIB_LOOP_HPP
+} // namespace utils
+} // namespace security_containers
+
+#endif // UTILS_SCOPED_DAEMON_HPP

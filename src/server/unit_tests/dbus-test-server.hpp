@@ -17,31 +17,29 @@
  */
 
 /**
- * @file    dbus-server-test.hpp
+ * @file    dbus-test-server.hpp
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
  * @brief   Example dbus api server
  */
 
-#ifndef DBUS_SERVER_TEST_HPP
-#define DBUS_SERVER_TEST_HPP
+#ifndef DBUS_TEST_SERVER_HPP
+#define DBUS_TEST_SERVER_HPP
 
+#include "dbus-connection.hpp" // TODO dbus-connection-iface.h
 #include <string>
 #include <memory>
 #include <mutex>
 #include <condition_variable>
-#include <gio/gio.h>//TODO how to hide this?
 
-class DbusConnection;
-typedef std::shared_ptr<DbusConnection> DbusConnectionPtr;//TODO include dbus-connection-iface.h
-class MethodResultBuilder;
+namespace security_containers {
 
 /**
  * Simple dbus server for test purposes.
  * Class used to test all possible kinds of callbacks.
  */
-class DbusServerTest {
+class DbusTestServer {
 public:
-    DbusServerTest();
+    DbusTestServer();
 
     typedef std::function<void()> DisconnectCallback;
     void setDisconnectCallback(const DisconnectCallback& callback);
@@ -53,7 +51,7 @@ private:
     void throwException(int arg);
     //}
 
-    DbusConnectionPtr mConnection;
+    dbus::DbusConnection::Pointer mConnection;
     DisconnectCallback mDisconnectCallback;
     bool mNameAcquired;
     bool mPendingDisconnect;
@@ -71,7 +69,9 @@ private:
         const std::string& interface,
         const std::string& method,
         GVariant* parameters,
-        MethodResultBuilder& result);
+        dbus::MethodResultBuilder& result);
 };
 
-#endif //DBUS_SERVER_TEST_HPP
+} // namespace security_containers
+
+#endif //DBUS_TEST_SERVER_HPP

@@ -17,45 +17,33 @@
  */
 
 /**
- * @file    latch.cpp
+ * @file    utils-glib-loop.cpp
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Synchronization latch
+ * @brief   C++ wrapper of glib main loop
  */
 
-#include "latch.hpp"
+#include "utils-glib-loop.hpp"
+#include <glib.h>
 
-Latch::Latch()
-    : mCount(0)
+namespace security_containers {
+namespace utils {
+
+ScopedGlibLoop::ScopedGlibLoop()
+    : mLoop(g_main_loop_new(NULL, FALSE), g_main_loop_unref)
 {
+    mLoopThread = std::thread([this] {g_main_loop_run(mLoop.get());});
 }
 
-void Latch::set()
+ScopedGlibLoop::~ScopedGlibLoop()
 {
-    std::unique_lock<std::mutex> lock(mMutex);
-    ++mCount;
-    mCondition.notify_one();
-}
-
-void Latch::wait()
-{
-    std::unique_lock<std::mutex> lock(mMutex);
-    mCondition.wait(lock, [this] {return mCount > 0;});
-    --mCount;
-}
-
-bool Latch::wait(const unsigned int timeoutMs)
-{
-    std::unique_lock<std::mutex> lock(mMutex);
-    if (!mCondition.wait_for(lock, std::chrono::milliseconds(timeoutMs),
-                             [this] {return mCount > 0;})) {
-        return false;
+    // ensure loop is running (avoid race condition when stop is called to early)
+    while (!g_main_loop_is_running(mLoop.get())) {
+        std::this_thread::yield();
     }
-    --mCount;
-    return true;
+    //stop loop and wait
+    g_main_loop_quit(mLoop.get());
+    mLoopThread.join();
 }
 
-bool Latch::empty()
-{
-    std::unique_lock<std::mutex> lock(mMutex);
-    return mCount == 0;
-}
+} // namespace utils
+} // namespace security_containers

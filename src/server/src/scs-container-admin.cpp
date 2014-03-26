@@ -24,7 +24,7 @@
 
 #include "scs-container-admin.hpp"
 #include "scs-exception.hpp"
-#include "scs-log.hpp"
+#include "log.hpp"
 
 #include <assert.h>
 #include <string>

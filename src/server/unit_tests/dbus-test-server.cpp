@@ -17,43 +17,44 @@
  */
 
 /**
- * @file    dbus-server-test.cpp
+ * @file    dbus-test-server.cpp
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
  * @brief   Example dbus api server
  */
 
-#include "dbus-server-test.hpp"
+#include "dbus-test-server.hpp"
 #include "dbus-connection.hpp"
 #include "dbus-exception.hpp"
 #include "dbus-test-common.hpp"
-#include "scs-log.hpp"
+#include "log.hpp"
 
+namespace security_containers {
 
-DbusServerTest::DbusServerTest()
+DbusTestServer::DbusTestServer()
     : mNameAcquired(false)
     , mPendingDisconnect(false)
 {
-    mConnection = DbusConnection::create(DBUS_ADDRESS);
+    mConnection = dbus::DbusConnection::create(DBUS_ADDRESS);
     mConnection->setName(TESTAPI_BUS_NAME,
-                         std::bind(&DbusServerTest::onNameAcquired, this),
-                         std::bind(&DbusServerTest::onDisconnect, this));
+                         std::bind(&DbusTestServer::onNameAcquired, this),
+                         std::bind(&DbusTestServer::onDisconnect, this));
     if (!waitForName()) {
         mConnection.reset();
-        throw DbusConnectException("Could not acquire name");
+        throw dbus::DbusConnectException("Could not acquire name");
     }
     using namespace std::placeholders;
     mConnection->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION,
-                                std::bind(&DbusServerTest::onMessageCall, this, _1, _2, _3, _4, _5));
+                                std::bind(&DbusTestServer::onMessageCall, this, _1, _2, _3, _4, _5));
 }
 
-bool DbusServerTest::waitForName()
+bool DbusTestServer::waitForName()
 {
     std::unique_lock<std::mutex> lock(mMutex);
     mNameCondition.wait(lock, [this] {return mNameAcquired || mPendingDisconnect;});
     return mNameAcquired;
 }
 
-void DbusServerTest::setDisconnectCallback(const DisconnectCallback& callback)
+void DbusTestServer::setDisconnectCallback(const DisconnectCallback& callback)
 {
     std::unique_lock<std::mutex> lock(mMutex);
     mDisconnectCallback = callback;
@@ -64,14 +65,14 @@ void DbusServerTest::setDisconnectCallback(const DisconnectCallback& callback)
 
 }
 
-void DbusServerTest::onNameAcquired()
+void DbusTestServer::onNameAcquired()
 {
     std::unique_lock<std::mutex> lock(mMutex);
     mNameAcquired = true;
     mNameCondition.notify_one();
 }
 
-void DbusServerTest::onDisconnect()
+void DbusTestServer::onDisconnect()
 {
     std::unique_lock<std::mutex> lock(mMutex);
     if (mDisconnectCallback) {
@@ -82,28 +83,28 @@ void DbusServerTest::onDisconnect()
     }
 }
 
-void DbusServerTest::noop()
+void DbusTestServer::noop()
 {
 }
 
-std::string DbusServerTest::process(const std::string& arg)
+std::string DbusTestServer::process(const std::string& arg)
 {
     return "Processed: " + arg;
 }
 
-void DbusServerTest::throwException(int arg)
+void DbusTestServer::throwException(int arg)
 {
     if (arg != 0) {
         throw std::runtime_error("Argument: " + std::to_string(arg));
     }
 }
 
-void DbusServerTest::onMessageCall(
+void DbusTestServer::onMessageCall(
     const std::string& objectPath,
     const std::string& interface,
     const std::string& method,
     GVariant* parameters,
-    MethodResultBuilder& result)
+    dbus::MethodResultBuilder& result)
 {
     try {
         if (objectPath != TESTAPI_OBJECT_PATH || interface != TESTAPI_INTERFACE) {
@@ -131,3 +132,5 @@ void DbusServerTest::onMessageCall(
         result.setError("com.samsung.Exception", e.what());
     }
 }
+
+} // namespace security_containers

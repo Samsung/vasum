@@ -17,22 +17,23 @@
  */
 
 /**
- * @file    dbus-client-test.cpp
+ * @file    dbus-test-client.cpp
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
  * @brief   Example dbus api client
  */
 
-#include "dbus-client-test.hpp"
+#include "dbus-test-client.hpp"
 #include "dbus-connection.hpp"
 #include "dbus-test-common.hpp"
 
+namespace security_containers {
 
-DbusClientTest::DbusClientTest()
+DbusTestClient::DbusTestClient()
 {
-    mConnection = DbusConnection::create(DBUS_ADDRESS);
+    mConnection = dbus::DbusConnection::create(DBUS_ADDRESS);
 }
 
-void DbusClientTest::noop()
+void DbusTestClient::noop()
 {
     GVariant* result = mConnection->callMethod(TESTAPI_BUS_NAME,
                                                TESTAPI_OBJECT_PATH,
@@ -43,7 +44,7 @@ void DbusClientTest::noop()
     g_variant_unref(result);
 }
 
-std::string DbusClientTest::process(const std::string& arg)
+std::string DbusTestClient::process(const std::string& arg)
 {
     GVariant* parameters = g_variant_new("(s)", arg.c_str());
     GVariant* result = mConnection->callMethod(TESTAPI_BUS_NAME,
@@ -59,7 +60,7 @@ std::string DbusClientTest::process(const std::string& arg)
     return ret;
 }
 
-void DbusClientTest::throwException(int arg)
+void DbusTestClient::throwException(int arg)
 {
     GVariant* parameters = g_variant_new("(i)", arg);
     GVariant* result = mConnection->callMethod(TESTAPI_BUS_NAME,
@@ -70,3 +71,5 @@ void DbusClientTest::throwException(int arg)
                                                NULL);
     g_variant_unref(result);
 }
+
+} // namespace security_containers

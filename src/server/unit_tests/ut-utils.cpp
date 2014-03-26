@@ -18,20 +18,19 @@
 
 
 /**
- * @file    ut-scs-utils.cpp
+ * @file    ut-utils.cpp
  * @author  Jan Olszak (j.olszak@samsung.com)
  * @brief   Unit tests of utils
  */
 
 #include "ut.hpp"
-#include "scs-utils.hpp"
-#include "scs-exception.hpp"
+#include "utils.hpp"
 
 #include <memory>
 
 BOOST_AUTO_TEST_SUITE(UtilsSuite)
 
-using namespace security_containers;
+using namespace security_containers::utils;
 
 BOOST_AUTO_TEST_CASE(CreateFilePathTest)
 {

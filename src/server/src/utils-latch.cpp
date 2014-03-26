@@ -17,43 +17,51 @@
  */
 
 /**
- * @file    dbus-exception.hpp
+ * @file    utils-latch.cpp
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Dbus exceptions
+ * @brief   Synchronization latch
  */
 
-
-#ifndef DBUS_EXCEPTION_HPP
-#define DBUS_EXCEPTION_HPP
-
-#include <stdexcept>
+#include "utils-latch.hpp"
 
 namespace security_containers {
-namespace dbus {
+namespace utils {
 
-/**
- * Base class for dbus exceptions
- */
-struct DbusException: public std::runtime_error {
-    using std::runtime_error::runtime_error;
-};
+Latch::Latch()
+    : mCount(0)
+{
+}
 
-/**
- * Dbus connection failed exception
- */
-struct DbusConnectException: public DbusException {
-    using DbusException::DbusException;
-};
+void Latch::set()
+{
+    std::unique_lock<std::mutex> lock(mMutex);
+    ++mCount;
+    mCondition.notify_one();
+}
 
-/**
- * Dbus operation failed exception
- * TODO split to more specific exceptions
- */
-struct DbusOperationException: public DbusException {
-    using DbusException::DbusException;
-};
+void Latch::wait()
+{
+    std::unique_lock<std::mutex> lock(mMutex);
+    mCondition.wait(lock, [this] {return mCount > 0;});
+    --mCount;
+}
 
-} // namespace dbus
+bool Latch::wait(const unsigned int timeoutMs)
+{
+    std::unique_lock<std::mutex> lock(mMutex);
+    if (!mCondition.wait_for(lock, std::chrono::milliseconds(timeoutMs),
+                             [this] {return mCount > 0;})) {
+        return false;
+    }
+    --mCount;
+    return true;
+}
+
+bool Latch::empty()
+{
+    std::unique_lock<std::mutex> lock(mMutex);
+    return mCount == 0;
+}
+
+} // namespace utils
 } // namespace security_containers
-
-#endif // DBUS_EXCEPTION_HPP

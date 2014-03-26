@@ -17,40 +17,37 @@
  */
 
 /**
- * @file    scoped-daemon.hpp
+ * @file    dbus-test-client.hpp
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Starts external daemon in constructor, stops it in destructor
+ * @brief   Example dbus api client
  */
 
-#ifndef SCOPED_DAEMON_HPP
-#define SCOPED_DAEMON_HPP
+#ifndef DBUS_TEST_CLIENT_HPP
+#define DBUS_TEST_CLIENT_HPP
 
-#include <sys/types.h>
+#include "dbus-connection.hpp" //TODO dbus-connection-iface.h
+#include <string>
+#include <memory>
+
+namespace security_containers {
 
 /**
- * External daemon launcher helper.
+ * Simple dbus client for test purposes.
+ * Class used to test all possible kinds of dbus calls.
  */
-class ScopedDaemon {
+class DbusTestClient {
 public:
-    /**
-     * Starts a daemon.
-     * @param path daemon path
-     * @param argv arguments passed to the daemon
-     * @param useLauncher use additional launcher process
-     */
-    ScopedDaemon(const char* path, const char* const argv[], const bool useLauncher = true);
+    DbusTestClient();
 
-    /**
-     * Stops a daemon if it is not stopped already.
-     */
-    ~ScopedDaemon();
+    // interface methods
+    void noop();
+    std::string process(const std::string& arg);
+    void throwException(int arg);
 
-    /**
-     * Stops a daemon by sending SIGTERM and waits for a process.
-     */
-    void stop();
 private:
-    pid_t mPid;
+    dbus::DbusConnection::Pointer mConnection;
 };
 
-#endif //SCOPED_DAEMON_HPP
+} // namespace security_containers
+
+#endif //DBUS_TEST_CLIENT_HPP

@@ -26,7 +26,7 @@
 #ifndef SECURITY_CONTAINERS_SERVER_CONFIG_HPP
 #define SECURITY_CONTAINERS_SERVER_CONFIG_HPP
 
-#include "scs-log.hpp"
+#include "log.hpp"
 #include "scs-exception.hpp"
 #include <json/json.h>
 #include <string>
