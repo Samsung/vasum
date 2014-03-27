@@ -19,22 +19,147 @@
 
 /**
  * @file    ut-log.cpp
- * @author  Lukasz Kostyra (l.kostyra@samsung.com)
- * @brief   Unit tests for security-containers logging system
+ * @author  Pawel Broda (p.broda@partner.samsung.com)
+ * @brief   Unit tests of the log utility
  */
 
 #include "ut.hpp"
 #include "log.hpp"
+#include "log-backend.hpp"
+#include "log-backend-stderr.hpp"
+
 
 BOOST_AUTO_TEST_SUITE(LogSuite)
 
-BOOST_AUTO_TEST_CASE(DumpAllLogTypes)
+using namespace security_containers::log;
+
+class StubbedBackend : public LogBackend {
+public:
+    StubbedBackend(std::ostringstream& s) : mLogStream(s) {}
+
+    // stubbed function
+    void log(const std::string& s) override
+    {
+        mLogStream << s;
+    }
+
+private:
+    std::ostringstream& mLogStream;
+};
+
+class TestLog {
+public:
+    TestLog(LogLevel level)
+    {
+        Logger::setLogLevel(level);
+        Logger::setLogBackend(new StubbedBackend(mLogStream));
+    }
+
+    ~TestLog()
+    {
+        Logger::setLogLevel(LogLevel::TRACE);
+        Logger::setLogBackend(new StderrBackend());
+    }
+
+    // helpers
+    bool logContains(const std::string& expression) const
+    {
+        std::string s = mLogStream.str();
+        if (s.find(expression) != std::string::npos) {
+            return true;
+        }
+        return false;
+    }
+private:
+    std::ostringstream mLogStream;
+};
+
+void exampleTestLogs(void)
 {
-    LOGE("Logging an error message.");
-    LOGW("Logging a warning.");
-    LOGI("Logging some information.");
-    LOGD("Logging debug information.");
-    LOGT("Logging trace information.");
+    LOGE("test log error " << "1");
+    LOGW("test log warn "  << "2");
+    LOGI("test log info "  << "3");
+    LOGD("test log debug " << "4");
+    LOGT("test log trace " << "5");
 }
+
+BOOST_AUTO_TEST_CASE(LogLevelSetandGet)
+{
+    Logger::setLogLevel(LogLevel::TRACE);
+    BOOST_CHECK(LogLevel::TRACE == Logger::getLogLevel());
+
+    Logger::setLogLevel(LogLevel::DEBUG);
+    BOOST_CHECK(LogLevel::DEBUG == Logger::getLogLevel());
+
+    Logger::setLogLevel(LogLevel::INFO);
+    BOOST_CHECK(LogLevel::INFO == Logger::getLogLevel());
+
+    Logger::setLogLevel(LogLevel::WARN);
+    BOOST_CHECK(LogLevel::WARN == Logger::getLogLevel());
+
+    Logger::setLogLevel(LogLevel::ERROR);
+    BOOST_CHECK(LogLevel::ERROR == Logger::getLogLevel());
+}
+
+BOOST_AUTO_TEST_CASE(TestLogsError)
+{
+    TestLog tf(LogLevel::ERROR);
+    exampleTestLogs();
+
+    BOOST_CHECK(tf.logContains("[ERROR]") == true);
+    BOOST_CHECK(tf.logContains("[WARN]")  == false);
+    BOOST_CHECK(tf.logContains("[INFO]")  == false);
+    BOOST_CHECK(tf.logContains("[DEBUG]") == false);
+    BOOST_CHECK(tf.logContains("[TRACE]") == false);
+}
+
+BOOST_AUTO_TEST_CASE(TestLogsWarn)
+{
+    TestLog tf(LogLevel::WARN);
+    exampleTestLogs();
+
+    BOOST_CHECK(tf.logContains("[ERROR]") == true);
+    BOOST_CHECK(tf.logContains("[WARN]")  == true);
+    BOOST_CHECK(tf.logContains("[INFO]")  == false);
+    BOOST_CHECK(tf.logContains("[DEBUG]") == false);
+    BOOST_CHECK(tf.logContains("[TRACE]") == false);
+}
+
+BOOST_AUTO_TEST_CASE(TestLogsInfo)
+{
+    TestLog tf(LogLevel::INFO);
+    exampleTestLogs();
+
+    BOOST_CHECK(tf.logContains("[ERROR]") == true);
+    BOOST_CHECK(tf.logContains("[WARN]")  == true);
+    BOOST_CHECK(tf.logContains("[INFO]")  == true);
+    BOOST_CHECK(tf.logContains("[DEBUG]") == false);
+    BOOST_CHECK(tf.logContains("[TRACE]") == false);
+}
+
+BOOST_AUTO_TEST_CASE(TestLogsDebug)
+{
+    TestLog tf(LogLevel::DEBUG);
+    exampleTestLogs();
+
+    BOOST_CHECK(tf.logContains("[ERROR]") == true);
+    BOOST_CHECK(tf.logContains("[WARN]")  == true);
+    BOOST_CHECK(tf.logContains("[INFO]")  == true);
+    BOOST_CHECK(tf.logContains("[DEBUG]") == true);
+    BOOST_CHECK(tf.logContains("[TRACE]") == false);
+}
+
+BOOST_AUTO_TEST_CASE(TestLogsTrace)
+{
+    TestLog tf(LogLevel::TRACE);
+    exampleTestLogs();
+
+    BOOST_CHECK(tf.logContains("[ERROR]") == true);
+    BOOST_CHECK(tf.logContains("[WARN]")  == true);
+    BOOST_CHECK(tf.logContains("[INFO]")  == true);
+    BOOST_CHECK(tf.logContains("[DEBUG]") == true);
+    BOOST_CHECK(tf.logContains("[TRACE]") == true);
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -8,11 +8,13 @@ License:       Apache-2.0
 Group:         Security/Other
 Summary:       Daemon for managing containers
 BuildRequires: cmake
-BuildRequires: libvirt
 BuildRequires: libvirt-devel
-BuildRequires: libjson
 BuildRequires: libjson-devel
 BuildRequires: pkgconfig(glib-2.0)
+Requires: libvirt
+Requires: libjson
+Requires: libboost_program_options
+Requires: libboost_test
 
 %description
 This package provides a daemon used to manage containers - start, stop and switch

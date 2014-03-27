@@ -16,27 +16,24 @@
  *  limitations under the License
  */
 
-
 /**
- * @file    ut-main.cpp
- * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Main file for the Security Containers Daemon unit tests
+ * @file    log-backend-stderr.cpp
+ * @author  Pawel Broda (p.broda@partner.samsung.com)
+ * @brief   Stderr backend for logger
  */
 
-#include "log.hpp"
+
 #include "log-backend-stderr.hpp"
 
-#include <boost/test/included/unit_test.hpp>
-#include <boost/test/unit_test.hpp>  // for unit_test framework
+#include <stdio.h>
 
+namespace security_containers {
+namespace log {
 
-using namespace boost::unit_test;
-using namespace security_containers::log;
-
-test_suite* init_unit_test_suite(int /*argc*/, char** /*argv*/)
+void StderrBackend::log(const std::string& message)
 {
-    Logger::setLogLevel(LogLevel::TRACE);
-    Logger::setLogBackend(new StderrBackend());
-
-    return NULL;
+    fprintf(stderr, "%s", message.c_str());
 }
+
+} // namespace log
+} // namespace security_containers

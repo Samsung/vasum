@@ -19,27 +19,60 @@
 /**
  * @file    log.hpp
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Logging macros
+ * @brief   Logger
  */
 
 
 #ifndef LOG_HPP
 #define LOG_HPP
 
-#include <iostream>
+#include "log-backend.hpp"
+
+#include <sstream>
 #include <string.h>
+
+namespace security_containers {
+namespace log {
+
+enum class LogLevel {
+    TRACE, DEBUG, INFO, WARN, ERROR
+};
+
+class Logger {
+public:
+    Logger(const std::string& severity, const std::string& file, const int line);
+    void logMessage(const std::string& message);
+
+    static void setLogLevel(LogLevel level);
+    static LogLevel getLogLevel(void);
+    static void setLogBackend(LogBackend* pBackend);
+
+private:
+    std::ostringstream mLogLine;
+};
+
+} // namespace log
+} // namespace security_containers
+
 
 #define BASE_FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#define LOG_LEVEL(level, ...) \
-    std::cout << "[" << level << "] " << BASE_FILE << ":" << __LINE__ << " " \
-              << __VA_ARGS__ << std::endl
+#define LOG(SEVERITY, MESSAGE) \
+    do { \
+        if (security_containers::log::Logger::getLogLevel() <= \
+            security_containers::log::LogLevel::SEVERITY) { \
+            std::ostringstream message; \
+            message << MESSAGE; \
+            security_containers::log::Logger logger(#SEVERITY, BASE_FILE, __LINE__); \
+            logger.logMessage(message.str()); \
+        } \
+    } while(0)
 
-#define LOGE(...) LOG_LEVEL("ERROR", __VA_ARGS__)
-#define LOGW(...) LOG_LEVEL("WARN ", __VA_ARGS__)
-#define LOGI(...) LOG_LEVEL("INFO ", __VA_ARGS__)
-#define LOGD(...) LOG_LEVEL("DEBUG", __VA_ARGS__)
-#define LOGT(...) LOG_LEVEL("TRACE", __VA_ARGS__)
+#define LOGE(MESSAGE) LOG(ERROR, MESSAGE)
+#define LOGW(MESSAGE) LOG(WARN, MESSAGE)
+#define LOGI(MESSAGE) LOG(INFO, MESSAGE)
+#define LOGD(MESSAGE) LOG(DEBUG, MESSAGE)
+#define LOGT(MESSAGE) LOG(TRACE, MESSAGE)
 
 
 #endif // LOG_HPP

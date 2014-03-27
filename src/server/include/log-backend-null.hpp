@@ -16,27 +16,30 @@
  *  limitations under the License
  */
 
-
 /**
- * @file    ut-main.cpp
- * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Main file for the Security Containers Daemon unit tests
+ * @file    log-backend-null.hpp
+ * @author  Pawel Broda (p.broda@partner.samsung.com)
+ * @brief   Null backend for logger
  */
 
-#include "log.hpp"
-#include "log-backend-stderr.hpp"
 
-#include <boost/test/included/unit_test.hpp>
-#include <boost/test/unit_test.hpp>  // for unit_test framework
+#ifndef LOG_BACKEND_NULL_HPP
+#define LOG_BACKEND_NULL_HPP
 
+#include "log-backend.hpp"
 
-using namespace boost::unit_test;
-using namespace security_containers::log;
+namespace security_containers {
+namespace log {
 
-test_suite* init_unit_test_suite(int /*argc*/, char** /*argv*/)
-{
-    Logger::setLogLevel(LogLevel::TRACE);
-    Logger::setLogBackend(new StderrBackend());
+/**
+    Null logging backend
+ */
+class NullLogger : public LogBackend {
+public:
+    void log(const std::string& /*message*/) override {}
+};
 
-    return NULL;
-}
+} // namespace log
+} // namespace security_containers
+
+#endif // LOG_BACKEND_NULL_HPP
