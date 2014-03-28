@@ -26,42 +26,38 @@
 #ifndef SECURITY_CONTAINERS_SERVER_EXCEPTION_HPP
 #define SECURITY_CONTAINERS_SERVER_EXCEPTION_HPP
 
-#include <stdexcept>
+#include "base-exception.hpp"
 
 namespace security_containers {
 
 /**
- * @brief Base class for exceptions in Security Containers Server
+ * Base class for exceptions in Security Containers Server
  */
-struct ServerException: public std::runtime_error {
-    ServerException(const std::string& mess = "Security Containers Server Exception"):
-        std::runtime_error(mess) {}
+struct ServerException: public SecurityContainersException {
+    using SecurityContainersException::SecurityContainersException;
 };
 
 /**
- * @brief Error occured during an attempt to connect to libvirt's daemon.
+ * Error occured during an attempt to connect to libvirt's daemon.
  */
 struct ConnectionException: public ServerException {
-    ConnectionException(const std::string& mess = "Security Containers Connection Exception"):
-        ServerException(mess) {}
+    using ServerException::ServerException;
 };
 
 /**
- * @brief Error occured during an attempt to perform an operation on a domain,
+ * Error occured during an attempt to perform an operation on a domain,
  * e.g. start, stop a container
  */
 struct DomainOperationException: public ServerException {
-    DomainOperationException(const std::string& mess = "Security Containers Domain Operation Exception"):
-        ServerException(mess) {}
+    using ServerException::ServerException;
 };
 
 /**
- * @brief Error occured during a config file parsing,
+ * Error occured during a config file parsing,
  * e.g. syntax error
  */
 struct ConfigException: public ServerException {
-    ConfigException(const std::string& mess = "Security Containers Configuration Exception"):
-        ServerException(mess) {}
+    using ServerException::ServerException;
 };
 
 }

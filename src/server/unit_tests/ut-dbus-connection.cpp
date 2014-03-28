@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(DbusDaemonTest)
 BOOST_AUTO_TEST_CASE(NoDbusTest)
 {
     ScopedGlibLoop loop;
-    BOOST_CHECK_THROW(DbusConnection::create(DBUS_ADDRESS), DbusConnectException);
+    BOOST_CHECK_THROW(DbusConnection::create(DBUS_ADDRESS), DbusIOException);
 }
 
 BOOST_AUTO_TEST_CASE(SimpleTest)
@@ -170,6 +170,21 @@ BOOST_AUTO_TEST_CASE(SignalTest)
     sleep(1);
 }
 
+BOOST_AUTO_TEST_CASE(RegisterObjectTest)
+{
+    ScopedDbusDaemon daemon;
+    ScopedGlibLoop loop;
+    DbusConnection::Pointer conn = DbusConnection::create(DBUS_ADDRESS);
+    DbusConnection::MethodCallCallback callback;
+    BOOST_CHECK_THROW(conn->registerObject(TESTAPI_OBJECT_PATH, "<invalid", callback),
+                      DbusInvalidArgumentException);
+    BOOST_CHECK_THROW(conn->registerObject(TESTAPI_OBJECT_PATH, "", callback),
+                      DbusInvalidArgumentException);
+    BOOST_CHECK_THROW(conn->registerObject(TESTAPI_OBJECT_PATH, "<node></node>", callback),
+                      DbusInvalidArgumentException);
+    BOOST_CHECK_NO_THROW(conn->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, callback));
+}
+
 BOOST_AUTO_TEST_CASE(IntrospectSystemTest)
 {
     ScopedDbusDaemon daemon;
@@ -192,7 +207,8 @@ BOOST_AUTO_TEST_CASE(IntrospectTest)
                    [&] {nameAcquired.set();},
                    [] {});
     BOOST_REQUIRE(nameAcquired.wait(EVENT_TIMEOUT));
-    conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION,
+    conn1->registerObject(TESTAPI_OBJECT_PATH,
+                          TESTAPI_DEFINITION,
                           DbusConnection::MethodCallCallback());
     std::string xml = conn2->introspect(TESTAPI_BUS_NAME, TESTAPI_OBJECT_PATH);
     std::string iface = getInterfaceFromIntrospectionXML(xml, TESTAPI_INTERFACE);
@@ -222,8 +238,13 @@ BOOST_AUTO_TEST_CASE(MethodCallTest)
         }
     };
     conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler);
-    BOOST_CHECK(conn2->callMethod(TESTAPI_BUS_NAME, TESTAPI_OBJECT_PATH,
-                                  TESTAPI_INTERFACE, TESTAPI_METHOD_NOOP, NULL, NULL));
+    GVariantPtr result = conn2->callMethod(TESTAPI_BUS_NAME,
+                                           TESTAPI_OBJECT_PATH,
+                                           TESTAPI_INTERFACE,
+                                           TESTAPI_METHOD_NOOP,
+                                           NULL,
+                                           "()");
+    BOOST_CHECK(g_variant_is_of_type(result.get(), G_VARIANT_TYPE_UNIT));
 }
 
 BOOST_AUTO_TEST_CASE(MethodCallExceptionTest)
@@ -240,17 +261,33 @@ BOOST_AUTO_TEST_CASE(MethodCallExceptionTest)
     BOOST_REQUIRE(nameAcquired.wait(EVENT_TIMEOUT));
     conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION,
                           DbusConnection::MethodCallCallback());
-    BOOST_CHECK_THROW(conn2->callMethod(TESTAPI_BUS_NAME, TESTAPI_OBJECT_PATH,
-                                        TESTAPI_INTERFACE, TESTAPI_METHOD_NOOP, NULL, NULL),
+    BOOST_CHECK_THROW(conn2->callMethod(TESTAPI_BUS_NAME,
+                                        TESTAPI_OBJECT_PATH,
+                                        TESTAPI_INTERFACE,
+                                        TESTAPI_METHOD_NOOP,
+                                        NULL,
+                                        "()"),
                       DbusOperationException);
-    BOOST_CHECK_THROW(conn2->callMethod(TESTAPI_BUS_NAME, TESTAPI_OBJECT_PATH,
-                                        TESTAPI_INTERFACE, "Foo", NULL, NULL),
+    BOOST_CHECK_THROW(conn2->callMethod(TESTAPI_BUS_NAME,
+                                        TESTAPI_OBJECT_PATH,
+                                        TESTAPI_INTERFACE,
+                                        "Foo",
+                                        NULL,
+                                        "()"),
                       DbusOperationException);
-    BOOST_CHECK_THROW(conn2->callMethod(TESTAPI_BUS_NAME, TESTAPI_OBJECT_PATH,
-                                        TESTAPI_INTERFACE + ".foo", TESTAPI_METHOD_NOOP, NULL, NULL),
+    BOOST_CHECK_THROW(conn2->callMethod(TESTAPI_BUS_NAME,
+                                        TESTAPI_OBJECT_PATH,
+                                        TESTAPI_INTERFACE + ".foo",
+                                        TESTAPI_METHOD_NOOP,
+                                        NULL,
+                                        "()"),
                       DbusOperationException);
-    BOOST_CHECK_THROW(conn2->callMethod(TESTAPI_BUS_NAME, TESTAPI_OBJECT_PATH + "/foo",
-                                        TESTAPI_INTERFACE, TESTAPI_METHOD_NOOP, NULL, NULL),
+    BOOST_CHECK_THROW(conn2->callMethod(TESTAPI_BUS_NAME,
+                                        TESTAPI_OBJECT_PATH + "/foo",
+                                        TESTAPI_INTERFACE,
+                                        TESTAPI_METHOD_NOOP,
+                                        NULL,
+                                        "()"),
                       DbusOperationException);
 }
 
@@ -264,7 +301,11 @@ BOOST_AUTO_TEST_CASE(DbusApiTest)
     BOOST_CHECK_NO_THROW(client.noop());
     BOOST_CHECK_EQUAL("Processed: arg", client.process("arg"));
     BOOST_CHECK_NO_THROW(client.throwException(0));
-    BOOST_CHECK_THROW(client.throwException(666), std::exception);
+
+    auto checkException = [](const DbusCustomException& e) {
+        return e.what() == std::string("Argument: 666");
+    };
+    BOOST_CHECK_EXCEPTION(client.throwException(666), DbusCustomException, checkException);
 }
 
 BOOST_AUTO_TEST_CASE(DbusApiNameAcquiredTest)
@@ -274,7 +315,7 @@ BOOST_AUTO_TEST_CASE(DbusApiNameAcquiredTest)
     DbusTestServer server;
     DbusTestClient client;
 
-    BOOST_CHECK_THROW(DbusTestServer(), DbusConnectException);
+    BOOST_CHECK_THROW(DbusTestServer(), DbusOperationException);
     BOOST_CHECK_NO_THROW(client.noop());
 }
 
@@ -291,7 +332,7 @@ BOOST_AUTO_TEST_CASE(DbusApiConnectionLost1Test)
     BOOST_CHECK_NO_THROW(client.noop());
     daemon.stop();
     BOOST_CHECK(disconnected.wait(EVENT_TIMEOUT));
-    BOOST_CHECK_THROW(client.noop(), DbusOperationException);
+    BOOST_CHECK_THROW(client.noop(), DbusIOException);
 }
 
 BOOST_AUTO_TEST_CASE(DbusApiConnectionLost2Test)
@@ -303,7 +344,7 @@ BOOST_AUTO_TEST_CASE(DbusApiConnectionLost2Test)
 
     BOOST_CHECK_NO_THROW(client.noop());
     daemon.stop();
-    BOOST_CHECK_THROW(client.noop(), DbusOperationException);
+    BOOST_CHECK_THROW(client.noop(), DbusIOException);
 
     Latch disconnected;
     server.setDisconnectCallback([&] {disconnected.set();});

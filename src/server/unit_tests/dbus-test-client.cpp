@@ -35,41 +35,37 @@ DbusTestClient::DbusTestClient()
 
 void DbusTestClient::noop()
 {
-    GVariant* result = mConnection->callMethod(TESTAPI_BUS_NAME,
-                                               TESTAPI_OBJECT_PATH,
-                                               TESTAPI_INTERFACE,
-                                               TESTAPI_METHOD_NOOP,
-                                               NULL,
-                                               NULL);
-    g_variant_unref(result);
+    mConnection->callMethod(TESTAPI_BUS_NAME,
+                            TESTAPI_OBJECT_PATH,
+                            TESTAPI_INTERFACE,
+                            TESTAPI_METHOD_NOOP,
+                            NULL,
+                            "()");
 }
 
 std::string DbusTestClient::process(const std::string& arg)
 {
     GVariant* parameters = g_variant_new("(s)", arg.c_str());
-    GVariant* result = mConnection->callMethod(TESTAPI_BUS_NAME,
-                                               TESTAPI_OBJECT_PATH,
-                                               TESTAPI_INTERFACE,
-                                               TESTAPI_METHOD_PROCESS,
-                                               parameters,
-                                               G_VARIANT_TYPE("(s)"));
+    dbus::GVariantPtr result = mConnection->callMethod(TESTAPI_BUS_NAME,
+                                                       TESTAPI_OBJECT_PATH,
+                                                       TESTAPI_INTERFACE,
+                                                       TESTAPI_METHOD_PROCESS,
+                                                       parameters,
+                                                       "(s)");
     const gchar* cresult;
-    g_variant_get(result, "(&s)", &cresult);
-    std::string ret = cresult;
-    g_variant_unref(result);
-    return ret;
+    g_variant_get(result.get(), "(&s)", &cresult);
+    return cresult;
 }
 
 void DbusTestClient::throwException(int arg)
 {
     GVariant* parameters = g_variant_new("(i)", arg);
-    GVariant* result = mConnection->callMethod(TESTAPI_BUS_NAME,
-                                               TESTAPI_OBJECT_PATH,
-                                               TESTAPI_INTERFACE,
-                                               TESTAPI_METHOD_THROW,
-                                               parameters,
-                                               NULL);
-    g_variant_unref(result);
+    mConnection->callMethod(TESTAPI_BUS_NAME,
+                            TESTAPI_OBJECT_PATH,
+                            TESTAPI_INTERFACE,
+                            TESTAPI_METHOD_THROW,
+                            parameters,
+                            "()");
 }
 
 } // namespace security_containers

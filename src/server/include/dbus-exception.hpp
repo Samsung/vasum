@@ -26,7 +26,7 @@
 #ifndef DBUS_EXCEPTION_HPP
 #define DBUS_EXCEPTION_HPP
 
-#include <stdexcept>
+#include "base-exception.hpp"
 
 namespace security_containers {
 namespace dbus {
@@ -34,22 +34,35 @@ namespace dbus {
 /**
  * Base class for dbus exceptions
  */
-struct DbusException: public std::runtime_error {
-    using std::runtime_error::runtime_error;
+struct DbusException: public SecurityContainersException {
+    using SecurityContainersException::SecurityContainersException;
 };
 
 /**
- * Dbus connection failed exception
+ * Dbus IO exception (connection failed, connection lost, etc)
  */
-struct DbusConnectException: public DbusException {
+struct DbusIOException: public DbusException {
     using DbusException::DbusException;
 };
 
 /**
  * Dbus operation failed exception
- * TODO split to more specific exceptions
  */
 struct DbusOperationException: public DbusException {
+    using DbusException::DbusException;
+};
+
+/**
+ * Dbus custom exception triggered by user logic
+ */
+struct DbusCustomException: public DbusException {
+    using DbusException::DbusException;
+};
+
+/**
+ * Dbus invalid argument exception
+ */
+struct DbusInvalidArgumentException: public DbusException {
     using DbusException::DbusException;
 };
 

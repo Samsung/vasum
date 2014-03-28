@@ -40,7 +40,7 @@ DbusTestServer::DbusTestServer()
                          std::bind(&DbusTestServer::onDisconnect, this));
     if (!waitForName()) {
         mConnection.reset();
-        throw dbus::DbusConnectException("Could not acquire name");
+        throw dbus::DbusOperationException("Could not acquire name");
     }
     using namespace std::placeholders;
     mConnection->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION,

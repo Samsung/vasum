@@ -52,6 +52,10 @@ public:
             g_error_free(mError);
         }
     }
+    void strip()
+    {
+        g_dbus_error_strip_remote_error(mError);
+    }
     operator bool () const
     {
         return mError;
@@ -100,6 +104,23 @@ private:
     bool mResultSet;
 };
 
+void throwDbusException(const ScopedError& e)
+{
+    if (e->domain == g_io_error_quark()) {
+        if (e->code == G_IO_ERROR_DBUS_ERROR) {
+            throw DbusCustomException(e->message);
+        } else {
+            throw DbusIOException(e->message);
+        }
+    } else if (e->domain == g_dbus_error_quark()) {
+        throw DbusOperationException(e->message);
+    } else if (e->domain == g_markup_error_quark()) {
+        throw DbusInvalidArgumentException(e->message);
+    } else {
+        throw DbusException(e->message);
+    }
+}
+
 } // namespace
 
 DbusConnection::Pointer DbusConnection::create(const std::string& address)
@@ -126,8 +147,9 @@ DbusConnection::DbusConnection(const std::string& address)
                                                          NULL,
                                                          &error);
     if (error) {
-        LOGE("Could not create connection for address " << address << "; " << error);
-        throw DbusConnectException("Could not connect");
+        error.strip();
+        LOGE("Could not connect to " << address << "; " << error);
+        throwDbusException(error);
     }
 }
 
@@ -189,8 +211,9 @@ void DbusConnection::emitSignal(const std::string& objectPath,
                                   parameters,
                                   &error);
     if (error) {
+        error.strip();
         LOGE("Emit signal failed; " << error);
-        throw DbusOperationException("could not emit signal");
+        throwDbusException(error);
     }
 }
 
@@ -222,16 +245,15 @@ void DbusConnection::onSignal(GDBusConnection*,
 
 std::string DbusConnection::introspect(const std::string& busName, const std::string& objectPath)
 {
-    GVariant* result = DbusConnection::callMethod(busName,
-                                                  objectPath,
-                                                  INTROSPECT_INTERFACE,
-                                                  INTROSPECT_METHOD,
-                                                  NULL,
-                                                  G_VARIANT_TYPE("(s)"));
+    GVariantPtr result = DbusConnection::callMethod(busName,
+                                                    objectPath,
+                                                    INTROSPECT_INTERFACE,
+                                                    INTROSPECT_METHOD,
+                                                    NULL,
+                                                    "(s)");
     const gchar* s;
-    g_variant_get(result, "(&s)", &s);
+    g_variant_get(result.get(), "(&s)", &s);
     std::string xml = s;
-    g_variant_unref(result);
     return xml;
 }
 
@@ -241,16 +263,19 @@ void DbusConnection::registerObject(const std::string& objectPath,
 {
     ScopedError error;
     GDBusNodeInfo* nodeInfo = g_dbus_node_info_new_for_xml(objectDefinitionXml.c_str(), &error);
-    if (error) {
-        LOGE("Invalid xml");
-        throw std::logic_error("invalid xml"); //TODO invalid argument exception
-    }
-    if (nodeInfo->interfaces == NULL ||
-            nodeInfo->interfaces[0] == NULL ||
-            nodeInfo->interfaces[1] != NULL) {
-        LOGE("Wrong number of interfaces");
+    if (nodeInfo != NULL && (nodeInfo->interfaces == NULL ||
+                             nodeInfo->interfaces[0] == NULL ||
+                             nodeInfo->interfaces[1] != NULL)) {
         g_dbus_node_info_unref(nodeInfo);
-        throw std::logic_error("Wrong number of interfaces"); //TODO invalid argument exception
+        g_set_error(&error,
+                    G_MARKUP_ERROR,
+                    G_MARKUP_ERROR_INVALID_CONTENT,
+                    "Expected exactly one interface");
+    }
+    if (error) {
+        error.strip();
+        LOGE("Invalid xml; " << error);
+        throwDbusException(error);
     }
     GDBusInterfaceInfo* interfaceInfo = nodeInfo->interfaces[0];
 
@@ -268,8 +293,9 @@ void DbusConnection::registerObject(const std::string& objectPath,
                                       &error);
     g_dbus_node_info_unref(nodeInfo);
     if (error) {
+        error.strip();
         LOGE("Register object failed; " << error);
-        throw DbusOperationException("register object failed");
+        throwDbusException(error);
     }
 }
 
@@ -296,12 +322,12 @@ void DbusConnection::onMethodCall(GDBusConnection*,
     }
 }
 
-GVariant* DbusConnection::callMethod(const std::string& busName,
-                                     const std::string& objectPath,
-                                     const std::string& interface,
-                                     const std::string& method,
-                                     GVariant* parameters,
-                                     const GVariantType* replyType)
+GVariantPtr DbusConnection::callMethod(const std::string& busName,
+                                       const std::string& objectPath,
+                                       const std::string& interface,
+                                       const std::string& method,
+                                       GVariant* parameters,
+                                       const std::string& replyType)
 {
     ScopedError error;
     GVariant* result = g_dbus_connection_call_sync(mConnection,
@@ -310,16 +336,17 @@ GVariant* DbusConnection::callMethod(const std::string& busName,
                                                    interface.c_str(),
                                                    method.c_str(),
                                                    parameters,
-                                                   replyType,
+                                                   G_VARIANT_TYPE(replyType.c_str()),
                                                    G_DBUS_CALL_FLAGS_NONE,
                                                    CALL_METHOD_TIMEOUT_MS,
                                                    NULL,
                                                    &error);
     if (error) {
+        error.strip();
         LOGE("Call method failed; " << error);
-        throw DbusOperationException("call method failed");//TODO split to different exceptions
+        throwDbusException(error);
     }
-    return result;
+    return GVariantPtr(result, g_variant_unref);
 }
 
 } // namespace dbus

@@ -33,6 +33,8 @@
 namespace security_containers {
 namespace dbus {
 
+typedef std::unique_ptr<GVariant, void(*)(GVariant*)> GVariantPtr;
+
 /**
  * An interface used to set a result to a method call.
  */
@@ -50,7 +52,6 @@ public:
  * register dbus interfaces, etc.
  *
  * TODO divide to interface and implementation header
- * TODO wrap GVariant type
  */
 class DbusConnection {
 public:
@@ -110,12 +111,12 @@ public:
     /**
      * Call a dbus method
      */
-    GVariant* callMethod(const std::string& busName,
-                         const std::string& objectPath,
-                         const std::string& interface,
-                         const std::string& method,
-                         GVariant* parameters,
-                         const GVariantType* replyType);
+    GVariantPtr callMethod(const std::string& busName,
+                           const std::string& objectPath,
+                           const std::string& interface,
+                           const std::string& method,
+                           GVariant* parameters,
+                           const std::string& replyType);
 
     /**
      * Returns an xml with meta description of specified dbus object.
