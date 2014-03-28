@@ -41,7 +41,56 @@ public:
     Container(Container&&) = default;
     virtual ~Container();
 
-    ContainerAdmin& getAdmin();
+    /**
+     * Get the container id
+     */
+    std::string getId();
+
+    /**
+     * Get the container privilege
+     */
+    int getPrivilege();
+
+    /**
+     * Boot the container to the background.
+     */
+    void start();
+
+    /**
+     * Forcefully stop the container.
+     */
+    void stop();
+
+    /**
+     * Setup this container to be put in the foreground.
+     * I.e. set appropriate scheduler level.
+     */
+    void goForeground();
+
+    /**
+     * Setup this container to be put in the background.
+     * I.e. set appropriate scheduler level.
+     */
+    void goBackground();
+
+    /**
+     * @return Is the container running?
+     */
+    bool isRunning();
+
+    /**
+     * Check if the container is stopped. It's NOT equivalent to !isRunning,
+     * because it checks different internal libvirt's states. There are other states,
+     * (e.g. paused) when the container isn't runnig nor stopped.
+     *
+     * @return Is the container stopped?
+     */
+    bool isStopped();
+
+    /**
+     * @return Is the container in a paused state?
+     */
+    bool isPaused();
 
 private:
     ContainerConfig mConfig;

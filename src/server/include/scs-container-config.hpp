@@ -44,9 +44,21 @@ struct ContainerConfig : public ConfigurationBase {
      */
     std::string config;
 
+    /**
+     * Container's CFS quota in us when it's in the foreground
+     */
+    double cpuQuotaForeground;
+
+    /**
+     * Container's CFS quota in us when it's in the background
+     */
+    double cpuQuotaBackground;
+
     CONFIG_REGISTER {
         CONFIG_VALUE(privilege)
         CONFIG_VALUE(config)
+        CONFIG_VALUE(cpuQuotaForeground)
+        CONFIG_VALUE(cpuQuotaBackground)
     }
 };
 

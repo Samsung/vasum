@@ -1,0 +1,11 @@
+<domain type="lxc">
+    <name>console3</name>
+    <memory>102400</memory>
+    <os>
+        <type>exe</type>
+        <init>/bin/sh</init>
+    </os>
+    <devices>
+        <console type="pty"/>
+    </devices>
+</domain>

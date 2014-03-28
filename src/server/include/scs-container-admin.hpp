@@ -26,15 +26,23 @@
 #ifndef SECURITY_CONTAINERS_SERVER_CONTAINER_ADMIN_HPP
 #define SECURITY_CONTAINERS_SERVER_CONTAINER_ADMIN_HPP
 
+#include "scs-container-config.hpp"
+
 #include <string>
+#include <cstdint>
 #include <libvirt/libvirt.h>
 
 namespace security_containers {
 
+enum class SchedulerLevel {
+    FOREGROUND,
+    BACKGROUND
+};
+
 class ContainerAdmin {
 
 public:
-    ContainerAdmin(const std::string& libvirtConfigPath);
+    ContainerAdmin(ContainerConfig& config);
     virtual ~ContainerAdmin();
 
     /**
@@ -43,7 +51,7 @@ public:
     std::string getId();
 
     /**
-     * Boot the container
+     * Boot the container to the background.
      */
     void start();
 
@@ -60,7 +68,7 @@ public:
     void shutdown();
 
     /**
-     * @return Is the process started?
+     * @return Is the container running?
      */
     bool isRunning();
 
@@ -69,7 +77,7 @@ public:
      * because it checks different internal libvirt's states. There are other states,
      * (e.g. paused) when the container isn't runnig nor stopped.
      *
-     * @return Is the process stopped?
+     * @return Is the container stopped?
      */
     bool isStopped();
 
@@ -91,10 +99,23 @@ public:
      */
     bool isPaused();
 
+    /**
+     * Sets the containers scheduler CFS quota.
+     */
+    void setSchedulerLevel(SchedulerLevel sched);
+
+    /**
+     * @return Scheduler CFS quota,
+     * TODO: this function is only for UNIT TESTS
+     */
+    std::int64_t getSchedulerQuota();
+
 private:
     // TODO: secure those pointers from exceptions (e.g. in constructor)
     virConnectPtr mVir = NULL; // pointer to the connection with libvirt
     virDomainPtr  mDom = NULL; // pointer to the domain
+
+    ContainerConfig& mConfig;
 
     // TODO: This is a temporary sollution.
     const std::string mDefaultConfigXML = "<domain type=\"lxc\">\
@@ -113,9 +134,8 @@ private:
     void disconnect(); // release mVir
     void define(const std::string& configXML); // containers can't share the same libvirt configuration
     void undefine();
-
     int  getState();   // get the libvirt's domain state
-    bool isPMSuspended(); // the cotainer suspended by the power manager
+    void setSchedulerParams(std::uint64_t cpuShares, std::uint64_t vcpuPeriod, std::int64_t vcpuQuota);
 };
 }
 #endif // SECURITY_CONTAINERS_SERVER_CONTAINER_ADMIN_HPP

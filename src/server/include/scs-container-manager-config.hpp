@@ -41,8 +41,14 @@ struct ContainerManagerConfig : public ConfigurationBase {
      */
     std::vector<std::string> containerConfigs;
 
+    /**
+     * An ID of a currently focused/foreground container.
+     */
+    std::string foregroundId;
+
     CONFIG_REGISTER {
         CONFIG_VALUE(containerConfigs)
+        CONFIG_VALUE(foregroundId)
     }
 };
 

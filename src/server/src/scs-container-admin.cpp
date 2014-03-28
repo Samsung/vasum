@@ -30,13 +30,19 @@
 #include <string>
 #include <fstream>
 #include <streambuf>
+#include <memory>
+#include <cstdint>
 
 namespace security_containers {
 
-ContainerAdmin::ContainerAdmin(const std::string& libvirtConfigPath)
+const std::uint64_t DEFAULT_CPU_SHARES = 1024;
+const std::uint64_t DEFAULT_VCPU_PERIOD_MS = 100000;
+
+ContainerAdmin::ContainerAdmin(ContainerConfig& config)
+    : mConfig(config)
 {
     connect();
-    std::ifstream t(libvirtConfigPath);
+    std::ifstream t(mConfig.config);
     if (!t.is_open()) {
         LOGE("libvirt config file is missing");
         throw ConfigException();
@@ -50,7 +56,6 @@ ContainerAdmin::~ContainerAdmin()
 {
     // Try to shutdown
     try {
-        resume();
         shutdown();
     } catch (ServerException& e) {}
 
@@ -123,6 +128,11 @@ void ContainerAdmin::start()
         LOGE("Failed to start the container");
         throw DomainOperationException();
     }
+
+    // TODO: the container should be started in the background,
+    // unfortunately libvirt doesn't allow us to set cgroups
+    // before the start, hence we do it immediately afterwards
+    setSchedulerLevel(SchedulerLevel::BACKGROUND);
 }
 
 
@@ -131,7 +141,7 @@ void ContainerAdmin::stop()
     assert(mVir != NULL);
     assert(mDom != NULL);
 
-    if (!isRunning()) {
+    if (isStopped()) {
         return;
     }
 
@@ -150,9 +160,11 @@ void ContainerAdmin::shutdown()
     assert(mVir != NULL);
     assert(mDom != NULL);
 
-    if (!isRunning()) {
+    if (isStopped()) {
         return;
     }
+
+    resume();
 
     if (virDomainShutdown(mDom) < 0) {
         LOGE("Error during domain shutdown");
@@ -223,7 +235,7 @@ void ContainerAdmin::suspend()
         return;
     }
 
-    if (isPMSuspended() || virDomainSuspend(mDom) < 0) {
+    if (virDomainSuspend(mDom) < 0) {
         LOGE("Error during domain suspension");
         throw DomainOperationException();
     }
@@ -239,7 +251,7 @@ void ContainerAdmin::resume()
         return;
     }
 
-    if (isPMSuspended() || virDomainResume(mDom) < 0) {
+    if (virDomainResume(mDom) < 0) {
         LOGE("Error during domain resumming");
         throw DomainOperationException();
     }
@@ -249,12 +261,6 @@ void ContainerAdmin::resume()
 bool ContainerAdmin::isPaused()
 {
     return getState() == VIR_DOMAIN_PAUSED;
-}
-
-
-bool ContainerAdmin::isPMSuspended()
-{
-    return getState() == VIR_DOMAIN_PMSUSPENDED;
 }
 
 
@@ -271,6 +277,81 @@ int ContainerAdmin::getState()
     }
 
     return state;
+}
+
+
+void ContainerAdmin::setSchedulerLevel(SchedulerLevel sched)
+{
+    switch (sched) {
+    case SchedulerLevel::FOREGROUND:
+        setSchedulerParams(DEFAULT_CPU_SHARES,
+                           DEFAULT_VCPU_PERIOD_MS,
+                           mConfig.cpuQuotaForeground);
+        break;
+    case SchedulerLevel::BACKGROUND:
+        setSchedulerParams(DEFAULT_CPU_SHARES,
+                           DEFAULT_VCPU_PERIOD_MS,
+                           mConfig.cpuQuotaBackground);
+        break;
+    default:
+        assert(!"Unknown sched parameter value");
+    }
+}
+
+
+void ContainerAdmin::setSchedulerParams(std::uint64_t cpuShares, std::uint64_t vcpuPeriod, std::int64_t vcpuQuota)
+{
+    assert(mVir != NULL);
+    assert(mDom != NULL);
+
+    int maxParams = 3;
+    int numParamsBuff = 0;
+
+    std::unique_ptr<virTypedParameter[]> params(new virTypedParameter[maxParams]);
+
+    virTypedParameterPtr paramsTmp = params.get();
+
+    virTypedParamsAddULLong(&paramsTmp, &numParamsBuff, &maxParams, VIR_DOMAIN_SCHEDULER_CPU_SHARES, cpuShares);
+    virTypedParamsAddULLong(&paramsTmp, &numParamsBuff, &maxParams, VIR_DOMAIN_SCHEDULER_VCPU_PERIOD, vcpuPeriod);
+    virTypedParamsAddLLong(&paramsTmp, &numParamsBuff, &maxParams, VIR_DOMAIN_SCHEDULER_VCPU_QUOTA, vcpuQuota);
+
+    if (virDomainSetSchedulerParameters(mDom, params.get(), numParamsBuff) < 0) {
+        LOGE("Error whilte setting scheduler params");
+        throw DomainOperationException();
+    }
+}
+
+
+std::int64_t ContainerAdmin::getSchedulerQuota()
+{
+    assert(mVir != NULL);
+    assert(mDom != NULL);
+
+    int numParamsBuff;
+    std::unique_ptr<char, void(*)(void*)> type(virDomainGetSchedulerType(mDom, &numParamsBuff), free);
+
+    if (type == NULL || numParamsBuff <= 0 || strcmp(type.get(), "posix") != 0) {
+        LOGE("Error while getting scheduler type");
+        throw DomainOperationException();
+    }
+
+    std::unique_ptr<virTypedParameter[]> params(new virTypedParameter[numParamsBuff]);
+
+    if (virDomainGetSchedulerParameters(mDom, params.get(), &numParamsBuff) < 0) {
+        LOGE("Error whilte getting scheduler parameters");
+        throw DomainOperationException();
+    }
+
+    long long quota;
+    if (virTypedParamsGetLLong(params.get(),
+                               numParamsBuff,
+                               VIR_DOMAIN_SCHEDULER_VCPU_QUOTA,
+                               &quota) <= 0) {
+        LOGE("Error whilte getting scheduler quota parameter");
+        throw DomainOperationException();
+    }
+
+    return quota;
 }
 
 } // namespace security_containers

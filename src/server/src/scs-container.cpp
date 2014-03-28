@@ -43,8 +43,9 @@ Container::Container(const std::string& containerConfigPath)
         libvirtConfigPath = utils::createFilePath(baseConfigPath, "/", mConfig.config);
     }
 
-    LOGT("Creating Container Admin " << libvirtConfigPath);
-    mAdmin.reset(new ContainerAdmin(libvirtConfigPath));
+    mConfig.config = libvirtConfigPath;
+    LOGT("Creating Container Admin " << mConfig.config);
+    mAdmin.reset(new ContainerAdmin(mConfig));
 }
 
 
@@ -52,11 +53,59 @@ Container::~Container()
 {
 }
 
-ContainerAdmin& Container::getAdmin()
-{
-    assert(mAdmin.get() != NULL);
 
-    return *mAdmin;
+std::string Container::getId()
+{
+    return mAdmin->getId();
 }
+
+
+int Container::getPrivilege()
+{
+    return mConfig.privilege;
+}
+
+
+void Container::start()
+{
+    return mAdmin->start();
+}
+
+
+void Container::stop()
+{
+    return mAdmin->stop();
+}
+
+
+void Container::goForeground()
+{
+    mAdmin->setSchedulerLevel(SchedulerLevel::FOREGROUND);
+}
+
+
+void Container::goBackground()
+{
+    mAdmin->setSchedulerLevel(SchedulerLevel::BACKGROUND);
+}
+
+
+bool Container::isRunning()
+{
+    return mAdmin->isRunning();
+}
+
+
+bool Container::isStopped()
+{
+    return mAdmin->isStopped();
+}
+
+
+bool Container::isPaused()
+{
+    return mAdmin->isPaused();
+}
+
 
 } // namespace security_containers

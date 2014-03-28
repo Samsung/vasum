@@ -35,8 +35,9 @@ BOOST_AUTO_TEST_SUITE(ContainerManagerSuite)
 
 using namespace security_containers;
 
-const std::string TEST_CONFIG_PATH = "/etc/security-containers/config/tests/ut-scs-container-manager/test-daemon.conf";
-const std::string BUGGY_CONFIG_PATH = "/etc/security-containers/config/tests/ut-scs-container-manager/buggy-daemon.conf";
+const std::string TEST_CONFIG_PATH = "/etc/security-containers/tests/ut-scs-container-manager/test-daemon.conf";
+const std::string BUGGY_CONFIG_PATH = "/etc/security-containers/tests/ut-scs-container-manager/buggy-daemon.conf";
+const std::string BUGGY_FOREGROUND_CONFIG_PATH = "/etc/security-containers/tests/ut-scs-container-manager/buggy-foreground-daemon.conf";
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/missing-daemon.conf";
 
 
@@ -65,7 +66,14 @@ BOOST_AUTO_TEST_CASE(StartAllTest)
 {
     ContainerManager cm(TEST_CONFIG_PATH);
     BOOST_REQUIRE_NO_THROW(cm.startAll());
-    BOOST_CHECK(!cm.getRunningContainerId().empty());
+    BOOST_CHECK(cm.getRunningForegroundContainerId() == "console1");
+}
+
+BOOST_AUTO_TEST_CASE(BuggyForegroundTest)
+{
+    ContainerManager cm(BUGGY_FOREGROUND_CONFIG_PATH);
+    BOOST_REQUIRE_NO_THROW(cm.startAll());
+    BOOST_CHECK(cm.getRunningForegroundContainerId() == "console2");
 }
 
 BOOST_AUTO_TEST_CASE(StopAllTest)
@@ -73,20 +81,19 @@ BOOST_AUTO_TEST_CASE(StopAllTest)
     ContainerManager cm(TEST_CONFIG_PATH);
     BOOST_REQUIRE_NO_THROW(cm.startAll());
     BOOST_REQUIRE_NO_THROW(cm.stopAll());
-    BOOST_CHECK(cm.getRunningContainerId().empty());
-
+    BOOST_CHECK(cm.getRunningForegroundContainerId().empty());
 }
 
 BOOST_AUTO_TEST_CASE(FocusTest)
 {
     ContainerManager cm(TEST_CONFIG_PATH);
     BOOST_REQUIRE_NO_THROW(cm.startAll());
-    BOOST_REQUIRE_NO_THROW(cm.focus("console"));
-    BOOST_CHECK(!cm.getSuspendedContainerIds().empty());
-    BOOST_TEST_MESSAGE("Suspended");
-    for (auto& id : cm.getSuspendedContainerIds()) {
-        BOOST_TEST_MESSAGE(id);
-    }
+    BOOST_REQUIRE_NO_THROW(cm.focus("console2"));
+    BOOST_CHECK(cm.getRunningForegroundContainerId() == "console2");
+    BOOST_REQUIRE_NO_THROW(cm.focus("console1"));
+    BOOST_CHECK(cm.getRunningForegroundContainerId() == "console1");
+    BOOST_REQUIRE_NO_THROW(cm.focus("console3"));
+    BOOST_CHECK(cm.getRunningForegroundContainerId() == "console3");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

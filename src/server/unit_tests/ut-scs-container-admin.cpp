@@ -29,48 +29,56 @@
 
 #include <memory>
 #include <string>
+#include <thread>
+#include <chrono>
 
 
 BOOST_AUTO_TEST_SUITE(ContainerAdminSuite)
 
 using namespace security_containers;
 
-const std::string TEST_CONFIG_PATH = "/etc/security-containers/config/tests/ut-scs-container-manager/libvirt-config/test.xml";
-const std::string BUGGY_CONFIG_PATH = "/etc/security-containers/config/tests/ut-scs-container-manager/libvirt-config/buggy.xml";
-const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/missing.xml";
+const std::string TEST_CONFIG_PATH = "/etc/security-containers/tests/ut-scs-container-admin/containers/test.conf";
+const std::string BUGGY_CONFIG_PATH = "/etc/security-containers/tests/ut-scs-container-admin/containers/buggy.conf";
+const std::string MISSING_CONFIG_PATH = "/etc/security-containers/tests/ut-scs-container-admin/containers/missing.conf";
 
 
 BOOST_AUTO_TEST_CASE(ConstructorTest)
 {
-    BOOST_REQUIRE_NO_THROW(ContainerAdmin ca(TEST_CONFIG_PATH));
+    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    BOOST_REQUIRE_NO_THROW(ContainerAdmin ca(config));
 }
 
 BOOST_AUTO_TEST_CASE(DestructorTest)
 {
-    std::unique_ptr<ContainerAdmin> ca(new ContainerAdmin(TEST_CONFIG_PATH));
+    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    std::unique_ptr<ContainerAdmin> ca(new ContainerAdmin(config));
     BOOST_REQUIRE_NO_THROW(ca.reset());
 }
 
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)
 {
-    BOOST_REQUIRE_THROW(ContainerAdmin ca(BUGGY_CONFIG_PATH), ServerException);
+    ContainerConfig config; config.parseFile(BUGGY_CONFIG_PATH);
+    BOOST_REQUIRE_THROW(ContainerAdmin ca(config), ServerException);
 }
 
 BOOST_AUTO_TEST_CASE(MissingConfigTest)
 {
-    BOOST_REQUIRE_THROW(ContainerAdmin ca(MISSING_CONFIG_PATH), ConfigException);
+    ContainerConfig config; config.parseFile(MISSING_CONFIG_PATH);
+    BOOST_REQUIRE_THROW(ContainerAdmin ca(config), ConfigException);
 }
 
 BOOST_AUTO_TEST_CASE(StartTest)
 {
-    ContainerAdmin ca(TEST_CONFIG_PATH);
+    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start());
     BOOST_CHECK(ca.isRunning());
 }
 
 BOOST_AUTO_TEST_CASE(StopTest)
 {
-    ContainerAdmin ca(TEST_CONFIG_PATH);
+    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start());
     BOOST_CHECK(ca.isRunning());
     BOOST_REQUIRE_NO_THROW(ca.stop())
@@ -80,7 +88,8 @@ BOOST_AUTO_TEST_CASE(StopTest)
 
 BOOST_AUTO_TEST_CASE(ShutdownTest)
 {
-    ContainerAdmin ca(TEST_CONFIG_PATH);
+    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start())
     BOOST_CHECK(ca.isRunning());
     BOOST_REQUIRE_NO_THROW(ca.shutdown())
@@ -91,23 +100,41 @@ BOOST_AUTO_TEST_CASE(ShutdownTest)
 
 BOOST_AUTO_TEST_CASE(SuspendTest)
 {
-    ContainerAdmin ca(TEST_CONFIG_PATH);
+    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start())
     BOOST_CHECK(ca.isRunning());
-    BOOST_REQUIRE_NO_THROW(ca.suspend())
+    // TODO: fix the libvirt usage so this is not required
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    BOOST_REQUIRE_NO_THROW(ca.suspend());
     BOOST_CHECK(!ca.isRunning());
     BOOST_CHECK(ca.isPaused());
 }
 
 BOOST_AUTO_TEST_CASE(ResumeTest)
 {
-    ContainerAdmin ca(TEST_CONFIG_PATH);
+    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start());
+    // TODO: fix the libvirt usage so this is not required
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     BOOST_REQUIRE_NO_THROW(ca.suspend())
     BOOST_CHECK(ca.isPaused());
     BOOST_REQUIRE_NO_THROW(ca.resume());
     BOOST_CHECK(!ca.isPaused());
     BOOST_CHECK(ca.isRunning());
+}
+
+BOOST_AUTO_TEST_CASE(SchedulerLevelTest)
+{
+    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerAdmin ca(config);
+    BOOST_REQUIRE_NO_THROW(ca.start());
+    BOOST_REQUIRE(ca.getSchedulerQuota() == config.cpuQuotaBackground);
+    BOOST_REQUIRE_NO_THROW(ca.setSchedulerLevel(SchedulerLevel::FOREGROUND));
+    BOOST_REQUIRE(ca.getSchedulerQuota() == config.cpuQuotaForeground);
+    BOOST_REQUIRE_NO_THROW(ca.setSchedulerLevel(SchedulerLevel::BACKGROUND));
+    BOOST_REQUIRE(ca.getSchedulerQuota() == config.cpuQuotaBackground);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

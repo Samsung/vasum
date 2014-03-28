@@ -30,8 +30,10 @@
 
 #include <assert.h>
 #include <string>
+#include <climits>
 
 namespace security_containers {
+
 
 ContainerManager::ContainerManager(const std::string& managerConfigPath)
 {
@@ -50,7 +52,7 @@ ContainerManager::ContainerManager(const std::string& managerConfigPath)
 
         LOGT("Creating Container " << containerConfigPath);
         std::unique_ptr<Container> c(new Container(containerConfigPath));
-        std::string id = c->getAdmin().getId();
+        std::string id = c->getId();
         mContainers.emplace(id, std::move(c));
     }
 }
@@ -69,17 +71,38 @@ ContainerManager::~ContainerManager()
 
 void ContainerManager::focus(const std::string& containerId)
 {
+    /* try to access the object first to throw immediately if it doesn't exist */
+    ContainerMap::mapped_type& foregroundContainer = mContainers.at(containerId);
+
     for (auto& container : mContainers) {
-        container.second->getAdmin().suspend();
+        container.second->goBackground();
     }
-    mContainers.at(containerId)->getAdmin().resume();
+    mConfig.foregroundId = foregroundContainer->getId();
+    foregroundContainer->goForeground();
 }
 
 
 void ContainerManager::startAll()
 {
+    bool isForegroundFound = false;
+
     for (auto& container : mContainers) {
-        container.second->getAdmin().start();
+        container.second->start();
+
+        if (container.first == mConfig.foregroundId) {
+            isForegroundFound = true;
+            container.second->goForeground();
+        }
+    }
+
+    if (!isForegroundFound) {
+        auto foregroundIterator = std::min_element(mContainers.begin(), mContainers.end(),
+                                                   [](ContainerMap::value_type &c1, ContainerMap::value_type &c2) {
+                                                       return c1.second->getPrivilege() < c2.second->getPrivilege();
+                                                   });
+
+        mConfig.foregroundId = foregroundIterator->second->getId();
+        foregroundIterator->second->goForeground();
     }
 }
 
@@ -87,31 +110,20 @@ void ContainerManager::startAll()
 void ContainerManager::stopAll()
 {
     for (auto& container : mContainers) {
-        container.second->getAdmin().stop();
+        container.second->stop();
     }
 }
 
 
-std::string ContainerManager::getRunningContainerId()
+std::string ContainerManager::getRunningForegroundContainerId()
 {
     for (auto& container : mContainers) {
-        if (container.second->getAdmin().isRunning()) {
+        if (container.first == mConfig.foregroundId &&
+            container.second->isRunning()) {
             return container.first;
         }
     }
     return "";
-}
-
-
-std::vector<std::string> ContainerManager::getSuspendedContainerIds()
-{
-    std::vector<std::string> retContainerIds;
-    for (auto& container : mContainers) {
-        if (container.second->getAdmin().isPaused()) {
-            retContainerIds.push_back(container.first);
-        }
-    }
-    return retContainerIds;
 }
 
 

@@ -1,5 +1,5 @@
 <domain type="lxc">
-    <name>console</name>
+    <name>console2</name>
     <memory>102400</memory>
     <os>
         <type>exe</type>

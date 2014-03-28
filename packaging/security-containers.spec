@@ -23,9 +23,9 @@ between them. A process from inside a container can request a switch of context
 
 %files
 %attr(755,root,root) %{_bindir}/security-containers-server
-%config %attr(644,root,root) /etc/security-containers/config/daemon.conf
-%config %attr(644,root,root) /etc/security-containers/config/containers/xminimal.conf
-%config %attr(400,root,root) /etc/security-containers/config/libvirt-config/*.xml
+%config %attr(644,root,root) /etc/security-containers/daemon.conf
+%config %attr(644,root,root) /etc/security-containers/containers/xminimal.conf
+%config %attr(400,root,root) /etc/security-containers/libvirt-config/*.xml
 
 %prep
 %setup -q
@@ -103,7 +103,11 @@ Unit tests for both: server and client.
 %attr(755,root,root) %{script_dir}/sc_all_tests.py
 %attr(755,root,root) %{script_dir}/sc_launch_test.py
 %{script_dir}/sc_test_parser.py
-%config %attr(644,root,root) /etc/security-containers/config/tests/ut-scs-container-manager/*.conf
-%config %attr(644,root,root) /etc/security-containers/config/tests/ut-scs-container-manager/containers/*.conf
-%config %attr(644,root,root) /etc/security-containers/config/tests/ut-scs-container-manager/libvirt-config/*.xml
-%config %attr(644,root,root) /etc/security-containers/config/tests/ut-dbus-connection/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container-manager/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container-manager/containers/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container-manager/libvirt-config/*.xml
+%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container/containers/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container/libvirt-config/*.xml
+%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container-admin/containers/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container-admin/libvirt-config/*.xml
+%config %attr(644,root,root) /etc/security-containers/tests/ut-dbus-connection/*.conf

@@ -47,16 +47,34 @@ TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_
 ## Install #####################################################################
 INSTALL(TARGETS ${UT_SERVER_CODENAME} DESTINATION bin)
 
-FILE(GLOB manager_CONF         ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/*.conf)
-FILE(GLOB container_CONF       ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/containers/*.conf)
-FILE(GLOB containeradmin_CONF  ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/libvirt-config/*.xml)
-FILE(GLOB dbus_CONF            ${SERVER_FOLDER}/unit_tests/config/ut-dbus-connection/*.conf)
+FILE(GLOB manager_manager_CONF      ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/*.conf)
+FILE(GLOB manager_container_CONF    ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/containers/*.conf)
+FILE(GLOB manager_admin_CONF        ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-manager/libvirt-config/*.xml)
 
-INSTALL(FILES        ${manager_CONF}
+FILE(GLOB container_container_CONF  ${SERVER_FOLDER}/unit_tests/config/ut-scs-container/containers/*.conf)
+FILE(GLOB container_admin_CONF      ${SERVER_FOLDER}/unit_tests/config/ut-scs-container/libvirt-config/*.xml)
+
+FILE(GLOB admin_container_CONF      ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-admin/containers/*.conf)
+FILE(GLOB admin_admin_CONF          ${SERVER_FOLDER}/unit_tests/config/ut-scs-container-admin/libvirt-config/*.xml)
+
+FILE(GLOB dbus_CONF                 ${SERVER_FOLDER}/unit_tests/config/ut-dbus-connection/*.conf)
+
+INSTALL(FILES        ${manager_manager_CONF}
         DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/ut-scs-container-manager)
-INSTALL(FILES        ${container_CONF}
+INSTALL(FILES        ${manager_container_CONF}
         DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/ut-scs-container-manager/containers)
-INSTALL(FILES        ${containeradmin_CONF}
+INSTALL(FILES        ${manager_admin_CONF}
         DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/ut-scs-container-manager/libvirt-config)
+
+INSTALL(FILES        ${container_container_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/ut-scs-container/containers)
+INSTALL(FILES        ${container_admin_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/ut-scs-container/libvirt-config)
+
+INSTALL(FILES        ${admin_container_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/ut-scs-container-admin/containers)
+INSTALL(FILES        ${admin_admin_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/ut-scs-container-admin/libvirt-config)
+
 INSTALL(FILES        ${dbus_CONF}
         DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/ut-dbus-connection)

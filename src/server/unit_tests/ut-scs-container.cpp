@@ -35,8 +35,8 @@ BOOST_AUTO_TEST_SUITE(ContainerSuite)
 
 using namespace security_containers;
 
-const std::string TEST_CONFIG_PATH = "/etc/security-containers/config/tests/ut-scs-container-manager/containers/test.conf";
-const std::string BUGGY_CONFIG_PATH = "/etc/security-containers/config/tests/ut-scs-container-manager/containers/buggy.conf";
+const std::string TEST_CONFIG_PATH = "/etc/security-containers/tests/ut-scs-container/containers/test.conf";
+const std::string BUGGY_CONFIG_PATH = "/etc/security-containers/tests/ut-scs-container/containers/buggy.conf";
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/config.conf";
 
 
@@ -61,10 +61,5 @@ BOOST_AUTO_TEST_CASE(MissingConfigTest)
     BOOST_REQUIRE_THROW(Container c(MISSING_CONFIG_PATH), ConfigException);
 }
 
-BOOST_AUTO_TEST_CASE(AdminTest)
-{
-    std::unique_ptr<Container> c(new Container(TEST_CONFIG_PATH));
-    //BOOST_REQUIRE(c->getAdmin());
-}
 
 BOOST_AUTO_TEST_SUITE_END()

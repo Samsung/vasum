@@ -43,7 +43,7 @@ public:
     ~ContainerManager();
 
     /**
-     * Switch to this container.
+     * Focus this container, put it to the foreground.
      * Method blocks until the focus is switched.
      *
      * @param containerId id of the container
@@ -61,20 +61,16 @@ public:
     void stopAll();
 
     /**
-     * @return id of the currently running container
+     * @return id of the currently focused/foreground container
      */
-    std::string getRunningContainerId();
-
-    /**
-     * @return vector of suspended container ids
-     */
-    std::vector<std::string> getSuspendedContainerIds();
+    std::string getRunningForegroundContainerId();
 
 private:
     ContainerManagerConfig mConfig;
     // TODO: secure this pointer from exceptions (e.g. in constructor)
     virConnectPtr mVir = NULL; // pointer to the connection with libvirt
-    std::unordered_map<std::string, std::unique_ptr<Container>> mContainers; // map of containers, id is the key
+    typedef std::unordered_map<std::string, std::unique_ptr<Container>> ContainerMap;
+    ContainerMap mContainers; // map of containers, id is the key
 
     void connect();
     void disconnect();
