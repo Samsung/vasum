@@ -19,4 +19,4 @@ Makefile
 
 # Others
 security-containers.pc
-doc/*/
+doc/html

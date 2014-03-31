@@ -47,7 +47,6 @@ make -k %{?jobs:-j%jobs}
 
 %install
 %make_install
-mkdir -p %{buildroot}/etc/security-containers/config/libvirt-config/
 
 %clean
 rm -rf %{buildroot}
@@ -103,11 +102,11 @@ Unit tests for both: server and client.
 %attr(755,root,root) %{script_dir}/sc_all_tests.py
 %attr(755,root,root) %{script_dir}/sc_launch_test.py
 %{script_dir}/sc_test_parser.py
-%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container-manager/*.conf
-%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container-manager/containers/*.conf
-%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container-manager/libvirt-config/*.xml
-%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container/containers/*.conf
-%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container/libvirt-config/*.xml
-%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container-admin/containers/*.conf
-%config %attr(644,root,root) /etc/security-containers/tests/ut-scs-container-admin/libvirt-config/*.xml
-%config %attr(644,root,root) /etc/security-containers/tests/ut-dbus-connection/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/dbus/ut-connection/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/server/ut-containers-manager/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/server/ut-containers-manager/containers/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/server/ut-containers-manager/libvirt-config/*.xml
+%config %attr(644,root,root) /etc/security-containers/tests/server/ut-container/containers/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/server/ut-container/libvirt-config/*.xml
+%config %attr(644,root,root) /etc/security-containers/tests/server/ut-container-admin/containers/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/server/ut-container-admin/libvirt-config/*.xml

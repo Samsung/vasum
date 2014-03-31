@@ -1,0 +1,48 @@
+# Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+#
+# @file   CMakeLists.txt
+# @author Jan Olszak (j.olszak@samsung.com)
+#
+
+MESSAGE(STATUS "Installing configs for the Server Unit Tests to " ${SC_CONFIG_INSTALL_DIR})
+FILE(GLOB manager_manager_CONF      ut-containers-manager/*.conf)
+FILE(GLOB manager_container_CONF    ut-containers-manager/containers/*.conf)
+FILE(GLOB manager_admin_CONF        ut-containers-manager/libvirt-config/*.xml)
+
+FILE(GLOB container_container_CONF  ut-container/containers/*.conf)
+FILE(GLOB container_admin_CONF      ut-container/libvirt-config/*.xml)
+
+FILE(GLOB admin_container_CONF      ut-container-admin/containers/*.conf)
+FILE(GLOB admin_admin_CONF          ut-container-admin/libvirt-config/*.xml)
+
+
+## Install #####################################################################
+INSTALL(FILES        ${manager_manager_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-containers-manager)
+INSTALL(FILES        ${manager_container_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-containers-manager/containers)
+INSTALL(FILES        ${manager_admin_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-containers-manager/libvirt-config)
+
+INSTALL(FILES        ${container_container_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-container/containers)
+INSTALL(FILES        ${container_admin_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-container/libvirt-config)
+
+INSTALL(FILES        ${admin_container_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-container-admin/containers)
+INSTALL(FILES        ${admin_admin_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-container-admin/libvirt-config)

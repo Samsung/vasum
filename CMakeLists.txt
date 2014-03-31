@@ -20,19 +20,13 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.6.2)
 PROJECT(security-containers)
 
+
 ## pkgconfig ###################################################################
 INCLUDE(FindPkgConfig)
 
+
 ## default CMAKE_INSTALL_* variables ###########################################
 INCLUDE(GNUInstallDirs)
-
-## File names ##################################################################
-SET(SERVER_CODENAME "${PROJECT_NAME}-server")
-SET(CLIENT_CODENAME "${PROJECT_NAME}-client")
-
-
-## Generate the pc file ########################################################
-CONFIGURE_FILE(security-containers.pc.in security-containers.pc @ONLY)
 
 
 ## Compiler flags, depending on the build type #################################
@@ -60,8 +54,10 @@ ADD_DEFINITIONS(-DPROGRAM_VERSION="${VERSION}")
 
 
 ## Subdirectories ##############################################################
-SET(CLIENT_FOLDER ${PROJECT_SOURCE_DIR}/src/client)
-SET(SERVER_FOLDER ${PROJECT_SOURCE_DIR}/src/server)
+SET(COMMON_FOLDER ${PROJECT_SOURCE_DIR}/common)
+SET(CLIENT_FOLDER ${PROJECT_SOURCE_DIR}/client)
+SET(SERVER_FOLDER ${PROJECT_SOURCE_DIR}/server)
+SET(UNIT_TESTS_FOLDER ${PROJECT_SOURCE_DIR}/unit_tests)
 
 IF(NOT DEFINED SYSCONF_INSTALL_DIR)
     SET(SYSCONF_INSTALL_DIR "/etc")
@@ -81,21 +77,7 @@ ENDIF(NOT DEFINED SCRIPT_INSTALL_DIR)
 
 SET(SC_CONFIG_INSTALL_DIR ${SYSCONF_INSTALL_DIR}/security-containers)
 
-ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(${CLIENT_FOLDER})
+ADD_SUBDIRECTORY(${SERVER_FOLDER})
+ADD_SUBDIRECTORY(${UNIT_TESTS_FOLDER})
 
-
-## Installations ###############################################################
-INSTALL(FILES       ${CLIENT_FOLDER}/include/security-containers-client.h
-        DESTINATION ${INCLUDE_INSTALL_DIR}/security-containers)
-
-INSTALL(FILES       ${CMAKE_BINARY_DIR}/security-containers.pc
-        DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
-
-INSTALL(FILES       ${SERVER_FOLDER}/config/daemon.conf
-        DESTINATION ${SC_CONFIG_INSTALL_DIR})
-
-INSTALL(FILES       ${SERVER_FOLDER}/config/containers/xminimal.conf
-        DESTINATION ${SC_CONFIG_INSTALL_DIR}/containers)
-
-INSTALL(FILES       ${SERVER_FOLDER}/config/libvirt-config/xminimal.xml
-        DESTINATION ${SC_CONFIG_INSTALL_DIR}/libvirt-config)
