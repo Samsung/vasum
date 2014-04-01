@@ -24,8 +24,14 @@ MESSAGE(STATUS "Installing configs to " ${SC_CONFIG_INSTALL_DIR})
 INSTALL(FILES       daemon.conf
         DESTINATION ${SC_CONFIG_INSTALL_DIR})
 
-INSTALL(FILES       containers/xminimal.conf
+INSTALL(FILES       containers/private.conf
         DESTINATION ${SC_CONFIG_INSTALL_DIR}/containers)
 
-INSTALL(FILES       libvirt-config/xminimal.xml
+INSTALL(FILES       libvirt-config/private.xml
+        DESTINATION ${SC_CONFIG_INSTALL_DIR}/libvirt-config)
+
+INSTALL(FILES       containers/business.conf
+        DESTINATION ${SC_CONFIG_INSTALL_DIR}/containers)
+
+INSTALL(FILES       libvirt-config/business.xml
         DESTINATION ${SC_CONFIG_INSTALL_DIR}/libvirt-config)

@@ -85,6 +85,8 @@ void ContainersManager::focus(const std::string& containerId)
 
 void ContainersManager::startAll()
 {
+    LOGI("Starting all containers");
+
     bool isForegroundFound = false;
 
     for (auto& container : mContainers) {
@@ -110,6 +112,8 @@ void ContainersManager::startAll()
 
 void ContainersManager::stopAll()
 {
+    LOGI("Stopping all containers");
+
     for (auto& container : mContainers) {
         container.second->stop();
     }

@@ -20,7 +20,7 @@ between them. A process from inside a container can request a switch of context
 %files
 %attr(755,root,root) %{_bindir}/security-containers-server
 %config %attr(644,root,root) /etc/security-containers/daemon.conf
-%config %attr(644,root,root) /etc/security-containers/containers/xminimal.conf
+%config %attr(644,root,root) /etc/security-containers/containers/*.conf
 %config %attr(400,root,root) /etc/security-containers/libvirt-config/*.xml
 
 %prep
@@ -97,6 +97,9 @@ Unit tests for both: server and client.
 %attr(755,root,root) %{script_dir}/sc_launch_test.py
 %{script_dir}/sc_test_parser.py
 %config %attr(644,root,root) /etc/security-containers/tests/dbus/ut-connection/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/server/ut-server/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/server/ut-server/containers/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/server/ut-server/libvirt-config/*.xml
 %config %attr(644,root,root) /etc/security-containers/tests/server/ut-containers-manager/*.conf
 %config %attr(644,root,root) /etc/security-containers/tests/server/ut-containers-manager/containers/*.conf
 %config %attr(644,root,root) /etc/security-containers/tests/server/ut-containers-manager/libvirt-config/*.xml

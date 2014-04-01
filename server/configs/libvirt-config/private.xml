@@ -1,0 +1,81 @@
+<domain type='lxc'>
+  <name>private</name>
+  <memory>102400</memory>
+  <os>
+    <type>exe</type>
+    <init>/usr/lib/systemd/systemd</init>
+  </os>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+  <devices>
+    <console type='pty'/>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/fb0</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/tty2</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/tty3</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/tty4</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/tty5</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/input/event0</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/input/event1</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/input/event2</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/input/event3</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/input/event4</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/input/mice</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/input/mouse0</char>
+      </source>
+    </hostdev>
+    <interface type='network'>
+      <source network='default'/>
+    </interface>
+    <filesystem type='mount'>
+      <source dir='/domains/private'/>
+      <target dir='/'/>
+    </filesystem>
+  </devices>
+</domain>

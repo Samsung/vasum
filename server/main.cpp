@@ -25,56 +25,24 @@
 
 #include "log/logger.hpp"
 #include "log/backend-stderr.hpp"
-#include "utils/glib-loop.hpp"
-#include "utils/latch.hpp"
+#include "utils/typeinfo.hpp"
+#include "exception.hpp"
+#include "server.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #include <iostream>
-#include <csignal>
 
+using namespace security_containers::log;
+using namespace security_containers;
 
 namespace po = boost::program_options;
 
-namespace security_containers {
-namespace {
-
-
-utils::Latch signalLatch;
-
-void signalHandler(int sig)
-{
-    LOGI("Got signal " << sig);
-    signalLatch.set();
-}
-
-void runDaemon()
-{
-    signal(SIGINT, signalHandler);
-    signal(SIGTERM, signalHandler);
-
-    LOGI("Starting daemon...");
-    {
-        utils::ScopedGlibLoop loop;
-        //TODO bootstrap
-        LOGI("Daemon started");
-        signalLatch.wait();
-        LOGI("Stopping daemon...");
-    }
-    LOGI("Daemon stopped");
-}
-
-} // namespace
-} // namespace security_containers
-
 
 namespace {
-
 
 const std::string PROGRAM_NAME_AND_VERSION =
     "Security Containers Server " PROGRAM_VERSION;
-
-using namespace security_containers::log;
 
 /**
  * Resolve if given log severity level is valid
@@ -107,13 +75,16 @@ LogLevel validateLogLevel(const std::string& s)
 
 int main(int argc, char* argv[])
 {
+    std::string configPath ;
+
     try {
         po::options_description desc("Allowed options");
 
         desc.add_options()
         ("help,h", "print this help")
         ("version,v", "show application version")
-        ("log-level", po::value<std::string>()->default_value("DEBUG"), "set log level")
+        ("log-level,l", po::value<std::string>()->default_value("DEBUG"), "set log level")
+        ("config,c", po::value<std::string>()->default_value("/etc/security-containers/daemon.conf"), "server configuration file")
         ;
 
         po::variables_map vm;
@@ -147,18 +118,25 @@ int main(int argc, char* argv[])
             return 0;
         }
 
-        if (vm.count("log-level")) {
-            using namespace security_containers::log;
-            LogLevel level = validateLogLevel(vm["log-level"].as<std::string>());
-            Logger::setLogLevel(level);
-            Logger::setLogBackend(new StderrBackend());
-        }
+        LogLevel level = validateLogLevel(vm["log-level"].as<std::string>());
+        Logger::setLogLevel(level);
+        Logger::setLogBackend(new StderrBackend());
+
+        configPath = vm["config"].as<std::string>();
+
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
         return 1;
     }
 
-    security_containers::runDaemon();
+    try {
+        Server server(configPath);
+        server.run();
+
+    } catch (std::exception& e) {
+        LOGE("Unexpected: " << utils::getTypeName(e) << ": " << e.what());
+        return 1;
+    }
 
     return 0;
 }

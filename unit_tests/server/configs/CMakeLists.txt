@@ -18,6 +18,11 @@
 #
 
 MESSAGE(STATUS "Installing configs for the Server Unit Tests to " ${SC_CONFIG_INSTALL_DIR})
+
+FILE(GLOB server_manager_CONF       ut-server/*.conf)
+FILE(GLOB server_container_CONF     ut-server/containers/*.conf)
+FILE(GLOB server_admin_CONF         ut-server/libvirt-config/*.xml)
+
 FILE(GLOB manager_manager_CONF      ut-containers-manager/*.conf)
 FILE(GLOB manager_container_CONF    ut-containers-manager/containers/*.conf)
 FILE(GLOB manager_admin_CONF        ut-containers-manager/libvirt-config/*.xml)
@@ -30,6 +35,13 @@ FILE(GLOB admin_admin_CONF          ut-container-admin/libvirt-config/*.xml)
 
 
 ## Install #####################################################################
+INSTALL(FILES        ${server_manager_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-server)
+INSTALL(FILES        ${server_container_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-server/containers)
+INSTALL(FILES        ${server_admin_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-server/libvirt-config)
+
 INSTALL(FILES        ${manager_manager_CONF}
         DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-containers-manager)
 INSTALL(FILES        ${manager_container_CONF}
