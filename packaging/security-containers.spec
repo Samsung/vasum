@@ -33,11 +33,9 @@ between them. A process from inside a container can request a switch of context
 %build
 %{!?build_type:%define build_type "RELEASE"}
 
-%if %{build_type} == "DEBUG"
-    # workaround for a bug in build.conf
-    %global optflags %(echo %{optflags} | sed 's/-Wp,-D_FORTIFY_SOURCE=2//')
-    export CFLAGS=""
-    export CXXFLAGS=""
+%if %{build_type} == "DEBUG" || %{build_type} == "PROFILING"
+    CFLAGS="$CFLAGS -Wp,-U_FORTIFY_SOURCE"
+    CXXFLAGS="$CXXFLAGS -Wp,-U_FORTIFY_SOURCE"
 %endif
 
 %cmake . -DVERSION=%{version} \
