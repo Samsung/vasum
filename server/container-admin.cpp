@@ -26,7 +26,8 @@
 #include "exception.hpp"
 #include "log/logger.hpp"
 
-#include <assert.h>
+#include <cassert>
+#include <cstring>
 #include <string>
 #include <fstream>
 #include <streambuf>

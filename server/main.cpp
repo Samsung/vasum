@@ -31,7 +31,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #include <iostream>
-#include <signal.h>
+#include <csignal>
 
 
 namespace po = boost::program_options;

@@ -26,7 +26,6 @@
 #include "log/logger.hpp"
 #include "utils/paths.hpp"
 
-#include <assert.h>
 #include <string>
 
 

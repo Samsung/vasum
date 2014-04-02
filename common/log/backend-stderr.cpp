@@ -24,7 +24,7 @@
 
 #include "log/backend-stderr.hpp"
 
-#include <stdio.h>
+#include <cstdio>
 
 
 namespace security_containers {

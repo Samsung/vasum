@@ -26,7 +26,6 @@
 #include "config/configuration.hpp"
 #include "config/exception.hpp"
 
-#include <string.h>
 #include <fstream>
 
 

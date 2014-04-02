@@ -23,17 +23,16 @@
  * @brief   Main file for the Security Containers Daemon unit tests
  */
 
-#define BOOST_TEST_MAIN init_unit_test_suite
-#include "ut.hpp"
-
 #include "log/logger.hpp"
 #include "log/backend-stderr.hpp"
+
+#include <boost/test/included/unit_test.hpp>
 
 
 using namespace boost::unit_test;
 using namespace security_containers::log;
 
-test_suite* BOOST_TEST_MAIN(int /*argc*/, char** /*argv*/)
+test_suite* init_unit_test_suite(int /*argc*/, char** /*argv*/)
 {
     Logger::setLogLevel(LogLevel::TRACE);
     Logger::setLogBackend(new StderrBackend());

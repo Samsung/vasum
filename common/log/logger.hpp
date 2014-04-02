@@ -26,10 +26,8 @@
 #ifndef COMMON_LOG_LOGGER_HPP
 #define COMMON_LOG_LOGGER_HPP
 
-#include "log/backend.hpp"
-
 #include <sstream>
-#include <string.h>
+#include <string>
 
 
 namespace security_containers {
@@ -39,6 +37,8 @@ namespace log {
 enum class LogLevel {
     TRACE, DEBUG, INFO, WARN, ERROR
 };
+
+class LogBackend;
 
 class Logger {
 public:
@@ -57,15 +57,13 @@ private:
 } // namespace security_containers
 
 
-#define BASE_FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-
 #define LOG(SEVERITY, MESSAGE) \
     do { \
         if (security_containers::log::Logger::getLogLevel() <= \
             security_containers::log::LogLevel::SEVERITY) { \
             std::ostringstream message; \
             message << MESSAGE; \
-            security_containers::log::Logger logger(#SEVERITY, BASE_FILE, __LINE__); \
+            security_containers::log::Logger logger(#SEVERITY, __FILE__, __LINE__); \
             logger.logMessage(message.str()); \
         } \
     } while(0)

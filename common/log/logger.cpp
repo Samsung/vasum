@@ -28,6 +28,7 @@
 #include <iomanip>
 #include <memory>
 #include <mutex>
+#include <cassert>
 
 
 namespace security_containers {
@@ -40,12 +41,21 @@ volatile LogLevel gLogLevel = LogLevel::DEBUG;
 std::unique_ptr<LogBackend> gLogBackendPtr(new NullLogger());
 std::mutex gLogMutex;
 
+const std::string SOURCE_DIR = PROJECT_SOURCE_DIR "/";
+
+inline std::string stripProjectDir(const std::string& file)
+{
+    // it will work until someone use in cmake FILE(GLOB ... RELATIVE ...)
+    assert(0 == file.compare(0, SOURCE_DIR.size(), SOURCE_DIR));
+    return file.substr(SOURCE_DIR.size());
+}
+
 } // namespace
 
 Logger::Logger(const std::string& severity, const std::string& file, const int line)
 {
     mLogLine << std::left << std::setw(8) << '[' + severity + ']'
-             << file << ':'
+             << stripProjectDir(file) << ':'
              << line << ' ';
 }
 

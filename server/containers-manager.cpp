@@ -28,7 +28,7 @@
 #include "utils/paths.hpp"
 #include "log/logger.hpp"
 
-#include <assert.h>
+#include <cassert>
 #include <string>
 #include <climits>
 
