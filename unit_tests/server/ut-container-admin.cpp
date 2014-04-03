@@ -43,6 +43,12 @@ const std::string TEST_CONFIG_PATH = "/etc/security-containers/tests/server/ut-c
 const std::string BUGGY_CONFIG_PATH = "/etc/security-containers/tests/server/ut-container-admin/containers/buggy.conf";
 const std::string MISSING_CONFIG_PATH = "/etc/security-containers/tests/server/ut-container-admin/containers/missing.conf";
 
+void ensureStarted()
+{
+    // TODO: fix the libvirt usage so this is not required
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+}
+
 
 BOOST_AUTO_TEST_CASE(ConstructorTest)
 {
@@ -74,6 +80,7 @@ BOOST_AUTO_TEST_CASE(StartTest)
     ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
     ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start());
+    ensureStarted();
     BOOST_CHECK(ca.isRunning());
 }
 
@@ -82,6 +89,7 @@ BOOST_AUTO_TEST_CASE(StopTest)
     ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
     ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start());
+    ensureStarted();
     BOOST_CHECK(ca.isRunning());
     BOOST_REQUIRE_NO_THROW(ca.stop())
     BOOST_CHECK(!ca.isRunning());
@@ -93,6 +101,7 @@ BOOST_AUTO_TEST_CASE(ShutdownTest)
     ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
     ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start())
+    ensureStarted();
     BOOST_CHECK(ca.isRunning());
     BOOST_REQUIRE_NO_THROW(ca.shutdown())
     // TODO: For this simple configuration, the shutdown signal is ignored
@@ -105,9 +114,8 @@ BOOST_AUTO_TEST_CASE(SuspendTest)
     ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
     ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start())
+    ensureStarted();
     BOOST_CHECK(ca.isRunning());
-    // TODO: fix the libvirt usage so this is not required
-    std::this_thread::sleep_for(std::chrono::seconds(1));
     BOOST_REQUIRE_NO_THROW(ca.suspend());
     BOOST_CHECK(!ca.isRunning());
     BOOST_CHECK(ca.isPaused());
@@ -118,8 +126,7 @@ BOOST_AUTO_TEST_CASE(ResumeTest)
     ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
     ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start());
-    // TODO: fix the libvirt usage so this is not required
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    ensureStarted();
     BOOST_REQUIRE_NO_THROW(ca.suspend())
     BOOST_CHECK(ca.isPaused());
     BOOST_REQUIRE_NO_THROW(ca.resume());
@@ -132,6 +139,7 @@ BOOST_AUTO_TEST_CASE(SchedulerLevelTest)
     ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
     ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start());
+    ensureStarted();
     BOOST_REQUIRE(ca.getSchedulerQuota() == config.cpuQuotaBackground);
     BOOST_REQUIRE_NO_THROW(ca.setSchedulerLevel(SchedulerLevel::FOREGROUND));
     BOOST_REQUIRE(ca.getSchedulerQuota() == config.cpuQuotaForeground);
