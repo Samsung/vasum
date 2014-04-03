@@ -68,13 +68,8 @@ public:
 
 private:
     ContainersManagerConfig mConfig;
-    // TODO: secure this pointer from exceptions (e.g. in constructor)
-    virConnectPtr mVir = NULL; // pointer to the connection with libvirt
     typedef std::unordered_map<std::string, std::unique_ptr<Container>> ContainerMap;
     ContainerMap mContainers; // map of containers, id is the key
-
-    void connect();
-    void disconnect();
 };
 
 

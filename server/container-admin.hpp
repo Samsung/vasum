@@ -28,6 +28,9 @@
 
 #include "container-config.hpp"
 
+#include "libvirt/connection.hpp"
+#include "libvirt/domain.hpp"
+
 #include <string>
 #include <cstdint>
 #include <libvirt/libvirt.h>
@@ -113,31 +116,12 @@ public:
     std::int64_t getSchedulerQuota();
 
 private:
-    // TODO: secure those pointers from exceptions (e.g. in constructor)
-    virConnectPtr mVir = NULL; // pointer to the connection with libvirt
-    virDomainPtr  mDom = NULL; // pointer to the domain
-
     ContainerConfig& mConfig;
+    libvirt::LibvirtDomain mDom;
 
-    // TODO: This is a temporary sollution.
-    const std::string mDefaultConfigXML = "<domain type=\"lxc\">\
-                                         <name>cnsl</name>\
-                                         <memory>102400</memory>\
-                                         <os>\
-                                         <type>exe</type>\
-                                         <init>/bin/sh</init>\
-                                         </os>\
-                                         <devices>\
-                                         <console type=\"pty\"/>\
-                                         </devices>\
-                                         </domain>";
-
-    void connect();    // fill mVir
-    void disconnect(); // release mVir
-    void define(const std::string& configXML); // containers can't share the same libvirt configuration
-    void undefine();
-    int  getState();   // get the libvirt's domain state
+    int getState();   // get the libvirt's domain state
     void setSchedulerParams(std::uint64_t cpuShares, std::uint64_t vcpuPeriod, std::int64_t vcpuQuota);
+
 };
 
 

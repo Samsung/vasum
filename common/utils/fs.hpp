@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Jan Olszak <j.olszak@samsung.com>
+ *  Contact: Lukasz Pawelczyk <l.pawelczyk@partner.samsung.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,37 +18,27 @@
 
 /**
  * @file
- * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Exceptions for the server
+ * @author  Lukasz Pawelczyk (l.pawelczyk@partner.samsung.com)
+ * @brief   File utility functions declaration
  */
 
+#ifndef COMMON_UTILS_PATHS_HPP
+#define COMMON_UTILS_PATHS_HPP
 
-#ifndef SERVER_EXCEPTION_HPP
-#define SERVER_EXCEPTION_HPP
-
-#include "base-exception.hpp"
+#include <string>
 
 
 namespace security_containers {
-
-
-/**
- * Base class for exceptions in Security Containers Server
- */
-struct ServerException: public SecurityContainersException {
-    using SecurityContainersException::SecurityContainersException;
-};
+namespace utils {
 
 /**
- * Error occured during an attempt to perform an operation on a domain,
- * e.g. start, stop a container
+ * Reads the content of a file
  */
-struct DomainOperationException: public ServerException {
-    using ServerException::ServerException;
-};
+std::string readFileContent(const std::string& path);
 
 
-}
+} // namespace utils
+} // namespace security_containers
 
 
-#endif // SERVER_EXCEPTION_HPP
+#endif // COMMON_UTILS_PATHS_HPP

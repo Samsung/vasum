@@ -29,7 +29,7 @@
 
 #include <memory>
 
-BOOST_AUTO_TEST_SUITE(UtilsSuite)
+BOOST_AUTO_TEST_SUITE(UtilsPathsSuite)
 
 using namespace security_containers::utils;
 

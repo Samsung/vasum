@@ -20,50 +20,48 @@
 /**
  * @file
  * @author  Lukasz Pawelczyk (l.pawelczyk@partner.samsung.com)
- * @brief   Unit tests of the Container class
+ * @brief   Unit tests of the LibvirtConnection class
  */
 
 #include "ut.hpp"
 
-#include "container.hpp"
-#include "exception.hpp"
-
-#include "utils/exception.hpp"
+#include "libvirt/connection.hpp"
+#include "libvirt/exception.hpp"
 
 #include <memory>
-#include <string>
 
+BOOST_AUTO_TEST_SUITE(LibvirtConnectionSuite)
 
-BOOST_AUTO_TEST_SUITE(ContainerSuite)
 
 using namespace security_containers;
-using namespace security_containers::config;
+using namespace security_containers::libvirt;
 
-const std::string TEST_CONFIG_PATH = "/etc/security-containers/tests/server/ut-container/containers/test.conf";
-const std::string BUGGY_CONFIG_PATH = "/etc/security-containers/tests/server/ut-container/containers/buggy.conf";
-const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/config.conf";
 
+const std::string CORRECT_URI_STRING = LIBVIRT_LXC_ADDRESS;
+const std::string BUGGY_URI_STRING = "some_random_string";
 
 BOOST_AUTO_TEST_CASE(ConstructorTest)
 {
-    BOOST_REQUIRE_NO_THROW(Container c(TEST_CONFIG_PATH));
+    std::unique_ptr<LibvirtConnection> con;
+    BOOST_REQUIRE_NO_THROW(con.reset(new LibvirtConnection(CORRECT_URI_STRING)));
 }
 
 BOOST_AUTO_TEST_CASE(DestructorTest)
 {
-    std::unique_ptr<Container> c(new Container(TEST_CONFIG_PATH));
-    BOOST_REQUIRE_NO_THROW(c.reset());
+    std::unique_ptr<LibvirtConnection> con(new LibvirtConnection(CORRECT_URI_STRING));
+    BOOST_REQUIRE_NO_THROW(con.reset());
 }
 
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)
 {
-    BOOST_REQUIRE_THROW(Container c(BUGGY_CONFIG_PATH), UtilsException);
+    std::unique_ptr<LibvirtConnection> con;
+    BOOST_REQUIRE_THROW(con.reset(new LibvirtConnection(BUGGY_URI_STRING)), LibvirtOperationException);
 }
 
-BOOST_AUTO_TEST_CASE(MissingConfigTest)
+BOOST_AUTO_TEST_CASE(ConnectionTest)
 {
-    BOOST_REQUIRE_THROW(Container c(MISSING_CONFIG_PATH), ConfigException);
+    std::unique_ptr<LibvirtConnection> con(new LibvirtConnection(CORRECT_URI_STRING));
+    BOOST_CHECK(con->get() != NULL);
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

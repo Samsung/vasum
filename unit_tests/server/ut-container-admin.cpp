@@ -28,6 +28,9 @@
 #include "container-admin.hpp"
 #include "exception.hpp"
 
+#include "utils/exception.hpp"
+#include "libvirt/exception.hpp"
+
 #include <memory>
 #include <string>
 #include <thread>
@@ -66,13 +69,13 @@ BOOST_AUTO_TEST_CASE(DestructorTest)
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)
 {
     ContainerConfig config; config.parseFile(BUGGY_CONFIG_PATH);
-    BOOST_REQUIRE_THROW(ContainerAdmin ca(config), ServerException);
+    BOOST_REQUIRE_THROW(ContainerAdmin ca(config), LibvirtOperationException);
 }
 
 BOOST_AUTO_TEST_CASE(MissingConfigTest)
 {
     ContainerConfig config; config.parseFile(MISSING_CONFIG_PATH);
-    BOOST_REQUIRE_THROW(ContainerAdmin ca(config), ConfigException);
+    BOOST_REQUIRE_THROW(ContainerAdmin ca(config), UtilsException);
 }
 
 BOOST_AUTO_TEST_CASE(StartTest)

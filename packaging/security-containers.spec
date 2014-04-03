@@ -97,6 +97,7 @@ Unit tests for both: server and client.
 %attr(755,root,root) %{script_dir}/sc_launch_test.py
 %{script_dir}/sc_test_parser.py
 %config %attr(644,root,root) /etc/security-containers/tests/dbus/ut-connection/*.conf
+%config %attr(644,root,root) /etc/security-containers/tests/utils/ut-fs/*.txt
 %config %attr(644,root,root) /etc/security-containers/tests/server/ut-server/*.conf
 %config %attr(644,root,root) /etc/security-containers/tests/server/ut-server/containers/*.conf
 %config %attr(644,root,root) /etc/security-containers/tests/server/ut-server/libvirt-config/*.xml

@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Jan Olszak <j.olszak@samsung.com>
+ *  Contact: Lukasz Pawelczyk <l.pawelczyk@partner.samsung.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@
 
 /**
  * @file
- * @author  Jan Olszak (j.olszak@samsung.com)
+ * @author  Lukasz Pawelczyk (l.pawelczyk@partner.samsung.com)
  * @brief   Exceptions for the server
  */
 
 
-#ifndef SERVER_EXCEPTION_HPP
-#define SERVER_EXCEPTION_HPP
+#ifndef COMMON_UTILS_EXCEPTION_HPP
+#define COMMON_UTILS_EXCEPTION_HPP
 
 #include "base-exception.hpp"
 
@@ -33,22 +33,14 @@ namespace security_containers {
 
 
 /**
- * Base class for exceptions in Security Containers Server
+ * Base class for exceptions in utils
  */
-struct ServerException: public SecurityContainersException {
+struct UtilsException: public SecurityContainersException {
     using SecurityContainersException::SecurityContainersException;
-};
-
-/**
- * Error occured during an attempt to perform an operation on a domain,
- * e.g. start, stop a container
- */
-struct DomainOperationException: public ServerException {
-    using ServerException::ServerException;
 };
 
 
 }
 
 
-#endif // SERVER_EXCEPTION_HPP
+#endif // COMMON_UTILS_EXCEPTION_HPP

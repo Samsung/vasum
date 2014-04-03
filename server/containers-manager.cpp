@@ -39,7 +39,6 @@ namespace security_containers {
 ContainersManager::ContainersManager(const std::string& managerConfigPath)
 {
     mConfig.parseFile(managerConfigPath);
-    connect();
 
     for (auto& containerConfig : mConfig.containerConfigs) {
         std::string containerConfigPath;
@@ -66,7 +65,6 @@ ContainersManager::~ContainersManager()
     } catch (ServerException& e) {
         LOGE("Failed to stop all of the containers");
     }
-    disconnect();
 }
 
 
@@ -128,32 +126,7 @@ std::string ContainersManager::getRunningForegroundContainerId()
             return container.first;
         }
     }
-    return "";
-}
-
-
-void ContainersManager::connect()
-{
-    assert(mVir == NULL);
-
-    mVir = virConnectOpen("lxc://");
-    if (mVir == NULL) {
-        LOGE("Failed to open connection to lxc://");
-        throw ConnectionException();
-    }
-}
-
-
-void ContainersManager::disconnect()
-{
-    if (mVir == NULL) {
-        return;
-    }
-
-    if (virConnectClose(mVir) < 0) {
-        LOGE("Error during unconnecting from libvirt");
-    };
-    mVir = NULL;
+    return std::string();
 }
 
 

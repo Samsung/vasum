@@ -44,6 +44,7 @@ TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_
 ADD_SUBDIRECTORY(scripts)
 ADD_SUBDIRECTORY(dbus/configs)
 ADD_SUBDIRECTORY(server/configs)
+ADD_SUBDIRECTORY(utils/configs)
 
 
 ## Install #####################################################################
