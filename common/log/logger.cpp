@@ -55,8 +55,8 @@ inline std::string stripProjectDir(const std::string& file)
 Logger::Logger(const std::string& severity, const std::string& file, const int line)
 {
     mLogLine << std::left << std::setw(8) << '[' + severity + ']'
-             << stripProjectDir(file) << ':'
-             << line << ' ';
+             << std::left << std::setw(40) << stripProjectDir(file) + ':' + std::to_string(line)
+             << ' ';
 }
 
 void Logger::logMessage(const std::string& message)
