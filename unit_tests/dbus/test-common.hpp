@@ -40,6 +40,7 @@ const std::string TESTAPI_INTERFACE      = "tests.api";
 const std::string TESTAPI_METHOD_NOOP    = "Noop";
 const std::string TESTAPI_METHOD_PROCESS = "Process";
 const std::string TESTAPI_METHOD_THROW   = "Throw";
+const std::string TESTAPI_SIGNAL_NOTIFY  = "Notify";
 
 const std::string TESTAPI_DEFINITION =
     "<node>"
@@ -52,6 +53,9 @@ const std::string TESTAPI_DEFINITION =
     "    <method name='" + TESTAPI_METHOD_THROW + "'>"
     "      <arg type='i' name='argument' direction='in'/>"
     "    </method>"
+    "    <signal name='" + TESTAPI_SIGNAL_NOTIFY + "'>"
+    "      <arg type='s' name='arument'/>"
+    "    </signal>"
     "  </interface>"
     "</node>";
 

@@ -47,8 +47,17 @@ public:
     std::string process(const std::string& arg);
     void throwException(int arg);
 
+    typedef std::function<void(const std::string& message)> NotifyCallback;
+    void setNotifyCallback(const NotifyCallback& callback);
 private:
     dbus::DbusConnection::Pointer mConnection;
+    NotifyCallback mNotifyCallback;
+
+    void onSignal(const std::string& senderBusName,
+                  const std::string& objectPath,
+                  const std::string& interface,
+                  const std::string& signalName,
+                  GVariant* parameters);
 };
 
 

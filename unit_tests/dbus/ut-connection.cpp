@@ -161,15 +161,84 @@ BOOST_AUTO_TEST_CASE(NameOwnerTest)
     //BOOST_CHECK(nameAcquired2.wait(EVENT_TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(SignalTest)
+BOOST_AUTO_TEST_CASE(GenericSignalTest)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
     DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
-    conn2->signalSubscribe();
-    conn1->emitSignal("/a/b/c", "a.b.c", "Foo", NULL);
-    sleep(1);
+
+    const std::string OBJECT_PATH = "/a/b/c";
+    const std::string INTERFACE = "a.b.c";
+    const std::string SIGNAL_NAME = "Foo";
+
+    Latch signalEmited;
+    auto handler = [&](const std::string& /*senderBusName*/,
+                       const std::string& objectPath,
+                       const std::string& interface,
+                       const std::string& signalName,
+                       GVariant* parameters) {
+        if (objectPath == OBJECT_PATH &&
+            interface == INTERFACE &&
+            signalName == SIGNAL_NAME &&
+            g_variant_is_of_type(parameters, G_VARIANT_TYPE_UNIT)) {
+            signalEmited.set();
+        }
+    };
+    conn2->signalSubscribe(handler, std::string());
+
+    conn1->emitSignal(OBJECT_PATH, INTERFACE, SIGNAL_NAME, NULL);
+    BOOST_CHECK(signalEmited.wait(EVENT_TIMEOUT));
+}
+
+BOOST_AUTO_TEST_CASE(FilteredSignalTest)
+{
+    ScopedDbusDaemon daemon;
+    ScopedGlibLoop loop;
+    DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
+    DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
+
+    Latch goodSignalEmited;
+    Latch wrongSignalEmited;
+    auto handler = [&](const std::string& /*senderBusName*/,
+                       const std::string& objectPath,
+                       const std::string& interface,
+                       const std::string& signalName,
+                       GVariant* parameters) {
+        if (objectPath == TESTAPI_OBJECT_PATH &&
+            interface == TESTAPI_INTERFACE &&
+            signalName == TESTAPI_SIGNAL_NOTIFY &&
+            g_variant_is_of_type(parameters, G_VARIANT_TYPE("(s)"))) {
+
+            const gchar* msg = NULL;
+            g_variant_get(parameters, "(&s)", &msg);
+            if (msg == std::string("jipii")) {
+                goodSignalEmited.set();
+            } else {
+                wrongSignalEmited.set();
+            }
+        }
+    };
+    conn2->signalSubscribe(handler, TESTAPI_BUS_NAME);
+
+    conn1->emitSignal(TESTAPI_OBJECT_PATH,
+                      TESTAPI_INTERFACE,
+                      TESTAPI_SIGNAL_NOTIFY,
+                      g_variant_new("(s)", "boo"));
+
+    Latch nameAcquired;
+    conn1->setName(TESTAPI_BUS_NAME,
+                   [&] {nameAcquired.set();},
+                   [] {});
+    BOOST_REQUIRE(nameAcquired.wait(EVENT_TIMEOUT));
+
+    conn1->emitSignal(TESTAPI_OBJECT_PATH,
+                      TESTAPI_INTERFACE,
+                      TESTAPI_SIGNAL_NOTIFY,
+                      g_variant_new("(s)", "jipii"));
+
+    BOOST_CHECK(goodSignalEmited.wait(EVENT_TIMEOUT));
+    BOOST_CHECK(wrongSignalEmited.empty());
 }
 
 BOOST_AUTO_TEST_CASE(RegisterObjectTest)
@@ -219,6 +288,7 @@ BOOST_AUTO_TEST_CASE(IntrospectTest)
     BOOST_CHECK(std::string::npos != iface.find(TESTAPI_METHOD_NOOP));
     BOOST_CHECK(std::string::npos != iface.find(TESTAPI_METHOD_PROCESS));
     BOOST_CHECK(std::string::npos != iface.find(TESTAPI_METHOD_THROW));
+    BOOST_CHECK(std::string::npos != iface.find(TESTAPI_SIGNAL_NOTIFY));
 }
 
 BOOST_AUTO_TEST_CASE(MethodCallTest)
@@ -233,9 +303,15 @@ BOOST_AUTO_TEST_CASE(MethodCallTest)
                    [&] {nameAcquired.set();},
                    [] {});
     BOOST_REQUIRE(nameAcquired.wait(EVENT_TIMEOUT));
-    auto handler = [] (const std::string&, const std::string&, const std::string& method,
-                       GVariant* /*parameters*/, MethodResultBuilder& result) {
-        if (method == TESTAPI_METHOD_NOOP) {
+    auto handler = [](const std::string& objectPath,
+                      const std::string& interface,
+                      const std::string& methodName,
+                      GVariant* parameters,
+                      MethodResultBuilder& result) {
+        if (objectPath == TESTAPI_OBJECT_PATH &&
+            interface == TESTAPI_INTERFACE &&
+            methodName == TESTAPI_METHOD_NOOP &&
+            g_variant_is_of_type(parameters, G_VARIANT_TYPE_UNIT)) {
             result.setVoid();
         }
     };
@@ -261,7 +337,8 @@ BOOST_AUTO_TEST_CASE(MethodCallExceptionTest)
                    [&] {nameAcquired.set();},
                    [] {});
     BOOST_REQUIRE(nameAcquired.wait(EVENT_TIMEOUT));
-    conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION,
+    conn1->registerObject(TESTAPI_OBJECT_PATH,
+                          TESTAPI_DEFINITION,
                           DbusConnection::MethodCallCallback());
     BOOST_CHECK_THROW(conn2->callMethod(TESTAPI_BUS_NAME,
                                         TESTAPI_OBJECT_PATH,
@@ -308,6 +385,23 @@ BOOST_AUTO_TEST_CASE(DbusApiTest)
         return e.what() == std::string("Argument: 666");
     };
     BOOST_CHECK_EXCEPTION(client.throwException(666), DbusCustomException, checkException);
+}
+
+BOOST_AUTO_TEST_CASE(DbusApiNotifyTest)
+{
+    ScopedDbusDaemon daemon;
+    ScopedGlibLoop loop;
+    DbusTestServer server;
+    DbusTestClient client;
+
+    Latch notified;
+    auto onNotify = [&](const std::string& message) {
+        BOOST_CHECK_EQUAL("notification", message);
+        notified.set();
+    };
+    client.setNotifyCallback(onNotify);
+    server.notifyClients("notification");
+    BOOST_CHECK(notified.wait(EVENT_TIMEOUT));
 }
 
 BOOST_AUTO_TEST_CASE(DbusApiNameAcquiredTest)

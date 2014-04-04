@@ -57,16 +57,23 @@ public:
  */
 class DbusConnection {
 public:
-    typedef std::shared_ptr<DbusConnection> Pointer;
+    typedef std::unique_ptr<DbusConnection> Pointer;
 
     typedef std::function<void()> VoidCallback;
 
     typedef std::function<void(const std::string& objectPath,
                                const std::string& interface,
-                               const std::string& method,
+                               const std::string& methodName,
                                GVariant* parameters,
                                MethodResultBuilder& result
                               )> MethodCallCallback;
+
+    typedef std::function<void(const std::string& senderBusName,
+                               const std::string& objectPath,
+                               const std::string& interface,
+                               const std::string& signalName,
+                               GVariant* parameters
+                              )> SignalCallback;
 
     /**
      * Creates a connection to the dbus with given address.
@@ -98,9 +105,9 @@ public:
 
     /**
      * Subscribes to a signal.
-     * TODO not finished
+     * Empty sender means subscribe to all signals
      */
-    void signalSubscribe();
+    void signalSubscribe(const SignalCallback& callback, const std::string& senderBusName);
 
     /**
      * Registers an object with given definition.

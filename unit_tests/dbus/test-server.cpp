@@ -34,10 +34,10 @@ namespace security_containers {
 
 
 DbusTestServer::DbusTestServer()
-    : mNameAcquired(false)
+    : mConnection(dbus::DbusConnection::create(DBUS_ADDRESS))
+    , mNameAcquired(false)
     , mPendingDisconnect(false)
 {
-    mConnection = dbus::DbusConnection::create(DBUS_ADDRESS);
     mConnection->setName(TESTAPI_BUS_NAME,
                          std::bind(&DbusTestServer::onNameAcquired, this),
                          std::bind(&DbusTestServer::onDisconnect, this));
@@ -102,28 +102,35 @@ void DbusTestServer::throwException(int arg)
     }
 }
 
-void DbusTestServer::onMessageCall(
-    const std::string& objectPath,
-    const std::string& interface,
-    const std::string& method,
-    GVariant* parameters,
-    dbus::MethodResultBuilder& result)
+void DbusTestServer::notifyClients(const std::string& message)
+{
+    mConnection->emitSignal(TESTAPI_OBJECT_PATH,
+                            TESTAPI_INTERFACE,
+                            TESTAPI_SIGNAL_NOTIFY,
+                            g_variant_new("(s)", message.c_str()));
+}
+
+void DbusTestServer::onMessageCall(const std::string& objectPath,
+                                   const std::string& interface,
+                                   const std::string& methodName,
+                                   GVariant* parameters,
+                                   dbus::MethodResultBuilder& result)
 {
     try {
         if (objectPath != TESTAPI_OBJECT_PATH || interface != TESTAPI_INTERFACE) {
             throw std::logic_error("unsupported interface");
         }
 
-        if (method == TESTAPI_METHOD_NOOP) {
+        if (methodName == TESTAPI_METHOD_NOOP) {
             noop();
             result.setVoid();
-        } else if (method == TESTAPI_METHOD_PROCESS) {
+        } else if (methodName == TESTAPI_METHOD_PROCESS) {
             const gchar* arg;
             g_variant_get(parameters, "(&s)", &arg);
             std::string ret = process(arg);
             GVariant* variant = g_variant_new("(s)", ret.c_str());
             result.set(variant);
-        } else if (method == TESTAPI_METHOD_THROW) {
+        } else if (methodName == TESTAPI_METHOD_THROW) {
             int arg;
             g_variant_get(parameters, "(i)", &arg);
             throwException(arg);

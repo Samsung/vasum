@@ -47,6 +47,8 @@ public:
     typedef std::function<void()> DisconnectCallback;
     void setDisconnectCallback(const DisconnectCallback& callback);
 
+    void notifyClients(const std::string& message);
+
 private:
     //{ interface methods
     void noop();
@@ -67,12 +69,11 @@ private:
     void onNameAcquired();
     void onDisconnect();
 
-    void onMessageCall(
-        const std::string& objectPath,
-        const std::string& interface,
-        const std::string& method,
-        GVariant* parameters,
-        dbus::MethodResultBuilder& result);
+    void onMessageCall(const std::string& objectPath,
+                       const std::string& interface,
+                       const std::string& methodName,
+                       GVariant* parameters,
+                       dbus::MethodResultBuilder& result);
 };
 
 

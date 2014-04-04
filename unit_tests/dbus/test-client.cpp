@@ -32,8 +32,34 @@ namespace security_containers {
 
 
 DbusTestClient::DbusTestClient()
+    : mConnection(dbus::DbusConnection::create(DBUS_ADDRESS))
 {
-    mConnection = dbus::DbusConnection::create(DBUS_ADDRESS);
+    using namespace std::placeholders;
+    mConnection->signalSubscribe(std::bind(&DbusTestClient::onSignal, this, _1, _2, _3, _4, _5),
+                                 TESTAPI_BUS_NAME);
+}
+
+void DbusTestClient::setNotifyCallback(const NotifyCallback& callback)
+{
+    mNotifyCallback = callback;
+}
+
+void DbusTestClient::onSignal(const std::string& /*senderBusName*/,
+                              const std::string& objectPath,
+                              const std::string& interface,
+                              const std::string& signalName,
+                              GVariant* parameters)
+{
+    if (objectPath != TESTAPI_OBJECT_PATH || interface != TESTAPI_INTERFACE) {
+        return;
+    }
+    if (signalName == TESTAPI_SIGNAL_NOTIFY) {
+        if (mNotifyCallback) {
+            const gchar* message;
+            g_variant_get(parameters, "(&s)", &message);
+            mNotifyCallback(message);
+        }
+    }
 }
 
 void DbusTestClient::noop()

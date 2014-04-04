@@ -219,18 +219,19 @@ void DbusConnection::emitSignal(const std::string& objectPath,
     }
 }
 
-void DbusConnection::signalSubscribe()
+void DbusConnection::signalSubscribe(const SignalCallback& callback,
+                                     const std::string& senderBusName)
 {
     g_dbus_connection_signal_subscribe(mConnection,
-                                       NULL,
+                                       senderBusName.empty() ? NULL : senderBusName.c_str(),
                                        NULL,
                                        NULL,
                                        NULL,
                                        NULL,
                                        G_DBUS_SIGNAL_FLAGS_NONE,
                                        &DbusConnection::onSignal,
-                                       NULL,//data
-                                       NULL);
+                                       new SignalCallback(callback),
+                                       &deleteCallback<SignalCallback>);
 }
 
 void DbusConnection::onSignal(GDBusConnection*,
@@ -238,11 +239,16 @@ void DbusConnection::onSignal(GDBusConnection*,
                               const gchar* object,
                               const gchar* interface,
                               const gchar* name,
-                              GVariant* /*parameters*/,
-                              gpointer /*userData*/)
+                              GVariant* parameters,
+                              gpointer userData)
 {
+    const SignalCallback& callback = *static_cast<const SignalCallback*>(userData);
+
     LOGD("Signal: " << sender << "; " << object << "; " << interface << "; " << name);
-    //TODO call some callback
+
+    if (callback) {
+        callback(sender, object, interface, name, parameters);
+    }
 }
 
 std::string DbusConnection::introspect(const std::string& busName, const std::string& objectPath)
@@ -253,9 +259,8 @@ std::string DbusConnection::introspect(const std::string& busName, const std::st
                                                     INTROSPECT_METHOD,
                                                     NULL,
                                                     "(s)");
-    const gchar* s;
-    g_variant_get(result.get(), "(&s)", &s);
-    std::string xml = s;
+    const gchar* xml;
+    g_variant_get(result.get(), "(&s)", &xml);
     return xml;
 }
 
