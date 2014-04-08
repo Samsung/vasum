@@ -24,18 +24,47 @@
 
 #include "log/backend-stderr.hpp"
 
-#include <cstdio>
-
+#include <sstream>
+#include <iomanip>
+#include <sys/time.h>
 
 namespace security_containers {
 namespace log {
 
+namespace {
 
-void StderrBackend::log(const std::string& message)
+inline std::string getCurrentTime(void)
 {
-    fprintf(stderr, "%s", message.c_str());
+    char time[13];
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    struct tm* tm = localtime(&tv.tv_sec);
+    sprintf(time, "%02d:%02d:%02d.%03d", tm->tm_hour, tm->tm_min, tm->tm_sec, int(tv.tv_usec / 1000));
+
+    return std::string(time);
+}
+
+} // namespace
+
+void StderrBackend::log(const std::string& severity,
+                        const std::string& file,
+                        const unsigned int& line,
+                        const std::string& func,
+                        const std::string& message)
+{
+    std::ostringstream logLine;
+
+    // example log string
+    // 06:52:35.123 [ERROR] src/util/fs.cpp:43 readFileContent: /file/file.txt is missing
+
+    logLine << getCurrentTime() << ' '
+            << std::left << std::setw(8) << '[' + severity + ']'
+            << std::left << std::setw(52) << file + ':' + std::to_string(line) + ' ' + func + ':'
+            << message << std::endl;
+    fprintf(stderr, "%s", logLine.str().c_str());
 }
 
 
 } // namespace log
 } // namespace security_containers
+

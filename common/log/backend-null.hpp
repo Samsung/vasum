@@ -38,7 +38,11 @@ namespace log {
  */
 class NullLogger : public LogBackend {
 public:
-    void log(const std::string& /*message*/) override {}
+    void log(const std::string& /*severity*/,
+             const std::string& /*file*/,
+             const unsigned int& /*line*/,
+             const std::string& /*func*/,
+             const std::string& /*message*/) override {}
 };
 
 

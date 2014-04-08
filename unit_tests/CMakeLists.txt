@@ -34,7 +34,7 @@ ADD_EXECUTABLE(${UT_SERVER_CODENAME} ${project_SRCS} ${common_SRCS} ${server_SRC
 ## Link libraries ##############################################################
 FIND_PACKAGE (Boost COMPONENTS unit_test_framework REQUIRED)
 
-PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED libvirt json gio-2.0)
+PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED libvirt json gio-2.0 libsystemd-journal)
 INCLUDE_DIRECTORIES(${COMMON_FOLDER} ${SERVER_FOLDER} ${UNIT_TESTS_FOLDER}
                     ${UT_SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES})

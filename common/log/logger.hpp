@@ -42,7 +42,11 @@ class LogBackend;
 
 class Logger {
 public:
-    Logger(const std::string& severity, const std::string& file, const int line);
+    Logger(const std::string& severity,
+           const std::string& file,
+           const unsigned int line,
+           const std::string& func);
+
     void logMessage(const std::string& message);
 
     static void setLogLevel(LogLevel level);
@@ -50,7 +54,10 @@ public:
     static void setLogBackend(LogBackend* pBackend);
 
 private:
-    std::ostringstream mLogLine;
+    std::string mSeverity;
+    std::string mFile;
+    unsigned int mLine;
+    std::string mFunc;
 };
 
 } // namespace log
@@ -63,7 +70,7 @@ private:
             security_containers::log::LogLevel::SEVERITY) { \
             std::ostringstream messageStream__; \
             messageStream__ << MESSAGE; \
-            security_containers::log::Logger logger(#SEVERITY, __FILE__, __LINE__); \
+            security_containers::log::Logger logger(#SEVERITY, __FILE__, __LINE__, __func__); \
             logger.logMessage(messageStream__.str()); \
         } \
     } while(0)

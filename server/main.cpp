@@ -23,8 +23,14 @@
  * @brief   Main file for the Security Containers Daemon
  */
 
+// Always log to console in DEBUG mode
+#if !defined(LOG_TO_CONSOLE) && !defined(NDEBUG)
+#define LOG_TO_CONSOLE
+#endif
+
 #include "log/logger.hpp"
 #include "log/backend-stderr.hpp"
+#include "log/backend-journal.hpp"
 #include "utils/typeinfo.hpp"
 #include "exception.hpp"
 #include "server.hpp"
@@ -120,7 +126,11 @@ int main(int argc, char* argv[])
 
         LogLevel level = validateLogLevel(vm["log-level"].as<std::string>());
         Logger::setLogLevel(level);
+#ifdef LOG_TO_CONSOLE
         Logger::setLogBackend(new StderrBackend());
+#else
+        Logger::setLogBackend(new SystemdJournalBackend());
+#endif
 
         configPath = vm["config"].as<std::string>();
 
@@ -140,3 +150,4 @@ int main(int argc, char* argv[])
 
     return 0;
 }
+

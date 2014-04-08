@@ -38,7 +38,11 @@ namespace log {
  */
 class LogBackend {
 public:
-    virtual void log(const std::string& message) = 0;
+    virtual void log(const std::string& severity,
+                     const std::string& file,
+                     const unsigned int& line,
+                     const std::string& func,
+                     const std::string& message) = 0;
     virtual ~LogBackend() {}
 };
 

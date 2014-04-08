@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Pawel Broda <p.broda@partner.samsung.com>
+ *  Contact: Dariusz Michaluk <d.michaluk@samsung.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@
 
 /**
  * @file
- * @author  Pawel Broda (p.broda@partner.samsung.com)
- * @brief   Stderr backend for logger
+ * @author  Dariusz Michaluk (d.michaluk@samsung.com)
+ * @brief   Systemd journal backend for logger
  */
 
-#ifndef COMMON_LOG_BACKEND_STDERR_HPP
-#define COMMON_LOG_BACKEND_STDERR_HPP
+#ifndef COMMON_LOG_BACKEND_JOURNAL_HPP
+#define COMMON_LOG_BACKEND_JOURNAL_HPP
 
 #include "log/backend.hpp"
 
@@ -33,9 +33,9 @@ namespace log {
 
 
 /**
-    Stderr logging backend
+    systemd journal logging backend
  */
-class StderrBackend : public LogBackend {
+class SystemdJournalBackend : public LogBackend {
 public:
     void log(const std::string& severity,
              const std::string& file,
@@ -49,4 +49,4 @@ public:
 } // namespace security_containers
 
 
-#endif // COMMON_LOG_BACKEND_STDERR_HPP
+#endif // COMMON_LOG_BACKEND_JOURNAL_HPP

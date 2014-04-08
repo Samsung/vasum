@@ -25,7 +25,6 @@
 #include "log/logger.hpp"
 #include "log/backend-null.hpp"
 
-#include <iomanip>
 #include <memory>
 #include <mutex>
 #include <cassert>
@@ -52,18 +51,22 @@ inline std::string stripProjectDir(const std::string& file)
 
 } // namespace
 
-Logger::Logger(const std::string& severity, const std::string& file, const int line)
+Logger::Logger(const std::string& severity,
+               const std::string& file,
+               const unsigned int line,
+               const std::string& func)
+    : mSeverity(severity),
+      mFile(stripProjectDir(file)),
+      mLine(line),
+      mFunc(func)
 {
-    mLogLine << std::left << std::setw(8) << '[' + severity + ']'
-             << std::left << std::setw(40) << stripProjectDir(file) + ':' + std::to_string(line)
-             << ' ';
+
 }
 
 void Logger::logMessage(const std::string& message)
 {
-    mLogLine << message << std::endl;
     std::unique_lock<std::mutex> lock(gLogMutex);
-    gLogBackendPtr->log(mLogLine.str());
+    gLogBackendPtr->log(mSeverity, mFile, mLine, mFunc, message);
 }
 
 void Logger::setLogLevel(LogLevel level)
@@ -84,3 +87,4 @@ void Logger::setLogBackend(LogBackend* pBackend)
 
 } // namespace log
 } // namespace security_containers
+

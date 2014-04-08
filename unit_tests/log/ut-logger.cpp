@@ -24,7 +24,6 @@
  */
 
 #include "ut.hpp"
-
 #include "log/logger.hpp"
 #include "log/backend.hpp"
 #include "log/backend-stderr.hpp"
@@ -39,9 +38,15 @@ public:
     StubbedBackend(std::ostringstream& s) : mLogStream(s) {}
 
     // stubbed function
-    void log(const std::string& s) override
+    void log(const std::string& severity,
+             const std::string& file,
+             const unsigned int& line,
+             const std::string& func,
+             const std::string& message) override
     {
-        mLogStream << s;
+        mLogStream << '[' + severity + ']' + ' '
+                   << file + ':' + std::to_string(line) + ' ' + func + ':'
+                   << message << std::endl;
     }
 
 private:
@@ -164,3 +169,4 @@ BOOST_AUTO_TEST_CASE(TestLogsTrace)
 
 
 BOOST_AUTO_TEST_SUITE_END()
+
