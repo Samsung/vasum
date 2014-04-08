@@ -70,6 +70,32 @@
         <char>/dev/input/mouse0</char>
       </source>
     </hostdev>
+
+    <!--
+        DLOG devices
+        TODO: remove when dlogutil disappears
+    -->
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/log_events</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/log_main</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/log_radio</char>
+      </source>
+    </hostdev>
+    <hostdev mode='capabilities' type='misc'>
+      <source>
+        <char>/dev/log_system</char>
+      </source>
+    </hostdev>
+
     <interface type='network'>
       <source network='default'/>
     </interface>
