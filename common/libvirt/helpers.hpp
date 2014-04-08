@@ -19,45 +19,33 @@
 /**
  * @file
  * @author  Lukasz Pawelczyk (l.pawelczyk@partner.samsung.com)
- * @brief   Implementation of the class wrapping connection to libvirtd
+ * @brief   A function helpers for the libvirt library
  */
 
-#include "log/logger.hpp"
-#include "libvirt/helpers.hpp"
-#include "libvirt/connection.hpp"
-#include "libvirt/exception.hpp"
+#ifndef COMMON_LIBVIRT_HELPERS_HPP
+#define COMMON_LIBVIRT_HELPERS_HPP
+
+#include <string>
 
 
 namespace security_containers {
 namespace libvirt {
 
 
-LibvirtConnection::LibvirtConnection(const std::string& uri)
-{
-    libvirtInitialize();
+/**
+ * Initialize libvirt library in a thread safety manner
+ */
+void libvirtInitialize(void);
 
-    mCon = virConnectOpen(uri.c_str());
-
-    if (mCon == NULL) {
-        LOGE("Failed to open a connection to the libvirtd:\n"
-             << libvirtFormatError());
-        throw LibvirtOperationException();
-    }
-}
-
-LibvirtConnection::~LibvirtConnection()
-{
-    if (virConnectClose(mCon) < 0) {
-        LOGE("Error while disconnecting from the libvirtd:\n"
-             << libvirtFormatError());
-    };
-}
-
-virConnectPtr LibvirtConnection::get()
-{
-    return mCon;
-}
+/**
+ * Formats libvirt's last error. Might include
+ * the affected domain's name if it exists.
+ */
+std::string libvirtFormatError(const std::string& domainName = std::string());
 
 
 } // namespace libvirt
 } // namespace security_containers
+
+
+#endif // COMMON_LIBVIRT_HELPERS_HPP

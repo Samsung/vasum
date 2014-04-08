@@ -24,6 +24,7 @@
 
 #include "log/logger.hpp"
 #include "libvirt/domain.hpp"
+#include "libvirt/helpers.hpp"
 #include "libvirt/exception.hpp"
 
 #include <cassert>
@@ -39,7 +40,8 @@ LibvirtDomain::LibvirtDomain(const std::string& configXML)
     mDom = virDomainDefineXML(mCon.get(), configXML.c_str());
 
     if (mDom == NULL) {
-        LOGE("Error during domain defining");
+        LOGE("Error while defining a domain:\n"
+             << libvirtFormatError());
         throw LibvirtOperationException();
     }
 }
@@ -47,11 +49,13 @@ LibvirtDomain::LibvirtDomain(const std::string& configXML)
 LibvirtDomain::~LibvirtDomain()
 {
     if (virDomainUndefine(mDom) < 0) {
-        LOGE("Error during domain undefine");
+        LOGE("Error while undefining the domain:\n"
+             << libvirtFormatError());
     }
 
     if (virDomainFree(mDom) < 0) {
-        LOGE("Error during domain destruction");
+        LOGE("Error while destroying the domain object:\n"
+             << libvirtFormatError());
     }
 }
 

@@ -25,6 +25,7 @@
 #include "container-admin.hpp"
 #include "exception.hpp"
 
+#include "libvirt/helpers.hpp"
 #include "log/logger.hpp"
 #include "utils/fs.hpp"
 
@@ -38,11 +39,29 @@
 namespace security_containers {
 
 
+namespace {
+
+std::string getDomainName(virDomainPtr dom)
+{
+    assert(dom != NULL);
+
+    const char* name;
+    if ((name = virDomainGetName(dom)) == NULL) {
+        LOGE("Failed to get the domain's id:\n"
+             << libvirt::libvirtFormatError());
+        throw DomainOperationException();
+    }
+
+    return name;
+}
+
+} // namespace
+
 const std::uint64_t DEFAULT_CPU_SHARES = 1024;
 const std::uint64_t DEFAULT_VCPU_PERIOD_MS = 100000;
 
 ContainerAdmin::ContainerAdmin(ContainerConfig& config)
-    : mConfig(config), mDom(utils::readFileContent(mConfig.config))
+    : mConfig(config), mDom(utils::readFileContent(mConfig.config)), mId(getDomainName(mDom.get()))
 {
 }
 
@@ -63,17 +82,9 @@ ContainerAdmin::~ContainerAdmin()
 }
 
 
-std::string ContainerAdmin::getId()
+const std::string& ContainerAdmin::getId() const
 {
-    assert(mDom.get() != NULL);
-
-    const char* id;
-    if ((id = virDomainGetName(mDom.get())) == NULL) {
-        LOGE("Failed to get container's id");
-        throw DomainOperationException();
-    }
-
-    return id;
+    return mId;
 }
 
 
@@ -91,7 +102,8 @@ void ContainerAdmin::start()
     u_int flags = VIR_DOMAIN_START_AUTODESTROY;
 
     if (virDomainCreateWithFlags(mDom.get(), flags) < 0) {
-        LOGE("Failed to start the container");
+        LOGE("Failed to start the domain:\n"
+             << libvirt::libvirtFormatError(mId));
         throw DomainOperationException();
     }
 
@@ -114,7 +126,8 @@ void ContainerAdmin::stop()
     u_int flags = VIR_DOMAIN_DESTROY_DEFAULT;
 
     if (virDomainDestroyFlags(mDom.get(), flags) < 0) {
-        LOGE("Error during domain stopping");
+        LOGE("Error while stopping the domain:\n"
+             << libvirt::libvirtFormatError(mId));
         throw DomainOperationException();
     }
 }
@@ -131,7 +144,8 @@ void ContainerAdmin::shutdown()
     resume();
 
     if (virDomainShutdown(mDom.get()) < 0) {
-        LOGE("Error during domain shutdown");
+        LOGE("Error while shutting down the domain:\n"
+             << libvirt::libvirtFormatError(mId));
         throw DomainOperationException();
     }
 }
@@ -161,7 +175,8 @@ void ContainerAdmin::suspend()
     }
 
     if (virDomainSuspend(mDom.get()) < 0) {
-        LOGE("Error during domain suspension");
+        LOGE("Error while suspending the domain:\n"
+             << libvirt::libvirtFormatError(mId));
         throw DomainOperationException();
     }
 }
@@ -176,7 +191,8 @@ void ContainerAdmin::resume()
     }
 
     if (virDomainResume(mDom.get()) < 0) {
-        LOGE("Error during domain resumming");
+        LOGE("Error while resumming the domain:\n"
+             << libvirt::libvirtFormatError(mId));
         throw DomainOperationException();
     }
 }
@@ -195,7 +211,8 @@ int ContainerAdmin::getState()
     int state;
 
     if (virDomainGetState(mDom.get(), &state, NULL, 0)) {
-        LOGE("Error during getting domain's state");
+        LOGE("Error whilte getting the domain's state:\n"
+             << libvirt::libvirtFormatError(mId));
         throw DomainOperationException();
     }
 
@@ -238,7 +255,8 @@ void ContainerAdmin::setSchedulerParams(std::uint64_t cpuShares, std::uint64_t v
     virTypedParamsAddLLong(&paramsTmp, &numParamsBuff, &maxParams, VIR_DOMAIN_SCHEDULER_VCPU_QUOTA, vcpuQuota);
 
     if (virDomainSetSchedulerParameters(mDom.get(), params.get(), numParamsBuff) < 0) {
-        LOGE("Error whilte setting scheduler params");
+        LOGE("Error whilte setting the domain's scheduler params:\n"
+             << libvirt::libvirtFormatError(mId));
         throw DomainOperationException();
     }
 }
@@ -252,14 +270,16 @@ std::int64_t ContainerAdmin::getSchedulerQuota()
     std::unique_ptr<char, void(*)(void*)> type(virDomainGetSchedulerType(mDom.get(), &numParamsBuff), free);
 
     if (type == NULL || numParamsBuff <= 0 || strcmp(type.get(), "posix") != 0) {
-        LOGE("Error while getting scheduler type");
+        LOGE("Error while getting the domain's scheduler type:\n"
+             << libvirt::libvirtFormatError(mId));
         throw DomainOperationException();
     }
 
     std::unique_ptr<virTypedParameter[]> params(new virTypedParameter[numParamsBuff]);
 
     if (virDomainGetSchedulerParameters(mDom.get(), params.get(), &numParamsBuff) < 0) {
-        LOGE("Error whilte getting scheduler parameters");
+        LOGE("Error while getting the domain's scheduler params:\n"
+             << libvirt::libvirtFormatError(mId));
         throw DomainOperationException();
     }
 
@@ -268,7 +288,8 @@ std::int64_t ContainerAdmin::getSchedulerQuota()
                                numParamsBuff,
                                VIR_DOMAIN_SCHEDULER_VCPU_QUOTA,
                                &quota) <= 0) {
-        LOGE("Error whilte getting scheduler quota parameter");
+        LOGE("Error while getting the domain's scheduler quota param:\n"
+             << libvirt::libvirtFormatError(mId));
         throw DomainOperationException();
     }
 

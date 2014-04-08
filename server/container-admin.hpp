@@ -53,7 +53,7 @@ public:
     /**
      * Get the container id
      */
-    std::string getId();
+    const std::string& getId() const;
 
     /**
      * Boot the container to the background.
@@ -118,6 +118,7 @@ public:
 private:
     ContainerConfig& mConfig;
     libvirt::LibvirtDomain mDom;
+    const std::string mId;
 
     int getState();   // get the libvirt's domain state
     void setSchedulerParams(std::uint64_t cpuShares, std::uint64_t vcpuPeriod, std::int64_t vcpuQuota);
