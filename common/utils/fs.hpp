@@ -36,6 +36,11 @@ namespace utils {
  */
 std::string readFileContent(const std::string& path);
 
+/**
+ * Removes a file or directory
+ */
+bool remove(const std::string& path);
+
 
 } // namespace utils
 } // namespace security_containers

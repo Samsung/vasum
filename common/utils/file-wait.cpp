@@ -23,7 +23,6 @@
  */
 
 #include "utils/file-wait.hpp"
-#include "log/logger.hpp"
 
 #include <sys/stat.h>
 #include <unistd.h>

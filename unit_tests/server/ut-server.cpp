@@ -30,7 +30,7 @@
 #include "config/exception.hpp"
 
 #include <string>
-#include <thread>
+#include <future>
 
 BOOST_AUTO_TEST_SUITE(ServerSuite)
 
@@ -65,14 +65,26 @@ BOOST_AUTO_TEST_CASE(TerminateTest)
     BOOST_REQUIRE_NO_THROW(s.terminate());
 }
 
+BOOST_AUTO_TEST_CASE(TerminateRunTest)
+{
+    Server s(TEST_CONFIG_PATH);
+    BOOST_REQUIRE_NO_THROW(s.terminate());
+    BOOST_REQUIRE_NO_THROW(s.run());
+}
+
 BOOST_AUTO_TEST_CASE(RunTerminateTest)
 {
     Server s(TEST_CONFIG_PATH);
-    std::thread t([&]() {
-        BOOST_REQUIRE_NO_THROW(s.run());
-    });
+    std::future<void> runFuture = std::async(std::launch::async, [&] {s.run();});
+
+    // give a chance to run a thread
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
     BOOST_REQUIRE_NO_THROW(s.terminate());
-    t.join();
+    runFuture.wait();
+
+    // a potential exception from std::async thread will be delegated to this thread
+    BOOST_REQUIRE_NO_THROW(runFuture.get());
 }
 
 

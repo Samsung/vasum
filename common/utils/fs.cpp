@@ -28,6 +28,7 @@
 
 #include <fstream>
 #include <streambuf>
+#include <sys/stat.h>
 
 
 namespace security_containers {
@@ -52,6 +53,15 @@ std::string readFileContent(const std::string& path)
     content.assign((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
 
     return content;
+}
+
+bool remove(const std::string& path)
+{
+    if (::remove(path.c_str()) != 0 && errno != ENOENT) {
+        LOGE("Could not remove '" << path << "'; errno: " << errno);
+        return false;
+    }
+    return true;
 }
 
 

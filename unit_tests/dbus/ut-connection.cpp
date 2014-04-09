@@ -33,6 +33,7 @@
 #include "utils/glib-loop.hpp"
 #include "utils/file-wait.hpp"
 #include "utils/latch.hpp"
+#include "utils/fs.hpp"
 #include "log/logger.hpp"
 
 #include <thread>
@@ -58,12 +59,20 @@ const char* const DBUS_DAEMON_ARGS[] = {
 const int DBUS_DAEMON_TIMEOUT = 1000;
 const int EVENT_TIMEOUT = 1000;
 
-class ScopedDbusDaemon : public ScopedDaemon {
+class ScopedDbusDaemon {
 public:
-    ScopedDbusDaemon() : ScopedDaemon(DBUS_DAEMON_PROC, DBUS_DAEMON_ARGS)
+    ScopedDbusDaemon()
     {
+        utils::remove("/tmp/container_socket");
+        daemon.reset(new ScopedDaemon(DBUS_DAEMON_PROC, DBUS_DAEMON_ARGS));
         waitForFile(DBUS_SOCKET_FILE, DBUS_DAEMON_TIMEOUT);
     }
+    void stop()
+    {
+        daemon->stop();
+    }
+private:
+    std::unique_ptr<ScopedDaemon> daemon;
 };
 
 std::string getInterfaceFromIntrospectionXML(const std::string& xml, const std::string& name)
@@ -104,6 +113,7 @@ BOOST_AUTO_TEST_CASE(SimpleTest)
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
     Latch nameAcquired, nameLost;
+
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
     DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
     conn1->setName(TESTAPI_BUS_NAME,
@@ -119,6 +129,7 @@ BOOST_AUTO_TEST_CASE(ConnectionLostTest)
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
     Latch nameAcquired, nameLost;
+
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
     conn1->setName(TESTAPI_BUS_NAME,
                    [&] {nameAcquired.set();},
@@ -135,12 +146,13 @@ BOOST_AUTO_TEST_CASE(NameOwnerTest)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
+    Latch nameAcquired1, nameLost1;
+    Latch nameAcquired2, nameLost2;
 
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
     DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
 
     // acquire name by conn1
-    Latch nameAcquired1, nameLost1;
     conn1->setName(TESTAPI_BUS_NAME,
                    [&] {nameAcquired1.set();},
                    [&] {nameLost1.set();});
@@ -148,7 +160,6 @@ BOOST_AUTO_TEST_CASE(NameOwnerTest)
     BOOST_CHECK(nameLost1.empty());
 
     // conn2 can't acquire name
-    Latch nameAcquired2, nameLost2;
     conn2->setName(TESTAPI_BUS_NAME,
                    [&] {nameAcquired2.set();},
                    [&] {nameLost2.set();});
@@ -165,6 +176,8 @@ BOOST_AUTO_TEST_CASE(GenericSignalTest)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
+    Latch signalEmited;
+
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
     DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
 
@@ -172,7 +185,6 @@ BOOST_AUTO_TEST_CASE(GenericSignalTest)
     const std::string INTERFACE = "a.b.c";
     const std::string SIGNAL_NAME = "Foo";
 
-    Latch signalEmited;
     auto handler = [&](const std::string& /*senderBusName*/,
                        const std::string& objectPath,
                        const std::string& interface,
@@ -195,11 +207,13 @@ BOOST_AUTO_TEST_CASE(FilteredSignalTest)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
+    Latch goodSignalEmited;
+    Latch wrongSignalEmited;
+    Latch nameAcquired;
+
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
     DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
 
-    Latch goodSignalEmited;
-    Latch wrongSignalEmited;
     auto handler = [&](const std::string& /*senderBusName*/,
                        const std::string& objectPath,
                        const std::string& interface,
@@ -226,7 +240,6 @@ BOOST_AUTO_TEST_CASE(FilteredSignalTest)
                       TESTAPI_SIGNAL_NOTIFY,
                       g_variant_new("(s)", "boo"));
 
-    Latch nameAcquired;
     conn1->setName(TESTAPI_BUS_NAME,
                    [&] {nameAcquired.set();},
                    [] {});
@@ -270,10 +283,11 @@ BOOST_AUTO_TEST_CASE(IntrospectTest)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
+    Latch nameAcquired;
+
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
     DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
 
-    Latch nameAcquired;
     conn1->setName(TESTAPI_BUS_NAME,
                    [&] {nameAcquired.set();},
                    [] {});
@@ -295,10 +309,11 @@ BOOST_AUTO_TEST_CASE(MethodCallTest)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
+    Latch nameAcquired;
+
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
     DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
 
-    Latch nameAcquired;
     conn1->setName(TESTAPI_BUS_NAME,
                    [&] {nameAcquired.set();},
                    [] {});
@@ -329,10 +344,11 @@ BOOST_AUTO_TEST_CASE(MethodCallExceptionTest)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
+    Latch nameAcquired;
+
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
     DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
 
-    Latch nameAcquired;
     conn1->setName(TESTAPI_BUS_NAME,
                    [&] {nameAcquired.set();},
                    [] {});
@@ -391,10 +407,11 @@ BOOST_AUTO_TEST_CASE(DbusApiNotifyTest)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
+    Latch notified;
+
     DbusTestServer server;
     DbusTestClient client;
 
-    Latch notified;
     auto onNotify = [&](const std::string& message) {
         BOOST_CHECK_EQUAL("notification", message);
         notified.set();
@@ -408,6 +425,7 @@ BOOST_AUTO_TEST_CASE(DbusApiNameAcquiredTest)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
+
     DbusTestServer server;
     DbusTestClient client;
 
@@ -435,6 +453,8 @@ BOOST_AUTO_TEST_CASE(DbusApiConnectionLost2Test)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
+    Latch disconnected;
+
     DbusTestServer server;
     DbusTestClient client;
 
@@ -442,7 +462,6 @@ BOOST_AUTO_TEST_CASE(DbusApiConnectionLost2Test)
     daemon.stop();
     BOOST_CHECK_THROW(client.noop(), DbusIOException);
 
-    Latch disconnected;
     server.setDisconnectCallback([&] {disconnected.set();});
     BOOST_CHECK(disconnected.wait(EVENT_TIMEOUT));
 }

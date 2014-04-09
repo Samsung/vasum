@@ -46,7 +46,8 @@ DbusTestServer::DbusTestServer()
         throw dbus::DbusOperationException("Could not acquire name");
     }
     using namespace std::placeholders;
-    mConnection->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION,
+    mConnection->registerObject(TESTAPI_OBJECT_PATH,
+                                TESTAPI_DEFINITION,
                                 std::bind(&DbusTestServer::onMessageCall, this, _1, _2, _3, _4, _5));
 }
 
