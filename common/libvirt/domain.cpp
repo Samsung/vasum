@@ -64,6 +64,10 @@ virDomainPtr LibvirtDomain::get()
     return mDom;
 }
 
+LibvirtDomain::operator bool() const
+{
+    return mDom != NULL;
+}
 
 } // namespace libvirt
 } // namespace security_containers

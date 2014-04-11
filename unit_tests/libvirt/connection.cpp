@@ -40,28 +40,29 @@ using namespace security_containers::libvirt;
 const std::string CORRECT_URI_STRING = LIBVIRT_LXC_ADDRESS;
 const std::string BUGGY_URI_STRING = "some_random_string";
 
-BOOST_AUTO_TEST_CASE(ConstructorTest)
-{
-    std::unique_ptr<LibvirtConnection> con;
-    BOOST_REQUIRE_NO_THROW(con.reset(new LibvirtConnection(CORRECT_URI_STRING)));
-}
 
-BOOST_AUTO_TEST_CASE(DestructorTest)
+BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 {
-    std::unique_ptr<LibvirtConnection> con(new LibvirtConnection(CORRECT_URI_STRING));
-    BOOST_REQUIRE_NO_THROW(con.reset());
+    std::unique_ptr<LibvirtConnection> conPtr;
+    BOOST_REQUIRE_NO_THROW(conPtr.reset(new LibvirtConnection(CORRECT_URI_STRING)));
+    BOOST_REQUIRE_NO_THROW(conPtr.reset());
 }
 
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)
 {
-    std::unique_ptr<LibvirtConnection> con;
-    BOOST_REQUIRE_THROW(con.reset(new LibvirtConnection(BUGGY_URI_STRING)), LibvirtOperationException);
+    BOOST_REQUIRE_THROW(LibvirtConnection con(BUGGY_URI_STRING), LibvirtOperationException);
 }
 
 BOOST_AUTO_TEST_CASE(ConnectionTest)
 {
-    std::unique_ptr<LibvirtConnection> con(new LibvirtConnection(CORRECT_URI_STRING));
-    BOOST_CHECK(con->get() != NULL);
+    LibvirtConnection con(CORRECT_URI_STRING);
+    BOOST_CHECK(con.get() != NULL);
+}
+
+BOOST_AUTO_TEST_CASE(BoolTest)
+{
+    LibvirtConnection con(CORRECT_URI_STRING);
+    BOOST_CHECK(con);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

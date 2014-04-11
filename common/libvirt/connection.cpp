@@ -58,6 +58,11 @@ virConnectPtr LibvirtConnection::get()
     return mCon;
 }
 
+LibvirtConnection::operator bool() const
+{
+    return mCon != NULL;
+}
+
 
 } // namespace libvirt
 } // namespace security_containers

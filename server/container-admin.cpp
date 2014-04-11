@@ -90,7 +90,7 @@ const std::string& ContainerAdmin::getId() const
 
 void ContainerAdmin::start()
 {
-    assert(mDom.get() != NULL);
+    assert(mDom);
 
     if (isRunning()) {
         return;
@@ -116,7 +116,7 @@ void ContainerAdmin::start()
 
 void ContainerAdmin::stop()
 {
-    assert(mDom.get() != NULL);
+    assert(mDom);
 
     if (isStopped()) {
         return;
@@ -135,7 +135,7 @@ void ContainerAdmin::stop()
 
 void ContainerAdmin::shutdown()
 {
-    assert(mDom.get() != NULL);
+    assert(mDom);
 
     if (isStopped()) {
         return;
@@ -168,7 +168,7 @@ bool ContainerAdmin::isStopped()
 
 void ContainerAdmin::suspend()
 {
-    assert(mDom.get() != NULL);
+    assert(mDom);
 
     if (isPaused()) {
         return;
@@ -184,7 +184,7 @@ void ContainerAdmin::suspend()
 
 void ContainerAdmin::resume()
 {
-    assert(mDom.get() != NULL);
+    assert(mDom);
 
     if (!isPaused()) {
         return;
@@ -206,7 +206,7 @@ bool ContainerAdmin::isPaused()
 
 int ContainerAdmin::getState()
 {
-    assert(mDom.get() != NULL);
+    assert(mDom);
 
     int state;
 
@@ -241,7 +241,7 @@ void ContainerAdmin::setSchedulerLevel(SchedulerLevel sched)
 
 void ContainerAdmin::setSchedulerParams(std::uint64_t cpuShares, std::uint64_t vcpuPeriod, std::int64_t vcpuQuota)
 {
-    assert(mDom.get() != NULL);
+    assert(mDom);
 
     int maxParams = 3;
     int numParamsBuff = 0;
@@ -264,7 +264,7 @@ void ContainerAdmin::setSchedulerParams(std::uint64_t cpuShares, std::uint64_t v
 
 std::int64_t ContainerAdmin::getSchedulerQuota()
 {
-    assert(mDom.get() != NULL);
+    assert(mDom);
 
     int numParamsBuff;
     std::unique_ptr<char, void(*)(void*)> type(virDomainGetSchedulerType(mDom.get(), &numParamsBuff), free);

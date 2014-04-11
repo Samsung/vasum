@@ -48,6 +48,11 @@ public:
      */
     virConnectPtr get();
 
+    /**
+     * @return connection pointer is not NULL
+     */
+    operator bool() const;
+
 private:
     virConnectPtr mCon = NULL;
 };

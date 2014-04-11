@@ -54,15 +54,11 @@ const std::string BUGGY_CONFIG_XML = "<><TRASH>";
 
 } // namespace
 
-BOOST_AUTO_TEST_CASE(ConstructorTest)
+BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 {
-    BOOST_REQUIRE_NO_THROW(LibvirtDomain dom(CORRECT_CONFIG_XML));
-}
-
-BOOST_AUTO_TEST_CASE(DestructorTest)
-{
-    std::unique_ptr<LibvirtDomain> dom(new LibvirtDomain(CORRECT_CONFIG_XML));
-    BOOST_REQUIRE_NO_THROW(dom.reset());
+    std::unique_ptr<LibvirtDomain> domPtr;
+    BOOST_REQUIRE_NO_THROW(domPtr.reset(new LibvirtDomain(CORRECT_CONFIG_XML)));
+    BOOST_REQUIRE_NO_THROW(domPtr.reset());
 }
 
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)
@@ -72,8 +68,14 @@ BOOST_AUTO_TEST_CASE(BuggyConfigTest)
 
 BOOST_AUTO_TEST_CASE(DefinitionTest)
 {
-    std::unique_ptr<LibvirtDomain> dom(new LibvirtDomain(CORRECT_CONFIG_XML));
-    BOOST_CHECK(dom->get() != NULL);
+    LibvirtDomain dom(CORRECT_CONFIG_XML);
+    BOOST_CHECK(dom.get() != NULL);
+}
+
+BOOST_AUTO_TEST_CASE(BoolTest)
+{
+    LibvirtDomain dom(CORRECT_CONFIG_XML);
+    BOOST_CHECK(dom);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

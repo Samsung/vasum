@@ -48,6 +48,11 @@ public:
      */
     virDomainPtr get();
 
+    /**
+     * @return libvirt domain pointer is not NULL
+     */
+    operator bool() const;
+
 private:
     LibvirtConnection mCon;
     virDomainPtr mDom = NULL;
