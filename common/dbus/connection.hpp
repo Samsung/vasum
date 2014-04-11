@@ -25,6 +25,8 @@
 #ifndef COMMON_DBUS_CONNECTION_HPP
 #define COMMON_DBUS_CONNECTION_HPP
 
+#include "utils/callback-guard.hpp"
+
 #include <memory>
 #include <string>
 #include <functional>
@@ -141,6 +143,7 @@ private:
             : nameAcquired(acquired), nameLost(lost) {}
     };
 
+    utils::CallbackGuard mGuard;
     GDBusConnection* mConnection;
     guint mNameId;
 

@@ -24,6 +24,7 @@
 
 #include "dbus/connection.hpp"
 #include "dbus/exception.hpp"
+#include "utils/callback-wrapper.hpp"
 #include "log/logger.hpp"
 
 
@@ -38,12 +39,6 @@ const std::string INTROSPECT_INTERFACE = "org.freedesktop.DBus.Introspectable";
 const std::string INTROSPECT_METHOD = "Introspect";
 
 const int CALL_METHOD_TIMEOUT_MS = 1000;
-
-template<class Callback>
-void deleteCallback(gpointer data)
-{
-    delete reinterpret_cast<Callback*>(data);
-}
 
 class ScopedError {
 public:
@@ -160,10 +155,6 @@ DbusConnection::~DbusConnection()
     if (mNameId) {
         g_bus_unown_name(mNameId);
     }
-    //TODO should we unregister, flush, close etc?
-    //if (!g_dbus_connection_close_sync(mConnection, NULL, NULL)) {
-    //    LOGE("Could not close connection");
-    //}
     g_object_unref(mConnection);
     LOGT("Connection deleted");
 }
@@ -177,14 +168,16 @@ void DbusConnection::setName(const std::string& name,
                                            G_BUS_NAME_OWNER_FLAGS_NONE,
                                            &DbusConnection::onNameAcquired,
                                            &DbusConnection::onNameLost,
-                                           new NameCallbacks(onNameAcquired, onNameLost),
-                                           &deleteCallback<NameCallbacks>);
+                                           utils::createCallbackWrapper(
+                                               NameCallbacks(onNameAcquired, onNameLost),
+                                               mGuard.spawn()),
+                                           &utils::deleteCallbackWrapper<NameCallbacks>);
 }
 
 void DbusConnection::onNameAcquired(GDBusConnection*, const gchar* name, gpointer userData)
 {
     LOGD("Name acquired " << name);
-    const NameCallbacks& callbacks = *reinterpret_cast<const NameCallbacks*>(userData);
+    const NameCallbacks& callbacks = utils::getCallbackFromPointer<NameCallbacks>(userData);
     if (callbacks.nameAcquired) {
         callbacks.nameAcquired();
     }
@@ -193,7 +186,7 @@ void DbusConnection::onNameAcquired(GDBusConnection*, const gchar* name, gpointe
 void DbusConnection::onNameLost(GDBusConnection*, const gchar* name, gpointer userData)
 {
     LOGE("Name lost " << name);
-    const NameCallbacks& callbacks = *reinterpret_cast<const NameCallbacks*>(userData);
+    const NameCallbacks& callbacks = utils::getCallbackFromPointer<NameCallbacks>(userData);
     if (callbacks.nameLost) {
         callbacks.nameLost();
     }
@@ -230,8 +223,8 @@ void DbusConnection::signalSubscribe(const SignalCallback& callback,
                                        NULL,
                                        G_DBUS_SIGNAL_FLAGS_NONE,
                                        &DbusConnection::onSignal,
-                                       new SignalCallback(callback),
-                                       &deleteCallback<SignalCallback>);
+                                       utils::createCallbackWrapper(callback, mGuard.spawn()),
+                                       &utils::deleteCallbackWrapper<SignalCallback>);
 }
 
 void DbusConnection::onSignal(GDBusConnection*,
@@ -242,7 +235,7 @@ void DbusConnection::onSignal(GDBusConnection*,
                               GVariant* parameters,
                               gpointer userData)
 {
-    const SignalCallback& callback = *static_cast<const SignalCallback*>(userData);
+    const SignalCallback& callback = utils::getCallbackFromPointer<SignalCallback>(userData);
 
     LOGD("Signal: " << sender << "; " << object << "; " << interface << "; " << name);
 
@@ -295,8 +288,8 @@ void DbusConnection::registerObject(const std::string& objectPath,
                                       objectPath.c_str(),
                                       interfaceInfo,
                                       &vtable,
-                                      new MethodCallCallback(callback),
-                                      &deleteCallback<MethodCallCallback>,
+                                      utils::createCallbackWrapper(callback, mGuard.spawn()),
+                                      &utils::deleteCallbackWrapper<MethodCallCallback>,
                                       &error);
     g_dbus_node_info_unref(nodeInfo);
     if (error) {
@@ -315,7 +308,7 @@ void DbusConnection::onMethodCall(GDBusConnection*,
                                   GDBusMethodInvocation* invocation,
                                   gpointer userData)
 {
-    const MethodCallCallback& callback = *static_cast<const MethodCallCallback*>(userData);
+    const MethodCallCallback& callback = utils::getCallbackFromPointer<MethodCallCallback>(userData);
 
     LOGD("MethodCall; " << objectPath << "; " << interface << "; " << method);
 
