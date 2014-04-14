@@ -59,25 +59,16 @@ void libvirtInitialize(void)
         });
 }
 
-std::string libvirtFormatError(const std::string& domainName = std::string())
-{
-    std::string ret;
 
+std::string libvirtFormatError(void)
+{
     virErrorPtr error = virGetLastError();
 
     if (error == NULL) {
-        return ret;
+        return std::string();
     }
 
-    if (!domainName.empty()) {
-        ret += "LIBVIRT Domain: " + domainName + "\n";
-    }
-
-    if (error->message) {
-        ret += "LIBVIRT Message: " + std::string(error->message);
-    }
-
-    return ret;
+    return "Libvirt error: " + std::string(error->message);
 }
 
 

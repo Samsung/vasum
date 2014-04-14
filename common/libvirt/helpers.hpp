@@ -38,10 +38,9 @@ namespace libvirt {
 void libvirtInitialize(void);
 
 /**
- * Formats libvirt's last error. Might include
- * the affected domain's name if it exists.
+ * Formats libvirt's last error.
  */
-std::string libvirtFormatError(const std::string& domainName = std::string());
+std::string libvirtFormatError(void);
 
 
 } // namespace libvirt

@@ -40,7 +40,7 @@ struct ServerException: public SecurityContainersException {
 };
 
 /**
- * Error occured during an attempt to perform an operation on a domain,
+ * Error occurred during an attempt to perform an operation on a domain,
  * e.g. start, stop a container
  */
 struct DomainOperationException: public ServerException {

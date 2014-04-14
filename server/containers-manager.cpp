@@ -38,6 +38,7 @@ namespace security_containers {
 
 ContainersManager::ContainersManager(const std::string& managerConfigPath)
 {
+    LOGD("Instantiating ContainersManager object...");
     mConfig.parseFile(managerConfigPath);
 
     for (auto& containerConfig : mConfig.containerConfigs) {
@@ -50,21 +51,25 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath)
             containerConfigPath = utils::createFilePath(baseConfigPath, "/", containerConfig);
         }
 
-        LOGT("Creating Container " << containerConfigPath);
+        LOGD("Creating Container " << containerConfigPath);
         std::unique_ptr<Container> c(new Container(containerConfigPath));
         std::string id = c->getId();
         mContainers.emplace(id, std::move(c));
     }
+
+    LOGD("ContainersManager object instantiated");
 }
 
 
 ContainersManager::~ContainersManager()
 {
+    LOGD("Destroying ContainersManager object...");
     try {
         stopAll();
     } catch (ServerException& e) {
         LOGE("Failed to stop all of the containers");
     }
+    LOGD("ContainersManager object destroyed");
 }
 
 
@@ -74,9 +79,11 @@ void ContainersManager::focus(const std::string& containerId)
     ContainerMap::mapped_type& foregroundContainer = mContainers.at(containerId);
 
     for (auto& container : mContainers) {
+        LOGD(container.second->getId() << ": being sent to background");
         container.second->goBackground();
     }
     mConfig.foregroundId = foregroundContainer->getId();
+    LOGD(mConfig.foregroundId << ": being sent to foreground");
     foregroundContainer->goForeground();
 }
 

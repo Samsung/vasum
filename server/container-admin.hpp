@@ -67,7 +67,7 @@ public:
 
     /**
      * Gracefully shutdown the domain.
-     * This method will NOT block untill domain is shut down,
+     * This method will NOT block until domain is shut down,
      * because some configurations may ignore this.
      */
     void shutdown();
@@ -80,7 +80,7 @@ public:
     /**
      * Check if the container is stopped. It's NOT equivalent to !isRunning,
      * because it checks different internal libvirt's states. There are other states,
-     * (e.g. paused) when the container isn't runnig nor stopped.
+     * (e.g. paused) when the container isn't running nor stopped.
      *
      * @return Is the container stopped?
      */
