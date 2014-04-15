@@ -24,11 +24,16 @@
 
 #include "log/logger.hpp"
 #include "utils/fs.hpp"
+#include "utils/paths.hpp"
 #include "utils/exception.hpp"
 
 #include <fstream>
 #include <streambuf>
+#include <cstring>
+#include <cerrno>
 #include <sys/stat.h>
+#include <sys/mount.h>
+#include <unistd.h>
 
 
 namespace security_containers {
@@ -55,10 +60,58 @@ std::string readFileContent(const std::string& path)
     return content;
 }
 
-bool remove(const std::string& path)
+bool removeFile(const std::string& path)
 {
-    if (::remove(path.c_str()) != 0 && errno != ENOENT) {
-        LOGE("Could not remove '" << path << "'; errno: " << errno);
+    if (::unlink(path.c_str()) != 0 && errno != ENOENT) {
+        LOGD("Could not remove file '" << path << "': " << strerror(errno));
+        return false;
+    }
+    return true;
+}
+
+bool isDirectory(const std::string& path)
+{
+    struct stat s;
+    return ::stat(path.c_str(), &s) == 0 && S_IFDIR == (s.st_mode & S_IFMT);
+}
+
+bool createDirectory(const std::string& path, mode_t mode)
+{
+    if (::mkdir(path.c_str(), mode) == 0 && ::chmod(path.c_str(), mode) == 0) {
+        return true;
+    }
+    LOGD("Could not create directory '" << path << "': " << strerror(errno));
+    return false;
+}
+
+bool createDirectories(const std::string& path, mode_t mode)
+{
+    if (isDirectory(path)) {
+        return true;
+    }
+    std::string parent = dirName(path);
+    if (!parent.empty() && parent != path) {
+        if (!createDirectories(parent, mode)) {
+            return false;
+        }
+    }
+
+    return createDirectory(path, mode);
+}
+
+bool mountTmpfs(const std::string& path)
+{
+    if (::mount("tmpfs", path.c_str(), "tmpfs", MS_NOSUID|MS_NODEV, "mode=755") != 0) {
+        LOGD("Mount failed for '" << path << "': " << strerror(errno));
+        return false;
+    }
+    return true;
+}
+
+bool umount(const std::string& path)
+{
+    if (::umount(path.c_str()) != 0) {
+        LOGD("Umount failed for '" << path << "': " << strerror(errno));
         return false;
     }
     return true;

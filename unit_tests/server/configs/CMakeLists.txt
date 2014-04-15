@@ -33,6 +33,8 @@ FILE(GLOB container_admin_CONF      ut-container/libvirt-config/*.xml)
 FILE(GLOB admin_container_CONF      ut-container-admin/containers/*.conf)
 FILE(GLOB admin_admin_CONF          ut-container-admin/libvirt-config/*.xml)
 
+FILE(GLOB connection_CONF           ut-container-connection/*.conf)
+
 
 ## Install #####################################################################
 INSTALL(FILES        ${server_manager_CONF}
@@ -58,3 +60,6 @@ INSTALL(FILES        ${admin_container_CONF}
         DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-container-admin/containers)
 INSTALL(FILES        ${admin_admin_CONF}
         DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-container-admin/libvirt-config)
+
+INSTALL(FILES        ${connection_CONF}
+        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-container-connection)

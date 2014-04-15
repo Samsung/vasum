@@ -63,16 +63,16 @@ class ScopedDbusDaemon {
 public:
     ScopedDbusDaemon()
     {
-        utils::remove("/tmp/container_socket");
-        daemon.reset(new ScopedDaemon(DBUS_DAEMON_PROC, DBUS_DAEMON_ARGS));
+        utils::removeFile("/tmp/container_socket");
+        mDaemon.start(DBUS_DAEMON_PROC, DBUS_DAEMON_ARGS);
         waitForFile(DBUS_SOCKET_FILE, DBUS_DAEMON_TIMEOUT);
     }
     void stop()
     {
-        daemon->stop();
+        mDaemon.stop();
     }
 private:
-    std::unique_ptr<ScopedDaemon> daemon;
+    ScopedDaemon mDaemon;
 };
 
 std::string getInterfaceFromIntrospectionXML(const std::string& xml, const std::string& name)
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(GenericSignalTest)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
-    Latch signalEmited;
+    Latch signalEmitted;
 
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
     DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
@@ -194,21 +194,21 @@ BOOST_AUTO_TEST_CASE(GenericSignalTest)
             interface == INTERFACE &&
             signalName == SIGNAL_NAME &&
             g_variant_is_of_type(parameters, G_VARIANT_TYPE_UNIT)) {
-            signalEmited.set();
+            signalEmitted.set();
         }
     };
     conn2->signalSubscribe(handler, std::string());
 
     conn1->emitSignal(OBJECT_PATH, INTERFACE, SIGNAL_NAME, NULL);
-    BOOST_CHECK(signalEmited.wait(EVENT_TIMEOUT));
+    BOOST_CHECK(signalEmitted.wait(EVENT_TIMEOUT));
 }
 
 BOOST_AUTO_TEST_CASE(FilteredSignalTest)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
-    Latch goodSignalEmited;
-    Latch wrongSignalEmited;
+    Latch goodSignalEmitted;
+    Latch wrongSignalEmitted;
     Latch nameAcquired;
 
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
@@ -227,9 +227,9 @@ BOOST_AUTO_TEST_CASE(FilteredSignalTest)
             const gchar* msg = NULL;
             g_variant_get(parameters, "(&s)", &msg);
             if (msg == std::string("jipii")) {
-                goodSignalEmited.set();
+                goodSignalEmitted.set();
             } else {
-                wrongSignalEmited.set();
+                wrongSignalEmitted.set();
             }
         }
     };
@@ -250,8 +250,8 @@ BOOST_AUTO_TEST_CASE(FilteredSignalTest)
                       TESTAPI_SIGNAL_NOTIFY,
                       g_variant_new("(s)", "jipii"));
 
-    BOOST_CHECK(goodSignalEmited.wait(EVENT_TIMEOUT));
-    BOOST_CHECK(wrongSignalEmited.empty());
+    BOOST_CHECK(goodSignalEmitted.wait(EVENT_TIMEOUT));
+    BOOST_CHECK(wrongSignalEmitted.empty());
 }
 
 BOOST_AUTO_TEST_CASE(RegisterObjectTest)

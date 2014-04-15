@@ -21,6 +21,7 @@ between them. A process from inside a container can request a switch of context
 %files
 %attr(755,root,root) %{_bindir}/security-containers-server
 %config %attr(644,root,root) /etc/security-containers/daemon.conf
+%config %attr(644,root,root) /etc/security-containers/image-skel/etc/dbus-1/system.d/com.samsung.containers.conf
 %config %attr(644,root,root) /etc/security-containers/containers/*.conf
 %config %attr(400,root,root) /etc/security-containers/libvirt-config/*.xml
 
@@ -109,3 +110,4 @@ Unit tests for both: server and client.
 %config %attr(644,root,root) /etc/security-containers/tests/server/ut-container/libvirt-config/*.xml
 %config %attr(644,root,root) /etc/security-containers/tests/server/ut-container-admin/containers/*.conf
 %config %attr(644,root,root) /etc/security-containers/tests/server/ut-container-admin/libvirt-config/*.xml
+%config %attr(644,root,root) /etc/security-containers/tests/server/ut-container-connection/*.conf

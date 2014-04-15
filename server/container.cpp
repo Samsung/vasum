@@ -65,12 +65,16 @@ int Container::getPrivilege()
 
 void Container::start()
 {
-    return mAdmin->start();
+    mConnection.initialize(mConfig.runMountPoint);
+    mAdmin->start();
+    mConnection.connect();
 }
 
 void Container::stop()
 {
-    return mAdmin->stop();
+    mConnection.disconnect();
+    mAdmin->stop();
+    mConnection.deinitialize();
 }
 
 void Container::goForeground()

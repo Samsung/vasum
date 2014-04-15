@@ -33,7 +33,7 @@ namespace security_containers {
 namespace utils {
 
 
-const unsigned int GRANULARITY = 10;
+const unsigned int GRANULARITY = 100;
 
 void waitForFile(const std::string& filename, const unsigned int timeoutMs)
 {
@@ -46,7 +46,7 @@ void waitForFile(const std::string& filename, const unsigned int timeoutMs)
         }
         ++ loops;
         if (loops * GRANULARITY > timeoutMs) {
-            throw std::runtime_error("timeout");
+            throw std::runtime_error("timeout on waiting for: " + filename);
         }
         usleep(GRANULARITY * 1000);
     }

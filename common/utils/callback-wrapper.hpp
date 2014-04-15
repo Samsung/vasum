@@ -57,7 +57,7 @@ private:
 };
 
 /**
- * Creates callback wrapper. Usefull for C callback api.
+ * Creates callback wrapper. Useful for C callback api.
  */
 template<class Callback>
 CallbackWrapper<Callback>* createCallbackWrapper(const Callback& callback,
@@ -67,7 +67,7 @@ CallbackWrapper<Callback>* createCallbackWrapper(const Callback& callback,
 }
 
 /**
- * Deletes callback wrapper. Usefull for C callback api.
+ * Deletes callback wrapper. Useful for C callback api.
  */
 template<class Callback>
 void deleteCallbackWrapper(void* pointer)
@@ -76,7 +76,7 @@ void deleteCallbackWrapper(void* pointer)
 }
 
 /**
- * Recovers callback from wrapper pointer. Usefull for C callback api.
+ * Recovers callback from wrapper pointer. Useful for C callback api.
  */
 template<class Callback>
 const Callback& getCallbackFromPointer(const void* pointer)

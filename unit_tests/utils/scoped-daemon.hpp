@@ -37,18 +37,20 @@ namespace utils {
  */
 class ScopedDaemon {
 public:
+    ScopedDaemon();
+
+    /**
+     * Stops a daemon if it is not stopped already.
+     */
+    ~ScopedDaemon();
+
     /**
      * Starts a daemon.
      * @param path daemon path
      * @param argv arguments passed to the daemon
      * @param useLauncher use additional launcher process
      */
-    ScopedDaemon(const char* path, const char* const argv[], const bool useLauncher = true);
-
-    /**
-     * Stops a daemon if it is not stopped already.
-     */
-    ~ScopedDaemon();
+    void start(const char* path, const char* const argv[], const bool useLauncher = true);
 
     /**
      * Stops a daemon by sending SIGTERM and waits for a process.

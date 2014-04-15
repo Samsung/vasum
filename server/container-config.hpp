@@ -57,11 +57,17 @@ struct ContainerConfig : public config::ConfigurationBase {
      */
     double cpuQuotaBackground;
 
+    /**
+     * Path to containers dbus unix socket
+     */
+    std::string runMountPoint;
+
     CONFIG_REGISTER {
         CONFIG_VALUE(privilege)
         CONFIG_VALUE(config)
         CONFIG_VALUE(cpuQuotaForeground)
         CONFIG_VALUE(cpuQuotaBackground)
+        CONFIG_VALUE(runMountPoint)
     }
 };
 

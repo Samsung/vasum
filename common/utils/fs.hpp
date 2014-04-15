@@ -22,10 +22,11 @@
  * @brief   File utility functions declaration
  */
 
-#ifndef COMMON_UTILS_PATHS_HPP
-#define COMMON_UTILS_PATHS_HPP
+#ifndef COMMON_UTILS_FS_HPP
+#define COMMON_UTILS_FS_HPP
 
 #include <string>
+#include <sys/types.h>
 
 
 namespace security_containers {
@@ -37,13 +38,38 @@ namespace utils {
 std::string readFileContent(const std::string& path);
 
 /**
- * Removes a file or directory
+ * Removes a file
  */
-bool remove(const std::string& path);
+bool removeFile(const std::string& path);
+
+/**
+ * Checks if a directory exists
+ */
+bool isDirectory(const std::string& path);
+
+/**
+ * Creates a directory
+ */
+bool createDirectory(const std::string& path, mode_t mode);
+
+/**
+ * Creates a directory and its parents as needed
+ */
+bool createDirectories(const std::string& path, mode_t mode);
+
+/**
+ * Mounts a tmpfs on given a path
+ */
+bool mountTmpfs(const std::string& path);
+
+/**
+ * Umounts a filesystem
+ */
+bool umount(const std::string& path);
 
 
 } // namespace utils
 } // namespace security_containers
 
 
-#endif // COMMON_UTILS_PATHS_HPP
+#endif // COMMON_UTILS_FS_HPP

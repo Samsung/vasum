@@ -28,6 +28,7 @@
 
 #include "container-config.hpp"
 #include "container-admin.hpp"
+#include "container-connection.hpp"
 
 #include <string>
 #include <memory>
@@ -83,7 +84,7 @@ public:
     /**
      * Check if the container is stopped. It's NOT equivalent to !isRunning,
      * because it checks different internal libvirt's states. There are other states,
-     * (e.g. paused) when the container isn't runnig nor stopped.
+     * (e.g. paused) when the container isn't running nor stopped.
      *
      * @return Is the container stopped?
      */
@@ -97,6 +98,7 @@ public:
 private:
     ContainerConfig mConfig;
     std::unique_ptr<ContainerAdmin> mAdmin;
+    ContainerConnection mConnection;
 };
 
 

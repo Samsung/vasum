@@ -47,6 +47,13 @@ struct DomainOperationException: public ServerException {
     using ServerException::ServerException;
 };
 
+/**
+ * Exception during performing an operation on a container connection
+ */
+struct ContainerConnectionException: public ServerException {
+    using ServerException::ServerException;
+};
+
 
 }
 

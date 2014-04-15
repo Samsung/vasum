@@ -125,8 +125,21 @@ void startByLauncher(const char* path, const char* const argv[])
 
 } // namespace
 
-ScopedDaemon::ScopedDaemon(const char* path, const char* const argv[], const bool useLauncher)
+ScopedDaemon::ScopedDaemon()
+    : mPid(-1)
 {
+}
+
+ScopedDaemon::~ScopedDaemon()
+{
+    stop();
+}
+
+void ScopedDaemon::start(const char* path, const char* const argv[], const bool useLauncher)
+{
+    if (mPid != -1) {
+        throw std::runtime_error("already started");
+    }
     mPid = fork();
     if (mPid == -1) {
         throw std::runtime_error("fork failed");
@@ -139,11 +152,6 @@ ScopedDaemon::ScopedDaemon(const char* path, const char* const argv[], const boo
         }
         _exit(0);
     }
-}
-
-ScopedDaemon::~ScopedDaemon()
-{
-    stop();
 }
 
 void ScopedDaemon::stop()

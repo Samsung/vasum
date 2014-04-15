@@ -310,7 +310,7 @@ void DbusConnection::onMethodCall(GDBusConnection*,
 {
     const MethodCallCallback& callback = utils::getCallbackFromPointer<MethodCallCallback>(userData);
 
-    LOGD("MethodCall; " << objectPath << "; " << interface << "; " << method);
+    LOGD("MethodCall: " << objectPath << "; " << interface << "; " << method);
 
     MethodResultBuilderImpl resultBuilder(invocation);
     if (callback) {
@@ -318,6 +318,7 @@ void DbusConnection::onMethodCall(GDBusConnection*,
     }
 
     if (resultBuilder.isUndefined()) {
+        LOGW("Unimplemented method: " << objectPath << "; " << interface << "; " << method);
         resultBuilder.setError("org.freedesktop.DBus.Error.UnknownMethod", "Not implemented");
     }
 }

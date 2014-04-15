@@ -104,5 +104,10 @@
       <source dir='/domains/business'/>
       <target dir='/'/>
     </filesystem>
+    <!-- Enable access to the containers dbus -->
+    <filesystem type='mount'>
+      <source dir='/var/run/containers/business/run'/>
+      <target dir='/var/run'/>
+    </filesystem>
   </devices>
 </domain>

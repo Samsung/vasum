@@ -27,6 +27,10 @@ FILE(GLOB admin_CONF         libvirt-config/*.xml)
 INSTALL(FILES       daemon.conf
         DESTINATION ${SC_CONFIG_INSTALL_DIR})
 
+# TODO This file should be installed to /etc/dbus-1/system.d/ on an every container
+INSTALL(FILES       image-skel/etc/dbus-1/system.d/com.samsung.containers.conf
+        DESTINATION ${SC_CONFIG_INSTALL_DIR}/image-skel/etc/dbus-1/system.d)
+
 INSTALL(FILES       ${container_CONF}
         DESTINATION ${SC_CONFIG_INSTALL_DIR}/containers)
 
