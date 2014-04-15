@@ -61,10 +61,10 @@ private:
     do { \
         if (security_containers::log::Logger::getLogLevel() <= \
             security_containers::log::LogLevel::SEVERITY) { \
-            std::ostringstream message; \
-            message << MESSAGE; \
+            std::ostringstream messageStream__; \
+            messageStream__ << MESSAGE; \
             security_containers::log::Logger logger(#SEVERITY, __FILE__, __LINE__); \
-            logger.logMessage(message.str()); \
+            logger.logMessage(messageStream__.str()); \
         } \
     } while(0)
 
