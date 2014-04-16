@@ -28,6 +28,8 @@ between them. A process from inside a container can request a switch of context
 %dir /etc/security-containers/libvirt-config
 %config /etc/security-containers/daemon.conf
 %config /etc/security-containers/containers/*.conf
+%{_unitdir}/security-containers.service
+%{_unitdir}/multi-user.target.wants/security-containers.service
 %config %attr(400,root,root) /etc/security-containers/libvirt-config/*.xml
 /etc/security-containers/image-skel
 
@@ -44,15 +46,43 @@ between them. A process from inside a container can request a switch of context
 
 %cmake . -DVERSION=%{version} \
          -DCMAKE_BUILD_TYPE=%{build_type} \
-         -DSCRIPT_INSTALL_DIR=%{script_dir}
+         -DSCRIPT_INSTALL_DIR=%{script_dir} \
+         -DSYSTEMD_UNIT_DIR=%{_unitdir}
 make -k %{?jobs:-j%jobs}
 
 %install
 %make_install
+mkdir -p %{buildroot}/%{_unitdir}/multi-user.target.wants
+ln -s ../security-containers.service %{buildroot}/%{_unitdir}/multi-user.target.wants/security-containers.service
 
 %clean
 rm -rf %{buildroot}
 
+%post
+# Refresh systemd services list after installation
+if [ $1 == 1 ]; then
+    systemctl daemon-reload || :
+fi
+
+%preun
+# Stop the service before uninstall
+if [ $1 == 0 ]; then
+     systemctl stop security-containers.service || :
+fi
+
+%postun
+# Refresh systemd services list after uninstall/upgrade
+systemctl daemon-reload || :
+if [ $1 -ge 1 ]; then
+    # TODO: at this point an appropriate notification should show up
+    eval `systemctl show security-containers --property=MainPID`
+    if [ -n "$MainPID" -a "$MainPID" != "0" ]; then
+        kill -USR1 $MainPID
+    fi
+    echo "Security Containers updated. Reboot is required for the changes to take effect..."
+else
+    echo "Security Containers removed. Reboot is required for the changes to take effect..."
+fi
 
 ## Client Package ##############################################################
 %package client
