@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Pawel Broda <p.broda@partner.samsung.com>
+ *  Contact: Dariusz Michaluk <d.michaluk@samsung.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,36 +18,39 @@
 
 /**
  * @file
- * @author  Pawel Broda (p.broda@partner.samsung.com)
- * @brief   Null backend for logger
+ * @author  Dariusz Michaluk (d.michaluk@samsung.com)
+ * @brief   Console color for StderrBackend logger
  */
 
+#ifndef COMMON_LOG_CCOLOR_HPP
+#define COMMON_LOG_CCOLOR_HPP
 
-#ifndef COMMON_LOG_BACKEND_NULL_HPP
-#define COMMON_LOG_BACKEND_NULL_HPP
-
-#include "log/backend.hpp"
-
+#include <string>
 
 namespace security_containers {
 namespace log {
 
-
-/**
-    Null logging backend
- */
-class NullLogger : public LogBackend {
-public:
-    void log(LogLevel /*logLevel*/,
-             const std::string& /*file*/,
-             const unsigned int& /*line*/,
-             const std::string& /*func*/,
-             const std::string& /*message*/) override {}
+enum class Color : unsigned int {
+    DEFAULT     = 0,
+    BLACK       = 90,
+    RED         = 91,
+    GREEN       = 92,
+    YELLOW      = 93,
+    BLUE        = 94,
+    MAGENTA     = 95,
+    CYAN        = 96,
+    WHITE       = 97,
 };
 
+enum class Attributes : unsigned int {
+    DEFAULT     = 0,
+    BOLD        = 1,
+};
+
+std::string getConsoleEscapeSequence(Attributes attr, Color color);
 
 } // namespace log
 } // namespace security_containers
 
+#endif // COMMON_LOG_CCOLOR_HPP
 
-#endif // COMMON_LOG_BACKEND_NULL_HPP

@@ -23,12 +23,11 @@
  */
 
 #include "log/logger.hpp"
+#include "log/formatter.hpp"
 #include "log/backend-null.hpp"
 
 #include <memory>
 #include <mutex>
-#include <cassert>
-
 
 namespace security_containers {
 namespace log {
@@ -40,23 +39,14 @@ volatile LogLevel gLogLevel = LogLevel::DEBUG;
 std::unique_ptr<LogBackend> gLogBackendPtr(new NullLogger());
 std::mutex gLogMutex;
 
-const std::string SOURCE_DIR = PROJECT_SOURCE_DIR "/";
-
-inline std::string stripProjectDir(const std::string& file)
-{
-    // it will work until someone use in cmake FILE(GLOB ... RELATIVE ...)
-    assert(0 == file.compare(0, SOURCE_DIR.size(), SOURCE_DIR));
-    return file.substr(SOURCE_DIR.size());
-}
-
 } // namespace
 
-Logger::Logger(const std::string& severity,
+Logger::Logger(LogLevel logLevel,
                const std::string& file,
                const unsigned int line,
                const std::string& func)
-    : mSeverity(severity),
-      mFile(stripProjectDir(file)),
+    : mLogLevel(logLevel),
+      mFile(LogFormatter::stripProjectDir(file)),
       mLine(line),
       mFunc(func)
 {
@@ -66,7 +56,7 @@ Logger::Logger(const std::string& severity,
 void Logger::logMessage(const std::string& message)
 {
     std::unique_lock<std::mutex> lock(gLogMutex);
-    gLogBackendPtr->log(mSeverity, mFile, mLine, mFunc, message);
+    gLogBackendPtr->log(mLogLevel, mFile, mLine, mFunc, message);
 }
 
 void Logger::setLogLevel(LogLevel level)

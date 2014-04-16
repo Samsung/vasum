@@ -23,30 +23,15 @@
  */
 
 #include "log/backend-stderr.hpp"
+#include "log/formatter.hpp"
 
 #include <sstream>
 #include <iomanip>
-#include <sys/time.h>
 
 namespace security_containers {
 namespace log {
 
-namespace {
-
-inline std::string getCurrentTime(void)
-{
-    char time[13];
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    struct tm* tm = localtime(&tv.tv_sec);
-    sprintf(time, "%02d:%02d:%02d.%03d", tm->tm_hour, tm->tm_min, tm->tm_sec, int(tv.tv_usec / 1000));
-
-    return std::string(time);
-}
-
-} // namespace
-
-void StderrBackend::log(const std::string& severity,
+void StderrBackend::log(LogLevel logLevel,
                         const std::string& file,
                         const unsigned int& line,
                         const std::string& func,
@@ -57,10 +42,13 @@ void StderrBackend::log(const std::string& severity,
     // example log string
     // 06:52:35.123 [ERROR] src/util/fs.cpp:43 readFileContent: /file/file.txt is missing
 
-    logLine << getCurrentTime() << ' '
-            << std::left << std::setw(8) << '[' + severity + ']'
+    logLine << LogFormatter::setConsoleColor(logLevel)
+            << LogFormatter::getCurrentTime() << ' '
+            << std::left << std::setw(8) << '[' + LogFormatter::toString(logLevel) + ']'
             << std::left << std::setw(52) << file + ':' + std::to_string(line) + ' ' + func + ':'
-            << message << std::endl;
+            << message
+            << LogFormatter::setDefaultConsoleColor() << std::endl;
+
     fprintf(stderr, "%s", logLine.str().c_str());
 }
 

@@ -37,7 +37,7 @@ namespace log {
  */
 class StderrBackend : public LogBackend {
 public:
-    void log(const std::string& severity,
+    void log(LogLevel logLevel,
              const std::string& file,
              const unsigned int& line,
              const std::string& func,

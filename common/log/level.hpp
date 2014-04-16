@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Pawel Broda <p.broda@partner.samsung.com>
+ *  Contact: Dariusz Michaluk (d.michaluk@samsung.com)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,36 +18,26 @@
 
 /**
  * @file
- * @author  Pawel Broda (p.broda@partner.samsung.com)
- * @brief   Null backend for logger
+ * @author  Dariusz Michaluk (d.michaluk@samsung.com)
+ * @brief   LogLevel
  */
 
-
-#ifndef COMMON_LOG_BACKEND_NULL_HPP
-#define COMMON_LOG_BACKEND_NULL_HPP
-
-#include "log/backend.hpp"
-
+#ifndef COMMON_LOG_LEVEL_HPP
+#define COMMON_LOG_LEVEL_HPP
 
 namespace security_containers {
 namespace log {
 
-
-/**
-    Null logging backend
- */
-class NullLogger : public LogBackend {
-public:
-    void log(LogLevel /*logLevel*/,
-             const std::string& /*file*/,
-             const unsigned int& /*line*/,
-             const std::string& /*func*/,
-             const std::string& /*message*/) override {}
+enum class LogLevel {
+    TRACE,
+    DEBUG,
+    INFO,
+    WARN,
+    ERROR
 };
-
 
 } // namespace log
 } // namespace security_containers
 
+#endif // COMMON_LOG_LEVEL_HPP
 
-#endif // COMMON_LOG_BACKEND_NULL_HPP

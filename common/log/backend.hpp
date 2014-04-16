@@ -26,8 +26,9 @@
 #ifndef COMMON_LOG_BACKEND_HPP
 #define COMMON_LOG_BACKEND_HPP
 
-#include <string>
+#include "log/level.hpp"
 
+#include <string>
 
 namespace security_containers {
 namespace log {
@@ -38,7 +39,7 @@ namespace log {
  */
 class LogBackend {
 public:
-    virtual void log(const std::string& severity,
+    virtual void log(LogLevel logLevel,
                      const std::string& file,
                      const unsigned int& line,
                      const std::string& func,

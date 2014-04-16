@@ -25,6 +25,7 @@
 
 #include "ut.hpp"
 #include "log/logger.hpp"
+#include "log/formatter.hpp"
 #include "log/backend.hpp"
 #include "log/backend-stderr.hpp"
 
@@ -38,13 +39,13 @@ public:
     StubbedBackend(std::ostringstream& s) : mLogStream(s) {}
 
     // stubbed function
-    void log(const std::string& severity,
+    void log(LogLevel logLevel,
              const std::string& file,
              const unsigned int& line,
              const std::string& func,
              const std::string& message) override
     {
-        mLogStream << '[' + severity + ']' + ' '
+        mLogStream << '[' + LogFormatter::toString(logLevel) + ']' + ' '
                    << file + ':' + std::to_string(line) + ' ' + func + ':'
                    << message << std::endl;
     }

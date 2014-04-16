@@ -26,6 +26,8 @@
 #ifndef COMMON_LOG_LOGGER_HPP
 #define COMMON_LOG_LOGGER_HPP
 
+#include "log/level.hpp"
+
 #include <sstream>
 #include <string>
 
@@ -33,16 +35,11 @@
 namespace security_containers {
 namespace log {
 
-
-enum class LogLevel {
-    TRACE, DEBUG, INFO, WARN, ERROR
-};
-
 class LogBackend;
 
 class Logger {
 public:
-    Logger(const std::string& severity,
+    Logger(LogLevel logLevel,
            const std::string& file,
            const unsigned int line,
            const std::string& func);
@@ -54,7 +51,7 @@ public:
     static void setLogBackend(LogBackend* pBackend);
 
 private:
-    std::string mSeverity;
+    LogLevel mLogLevel;
     std::string mFile;
     unsigned int mLine;
     std::string mFunc;
@@ -70,7 +67,10 @@ private:
             security_containers::log::LogLevel::SEVERITY) { \
             std::ostringstream messageStream__; \
             messageStream__ << MESSAGE; \
-            security_containers::log::Logger logger(#SEVERITY, __FILE__, __LINE__, __func__); \
+            security_containers::log::Logger logger(security_containers::log::LogLevel::SEVERITY, \
+                                                    __FILE__, \
+                                                    __LINE__, \
+                                                    __func__); \
             logger.logMessage(messageStream__.str()); \
         } \
     } while(0)
@@ -83,3 +83,4 @@ private:
 
 
 #endif // COMMON_LOG_LOGGER_HPP
+
