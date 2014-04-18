@@ -1,5 +1,6 @@
 <domain type="lxc">
-    <name>console3</name>
+    <name>ut-containers-manager-console3</name>
+    <uuid>a36f0f39-097e-49fa-a4c9-124b622fba8d</uuid>
     <memory>102400</memory>
     <os>
         <type>exe</type>

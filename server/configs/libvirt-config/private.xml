@@ -1,5 +1,6 @@
 <domain type='lxc'>
   <name>private</name>
+  <uuid>5890186c-0a85-4b27-bd0f-b3505c3bbea8</uuid>
   <memory>102400</memory>
   <os>
     <type>exe</type>

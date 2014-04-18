@@ -1,5 +1,6 @@
 <domain type='lxc'>
   <name>business</name>
+  <uuid>df00c906-c223-46bd-a49e-b573f694c3a5</uuid>
   <memory>102400</memory>
   <os>
     <type>exe</type>

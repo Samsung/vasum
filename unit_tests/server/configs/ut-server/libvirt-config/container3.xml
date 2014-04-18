@@ -1,5 +1,6 @@
 <domain type="lxc">
-    <name>console2</name>
+    <name>ut-server-container3</name>
+    <uuid>42b4984e-a3f3-4c25-add0-21786594d1e9</uuid>
     <memory>102400</memory>
     <os>
         <type>exe</type>

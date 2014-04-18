@@ -68,14 +68,14 @@ BOOST_AUTO_TEST_CASE(StartAllTest)
 {
     ContainersManager cm(TEST_CONFIG_PATH);
     BOOST_REQUIRE_NO_THROW(cm.startAll());
-    BOOST_CHECK(cm.getRunningForegroundContainerId() == "console1");
+    BOOST_CHECK(cm.getRunningForegroundContainerId() == "ut-containers-manager-console1");
 }
 
 BOOST_AUTO_TEST_CASE(BuggyForegroundTest)
 {
     ContainersManager cm(BUGGY_FOREGROUND_CONFIG_PATH);
     BOOST_REQUIRE_NO_THROW(cm.startAll());
-    BOOST_CHECK(cm.getRunningForegroundContainerId() == "console2");
+    BOOST_CHECK(cm.getRunningForegroundContainerId() == "ut-containers-manager-console2");
 }
 
 BOOST_AUTO_TEST_CASE(StopAllTest)
@@ -90,12 +90,12 @@ BOOST_AUTO_TEST_CASE(FocusTest)
 {
     ContainersManager cm(TEST_CONFIG_PATH);
     BOOST_REQUIRE_NO_THROW(cm.startAll());
-    BOOST_REQUIRE_NO_THROW(cm.focus("console2"));
-    BOOST_CHECK(cm.getRunningForegroundContainerId() == "console2");
-    BOOST_REQUIRE_NO_THROW(cm.focus("console1"));
-    BOOST_CHECK(cm.getRunningForegroundContainerId() == "console1");
-    BOOST_REQUIRE_NO_THROW(cm.focus("console3"));
-    BOOST_CHECK(cm.getRunningForegroundContainerId() == "console3");
+    BOOST_REQUIRE_NO_THROW(cm.focus("ut-containers-manager-console2"));
+    BOOST_CHECK(cm.getRunningForegroundContainerId() == "ut-containers-manager-console2");
+    BOOST_REQUIRE_NO_THROW(cm.focus("ut-containers-manager-console1"));
+    BOOST_CHECK(cm.getRunningForegroundContainerId() == "ut-containers-manager-console1");
+    BOOST_REQUIRE_NO_THROW(cm.focus("ut-containers-manager-console3"));
+    BOOST_CHECK(cm.getRunningForegroundContainerId() == "ut-containers-manager-console3");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

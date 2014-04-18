@@ -1,5 +1,6 @@
 <domain type="lxc">
-    <name>test</name>
+    <name>ut-container-test</name>
+    <uuid>be2e7a5e-c59f-4264-aeab-390cedf47922</uuid>
     <memory>102400</memory>
     <on_poweroff>destroy</on_poweroff>
     <os>
