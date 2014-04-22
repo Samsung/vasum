@@ -25,8 +25,7 @@
 #include "log/backend-stderr.hpp"
 #include "log/formatter.hpp"
 
-#include <sstream>
-#include <iomanip>
+#include <boost/tokenizer.hpp>
 
 namespace security_containers {
 namespace log {
@@ -37,19 +36,26 @@ void StderrBackend::log(LogLevel logLevel,
                         const std::string& func,
                         const std::string& message)
 {
-    std::ostringstream logLine;
+    typedef boost::char_separator<char> charSeparator;
+    typedef boost::tokenizer<charSeparator> tokenizer;
 
     // example log string
     // 06:52:35.123 [ERROR] src/util/fs.cpp:43 readFileContent: /file/file.txt is missing
 
-    logLine << LogFormatter::setConsoleColor(logLevel)
-            << LogFormatter::getCurrentTime() << ' '
-            << std::left << std::setw(8) << '[' + LogFormatter::toString(logLevel) + ']'
-            << std::left << std::setw(52) << file + ':' + std::to_string(line) + ' ' + func + ':'
-            << message
-            << LogFormatter::setDefaultConsoleColor() << std::endl;
-
-    fprintf(stderr, "%s", logLine.str().c_str());
+    const std::string logColor = LogFormatter::getConsoleColor(logLevel);
+    const std::string defaultColor = LogFormatter::getDefaultConsoleColor();
+    const std::string header = LogFormatter::getHeader(logLevel, file, line, func);
+    tokenizer tokens(message, charSeparator("\n"));
+    for(const auto& line : tokens) {
+        if (!line.empty()) {
+            fprintf(stderr,
+                    "%s%s%s%s\n",
+                    logColor.c_str(),
+                    header.c_str(),
+                    line.c_str(),
+                    defaultColor.c_str());
+        }
+    }
 }
 
 

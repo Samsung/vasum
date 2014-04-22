@@ -35,10 +35,14 @@ namespace log {
 class LogFormatter {
 public:
     static std::string getCurrentTime(void);
-    static std::string setConsoleColor(LogLevel logLevel);
-    static std::string setDefaultConsoleColor(void);
+    static std::string getConsoleColor(LogLevel logLevel);
+    static std::string getDefaultConsoleColor(void);
     static std::string toString(LogLevel logLevel);
     static std::string stripProjectDir(const std::string& file);
+    static std::string getHeader(LogLevel logLevel,
+                                 const std::string& file,
+                                 const unsigned int& line,
+                                 const std::string& func);
 };
 
 } // namespace log

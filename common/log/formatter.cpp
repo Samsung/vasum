@@ -27,13 +27,19 @@
 
 #include <sys/time.h>
 #include <cassert>
+#include <sstream>
+#include <iomanip>
 
 namespace security_containers {
 namespace log {
 
+const int TIME_COLUMN_LENGTH = 12;
+const int SEVERITY_COLUMN_LENGTH = 8;
+const int FILE_COLUMN_LENGTH = 52;
+
 std::string LogFormatter::getCurrentTime(void)
 {
-    char time[13];
+    char time[TIME_COLUMN_LENGTH + 1];
     struct timeval tv;
     gettimeofday(&tv, NULL);
     struct tm* tm = localtime(&tv.tv_sec);
@@ -48,7 +54,7 @@ std::string LogFormatter::getCurrentTime(void)
     return std::string(time);
 }
 
-std::string LogFormatter::setConsoleColor(LogLevel logLevel)
+std::string LogFormatter::getConsoleColor(LogLevel logLevel)
 {
     switch (logLevel) {
     case LogLevel::ERROR:
@@ -66,7 +72,7 @@ std::string LogFormatter::setConsoleColor(LogLevel logLevel)
     }
 }
 
-std::string LogFormatter::setDefaultConsoleColor(void)
+std::string LogFormatter::getDefaultConsoleColor(void)
 {
     return getConsoleEscapeSequence(Attributes::DEFAULT, Color::DEFAULT);
 }
@@ -95,6 +101,19 @@ std::string LogFormatter::stripProjectDir(const std::string& file)
     // it will work until someone use in cmake FILE(GLOB ... RELATIVE ...)
     assert(0 == file.compare(0, SOURCE_DIR.size(), SOURCE_DIR));
     return file.substr(SOURCE_DIR.size());
+}
+
+std::string LogFormatter::getHeader(LogLevel logLevel,
+                                    const std::string& file,
+                                    const unsigned int& line,
+                                    const std::string& func)
+{
+    std::ostringstream logLine;
+    logLine << getCurrentTime() << ' '
+            << std::left << std::setw(SEVERITY_COLUMN_LENGTH) << '[' + toString(logLevel) + ']'
+            << std::left << std::setw(FILE_COLUMN_LENGTH)
+            << file + ':' + std::to_string(line) + ' ' + func + ':';
+    return logLine.str();
 }
 
 } // namespace log
