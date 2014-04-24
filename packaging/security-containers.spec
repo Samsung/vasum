@@ -19,11 +19,15 @@ between them. A process from inside a container can request a switch of context
 (display, input devices) to the other container.
 
 %files
+%defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/security-containers-server
-%config %attr(644,root,root) /etc/security-containers/daemon.conf
-%config %attr(644,root,root) /etc/security-containers/image-skel/etc/dbus-1/system.d/com.samsung.containers.conf
-%config %attr(644,root,root) /etc/security-containers/containers/*.conf
+%dir /etc/security-containers
+%dir /etc/security-containers/containers
+%dir /etc/security-containers/libvirt-config
+%config /etc/security-containers/daemon.conf
+%config /etc/security-containers/containers/*.conf
 %config %attr(400,root,root) /etc/security-containers/libvirt-config/*.xml
+/etc/security-containers/image-skel
 
 %prep
 %setup -q
@@ -74,9 +78,9 @@ Requires:         security-containers-client = %{version}-%{release}
 Development package including the header files for the client library
 
 %files devel
-%defattr(644,root,root,644)
-%attr(644,root,root) %{_includedir}/security-containers/security-containers-client.h
-%attr(644,root,root) %{_libdir}/pkgconfig/security-containers.pc
+%defattr(644,root,root,755)
+%{_includedir}/security-containers
+%{_libdir}/pkgconfig/*
 
 
 ## Test Package ################################################################
@@ -93,21 +97,9 @@ BuildRequires:    boost-devel
 Unit tests for both: server and client.
 
 %files unit-tests
-%defattr(644,root,root,644)
+%defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/security-containers-server-unit-tests
 %attr(755,root,root) %{script_dir}/sc_all_tests.py
 %attr(755,root,root) %{script_dir}/sc_launch_test.py
 %{script_dir}/sc_test_parser.py
-%config %attr(644,root,root) /etc/security-containers/tests/dbus/ut-connection/*.conf
-%config %attr(644,root,root) /etc/security-containers/tests/utils/ut-fs/*.txt
-%config %attr(644,root,root) /etc/security-containers/tests/server/ut-server/*.conf
-%config %attr(644,root,root) /etc/security-containers/tests/server/ut-server/containers/*.conf
-%config %attr(644,root,root) /etc/security-containers/tests/server/ut-server/libvirt-config/*.xml
-%config %attr(644,root,root) /etc/security-containers/tests/server/ut-containers-manager/*.conf
-%config %attr(644,root,root) /etc/security-containers/tests/server/ut-containers-manager/containers/*.conf
-%config %attr(644,root,root) /etc/security-containers/tests/server/ut-containers-manager/libvirt-config/*.xml
-%config %attr(644,root,root) /etc/security-containers/tests/server/ut-container/containers/*.conf
-%config %attr(644,root,root) /etc/security-containers/tests/server/ut-container/libvirt-config/*.xml
-%config %attr(644,root,root) /etc/security-containers/tests/server/ut-container-admin/containers/*.conf
-%config %attr(644,root,root) /etc/security-containers/tests/server/ut-container-admin/libvirt-config/*.xml
-%config %attr(644,root,root) /etc/security-containers/tests/server/ut-container-connection/*.conf
+%{_datadir}/security-containers

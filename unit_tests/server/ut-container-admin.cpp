@@ -42,9 +42,9 @@ BOOST_AUTO_TEST_SUITE(ContainerAdminSuite)
 using namespace security_containers;
 using namespace security_containers::config;
 
-const std::string TEST_CONFIG_PATH = "/etc/security-containers/tests/server/ut-container-admin/containers/test.conf";
-const std::string BUGGY_CONFIG_PATH = "/etc/security-containers/tests/server/ut-container-admin/containers/buggy.conf";
-const std::string MISSING_CONFIG_PATH = "/etc/security-containers/tests/server/ut-container-admin/containers/missing.conf";
+const std::string TEST_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container-admin/containers/test.conf";
+const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container-admin/containers/buggy.conf";
+const std::string MISSING_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container-admin/containers/missing.conf";
 
 void ensureStarted()
 {

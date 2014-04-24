@@ -46,7 +46,7 @@ namespace {
 const char* DBUS_DAEMON_PROC = "/bin/dbus-daemon";
 const char* const DBUS_DAEMON_ARGS[] = {
     DBUS_DAEMON_PROC,
-    "--config-file=/etc/security-containers/tests/server/ut-container-connection/ut-dbus.conf",
+    "--config-file=" SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container-connection/ut-dbus.conf",
     "--nofork",
     NULL
 };

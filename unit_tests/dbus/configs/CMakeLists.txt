@@ -23,4 +23,4 @@ FILE(GLOB dbus_CONF                 ut-connection/*.conf)
 
 ## Install #####################################################################
 INSTALL(FILES        ${dbus_CONF}
-        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/dbus/ut-connection)
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/dbus/ut-connection)

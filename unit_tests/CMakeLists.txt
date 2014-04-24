@@ -41,6 +41,9 @@ TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_
 
 
 ## Subdirectories ##############################################################
+SET(SC_TEST_CONFIG_INSTALL_DIR ${SC_DATA_INSTALL_DIR}/tests)
+ADD_DEFINITIONS(-DSC_TEST_CONFIG_INSTALL_DIR="${SC_TEST_CONFIG_INSTALL_DIR}")
+
 ADD_SUBDIRECTORY(scripts)
 ADD_SUBDIRECTORY(dbus/configs)
 ADD_SUBDIRECTORY(server/configs)

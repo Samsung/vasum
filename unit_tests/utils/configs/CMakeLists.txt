@@ -23,4 +23,4 @@ FILE(GLOB fs_CONF ut-fs/*.txt)
 
 ## Install #####################################################################
 INSTALL(FILES        ${fs_CONF}
-        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/utils/ut-fs)
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/utils/ut-fs)

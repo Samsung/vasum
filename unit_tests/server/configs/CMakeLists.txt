@@ -36,30 +36,40 @@ FILE(GLOB admin_admin_CONF          ut-container-admin/libvirt-config/*.xml)
 FILE(GLOB connection_CONF           ut-container-connection/*.conf)
 
 
+## Generate ####################################################################
+CONFIGURE_FILE(ut-container-admin/containers/buggy.conf.in
+               ${CMAKE_BINARY_DIR}/ut-container-admin/containers/buggy.conf @ONLY)
+CONFIGURE_FILE(ut-container-admin/containers/test.conf.in
+               ${CMAKE_BINARY_DIR}/ut-container-admin/containers/test.conf @ONLY)
+FILE(GLOB admin_container_CONF_GEN ${CMAKE_BINARY_DIR}/ut-container-admin/containers/*.conf)
+
+
 ## Install #####################################################################
 INSTALL(FILES        ${server_manager_CONF}
-        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-server)
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-server)
 INSTALL(FILES        ${server_container_CONF}
-        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-server/containers)
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-server/containers)
 INSTALL(FILES        ${server_admin_CONF}
-        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-server/libvirt-config)
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-server/libvirt-config)
 
 INSTALL(FILES        ${manager_manager_CONF}
-        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-containers-manager)
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager)
 INSTALL(FILES        ${manager_container_CONF}
-        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-containers-manager/containers)
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/containers)
 INSTALL(FILES        ${manager_admin_CONF}
-        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-containers-manager/libvirt-config)
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/libvirt-config)
 
 INSTALL(FILES        ${container_container_CONF}
-        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-container/containers)
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container/containers)
 INSTALL(FILES        ${container_admin_CONF}
-        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-container/libvirt-config)
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container/libvirt-config)
 
 INSTALL(FILES        ${admin_container_CONF}
-        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-container-admin/containers)
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container-admin/containers)
+INSTALL(FILES        ${admin_container_CONF_GEN}
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container-admin/containers)
 INSTALL(FILES        ${admin_admin_CONF}
-        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-container-admin/libvirt-config)
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container-admin/libvirt-config)
 
 INSTALL(FILES        ${connection_CONF}
-        DESTINATION  ${SC_CONFIG_INSTALL_DIR}/tests/server/ut-container-connection)
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container-connection)
