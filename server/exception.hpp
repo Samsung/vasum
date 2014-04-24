@@ -40,10 +40,10 @@ struct ServerException: public SecurityContainersException {
 };
 
 /**
- * Error occurred during an attempt to perform an operation on a domain,
+ * Error occurred during an attempt to perform an operation on a container,
  * e.g. start, stop a container
  */
-struct DomainOperationException: public ServerException {
+struct ContainerOperationException: public ServerException {
     using ServerException::ServerException;
 };
 

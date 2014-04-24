@@ -66,8 +66,8 @@ public:
     void stop();
 
     /**
-     * Gracefully shutdown the domain.
-     * This method will NOT block until domain is shut down,
+     * Gracefully shutdown the container.
+     * This method will NOT block until container is shut down,
      * because some configurations may ignore this.
      */
     void shutdown();
@@ -87,9 +87,9 @@ public:
     bool isStopped();
 
     /**
-     * Suspends an active domain, the process is frozen
+     * Suspends an active container, the process is frozen
      * without further access to CPU resources and I/O,
-     * but the memory used by the domain
+     * but the memory used by the container
      * at the hypervisor level will stay allocated
      */
     void suspend();

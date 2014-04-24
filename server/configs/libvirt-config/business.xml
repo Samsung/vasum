@@ -101,7 +101,7 @@
       <source network='default'/>
     </interface>
     <filesystem type='mount'>
-      <source dir='/domains/business'/>
+      <source dir='/opt/usr/containers/business'/>
       <target dir='/'/>
     </filesystem>
     <!-- Enable access to the containers dbus -->

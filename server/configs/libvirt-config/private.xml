@@ -101,7 +101,7 @@
       <source network='default'/>
     </interface>
     <filesystem type='mount'>
-      <source dir='/domains/private'/>
+      <source dir='/opt/usr/containers/private'/>
       <target dir='/'/>
     </filesystem>
     <!-- Enable access to the containers dbus -->
