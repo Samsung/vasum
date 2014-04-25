@@ -26,6 +26,7 @@
 #include "ut.hpp"
 
 #include "container-connection.hpp"
+#include "container-connection-transport.hpp"
 #include "container-dbus-definitions.hpp"
 
 #include "dbus/connection.hpp"
@@ -51,19 +52,24 @@ const char* const DBUS_DAEMON_ARGS[] = {
     NULL
 };
 
-// TODO fix destruction order - move transport stuff to separate raii class
 const std::string TRANSPORT_MOUNT_POINT = "/tmp/ut-container-connection";
-const std::string DBUS_ADDRESS = "unix:path=" + TRANSPORT_MOUNT_POINT + "/dbus/system_bus_socket";
 const int EVENT_TIMEOUT = 1000;
 
-class ScopedDbusDaemon : public ScopedDaemon {
+class ScopedDbusDaemon {
 public:
-    void start()
+    ScopedDbusDaemon()
+        : mTransport(TRANSPORT_MOUNT_POINT)
     {
         utils::createDirectory(TRANSPORT_MOUNT_POINT + "/dbus", 0755);
         mDaemon.start(DBUS_DAEMON_PROC, DBUS_DAEMON_ARGS);
     }
+
+    std::string acquireAddress()
+    {
+        return mTransport.acquireAddress();
+    }
 private:
+    ContainerConnectionTransport mTransport;
     ScopedDaemon mDaemon;
 };
 
@@ -77,28 +83,24 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 
 BOOST_AUTO_TEST_CASE(ConnectTest)
 {
-    ScopedDbusDaemon dbus;
     ScopedGlibLoop loop;
+    ScopedDbusDaemon dbus;
 
     ContainerConnection connection;
-    connection.initialize(TRANSPORT_MOUNT_POINT);
-    dbus.start();
 
-    BOOST_REQUIRE_NO_THROW(connection.connect());
+    BOOST_REQUIRE_NO_THROW(connection.connect(dbus.acquireAddress()));
     BOOST_REQUIRE_NO_THROW(connection.disconnect());
 }
 
 BOOST_AUTO_TEST_CASE(NotifyActiveContainerApiTest)
 {
-    ScopedDbusDaemon dbus;
     ScopedGlibLoop loop;
+    ScopedDbusDaemon dbus;
 
     Latch notifyCalled;
     ContainerConnection connection;
-    connection.initialize(TRANSPORT_MOUNT_POINT);
-    dbus.start();
 
-    BOOST_REQUIRE_NO_THROW(connection.connect());
+    BOOST_REQUIRE_NO_THROW(connection.connect(dbus.acquireAddress()));
 
     auto callback = [&](const std::string& application, const std::string& message) {
         if (application == "testapp" && message == "testmessage") {
@@ -107,7 +109,7 @@ BOOST_AUTO_TEST_CASE(NotifyActiveContainerApiTest)
     };
     connection.setNotifyActiveContainerCallback(callback);
 
-    DbusConnection::Pointer client = DbusConnection::create(DBUS_ADDRESS);
+    DbusConnection::Pointer client = DbusConnection::create(dbus.acquireAddress());
     client->callMethod(api::BUS_NAME,
                        api::OBJECT_PATH,
                        api::INTERFACE,
@@ -119,17 +121,15 @@ BOOST_AUTO_TEST_CASE(NotifyActiveContainerApiTest)
 
 BOOST_AUTO_TEST_CASE(SignalNotificationApiTest)
 {
-    ScopedDbusDaemon dbus;
     ScopedGlibLoop loop;
+    ScopedDbusDaemon dbus;
 
     Latch signalEmitted;
     ContainerConnection connection;
-    connection.initialize(TRANSPORT_MOUNT_POINT);
-    dbus.start();
 
-    BOOST_REQUIRE_NO_THROW(connection.connect());
+    BOOST_REQUIRE_NO_THROW(connection.connect(dbus.acquireAddress()));
 
-    DbusConnection::Pointer client = DbusConnection::create(DBUS_ADDRESS);
+    DbusConnection::Pointer client = DbusConnection::create(dbus.acquireAddress());
 
     auto handler = [&](const std::string& /*senderBusName*/,
                        const std::string& objectPath,

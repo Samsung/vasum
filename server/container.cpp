@@ -65,9 +65,9 @@ int Container::getPrivilege()
 
 void Container::start()
 {
-    mConnection.initialize(mConfig.runMountPoint);
+    mConnectionTransport.reset(new ContainerConnectionTransport(mConfig.runMountPoint));
     mAdmin->start();
-    mConnection.connect();
+    mConnection.connect(mConnectionTransport->acquireAddress());
 
     // Send to the background only after we're connected,
     // otherwise it'd take ages.
@@ -79,7 +79,7 @@ void Container::stop()
 {
     mConnection.disconnect();
     mAdmin->stop();
-    mConnection.deinitialize();
+    mConnectionTransport.reset();
 }
 
 void Container::goForeground()

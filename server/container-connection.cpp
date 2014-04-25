@@ -19,26 +19,19 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Implementation of class for communication between container and server
+ * @brief   Implementation of a class for communication between container and server
  */
 
 #include "container-connection.hpp"
 #include "container-dbus-definitions.hpp"
 #include "exception.hpp"
 
-#include "utils/file-wait.hpp"
-#include "utils/fs.hpp"
-#include "utils/paths.hpp"
 #include "log/logger.hpp"
 
 
 namespace security_containers {
 
 namespace {
-
-// Timeout in ms for waiting for dbus transport.
-// Should be very long to ensure dbus in container is ready.
-const unsigned int TRANSPORT_READY_TIMEOUT = 2 * 60 * 1000;
 
 // Timeout in ms for waiting for dbus name.
 // Can happen if glib loop is busy or not present.
@@ -56,56 +49,18 @@ ContainerConnection::ContainerConnection()
 
 ContainerConnection::~ContainerConnection()
 {
-    deinitialize();
 }
 
 
-void ContainerConnection::initialize(const std::string& runMountPoint)
+void ContainerConnection::connect(const std::string& address)
 {
-    if (runMountPoint.empty()) {
-        return;
-    }
-    if (!utils::createDirectories(runMountPoint, 0755)) {
-        LOGE("Initialization failed: could not create " << runMountPoint);
-        throw ContainerConnectionException("Could not create: " + runMountPoint);
-    }
-
-    // try to umount if already mounted
-    utils::umount(runMountPoint);
-
-    if (!utils::mountTmpfs(runMountPoint)) {
-        LOGE("Initialization failed: could not mount " << runMountPoint);
-        throw ContainerConnectionException("Could not mount: " + runMountPoint);
-    }
-
-    mRunMountPoint = runMountPoint;
-}
-
-void ContainerConnection::deinitialize()
-{
-    if (!mRunMountPoint.empty()) {
-        if (!utils::umount(mRunMountPoint)) {
-            LOGE("Deinitialization failed: could not umount " << mRunMountPoint);
-        }
-        mRunMountPoint.clear();
-    }
-}
-
-
-void ContainerConnection::connect()
-{
-    if (mRunMountPoint.empty()) {
+    if (address.empty()) {
         LOGW("The connection to the container is disabled");
         return;
     }
 
-    const std::string dbusPath = mRunMountPoint + "/dbus/system_bus_socket";
-
-    // TODO This should be done asynchronously.
-    LOGT("Waiting for " << dbusPath);
-    utils::waitForFile(dbusPath, TRANSPORT_READY_TIMEOUT);
-    LOGT("Connecting to DBUS");
-    mDbusConnection = dbus::DbusConnection::create("unix:path=" + dbusPath);
+    LOGT("Connecting to DBUS on " << address);
+    mDbusConnection = dbus::DbusConnection::create(address);
     LOGT("Setting DBUS name");
 
     mDbusConnection->setName(api::BUS_NAME,

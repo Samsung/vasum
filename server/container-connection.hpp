@@ -19,7 +19,7 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Declaration of the class for communication between container and server
+ * @brief   Declaration of a class for communication between container and server
  */
 
 
@@ -41,22 +41,10 @@ public:
     ContainerConnection();
     ~ContainerConnection();
 
-    //TODO Move initialize, deinitialize and related stuff to separate class
-
-    /**
-     * Should be called every time just before container is created.
-     */
-    void initialize(const std::string& runMountPoint);
-
-    /**
-     * Should be called every time after container is destroyed.
-     */
-    void deinitialize();
-
     /**
      * Connect to container.
      */
-    void connect();
+    void connect(const std::string& address);
 
     /**
      * Disconnect from container.
@@ -82,7 +70,6 @@ public:
                           const std::string& message);
 
 private:
-    std::string mRunMountPoint;
     dbus::DbusConnection::Pointer mDbusConnection;
     std::mutex mNameMutex;
     std::condition_variable mNameCondition;

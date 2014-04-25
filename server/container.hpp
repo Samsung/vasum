@@ -29,6 +29,7 @@
 #include "container-config.hpp"
 #include "container-admin.hpp"
 #include "container-connection.hpp"
+#include "container-connection-transport.hpp"
 
 #include <string>
 #include <memory>
@@ -98,6 +99,7 @@ public:
 private:
     ContainerConfig mConfig;
     std::unique_ptr<ContainerAdmin> mAdmin;
+    std::unique_ptr<ContainerConnectionTransport> mConnectionTransport;
     ContainerConnection mConnection;
 };
 
