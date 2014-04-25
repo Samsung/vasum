@@ -114,11 +114,6 @@ void ContainerAdmin::start()
     }
 
     LOGD(mId << ": Started");
-    // TODO: the container should be started in the background,
-    // unfortunately libvirt doesn't allow us to set cgroups
-    // before the start, hence we do it immediately afterwards
-    LOGD(mId << ": Sending to the background");
-    setSchedulerLevel(SchedulerLevel::BACKGROUND);
 }
 
 

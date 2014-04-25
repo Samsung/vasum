@@ -143,7 +143,6 @@ BOOST_AUTO_TEST_CASE(SchedulerLevelTest)
     ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start());
     ensureStarted();
-    BOOST_REQUIRE(ca.getSchedulerQuota() == config.cpuQuotaBackground);
     BOOST_REQUIRE_NO_THROW(ca.setSchedulerLevel(SchedulerLevel::FOREGROUND));
     BOOST_REQUIRE(ca.getSchedulerQuota() == config.cpuQuotaForeground);
     BOOST_REQUIRE_NO_THROW(ca.setSchedulerLevel(SchedulerLevel::BACKGROUND));

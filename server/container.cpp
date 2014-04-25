@@ -68,6 +68,11 @@ void Container::start()
     mConnection.initialize(mConfig.runMountPoint);
     mAdmin->start();
     mConnection.connect();
+
+    // Send to the background only after we're connected,
+    // otherwise it'd take ages.
+    LOGD(getId() << ": Sending to the background");
+    goBackground();
 }
 
 void Container::stop()
