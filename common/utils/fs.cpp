@@ -117,6 +117,25 @@ bool umount(const std::string& path)
     return true;
 }
 
+bool isMountPoint(const std::string& path, bool& result)
+{
+    struct stat stat, parentStat;
+    std::string parentPath = dirName(path);
+
+    if (::stat(path.c_str(), &stat)) {
+        LOGD("Failed to get stat of " << path << ": " << strerror(errno));
+        return false;
+    }
+
+    if (::stat(parentPath.c_str(), &parentStat)) {
+        LOGD("Failed to get stat of " << parentPath << ": " << strerror(errno));
+        return false;
+    }
+
+    result = (stat.st_dev != parentStat.st_dev);
+    return true;
+}
+
 
 } // namespace utils
 } // namespace security_containers

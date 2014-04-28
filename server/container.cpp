@@ -103,6 +103,12 @@ void Container::goBackground()
     mAdmin->setSchedulerLevel(SchedulerLevel::BACKGROUND);
 }
 
+void Container::setDetachOnExit()
+{
+    mAdmin->setDetachOnExit();
+    mConnectionTransport->setDetachOnExit();
+}
+
 bool Container::isRunning()
 {
     return mAdmin->isRunning();

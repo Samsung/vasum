@@ -134,6 +134,11 @@ public:
     void setSchedulerLevel(SchedulerLevel sched);
 
     /**
+     * Set whether container should be detached on exit.
+     */
+    void setDetachOnExit();
+
+    /**
      * @return Scheduler CFS quota,
      * TODO: this function is only for UNIT TESTS
      */
@@ -160,6 +165,7 @@ private:
     ContainerConfig& mConfig;
     libvirt::LibvirtDomain mDom;
     const std::string mId;
+    bool mDetachOnExit;
 
     int getState();   // get the libvirt's domain state
     void setSchedulerParams(std::uint64_t cpuShares, std::uint64_t vcpuPeriod, std::int64_t vcpuQuota);

@@ -46,8 +46,14 @@ public:
      */
     std::string acquireAddress();
 
+    /**
+     * Set whether object should detach from transport filesystem on exit
+     */
+    void setDetachOnExit();
+
 private:
     std::string mRunMountPoint;
+    bool mDetachOnExit;
 };
 
 

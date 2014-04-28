@@ -43,7 +43,7 @@ const unsigned int TRANSPORT_READY_TIMEOUT = 2 * 60 * 1000;
 
 
 ContainerConnectionTransport::ContainerConnectionTransport(const std::string& runMountPoint)
-    : mRunMountPoint(runMountPoint)
+    : mRunMountPoint(runMountPoint), mDetachOnExit(false)
 {
     if (runMountPoint.empty()) {
         return;
@@ -53,12 +53,20 @@ ContainerConnectionTransport::ContainerConnectionTransport(const std::string& ru
         throw ContainerConnectionException("Could not create: " + runMountPoint);
     }
 
-    // try to umount if already mounted
-    utils::umount(runMountPoint);
+    bool isMount = false;
+    if (!utils::isMountPoint(runMountPoint, isMount)) {
+        LOGE("Failed to check if " << runMountPoint << " is a mount point.");
+        throw ContainerConnectionException("Could not check if " + runMountPoint +
+                                           " is a mount point.");
+    }
 
-    if (!utils::mountTmpfs(runMountPoint)) {
-        LOGE("Initialization failed: could not mount " << runMountPoint);
-        throw ContainerConnectionException("Could not mount: " + runMountPoint);
+    if (!isMount) {
+        LOGD(runMountPoint << " not mounted - mounting.");
+
+        if (!utils::mountTmpfs(runMountPoint)) {
+            LOGE("Initialization failed: could not mount " << runMountPoint);
+            throw ContainerConnectionException("Could not mount: " + runMountPoint);
+        }
     }
 
     // if there is no systemd in the container this dir won't be created automatically
@@ -73,9 +81,11 @@ ContainerConnectionTransport::ContainerConnectionTransport(const std::string& ru
 
 ContainerConnectionTransport::~ContainerConnectionTransport()
 {
-    if (!mRunMountPoint.empty()) {
-        if (!utils::umount(mRunMountPoint)) {
-            LOGE("Deinitialization failed: could not umount " << mRunMountPoint);
+    if (!mDetachOnExit) {
+        if (!mRunMountPoint.empty()) {
+            if (!utils::umount(mRunMountPoint)) {
+                LOGE("Deinitialization failed: could not umount " << mRunMountPoint);
+            }
         }
     }
 }
@@ -96,5 +106,9 @@ std::string ContainerConnectionTransport::acquireAddress()
     return "unix:path=" + dbusPath;
 }
 
+void ContainerConnectionTransport::setDetachOnExit()
+{
+    mDetachOnExit = true;
+}
 
 } // namespace security_containers

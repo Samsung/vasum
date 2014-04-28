@@ -79,6 +79,14 @@ public:
     void goBackground();
 
     /**
+     * Set if container should be detached on exit.
+     *
+     * This sends detach flag to ContainerAdmin object and disables unmounting tmpfs
+     * in ContainerConnectionTransport.
+     */
+    void setDetachOnExit();
+
+    /**
      * @return Is the container running?
      */
     bool isRunning();

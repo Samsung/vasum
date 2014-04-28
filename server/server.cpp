@@ -30,7 +30,13 @@
 #include "utils/glib-loop.hpp"
 
 #include <csignal>
+#include <cerrno>
 #include <string>
+#include <cstring>
+#include <atomic>
+#include <unistd.h>
+
+extern char** environ;
 
 namespace security_containers {
 
@@ -47,18 +53,29 @@ Server::~Server()
 
 
 namespace {
-utils::Latch signalLatch;
+
+std::atomic_bool gUpdateTriggered(false);
+utils::Latch gSignalLatch;
+
 void signalHandler(const int sig)
 {
     LOGI("Got signal " << sig);
-    signalLatch.set();
+
+    if (sig == SIGUSR1) {
+        LOGD("Received SIGUSR1 - triggering update.");
+        gUpdateTriggered = true;
+    }
+
+    gSignalLatch.set();
 }
-}
+
+} // namespace
 
 void Server::run()
 {
     signal(SIGINT,  signalHandler);
     signal(SIGTERM, signalHandler);
+    signal(SIGUSR1, signalHandler);
 
     LOGI("Starting daemon...");
     {
@@ -68,7 +85,12 @@ void Server::run()
         manager.startAll();
         LOGI("Daemon started");
 
-        signalLatch.wait();
+        gSignalLatch.wait();
+
+        // Detach containers if we triggered an update
+        if (gUpdateTriggered) {
+            manager.setContainersDetachOnExit();
+        }
 
         LOGI("Stopping daemon...");
         // manager.stopAll() will be called in destructor
@@ -76,10 +98,19 @@ void Server::run()
     LOGI("Daemon stopped");
 }
 
+void Server::reloadIfRequired(char* argv[])
+{
+    if (gUpdateTriggered) {
+        execve(argv[0], argv, environ);
+
+        LOGE("Failed to reload " << argv[0] << ": " << strerror(errno));
+    }
+}
+
 void Server::terminate()
 {
     LOGI("Terminating server");
-    signalLatch.set();
+    gSignalLatch.set();
 }
 
 } // namespace security_containers

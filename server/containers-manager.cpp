@@ -36,7 +36,7 @@
 namespace security_containers {
 
 
-ContainersManager::ContainersManager(const std::string& managerConfigPath)
+ContainersManager::ContainersManager(const std::string& managerConfigPath): mDetachOnExit(false)
 {
     LOGD("Instantiating ContainersManager object...");
     mConfig.parseFile(managerConfigPath);
@@ -64,11 +64,15 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath)
 ContainersManager::~ContainersManager()
 {
     LOGD("Destroying ContainersManager object...");
-    try {
-        stopAll();
-    } catch (ServerException&) {
-        LOGE("Failed to stop all of the containers");
+
+    if (!mDetachOnExit) {
+        try {
+            stopAll();
+        } catch (ServerException&) {
+            LOGE("Failed to stop all of the containers");
+        }
     }
+
     LOGD("ContainersManager object destroyed");
 }
 
@@ -138,5 +142,14 @@ std::string ContainersManager::getRunningForegroundContainerId()
     return std::string();
 }
 
+
+void ContainersManager::setContainersDetachOnExit()
+{
+    mDetachOnExit = true;
+
+    for (auto& container : mContainers) {
+        container.second->setDetachOnExit();
+    }
+}
 
 } // namespace security_containers

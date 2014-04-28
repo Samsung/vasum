@@ -114,6 +114,7 @@ int main(int argc, char* argv[])
     try {
         Server server(configPath);
         server.run();
+        server.reloadIfRequired(argv);
 
     } catch (std::exception& e) {
         LOGE("Unexpected: " << utils::getTypeName(e) << ": " << e.what());

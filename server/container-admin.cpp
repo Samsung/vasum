@@ -69,6 +69,7 @@ ContainerAdmin::ContainerAdmin(ContainerConfig& config)
     : mConfig(config),
       mDom(utils::readFileContent(mConfig.config)),
       mId(getDomainName(mDom.get())),
+      mDetachOnExit(false),
       mLifecycleCallbackId(-1),
       mRebootCallbackId(-1),
       mNextIdForListener(0)
@@ -106,6 +107,8 @@ ContainerAdmin::ContainerAdmin(ContainerConfig& config)
 
 ContainerAdmin::~ContainerAdmin()
 {
+    LOGD(mId << ": Destroying ContainerAdmin object...");
+
     // Deregister callbacks
     if (mLifecycleCallbackId >= 0) {
         virConnectDomainEventDeregisterAny(virDomainGetConnect(mDom.get()),
@@ -117,11 +120,12 @@ ContainerAdmin::~ContainerAdmin()
     }
 
     // Try to forcefully stop
-    LOGD(mId << ": Destroying ContainerAdmin object...");
-    try {
-        destroy();
-    } catch (ServerException&) {
-        LOGE(mId << ": Failed to destroy the container");
+    if (!mDetachOnExit) {
+        try {
+            destroy();
+        } catch (ServerException&) {
+            LOGE(mId << ": Failed to destroy the container");
+        }
     }
 
     LOGD(mId << ": ContainerAdmin object destroyed");
@@ -144,10 +148,10 @@ void ContainerAdmin::start()
         return;
     }
 
-    // Autodestroyed when connection pointer released
-    // Any managed save file for this domain is discarded,
-    // and the domain boots from scratch
-    u_int flags = VIR_DOMAIN_START_AUTODESTROY;
+    // In order to update daemon without shutting down the containers
+    // autodestroy option must NOT be set. It's best to create domain
+    // without any flags.
+    u_int flags = VIR_DOMAIN_NONE;
 
     if (virDomainCreateWithFlags(mDom.get(), flags) < 0) {
         LOGE(mId << ": Failed to start the container\n"
@@ -362,6 +366,10 @@ void ContainerAdmin::setSchedulerParams(std::uint64_t cpuShares, std::uint64_t v
     }
 }
 
+void ContainerAdmin::setDetachOnExit()
+{
+    mDetachOnExit = true;
+}
 
 std::int64_t ContainerAdmin::getSchedulerQuota()
 {

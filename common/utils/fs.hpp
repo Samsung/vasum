@@ -67,6 +67,11 @@ bool mountTmpfs(const std::string& path);
  */
 bool umount(const std::string& path);
 
+/**
+ * Check if given path is a mount point
+ */
+bool isMountPoint(const std::string& path, bool& result);
+
 
 } // namespace utils
 } // namespace security_containers

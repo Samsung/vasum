@@ -38,9 +38,14 @@ public:
     virtual ~Server();
 
     /**
-     * Starts all the containers and blocks until SIGINT or SIGTERM
+     * Starts all the containers and blocks until SIGINT, SIGTERM or SIGUSR1
      */
     void run();
+
+    /**
+     * Reload the server by launching execve on itself if SIGUSR1 was sent to server.
+     */
+    void reloadIfRequired(char* argv[]);
 
     /**
      * Terminates the server.

@@ -66,10 +66,16 @@ public:
      */
     std::string getRunningForegroundContainerId();
 
+    /**
+     * Set whether ContainersManager should detach containers on exit
+     */
+    void setContainersDetachOnExit();
+
 private:
     ContainersManagerConfig mConfig;
     typedef std::unordered_map<std::string, std::unique_ptr<Container>> ContainerMap;
     ContainerMap mContainers; // map of containers, id is the key
+    bool mDetachOnExit;
 };
 
 
