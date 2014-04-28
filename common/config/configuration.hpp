@@ -141,9 +141,9 @@ protected:
     template <typename T>
     static void readValue(json_object* jsonObj, T& val, const char* name)
     {
-        json_object* obj = json_object_object_get(jsonObj, name);
-        if (NULL == obj) {
-            LOGE("json_object_object_get failed");
+        json_object* obj = NULL;
+        if (!json_object_object_get_ex(jsonObj, name, &obj)) {
+            LOGE("json_object_object_get_ex() failed, name = " << name);
             throw ConfigException();
         }
         val = getValueFromJsonObj<T>(obj);
@@ -161,9 +161,9 @@ protected:
     static void readValue(json_object* jsonObj, std::vector<T>& val, const char* name)
     {
         val.clear();
-        json_object* array = json_object_object_get(jsonObj, name);
-        if (NULL == array) {
-            LOGE("json_object_object_get() failed, name = " << name);
+        json_object* array = NULL;
+        if (!json_object_object_get_ex(jsonObj, name, &array)) {
+            LOGE("json_object_object_get_ex() failed, name = " << name);
             throw ConfigException();
         }
         int len = json_object_array_length(array);
