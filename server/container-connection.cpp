@@ -40,19 +40,9 @@ const unsigned int NAME_ACQUIRED_TIMEOUT = 5 * 1000;
 } // namespace
 
 
-ContainerConnection::ContainerConnection()
+ContainerConnection::ContainerConnection(const std::string& address, const OnNameLostCallback& callback)
     : mNameAcquired(false)
     , mNameLost(false)
-{
-}
-
-
-ContainerConnection::~ContainerConnection()
-{
-}
-
-
-void ContainerConnection::connect(const std::string& address)
 {
     if (address.empty()) {
         LOGW("The connection to the container is disabled");
@@ -61,15 +51,14 @@ void ContainerConnection::connect(const std::string& address)
 
     LOGT("Connecting to DBUS on " << address);
     mDbusConnection = dbus::DbusConnection::create(address);
-    LOGT("Setting DBUS name");
 
+    LOGT("Setting DBUS name");
     mDbusConnection->setName(api::BUS_NAME,
                              std::bind(&ContainerConnection::onNameAcquired, this),
                              std::bind(&ContainerConnection::onNameLost, this));
 
-    if (!waitForName(NAME_ACQUIRED_TIMEOUT)) {
+    if (!waitForNameAndSetCallback(NAME_ACQUIRED_TIMEOUT, callback)) {
         LOGE("Could not acquire dbus name: " << api::BUS_NAME);
-        disconnect();
         throw ContainerConnectionException("Could not acquire dbus name: " + api::BUS_NAME);
     }
 
@@ -87,18 +76,11 @@ void ContainerConnection::connect(const std::string& address)
     LOGD("Connected");
 }
 
-
-void ContainerConnection::disconnect()
+ContainerConnection::~ContainerConnection()
 {
-    LOGD("Disconnecting");
-    mDbusConnection.reset();
-
-    std::unique_lock<std::mutex> lock(mNameMutex);
-    mNameAcquired = false;
-    mNameLost = false;
 }
 
-bool ContainerConnection::waitForName(const unsigned int timeoutMs)
+bool ContainerConnection::waitForNameAndSetCallback(const unsigned int timeoutMs, const OnNameLostCallback& callback)
 {
     std::unique_lock<std::mutex> lock(mNameMutex);
     mNameCondition.wait_for(lock,
@@ -106,6 +88,10 @@ bool ContainerConnection::waitForName(const unsigned int timeoutMs)
                             [this] {
                                 return mNameAcquired || mNameLost;
                             });
+    if(mNameAcquired) {
+        mOnNameLostCallback = callback;
+    }
+
     return mNameAcquired;
 }
 
@@ -121,7 +107,10 @@ void ContainerConnection::onNameLost()
     std::unique_lock<std::mutex> lock(mNameMutex);
     mNameLost = true;
     mNameCondition.notify_one();
-    //TODO some callback?
+
+    if(mOnNameLostCallback) {
+        mOnNameLostCallback();
+    }
 }
 
 void ContainerConnection::setNotifyActiveContainerCallback(

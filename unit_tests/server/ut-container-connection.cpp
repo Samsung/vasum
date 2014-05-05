@@ -76,20 +76,12 @@ private:
 } // namespace
 
 
-BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
-{
-    BOOST_REQUIRE_NO_THROW(ContainerConnection());
-}
-
-BOOST_AUTO_TEST_CASE(ConnectTest)
+BOOST_AUTO_TEST_CASE(ConstructorDestructorConnectTest)
 {
     ScopedGlibLoop loop;
     ScopedDbusDaemon dbus;
 
-    ContainerConnection connection;
-
-    BOOST_REQUIRE_NO_THROW(connection.connect(dbus.acquireAddress()));
-    BOOST_REQUIRE_NO_THROW(connection.disconnect());
+    BOOST_REQUIRE_NO_THROW(ContainerConnection(dbus.acquireAddress(), nullptr));
 }
 
 BOOST_AUTO_TEST_CASE(NotifyActiveContainerApiTest)
@@ -98,16 +90,16 @@ BOOST_AUTO_TEST_CASE(NotifyActiveContainerApiTest)
     ScopedDbusDaemon dbus;
 
     Latch notifyCalled;
-    ContainerConnection connection;
+    std::unique_ptr<ContainerConnection> connection;
 
-    BOOST_REQUIRE_NO_THROW(connection.connect(dbus.acquireAddress()));
+    BOOST_REQUIRE_NO_THROW(connection.reset(new ContainerConnection(dbus.acquireAddress(), nullptr)));
 
     auto callback = [&](const std::string& application, const std::string& message) {
         if (application == "testapp" && message == "testmessage") {
             notifyCalled.set();
         }
     };
-    connection.setNotifyActiveContainerCallback(callback);
+    connection->setNotifyActiveContainerCallback(callback);
 
     DbusConnection::Pointer client = DbusConnection::create(dbus.acquireAddress());
     client->callMethod(api::BUS_NAME,
@@ -125,9 +117,9 @@ BOOST_AUTO_TEST_CASE(SignalNotificationApiTest)
     ScopedDbusDaemon dbus;
 
     Latch signalEmitted;
-    ContainerConnection connection;
+    std::unique_ptr<ContainerConnection> connection;
 
-    BOOST_REQUIRE_NO_THROW(connection.connect(dbus.acquireAddress()));
+    BOOST_REQUIRE_NO_THROW(connection.reset(new ContainerConnection(dbus.acquireAddress(), nullptr)));
 
     DbusConnection::Pointer client = DbusConnection::create(dbus.acquireAddress());
 
@@ -154,7 +146,7 @@ BOOST_AUTO_TEST_CASE(SignalNotificationApiTest)
     };
     client->signalSubscribe(handler, api::BUS_NAME);
 
-    connection.sendNotification("testcontainer", "testapp", "testmessage");
+    connection->sendNotification("testcontainer", "testapp", "testmessage");
 
     BOOST_CHECK(signalEmitted.wait(EVENT_TIMEOUT));
 }

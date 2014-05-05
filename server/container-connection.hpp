@@ -38,18 +38,10 @@ namespace security_containers {
 class ContainerConnection {
 
 public:
-    ContainerConnection();
+    typedef std::function<void()> OnNameLostCallback;
+
+    ContainerConnection(const std::string& address, const OnNameLostCallback& callback);
     ~ContainerConnection();
-
-    /**
-     * Connect to container.
-     */
-    void connect(const std::string& address);
-
-    /**
-     * Disconnect from container.
-     */
-    void disconnect();
 
     // ------------- API --------------
 
@@ -75,11 +67,12 @@ private:
     std::condition_variable mNameCondition;
     bool mNameAcquired;
     bool mNameLost;
+    OnNameLostCallback mOnNameLostCallback;
     NotifyActiveContainerCallback mNotifyActiveContainerCallback;
 
     void onNameAcquired();
     void onNameLost();
-    bool waitForName(const unsigned int timeoutMs);
+    bool waitForNameAndSetCallback(const unsigned int timeoutMs, const OnNameLostCallback& callback);
 
     void onMessageCall(const std::string& objectPath,
                        const std::string& interface,

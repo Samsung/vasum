@@ -67,7 +67,8 @@ void Container::start()
 {
     mConnectionTransport.reset(new ContainerConnectionTransport(mConfig.runMountPoint));
     mAdmin->start();
-    mConnection.connect(mConnectionTransport->acquireAddress());
+    mConnection.reset(new ContainerConnection(mConnectionTransport->acquireAddress(),
+                                              std::bind(&Container::onNameLostCallback, this)));
 
     // Send to the background only after we're connected,
     // otherwise it'd take ages.
@@ -77,7 +78,7 @@ void Container::start()
 
 void Container::stop()
 {
-    mConnection.disconnect();
+    mConnection.reset();
     mAdmin->stop();
     mConnectionTransport.reset();
 }
@@ -105,6 +106,11 @@ bool Container::isStopped()
 bool Container::isPaused()
 {
     return mAdmin->isPaused();
+}
+
+void Container::onNameLostCallback()
+{
+    // TODO: try to reconnect
 }
 
 

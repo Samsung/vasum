@@ -100,7 +100,9 @@ private:
     ContainerConfig mConfig;
     std::unique_ptr<ContainerAdmin> mAdmin;
     std::unique_ptr<ContainerConnectionTransport> mConnectionTransport;
-    ContainerConnection mConnection;
+    std::unique_ptr<ContainerConnection> mConnection;
+
+    void onNameLostCallback();
 };
 
 
