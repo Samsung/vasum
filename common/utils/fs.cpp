@@ -101,7 +101,7 @@ bool createDirectories(const std::string& path, mode_t mode)
 
 bool mountTmpfs(const std::string& path)
 {
-    if (::mount("tmpfs", path.c_str(), "tmpfs", MS_NOSUID|MS_NODEV, "mode=755") != 0) {
+    if (::mount("tmpfs", path.c_str(), "tmpfs", MS_NOSUID | MS_NODEV, "mode=755") != 0) {
         LOGD("Mount failed for '" << path << "': " << strerror(errno));
         return false;
     }

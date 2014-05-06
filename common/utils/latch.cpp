@@ -24,6 +24,8 @@
 
 #include "utils/latch.hpp"
 
+#include <cassert>
+
 
 namespace security_containers {
 namespace utils {
@@ -43,21 +45,32 @@ void Latch::set()
 
 void Latch::wait()
 {
-    std::unique_lock<std::mutex> lock(mMutex);
-    mCondition.wait(lock, [this] {return mCount > 0;});
-    --mCount;
+    waitForN(1);
 }
 
 bool Latch::wait(const unsigned int timeoutMs)
 {
+    return waitForN(1, timeoutMs);
+}
+
+void Latch::waitForN(const unsigned int n)
+{
+    std::unique_lock<std::mutex> lock(mMutex);
+    mCondition.wait(lock, [this, &n] {return mCount >= n;});
+    mCount -= n;
+}
+
+bool Latch::waitForN(const unsigned int n, const unsigned int timeoutMs)
+{
     std::unique_lock<std::mutex> lock(mMutex);
     if (!mCondition.wait_for(lock, std::chrono::milliseconds(timeoutMs),
-                             [this] {return mCount > 0;})) {
+                             [this, &n] {return mCount >= n;})) {
         return false;
     }
-    --mCount;
+    mCount -= n;
     return true;
 }
+
 
 bool Latch::empty()
 {

@@ -185,7 +185,7 @@ void DbusConnection::onNameAcquired(GDBusConnection*, const gchar* name, gpointe
 
 void DbusConnection::onNameLost(GDBusConnection*, const gchar* name, gpointer userData)
 {
-    LOGE("Name lost " << name);
+    LOGD("Name lost " << name);
     const NameCallbacks& callbacks = utils::getCallbackFromPointer<NameCallbacks>(userData);
     if (callbacks.nameLost) {
         callbacks.nameLost();

@@ -29,6 +29,7 @@
 #include "exception.hpp"
 
 #include "utils/exception.hpp"
+#include "utils/glib-loop.hpp"
 
 #include <memory>
 #include <string>
@@ -38,11 +39,16 @@ BOOST_AUTO_TEST_SUITE(ContainerSuite)
 
 using namespace security_containers;
 using namespace security_containers::config;
+using namespace security_containers::utils;
+
+namespace {
 
 const std::string TEST_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container/containers/test.conf";
+const std::string TEST_DBUS_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container/containers/test-dbus.conf";
 const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container/containers/buggy.conf";
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/config.conf";
 
+} // namespace
 
 BOOST_AUTO_TEST_CASE(ConstructorTest)
 {
@@ -64,6 +70,27 @@ BOOST_AUTO_TEST_CASE(MissingConfigTest)
 {
     BOOST_REQUIRE_THROW(Container c(MISSING_CONFIG_PATH), ConfigException);
 }
+
+BOOST_AUTO_TEST_CASE(StartStopTest)
+{
+    ScopedGlibLoop loop;
+
+    std::unique_ptr<Container> c(new Container(TEST_CONFIG_PATH));
+    BOOST_REQUIRE_NO_THROW(c->start());
+    BOOST_REQUIRE_NO_THROW(c->stop());
+}
+
+BOOST_AUTO_TEST_CASE(DbusConnectionTest)
+{
+    ScopedGlibLoop loop;
+
+    std::unique_ptr<Container> c;
+    BOOST_REQUIRE_NO_THROW(c.reset(new Container(TEST_DBUS_CONFIG_PATH)));
+    BOOST_REQUIRE_NO_THROW(c->start());
+    BOOST_REQUIRE_NO_THROW(c->stop());
+}
+
+// TODO: DbusReconnectionTest
 
 
 BOOST_AUTO_TEST_SUITE_END()

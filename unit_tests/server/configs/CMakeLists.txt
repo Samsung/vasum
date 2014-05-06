@@ -27,6 +27,7 @@ FILE(GLOB manager_manager_CONF      ut-containers-manager/*.conf)
 FILE(GLOB manager_container_CONF    ut-containers-manager/containers/*.conf)
 FILE(GLOB manager_admin_CONF        ut-containers-manager/libvirt-config/*.xml)
 
+FILE(GLOB container_CONF            ut-container/*.conf)
 FILE(GLOB container_container_CONF  ut-container/containers/*.conf)
 FILE(GLOB container_admin_CONF      ut-container/libvirt-config/*.xml)
 
@@ -42,6 +43,10 @@ CONFIGURE_FILE(ut-container-admin/containers/buggy.conf.in
 CONFIGURE_FILE(ut-container-admin/containers/test.conf.in
                ${CMAKE_BINARY_DIR}/ut-container-admin/containers/test.conf @ONLY)
 FILE(GLOB admin_container_CONF_GEN ${CMAKE_BINARY_DIR}/ut-container-admin/containers/*.conf)
+
+CONFIGURE_FILE(ut-container/libvirt-config/test-dbus.xml.in
+               ${CMAKE_BINARY_DIR}/ut-container/libvirt-config/test-dbus.xml @ONLY)
+FILE(GLOB container_admin_CONF_GEN ${CMAKE_BINARY_DIR}/ut-container/libvirt-config/*.xml)
 
 
 ## Install #####################################################################
@@ -59,9 +64,13 @@ INSTALL(FILES        ${manager_container_CONF}
 INSTALL(FILES        ${manager_admin_CONF}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/libvirt-config)
 
+INSTALL(FILES        ${container_CONF}
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container)
 INSTALL(FILES        ${container_container_CONF}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container/containers)
 INSTALL(FILES        ${container_admin_CONF}
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container/libvirt-config)
+INSTALL(FILES        ${container_admin_CONF_GEN}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container/libvirt-config)
 
 INSTALL(FILES        ${admin_container_CONF}

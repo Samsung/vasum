@@ -60,7 +60,6 @@ public:
     ScopedDbusDaemon()
         : mTransport(TRANSPORT_MOUNT_POINT)
     {
-        utils::createDirectory(TRANSPORT_MOUNT_POINT + "/dbus", 0755);
         mDaemon.start(DBUS_DAEMON_PROC, DBUS_DAEMON_ARGS);
     }
 

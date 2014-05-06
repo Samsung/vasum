@@ -22,6 +22,7 @@
  * @brief   Wait for file utility function
  */
 
+#include "utils/exception.hpp"
 #include "utils/file-wait.hpp"
 
 #include <sys/stat.h>
@@ -42,11 +43,11 @@ void waitForFile(const std::string& filename, const unsigned int timeoutMs)
     unsigned int loops = 0;
     while (stat(filename.c_str(), &s) == -1) {
         if (errno != ENOENT) {
-            throw std::runtime_error("file access error: " + filename);
+            throw UtilsException("file access error: " + filename);
         }
         ++ loops;
         if (loops * GRANULARITY > timeoutMs) {
-            throw std::runtime_error("timeout on waiting for: " + filename);
+            throw UtilsException("timeout on waiting for: " + filename);
         }
         usleep(GRANULARITY * 1000);
     }

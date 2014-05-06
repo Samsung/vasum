@@ -65,7 +65,7 @@ ContainersManager::~ContainersManager()
 {
     LOGD("Destroying ContainersManager object...");
     try {
-        stopAll();
+        stopAll(); // TODO: shutdownOrStop()
     } catch (ServerException& e) {
         LOGE("Failed to stop all of the containers");
     }

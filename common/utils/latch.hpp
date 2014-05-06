@@ -54,10 +54,28 @@ public:
     void wait();
 
     /**
-     * Waits with timeout.
-     * @return false on timeout
+     * Waits for a single occurence of event with timeout.
+     *
+     * @param timeoutMs  timeout in ms to wait for
+     * @return           false on timeout
      */
     bool wait(const unsigned int timeoutMs);
+
+    /**
+     * Waits for @ref n occurrences of event.
+     *
+     * @param n  number of occurences to wait for
+     */
+    void waitForN(const unsigned int n);
+
+    /**
+     * Waits for @ref n occurences of event with timeout.
+     *
+     * @param n          number of occurences to wait for
+     * @param timeoutMs  timeout in ms to wait for
+     * @return           false on timeout
+     */
+    bool waitForN(const unsigned int n, const unsigned int timeoutMs);
 
     /**
      * Check if there are no pending events.
@@ -66,7 +84,7 @@ public:
 private:
     std::mutex mMutex;
     std::condition_variable mCondition;
-    int mCount;
+    unsigned int mCount;
 };
 
 

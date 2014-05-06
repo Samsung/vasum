@@ -46,7 +46,7 @@ void StderrBackend::log(LogLevel logLevel,
     const std::string defaultColor = LogFormatter::getDefaultConsoleColor();
     const std::string header = LogFormatter::getHeader(logLevel, file, line, func);
     tokenizer tokens(message, charSeparator("\n"));
-    for(const auto& line : tokens) {
+    for (const auto& line : tokens) {
         if (!line.empty()) {
             fprintf(stderr,
                     "%s%s%s%s\n",

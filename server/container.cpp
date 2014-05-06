@@ -23,10 +23,12 @@
  */
 
 #include "container.hpp"
+
 #include "log/logger.hpp"
 #include "utils/paths.hpp"
 
 #include <string>
+#include <thread>
 
 
 namespace security_containers {
@@ -51,6 +53,14 @@ Container::Container(const std::string& containerConfigPath)
 
 Container::~Container()
 {
+    // Make sure all OnNameLostCallbacks get finished and no new will
+    // get called before proceeding further. This guarantees no race
+    // condition on the mReconnectThread.
+    mConnection.reset();
+
+    if (mReconnectThread.joinable()) {
+        mReconnectThread.join();
+    }
 }
 
 std::string Container::getId()
@@ -110,7 +120,36 @@ bool Container::isPaused()
 
 void Container::onNameLostCallback()
 {
-    // TODO: try to reconnect
+    LOGI(getId() << ": A connection to the DBUS server has been lost, reconnecting...");
+
+    if (mReconnectThread.joinable()) {
+        mReconnectThread.join();
+    }
+    mReconnectThread = std::thread(std::bind(&Container::reconnectHandler, this));
+}
+
+void Container::reconnectHandler()
+{
+    std::string address;
+
+    mConnection.reset();
+
+    try {
+        address = mConnectionTransport->acquireAddress();
+    } catch (SecurityContainersException& e) {
+        LOGE(getId() << "The socket does not exist anymore, something went terribly wrong, stopping the container");
+        stop(); // TODO: shutdownOrStop()
+        return;
+    }
+
+    try {
+        mConnection.reset(new ContainerConnection(address, std::bind(&Container::onNameLostCallback, this)));
+        LOGI(getId() << ": Reconnected");
+    } catch (SecurityContainersException& e) {
+        LOGE(getId() << ": Reconnecting to the DBUS has failed, stopping the container");
+        stop(); // TODO: shutdownOrStop()
+        return;
+    }
 }
 
 

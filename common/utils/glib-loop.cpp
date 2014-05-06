@@ -23,8 +23,7 @@
  */
 
 #include "utils/glib-loop.hpp"
-
-#include <glib.h>
+#include "utils/callback-wrapper.hpp"
 
 
 namespace security_containers {
@@ -34,7 +33,9 @@ namespace utils {
 ScopedGlibLoop::ScopedGlibLoop()
     : mLoop(g_main_loop_new(NULL, FALSE), g_main_loop_unref)
 {
-    mLoopThread = std::thread([this] {g_main_loop_run(mLoop.get());});
+    mLoopThread = std::thread([this] {
+                                  g_main_loop_run(mLoop.get());
+                              });
 }
 
 ScopedGlibLoop::~ScopedGlibLoop()
@@ -46,6 +47,26 @@ ScopedGlibLoop::~ScopedGlibLoop()
     //stop loop and wait
     g_main_loop_quit(mLoop.get());
     mLoopThread.join();
+}
+
+void Glib::addTimerEvent(const unsigned int intervalMs,
+                         const OnTimerEventCallback& callback,
+                         const CallbackGuard& guard)
+{
+    g_timeout_add_full(G_PRIORITY_DEFAULT,
+                       intervalMs,
+                       &Glib::onTimerEvent,
+                       utils::createCallbackWrapper(callback, guard.spawn()),
+                       &utils::deleteCallbackWrapper<OnTimerEventCallback>);
+}
+
+gboolean Glib::onTimerEvent(gpointer data)
+{
+    const OnTimerEventCallback& callback = getCallbackFromPointer<OnTimerEventCallback>(data);
+    if (callback) {
+        return (gboolean)callback();
+    }
+    return FALSE;
 }
 
 

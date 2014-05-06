@@ -25,11 +25,11 @@
 #ifndef COMMON_UTILS_GLIB_LOOP_HPP
 #define COMMON_UTILS_GLIB_LOOP_HPP
 
+#include "utils/callback-guard.hpp"
+
 #include <thread>
 #include <memory>
-
-struct _GMainLoop;
-typedef struct _GMainLoop GMainLoop;
+#include <glib.h>
 
 
 namespace security_containers {
@@ -56,6 +56,29 @@ private:
     std::thread mLoopThread;
 };
 
+/**
+ * Miscellaneous helpers for the Glib library
+ */
+class Glib {
+public:
+    /**
+     * A user provided function that will be called succesively after an interval has passed.
+     *
+     * @return true if the callback is supposed to be called further,
+     *         false if the callback is not to be called anymore and be destroyed.
+     */
+    typedef std::function<bool()> OnTimerEventCallback;
+
+    /**
+     * Adds a timer event to the glib main loop.
+     */
+    static void addTimerEvent(const unsigned int intervalMs,
+                              const OnTimerEventCallback& callback,
+                              const CallbackGuard& guard);
+
+private:
+    static gboolean onTimerEvent(gpointer data);
+};
 
 } // namespace utils
 } // namespace security_containers

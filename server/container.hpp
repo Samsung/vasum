@@ -33,6 +33,7 @@
 
 #include <string>
 #include <memory>
+#include <thread>
 
 
 namespace security_containers {
@@ -98,11 +99,13 @@ public:
 
 private:
     ContainerConfig mConfig;
-    std::unique_ptr<ContainerAdmin> mAdmin;
     std::unique_ptr<ContainerConnectionTransport> mConnectionTransport;
+    std::unique_ptr<ContainerAdmin> mAdmin;
     std::unique_ptr<ContainerConnection> mConnection;
+    std::thread mReconnectThread;
 
     void onNameLostCallback();
+    void reconnectHandler();
 };
 
 

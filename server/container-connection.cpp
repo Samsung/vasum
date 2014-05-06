@@ -45,6 +45,7 @@ ContainerConnection::ContainerConnection(const std::string& address, const OnNam
     , mNameLost(false)
 {
     if (address.empty()) {
+        // TODO: this should throw. Don't return cleanly unless the object is fully usable.
         LOGW("The connection to the container is disabled");
         return;
     }

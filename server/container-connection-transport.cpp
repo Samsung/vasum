@@ -59,6 +59,14 @@ ContainerConnectionTransport::ContainerConnectionTransport(const std::string& ru
         LOGE("Initialization failed: could not mount " << runMountPoint);
         throw ContainerConnectionException("Could not mount: " + runMountPoint);
     }
+
+    // if there is no systemd in the container this dir won't be created automatically
+    // TODO: will require chown with USER namespace enabled
+    std::string dbusDirectory = runMountPoint + "/dbus";
+    if (!utils::createDirectories(dbusDirectory, 0755)) {
+        LOGE("Initialization failed: could not create " << dbusDirectory);
+        throw ContainerConnectionException("Could not create: " + dbusDirectory);
+    }
 }
 
 
