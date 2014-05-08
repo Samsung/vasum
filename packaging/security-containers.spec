@@ -83,6 +83,23 @@ Development package including the header files for the client library
 %{_libdir}/pkgconfig/*
 
 
+## Container Daemon Package ####################################################
+%package container-daemon
+Summary:          Security Containers Containers Daemon
+Group:            Security/Other
+Requires:         security-containers = %{version}-%{release}
+BuildRequires:    pkgconfig(glib-2.0)
+BuildRequires:    pkgconfig(libsystemd-journal)
+
+%description container-daemon
+Daemon running inside every container.
+
+%files container-daemon
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/security-containers-container-daemon
+/etc/dbus-1/system.d/com.samsung.container.daemon.conf
+
+
 ## Test Package ################################################################
 %package unit-tests
 Summary:          Security Containers Unit Tests
