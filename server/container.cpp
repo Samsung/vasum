@@ -63,12 +63,12 @@ Container::~Container()
     }
 }
 
-std::string Container::getId()
+const std::string& Container::getId() const
 {
     return mAdmin->getId();
 }
 
-int Container::getPrivilege()
+int Container::getPrivilege() const
 {
     return mConfig.privilege;
 }
@@ -136,7 +136,7 @@ void Container::reconnectHandler()
 
     try {
         address = mConnectionTransport->acquireAddress();
-    } catch (SecurityContainersException& e) {
+    } catch (SecurityContainersException&) {
         LOGE(getId() << "The socket does not exist anymore, something went terribly wrong, stopping the container");
         stop(); // TODO: shutdownOrStop()
         return;
@@ -145,7 +145,7 @@ void Container::reconnectHandler()
     try {
         mConnection.reset(new ContainerConnection(address, std::bind(&Container::onNameLostCallback, this)));
         LOGI(getId() << ": Reconnected");
-    } catch (SecurityContainersException& e) {
+    } catch (SecurityContainersException&) {
         LOGE(getId() << ": Reconnecting to the DBUS has failed, stopping the container");
         stop(); // TODO: shutdownOrStop()
         return;

@@ -73,12 +73,12 @@ ContainerAdmin::~ContainerAdmin()
     LOGD(mId << ": Destroying ContainerAdmin object...");
     try {
         shutdown();
-    } catch (ServerException& e) {}
+    } catch (ServerException&) {}
 
     // Try to forcefully stop
     try {
         stop();
-    } catch (ServerException& e) {
+    } catch (ServerException&) {
         LOGE(mId << ": Failed to destroy the container!");
     }
 
@@ -255,7 +255,7 @@ void ContainerAdmin::setSchedulerLevel(SchedulerLevel sched)
                            mConfig.cpuQuotaBackground);
         break;
     default:
-        assert(!"Unknown sched parameter value");
+        assert(0 && "Unknown sched parameter value");
     }
 }
 

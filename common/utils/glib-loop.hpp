@@ -64,8 +64,8 @@ public:
     /**
      * A user provided function that will be called succesively after an interval has passed.
      *
-     * @return true if the callback is supposed to be called further,
-     *         false if the callback is not to be called anymore and be destroyed.
+     * Return true if the callback is supposed to be called further,
+     *        false if the callback is not to be called anymore and be destroyed.
      */
     typedef std::function<bool()> OnTimerEventCallback;
 

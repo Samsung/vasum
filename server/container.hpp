@@ -49,12 +49,12 @@ public:
     /**
      * Get the container id
      */
-    std::string getId();
+    const std::string& getId() const;
 
     /**
      * Get the container privilege
      */
-    int getPrivilege();
+    int getPrivilege() const;
 
     /**
      * Boot the container to the background.

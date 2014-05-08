@@ -109,7 +109,7 @@ void ContainerConnection::onNameLost()
     mNameLost = true;
     mNameCondition.notify_one();
 
-    if(mOnNameLostCallback) {
+    if (mOnNameLostCallback) {
         mOnNameLostCallback();
     }
 }

@@ -34,6 +34,8 @@ BOOST_AUTO_TEST_SUITE(LogSuite)
 
 using namespace security_containers::log;
 
+namespace {
+
 class StubbedBackend : public LogBackend {
 public:
     StubbedBackend(std::ostringstream& s) : mLogStream(s) {}
@@ -89,6 +91,8 @@ void exampleTestLogs(void)
     LOGD("test log debug " << "4");
     LOGT("test log trace " << "5");
 }
+
+} // namespace
 
 BOOST_AUTO_TEST_CASE(LogLevelSetandGet)
 {

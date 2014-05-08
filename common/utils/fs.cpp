@@ -52,7 +52,7 @@ std::string readFileContent(const std::string& path)
     std::string content;
 
     t.seekg(0, std::ios::end);
-    content.reserve(t.tellg());
+    content.reserve(static_cast<size_t>(t.tellg()));
     t.seekg(0, std::ios::beg);
 
     content.assign((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
