@@ -167,9 +167,9 @@ protected:
             throw ConfigException();
         }
         int len = json_object_array_length(array);
-        val.resize(len);
+        val.resize(static_cast<size_t>(len));
         for (int i = 0; i < len; ++i) {
-            val[i] = getValueFromJsonObj<T>(json_object_array_get_idx(array, i));
+            val[static_cast<size_t>(i)] = getValueFromJsonObj<T>(json_object_array_get_idx(array, i));
         }
     }
 
@@ -227,10 +227,10 @@ protected:
         }
 
         int len = json_object_array_length(obj);
-        val.resize(len);
+        val.resize(static_cast<size_t>(len));
         for (int i = 0; i < len; ++i) {
             json_object* arrayObj = json_object_array_get_idx(obj, i);
-            val[i].process(arrayObj, ConfigProcessMode::Read);
+            val[static_cast<size_t>(i)].process(arrayObj, ConfigProcessMode::Read);
         }
     }
 

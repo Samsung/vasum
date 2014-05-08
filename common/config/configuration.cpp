@@ -95,6 +95,11 @@ template<> json_object* ConfigurationBase::getJsonObjFromValue(const int& val)
     return json_object_new_int(val);
 }
 
+template<> json_object* ConfigurationBase::getJsonObjFromValue(const std::int64_t& val)
+{
+    return json_object_new_int64(val);
+}
+
 template<> json_object* ConfigurationBase::getJsonObjFromValue(const bool& val)
 {
     return json_object_new_boolean(val);
@@ -117,6 +122,11 @@ template<> json_object* ConfigurationBase::getJsonObjFromValue(const std::string
 template<> int ConfigurationBase::getValueFromJsonObj(json_object* obj)
 {
     return json_object_get_int(obj);
+}
+
+template<> std::int64_t ConfigurationBase::getValueFromJsonObj(json_object* obj)
+{
+    return json_object_get_int64(obj);
 }
 
 template<> bool ConfigurationBase::getValueFromJsonObj(json_object* obj)

@@ -47,6 +47,7 @@ struct TestConfig : public ConfigurationBase {
     };
 
     int intVal;
+    std::int64_t int64Val;
     std::string stringVal;
     double floatVal;
     bool boolVal;
@@ -60,6 +61,7 @@ struct TestConfig : public ConfigurationBase {
 
     CONFIG_REGISTER {
         CONFIG_VALUE(intVal)
+        CONFIG_VALUE(int64Val)
         CONFIG_VALUE(stringVal)
         CONFIG_VALUE(floatVal)
         CONFIG_VALUE(boolVal)
@@ -75,6 +77,7 @@ struct TestConfig : public ConfigurationBase {
     bool operator== (const TestConfig& rhs) const
     {
         return (rhs.intVal == intVal &&
+                rhs.int64Val == int64Val &&
                 rhs.stringVal == stringVal &&
                 rhs.floatVal == floatVal &&
                 rhs.boolVal == boolVal &&
@@ -91,6 +94,7 @@ struct TestConfig : public ConfigurationBase {
  */
 const std::string json_test_string =
     "{ \"intVal\": 12345, "
+    "\"int64Val\": -1234567890123456789, "
     "\"stringVal\": \"blah\", "
     "\"floatVal\": -1.234, "
     "\"boolVal\": true, "
@@ -111,6 +115,7 @@ BOOST_AUTO_TEST_CASE(SimpleTypesTest)
     BOOST_REQUIRE_NO_THROW(testConfig.parseStr(json_test_string));
 
     BOOST_CHECK_EQUAL(12345, testConfig.intVal);
+    BOOST_CHECK_EQUAL(-1234567890123456789ll, testConfig.int64Val);
     BOOST_CHECK_CLOSE(-1.234, testConfig.floatVal, max_float_error);
     BOOST_CHECK_EQUAL("blah", testConfig.stringVal);
     BOOST_CHECK_EQUAL(true, testConfig.boolVal);

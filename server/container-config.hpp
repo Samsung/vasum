@@ -50,12 +50,12 @@ struct ContainerConfig : public config::ConfigurationBase {
     /**
      * Container's CFS quota in us when it's in the foreground
      */
-    double cpuQuotaForeground;
+    std::int64_t cpuQuotaForeground;
 
     /**
      * Container's CFS quota in us when it's in the background
      */
-    double cpuQuotaBackground;
+    std::int64_t cpuQuotaBackground;
 
     /**
      * Path to containers dbus unix socket
