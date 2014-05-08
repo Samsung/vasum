@@ -35,6 +35,7 @@ namespace {
 
 // Timeout in ms for waiting for dbus name.
 // Can happen if glib loop is busy or not present.
+// TODO: this should be in container's configuration file
 const unsigned int NAME_ACQUIRED_TIMEOUT = 5 * 1000;
 
 } // namespace

@@ -36,6 +36,7 @@ namespace {
 
 // Timeout in ms for waiting for dbus transport.
 // Should be very long to ensure dbus in container is ready.
+// TODO: this should be in container's configuration file
 const unsigned int TRANSPORT_READY_TIMEOUT = 2 * 60 * 1000;
 
 } // namespace

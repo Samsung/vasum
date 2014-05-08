@@ -12,6 +12,7 @@ BuildRequires: libvirt-devel
 BuildRequires: libjson-devel
 BuildRequires: pkgconfig(glib-2.0)
 BuildRequires: pkgconfig(libsystemd-journal)
+BuildRequires: pkgconfig(libvirt-glib-1.0)
 
 %description
 This package provides a daemon used to manage containers - start, stop and switch

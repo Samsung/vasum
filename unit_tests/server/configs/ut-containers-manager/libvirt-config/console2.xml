@@ -5,6 +5,8 @@
     <os>
         <type>exe</type>
         <init>/bin/sh</init>
+        <initarg>-c</initarg>
+        <initarg>trap exit SIGTERM; read</initarg>
     </os>
     <devices>
         <console type="pty"/>

@@ -62,7 +62,7 @@ public:
     void start();
 
     /**
-     * Forcefully stop the container.
+     * Try to shutdown the container, if failed, destroy it.
      */
     void stop();
 

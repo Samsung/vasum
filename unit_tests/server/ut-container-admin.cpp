@@ -28,6 +28,7 @@
 #include "container-admin.hpp"
 #include "exception.hpp"
 
+#include "utils/glib-loop.hpp"
 #include "utils/exception.hpp"
 #include "libvirt/exception.hpp"
 
@@ -93,6 +94,8 @@ BOOST_AUTO_TEST_CASE(StartTest)
 
 BOOST_AUTO_TEST_CASE(StopTest)
 {
+    utils::ScopedGlibLoop loop;
+
     ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
     ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start());

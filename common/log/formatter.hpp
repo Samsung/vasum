@@ -34,6 +34,7 @@ namespace log {
 
 class LogFormatter {
 public:
+    static unsigned int getCurrentThread(void);
     static std::string getCurrentTime(void);
     static std::string getConsoleColor(LogLevel logLevel);
     static std::string getDefaultConsoleColor(void);

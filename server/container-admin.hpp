@@ -28,9 +28,14 @@
 
 #include "container-config.hpp"
 
+#include "utils/callback-guard.hpp"
+#include "utils/callback-wrapper.hpp"
 #include "libvirt/connection.hpp"
 #include "libvirt/domain.hpp"
 
+#include <map>
+#include <mutex>
+#include <atomic>
 #include <string>
 #include <cstdint>
 #include <libvirt/libvirt.h>
@@ -47,6 +52,21 @@ enum class SchedulerLevel {
 class ContainerAdmin {
 
 public:
+    /**
+     * A listener ID type.
+     */
+    typedef unsigned int ListenerId;
+
+    /**
+     * A function type used for the lifecycle listener
+     */
+    typedef std::function<void(const int eventId, const int detailId)> LifecycleListener;
+
+    /**
+     * A function type used for the reboot listener
+     */
+    typedef std::function<void()> RebootListener;
+
     ContainerAdmin(ContainerConfig& config);
     virtual ~ContainerAdmin();
 
@@ -61,14 +81,18 @@ public:
     void start();
 
     /**
-     * Forcefully stop the container.
+     * Try to shutdown the container, if failed, destroy it.
      */
     void stop();
 
     /**
+     * Forcefully stop the container.
+     */
+    void destroy();
+
+    /**
      * Gracefully shutdown the container.
-     * This method will NOT block until container is shut down,
-     * because some configurations may ignore this.
+     * This method will NOT block until container is shut down.
      */
     void shutdown();
 
@@ -115,6 +139,23 @@ public:
      */
     std::int64_t getSchedulerQuota();
 
+    /**
+     * Sets a listener for a specific event.
+     * It's a caller's responsibility to remove the listener
+     * prior to destroying the object.
+     *
+     * @return listener ID that can be used to remove.
+     */
+    template <typename Listener>
+    ListenerId registerListener(const Listener& listener,
+                                const utils::CallbackGuard::Tracker& tracker);
+
+    /**
+     * Remove a previously registered listener.
+     */
+    template <typename Listener>
+    void removeListener(const ListenerId id);
+
 private:
     ContainerConfig& mConfig;
     libvirt::LibvirtDomain mDom;
@@ -123,10 +164,63 @@ private:
     int getState();   // get the libvirt's domain state
     void setSchedulerParams(std::uint64_t cpuShares, std::uint64_t vcpuPeriod, std::int64_t vcpuQuota);
 
+    // for handling libvirt callbacks
+    utils::CallbackGuard mLibvirtGuard;
+    int mLifecycleCallbackId;
+    int mRebootCallbackId;
+
+    // virConnectDomainEventCallback
+    static int libvirtLifecycleCallback(virConnectPtr con,
+                                        virDomainPtr dom,
+                                        int event,
+                                        int detail,
+                                        void* opaque);
+
+    // virConnectDomainEventGenericCallback
+    static void libvirtRebootCallback(virConnectPtr con,
+                                      virDomainPtr dom,
+                                      void* opaque);
+
+    // for handling external listeners triggered from libvirt callbacks
+    // TODO, the Listener type might not be unique, reimplement using proper listeners
+    template <typename Listener>
+    using ListenerMap = std::map<ListenerId, utils::CallbackWrapper<Listener>>;
+
+    std::mutex mListenerMutex;
+    std::atomic<unsigned int> mNextIdForListener;
+    ListenerMap<LifecycleListener> mLifecycleListeners;
+    ListenerMap<RebootListener> mRebootListeners;
+
+    template <typename Listener>
+    ListenerMap<Listener>& getListenerMap();
 };
 
+template <typename Listener>
+unsigned int ContainerAdmin::registerListener(const Listener& listener,
+                                              const utils::CallbackGuard::Tracker& tracker)
+{
 
+    ListenerMap<Listener>& map = getListenerMap<Listener>();
+    unsigned int id = mNextIdForListener++;
+    utils::CallbackWrapper<Listener> wrap(listener, tracker);
+
+    std::unique_lock<std::mutex> lock(mListenerMutex);
+    map.emplace(id, std::move(wrap));
+
+    return id;
 }
+
+template <typename Listener>
+void ContainerAdmin::removeListener(const ContainerAdmin::ListenerId id)
+{
+    ListenerMap<Listener>& map = getListenerMap<Listener>();
+
+    std::unique_lock<std::mutex> lock(mListenerMutex);
+    map.erase(id);
+}
+
+
+} // namespace security_containers
 
 
 #endif // SERVER_CONTAINER_ADMIN_HPP

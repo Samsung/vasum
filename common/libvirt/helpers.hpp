@@ -42,6 +42,16 @@ void libvirtInitialize(void);
  */
 std::string libvirtFormatError(void);
 
+/**
+ * Converts an event ID to an event name.
+ */
+std::string libvirtEventToString(const int event);
+
+/**
+ * Converts an event's detail ID to an event's detail name.
+ */
+std::string libvirtEventDetailToString(const int event, const int detail);
+
 
 } // namespace libvirt
 } // namespace security_containers

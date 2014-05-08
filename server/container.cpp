@@ -82,7 +82,7 @@ void Container::start()
 
     // Send to the background only after we're connected,
     // otherwise it'd take ages.
-    LOGD(getId() << ": Sending to the background");
+    LOGD(getId() << ": DBUS connected, sending to the background");
     goBackground();
 }
 
@@ -138,7 +138,7 @@ void Container::reconnectHandler()
         address = mConnectionTransport->acquireAddress();
     } catch (SecurityContainersException&) {
         LOGE(getId() << "The socket does not exist anymore, something went terribly wrong, stopping the container");
-        stop(); // TODO: shutdownOrStop()
+        stop();
         return;
     }
 
@@ -147,7 +147,7 @@ void Container::reconnectHandler()
         LOGI(getId() << ": Reconnected");
     } catch (SecurityContainersException&) {
         LOGE(getId() << ": Reconnecting to the DBUS has failed, stopping the container");
-        stop(); // TODO: shutdownOrStop()
+        stop();
         return;
     }
 }

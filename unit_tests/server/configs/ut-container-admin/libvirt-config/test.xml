@@ -2,10 +2,11 @@
     <name>ut-container-admin-test</name>
     <uuid>a1299273-bce2-4d1f-8369-54b75a791279</uuid>
     <memory>102400</memory>
-    <on_poweroff>destroy</on_poweroff>
     <os>
         <type>exe</type>
         <init>/bin/sh</init>
+        <initarg>-c</initarg>
+        <initarg>trap exit SIGTERM; read</initarg>
     </os>
     <devices>
         <console type="pty"/>

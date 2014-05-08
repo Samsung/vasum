@@ -29,13 +29,29 @@
 #include <cassert>
 #include <sstream>
 #include <iomanip>
+#include <thread>
+#include <atomic>
 
 namespace security_containers {
 namespace log {
 
 const int TIME_COLUMN_LENGTH = 12;
 const int SEVERITY_COLUMN_LENGTH = 8;
-const int FILE_COLUMN_LENGTH = 52;
+const int THREAD_COLUMN_LENGTH = 3;
+const int FILE_COLUMN_LENGTH = 60;
+
+std::atomic<unsigned int> gNextThreadId(1);
+thread_local unsigned int gThisThreadId(0);
+
+unsigned int LogFormatter::getCurrentThread(void)
+{
+    unsigned int id = gThisThreadId;
+    if (id == 0) {
+        gThisThreadId = id = gNextThreadId++;
+    }
+
+    return id;
+}
 
 std::string LogFormatter::getCurrentTime(void)
 {
@@ -93,6 +109,7 @@ std::string LogFormatter::getHeader(LogLevel logLevel,
     std::ostringstream logLine;
     logLine << getCurrentTime() << ' '
             << std::left << std::setw(SEVERITY_COLUMN_LENGTH) << '[' + toString(logLevel) + ']'
+            << std::right << std::setw(THREAD_COLUMN_LENGTH) << getCurrentThread() << ": "
             << std::left << std::setw(FILE_COLUMN_LENGTH)
             << file + ':' + std::to_string(line) + ' ' + func + ':';
     return logLine.str();
@@ -100,4 +117,3 @@ std::string LogFormatter::getHeader(LogLevel logLevel,
 
 } // namespace log
 } // namespace security_containers
-

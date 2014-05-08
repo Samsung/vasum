@@ -65,7 +65,7 @@ ContainersManager::~ContainersManager()
 {
     LOGD("Destroying ContainersManager object...");
     try {
-        stopAll(); // TODO: shutdownOrStop()
+        stopAll();
     } catch (ServerException&) {
         LOGE("Failed to stop all of the containers");
     }
@@ -99,6 +99,7 @@ void ContainersManager::startAll()
 
         if (container.first == mConfig.foregroundId) {
             isForegroundFound = true;
+            LOGI(container.second->getId() << ": set as the foreground container");
             container.second->goForeground();
         }
     }
@@ -110,6 +111,7 @@ void ContainersManager::startAll()
                                                    });
 
         mConfig.foregroundId = foregroundIterator->second->getId();
+        LOGI(mConfig.foregroundId << ": no foreground container configured, setting one with highest priority");
         foregroundIterator->second->goForeground();
     }
 }
