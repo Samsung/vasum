@@ -44,7 +44,8 @@ namespace security_containers {
 class Container {
 
 public:
-    Container(const std::string& containerConfigPath);
+    Container(const std::string& containerConfigPath,
+              const std::string& baseRunMountPointPath = "");
     Container(Container&&) = default;
     virtual ~Container();
 
@@ -166,6 +167,7 @@ private:
     NotifyActiveContainerCallback mNotifyCallback;
     DisplayOffCallback mDisplayOffCallback;
     FileMoveRequestCallback mFileMoveCallback;
+    std::string mRunMountPoint;
 
     void onNameLostCallback();
     void reconnectHandler();

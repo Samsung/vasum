@@ -30,12 +30,19 @@
 
 #include <string>
 
+
 namespace security_containers {
+
 
 class Server {
 public:
-    Server(const std::string& configPath);
+    Server(const std::string& configPath, bool runAsRoot = true);
     virtual ~Server();
+
+    /**
+     * Set needed caps, groups and drop root privileges.
+     */
+    static bool prepareEnvironment(const std::string& configPath, bool runAsRoot);
 
     /**
      * Starts all the containers and blocks until SIGINT, SIGTERM or SIGUSR1

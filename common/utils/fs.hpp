@@ -28,6 +28,7 @@
 #include <string>
 #include <sys/types.h>
 #include <vector>
+#include <boost/filesystem.hpp>
 
 
 namespace security_containers {
@@ -84,6 +85,11 @@ bool hasSameMountPoint(const std::string& path1, const std::string& path2, bool&
  * The destination has to be a full path including file name.
  */
 bool moveFile(const std::string& src, const std::string& dst);
+
+/**
+ * Creates a directory with specific UID, GID and permissions set.
+ */
+bool createDir(const std::string& path, uid_t uid, uid_t gid, boost::filesystem::perms mode);
 
 
 } // namespace utils

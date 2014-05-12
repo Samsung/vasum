@@ -50,7 +50,8 @@ const int RECONNECT_DELAY = 1 * 1000;
 
 } // namespace
 
-Container::Container(const std::string& containerConfigPath)
+Container::Container(const std::string& containerConfigPath,
+                     const std::string& baseRunMountPointPath)
 {
     config::loadFromFile(containerConfigPath, mConfig);
 
@@ -64,6 +65,9 @@ Container::Container(const std::string& containerConfigPath)
     const std::string baseConfigPath = utils::dirName(containerConfigPath);
     mConfig.config = fs::absolute(mConfig.config, baseConfigPath).string();
     mConfig.networkConfig = fs::absolute(mConfig.networkConfig, baseConfigPath).string();
+    if (!mConfig.runMountPoint.empty()) {
+        mRunMountPoint = fs::absolute(mConfig.runMountPoint, baseRunMountPointPath).string();
+    }
 
     LOGT("Creating Network Admin " << mConfig.networkConfig);
     mNetworkAdmin.reset(new NetworkAdmin(mConfig));
@@ -110,7 +114,7 @@ int Container::getPrivilege() const
 void Container::start()
 {
     Lock lock(mReconnectMutex);
-    mConnectionTransport.reset(new ContainerConnectionTransport(mConfig.runMountPoint));
+    mConnectionTransport.reset(new ContainerConnectionTransport(mRunMountPoint));
     mNetworkAdmin->start();
     mAdmin->start();
     mConnection.reset(new ContainerConnection(mConnectionTransport->acquireAddress(),

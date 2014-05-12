@@ -199,6 +199,45 @@ bool moveFile(const std::string& src, const std::string& dst)
     return true;
 }
 
+bool createDir(const std::string& path, uid_t uid, uid_t gid, boost::filesystem::perms mode)
+{
+    namespace fs = boost::filesystem;
+
+    fs::path dirPath(path);
+    boost::system::error_code ec;
+    bool runDirCreated = false;
+    if (!fs::exists(dirPath)) {
+        if (!fs::create_directory(dirPath, ec)) {
+            LOGE("Failed to create directory '" << path << "': "
+                 << ec.message());
+            return false;
+        }
+        runDirCreated = true;
+    } else if (!fs::is_directory(dirPath)) {
+        LOGE("Path '" << path << " already exists");
+        return false;
+    }
+
+    // set permissions
+    fs::permissions(dirPath, mode, ec);
+    if (fs::status(dirPath).permissions() != mode) {
+        LOGE("Failed to set permissions to '" << path << "': "
+             << ec.message());
+        return false;
+    }
+
+    // set owner
+    if (::chown(path.c_str(), uid, gid) != 0) {
+        // remove the directory only if it hadn't existed before
+        if (runDirCreated) {
+            fs::remove(dirPath);
+        }
+        LOGE("chown() failed for path '" << path << "': " << strerror(errno));
+        return false;
+    }
+
+    return true;
+}
 
 } // namespace utils
 } // namespace security_containers

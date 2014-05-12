@@ -66,13 +66,19 @@ struct ContainersManagerConfig {
      */
     InputConfig inputConfig;
 
+    /**
+     * Prefix added to a path of "run" tmpfs mount point for each container.
+     */
+    std::string runMountPointPrefix;
+
     CONFIG_REGISTER
     (
         containerConfigs,
         foregroundId,
         defaultId,
         containersPath,
-        inputConfig
+        inputConfig,
+        runMountPointPrefix
     )
 };
 

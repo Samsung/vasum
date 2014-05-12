@@ -27,9 +27,18 @@ FILE(GLOB SYSTEMD_SERVICES   systemd/*.service)
 INSTALL(FILES       daemon.conf
         DESTINATION ${SC_CONFIG_INSTALL_DIR})
 
+# preprocess d-bus configs
+CONFIGURE_FILE(dbus-1/system.d/org.tizen.containers.host.conf.in
+               ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.containers.host.conf)
+CONFIGURE_FILE(image-skel/etc/dbus-1/system.d/org.tizen.containers.domain.conf.in
+               ${CMAKE_BINARY_DIR}/image-skel/etc/dbus-1/system.d/org.tizen.containers.domain.conf)
+
 # TODO This file should be installed to /etc/dbus-1/system.d/ on an every container
-INSTALL(FILES       image-skel/etc/dbus-1/system.d/org.tizen.containers.domain.conf
+INSTALL(FILES       ${CMAKE_BINARY_DIR}/image-skel/etc/dbus-1/system.d/org.tizen.containers.domain.conf
         DESTINATION ${SC_CONFIG_INSTALL_DIR}/image-skel/etc/dbus-1/system.d)
+
+INSTALL(FILES       ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.containers.host.conf
+        DESTINATION ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)
 
 INSTALL(FILES       ${container_CONF}
         DESTINATION ${SC_CONFIG_INSTALL_DIR}/containers)
@@ -39,6 +48,3 @@ INSTALL(FILES       ${admin_CONF}
 
 INSTALL(FILES       ${SYSTEMD_SERVICES}
         DESTINATION ${SYSTEMD_UNIT_DIR})
-
-INSTALL(FILES       dbus-1/system.d/org.tizen.containers.host.conf
-        DESTINATION ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)

@@ -74,7 +74,8 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
         }
 
         LOGD("Creating Container " << containerConfigPath);
-        std::unique_ptr<Container> c(new Container(containerConfigPath));
+        std::unique_ptr<Container> c(new Container(containerConfigPath,
+                                                   mConfig.runMountPointPrefix));
         std::string id = c->getId();
         using namespace std::placeholders;
         c->setNotifyActiveContainerCallback(bind(&ContainersManager::notifyActiveContainerHandler,

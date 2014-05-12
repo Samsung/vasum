@@ -28,8 +28,10 @@
 #include "containers-manager.hpp"
 #include "exception.hpp"
 
+#include "config/manager.hpp"
 #include "log/logger.hpp"
 #include "utils/glib-loop.hpp"
+#include "utils/environment.hpp"
 
 #include <csignal>
 #include <cerrno>
@@ -37,15 +39,35 @@
 #include <cstring>
 #include <atomic>
 #include <unistd.h>
+#include <cap-ng.h>
+#include <pwd.h>
+#include <sys/stat.h>
+#include <boost/filesystem.hpp>
+
+
+#ifndef SECURITY_CONTAINERS_USER
+#error "SECURITY_CONTAINERS_USER must be defined!"
+#endif
+
+#ifndef INPUT_EVENT_GROUP
+#error "INPUT_EVENT_GROUP must be defined!"
+#endif
+
+#ifndef LIBVIRT_GROUP
+#error "LIBVIRT_GROUP must be defined!"
+#endif
 
 extern char** environ;
 
 namespace security_containers {
 
 
-Server::Server(const std::string& configPath)
+Server::Server(const std::string& configPath, bool runAsRoot)
     : mConfigPath(configPath)
 {
+    if (!prepareEnvironment(configPath, runAsRoot)) {
+        throw ServerException("Environment setup failed");
+    }
 }
 
 
@@ -114,5 +136,52 @@ void Server::terminate()
     LOGI("Terminating server");
     gSignalLatch.set();
 }
+
+bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
+{
+    namespace fs = boost::filesystem;
+
+    // TODO: currently this config is loaded twice: here and in ContainerManager
+    ContainersManagerConfig config;
+    config::loadFromFile(configPath, config);
+
+    struct passwd* pwd = ::getpwnam(SECURITY_CONTAINERS_USER);
+    if (pwd == NULL) {
+        LOGE("getpwnam failed to find user '" << SECURITY_CONTAINERS_USER << "'");
+        return false;
+    }
+    uid_t uid = pwd->pw_uid;
+    gid_t gid = pwd->pw_gid;
+    LOGD("security-containers UID = " << uid << ", GID = " << gid);
+
+    // create directory for dbus socket (if needed)
+    if (!config.runMountPointPrefix.empty()) {
+        if (!utils::createDir(config.runMountPointPrefix, uid, gid,
+                              fs::perms::owner_all |
+                              fs::perms::group_read | fs::perms::group_exe |
+                              fs::perms::others_read | fs::perms::others_exe)) {
+            return false;
+        }
+    }
+
+    // Omit supplementaty group setup and root drop if the user is already switched.
+    // This situation will happen during daemon update triggered by SIGUSR1.
+    if (!runAsRoot && geteuid() == uid) {
+        return true;
+    }
+
+    // LIBVIRT_GROUP provides access to libvirt's daemon socket.
+    // INPUT_EVENT_GROUP provides access to /dev/input/event* devices used by InputMonitor.
+    if (!utils::setSuppGroups({LIBVIRT_GROUP, INPUT_EVENT_GROUP})) {
+        return false;
+    }
+
+    // CAP_SYS_ADMIN allows to mount tmpfs' for dbus communication at the runtime.
+    // NOTE: CAP_MAC_OVERRIDE is temporary and must be removed when "smack namespace"
+    // is introduced. The capability is needed to allow modify SMACK labels of
+    // "/var/run/containers/<container>/run" mount point.
+    return (runAsRoot || utils::dropRoot(uid, gid, {CAP_SYS_ADMIN, CAP_MAC_OVERRIDE}));
+}
+
 
 } // namespace security_containers

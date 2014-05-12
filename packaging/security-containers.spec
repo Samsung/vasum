@@ -1,19 +1,28 @@
 %define script_dir %{_sbindir}
+# Security Containers Server's user info - it should already exist in the system
+%define scs_user          security-containers
+%define libvirt_group     libvirt
+# The group that has read and write access to /dev/input/event* devices.
+# It may vary between platforms.
+%define input_event_group video
 
-Name:          security-containers
-Version:       0.1.0
-Release:       0
-Source0:       %{name}-%{version}.tar.gz
-License:       Apache-2.0
-Group:         Security/Other
-Summary:       Daemon for managing containers
-BuildRequires: cmake
-BuildRequires: boost-devel
-BuildRequires: libvirt-devel
-BuildRequires: libjson-devel
-BuildRequires: pkgconfig(glib-2.0)
-BuildRequires: pkgconfig(libsystemd-journal)
-BuildRequires: pkgconfig(libvirt-glib-1.0)
+Name:           security-containers
+Version:        0.1.0
+Release:        0
+Source0:        %{name}-%{version}.tar.gz
+License:        Apache-2.0
+Group:          Security/Other
+Summary:        Daemon for managing containers
+BuildRequires:  cmake
+BuildRequires:  boost-devel
+BuildRequires:  libvirt-devel
+BuildRequires:  libjson-devel
+BuildRequires:  libcap-ng-devel
+BuildRequires:  pkgconfig(glib-2.0)
+BuildRequires:  pkgconfig(libsystemd-journal)
+BuildRequires:  pkgconfig(libvirt-glib-1.0)
+Requires:       libvirt-daemon >= 1.2.4
+Requires(post): libcap-tools
 
 %description
 This package provides a daemon used to manage containers - start, stop and switch
@@ -29,11 +38,11 @@ between them. A process from inside a container can request a switch of context
 %dir /etc/security-containers/libvirt-config
 %config /etc/security-containers/daemon.conf
 %config /etc/security-containers/containers/*.conf
+%config /etc/security-containers/libvirt-config/*.xml
+/etc/security-containers/image-skel
 %{_unitdir}/security-containers.service
 %{_unitdir}/multi-user.target.wants/security-containers.service
-%config %attr(400,root,root) /etc/security-containers/libvirt-config/*.xml
 /etc/dbus-1/system.d/org.tizen.containers.host.conf
-/etc/security-containers/image-skel
 
 %prep
 %setup -q
@@ -50,7 +59,10 @@ between them. A process from inside a container can request a switch of context
          -DCMAKE_BUILD_TYPE=%{build_type} \
          -DSCRIPT_INSTALL_DIR=%{script_dir} \
          -DSYSTEMD_UNIT_DIR=%{_unitdir} \
-         -DPYTHON_SITELIB=%{python_sitelib}
+         -DPYTHON_SITELIB=%{python_sitelib} \
+         -DSECURITY_CONTAINERS_USER=%{scs_user} \
+         -DLIBVIRT_GROUP=%{libvirt_group} \
+         -DINPUT_EVENT_GROUP=%{input_event_group}
 make -k %{?jobs:-j%jobs}
 
 %install
@@ -66,6 +78,8 @@ rm -rf %{buildroot}
 if [ $1 == 1 ]; then
     systemctl daemon-reload || :
 fi
+# set needed caps on the binary to allow restart without loosing them
+setcap CAP_SYS_ADMIN,CAP_MAC_OVERRIDE+ei %{_bindir}/security-containers-server
 
 %preun
 # Stop the service before uninstall
@@ -158,4 +172,3 @@ Unit tests for both: server and client and integration tests.
 %{script_dir}/sc_test_parser.py
 %{_datadir}/security-containers
 %{python_sitelib}/sc_integration_tests
-

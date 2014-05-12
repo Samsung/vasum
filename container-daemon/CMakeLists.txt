@@ -31,7 +31,7 @@ ADD_EXECUTABLE(${CONTAINER_DAEMON_CODENAME} ${project_SRCS} ${common_SRCS})
 ## Link libraries ##############################################################
 FIND_PACKAGE (Boost COMPONENTS program_options system filesystem)
 
-PKG_CHECK_MODULES(CONTAINER_DAEMON_DEPS REQUIRED gio-2.0 libsystemd-journal)
+PKG_CHECK_MODULES(CONTAINER_DAEMON_DEPS REQUIRED gio-2.0 libsystemd-journal libcap-ng)
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${CONTAINER_DAEMON_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(${CONTAINER_DAEMON_CODENAME} ${CONTAINER_DAEMON_DEPS_LIBRARIES} ${Boost_LIBRARIES})
@@ -40,5 +40,8 @@ TARGET_LINK_LIBRARIES(${CONTAINER_DAEMON_CODENAME} ${CONTAINER_DAEMON_DEPS_LIBRA
 ## Install #####################################################################
 INSTALL(TARGETS ${CONTAINER_DAEMON_CODENAME} DESTINATION bin)
 
-INSTALL(FILES       configs/org.tizen.containers.domain.daemon.conf
+CONFIGURE_FILE(configs/org.tizen.containers.domain.daemon.conf.in
+               ${CMAKE_BINARY_DIR}/configs/org.tizen.containers.domain.daemon.conf)
+
+INSTALL(FILES       ${CMAKE_BINARY_DIR}/configs/org.tizen.containers.domain.daemon.conf
         DESTINATION /etc/dbus-1/system.d/)

@@ -28,9 +28,10 @@ ADD_EXECUTABLE(${SERVER_CODENAME} ${project_SRCS} ${common_SRCS})
 
 
 ## Link libraries ##############################################################
-FIND_PACKAGE (Boost COMPONENTS program_options system filesystem regex)
+FIND_PACKAGE(Boost COMPONENTS program_options system filesystem regex)
+PKG_CHECK_MODULES(SERVER_DEPS REQUIRED libvirt libvirt-glib-1.0 json gio-2.0 libsystemd-journal
+                  libcap-ng)
 
-PKG_CHECK_MODULES(SERVER_DEPS REQUIRED libvirt libvirt-glib-1.0 json gio-2.0 libsystemd-journal)
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(${SERVER_CODENAME} ${SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES})
@@ -42,3 +43,6 @@ ADD_SUBDIRECTORY(configs)
 
 ## Install #####################################################################
 INSTALL(TARGETS ${SERVER_CODENAME} DESTINATION bin)
+
+## Set capabilities on server executable #######################################
+INSTALL(CODE "EXECUTE_PROCESS(COMMAND setcap CAP_SYS_ADMIN,CAP_MAC_OVERRIDE+ei \$ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/bin/${SERVER_CODENAME})")

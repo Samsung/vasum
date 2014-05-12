@@ -54,16 +54,17 @@ const std::string PROGRAM_NAME_AND_VERSION =
 
 } // namespace
 
-
 int main(int argc, char* argv[])
 {
-    std::string configPath ;
+    std::string configPath;
+    bool runAsRoot = false;
 
     try {
         po::options_description desc("Allowed options");
 
         desc.add_options()
         ("help,h", "print this help")
+        ("root,r", "Don't drop root privileges at startup")
         ("version,v", "show application version")
         ("log-level,l", po::value<std::string>()->default_value("DEBUG"), "set log level")
         ("config,c", po::value<std::string>()->default_value("/etc/security-containers/daemon.conf"), "server configuration file")
@@ -108,6 +109,7 @@ int main(int argc, char* argv[])
 #endif
 
         configPath = vm["config"].as<std::string>();
+        runAsRoot = vm.count("root") > 0;
 
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
@@ -115,7 +117,7 @@ int main(int argc, char* argv[])
     }
 
     try {
-        Server server(configPath);
+        Server server(configPath, runAsRoot);
         server.run();
         server.reloadIfRequired(argv);
 
