@@ -29,6 +29,7 @@
 #include "log/backend.hpp"
 #include "log/backend-stderr.hpp"
 
+#include <stdexcept>
 
 BOOST_AUTO_TEST_SUITE(LogSuite)
 
@@ -47,7 +48,7 @@ public:
              const std::string& func,
              const std::string& message) override
     {
-        mLogStream << '[' + LogFormatter::toString(logLevel) + ']' + ' '
+        mLogStream << '[' + toString(logLevel) + ']' + ' '
                    << file + ':' + std::to_string(line) + ' ' + func + ':'
                    << message << std::endl;
     }
@@ -110,6 +111,29 @@ BOOST_AUTO_TEST_CASE(LogLevelSetandGet)
 
     Logger::setLogLevel(LogLevel::ERROR);
     BOOST_CHECK(LogLevel::ERROR == Logger::getLogLevel());
+}
+
+BOOST_AUTO_TEST_CASE(StringLogLevelSetandGet)
+{
+    Logger::setLogLevel("TRACE");
+    BOOST_CHECK(LogLevel::TRACE == Logger::getLogLevel());
+
+    Logger::setLogLevel("traCE");
+    BOOST_CHECK(LogLevel::TRACE == Logger::getLogLevel());
+
+    Logger::setLogLevel("DEBUG");
+    BOOST_CHECK(LogLevel::DEBUG == Logger::getLogLevel());
+
+    Logger::setLogLevel("INFO");
+    BOOST_CHECK(LogLevel::INFO == Logger::getLogLevel());
+
+    Logger::setLogLevel("WARN");
+    BOOST_CHECK(LogLevel::WARN == Logger::getLogLevel());
+
+    Logger::setLogLevel("ERROR");
+    BOOST_CHECK(LogLevel::ERROR == Logger::getLogLevel());
+
+    BOOST_REQUIRE_THROW(Logger::setLogLevel("UNKNOWN"), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(TestLogsError)

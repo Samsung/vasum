@@ -25,6 +25,9 @@
 #ifndef COMMON_LOG_LEVEL_HPP
 #define COMMON_LOG_LEVEL_HPP
 
+#include <string>
+
+
 namespace security_containers {
 namespace log {
 
@@ -36,8 +39,20 @@ enum class LogLevel {
     ERROR
 };
 
+/**
+ * @param logLevel LogLevel
+ * @return std::sting representation of the LogLevel value
+ */
+std::string toString(const LogLevel logLevel);
+
+/**
+ * @param level string representation of log level
+ * @return parsed LogLevel value
+ */
+LogLevel parseLogLevel(const std::string& level);
+
+
 } // namespace log
 } // namespace security_containers
 
 #endif // COMMON_LOG_LEVEL_HPP
-

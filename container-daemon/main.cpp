@@ -36,7 +36,6 @@
 #include "exception.hpp"
 #include "runner.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #include <iostream>
 
@@ -50,33 +49,6 @@ namespace {
 
 const std::string PROGRAM_NAME_AND_VERSION =
     "Security Containers Containers Daemon " PROGRAM_VERSION;
-
-/**
- * TODO: This is a copied function, move to common/log
- * Resolve if given log severity level is valid
- *
- * @param s     log severity level
- * @return      LogLevel when valid,
- *              otherwise exception po::validation_error::invalid_option_value thrown
- */
-LogLevel validateLogLevel(const std::string& s)
-{
-    std::string s_capitalized = boost::to_upper_copy(s);
-
-    if (s_capitalized == "ERROR") {
-        return LogLevel::ERROR;
-    } else if (s_capitalized == "WARN") {
-        return LogLevel::WARN;
-    } else if (s_capitalized == "INFO") {
-        return LogLevel::INFO;
-    } else if (s_capitalized == "DEBUG") {
-        return LogLevel::DEBUG;
-    } else if (s_capitalized == "TRACE") {
-        return LogLevel::TRACE;
-    } else {
-        throw po::validation_error(po::validation_error::invalid_option_value);
-    }
-}
 
 } // namespace
 
@@ -125,8 +97,7 @@ int main(int argc, char* argv[])
             return 0;
         }
 
-        LogLevel level = validateLogLevel(vm["log-level"].as<std::string>());
-        Logger::setLogLevel(level);
+        Logger::setLogLevel(vm["log-level"].as<std::string>());
 #ifdef LOG_TO_CONSOLE
         Logger::setLogBackend(new StderrBackend());
 #else

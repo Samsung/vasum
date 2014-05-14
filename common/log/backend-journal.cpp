@@ -37,7 +37,7 @@ void SystemdJournalBackend::log(LogLevel logLevel,
                                 const std::string& message)
 {
 #define SD_JOURNAL_SUPPRESS_LOCATION
-    sd_journal_send("PRIORITY=%s", LogFormatter::toString(logLevel).c_str(),
+    sd_journal_send("PRIORITY=%s", toString(logLevel).c_str(),
                     "CODE_FILE=%s", file.c_str(),
                     "CODE_LINE=%d", line,
                     "CODE_FUNC=%s", func.c_str(),

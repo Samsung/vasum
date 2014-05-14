@@ -46,7 +46,8 @@ public:
 
     void logMessage(const std::string& message);
 
-    static void setLogLevel(LogLevel level);
+    static void setLogLevel(const LogLevel level);
+    static void setLogLevel(const std::string& level);
     static LogLevel getLogLevel(void);
     static void setLogBackend(LogBackend* pBackend);
 

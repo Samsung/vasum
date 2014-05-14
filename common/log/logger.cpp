@@ -59,9 +59,14 @@ void Logger::logMessage(const std::string& message)
     gLogBackendPtr->log(mLogLevel, mFile, mLine, mFunc, message);
 }
 
-void Logger::setLogLevel(LogLevel level)
+void Logger::setLogLevel(const LogLevel level)
 {
     gLogLevel = level;
+}
+
+void Logger::setLogLevel(const std::string& level)
+{
+    gLogLevel = parseLogLevel(level);
 }
 
 LogLevel Logger::getLogLevel(void)

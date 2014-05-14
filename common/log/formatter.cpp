@@ -77,24 +77,6 @@ std::string LogFormatter::getDefaultConsoleColor(void)
     return getConsoleEscapeSequence(Attributes::DEFAULT, Color::DEFAULT);
 }
 
-std::string LogFormatter::toString(LogLevel logLevel)
-{
-    switch (logLevel) {
-    case LogLevel::ERROR:
-        return "ERROR";
-    case LogLevel::WARN:
-        return "WARN";
-    case LogLevel::INFO:
-        return "INFO";
-    case LogLevel::DEBUG:
-        return "DEBUG";
-    case LogLevel::TRACE:
-        return "TRACE";
-    default:
-        return "UNKNOWN";
-    }
-}
-
 std::string LogFormatter::stripProjectDir(const std::string& file)
 {
     const std::string SOURCE_DIR = PROJECT_SOURCE_DIR "/";
