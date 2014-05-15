@@ -19,6 +19,7 @@ between them. A process from inside a container can request a switch of context
 (display, input devices) to the other container.
 
 %files
+%manifest packaging/security-containers.manifest
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/security-containers-server
 %dir /etc/security-containers
@@ -64,6 +65,7 @@ Requires(postun): /sbin/ldconfig
 Library interface to the security-containers daemon
 
 %files client
+%manifest packaging/libsecurity-containers-client.manifest
 %attr(644,root,root) %{_libdir}/libsecurity-containers-client.so
 
 
@@ -78,6 +80,7 @@ Requires:         security-containers-client = %{version}-%{release}
 Development package including the header files for the client library
 
 %files devel
+%manifest packaging/security-containers.manifest
 %defattr(644,root,root,755)
 %{_includedir}/security-containers
 %{_libdir}/pkgconfig/*
@@ -95,6 +98,7 @@ BuildRequires:    pkgconfig(libsystemd-journal)
 Daemon running inside every container.
 
 %files container-daemon
+%manifest packaging/security-containers-container-daemon.manifest
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/security-containers-container-daemon
 /etc/dbus-1/system.d/com.samsung.container.daemon.conf
@@ -114,6 +118,7 @@ BuildRequires:    boost-devel
 Unit tests for both: server and client.
 
 %files unit-tests
+%manifest packaging/security-containers-server-unit-tests.manifest
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/security-containers-server-unit-tests
 %attr(755,root,root) %{script_dir}/sc_all_tests.py
