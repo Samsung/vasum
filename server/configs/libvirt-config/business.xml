@@ -109,5 +109,12 @@
       <source dir='/var/run/containers/business/run'/>
       <target dir='/var/run'/>
     </filesystem>
+    <!-- Enable access to the SMACK labels -->
+    <!-- TODO: This only helps investigating smack problems,
+               and should be removed eventually -->
+    <filesystem type='mount'>
+      <source dir='/sys/fs/smackfs'/>
+      <target dir='/sys/fs/smackfs'/>
+    </filesystem>
   </devices>
 </domain>
