@@ -46,7 +46,7 @@ const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-con
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/config.conf";
 
 struct Fixture {
-    utils::ScopedGlibLoop loop;
+    utils::ScopedGlibLoop mLoop;
 };
 
 } // namespace

@@ -42,6 +42,8 @@ CONFIGURE_FILE(ut-container-admin/containers/buggy.conf.in
                ${CMAKE_BINARY_DIR}/ut-container-admin/containers/buggy.conf @ONLY)
 CONFIGURE_FILE(ut-container-admin/containers/test.conf.in
                ${CMAKE_BINARY_DIR}/ut-container-admin/containers/test.conf @ONLY)
+CONFIGURE_FILE(ut-container-admin/containers/test-no-shutdown.conf.in
+               ${CMAKE_BINARY_DIR}/ut-container-admin/containers/test-no-shutdown.conf @ONLY)
 FILE(GLOB admin_container_CONF_GEN ${CMAKE_BINARY_DIR}/ut-container-admin/containers/*.conf)
 
 CONFIGURE_FILE(ut-container/libvirt-config/test-dbus.xml.in

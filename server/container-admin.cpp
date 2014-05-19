@@ -187,7 +187,7 @@ void ContainerAdmin::stop()
     removeListener<LifecycleListener>(id);
 
     if (!stopped) {
-        LOGD(mId << ": waiting for shutdown timed out, destroying");
+        LOGW(mId << ": Gracefull shutdown timed out, the container is still running, destroying");
         destroy();
     }
 
