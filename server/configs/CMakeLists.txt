@@ -21,7 +21,7 @@ MESSAGE(STATUS "Installing configs to " ${SC_CONFIG_INSTALL_DIR})
 
 FILE(GLOB container_CONF     containers/*.conf)
 FILE(GLOB admin_CONF         libvirt-config/*.xml)
-
+FILE(GLOB SYSTEMD_SERVICES   systemd/*.service)
 
 ## Installations ###############################################################
 INSTALL(FILES       daemon.conf
@@ -36,3 +36,6 @@ INSTALL(FILES       ${container_CONF}
 
 INSTALL(FILES       ${admin_CONF}
         DESTINATION ${SC_CONFIG_INSTALL_DIR}/libvirt-config)
+
+INSTALL(FILES       ${SYSTEMD_SERVICES}
+        DESTINATION ${SYSTEMD_UNIT_DIR})
