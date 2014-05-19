@@ -99,13 +99,26 @@ bool createDirectories(const std::string& path, mode_t mode)
     return createDirectory(path, mode);
 }
 
-bool mountTmpfs(const std::string& path)
+namespace {
+// NOTE: Should be the same as in systemd/src/core/mount-setup.c
+const std::string RUN_MOUNT_POINT_OPTIONS = "mode=755,smackfstransmute=System::Run";
+const std::string RUN_MOUNT_POINT_OPTIONS_NO_SMACK = "mode=755";
+const unsigned long RUN_MOUNT_POINT_FLAGS = MS_NOSUID | MS_NODEV | MS_STRICTATIME;
+
+bool mountTmpfs(const std::string& path, unsigned long flags, const std::string& options)
 {
-    if (::mount("tmpfs", path.c_str(), "tmpfs", MS_NOSUID | MS_NODEV, "mode=755") != 0) {
-        LOGD("Mount failed for '" << path << "': " << strerror(errno));
+    if (::mount("tmpfs", path.c_str(), "tmpfs", flags, options.c_str()) != 0) {
+        LOGD("Mount failed for '" << path << "', options=" << options << ": " << strerror(errno));
         return false;
     }
     return true;
+}
+
+} // namespace
+
+bool mountRun(const std::string& path) {
+    return utils::mountTmpfs(path, RUN_MOUNT_POINT_FLAGS, RUN_MOUNT_POINT_OPTIONS) ||
+        utils::mountTmpfs(path, RUN_MOUNT_POINT_FLAGS, RUN_MOUNT_POINT_OPTIONS_NO_SMACK);
 }
 
 bool umount(const std::string& path)

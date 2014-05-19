@@ -63,7 +63,7 @@ ContainerConnectionTransport::ContainerConnectionTransport(const std::string& ru
     if (!isMount) {
         LOGD(runMountPoint << " not mounted - mounting.");
 
-        if (!utils::mountTmpfs(runMountPoint)) {
+        if (!utils::mountRun(runMountPoint)) {
             LOGE("Initialization failed: could not mount " << runMountPoint);
             throw ContainerConnectionException("Could not mount: " + runMountPoint);
         }

@@ -58,9 +58,9 @@ bool createDirectory(const std::string& path, mode_t mode);
 bool createDirectories(const std::string& path, mode_t mode);
 
 /**
- * Mounts a tmpfs on given a path
+ * Mounts run as a tmpfs on a given path
  */
-bool mountTmpfs(const std::string& path);
+bool mountRun(const std::string& path);
 
 /**
  * Umounts a filesystem
