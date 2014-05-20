@@ -34,6 +34,14 @@
 namespace security_containers {
 
 
+namespace {
+
+// TODO: move constants to the config file when default values are implemented there
+const int RECONNECT_RETRIES = 15;
+const int RECONNECT_DELAY = 1 * 1000;
+
+} // namespace
+
 Container::Container(const std::string& containerConfigPath)
 {
     mConfig.parseFile(containerConfigPath);
@@ -136,26 +144,30 @@ void Container::onNameLostCallback()
 
 void Container::reconnectHandler()
 {
-    std::string address;
-
     mConnection.reset();
 
-    try {
-        address = mConnectionTransport->acquireAddress();
-    } catch (SecurityContainersException&) {
-        LOGE(getId() << "The socket does not exist anymore, something went terribly wrong, stopping the container");
-        stop();
-        return;
+    for (int i = 0; i < RECONNECT_RETRIES; ++i) {
+        // This sleeps even before the first try to give DBUS some time to come back up
+        std::this_thread::sleep_for(std::chrono::milliseconds(RECONNECT_DELAY));
+
+        if (isStopped()) {
+            LOGI(getId() << ": Has stopped, nothing to reconnect to, bailing out");
+            return;
+        }
+
+        try {
+            LOGT(getId() << ": Reconnect try " << i+1);
+            mConnection.reset(new ContainerConnection(mConnectionTransport->acquireAddress(),
+                                                      std::bind(&Container::onNameLostCallback, this)));
+            LOGI(getId() << ": Reconnected");
+            return;
+        } catch (SecurityContainersException&) {
+            LOGT(getId() << ": Reconnect try " << i+1 << " has been unsuccessful");
+        }
     }
 
-    try {
-        mConnection.reset(new ContainerConnection(address, std::bind(&Container::onNameLostCallback, this)));
-        LOGI(getId() << ": Reconnected");
-    } catch (SecurityContainersException&) {
-        LOGE(getId() << ": Reconnecting to the DBUS has failed, stopping the container");
-        stop();
-        return;
-    }
+    LOGE(getId() << ": Reconnecting to the DBUS has failed, stopping the container");
+    stop();
 }
 
 
