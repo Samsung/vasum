@@ -27,6 +27,7 @@
 #define SERVER_CONTAINERS_MANAGER_CONFIG_HPP
 
 #include "config/configuration.hpp"
+#include "input-monitor-config.hpp"
 
 #include <string>
 #include <vector>
@@ -38,6 +39,12 @@ namespace security_containers {
 const std::string CONTAINERS_MANAGER_CONFIG_PATH = "/etc/security-containers/config/daemon.conf";
 
 struct ContainersManagerConfig : public config::ConfigurationBase {
+
+    /**
+     * Parameters describing input device used to switch between containers
+     */
+    InputConfig inputConfig;
+
     /**
      * List of containers' configs that we manage.
      * File paths can be relative to the ContainerManager config file.
@@ -52,6 +59,7 @@ struct ContainersManagerConfig : public config::ConfigurationBase {
     CONFIG_REGISTER {
         CONFIG_VALUE(containerConfigs)
         CONFIG_VALUE(foregroundId)
+        CONFIG_SUB_OBJECT(inputConfig)
     }
 };
 

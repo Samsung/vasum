@@ -27,12 +27,14 @@
 #include "utils/paths.hpp"
 #include "utils/exception.hpp"
 
+#include <dirent.h>
 #include <fstream>
 #include <streambuf>
 #include <cstring>
 #include <cerrno>
 #include <sys/stat.h>
 #include <sys/mount.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 
@@ -60,6 +62,28 @@ std::string readFileContent(const std::string& path)
     return content;
 }
 
+bool isCharDevice(const std::string& path)
+{
+    struct stat s;
+    return ::stat(path.c_str(), &s) == 0 && S_IFCHR == (s.st_mode & S_IFMT);
+}
+
+bool listDir(const std::string& path, std::vector<std::string>& files)
+{
+    DIR *dirp = ::opendir(path.c_str());
+    if(dirp == NULL) {
+        LOGE("Could not open directory" << path << "': " << strerror(errno));
+        return false;
+    }
+
+    struct dirent *entry;
+    while ((entry = ::readdir(dirp)) != NULL) {
+        files.push_back(entry->d_name);
+    }
+
+    ::closedir(dirp);
+    return true;
+}
 
 namespace {
 // NOTE: Should be the same as in systemd/src/core/mount-setup.c

@@ -54,6 +54,14 @@ struct ContainerConnectionException: public ServerException {
     using ServerException::ServerException;
 };
 
+/**
+* Exception during performing an operation by input monitor,
+* e.g. create channel, register callback etc.
+*/
+struct InputMonitorException: public ServerException {
+    using ServerException::ServerException;
+};
+
 
 }
 

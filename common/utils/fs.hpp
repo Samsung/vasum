@@ -27,6 +27,7 @@
 
 #include <string>
 #include <sys/types.h>
+#include <vector>
 
 
 namespace security_containers {
@@ -36,6 +37,16 @@ namespace utils {
  * Reads the content of a file
  */
 std::string readFileContent(const std::string& path);
+
+/**
+ * Checks if a char device exists
+ */
+bool isCharDevice(const std::string& path);
+
+/**
+ * List all (including '.' and '..' entries) dir entries
+ */
+bool listDir(const std::string& path, std::vector<std::string>& files);
 
 /**
  * Mounts run as a tmpfs on a given path

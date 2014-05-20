@@ -114,14 +114,14 @@ public:
     void parseFile(const std::string& path);
 
     /**
-     * Convert cofig object to string.
+     * Convert config object to string.
      * This method throws ConfigException when fails.
      * @return  String in JSON format
      */
     std::string toString() const;
 
     /**
-     * Write cofig object to a file (in JSON format).
+     * Write config object to a file (in JSON format).
      * This method throws ConfigException when fails.
      * @param  path        Target file path
      */

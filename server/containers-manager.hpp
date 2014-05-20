@@ -28,10 +28,12 @@
 
 #include "container.hpp"
 #include "containers-manager-config.hpp"
+#include "input-monitor.hpp"
 
 #include <string>
 #include <unordered_map>
 #include <libvirt/libvirt.h>
+#include <memory>
 
 
 namespace security_containers {
@@ -73,9 +75,13 @@ public:
 
 private:
     ContainersManagerConfig mConfig;
+    // to hold InputMonitor pointer to monitor if container switching sequence is recognized
+    std::unique_ptr<InputMonitor> mSwitchingSequenceMonitor;
     typedef std::unordered_map<std::string, std::unique_ptr<Container>> ContainerMap;
     ContainerMap mContainers; // map of containers, id is the key
     bool mDetachOnExit;
+
+    void switchingSequenceMonitorNotify();
 };
 
 

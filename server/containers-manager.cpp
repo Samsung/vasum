@@ -58,6 +58,14 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
     }
 
     LOGD("ContainersManager object instantiated");
+
+    if (mConfig.inputConfig.enabled) {
+        LOGI("Registering input monitor [" << mConfig.inputConfig.device.c_str() << "]");
+        mSwitchingSequenceMonitor.reset(
+                new InputMonitor(mConfig.inputConfig,
+                                 std::bind(&ContainersManager::switchingSequenceMonitorNotify,
+                                           this)));
+    }
 }
 
 
@@ -140,6 +148,12 @@ std::string ContainersManager::getRunningForegroundContainerId()
         }
     }
     return std::string();
+}
+
+void ContainersManager::switchingSequenceMonitorNotify()
+{
+    LOGI("switchingSequenceMonitorNotify() called");
+    // TODO: implement
 }
 
 
