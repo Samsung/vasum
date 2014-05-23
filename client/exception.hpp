@@ -36,7 +36,8 @@ namespace security_containers {
  * @brief Base class for exceptions in Security Containers Client
  */
 struct ClientException: public SecurityContainersException {
-    using SecurityContainersException::SecurityContainersException;
+
+    ClientException(const std::string& error = "") : SecurityContainersException(error) {}
 };
 
 

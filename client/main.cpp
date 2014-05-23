@@ -16,11 +16,12 @@
  *  limitations under the License
  */
 
-
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
  * @brief   Main file for the Security Containers Client
  */
+
+#include "config.hpp"
 
 #include "exception.hpp"

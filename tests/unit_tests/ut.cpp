@@ -23,6 +23,8 @@
  * @brief   Main file for the Security Containers Daemon unit tests
  */
 
+#include "config.hpp"
+
 #include "log/logger.hpp"
 #include "log/backend-stderr.hpp"
 

@@ -36,7 +36,8 @@ namespace security_containers {
  * Base class for exceptions in utils
  */
 struct UtilsException: public SecurityContainersException {
-    using SecurityContainersException::SecurityContainersException;
+
+    UtilsException(const std::string& error = "") : SecurityContainersException(error) {}
 };
 
 

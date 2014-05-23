@@ -23,6 +23,7 @@
  * @brief   Unit tests of the ContainersManager class
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 
 #include "containers-manager.hpp"

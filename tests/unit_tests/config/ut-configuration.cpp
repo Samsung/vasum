@@ -23,6 +23,7 @@
  * @brief   Unit test of ConfigurationBase
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 #include "config/configuration.hpp"
 

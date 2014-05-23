@@ -58,6 +58,11 @@ public:
     typedef unsigned int ListenerId;
 
     /**
+     * An invalid ListenerId value.
+     */
+    static const ListenerId LISTENER_ID_INVALID = 0;
+
+    /**
      * A function type used for the lifecycle listener
      */
     typedef std::function<void(const int eventId, const int detailId)> LifecycleListener;
@@ -145,20 +150,28 @@ public:
     std::int64_t getSchedulerQuota();
 
     /**
-     * Sets a listener for a specific event.
+     * Sets a listener for a lifecycle event.
      * It's a caller's responsibility to remove the listener
      * prior to destroying the object.
      *
      * @return listener ID that can be used to remove.
      */
-    template <typename Listener>
-    ListenerId registerListener(const Listener& listener,
-                                const utils::CallbackGuard::Tracker& tracker);
+    ListenerId registerLifecycleListener(const LifecycleListener& listener,
+                                         const utils::CallbackGuard::Tracker& tracker);
+
+    /**
+     * Sets a listener for a reboot event.
+     * It's a caller's responsibility to remove the listener
+     * prior to destroying the object.
+     *
+     * @return listener ID that can be used to remove.
+     */
+    ListenerId registerRebootListener(const RebootListener& listener,
+                                      const utils::CallbackGuard::Tracker& tracker);
 
     /**
      * Remove a previously registered listener.
      */
-    template <typename Listener>
     void removeListener(const ListenerId id);
 
 private:
@@ -189,41 +202,14 @@ private:
 
     // for handling external listeners triggered from libvirt callbacks
     // TODO, the Listener type might not be unique, reimplement using proper listeners
-    template <typename Listener>
-    using ListenerMap = std::map<ListenerId, utils::CallbackWrapper<Listener>>;
+    typedef std::map<ListenerId, utils::CallbackWrapper<LifecycleListener>> LifecycleListenerMap;
+    typedef std::map<ListenerId, utils::CallbackWrapper<RebootListener>> RebootListenerMap;
 
     std::mutex mListenerMutex;
-    std::atomic<unsigned int> mNextIdForListener;
-    ListenerMap<LifecycleListener> mLifecycleListeners;
-    ListenerMap<RebootListener> mRebootListeners;
-
-    template <typename Listener>
-    ListenerMap<Listener>& getListenerMap();
+    unsigned int mNextIdForListener;
+    LifecycleListenerMap mLifecycleListeners;
+    RebootListenerMap mRebootListeners;
 };
-
-template <typename Listener>
-unsigned int ContainerAdmin::registerListener(const Listener& listener,
-                                              const utils::CallbackGuard::Tracker& tracker)
-{
-
-    ListenerMap<Listener>& map = getListenerMap<Listener>();
-    unsigned int id = mNextIdForListener++;
-    utils::CallbackWrapper<Listener> wrap(listener, tracker);
-
-    std::unique_lock<std::mutex> lock(mListenerMutex);
-    map.emplace(id, std::move(wrap));
-
-    return id;
-}
-
-template <typename Listener>
-void ContainerAdmin::removeListener(const ContainerAdmin::ListenerId id)
-{
-    ListenerMap<Listener>& map = getListenerMap<Listener>();
-
-    std::unique_lock<std::mutex> lock(mListenerMutex);
-    map.erase(id);
-}
 
 
 } // namespace security_containers

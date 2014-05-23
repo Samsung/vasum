@@ -22,7 +22,8 @@
  * @brief   Synchronization latch
  */
 
-#include "typeinfo.hpp"
+#include "config.hpp"
+#include "utils/typeinfo.hpp"
 
 #include <string>
 #include <cxxabi.h>

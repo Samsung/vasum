@@ -23,6 +23,7 @@
  * @brief   Unit tests of the LibvirtNetwork class
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 
 #include "libvirt/network.hpp"

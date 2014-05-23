@@ -23,6 +23,7 @@
  * @brief   Unit tests of the Container class
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 
 #include "container.hpp"

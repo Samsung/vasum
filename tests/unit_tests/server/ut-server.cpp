@@ -23,6 +23,7 @@
  * @brief   Unit tests of the Server class
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 
 #include "server.hpp"
@@ -31,6 +32,7 @@
 
 #include <string>
 #include <future>
+
 
 BOOST_AUTO_TEST_SUITE(ServerSuite)
 

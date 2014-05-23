@@ -22,6 +22,7 @@
  * @brief   Dbus connection class
  */
 
+#include "config.hpp"
 #include "dbus/connection.hpp"
 #include "dbus/exception.hpp"
 #include "utils/callback-wrapper.hpp"
@@ -138,6 +139,8 @@ DbusConnection::DbusConnection(const std::string& address)
     const GDBusConnectionFlags flags =
         static_cast<GDBusConnectionFlags>(G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT |
                                           G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION);
+    // TODO: this is possible deadlock if the dbus
+    // socket exists but there is no dbus-daemon
     mConnection = g_dbus_connection_new_for_address_sync(address.c_str(),
                                                          flags,
                                                          NULL,

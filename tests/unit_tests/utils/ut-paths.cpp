@@ -23,6 +23,7 @@
  * @brief   Unit tests of utils
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 
 #include "utils/paths.hpp"

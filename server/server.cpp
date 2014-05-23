@@ -22,6 +22,8 @@
  * @brief   Server class definition
  */
 
+#include "config.hpp"
+
 #include "server.hpp"
 #include "containers-manager.hpp"
 #include "exception.hpp"

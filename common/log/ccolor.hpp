@@ -39,12 +39,12 @@ enum class Color : unsigned int {
     BLUE        = 94,
     MAGENTA     = 95,
     CYAN        = 96,
-    WHITE       = 97,
+    WHITE       = 97
 };
 
 enum class Attributes : unsigned int {
     DEFAULT     = 0,
-    BOLD        = 1,
+    BOLD        = 1
 };
 
 std::string getConsoleEscapeSequence(Attributes attr, Color color);

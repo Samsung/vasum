@@ -22,9 +22,12 @@
  * @brief   Definition of the class for managing containers
  */
 
+#include "config.hpp"
+
 #include "containers-manager.hpp"
 #include "container-admin.hpp"
 #include "exception.hpp"
+
 #include "utils/paths.hpp"
 #include "log/logger.hpp"
 
@@ -54,7 +57,7 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
         LOGD("Creating Container " << containerConfigPath);
         std::unique_ptr<Container> c(new Container(containerConfigPath));
         std::string id = c->getId();
-        mContainers.emplace(id, std::move(c));
+        mContainers.insert(ContainerMap::value_type(id, std::move(c)));
     }
 
     LOGD("ContainersManager object instantiated");

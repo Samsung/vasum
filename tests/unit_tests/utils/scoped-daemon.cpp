@@ -22,6 +22,8 @@
  * @brief   Starts external daemon in constructor, stops it in destructor
  */
 
+#include "config.hpp"
+
 #include "utils/scoped-daemon.hpp"
 
 #include "log/logger.hpp"

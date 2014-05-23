@@ -22,6 +22,7 @@
  * @brief   Implementation of the class wrapping libvirt domain
  */
 
+#include "config.hpp"
 #include "log/logger.hpp"
 #include "libvirt/domain.hpp"
 #include "libvirt/helpers.hpp"
@@ -33,7 +34,7 @@ namespace libvirt {
 
 
 LibvirtDomain::LibvirtDomain(const std::string& configXML)
-    : mCon(LIBVIRT_LXC_ADDRESS)
+    : mCon(LIBVIRT_LXC_ADDRESS), mDom(NULL)
 {
     mDom = virDomainDefineXML(mCon.get(), configXML.c_str());
 

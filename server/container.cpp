@@ -22,6 +22,8 @@
  * @brief   Implementation of class for managing one container
  */
 
+#include "config.hpp"
+
 #include "container.hpp"
 
 #include "log/logger.hpp"

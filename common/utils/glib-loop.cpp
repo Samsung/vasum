@@ -22,6 +22,7 @@
  * @brief   C++ wrapper of glib main loop
  */
 
+#include "config.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/callback-wrapper.hpp"
 

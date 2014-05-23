@@ -22,6 +22,7 @@
  * @brief   Helper class for parsing and storing configurations in JSON format.
  */
 
+#include "config.hpp"
 #include "log/logger.hpp"
 #include "config/configuration.hpp"
 #include "config/exception.hpp"

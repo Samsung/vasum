@@ -39,7 +39,8 @@ namespace config {
  * e.g. syntax error
  */
 struct ConfigException: public SecurityContainersException {
-    using SecurityContainersException::SecurityContainersException;
+
+    ConfigException(const std::string& error = "") : SecurityContainersException(error) {}
 };
 
 

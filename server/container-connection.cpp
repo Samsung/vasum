@@ -22,6 +22,8 @@
  * @brief   Implementation of a class for communication between container and server
  */
 
+#include "config.hpp"
+
 #include "container-connection.hpp"
 #include "container-dbus-definitions.hpp"
 #include "exception.hpp"

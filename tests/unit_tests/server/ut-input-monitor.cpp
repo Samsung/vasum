@@ -23,6 +23,7 @@
  * @brief   Unit tests of the InputMonitor class
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 
 #include "input-monitor.hpp"

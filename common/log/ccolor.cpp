@@ -22,6 +22,7 @@
  * @brief   Console color for StderrBackend logger
  */
 
+#include "config.hpp"
 #include "log/ccolor.hpp"
 
 #include <stdio.h>

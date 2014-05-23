@@ -36,7 +36,8 @@ namespace security_containers {
  * Base class for exceptions in libvirt
  */
 struct LibvirtOperationException: public SecurityContainersException {
-    using SecurityContainersException::SecurityContainersException;
+
+    LibvirtOperationException(const std::string& error = "") : SecurityContainersException(error) {}
 };
 
 

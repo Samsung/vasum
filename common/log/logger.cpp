@@ -22,6 +22,7 @@
  * @brief   Logger
  */
 
+#include "config.hpp"
 #include "log/logger.hpp"
 #include "log/formatter.hpp"
 #include "log/backend-null.hpp"

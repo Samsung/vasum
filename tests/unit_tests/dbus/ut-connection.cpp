@@ -22,6 +22,7 @@
  * @brief   Dbus connection unit tests
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 #include "dbus/test-server.hpp"
 #include "dbus/test-client.hpp"

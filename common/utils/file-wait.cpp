@@ -22,6 +22,7 @@
  * @brief   Wait for file utility function
  */
 
+#include "config.hpp"
 #include "utils/exception.hpp"
 #include "utils/file-wait.hpp"
 

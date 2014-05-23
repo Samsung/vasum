@@ -55,7 +55,7 @@ public:
 
 private:
     LibvirtConnection mCon;
-    virDomainPtr mDom = NULL;
+    virDomainPtr mDom;
 };
 
 

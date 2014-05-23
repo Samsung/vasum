@@ -23,6 +23,7 @@
  * @brief   Unit tests of glib-loop
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 
 #include "utils/latch.hpp"
@@ -50,7 +51,7 @@ BOOST_AUTO_TEST_CASE(GlibTimerEventTest)
     CallbackGuard guard;
     Latch latch;
 
-    Glib::OnTimerEventCallback callback = [&] {
+    Glib::OnTimerEventCallback callback = [&]()->bool {
         static unsigned int counter = 0;
         latch.set();
         if (++counter >= TIMER_NUMBER) {

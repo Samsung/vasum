@@ -22,6 +22,8 @@
  * @brief   Implementation of class for administrating one container
  */
 
+#include "config.hpp"
+
 #include "container-admin.hpp"
 #include "exception.hpp"
 
@@ -72,7 +74,7 @@ ContainerAdmin::ContainerAdmin(ContainerConfig& config)
       mDetachOnExit(false),
       mLifecycleCallbackId(-1),
       mRebootCallbackId(-1),
-      mNextIdForListener(0)
+      mNextIdForListener(1)
 {
     LOGD(mId << ": Instantiating ContainerAdmin object");
 
@@ -185,10 +187,10 @@ void ContainerAdmin::stop()
         }
     };
 
-    ListenerId id = registerListener(setStopped, nullptr);
+    ListenerId id = registerLifecycleListener(setStopped, nullptr);
     shutdown();
     bool stopped = stoppedOccured.wait(SHUTDOWN_WAIT);
-    removeListener<LifecycleListener>(id);
+    removeListener(id);
 
     if (!stopped) {
         LOGW(mId << ": Gracefull shutdown timed out, the container is still running, destroying");
@@ -405,6 +407,39 @@ std::int64_t ContainerAdmin::getSchedulerQuota()
     return quota;
 }
 
+ContainerAdmin::ListenerId ContainerAdmin::registerLifecycleListener(const ContainerAdmin::LifecycleListener& listener,
+                                                                     const utils::CallbackGuard::Tracker& tracker)
+{
+
+    utils::CallbackWrapper<LifecycleListener> wrap(listener, tracker);
+
+    std::unique_lock<std::mutex> lock(mListenerMutex);
+    unsigned int id = mNextIdForListener++;
+    mLifecycleListeners.insert(LifecycleListenerMap::value_type(id, std::move(wrap)));
+
+    return id;
+}
+
+ContainerAdmin::ListenerId ContainerAdmin::registerRebootListener(const ContainerAdmin::RebootListener& listener,
+                                                                  const utils::CallbackGuard::Tracker& tracker)
+{
+
+    utils::CallbackWrapper<RebootListener> wrap(listener, tracker);
+
+    std::unique_lock<std::mutex> lock(mListenerMutex);
+    unsigned int id = mNextIdForListener++;
+    mRebootListeners.insert(RebootListenerMap::value_type(id, std::move(wrap)));
+
+    return id;
+}
+
+void ContainerAdmin::removeListener(const ContainerAdmin::ListenerId id)
+{
+    std::unique_lock<std::mutex> lock(mListenerMutex);
+    mLifecycleListeners.erase(id);
+    mRebootListeners.erase(id);
+}
+
 int ContainerAdmin::libvirtLifecycleCallback(virConnectPtr /*con*/,
                                              virDomainPtr /*dom*/,
                                              int event,
@@ -442,20 +477,6 @@ void ContainerAdmin::libvirtRebootCallback(virConnectPtr /*con*/,
         RebootListener f = it.second.get();
         f();
     }
-}
-
-template<>
-ContainerAdmin::ListenerMap<ContainerAdmin::LifecycleListener>&
-ContainerAdmin::getListenerMap<ContainerAdmin::LifecycleListener>()
-{
-    return mLifecycleListeners;
-}
-
-template<>
-ContainerAdmin::ListenerMap<ContainerAdmin::RebootListener>&
-ContainerAdmin::getListenerMap<ContainerAdmin::RebootListener>()
-{
-    return mRebootListeners;
 }
 
 

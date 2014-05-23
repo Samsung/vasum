@@ -23,6 +23,7 @@
  * @brief   Unit tests of the LibvirtDomain class
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 
 #include "libvirt/domain.hpp"

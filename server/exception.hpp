@@ -36,7 +36,8 @@ namespace security_containers {
  * Base class for exceptions in Security Containers Server
  */
 struct ServerException: public SecurityContainersException {
-    using SecurityContainersException::SecurityContainersException;
+
+    ServerException(const std::string& error = "") : SecurityContainersException(error) {}
 };
 
 /**
@@ -44,14 +45,16 @@ struct ServerException: public SecurityContainersException {
  * e.g. start, stop a container
  */
 struct ContainerOperationException: public ServerException {
-    using ServerException::ServerException;
+
+    ContainerOperationException(const std::string& error = "") : ServerException(error) {}
 };
 
 /**
  * Exception during performing an operation on a container connection
  */
 struct ContainerConnectionException: public ServerException {
-    using ServerException::ServerException;
+
+    ContainerConnectionException(const std::string& error = "") : ServerException(error) {}
 };
 
 /**
@@ -59,7 +62,8 @@ struct ContainerConnectionException: public ServerException {
 * e.g. create channel, register callback etc.
 */
 struct InputMonitorException: public ServerException {
-    using ServerException::ServerException;
+
+    InputMonitorException(const std::string& error = "") : ServerException(error) {}
 };
 
 

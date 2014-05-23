@@ -23,6 +23,7 @@
  * @brief   Unit tests of callback guard
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 
 #include "utils/callback-guard.hpp"
@@ -71,7 +72,7 @@ BOOST_AUTO_TEST_CASE(ThreadTest)
     Latch trackerCreated;
     Latch trackerCanBeDestroyed;
 
-    std::future<bool> future = std::async(std::launch::async, [&] {
+    std::future<bool> future = std::async(std::launch::async, [&]() -> bool {
             CallbackGuard::Tracker tracker = guard.spawn();
             trackerCreated.set();
             if (!trackerCanBeDestroyed.wait(TIMEOUT)) {

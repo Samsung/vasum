@@ -54,7 +54,7 @@ public:
     operator bool() const;
 
 private:
-    virConnectPtr mCon = NULL;
+    virConnectPtr mCon;
 };
 
 

@@ -22,6 +22,8 @@
  * @brief   Definition of the Runner class, that manages daemon's lifetime
  */
 
+#include "config.hpp"
+
 #include "runner.hpp"
 #include "daemon.hpp"
 

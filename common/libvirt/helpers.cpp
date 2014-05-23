@@ -22,6 +22,7 @@
  * @brief   A function helpers for the libvirt library
  */
 
+#include "config.hpp"
 #include "libvirt/helpers.hpp"
 #include "log/logger.hpp"
 

@@ -36,7 +36,8 @@ namespace container_daemon {
  * Base class for exceptions in Security Containers Container Daemon
  */
 struct ContainerDaemonException: public SecurityContainersException {
-    using SecurityContainersException::SecurityContainersException;
+
+    ContainerDaemonException(const std::string& error = "") : SecurityContainersException(error) {}
 };
 
 

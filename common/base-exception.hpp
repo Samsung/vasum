@@ -27,6 +27,7 @@
 #define COMMON_BASE_EXCEPTION_HPP
 
 #include <stdexcept>
+#include <string>
 
 
 namespace security_containers {
@@ -36,9 +37,8 @@ namespace security_containers {
  * Base class security containers exceptions
  */
 struct SecurityContainersException: public std::runtime_error {
-    using std::runtime_error::runtime_error;
 
-    SecurityContainersException() : std::runtime_error(std::string()) {}
+    SecurityContainersException(const std::string& error = "") : std::runtime_error(error) {}
 };
 
 

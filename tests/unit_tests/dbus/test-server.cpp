@@ -22,6 +22,8 @@
  * @brief   Example dbus api server
  */
 
+#include "config.hpp"
+
 #include "dbus/test-server.hpp"
 #include "dbus/test-common.hpp"
 

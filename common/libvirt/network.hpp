@@ -52,7 +52,7 @@ public:
 
 private:
     LibvirtConnection mCon;
-    virNetworkPtr mNet = NULL;
+    virNetworkPtr mNet;
 };
 
 

@@ -22,6 +22,8 @@
  * @brief   Definition of the Daemon, implementation of the logic of the daemon.
  */
 
+#include "config.hpp"
+
 #include "daemon.hpp"
 
 #include "log/logger.hpp"

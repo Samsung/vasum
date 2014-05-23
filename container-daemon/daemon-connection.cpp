@@ -22,6 +22,8 @@
  * @brief   Dbus API for the Container Daemon
  */
 
+#include "config.hpp"
+
 #include "daemon-connection.hpp"
 #include "daemon-dbus-definitions.hpp"
 #include "exception.hpp"

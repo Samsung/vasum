@@ -23,6 +23,7 @@
  * @brief   Unit tests of the ContainerAdmin class
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 
 #include "container-admin.hpp"
@@ -96,7 +97,7 @@ BOOST_AUTO_TEST_CASE(MissingConfigTest)
 BOOST_AUTO_TEST_CASE(StartTest)
 {
     utils::Latch booted;
-    ContainerAdmin::ListenerId id;
+    ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
     ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
     ContainerAdmin ca(config);
 
@@ -105,7 +106,7 @@ BOOST_AUTO_TEST_CASE(StartTest)
             booted.set();
         }
     };
-    BOOST_REQUIRE_NO_THROW(id = ca.registerListener(bootedListener, mGuard.spawn()));
+    BOOST_REQUIRE_NO_THROW(id = ca.registerLifecycleListener(bootedListener, mGuard.spawn()));
 
     BOOST_REQUIRE_NO_THROW(ca.start());
     ensureStarted();
@@ -113,13 +114,13 @@ BOOST_AUTO_TEST_CASE(StartTest)
     BOOST_CHECK(booted.wait(WAIT_TIMEOUT));
     BOOST_CHECK(ca.isRunning());
 
-    BOOST_REQUIRE_NO_THROW(ca.removeListener<ContainerAdmin::LifecycleListener>(id));
+    BOOST_REQUIRE_NO_THROW(ca.removeListener(id));
 }
 
 BOOST_AUTO_TEST_CASE(ShutdownTest)
 {
     utils::Latch shutdown;
-    ContainerAdmin::ListenerId id;
+    ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
     ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
     ContainerAdmin ca(config);
 
@@ -132,20 +133,20 @@ BOOST_AUTO_TEST_CASE(ShutdownTest)
     BOOST_REQUIRE_NO_THROW(ca.start());
     ensureStarted();
     BOOST_REQUIRE(ca.isRunning());
-    BOOST_REQUIRE_NO_THROW(id = ca.registerListener(shutdownListener, mGuard.spawn()));
+    BOOST_REQUIRE_NO_THROW(id = ca.registerLifecycleListener(shutdownListener, mGuard.spawn()));
 
     BOOST_REQUIRE_NO_THROW(ca.shutdown());
     BOOST_CHECK(shutdown.wait(WAIT_TIMEOUT));
     BOOST_CHECK(!ca.isRunning());
     BOOST_CHECK(ca.isStopped());
 
-    BOOST_REQUIRE_NO_THROW(ca.removeListener<ContainerAdmin::LifecycleListener>(id));
+    BOOST_REQUIRE_NO_THROW(ca.removeListener(id));
 }
 
 BOOST_AUTO_TEST_CASE(DestroyTest)
 {
     utils::Latch destroyed;
-    ContainerAdmin::ListenerId id;
+    ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
     ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
     ContainerAdmin ca(config);
 
@@ -158,20 +159,20 @@ BOOST_AUTO_TEST_CASE(DestroyTest)
     BOOST_REQUIRE_NO_THROW(ca.start());
     ensureStarted();
     BOOST_REQUIRE(ca.isRunning());
-    BOOST_REQUIRE_NO_THROW(id = ca.registerListener(destroyedListener, mGuard.spawn()));
+    BOOST_REQUIRE_NO_THROW(id = ca.registerLifecycleListener(destroyedListener, mGuard.spawn()));
 
     BOOST_REQUIRE_NO_THROW(ca.destroy());
     BOOST_CHECK(destroyed.wait(WAIT_TIMEOUT));
     BOOST_CHECK(!ca.isRunning());
     BOOST_CHECK(ca.isStopped());
 
-    BOOST_REQUIRE_NO_THROW(ca.removeListener<ContainerAdmin::LifecycleListener>(id));
+    BOOST_REQUIRE_NO_THROW(ca.removeListener(id));
 }
 
 BOOST_AUTO_TEST_CASE(StopShutdownTest)
 {
     utils::Latch shutdown;
-    ContainerAdmin::ListenerId id;
+    ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
     ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
     ContainerAdmin ca(config);
 
@@ -184,21 +185,21 @@ BOOST_AUTO_TEST_CASE(StopShutdownTest)
     BOOST_REQUIRE_NO_THROW(ca.start());
     ensureStarted();
     BOOST_REQUIRE(ca.isRunning());
-    BOOST_REQUIRE_NO_THROW(id = ca.registerListener(shutdownListener, mGuard.spawn()));
+    BOOST_REQUIRE_NO_THROW(id = ca.registerLifecycleListener(shutdownListener, mGuard.spawn()));
 
     BOOST_REQUIRE_NO_THROW(ca.stop());
     BOOST_CHECK(shutdown.wait(WAIT_TIMEOUT));
     BOOST_CHECK(!ca.isRunning());
     BOOST_CHECK(ca.isStopped());
 
-    BOOST_REQUIRE_NO_THROW(ca.removeListener<ContainerAdmin::LifecycleListener>(id));
+    BOOST_REQUIRE_NO_THROW(ca.removeListener(id));
 }
 
 // This test needs to wait for a shutdown timer in stop() method. This takes 10s+.
 BOOST_AUTO_TEST_CASE(StopDestroyTest)
 {
     utils::Latch destroyed;
-    ContainerAdmin::ListenerId id;
+    ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
     ContainerConfig config; config.parseFile(TEST_NO_SHUTDOWN_CONFIG_PATH);
     ContainerAdmin ca(config);
 
@@ -211,20 +212,20 @@ BOOST_AUTO_TEST_CASE(StopDestroyTest)
     BOOST_REQUIRE_NO_THROW(ca.start());
     ensureStarted();
     BOOST_REQUIRE(ca.isRunning());
-    BOOST_REQUIRE_NO_THROW(id = ca.registerListener(destroyedListener, mGuard.spawn()));
+    BOOST_REQUIRE_NO_THROW(id = ca.registerLifecycleListener(destroyedListener, mGuard.spawn()));
 
     BOOST_REQUIRE_NO_THROW(ca.stop());
     BOOST_CHECK(destroyed.wait(WAIT_STOP_TIMEOUT));
     BOOST_CHECK(!ca.isRunning());
     BOOST_CHECK(ca.isStopped());
 
-    BOOST_REQUIRE_NO_THROW(ca.removeListener<ContainerAdmin::LifecycleListener>(id));
+    BOOST_REQUIRE_NO_THROW(ca.removeListener(id));
 }
 
 BOOST_AUTO_TEST_CASE(SuspendTest)
 {
     utils::Latch paused;
-    ContainerAdmin::ListenerId id;
+    ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
     ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
     ContainerAdmin ca(config);
 
@@ -237,20 +238,20 @@ BOOST_AUTO_TEST_CASE(SuspendTest)
     BOOST_REQUIRE_NO_THROW(ca.start())
     ensureStarted();
     BOOST_REQUIRE(ca.isRunning());
-    BOOST_REQUIRE_NO_THROW(id = ca.registerListener(pausedListener, mGuard.spawn()));
+    BOOST_REQUIRE_NO_THROW(id = ca.registerLifecycleListener(pausedListener, mGuard.spawn()));
 
     BOOST_REQUIRE_NO_THROW(ca.suspend());
     BOOST_CHECK(paused.wait(WAIT_TIMEOUT));
     BOOST_CHECK(!ca.isRunning());
     BOOST_CHECK(ca.isPaused());
 
-    BOOST_REQUIRE_NO_THROW(ca.removeListener<ContainerAdmin::LifecycleListener>(id));
+    BOOST_REQUIRE_NO_THROW(ca.removeListener(id));
 }
 
 BOOST_AUTO_TEST_CASE(ResumeTest)
 {
     utils::Latch unpaused;
-    ContainerAdmin::ListenerId id;
+    ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
     ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
     ContainerAdmin ca(config);
 
@@ -265,14 +266,14 @@ BOOST_AUTO_TEST_CASE(ResumeTest)
     BOOST_REQUIRE(ca.isRunning());
     BOOST_REQUIRE_NO_THROW(ca.suspend())
     BOOST_REQUIRE(ca.isPaused());
-    BOOST_REQUIRE_NO_THROW(id = ca.registerListener(unpausedListener, mGuard.spawn()));
+    BOOST_REQUIRE_NO_THROW(id = ca.registerLifecycleListener(unpausedListener, mGuard.spawn()));
 
     BOOST_REQUIRE_NO_THROW(ca.resume());
     BOOST_CHECK(unpaused.wait(WAIT_TIMEOUT));
     BOOST_CHECK(!ca.isPaused());
     BOOST_CHECK(ca.isRunning());
 
-    BOOST_REQUIRE_NO_THROW(ca.removeListener<ContainerAdmin::LifecycleListener>(id));
+    BOOST_REQUIRE_NO_THROW(ca.removeListener(id));
 }
 
 BOOST_AUTO_TEST_CASE(SchedulerLevelTest)

@@ -22,6 +22,8 @@
  * @brief   Implementation of a class for communication transport between container and server
  */
 
+#include "config.hpp"
+
 #include "container-connection-transport.hpp"
 #include "exception.hpp"
 

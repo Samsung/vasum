@@ -22,7 +22,8 @@
  * @brief   Callback guard
  */
 
-#include "callback-guard.hpp"
+#include "config.hpp"
+#include "utils/callback-guard.hpp"
 #include "log/logger.hpp"
 
 #include <mutex>
@@ -36,6 +37,8 @@ namespace utils {
 // Reference counting class like shared_ptr but with the ability to wait for it.
 class CallbackGuard::SharedState {
 public:
+    SharedState() : mCounter(0) {}
+
     void inc()
     {
         std::unique_lock<std::mutex> lock(mMutex);
@@ -65,7 +68,7 @@ public:
 private:
     std::mutex mMutex;
     std::condition_variable mEmptyCondition;
-    long mCounter = 0;
+    long mCounter;
 };
 
 namespace {

@@ -81,8 +81,10 @@ inline void removeDuplicateSlashes(std::string& path)
 
 inline void removeTrailingSlash(std::string& path)
 {
-    if (path.size() > 1 && *(path.end() - 1) == '/') {
-        path.pop_back();
+    size_t size = path.size();
+
+    if (size > 1 && path[size - 1] == '/') {
+        path.resize(size - 1);
     }
 }
 

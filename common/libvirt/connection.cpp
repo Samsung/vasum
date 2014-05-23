@@ -22,6 +22,7 @@
  * @brief   Implementation of the class wrapping connection to libvirtd
  */
 
+#include "config.hpp"
 #include "log/logger.hpp"
 #include "libvirt/helpers.hpp"
 #include "libvirt/connection.hpp"
@@ -33,6 +34,7 @@ namespace libvirt {
 
 
 LibvirtConnection::LibvirtConnection(const std::string& uri)
+    : mCon(NULL)
 {
     libvirtInitialize();
 

@@ -37,35 +37,40 @@ namespace dbus {
  * Base class for dbus exceptions
  */
 struct DbusException: public SecurityContainersException {
-    using SecurityContainersException::SecurityContainersException;
+
+    DbusException(const std::string& error = "") : SecurityContainersException(error) {}
 };
 
 /**
  * Dbus IO exception (connection failed, connection lost, etc)
  */
 struct DbusIOException: public DbusException {
-    using DbusException::DbusException;
+
+    DbusIOException(const std::string& error = "") : DbusException(error) {}
 };
 
 /**
  * Dbus operation failed exception
  */
 struct DbusOperationException: public DbusException {
-    using DbusException::DbusException;
+
+    DbusOperationException(const std::string& error = "") : DbusException(error) {}
 };
 
 /**
  * Dbus custom exception triggered by user logic
  */
 struct DbusCustomException: public DbusException {
-    using DbusException::DbusException;
+
+    DbusCustomException(const std::string& error = "") : DbusException(error) {}
 };
 
 /**
  * Dbus invalid argument exception
  */
 struct DbusInvalidArgumentException: public DbusException {
-    using DbusException::DbusException;
+
+    DbusInvalidArgumentException(const std::string& error = "") : DbusException(error) {}
 };
 
 

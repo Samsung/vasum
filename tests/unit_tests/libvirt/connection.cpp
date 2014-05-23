@@ -23,6 +23,7 @@
  * @brief   Unit tests of the LibvirtConnection class
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 
 #include "libvirt/connection.hpp"

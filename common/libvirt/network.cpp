@@ -22,6 +22,8 @@
  * @brief   Implementation of the class wrapping libvirt network
  */
 
+#include "config.hpp"
+
 #include "log/logger.hpp"
 #include "libvirt/network.hpp"
 #include "libvirt/helpers.hpp"
@@ -33,7 +35,7 @@ namespace libvirt {
 
 
 LibvirtNetwork::LibvirtNetwork(const std::string& configXML)
-    : mCon(LIBVIRT_LXC_ADDRESS)
+    : mCon(LIBVIRT_LXC_ADDRESS), mNet(NULL)
 {
     mNet = virNetworkDefineXML(mCon.get(), configXML.c_str());
 

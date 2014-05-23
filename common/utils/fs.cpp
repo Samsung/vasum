@@ -22,6 +22,7 @@
  * @brief   File utility functions
  */
 
+#include "config.hpp"
 #include "log/logger.hpp"
 #include "utils/fs.hpp"
 #include "utils/paths.hpp"

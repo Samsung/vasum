@@ -23,6 +23,7 @@
  * @brief   Unit tests of the log utility
  */
 
+#include "config.hpp"
 #include "ut.hpp"
 #include "log/logger.hpp"
 #include "log/formatter.hpp"

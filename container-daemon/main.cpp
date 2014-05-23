@@ -28,13 +28,15 @@
 #define LOG_TO_CONSOLE
 #endif
 
+#include "config.hpp"
+
+#include "exception.hpp"
+#include "runner.hpp"
+
 #include "log/logger.hpp"
 #include "log/backend-stderr.hpp"
 #include "log/backend-journal.hpp"
 #include "utils/typeinfo.hpp"
-
-#include "exception.hpp"
-#include "runner.hpp"
 
 #include <boost/program_options.hpp>
 #include <iostream>
