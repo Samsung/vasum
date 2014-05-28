@@ -29,6 +29,8 @@
 #include "utils/fs.hpp"
 #include "log/logger.hpp"
 
+#include <boost/filesystem.hpp>
+#include <boost/system/system_error.hpp>
 
 namespace security_containers {
 
@@ -48,9 +50,12 @@ ContainerConnectionTransport::ContainerConnectionTransport(const std::string& ru
     if (runMountPoint.empty()) {
         return;
     }
-    if (!utils::createDirectories(runMountPoint, 0755)) {
-        LOGE("Initialization failed: could not create " << runMountPoint);
-        throw ContainerConnectionException("Could not create: " + runMountPoint);
+    boost::system::error_code errorCode;
+    boost::filesystem::create_directories(runMountPoint, errorCode);
+    if (errorCode) {
+        LOGE("Initialization failed: could not create '" << runMountPoint << "' :" << errorCode);
+        throw ContainerConnectionException("Could not create: " + runMountPoint +
+                                           " :" + errorCode.message());
     }
 
     bool isMount = false;
@@ -72,9 +77,11 @@ ContainerConnectionTransport::ContainerConnectionTransport(const std::string& ru
     // if there is no systemd in the container this dir won't be created automatically
     // TODO: will require chown with USER namespace enabled
     std::string dbusDirectory = runMountPoint + "/dbus";
-    if (!utils::createDirectories(dbusDirectory, 0755)) {
-        LOGE("Initialization failed: could not create " << dbusDirectory);
-        throw ContainerConnectionException("Could not create: " + dbusDirectory);
+    boost::filesystem::create_directories(dbusDirectory, errorCode);
+    if (errorCode) {
+        LOGE("Initialization failed: could not create '" << dbusDirectory << "' :" << errorCode);
+        throw ContainerConnectionException("Could not create: " + dbusDirectory +
+                                           " :" + errorCode.message());
     }
 }
 

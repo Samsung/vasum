@@ -36,6 +36,7 @@
 #include "utils/fs.hpp"
 #include "log/logger.hpp"
 
+#include <boost/filesystem.hpp>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -63,7 +64,7 @@ class ScopedDbusDaemon {
 public:
     ScopedDbusDaemon()
     {
-        utils::removeFile("/tmp/container_socket");
+        boost::filesystem::remove("/tmp/container_socket");
         mDaemon.start(DBUS_DAEMON_PROC, DBUS_DAEMON_ARGS);
         waitForFile(DBUS_SOCKET_FILE, DBUS_DAEMON_TIMEOUT);
     }

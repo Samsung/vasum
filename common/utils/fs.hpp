@@ -38,26 +38,6 @@ namespace utils {
 std::string readFileContent(const std::string& path);
 
 /**
- * Removes a file
- */
-bool removeFile(const std::string& path);
-
-/**
- * Checks if a directory exists
- */
-bool isDirectory(const std::string& path);
-
-/**
- * Creates a directory
- */
-bool createDirectory(const std::string& path, mode_t mode);
-
-/**
- * Creates a directory and its parents as needed
- */
-bool createDirectories(const std::string& path, mode_t mode);
-
-/**
  * Mounts run as a tmpfs on a given path
  */
 bool mountRun(const std::string& path);

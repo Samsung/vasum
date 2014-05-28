@@ -60,44 +60,6 @@ std::string readFileContent(const std::string& path)
     return content;
 }
 
-bool removeFile(const std::string& path)
-{
-    if (::unlink(path.c_str()) != 0 && errno != ENOENT) {
-        LOGD("Could not remove file '" << path << "': " << strerror(errno));
-        return false;
-    }
-    return true;
-}
-
-bool isDirectory(const std::string& path)
-{
-    struct stat s;
-    return ::stat(path.c_str(), &s) == 0 && S_IFDIR == (s.st_mode & S_IFMT);
-}
-
-bool createDirectory(const std::string& path, mode_t mode)
-{
-    if (::mkdir(path.c_str(), mode) == 0 && ::chmod(path.c_str(), mode) == 0) {
-        return true;
-    }
-    LOGD("Could not create directory '" << path << "': " << strerror(errno));
-    return false;
-}
-
-bool createDirectories(const std::string& path, mode_t mode)
-{
-    if (isDirectory(path)) {
-        return true;
-    }
-    std::string parent = dirName(path);
-    if (!parent.empty() && parent != path) {
-        if (!createDirectories(parent, mode)) {
-            return false;
-        }
-    }
-
-    return createDirectory(path, mode);
-}
 
 namespace {
 // NOTE: Should be the same as in systemd/src/core/mount-setup.c
@@ -116,9 +78,10 @@ bool mountTmpfs(const std::string& path, unsigned long flags, const std::string&
 
 } // namespace
 
-bool mountRun(const std::string& path) {
-    return utils::mountTmpfs(path, RUN_MOUNT_POINT_FLAGS, RUN_MOUNT_POINT_OPTIONS) ||
-        utils::mountTmpfs(path, RUN_MOUNT_POINT_FLAGS, RUN_MOUNT_POINT_OPTIONS_NO_SMACK);
+bool mountRun(const std::string& path)
+{
+    return utils::mountTmpfs(path, RUN_MOUNT_POINT_FLAGS, RUN_MOUNT_POINT_OPTIONS)
+           || utils::mountTmpfs(path, RUN_MOUNT_POINT_FLAGS, RUN_MOUNT_POINT_OPTIONS_NO_SMACK);
 }
 
 bool umount(const std::string& path)
