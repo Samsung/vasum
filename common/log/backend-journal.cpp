@@ -23,12 +23,33 @@
  */
 
 #include "log/backend-journal.hpp"
-#include "log/formatter.hpp"
 
+#define SD_JOURNAL_SUPPRESS_LOCATION
 #include <systemd/sd-journal.h>
 
 namespace security_containers {
 namespace log {
+
+namespace {
+
+inline int toJournalPriority(LogLevel logLevel) {
+    switch (logLevel) {
+    case LogLevel::ERROR:
+        return LOG_ERR; // 3
+    case LogLevel::WARN:
+        return LOG_WARNING; // 4
+    case LogLevel::INFO:
+        return LOG_INFO; // 6
+    case LogLevel::DEBUG:
+        return LOG_DEBUG; // 7
+    case LogLevel::TRACE:
+        return LOG_DEBUG; // 7
+    default:
+        return LOG_DEBUG;
+    }
+}
+
+} // namespace
 
 void SystemdJournalBackend::log(LogLevel logLevel,
                                 const std::string& file,
@@ -36,14 +57,12 @@ void SystemdJournalBackend::log(LogLevel logLevel,
                                 const std::string& func,
                                 const std::string& message)
 {
-#define SD_JOURNAL_SUPPRESS_LOCATION
-    sd_journal_send("PRIORITY=%s", toString(logLevel).c_str(),
+    sd_journal_send("PRIORITY=%d", toJournalPriority(logLevel),
                     "CODE_FILE=%s", file.c_str(),
                     "CODE_LINE=%d", line,
                     "CODE_FUNC=%s", func.c_str(),
                     "MESSAGE=%s", message.c_str(),
                     NULL);
-#undef SD_JOURNAL_SUPPRESS_LOCATION
 }
 
 } // namespace log
