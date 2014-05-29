@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+#Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -59,7 +59,8 @@ SET(COMMON_FOLDER ${PROJECT_SOURCE_DIR}/common)
 SET(CLIENT_FOLDER ${PROJECT_SOURCE_DIR}/client)
 SET(SERVER_FOLDER ${PROJECT_SOURCE_DIR}/server)
 SET(CONTAINER_DAEMON_FOLDER ${PROJECT_SOURCE_DIR}/container-daemon)
-SET(UNIT_TESTS_FOLDER ${PROJECT_SOURCE_DIR}/unit_tests)
+SET(TESTS_FOLDER ${PROJECT_SOURCE_DIR}/tests)
+SET(UNIT_TESTS_FOLDER ${TESTS_FOLDER}/unit_tests)
 
 IF(NOT DEFINED SYSCONF_INSTALL_DIR)
     SET(SYSCONF_INSTALL_DIR "/etc")
@@ -91,5 +92,5 @@ SET(SC_DATA_INSTALL_DIR ${SHARE_INSTALL_PREFIX}/security-containers)
 ADD_SUBDIRECTORY(${CLIENT_FOLDER})
 ADD_SUBDIRECTORY(${SERVER_FOLDER})
 ADD_SUBDIRECTORY(${CONTAINER_DAEMON_FOLDER})
-ADD_SUBDIRECTORY(${UNIT_TESTS_FOLDER})
+ADD_SUBDIRECTORY(${TESTS_FOLDER})
 

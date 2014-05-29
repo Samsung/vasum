@@ -136,8 +136,8 @@ Daemon running inside every container.
 
 
 ## Test Package ################################################################
-%package unit-tests
-Summary:          Security Containers Unit Tests
+%package tests
+Summary:          Security Containers Tests
 Group:            Development/Libraries
 Requires:         security-containers = %{version}-%{release}
 Requires:         security-containers-client = %{version}-%{release}
@@ -145,11 +145,11 @@ Requires:         python
 Requires:         boost-test
 BuildRequires:    boost-devel
 
-%description unit-tests
-Unit tests for both: server and client.
+%description tests
+Unit tests for both: server and client and integration tests.
 
-%files unit-tests
-%manifest packaging/security-containers-server-unit-tests.manifest
+%files tests
+%manifest packaging/security-containers-server-tests.manifest
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/security-containers-server-unit-tests
 %attr(755,root,root) %{script_dir}/sc_all_tests.py
