@@ -84,30 +84,9 @@ class Logger(object):
 
 
 
-class Colorizer(object):
-    # Add new types of errors/tags for parser here
-    lineTypeDict = {'[ERROR]': RED + BOLD,
-                    '[WARN ]': YELLOW + BOLD,
-                    '[INFO ]': BLUE + BOLD,
-                    '[DEBUG]': GREEN,
-                    '[TRACE]': BLACK
-                    }
-
-    # Looks for lineTypeDict keywords in provided line and paints such line appropriately
-    def paintLine(self, line):
-        for key in self.lineTypeDict.iterkeys():
-            if key in line:
-                return self.lineTypeDict[key] + line + ENDC
-
-        return line
-
-
-
 class Parser(object):
     _testResultBegin = "<TestResult>"
     _testResultEnd = "</TestResult>"
-
-    colorizer = Colorizer()
 
     def __parseAndWriteLine(self, line):
         result = ""
@@ -117,29 +96,22 @@ class Parser(object):
                            line.find(self._testResultEnd) + len(self._testResultEnd)]
             line = line[0:line.find(self._testResultBegin)] + line[line.find(self._testResultEnd) +
                                                                    len(self._testResultEnd):]
-        sys.stdout.write(str(self.colorizer.paintLine(line)))
+        sys.stdout.write(line)
         sys.stdout.flush()
 
         return result
 
 
     def parseOutputFromProcess(self, p):
-        """Parses stdout from given subprocess p - colors printed lines and looks for test results.
+        """Parses stdout from given subprocess p.
         """
         testResult = ""
         # Dump test results
         while True:
             outline = p.stdout.readline()
             testResult += self.__parseAndWriteLine(outline)
-            # If process returns a value, leave loop
-            if p.poll() != None:
+            # Break if process has ended and everything has been read
+            if not outline and p.poll() != None:
                 break
 
-        # Sometimes the process might exit before we finish reading entire stdout
-        # Split ending of stdout in lines and finish reading it before ending the function
-        stdoutEnding = [s + '\n' for s in p.stdout.read().split('\n')]
-        for outline in stdoutEnding:
-            testResult += self.__parseAndWriteLine(outline)
-
         return testResult
-
