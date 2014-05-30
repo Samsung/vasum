@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Lukasz Pawelczyk <l.pawelczyk@partner.samsung.com>
+ *  Contact: Jan Olszak <j.olszak@samsung.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@
 
 /**
  * @file
- * @author  Lukasz Pawelczyk (l.pawelczyk@partner.samsung.com)
- * @brief   Implementation of the class wrapping libvirt domain
+ * @author  Jan Olszak (j.olszak@samsung.com)
+ * @brief   Implementation of the class wrapping libvirt network
  */
 
 #include "log/logger.hpp"
-#include "libvirt/domain.hpp"
+#include "libvirt/network.hpp"
 #include "libvirt/helpers.hpp"
 #include "libvirt/exception.hpp"
 
@@ -32,39 +32,39 @@ namespace security_containers {
 namespace libvirt {
 
 
-LibvirtDomain::LibvirtDomain(const std::string& configXML)
+LibvirtNetwork::LibvirtNetwork(const std::string& configXML)
     : mCon(LIBVIRT_LXC_ADDRESS)
 {
-    mDom = virDomainDefineXML(mCon.get(), configXML.c_str());
+    mNet = virNetworkDefineXML(mCon.get(), configXML.c_str());
 
-    if (mDom == NULL) {
-        LOGE("Error while defining a domain:\n"
+    if (mNet == NULL) {
+        LOGE("Error while defining a network:\n"
              << libvirtFormatError());
         throw LibvirtOperationException();
     }
 }
 
-LibvirtDomain::~LibvirtDomain()
+LibvirtNetwork::~LibvirtNetwork()
 {
-    if (virDomainUndefine(mDom) < 0) {
-        LOGE("Error while undefining the domain:\n"
+    if (virNetworkUndefine(mNet) < 0) {
+        LOGE("Error while undefining the network:\n"
              << libvirtFormatError());
     }
 
-    if (virDomainFree(mDom) < 0) {
-        LOGE("Error while destroying the domain object:\n"
+    if (virNetworkFree(mNet) < 0) {
+        LOGE("Error while destroying the network object:\n"
              << libvirtFormatError());
     }
 }
 
-virDomainPtr LibvirtDomain::get()
+virNetworkPtr LibvirtNetwork::get()
 {
-    return mDom;
+    return mNet;
 }
 
-LibvirtDomain::operator bool() const
+LibvirtNetwork::operator bool() const
 {
-    return mDom != NULL;
+    return mNet != NULL;
 }
 
 } // namespace libvirt

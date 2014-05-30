@@ -20,7 +20,7 @@
 /**
  * @file
  * @author  Lukasz Pawelczyk (l.pawelczyk@partner.samsung.com)
- * @brief   Unit tests of the ContainerAdmin class
+ * @brief   Unit tests of the LibvirtDomain class
  */
 
 #include "ut.hpp"
