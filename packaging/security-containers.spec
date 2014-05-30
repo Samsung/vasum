@@ -47,7 +47,8 @@ between them. A process from inside a container can request a switch of context
 %cmake . -DVERSION=%{version} \
          -DCMAKE_BUILD_TYPE=%{build_type} \
          -DSCRIPT_INSTALL_DIR=%{script_dir} \
-         -DSYSTEMD_UNIT_DIR=%{_unitdir}
+         -DSYSTEMD_UNIT_DIR=%{_unitdir} \
+         -DPYTHON_SITELIB=%{python_sitelib}
 make -k %{?jobs:-j%jobs}
 
 %install
@@ -153,6 +154,9 @@ Unit tests for both: server and client and integration tests.
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/security-containers-server-unit-tests
 %attr(755,root,root) %{script_dir}/sc_all_tests.py
+%attr(755,root,root) %{script_dir}/sc_int_tests.py
 %attr(755,root,root) %{script_dir}/sc_launch_test.py
 %{script_dir}/sc_test_parser.py
 %{_datadir}/security-containers
+%{python_sitelib}/sc_integration_tests/
+

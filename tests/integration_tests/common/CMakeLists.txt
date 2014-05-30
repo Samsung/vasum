@@ -1,4 +1,4 @@
-#Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+# Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -17,7 +17,11 @@
 # @author Lukasz Kostyra (l.kostyra@samsung.com)
 #
 
-ADD_SUBDIRECTORY(scripts)
-ADD_SUBDIRECTORY(integration_tests)
-ADD_SUBDIRECTORY(unit_tests)
+MESSAGE(STATUS "Including common package for Integration Tests...")
+
+SET(TEST_COMMON_DEST_DIR "${TEST_DEST_DIR}/common")
+
+FILE(GLOB common_SCRIPTS *.py)
+
+INSTALL(FILES ${common_SCRIPTS} DESTINATION ${TEST_COMMON_DEST_DIR})
 

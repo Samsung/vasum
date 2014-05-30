@@ -61,6 +61,15 @@ ADD_DEFINITIONS(-DPROGRAM_VERSION="${VERSION}")
 ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 
 
+## Python packages directory ###################################################
+
+IF(NOT DEFINED PYTHON_SITELIB)
+    EXECUTE_PROCESS(COMMAND python -c
+    "from distutils.sysconfig import get_python_lib; import sys; sys.stdout.write(get_python_lib())"
+    OUTPUT_VARIABLE PYTHON_SITELIB)
+ENDIF(NOT DEFINED PYTHON_SITELIB)
+
+
 ## Subdirectories ##############################################################
 SET(COMMON_FOLDER ${PROJECT_SOURCE_DIR}/common)
 SET(CLIENT_FOLDER ${PROJECT_SOURCE_DIR}/client)
