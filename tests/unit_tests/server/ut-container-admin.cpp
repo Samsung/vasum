@@ -55,7 +55,6 @@ const unsigned int WAIT_STOP_TIMEOUT = 15 * 1000;
 
 void ensureStarted()
 {
-    // TODO: fix the libvirt usage so this is not required
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 }
 

@@ -34,6 +34,8 @@
 
 #include <memory>
 #include <string>
+#include <thread>
+#include <chrono>
 
 
 using namespace security_containers;
@@ -45,6 +47,11 @@ const std::string TEST_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-cont
 const std::string TEST_DBUS_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container/containers/test-dbus.conf";
 const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container/containers/buggy.conf";
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/config.conf";
+
+void ensureStarted()
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+}
 
 struct Fixture {
     utils::ScopedGlibLoop mLoop;
@@ -80,6 +87,7 @@ BOOST_AUTO_TEST_CASE(StartStopTest)
 {
     std::unique_ptr<Container> c(new Container(TEST_CONFIG_PATH));
     BOOST_REQUIRE_NO_THROW(c->start());
+    ensureStarted();
     BOOST_REQUIRE_NO_THROW(c->stop());
 }
 
@@ -88,6 +96,7 @@ BOOST_AUTO_TEST_CASE(DbusConnectionTest)
     std::unique_ptr<Container> c;
     BOOST_REQUIRE_NO_THROW(c.reset(new Container(TEST_DBUS_CONFIG_PATH)));
     BOOST_REQUIRE_NO_THROW(c->start());
+    ensureStarted();
     BOOST_REQUIRE_NO_THROW(c->stop());
 }
 
