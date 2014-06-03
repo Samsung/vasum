@@ -26,6 +26,7 @@
 #include "utils/glib-loop.hpp"
 #include "utils/callback-wrapper.hpp"
 
+#include <glib-object.h>
 
 namespace security_containers {
 namespace utils {
@@ -34,6 +35,9 @@ namespace utils {
 ScopedGlibLoop::ScopedGlibLoop()
     : mLoop(g_main_loop_new(NULL, FALSE), g_main_loop_unref)
 {
+#if !GLIB_CHECK_VERSION(2,36,0)
+    g_type_init();
+#endif
     mLoopThread = std::thread([this] {
                                   g_main_loop_run(mLoop.get());
                               });
