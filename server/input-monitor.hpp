@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Pawel Broda <p.broda@partner.samsung.com>
+ *  Contact: Jan Olszak <j.olszak@samsung.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,50 +18,53 @@
 
 /**
  * @file
- * @author  Pawel Broda (p.broda@partner.samsung.com)
+ * @author  Jan Olszak (j.olszak@samsung.com)
  * @brief   C++ wrapper for glib input monitor
  */
 
 #ifndef SERVER_INPUT_MONITOR_HPP
 #define SERVER_INPUT_MONITOR_HPP
 
-
 #include "input-monitor-config.hpp"
+#include "utils/callback-guard.hpp"
 
-#include <functional>
-#include <glib.h>
 #include <linux/input.h>
 #include <sys/time.h>
+#include <glib.h>
+
+#include <functional>
+#include <string>
+#include <list>
 
 
 namespace security_containers {
 
-
 class InputMonitor {
 public:
-    typedef std::function<void()> InputNotifyCallback;
-    InputMonitor(const InputConfig&, const InputNotifyCallback&);
+    typedef std::function<void()> NotifyCallback;
+
+    InputMonitor(const InputConfig& inputConfig,
+                 const NotifyCallback& notifyCallback);
     ~InputMonitor();
 
 private:
-    static const int MAX_NUMBER_OF_EVENTS = 5;
-    static const int MAX_TIME_WINDOW_SEC = 10;
-    static const int KEY_PRESSED = 1;
-    static const int DEVICE_NAME_LENGTH = 256;
-    static const std::string DEVICE_DIR;
-    struct timeval mEventTime[MAX_NUMBER_OF_EVENTS];
-    GIOChannel *mChannel;
-    InputConfig mConfig;
+    typedef std::function<void(GIOChannel* gio)> ReadDeviceCallback;
 
-    // External callback to be registered at InputMonitor instance
-    InputNotifyCallback mNotifyCallback;
+    InputConfig mConfig;
+    NotifyCallback mNotifyCallback;
+
+    std::list<struct timeval> mEventTimes;
+    GIOChannel* mChannelPtr;
+
+    std::string getDevicePath();
+    void createGIOChannel(const std::string& devicePath);
 
     // Internal callback to be registered at glib g_io_add_watch()
-    static gboolean readDeviceCallback(GIOChannel *, GIOCondition, gpointer);
-    std::string findDeviceNode(const std::string&);
-    bool detectExpectedEvent(const struct input_event&);
-    void readDevice(GIOChannel *);
-    void resetEventsTime();
+    static gboolean readDeviceCallback(GIOChannel*, GIOCondition, gpointer);
+    bool isExpectedEventSequence(const struct input_event&);
+    void readDevice(GIOChannel*);
+    utils::CallbackGuard mGuard;
+    guint mSourceId;
 };
 
 } // namespace security_containers

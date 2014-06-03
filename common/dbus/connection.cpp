@@ -26,8 +26,10 @@
 #include "dbus/connection.hpp"
 #include "dbus/exception.hpp"
 #include "utils/callback-wrapper.hpp"
+#include "utils/scoped-gerror.hpp"
 #include "log/logger.hpp"
 
+using namespace security_containers::utils;
 
 namespace security_containers {
 namespace dbus {
@@ -40,40 +42,6 @@ const std::string INTROSPECT_INTERFACE = "org.freedesktop.DBus.Introspectable";
 const std::string INTROSPECT_METHOD = "Introspect";
 
 const int CALL_METHOD_TIMEOUT_MS = 1000;
-
-class ScopedError {
-public:
-    ScopedError() : mError(NULL) {}
-    ~ScopedError()
-    {
-        if (mError) {
-            g_error_free(mError);
-        }
-    }
-    void strip()
-    {
-        g_dbus_error_strip_remote_error(mError);
-    }
-    operator bool () const
-    {
-        return mError;
-    }
-    GError** operator& ()
-    {
-        return &mError;
-    }
-    const GError* operator->() const
-    {
-        return mError;
-    }
-    friend std::ostream& operator<<(std::ostream& os, const ScopedError& e)
-    {
-        os << e->message;
-        return os;
-    }
-private:
-    GError* mError;
-};
 
 class MethodResultBuilderImpl : public MethodResultBuilder {
 public:
@@ -102,7 +70,7 @@ private:
     bool mResultSet;
 };
 
-void throwDbusException(const ScopedError& e)
+void throwDbusException(const ScopedGError& e)
 {
     if (e->domain == g_io_error_quark()) {
         if (e->code == G_IO_ERROR_DBUS_ERROR) {
@@ -135,7 +103,7 @@ DbusConnection::DbusConnection(const std::string& address)
     : mConnection(NULL)
     , mNameId(0)
 {
-    ScopedError error;
+    ScopedGError error;
     const GDBusConnectionFlags flags =
         static_cast<GDBusConnectionFlags>(G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT |
                                           G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION);
@@ -200,7 +168,7 @@ void DbusConnection::emitSignal(const std::string& objectPath,
                                 const std::string& name,
                                 GVariant* parameters)
 {
-    ScopedError error;
+    ScopedGError error;
     g_dbus_connection_emit_signal(mConnection,
                                   NULL,
                                   objectPath.c_str(),
@@ -264,7 +232,7 @@ void DbusConnection::registerObject(const std::string& objectPath,
                                     const std::string& objectDefinitionXml,
                                     const MethodCallCallback& callback)
 {
-    ScopedError error;
+    ScopedGError error;
     GDBusNodeInfo* nodeInfo = g_dbus_node_info_new_for_xml(objectDefinitionXml.c_str(), &error);
     if (nodeInfo != NULL && (nodeInfo->interfaces == NULL ||
                              nodeInfo->interfaces[0] == NULL ||
@@ -333,7 +301,7 @@ GVariantPtr DbusConnection::callMethod(const std::string& busName,
                                        GVariant* parameters,
                                        const std::string& replyType)
 {
-    ScopedError error;
+    ScopedGError error;
     GVariant* result = g_dbus_connection_call_sync(mConnection,
                                                    busName.c_str(),
                                                    objectPath.c_str(),

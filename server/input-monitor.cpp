@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Pawel Broda <p.broda@partner.samsung.com>
+ *  Contact: Jan Olszak <j.olszak@samsung.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,17 +18,21 @@
 
 /**
  * @file
- * @author  Pawel Broda (p.broda@partner.samsung.com)
+ * @author  Jan Olszak (j.olszak@samsung.com)
  * @brief   C++ wrapper for glib input monitor
  */
 
-#include "exception.hpp"
-#include "input-monitor.hpp"
+#include "config.hpp"
+
 #include "input-monitor-config.hpp"
+#include "input-monitor.hpp"
+#include "exception.hpp"
 
 #include "log/logger.hpp"
 #include "utils/exception.hpp"
 #include "utils/fs.hpp"
+#include "utils/callback-wrapper.hpp"
+#include "utils/scoped-gerror.hpp"
 
 #include <cassert>
 #include <cstring>
@@ -39,225 +43,253 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <vector>
 
+#include <boost/filesystem.hpp>
+#include <boost/regex.hpp>
+#include <vector>
+#include <functional>
+
+using namespace security_containers::utils;
+namespace fs = boost::filesystem;
 
 namespace security_containers {
 
-// TODO: extract device helper and monitoring utilities from InputMonitor to separate files
+namespace {
+const int MAX_TIME_WINDOW_SEC = 10;
+const int KEY_PRESSED = 1;
+const int DEVICE_NAME_LENGTH = 256;
+const int MAX_NUMBER_OF_EVENTS = 10;
+const std::string DEVICE_DIR = "/dev/input/";
 
+} // namespace
 
-const std::string InputMonitor::DEVICE_DIR = "/dev/input/";
-
-
-std::string InputMonitor::findDeviceNode(const std::string& deviceName)
-{
-    std::vector<std::string> files;
-
-    try {
-        utils::listDir(DEVICE_DIR, files);
-    } catch (UtilsException&) {
-        throw InputMonitorException();
-    }
-
-    for (auto fileName: files) {
-        std::string fullDevicePath = DEVICE_DIR + fileName;
-        if (utils::isCharDevice(fullDevicePath)) {
-            char name[DEVICE_NAME_LENGTH];
-            memset(name, 0, sizeof(name));
-            int fd = open(fullDevicePath.c_str(), O_RDONLY);
-            if (fd < 0) {
-                LOGD("Failed to open'" << fullDevicePath << "'");
-                continue;
-            }
-
-            if (ioctl(fd, EVIOCGNAME(sizeof(name)), name) < 0) {
-                LOGD("Failed to send ioctl with request about device name to '"
-                     << fullDevicePath << "'");
-                close(fd);
-                continue;
-            }
-
-            close(fd);
-
-            if (deviceName == name) {
-                LOGI("Device file for '" << deviceName << "' found under '"
-                     << fullDevicePath << "'");
-                return fullDevicePath;
-            }
-        }
-    }
-
-    return std::string();
-}
-
-bool InputMonitor::detectExpectedEvent(const struct input_event& ie)
-{
-    // log events. Example log:
-    // Event detected [/dev/input/event4]:
-    //         time: 946705528.918966 sec
-    //         type, code, value: 1, 139, 1
-    LOGT("Event detected [" << mConfig.device.c_str() << "]:\n"
-         << "\ttime: " << ie.time.tv_sec << "." << ie.time.tv_usec << " sec\n"
-         << "\ttype, code, value: " << ie.type << ", " << ie.code << ", " << ie.value);
-
-    if (ie.type == EV_KEY &&
-        ie.code == mConfig.code &&
-        ie.value == KEY_PRESSED) {
-        for (int i = mConfig.numberOfEvents - 1; i > 0; --i) {
-            mEventTime[i].tv_sec = mEventTime[i - 1].tv_sec;
-            mEventTime[i].tv_usec = mEventTime[i - 1].tv_usec;
-        }
-
-        mEventTime[0].tv_sec = ie.time.tv_sec;
-        mEventTime[0].tv_usec = ie.time.tv_usec;
-
-        // a) check, if given event sequence happened within specified time window
-        //    (this is necessary, because of multiplying in the next step)
-        // b) if yes, then compute the difference between the first and the last one
-        if (((mEventTime[0].tv_sec - mEventTime[mConfig.numberOfEvents - 1].tv_sec) < MAX_TIME_WINDOW_SEC) &&
-            (mEventTime[0].tv_sec - mEventTime[mConfig.numberOfEvents - 1].tv_sec) * 1000000L +
-             mEventTime[0].tv_usec - mEventTime[mConfig.numberOfEvents - 1].tv_usec < mConfig.timeWindowMs * 1000L) {
-
-            resetEventsTime();
-
-            return true;
-        }
-    }
-
-    return false;
-}
-
-void InputMonitor::readDevice(GIOChannel* gio)
-{
-    struct input_event ie;
-    gchar buff[sizeof(struct input_event)];
-    gsize nBytesRequested = sizeof(struct input_event);
-    gsize nBytesRead = 0;
-    gsize nBytesReadTotal = 0;
-    GError *err = NULL;
-
-    do {
-        GIOStatus readStatus = g_io_channel_read_chars(gio,
-                                                       &buff[nBytesReadTotal],
-                                                       nBytesRequested,
-                                                       &nBytesRead,
-                                                       &err);
-
-         if (readStatus == G_IO_STATUS_ERROR || err != NULL) {
-             LOGE("Read from input monitor channel failed");
-             return;
-         }
-
-        nBytesRequested -= nBytesRead;
-        nBytesReadTotal += nBytesRead;
-    } while (nBytesRequested > 0);
-
-    memcpy(&ie, buff, sizeof(struct input_event));
-
-    if (detectExpectedEvent(ie)) {
-        LOGI("Input monitor detected pattern.");
-        mNotifyCallback();
-    }
-}
-
-gboolean InputMonitor::readDeviceCallback(GIOChannel* gio,
-                                          GIOCondition /*condition*/,
-                                          gpointer data)
-{
-        InputMonitor& inputMonitor = *reinterpret_cast<InputMonitor*>(data);
-        inputMonitor.readDevice(gio);
-
-        return TRUE;
-}
 
 InputMonitor::InputMonitor(const InputConfig& inputConfig,
-                           const InputNotifyCallback& inputNotifyCallback)
+                           const NotifyCallback& notifyCallback)
+    : mConfig(inputConfig),
+      mNotifyCallback(notifyCallback)
 {
-    mConfig = inputConfig;
-    mNotifyCallback = inputNotifyCallback;
-
-    resetEventsTime();
+    if (mConfig.timeWindowMs > MAX_TIME_WINDOW_SEC * 1000L) {
+        LOGE("Time window exceeds maximum: " << MAX_TIME_WINDOW_SEC);
+        throw InputMonitorException();
+    }
 
     if (mConfig.numberOfEvents > MAX_NUMBER_OF_EVENTS) {
-        LOGE("Input monitor numberOfEvents > MAX_NUMBER_OF_EVENTS\n"
-             << "\twhere MAX_NUMBER_OF_EVENTS = " << MAX_NUMBER_OF_EVENTS);
+        LOGE("Number of events exceeds maximum: " << MAX_NUMBER_OF_EVENTS);
         throw InputMonitorException();
     }
 
-    if (mConfig.timeWindowMs > MAX_TIME_WINDOW_SEC * 1000L) {
-        LOGE("Input monitor timeWindowMs > MAX_TIME_WINDOW_SEC * 1000L\n"
-             << "\twhere MAX_TIME_WINDOW_SEC = " << MAX_TIME_WINDOW_SEC);
-        throw InputMonitorException();
-    }
-
-    std::string devicePath;
-    if (mConfig.device[0] == '/') { // device file path is given
-        devicePath = mConfig.device;
-    } else { // device name is given - device file path is to be determined
-        LOGT("Determining, which device node is assigned to '" << mConfig.device << "'");
-        devicePath = findDeviceNode(mConfig.device);
-        if (devicePath.empty()) {
-            LOGE("None of the files under '" << DEVICE_DIR << "' represents device named: "
-                 << mConfig.device.c_str());
-                throw InputMonitorException();
-        }
-    }
+    std::string devicePath = getDevicePath();
 
     LOGT("Input monitor configuration: \n"
          << "\tenabled: " << mConfig.enabled << "\n"
-         << "\tdevice: " << mConfig.device.c_str() << "\n"
-         << "\tpath: " << devicePath.c_str() << "\n"
+         << "\tdevice: " << mConfig.device << "\n"
+         << "\tpath: " << devicePath << "\n"
          << "\ttype: " << EV_KEY << "\n"
          << "\tcode: " << mConfig.code << "\n"
          << "\tvalue: " << KEY_PRESSED << "\n"
          << "\tnumberOfEvents: " << mConfig.numberOfEvents << "\n"
          << "\ttimeWindowMs: " << mConfig.timeWindowMs);
 
-    GError *err = NULL;
+    createGIOChannel(devicePath);
+}
 
-    // creating channel using steps below, i.e.:
-    // 1) open()
-    // 2) g_io_channel_unix_new()
-    // was chosen, because glib API does not allow to open a file
-    // in a non-blocking mode. There is no argument to pass additional
-    // flags and we need such a mode for FIFOs in the tests.
+InputMonitor::~InputMonitor()
+{
+    LOGD("Destroying InputMonitor");
+    ScopedGError error;
+    g_io_channel_unref(mChannelPtr);
+    if (g_io_channel_shutdown(mChannelPtr, FALSE, &error)
+            != G_IO_STATUS_NORMAL) {
+        LOGE("Error during shutting down GIOChannel: " << error->message);
+    }
+
+    if (!g_source_remove(mSourceId)) {
+        LOGE("Error during removing the source");
+    }
+}
+
+namespace {
+bool isDeviceWithName(const boost::regex& deviceNameRegex,
+                      const fs::directory_entry& directoryEntry)
+{
+    std::string path = directoryEntry.path().string();
+
+    if (!utils::isCharDevice(path)) {
+        return false;
+    }
+
+    int fd = open(path.c_str(), O_RDONLY);
+    if (fd < 0) {
+        LOGD("Failed to open " << path);
+        return false;
+    }
+
+    char name[DEVICE_NAME_LENGTH];
+    if (ioctl(fd, EVIOCGNAME(sizeof(name)), name) < 0) {
+        LOGD("Failed to get the device name of: " << path);
+        if (close(fd) < 0) {
+            LOGE("Error during closing file " << path);
+        }
+        return false;
+    }
+
+    if (close(fd) < 0) {
+        LOGE("Error during closing file " << path);
+    }
+
+    LOGD("Checking device: " << name);
+    if (boost::regex_match(name, deviceNameRegex)) {
+        LOGI("Device file found under: " << path);
+        return true;
+    }
+
+    return false;
+}
+} // namespace
+
+std::string InputMonitor::getDevicePath()
+{
+    std::string device = mConfig.device;
+    if (fs::path(device).is_absolute()
+            && fs::exists(device)) {
+        LOGD("Device file path is given");
+        return device;
+    }
+
+    // device name is given - device file path is to be determined
+    LOGT("Determining, which device node is assigned to '" << device << "'");
+    using namespace std::placeholders;
+    fs::directory_iterator end;
+    boost::regex deviceNameRegex(".*" + device + ".*");
+    const auto it = std::find_if(fs::directory_iterator(DEVICE_DIR),
+                                 end,
+                                 std::bind(isDeviceWithName, deviceNameRegex, _1));
+    if (it == end) {
+        LOGE("None of the files under '" << DEVICE_DIR <<
+             "' represents device named: " << device);
+        throw InputMonitorException();
+    }
+
+    return it->path().string();
+}
+
+
+
+void InputMonitor::createGIOChannel(const std::string& devicePath)
+{
+    // We need NONBLOCK for FIFOs in the tests
     int fd = open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
     if (fd < 0) {
-        LOGE("Cannot create input monitor channel. Device file: " << devicePath.c_str()
-             << " doesn't exist" );
+        LOGE("Cannot create input monitor channel. Device file: " <<
+             devicePath << " doesn't exist");
         throw InputMonitorException();
     }
 
-    GIOChannel *mChannel = g_io_channel_unix_new(fd);
+    mChannelPtr = g_io_channel_unix_new(fd);
 
-    // close the channel on final unref
-    g_io_channel_set_close_on_unref(mChannel,
-                                    TRUE);
-
-    // read binary
-    g_io_channel_set_encoding(mChannel,
-                              NULL,
-                              &err);
-
-    if (err != NULL) {
-        LOGE("Cannot set encoding for input monitor channel");
+    // Read binary data
+    if (g_io_channel_set_encoding(mChannelPtr,
+                                  NULL,
+                                  NULL) != G_IO_STATUS_NORMAL) {
+        LOGE("Cannot set encoding for input monitor channel ");
         throw InputMonitorException();
     }
 
-    if (!g_io_add_watch(mChannel, G_IO_IN, readDeviceCallback, this)) {
+    using namespace std::placeholders;
+    ReadDeviceCallback callback = std::bind(&InputMonitor::readDevice, this, _1);
+    // Add the callback
+    mSourceId = g_io_add_watch_full(mChannelPtr,
+                                    G_PRIORITY_DEFAULT,
+                                    G_IO_IN,
+                                    readDeviceCallback,
+                                    utils::createCallbackWrapper(callback, mGuard.spawn()),
+                                    &utils::deleteCallbackWrapper<ReadDeviceCallback>);
+    if (!mSourceId) {
         LOGE("Cannot add watch on device input file");
         throw InputMonitorException();
     }
 }
 
-void InputMonitor::resetEventsTime()
+gboolean InputMonitor::readDeviceCallback(GIOChannel* gio,
+        GIOCondition /*condition*/,
+        gpointer data)
 {
-    memset(mEventTime, 0, sizeof(struct timeval) * MAX_NUMBER_OF_EVENTS);
+    const ReadDeviceCallback& callback = utils::getCallbackFromPointer<ReadDeviceCallback>(data);
+    callback(gio);
+    return TRUE;
 }
 
-InputMonitor::~InputMonitor()
+void InputMonitor::readDevice(GIOChannel* gio)
 {
+    struct input_event ie;
+    gsize nBytesReadTotal = 0;
+    gsize nBytesRequested = sizeof(struct input_event);
+    ScopedGError error;
+
+    do {
+        gsize nBytesRead = 0;
+        GIOStatus readStatus = g_io_channel_read_chars(gio,
+                               &reinterpret_cast<gchar*>(&ie)[nBytesReadTotal],
+                               nBytesRequested,
+                               &nBytesRead,
+                               &error);
+
+        if (readStatus == G_IO_STATUS_ERROR) {
+            LOGE("Read from input monitor channel failed: " << error->message);
+            return;
+        }
+
+        nBytesRequested -= nBytesRead;
+        nBytesReadTotal += nBytesRead;
+    } while (nBytesRequested > 0);
+
+
+    if (isExpectedEventSequence(ie)) {
+        LOGI("Input monitor detected pattern.");
+        mNotifyCallback();
+    }
 }
 
+bool InputMonitor::isExpectedEventSequence(const struct input_event& ie)
+{
+    LOGT("Event detected [" << mConfig.device.c_str() << "]:\n"
+         << "\ttime: " << ie.time.tv_sec << "." << ie.time.tv_usec << " sec\n"
+         << "\ttype, code, value: " << ie.type << ", " << ie.code << ", " << ie.value);
+
+    if (ie.type != EV_KEY
+            || ie.code != mConfig.code
+            || ie.value != KEY_PRESSED) {
+        LOGT("Wrong kind of event");
+        return false;
+    }
+
+    mEventTimes.push_back(ie.time);
+
+    if (mEventTimes.size() < static_cast<unsigned int>(mConfig.numberOfEvents)) {
+        LOGT("Event sequence too short");
+        return false;
+    }
+
+    struct timeval oldest = mEventTimes.front();
+    mEventTimes.pop_front();
+    struct timeval latest = mEventTimes.back();
+
+    long int secDiff = latest.tv_sec - oldest.tv_sec;
+    if (secDiff >= MAX_TIME_WINDOW_SEC) {
+        LOGT("Time window exceeded");
+        return false;
+    }
+
+    long int timeDiff = secDiff * 1000L;
+    timeDiff += static_cast<long int>((latest.tv_usec - oldest.tv_usec) / 1000L);
+    if (timeDiff < mConfig.timeWindowMs) {
+        LOGD("Event sequence detected");
+        mEventTimes.clear();
+        return true;
+    }
+
+    LOGT("Event sequence not detected");
+    return false;
+}
 } // namespace security_containers

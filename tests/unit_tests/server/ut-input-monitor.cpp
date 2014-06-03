@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Pawel Broda <p.broda@partner.samsung.com>
+ *  Contact: Jan Olszak <j.olszak@samsung.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 
 /**
  * @file
- * @author  Pawel Broda (p.broda@partner.samsung.com)
+ * @author  Jan Olszak (j.olszak@samsung.com)
  * @brief   Unit tests of the InputMonitor class
  */
 
@@ -33,96 +33,41 @@
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
 
-#include <atomic>
-#include <chrono>
-#include <fcntl.h>
-#include <memory>
-#include <string>
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <thread>
+#include <fcntl.h>
+#include <stdio.h>
 #include <unistd.h>
 
+#include <boost/filesystem.hpp>
+#include <atomic>
+#include <chrono>
+#include <memory>
+#include <string>
 
-BOOST_AUTO_TEST_SUITE(InputMonitorSuite)
 
 using namespace security_containers;
 using namespace security_containers::utils;
 
 namespace {
 
-const char* TEST_INPUT_DEVICE = "/tmp/testInputDevice";
+std::string TEST_INPUT_DEVICE =
+    boost::filesystem::unique_path("/tmp/testInputDevice-%%%%").string();
 
 const int EVENT_TYPE = 1;
 const int EVENT_CODE = 139;
 const int EVENT_BUTTON_RELEASED = 0;
 const int EVENT_BUTTON_PRESSED = 1;
 
-const unsigned int ONE_EVENT = 1;
-const unsigned int TEN_EVENTS = 10;
+const int SINGLE_EVENT_TIMEOUT = 1000;
 
-const int SINGLE_EVENT_TIMEOUT = 10;
-
-std::atomic<unsigned int> counter(0);
-
-
-void callbackEmpty()
-{
-}
-
-void callbackCounter()
-{
-    counter++;
-}
-
-void resetCounter()
-{
-    counter = 0;
-}
-
-unsigned int getCounter()
-{
-    return counter;
-}
-
-/*
- * A wrapper for write() which restarts after EINTR.
- */
-ssize_t safeWrite(int fd, const void *buff, size_t len)
-{
-    size_t totalBytesWritten = 0;
-
-    while (len > 0) {
-        ssize_t bytesWritten = write(fd, buff, len);
-
-        if (bytesWritten < 0 && errno == EINTR) {
-            continue;
-        }
-
-        if (bytesWritten < 0) {
-            return bytesWritten;
-        }
-
-        if (bytesWritten == 0) {
-            return totalBytesWritten;
-        }
-
-        buff = (const char *)buff + bytesWritten;
-        len -= bytesWritten;
-        totalBytesWritten += bytesWritten;
-    }
-
-    return totalBytesWritten;
-}
-
-class Fixture {
-public:
+struct Fixture {
     InputConfig inputConfig;
     utils::ScopedGlibLoop mLoop;
-    struct input_event ie[2];
+    struct input_event ie;
 
-    Fixture() {
+    Fixture()
+    {
         inputConfig.numberOfEvents = 2;
         inputConfig.device = TEST_INPUT_DEVICE;
         inputConfig.code = EVENT_CODE;
@@ -130,204 +75,136 @@ public:
         inputConfig.timeWindowMs = 500;
 
         // fill simulated events with init values
-        ie[0].time.tv_sec = 946707544;
-        ie[0].time.tv_usec = 0;
-        ie[0].type = EVENT_TYPE;
-        ie[0].code = EVENT_CODE;
-        ie[0].value = EVENT_BUTTON_RELEASED;
+        ie.time.tv_sec = 946707544;
+        ie.time.tv_usec = 0;
+        ie.type = EVENT_TYPE;
+        ie.code = EVENT_CODE;
+        ie.value = EVENT_BUTTON_RELEASED;
 
-        ie[1].time.tv_sec = 946707544;
-        ie[1].time.tv_usec = 0;
-        ie[1].type = 0;
-        ie[1].code = 0;
-        ie[1].value = 0;
-
-        resetCounter();
-        remove(TEST_INPUT_DEVICE);
-        mkfifo(TEST_INPUT_DEVICE, 0777);
+        ::remove(TEST_INPUT_DEVICE.c_str());
+        BOOST_CHECK(::mkfifo(TEST_INPUT_DEVICE.c_str(), S_IWUSR | S_IRUSR) >= 0);
     }
-    ~Fixture() {
-        remove(TEST_INPUT_DEVICE);
-        resetCounter();
+    ~Fixture()
+    {
+        ::remove(TEST_INPUT_DEVICE.c_str());
     }
 };
-
 } // namespace
+
+BOOST_FIXTURE_TEST_SUITE(InputMonitorSuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(Config_OK)
 {
-    Fixture f;
-
-    BOOST_REQUIRE_NO_THROW(InputMonitor inputMonitor(f.inputConfig, callbackEmpty));
-}
-
-BOOST_AUTO_TEST_CASE(Config_numberOfEventsTooHigh)
-{
-    Fixture f;
-    f.inputConfig.numberOfEvents = 100;
-
-    BOOST_REQUIRE_THROW(InputMonitor inputMonitor(f.inputConfig, callbackEmpty),
-                        InputMonitorException);
+    BOOST_REQUIRE_NO_THROW(InputMonitor inputMonitor(inputConfig, InputMonitor::NotifyCallback()));
 }
 
 BOOST_AUTO_TEST_CASE(Config_timeWindowMsTooHigh)
 {
-    Fixture f;
-    f.inputConfig.timeWindowMs = 50000;
+    inputConfig.timeWindowMs = 50000;
 
-    BOOST_REQUIRE_THROW(InputMonitor inputMonitor(f.inputConfig, callbackEmpty),
+    BOOST_REQUIRE_THROW(InputMonitor inputMonitor(inputConfig, InputMonitor::NotifyCallback()),
                         InputMonitorException);
 }
 
 BOOST_AUTO_TEST_CASE(Config_deviceFilePathNotExisting)
 {
-    Fixture f;
-    f.inputConfig.device = std::string(TEST_INPUT_DEVICE) + "notexisting";
+    inputConfig.device = TEST_INPUT_DEVICE + "notExisting";
 
-    BOOST_REQUIRE_THROW(InputMonitor inputMonitor(f.inputConfig, callbackEmpty),
+    BOOST_REQUIRE_THROW(InputMonitor inputMonitor(inputConfig, InputMonitor::NotifyCallback()),
                         InputMonitorException);
 }
 
-// ============================================================================================
-// All of the following tests are based on the (almost) the same scenario:
-// 1) set up input monitor (create InputMonitor instance + register callback)
-// 2) simulate an event(s)
-//    a) prepare an example sequence of event(s) to trigger the callback (one or more times,
-//       depending on the test purpose)
-//    b) send it to the device
-// 3) verify that callback was triggered (one or more times accordingly)
-//
-// Button press + release events are simulated based on logs gathered from working system.
-// Example log:
-//
-//           // button pressed
-//           Event detected [gpio-keys.4]:
-//             time: 946691112.844176 sec
-//             type, code, value: 1, 139, 1
-//           Event detected [gpio-keys.4]:
-//             time: 946691112.844176 sec
-//             type, code, value: 0, 0, 0
-//
-//           // button released
-//           Event detected [gpio-keys.4]:
-//             time: 946691113.384301 sec
-//             type, code, value: 1, 139, 0
-//           Event detected [gpio-keys.4]:
-//             time: 946691113.384301 sec
-//             type, code, value: 0, 0, 0
-//
-//
-// ============================================================================================
-
-void sendEvents(unsigned int noOfEvents)
+void sendNEvents(unsigned int noOfEventsToSend)
 {
     Fixture f;
     Latch eventLatch;
 
     std::unique_ptr<InputMonitor> inputMonitor;
-    BOOST_REQUIRE_NO_THROW(inputMonitor.reset(new InputMonitor(f.inputConfig,
-            [&] { callbackCounter();
-                  if (getCounter() == noOfEvents) {
-                      eventLatch.set();
-                  }
-                })));
+    BOOST_REQUIRE_NO_THROW(inputMonitor.reset(new InputMonitor(f.inputConfig, [&] {eventLatch.set();})));
 
-    int fd = open(TEST_INPUT_DEVICE, O_WRONLY);
+    int fd = ::open(TEST_INPUT_DEVICE.c_str(), O_WRONLY);
+    BOOST_REQUIRE(fd >= 0);
 
-    for (unsigned int i = 0; i < noOfEvents * f.inputConfig.numberOfEvents; ++i) {
+    for (unsigned int i = 0; i < noOfEventsToSend * f.inputConfig.numberOfEvents; ++i) {
         // button pressed event
-        f.ie[0].value = EVENT_BUTTON_PRESSED;
-        f.ie[0].time.tv_usec += 5;
-        f.ie[1].time.tv_usec += 5;
-        ssize_t ret = safeWrite(fd, f.ie, 2 * sizeof(struct input_event));
+        f.ie.value = EVENT_BUTTON_PRESSED;
+        f.ie.time.tv_usec += 5;
+        ssize_t ret = ::write(fd, &f.ie, sizeof(struct input_event));
         BOOST_CHECK(ret > 0);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         // button released event
-        f.ie[0].value = EVENT_BUTTON_RELEASED;
-        f.ie[0].time.tv_usec += 5;
-        f.ie[1].time.tv_usec += 5;
-        ret = safeWrite(fd, f.ie, 2 * sizeof(struct input_event));
+        f.ie.value = EVENT_BUTTON_RELEASED;
+        f.ie.time.tv_usec += 5;
+        ret = ::write(fd, &f.ie, sizeof(struct input_event));
         BOOST_CHECK(ret > 0);
     }
 
-    close(fd);
+    BOOST_CHECK(::close(fd) >= 0);
+    BOOST_CHECK(eventLatch.waitForN(noOfEventsToSend, SINGLE_EVENT_TIMEOUT * noOfEventsToSend));
 
-    BOOST_CHECK(eventLatch.wait(SINGLE_EVENT_TIMEOUT * noOfEvents));
-
-    // extra time to make sure, that no more events are read
-    std::this_thread::sleep_for(std::chrono::milliseconds(SINGLE_EVENT_TIMEOUT));
-
-    BOOST_CHECK(getCounter() == noOfEvents);
+    // Check if no more events are waiting
+    BOOST_CHECK(!eventLatch.wait(10));
 }
 
 BOOST_AUTO_TEST_CASE(Event_oneAtATime)
 {
-    sendEvents(ONE_EVENT);
+    sendNEvents(1);
 }
 
 BOOST_AUTO_TEST_CASE(Event_tenAtATime)
 {
-    sendEvents(TEN_EVENTS);
+    sendNEvents(10);
 }
 
-void sendEventsWithPauses(unsigned int noOfEvents)
+void sendNEventsWithPauses(unsigned int noOfEventsToSend)
 {
     Fixture f;
     Latch eventLatch;
 
     std::unique_ptr<InputMonitor> inputMonitor;
-    BOOST_REQUIRE_NO_THROW(inputMonitor.reset(new InputMonitor(f.inputConfig,
-            [&] { callbackCounter();
-                  if (getCounter() == noOfEvents) {
-                      eventLatch.set();
-                  }
-                })));
+    BOOST_REQUIRE_NO_THROW(inputMonitor.reset(new InputMonitor(f.inputConfig, [&] {eventLatch.set();})));
 
-    int fd = open(TEST_INPUT_DEVICE, O_WRONLY);
+    int fd = ::open(TEST_INPUT_DEVICE.c_str(), O_WRONLY);
+    BOOST_REQUIRE(fd >= 0);
 
-    for (unsigned int i = 0; i < noOfEvents * f.inputConfig.numberOfEvents; ++i) {
-        // button pressed event
-        f.ie[0].value = EVENT_BUTTON_PRESSED;
-        f.ie[0].time.tv_usec += 5;
-        f.ie[1].time.tv_usec += 5;
-        ssize_t ret = write(fd, f.ie, 2); // send first two bytes
+    for (unsigned int i = 0; i < noOfEventsToSend * f.inputConfig.numberOfEvents; ++i) {
+        // Send first two bytes of the button pressed event
+        f.ie.value = EVENT_BUTTON_PRESSED;
+        f.ie.time.tv_usec += 5;
+        ssize_t ret = ::write(fd, &f.ie, 2);
         BOOST_CHECK(ret > 0);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-        ret = write(fd, &reinterpret_cast<char *>(f.ie)[2], 2 * sizeof(struct input_event) - 2); // send the remaining part
+        // Send the remaining part
+        ret = ::write(fd, &reinterpret_cast<char*>(&f.ie)[2], sizeof(struct input_event) - 2);
         BOOST_CHECK(ret > 0);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-        // button released event
-        f.ie[0].value = EVENT_BUTTON_RELEASED;
-        f.ie[0].time.tv_usec += 5;
-        f.ie[1].time.tv_usec += 5;
-        ret = write(fd, f.ie, 2 * sizeof(struct input_event));
+        // Send the button released event
+        f.ie.value = EVENT_BUTTON_RELEASED;
+        f.ie.time.tv_usec += 5;
+        ret = ::write(fd, &f.ie, sizeof(struct input_event));
         BOOST_CHECK(ret > 0);
     }
+    BOOST_CHECK(::close(fd) >= 0);
+    BOOST_CHECK(eventLatch.waitForN(noOfEventsToSend, SINGLE_EVENT_TIMEOUT * noOfEventsToSend));
 
-    close(fd);
-
-    BOOST_CHECK(eventLatch.wait(SINGLE_EVENT_TIMEOUT * noOfEvents));
-
-    // extra time to make sure, that no more events are read
-    std::this_thread::sleep_for(std::chrono::milliseconds(SINGLE_EVENT_TIMEOUT));
-
-    BOOST_CHECK(getCounter() == noOfEvents);
+    // Check if no more events are waiting
+    BOOST_CHECK(!eventLatch.wait(10));
 }
 
 BOOST_AUTO_TEST_CASE(Event_oneAtATimeWithPauses)
 {
-    sendEventsWithPauses(ONE_EVENT);
+    sendNEventsWithPauses(1);
 }
 
 BOOST_AUTO_TEST_CASE(Event_tenAtATimeWithPauses)
 {
-    sendEventsWithPauses(TEN_EVENTS);
+    sendNEventsWithPauses(10);
 }
 
 

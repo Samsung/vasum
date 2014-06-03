@@ -36,15 +36,30 @@ namespace security_containers {
 
 struct InputConfig {
 
+    /**
+     * Is monitoring input enabled?
+     */
     bool enabled;
 
     /**
-     * represents either a device name or an absolute device file path (must be a string starting
-     *  with '/' character)
+     * Device name or an absolute device file path
+     * (must be a string starting with '/' character)
      */
     std::string device;
+
+    /**
+     * Event code
+     */
     int code;
+
+    /**
+     * Number of events that will trigger an action
+     */
     int numberOfEvents;
+
+    /**
+     * Time window in which subsequent events will trigger an action
+     */
     int timeWindowMs;
 
     CONFIG_REGISTER

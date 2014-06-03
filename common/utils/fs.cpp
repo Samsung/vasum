@@ -101,23 +101,6 @@ bool isCharDevice(const std::string& path)
     return ::stat(path.c_str(), &s) == 0 && S_IFCHR == (s.st_mode & S_IFMT);
 }
 
-bool listDir(const std::string& path, std::vector<std::string>& files)
-{
-    DIR* dirp = ::opendir(path.c_str());
-    if (dirp == NULL) {
-        LOGE("Could not open directory" << path << "': " << strerror(errno));
-        return false;
-    }
-
-    struct dirent* entry;
-    while ((entry = ::readdir(dirp)) != NULL) {
-        files.push_back(entry->d_name);
-    }
-
-    ::closedir(dirp);
-    return true;
-}
-
 namespace {
 // NOTE: Should be the same as in systemd/src/core/mount-setup.c
 const std::string RUN_MOUNT_POINT_OPTIONS = "mode=755,smackfstransmute=System::Run";
