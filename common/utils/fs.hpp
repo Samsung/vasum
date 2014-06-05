@@ -34,9 +34,19 @@ namespace security_containers {
 namespace utils {
 
 /**
- * Reads the content of a file
+ * Reads the content of a file; Throws exception on error
  */
 std::string readFileContent(const std::string& path);
+
+/**
+ * Reads the content of a file
+ */
+bool readFileContent(const std::string& path, std::string& content);
+
+/**
+ * Save the content to the file
+ */
+bool saveFileContent(const std::string& path, const std::string& content);
 
 /**
  * Checks if a char device exists

@@ -20,169 +20,253 @@
 /**
  * @file
  * @author  Michal Witanowski (m.witanowski@samsung.com)
- * @brief   Unit test of ConfigurationBase
+ * @brief   Unit test of Configuration
  */
 
 #include "config.hpp"
 #include "ut.hpp"
-#include "config/configuration.hpp"
+#include "config/fields.hpp"
+#include "config/manager.hpp"
 
 using namespace security_containers;
 using namespace security_containers::config;
 
-BOOST_AUTO_TEST_SUITE(ConfigSuite)
+BOOST_AUTO_TEST_SUITE(ConfigurationSuite)
 
-struct TestConfig : public ConfigurationBase {
+struct TestConfig {
     // subtree class
-    struct SubConfig : public ConfigurationBase {
+    struct SubConfig {
         int intVal;
 
-        CONFIG_REGISTER {
-            CONFIG_VALUE(intVal)
-        }
-
-        bool operator== (const SubConfig& rhs) const
-        {
-            return (rhs.intVal == intVal);
-        }
+        CONFIG_REGISTER
+        (
+            intVal
+        )
     };
 
     int intVal;
     std::int64_t int64Val;
     std::string stringVal;
-    double floatVal;
+    double doubleVal;
     bool boolVal;
 
     std::vector<int> intVector;
     std::vector<std::string> stringVector;
-    std::vector<double> floatVector;
+    std::vector<double> doubleVector;
 
     SubConfig subObj;
     std::vector<SubConfig> subVector;
 
-    CONFIG_REGISTER {
-        CONFIG_VALUE(intVal)
-        CONFIG_VALUE(int64Val)
-        CONFIG_VALUE(stringVal)
-        CONFIG_VALUE(floatVal)
-        CONFIG_VALUE(boolVal)
+    CONFIG_REGISTER
+    (
+        intVal,
+        int64Val,
+        stringVal,
+        doubleVal,
+        boolVal,
 
-        CONFIG_VALUE(intVector)
-        CONFIG_VALUE(stringVector)
-        CONFIG_VALUE(floatVector)
+        intVector,
+        stringVector,
+        doubleVector,
 
-        CONFIG_SUB_OBJECT(subObj)
-        CONFIG_SUB_OBJECT(subVector)
-    }
-
-    bool operator== (const TestConfig& rhs) const
-    {
-        return (rhs.intVal == intVal &&
-                rhs.int64Val == int64Val &&
-                rhs.stringVal == stringVal &&
-                rhs.floatVal == floatVal &&
-                rhs.boolVal == boolVal &&
-                rhs.subObj == subObj &&
-                rhs.intVector == intVector &&
-                rhs.stringVector == stringVector &&
-                rhs.floatVector == floatVector &&
-                rhs.subVector == subVector);
-    }
+        subObj,
+        subVector
+    )
 };
 
 /**
  * JSON string used in ConfigSuite test cases
+ * For the purpose of these tests the order of this string
+ * has to be equal to the above REGISTER order
  */
-const std::string json_test_string =
+const std::string jsonTestString =
     "{ \"intVal\": 12345, "
     "\"int64Val\": -1234567890123456789, "
     "\"stringVal\": \"blah\", "
-    "\"floatVal\": -1.234, "
+    "\"doubleVal\": -1.234000, "
     "\"boolVal\": true, "
-    "\"intVector\": [1, 2, 3], "
-    "\"stringVector\": [\"a\", \"b\"], "
-    "\"floatVector\": [0.0, 1.0, 2.0], "
+    "\"intVector\": [ 1, 2, 3 ], "
+    "\"stringVector\": [ \"a\", \"b\" ], "
+    "\"doubleVector\": [ 0.000000, 1.000000, 2.000000 ], "
     "\"subObj\": { \"intVal\": 54321 }, "
     "\"subVector\": [ { \"intVal\": 123 }, { \"intVal\": 456 } ] }";
 
-const double max_float_error = 1.0e-10;
+// Floating point tolerance as a number of rounding errors
+const int TOLERANCE = 1;
 
 
-BOOST_AUTO_TEST_CASE(SimpleTypesTest)
+BOOST_AUTO_TEST_CASE(FromStringTest)
 {
     TestConfig testConfig;
 
-    // make sure that parseStr() does not throw an exception
-    BOOST_REQUIRE_NO_THROW(testConfig.parseStr(json_test_string));
+    BOOST_REQUIRE_NO_THROW(loadFromString(jsonTestString, testConfig));
 
     BOOST_CHECK_EQUAL(12345, testConfig.intVal);
     BOOST_CHECK_EQUAL(-1234567890123456789ll, testConfig.int64Val);
-    BOOST_CHECK_CLOSE(-1.234, testConfig.floatVal, max_float_error);
     BOOST_CHECK_EQUAL("blah", testConfig.stringVal);
+    BOOST_CHECK_CLOSE(-1.234, testConfig.doubleVal, TOLERANCE);
     BOOST_CHECK_EQUAL(true, testConfig.boolVal);
-}
-
-BOOST_AUTO_TEST_CASE(IntVectorTest)
-{
-    TestConfig testConfig;
-    BOOST_REQUIRE_NO_THROW(testConfig.parseStr(json_test_string));
 
     BOOST_REQUIRE_EQUAL(3, testConfig.intVector.size());
     BOOST_CHECK_EQUAL(1, testConfig.intVector[0]);
     BOOST_CHECK_EQUAL(2, testConfig.intVector[1]);
     BOOST_CHECK_EQUAL(3, testConfig.intVector[2]);
-}
-
-BOOST_AUTO_TEST_CASE(StringVectorTest)
-{
-    TestConfig testConfig;
-    BOOST_REQUIRE_NO_THROW(testConfig.parseStr(json_test_string));
 
     BOOST_REQUIRE_EQUAL(2, testConfig.stringVector.size());
     BOOST_CHECK_EQUAL("a", testConfig.stringVector[0]);
     BOOST_CHECK_EQUAL("b", testConfig.stringVector[1]);
-}
 
-BOOST_AUTO_TEST_CASE(FloatVectorTest)
-{
-    TestConfig testConfig;
-    BOOST_REQUIRE_NO_THROW(testConfig.parseStr(json_test_string));
-
-    BOOST_REQUIRE_EQUAL(3, testConfig.floatVector.size());
-    BOOST_CHECK_CLOSE(0.0, testConfig.floatVector[0], max_float_error);
-    BOOST_CHECK_CLOSE(1.0, testConfig.floatVector[1], max_float_error);
-    BOOST_CHECK_CLOSE(2.0, testConfig.floatVector[2], max_float_error);
-}
-
-BOOST_AUTO_TEST_CASE(SubObjectTest)
-{
-    TestConfig testConfig;
-    BOOST_REQUIRE_NO_THROW(testConfig.parseStr(json_test_string));
+    BOOST_REQUIRE_EQUAL(3, testConfig.doubleVector.size());
+    BOOST_CHECK_CLOSE(0.0, testConfig.doubleVector[0], TOLERANCE);
+    BOOST_CHECK_CLOSE(1.0, testConfig.doubleVector[1], TOLERANCE);
+    BOOST_CHECK_CLOSE(2.0, testConfig.doubleVector[2], TOLERANCE);
 
     BOOST_CHECK_EQUAL(54321, testConfig.subObj.intVal);
-    // TODO: more attributes in subtree
-}
-
-BOOST_AUTO_TEST_CASE(SubObjectVectorTest)
-{
-    TestConfig testConfig;
-    BOOST_REQUIRE_NO_THROW(testConfig.parseStr(json_test_string));
 
     BOOST_REQUIRE_EQUAL(2, testConfig.subVector.size());
     BOOST_CHECK_EQUAL(123, testConfig.subVector[0].intVal);
     BOOST_CHECK_EQUAL(456, testConfig.subVector[1].intVal);
 }
 
+
 BOOST_AUTO_TEST_CASE(ToStringTest)
 {
     TestConfig testConfig;
-    BOOST_REQUIRE_NO_THROW(testConfig.parseStr(json_test_string));
-    BOOST_REQUIRE_NO_THROW(testConfig.toString());
+    BOOST_REQUIRE_NO_THROW(loadFromString(jsonTestString, testConfig));
 
-    // parse output again and check if both objects match
-    TestConfig outputConfig;
-    BOOST_REQUIRE_NO_THROW(outputConfig.parseStr(json_test_string));
-    BOOST_CHECK(outputConfig == testConfig);
+    std::string out = saveToString(testConfig);
+    BOOST_CHECK_EQUAL(out, jsonTestString);
+}
+
+namespace loadErrorsTest {
+
+#define DECLARE_CONFIG(name, type) \
+struct name { \
+    type field; \
+    CONFIG_REGISTER(field) \
+};
+DECLARE_CONFIG(IntConfig, int)
+DECLARE_CONFIG(StringConfig, std::string)
+DECLARE_CONFIG(DoubleConfig, double)
+DECLARE_CONFIG(BoolConfig, bool)
+DECLARE_CONFIG(ArrayConfig, std::vector<int>)
+DECLARE_CONFIG(ObjectConfig, IntConfig)
+#undef DECLARE_CONFIG
+
+} // namespace loadErrorsTest
+
+BOOST_AUTO_TEST_CASE(LoadErrorsTest)
+{
+    using namespace loadErrorsTest;
+
+    IntConfig config;
+    BOOST_REQUIRE_NO_THROW(loadFromString("{\"field\":1}", config));
+
+    BOOST_CHECK_THROW(loadFromString("", config), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{", config), ConfigException); // invalid json
+    BOOST_CHECK_THROW(loadFromString("{}", config), ConfigException); // missing field
+
+    // invalid type
+
+    IntConfig intConfig;
+    BOOST_CHECK_NO_THROW(loadFromString("{\"field\": 1}", intConfig));
+    BOOST_CHECK_THROW(loadFromString("{\"field\": \"1\"}", intConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": 1.0}", intConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": true}", intConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": []}", intConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": {}}", intConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": 1234567890123456789}", intConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": -1234567890123456789}", intConfig), ConfigException);
+
+    StringConfig stringConfig;
+    BOOST_CHECK_THROW(loadFromString("{\"field\": 1}", stringConfig), ConfigException);
+    BOOST_CHECK_NO_THROW(loadFromString("{\"field\": \"1\"}", stringConfig));
+    BOOST_CHECK_THROW(loadFromString("{\"field\": 1.0}", stringConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": true}", stringConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": []}", stringConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": {}}", stringConfig), ConfigException);
+
+    DoubleConfig doubleConfig;
+    BOOST_CHECK_THROW(loadFromString("{\"field\": 1}", doubleConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": \"1\"}", doubleConfig), ConfigException);
+    BOOST_CHECK_NO_THROW(loadFromString("{\"field\": 1.0}", doubleConfig));
+    BOOST_CHECK_THROW(loadFromString("{\"field\": true}", doubleConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": []}", doubleConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": {}}", doubleConfig), ConfigException);
+
+    BoolConfig boolConfig;
+    BOOST_CHECK_THROW(loadFromString("{\"field\": 1}", boolConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": \"1\"}", boolConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": 1.0}", boolConfig), ConfigException);
+    BOOST_CHECK_NO_THROW(loadFromString("{\"field\": true}", boolConfig));
+    BOOST_CHECK_THROW(loadFromString("{\"field\": []}", boolConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": {}}", boolConfig), ConfigException);
+
+    ArrayConfig arrayConfig;
+    BOOST_CHECK_THROW(loadFromString("{\"field\": 1}", arrayConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": \"1\"}", arrayConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": 1.0}", arrayConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": true}", arrayConfig), ConfigException);
+    BOOST_CHECK_NO_THROW(loadFromString("{\"field\": []}", arrayConfig));
+    BOOST_CHECK_THROW(loadFromString("{\"field\": {}}", arrayConfig), ConfigException);
+
+    ObjectConfig objectConfig;
+    BOOST_CHECK_THROW(loadFromString("{\"field\": 1}", objectConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": \"1\"}", objectConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": 1.0}", objectConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": true}", objectConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": []}", objectConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"field\": {}}", objectConfig), ConfigException);
+    BOOST_CHECK_NO_THROW(loadFromString("{\"field\": {\"field\": 1}}", objectConfig));
+}
+
+namespace hasVisitableTest {
+
+struct NotVisitable {};
+struct Visitable {
+    template<typename V>
+    void accept(V v);
+};
+struct ConstVisitable {
+    template<typename V>
+    void accept(V v) const;
+};
+struct FullVisitable {
+    template<typename V>
+    void accept(V v);
+    template<typename V>
+    void accept(V v) const;
+};
+struct DerivedVisitable : FullVisitable {};
+struct MissingArg {
+    template<typename V>
+    void accept();
+};
+struct WrongArg {
+    template<typename V>
+    void accept(int v);
+};
+struct NotFunction {
+    int accept;
+};
+
+} // namespace hasVisitableTest
+
+BOOST_AUTO_TEST_CASE(HasVisibleInternalHelperTest)
+{
+    using namespace hasVisitableTest;
+
+    static_assert(isVisitable<Visitable>::value, "");
+    static_assert(isVisitable<ConstVisitable>::value, "");
+    static_assert(isVisitable<FullVisitable>::value, "");
+    static_assert(isVisitable<DerivedVisitable>::value, "");
+
+    static_assert(!isVisitable<NotVisitable>::value, "");
+    static_assert(!isVisitable<MissingArg>::value, "");
+    static_assert(!isVisitable<WrongArg>::value, "");
+    static_assert(!isVisitable<NotFunction>::value, "");
+
+    BOOST_CHECK(isVisitable<Visitable>());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

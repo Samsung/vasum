@@ -26,7 +26,7 @@
 #ifndef SERVER_CONTAINER_CONFIG_HPP
 #define SERVER_CONTAINER_CONFIG_HPP
 
-#include "config/configuration.hpp"
+#include "config/fields.hpp"
 
 #include <string>
 
@@ -34,7 +34,7 @@
 namespace security_containers {
 
 
-struct ContainerConfig : public config::ConfigurationBase {
+struct ContainerConfig {
     /**
      * Privilege of the container.
      * The smaller the value the more important the container
@@ -62,13 +62,14 @@ struct ContainerConfig : public config::ConfigurationBase {
      */
     std::string runMountPoint;
 
-    CONFIG_REGISTER {
-        CONFIG_VALUE(privilege)
-        CONFIG_VALUE(config)
-        CONFIG_VALUE(cpuQuotaForeground)
-        CONFIG_VALUE(cpuQuotaBackground)
-        CONFIG_VALUE(runMountPoint)
-    }
+    CONFIG_REGISTER
+    (
+        privilege,
+        config,
+        cpuQuotaForeground,
+        cpuQuotaBackground,
+        runMountPoint
+    )
 };
 
 

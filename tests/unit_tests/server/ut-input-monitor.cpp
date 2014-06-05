@@ -48,7 +48,6 @@
 BOOST_AUTO_TEST_SUITE(InputMonitorSuite)
 
 using namespace security_containers;
-using namespace security_containers::config;
 using namespace security_containers::utils;
 
 namespace {

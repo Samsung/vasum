@@ -28,6 +28,7 @@
 
 #include "log/logger.hpp"
 #include "utils/paths.hpp"
+#include "config/manager.hpp"
 
 #include <string>
 #include <thread>
@@ -46,7 +47,7 @@ const int RECONNECT_DELAY = 1 * 1000;
 
 Container::Container(const std::string& containerConfigPath)
 {
-    mConfig.parseFile(containerConfigPath);
+    config::loadFromFile(containerConfigPath, mConfig);
     std::string libvirtConfigPath;
 
     if (mConfig.config[0] == '/') {
@@ -158,13 +159,13 @@ void Container::reconnectHandler()
         }
 
         try {
-            LOGT(getId() << ": Reconnect try " << i+1);
+            LOGT(getId() << ": Reconnect try " << i + 1);
             mConnection.reset(new ContainerConnection(mConnectionTransport->acquireAddress(),
                                                       std::bind(&Container::onNameLostCallback, this)));
             LOGI(getId() << ": Reconnected");
             return;
         } catch (SecurityContainersException&) {
-            LOGT(getId() << ": Reconnect try " << i+1 << " has been unsuccessful");
+            LOGT(getId() << ": Reconnect try " << i + 1 << " has been unsuccessful");
         }
     }
 

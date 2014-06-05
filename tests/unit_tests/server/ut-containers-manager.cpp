@@ -30,6 +30,7 @@
 #include "exception.hpp"
 
 #include "utils/glib-loop.hpp"
+#include "config/exception.hpp"
 
 #include <memory>
 #include <string>

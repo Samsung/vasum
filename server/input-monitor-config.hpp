@@ -27,14 +27,14 @@
 #define SERVER_INPUT_MONITOR_CONFIG_HPP
 
 
-#include "config/configuration.hpp"
+#include "config/fields.hpp"
 
 #include <string>
 
 
 namespace security_containers {
 
-struct InputConfig : public config::ConfigurationBase {
+struct InputConfig {
 
     bool enabled;
 
@@ -47,13 +47,14 @@ struct InputConfig : public config::ConfigurationBase {
     int numberOfEvents;
     int timeWindowMs;
 
-    CONFIG_REGISTER {
-        CONFIG_VALUE(enabled)
-        CONFIG_VALUE(device)
-        CONFIG_VALUE(code)
-        CONFIG_VALUE(numberOfEvents)
-        CONFIG_VALUE(timeWindowMs)
-    }
+    CONFIG_REGISTER
+    (
+        enabled,
+        device,
+        code,
+        numberOfEvents,
+        timeWindowMs
+    )
 
 };
 

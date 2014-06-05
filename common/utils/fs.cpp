@@ -45,22 +45,54 @@ namespace utils {
 
 std::string readFileContent(const std::string& path)
 {
-    std::ifstream t(path);
-
-    if (!t.is_open()) {
-        LOGE(path << " is missing");
+    std::string result;
+    if (!readFileContent(path, result)) {
         throw UtilsException();
     }
+    return result;
+}
 
-    std::string content;
+bool readFileContent(const std::string& path, std::string& result)
+{
+    std::ifstream file(path);
 
-    t.seekg(0, std::ios::end);
-    content.reserve(static_cast<size_t>(t.tellg()));
-    t.seekg(0, std::ios::beg);
+    if (!file) {
+        LOGD(path << ": could not open for reading");
+        return false;
+    }
 
-    content.assign((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+    file.seekg(0, std::ios::end);
+    std::streampos length = file.tellg();
+    if (length < 0) {
+        LOGD(path << ": tellg failed");
+        return false;
+    }
+    result.resize(static_cast<size_t>(length));
+    file.seekg(0, std::ios::beg);
 
-    return content;
+    file.read(&result[0], length);
+    if (!file) {
+        LOGD(path << ": read error");
+        result.clear();
+        return false;
+    }
+
+    return true;
+}
+
+bool saveFileContent(const std::string& path, const std::string& content)
+{
+    std::ofstream file(path);
+    if (!file) {
+        LOGD(path << ": could not open for writing");
+        return false;
+    }
+    file.write(content.data(), content.size());
+    if (!file) {
+        LOGD(path << ": could not write to");
+        return false;
+    }
+    return true;
 }
 
 bool isCharDevice(const std::string& path)
@@ -71,13 +103,13 @@ bool isCharDevice(const std::string& path)
 
 bool listDir(const std::string& path, std::vector<std::string>& files)
 {
-    DIR *dirp = ::opendir(path.c_str());
-    if(dirp == NULL) {
+    DIR* dirp = ::opendir(path.c_str());
+    if (dirp == NULL) {
         LOGE("Could not open directory" << path << "': " << strerror(errno));
         return false;
     }
 
-    struct dirent *entry;
+    struct dirent* entry;
     while ((entry = ::readdir(dirp)) != NULL) {
         files.push_back(entry->d_name);
     }

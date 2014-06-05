@@ -59,5 +59,12 @@
 
 #endif // GCC_VERSION
 
+// Variadic macros support for boost preprocessor should be enabled
+// manually for clang since they are marked as untested feature
+// (boost trunk if fixed but the latest 1.55 version is not,
+// see boost/preprocessor/config/config.hpp)
+#ifdef __clang__
+#define BOOST_PP_VARIADICS 1
+#endif
 
 #endif // COMMON_CONFIG_HPP

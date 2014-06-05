@@ -33,7 +33,8 @@ namespace log {
 
 namespace {
 
-inline int toJournalPriority(LogLevel logLevel) {
+inline int toJournalPriority(LogLevel logLevel)
+{
     switch (logLevel) {
     case LogLevel::ERROR:
         return LOG_ERR; // 3

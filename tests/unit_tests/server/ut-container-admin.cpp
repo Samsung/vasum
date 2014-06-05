@@ -34,6 +34,7 @@
 #include "utils/exception.hpp"
 #include "utils/callback-guard.hpp"
 #include "libvirt/exception.hpp"
+#include "config/manager.hpp"
 
 #include <memory>
 #include <string>
@@ -42,7 +43,6 @@
 
 
 using namespace security_containers;
-using namespace security_containers::config;
 
 namespace {
 
@@ -70,26 +70,30 @@ BOOST_FIXTURE_TEST_SUITE(ContainerAdminSuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(ConstructorTest)
 {
-    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerConfig config;
+    config::loadFromFile(TEST_CONFIG_PATH, config);
     BOOST_REQUIRE_NO_THROW(ContainerAdmin ca(config));
 }
 
 BOOST_AUTO_TEST_CASE(DestructorTest)
 {
-    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerConfig config;
+    config::loadFromFile(TEST_CONFIG_PATH, config);
     std::unique_ptr<ContainerAdmin> ca(new ContainerAdmin(config));
     BOOST_REQUIRE_NO_THROW(ca.reset());
 }
 
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)
 {
-    ContainerConfig config; config.parseFile(BUGGY_CONFIG_PATH);
+    ContainerConfig config;
+    config::loadFromFile(BUGGY_CONFIG_PATH, config);
     BOOST_REQUIRE_THROW(ContainerAdmin ca(config), LibvirtOperationException);
 }
 
 BOOST_AUTO_TEST_CASE(MissingConfigTest)
 {
-    ContainerConfig config; config.parseFile(MISSING_CONFIG_PATH);
+    ContainerConfig config;
+    config::loadFromFile(MISSING_CONFIG_PATH, config);
     BOOST_REQUIRE_THROW(ContainerAdmin ca(config), UtilsException);
 }
 
@@ -97,7 +101,8 @@ BOOST_AUTO_TEST_CASE(StartTest)
 {
     utils::Latch booted;
     ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
-    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerConfig config;
+    config::loadFromFile(TEST_CONFIG_PATH, config);
     ContainerAdmin ca(config);
 
     ContainerAdmin::LifecycleListener bootedListener = [&](const int event, const int detail) {
@@ -120,7 +125,8 @@ BOOST_AUTO_TEST_CASE(ShutdownTest)
 {
     utils::Latch shutdown;
     ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
-    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerConfig config;
+    config::loadFromFile(TEST_CONFIG_PATH, config);
     ContainerAdmin ca(config);
 
     ContainerAdmin::LifecycleListener shutdownListener = [&](const int event, const int detail) {
@@ -146,7 +152,8 @@ BOOST_AUTO_TEST_CASE(DestroyTest)
 {
     utils::Latch destroyed;
     ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
-    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerConfig config;
+    config::loadFromFile(TEST_CONFIG_PATH, config);
     ContainerAdmin ca(config);
 
     ContainerAdmin::LifecycleListener destroyedListener = [&](const int event, const int detail) {
@@ -172,7 +179,8 @@ BOOST_AUTO_TEST_CASE(StopShutdownTest)
 {
     utils::Latch shutdown;
     ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
-    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerConfig config;
+    config::loadFromFile(TEST_CONFIG_PATH, config);
     ContainerAdmin ca(config);
 
     ContainerAdmin::LifecycleListener shutdownListener = [&](const int event, const int detail) {
@@ -199,7 +207,8 @@ BOOST_AUTO_TEST_CASE(StopDestroyTest)
 {
     utils::Latch destroyed;
     ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
-    ContainerConfig config; config.parseFile(TEST_NO_SHUTDOWN_CONFIG_PATH);
+    ContainerConfig config;
+    config::loadFromFile(TEST_NO_SHUTDOWN_CONFIG_PATH, config);
     ContainerAdmin ca(config);
 
     ContainerAdmin::LifecycleListener destroyedListener = [&](const int event, const int detail) {
@@ -225,7 +234,8 @@ BOOST_AUTO_TEST_CASE(SuspendTest)
 {
     utils::Latch paused;
     ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
-    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerConfig config;
+    config::loadFromFile(TEST_CONFIG_PATH, config);
     ContainerAdmin ca(config);
 
     ContainerAdmin::LifecycleListener pausedListener = [&](const int event, const int detail) {
@@ -251,7 +261,8 @@ BOOST_AUTO_TEST_CASE(ResumeTest)
 {
     utils::Latch unpaused;
     ContainerAdmin::ListenerId id = ContainerAdmin::LISTENER_ID_INVALID;
-    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerConfig config;
+    config::loadFromFile(TEST_CONFIG_PATH, config);
     ContainerAdmin ca(config);
 
     ContainerAdmin::LifecycleListener unpausedListener = [&](const int event, const int detail) {
@@ -277,7 +288,8 @@ BOOST_AUTO_TEST_CASE(ResumeTest)
 
 BOOST_AUTO_TEST_CASE(SchedulerLevelTest)
 {
-    ContainerConfig config; config.parseFile(TEST_CONFIG_PATH);
+    ContainerConfig config;
+    config::loadFromFile(TEST_CONFIG_PATH, config);
     ContainerAdmin ca(config);
     BOOST_REQUIRE_NO_THROW(ca.start());
     ensureStarted();

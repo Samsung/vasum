@@ -30,6 +30,7 @@
 
 #include "utils/paths.hpp"
 #include "log/logger.hpp"
+#include "config/manager.hpp"
 
 #include <cassert>
 #include <string>
@@ -42,7 +43,7 @@ namespace security_containers {
 ContainersManager::ContainersManager(const std::string& managerConfigPath): mDetachOnExit(false)
 {
     LOGD("Instantiating ContainersManager object...");
-    mConfig.parseFile(managerConfigPath);
+    config::loadFromFile(managerConfigPath, mConfig);
 
     for (auto& containerConfig : mConfig.containerConfigs) {
         std::string containerConfigPath;
