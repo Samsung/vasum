@@ -41,7 +41,8 @@ using namespace security_containers::libvirt;
 namespace {
 
 const std::string CORRECT_CONFIG_XML =  "<network>"
-                                        "    <name>test</name>"
+                                        "    <name>test-network</name>"
+                                        "    <uuid>44089687-5004-4def-87f0-01c9565f74fd</uuid>"
                                         "    <forward mode='nat'>"
                                         "        <nat>"
                                         "          <port start='1024' end='65535'/>"

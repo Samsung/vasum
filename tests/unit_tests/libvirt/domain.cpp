@@ -41,7 +41,8 @@ using namespace security_containers::libvirt;
 namespace {
 
 const std::string CORRECT_CONFIG_XML = "<domain type=\"lxc\">"
-                                       "    <name>cnsl</name>"
+                                       "    <name>test-domain</name>"
+                                       "    <uuid>444d6e30-efdf-41b0-aafa-6684e6376831</uuid>"
                                        "    <memory>102400</memory>"
                                        "    <os>"
                                        "        <type>exe</type>"
