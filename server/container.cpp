@@ -42,6 +42,8 @@ namespace fs = boost::filesystem;
 
 namespace {
 
+typedef std::lock_guard<std::recursive_mutex> Lock;
+
 // TODO: move constants to the config file when default values are implemented there
 const int RECONNECT_RETRIES = 15;
 const int RECONNECT_DELAY = 1 * 1000;
@@ -67,7 +69,10 @@ Container::~Container()
     // Make sure all OnNameLostCallbacks get finished and no new will
     // get called before proceeding further. This guarantees no race
     // condition on the mReconnectThread.
-    mConnection.reset();
+    {
+        Lock lock(mReconnectMutex);
+        mConnection.reset();
+    }
 
     if (mReconnectThread.joinable()) {
         mReconnectThread.join();
@@ -76,6 +81,7 @@ Container::~Container()
 
 const std::string& Container::getId() const
 {
+    Lock lock(mReconnectMutex);
     return mAdmin->getId();
 }
 
@@ -86,12 +92,15 @@ int Container::getPrivilege() const
 
 void Container::start()
 {
+    Lock lock(mReconnectMutex);
     mConnectionTransport.reset(new ContainerConnectionTransport(mConfig.runMountPoint));
     mNetworkAdmin->start();
     mAdmin->start();
     mConnection.reset(new ContainerConnection(mConnectionTransport->acquireAddress(),
                                               std::bind(&Container::onNameLostCallback, this)));
-
+    if (mNotifyCallback) {
+        mConnection->setNotifyActiveContainerCallback(mNotifyCallback);
+    }
     // Send to the background only after we're connected,
     // otherwise it'd take ages.
     LOGD(getId() << ": DBUS connected, sending to the background");
@@ -100,6 +109,7 @@ void Container::start()
 
 void Container::stop()
 {
+    Lock lock(mReconnectMutex);
     mConnection.reset();
     mAdmin->stop();
     mNetworkAdmin->stop();
@@ -108,16 +118,19 @@ void Container::stop()
 
 void Container::goForeground()
 {
+    Lock lock(mReconnectMutex);
     mAdmin->setSchedulerLevel(SchedulerLevel::FOREGROUND);
 }
 
 void Container::goBackground()
 {
+    Lock lock(mReconnectMutex);
     mAdmin->setSchedulerLevel(SchedulerLevel::BACKGROUND);
 }
 
 void Container::setDetachOnExit()
 {
+    Lock lock(mReconnectMutex);
     mNetworkAdmin->setDetachOnExit();
     mAdmin->setDetachOnExit();
     mConnectionTransport->setDetachOnExit();
@@ -125,16 +138,19 @@ void Container::setDetachOnExit()
 
 bool Container::isRunning()
 {
+    Lock lock(mReconnectMutex);
     return mAdmin->isRunning();
 }
 
 bool Container::isStopped()
 {
+    Lock lock(mReconnectMutex);
     return mAdmin->isStopped();
 }
 
 bool Container::isPaused()
 {
+    Lock lock(mReconnectMutex);
     return mAdmin->isPaused();
 }
 
@@ -150,12 +166,16 @@ void Container::onNameLostCallback()
 
 void Container::reconnectHandler()
 {
-    mConnection.reset();
+    {
+        Lock lock(mReconnectMutex);
+        mConnection.reset();
+    }
 
     for (int i = 0; i < RECONNECT_RETRIES; ++i) {
         // This sleeps even before the first try to give DBUS some time to come back up
         std::this_thread::sleep_for(std::chrono::milliseconds(RECONNECT_DELAY));
 
+        Lock lock(mReconnectMutex);
         if (isStopped()) {
             LOGI(getId() << ": Has stopped, nothing to reconnect to, bailing out");
             return;
@@ -176,5 +196,26 @@ void Container::reconnectHandler()
     stop();
 }
 
+void Container::setNotifyActiveContainerCallback(const NotifyActiveContainerCallback& callback)
+{
+    Lock lock(mReconnectMutex);
+    mNotifyCallback = callback;
+    if (mConnection) {
+        mConnection->setNotifyActiveContainerCallback(mNotifyCallback);
+    }
+
+}
+
+void Container::sendNotification(const std::string& container,
+                                 const std::string& application,
+                                 const std::string& message)
+{
+    Lock lock(mReconnectMutex);
+    if (mConnection) {
+        mConnection->sendNotification(container, application, message);
+    } else {
+        LOGE(getId() << ": Can't send notification, no connection to DBUS");
+    }
+}
 
 } // namespace security_containers

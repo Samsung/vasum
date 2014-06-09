@@ -82,6 +82,9 @@ private:
     bool mDetachOnExit;
 
     void switchingSequenceMonitorNotify();
+    void notifyActiveContainerHandler(const std::string& caller,
+                                      const std::string& appliaction,
+                                      const std::string& message);
 };
 
 

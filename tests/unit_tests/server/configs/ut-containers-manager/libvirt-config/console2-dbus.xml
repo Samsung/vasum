@@ -1,0 +1,15 @@
+<domain type="lxc">
+    <name>ut-containers-manager-console2</name>
+    <uuid>3d18323e-4ada-4a1b-a907-836701891306</uuid>
+    <memory>102400</memory>
+    <os>
+        <type>exe</type>
+        <init>/bin/dbus-daemon</init>
+        <initarg>--nofork</initarg>
+        <initarg>--config-file=/usr/share/security-containers/tests/server/ut-containers-manager/ut-dbus.conf</initarg>
+        <initarg>--address=unix:path=/tmp/ut-containers-manager/console2-dbus/dbus/system_bus_socket</initarg>
+    </os>
+    <devices>
+        <console type="pty"/>
+    </devices>
+</domain>

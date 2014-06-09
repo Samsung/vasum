@@ -47,6 +47,8 @@ public:
     Container(Container&&) = default;
     virtual ~Container();
 
+    typedef ContainerConnection::NotifyActiveContainerCallback NotifyActiveContainerCallback;
+
     /**
      * Get the container id
      */
@@ -106,6 +108,22 @@ public:
      */
     bool isPaused();
 
+    /**
+     * Register notification request callback
+     */
+    void setNotifyActiveContainerCallback(const NotifyActiveContainerCallback& callback);
+
+    /**
+     * Send notification signal to this container
+     *
+     * @param container   name of container in which the notification occurred
+     * @param application name of application that cause notification
+     * @param message     message to be send to container
+     */
+    void sendNotification(const std::string& container,
+                          const std::string& application,
+                          const std::string& message);
+
 private:
     ContainerConfig mConfig;
     std::unique_ptr<ContainerConnectionTransport> mConnectionTransport;
@@ -113,6 +131,8 @@ private:
     std::unique_ptr<ContainerAdmin> mAdmin;
     std::unique_ptr<ContainerConnection> mConnection;
     std::thread mReconnectThread;
+    mutable std::recursive_mutex mReconnectMutex;
+    NotifyActiveContainerCallback mNotifyCallback;
 
     void onNameLostCallback();
     void reconnectHandler();

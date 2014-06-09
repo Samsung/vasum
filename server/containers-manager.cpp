@@ -58,6 +58,12 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
         LOGD("Creating Container " << containerConfigPath);
         std::unique_ptr<Container> c(new Container(containerConfigPath));
         std::string id = c->getId();
+        using namespace std::placeholders;
+        c->setNotifyActiveContainerCallback(bind(&ContainersManager::notifyActiveContainerHandler,
+                                                 this,
+                                                 id,
+                                                 _1,
+                                                 _2));
         mContainers.insert(ContainerMap::value_type(id, std::move(c)));
     }
 
@@ -167,6 +173,22 @@ void ContainersManager::setContainersDetachOnExit()
 
     for (auto& container : mContainers) {
         container.second->setDetachOnExit();
+    }
+}
+
+void ContainersManager::notifyActiveContainerHandler(const std::string& caller,
+                                                     const std::string& application,
+                                                     const std::string& message)
+{
+    LOGI("notifyActiveContainerHandler(" << caller << ", " << application << ", " << message
+         << ") called");
+    try {
+        const std::string activeContainer = getRunningForegroundContainerId();
+        if (!activeContainer.empty() && caller != activeContainer) {
+            mContainers[activeContainer]->sendNotification(caller, application, message);
+        }
+    } catch(const SecurityContainersException&) {
+        LOGE("Notification from " << caller << " hasn't been sent");
     }
 }
 
