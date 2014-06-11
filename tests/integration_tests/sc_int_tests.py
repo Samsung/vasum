@@ -6,8 +6,13 @@ Security-containers integration tests launcher. Launches all integration tests.
 '''
 import unittest
 
-test_groups = [# add tests here... #
+from sc_integration_tests.image_tests import *
+
+# add tests here...
+test_groups = [
+               image_tests
               ]
+
 
 def main():
     for test_group in test_groups:

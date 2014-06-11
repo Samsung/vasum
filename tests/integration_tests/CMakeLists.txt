@@ -37,4 +37,4 @@ INSTALL(PROGRAMS ${main_SCRIPT} DESTINATION ${SCRIPT_INSTALL_DIR})
 
 ## Subdirectories ##############################################################
 ADD_SUBDIRECTORY(common)
-
+ADD_SUBDIRECTORY(image_tests)

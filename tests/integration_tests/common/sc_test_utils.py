@@ -6,7 +6,6 @@ import subprocess
 import os
 
 
-
 def launchProc(cmd):
     '''! Launch specified command as a subprocess.
 
@@ -14,22 +13,15 @@ def launchProc(cmd):
     stderr.
 
     @param cmd Command to be launched
-    @return Output provided by specified command.
-    @exception Exception When a process exits with error code, a Exception object containing message
-                         with error data is raised.
+    @return Tuple containing output provided by specified command and return code.
     '''
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     ret = p.wait()
     output = p.stdout.read()
-
-    if ret != 0:
-        raise Exception(cmd + " failed. error: " + os.strerror(ret) + ", output: " + output)
-
-    return output
+    return (output, ret)
 
 
-
-def mount(dir, opts = []):
+def mount(dir, opts=[]):
     '''! Mounts specified directory with additional command line options.
 
     @param dir Directory to be mounted
@@ -39,7 +31,6 @@ def mount(dir, opts = []):
     launchProc(" ".join(["mount"] + opts + [dir]))
 
 
-
 def umount(dir):
     '''! Unmounts specified directory.
 
@@ -47,7 +38,6 @@ def umount(dir):
     @see launchProc
     '''
     launchProc(" ".join(["umount"] + [dir]))
-
 
 
 def isNumber(str):
