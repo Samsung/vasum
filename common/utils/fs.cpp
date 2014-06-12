@@ -28,6 +28,7 @@
 #include "utils/paths.hpp"
 #include "utils/exception.hpp"
 
+#include <boost/filesystem.hpp>
 #include <dirent.h>
 #include <fstream>
 #include <streambuf>
@@ -135,20 +136,66 @@ bool umount(const std::string& path)
 
 bool isMountPoint(const std::string& path, bool& result)
 {
-    struct stat stat, parentStat;
     std::string parentPath = dirName(path);
+    bool newResult;
+    bool ret = hasSameMountPoint(path, parentPath, newResult);
 
-    if (::stat(path.c_str(), &stat)) {
-        LOGD("Failed to get stat of " << path << ": " << strerror(errno));
+    result = !newResult;
+    return ret;
+}
+
+bool hasSameMountPoint(const std::string& path1, const std::string& path2, bool& result)
+{
+    struct stat s1, s2;
+
+    if (::stat(path1.c_str(), &s1)) {
+        LOGD("Failed to get stat of " << path1 << ": " << strerror(errno));
         return false;
     }
 
-    if (::stat(parentPath.c_str(), &parentStat)) {
-        LOGD("Failed to get stat of " << parentPath << ": " << strerror(errno));
+    if (::stat(path2.c_str(), &s2)) {
+        LOGD("Failed to get stat of " << path2 << ": " << strerror(errno));
         return false;
     }
 
-    result = (stat.st_dev != parentStat.st_dev);
+    result = (s1.st_dev == s2.st_dev);
+    return true;
+}
+
+bool moveFile(const std::string& src, const std::string& dst)
+{
+    bool bResult;
+
+    namespace fs = boost::filesystem;
+    boost::system::error_code error;
+
+    // The destination has to be a full path (including a file name)
+    // so it doesn't exist yet, we need to check upper level dir instead.
+    if (!hasSameMountPoint(src, dirName(dst), bResult)) {
+        LOGE("Failed to check the files' mount points");
+        return false;
+    }
+
+    if (bResult) {
+        fs::rename(src, dst, error);
+        if (error) {
+            LOGE("Failed to rename the file: " << error);
+            return false;
+        }
+    } else {
+        fs::copy_file(src, dst, error);
+        if (error) {
+            LOGE("Failed to copy the file: " << error);
+            return false;
+        }
+        fs::remove(src, error);
+        if (error) {
+            LOGE("Failed to remove the file: " << error);
+            fs::remove(dst, error);
+            return false;
+        }
+    }
+
     return true;
 }
 

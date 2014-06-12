@@ -67,4 +67,11 @@
 #define BOOST_PP_VARIADICS 1
 #endif
 
+// This has to be defined always when the boost has not been compiled
+// using C++11. Headers detect that you are compiling using C++11 and
+// blindly and wrongly assume that boost has been as well.
+#ifndef BOOST_NO_CXX11_SCOPED_ENUMS
+#define BOOST_NO_CXX11_SCOPED_ENUMS 1
+#endif
+
 #endif // COMMON_CONFIG_HPP

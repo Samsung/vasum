@@ -30,22 +30,105 @@
 #include "utils/exception.hpp"
 
 #include <memory>
+#include <sys/mount.h>
+#include <boost/filesystem.hpp>
 
 BOOST_AUTO_TEST_SUITE(UtilsFSSuite)
 
 using namespace security_containers;
 using namespace security_containers::utils;
 
+namespace {
+
 const std::string FILE_PATH = SC_TEST_CONFIG_INSTALL_DIR "/utils/ut-fs/file.txt";
 const std::string FILE_CONTENT = "File content\n"
                                  "Line 1\n"
                                  "Line 2\n";
 const std::string BUGGY_FILE_PATH = "/some/missing/file/path/file.txt";
+const std::string TMP_PATH = "/tmp";
+const std::string FILE_PATH_RANDOM =
+    boost::filesystem::unique_path("/tmp/testFile-%%%%").string();
+const std::string MOUNT_POINT_RANDOM_1 =
+    boost::filesystem::unique_path("/tmp/mountPoint-%%%%").string();
+const std::string MOUNT_POINT_RANDOM_2 =
+    boost::filesystem::unique_path("/tmp/mountPoint-%%%%").string();
+const std::string FILE_NAME_RANDOM_1 =
+    boost::filesystem::unique_path("testFile-%%%%").string();
+const std::string FILE_NAME_RANDOM_2 =
+    boost::filesystem::unique_path("testFile-%%%%").string();
+
+} // namespace
 
 BOOST_AUTO_TEST_CASE(ReadFileContentTest)
 {
     BOOST_CHECK_EQUAL(FILE_CONTENT, readFileContent(FILE_PATH));
     BOOST_CHECK_THROW(readFileContent(BUGGY_FILE_PATH), UtilsException);
+}
+
+BOOST_AUTO_TEST_CASE(SaveFileContentTest)
+{
+    BOOST_REQUIRE(saveFileContent(FILE_PATH_RANDOM, FILE_CONTENT));
+    BOOST_CHECK_EQUAL(FILE_CONTENT, readFileContent(FILE_PATH));
+
+    boost::system::error_code ec;
+    boost::filesystem::remove(FILE_PATH_RANDOM, ec);
+}
+
+BOOST_AUTO_TEST_CASE(MountPointTest)
+{
+    bool result;
+    namespace fs = boost::filesystem;
+    boost::system::error_code ec;
+
+    BOOST_REQUIRE(fs::create_directory(MOUNT_POINT_RANDOM_1, ec));
+    BOOST_REQUIRE(isMountPoint(MOUNT_POINT_RANDOM_1, result));
+    BOOST_CHECK_EQUAL(result, false);
+    BOOST_REQUIRE(hasSameMountPoint(TMP_PATH, MOUNT_POINT_RANDOM_1, result));
+    BOOST_CHECK_EQUAL(result, true);
+
+    BOOST_REQUIRE(mountRun(MOUNT_POINT_RANDOM_1));
+    BOOST_REQUIRE(isMountPoint(MOUNT_POINT_RANDOM_1, result));
+    BOOST_CHECK_EQUAL(result, true);
+    BOOST_REQUIRE(hasSameMountPoint(TMP_PATH, MOUNT_POINT_RANDOM_1, result));
+    BOOST_CHECK_EQUAL(result, false);
+
+    BOOST_REQUIRE(umount(MOUNT_POINT_RANDOM_1));
+    BOOST_REQUIRE(fs::remove(MOUNT_POINT_RANDOM_1, ec));
+}
+
+BOOST_AUTO_TEST_CASE(MoveFileTest)
+{
+    namespace fs = boost::filesystem;
+    boost::system::error_code ec;
+    std::string src, dst;
+
+    // same mount point
+    src = TMP_PATH + "/" + FILE_NAME_RANDOM_1;
+    dst = TMP_PATH + "/" + FILE_NAME_RANDOM_2;
+
+    BOOST_REQUIRE(saveFileContent(src, FILE_CONTENT));
+
+    BOOST_CHECK(moveFile(src, dst));
+    BOOST_CHECK(!fs::exists(src));
+    BOOST_CHECK_EQUAL(readFileContent(dst), FILE_CONTENT);
+
+    BOOST_REQUIRE(fs::remove(dst));
+
+    // different mount point
+    src = TMP_PATH + "/" + FILE_NAME_RANDOM_1;
+    dst = MOUNT_POINT_RANDOM_2 + "/" + FILE_NAME_RANDOM_2;
+
+    BOOST_REQUIRE(fs::create_directory(MOUNT_POINT_RANDOM_2, ec));
+    BOOST_REQUIRE(mountRun(MOUNT_POINT_RANDOM_2));
+    BOOST_REQUIRE(saveFileContent(src, FILE_CONTENT));
+
+    BOOST_CHECK(moveFile(src, dst));
+    BOOST_CHECK(!fs::exists(src));
+    BOOST_CHECK_EQUAL(readFileContent(dst), FILE_CONTENT);
+
+    BOOST_REQUIRE(fs::remove(dst));
+    BOOST_REQUIRE(umount(MOUNT_POINT_RANDOM_2));
+    BOOST_REQUIRE(fs::remove(MOUNT_POINT_RANDOM_2, ec));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -140,6 +140,12 @@ void ContainerConnection::setDisplayOffCallback(const DisplayOffCallback& callba
     mDisplayOffCallback = callback;
 }
 
+void ContainerConnection::setFileMoveRequestCallback(
+    const FileMoveRequestCallback& callback)
+{
+    mFileMoveRequestCallback = callback;
+}
+
 void ContainerConnection::onMessageCall(const std::string& objectPath,
                                         const std::string& interface,
                                         const std::string& methodName,
@@ -157,6 +163,15 @@ void ContainerConnection::onMessageCall(const std::string& objectPath,
         if (mNotifyActiveContainerCallback) {
             mNotifyActiveContainerCallback(application, message);
             result.setVoid();
+        }
+    }
+
+    if (methodName == api::METHOD_FILE_MOVE_REQUEST) {
+        const gchar* destination = NULL;
+        const gchar* path = NULL;
+        g_variant_get(parameters, "(&s&s)", &destination, &path);
+        if (mFileMoveRequestCallback) {
+            mFileMoveRequestCallback(destination, path, result);
         }
     }
 }

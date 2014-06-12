@@ -4,5 +4,7 @@
     "networkConfig" : "@SC_TEST_CONFIG_INSTALL_DIR@/server/ut-network-admin/libvirt-config/network.xml",
     "cpuQuotaForeground" : -1,
     "cpuQuotaBackground" : 1000,
-    "runMountPoint" : ""
+    "runMountPoint" : "",
+    "permittedToSend" : [],
+    "permittedToRecv" : []
 }

@@ -37,7 +37,16 @@ const std::string OBJECT_PATH                       = "/org/tizen/containers";
 const std::string INTERFACE                         = "org.tizen.containers.manager";
 
 const std::string METHOD_NOTIFY_ACTIVE_CONTAINER    = "NotifyActiveContainer";
+const std::string METHOD_FILE_MOVE_REQUEST          = "FileMoveRequest";
 const std::string SIGNAL_NOTIFICATION               = "Notification";
+
+const std::string FILE_MOVE_DESTINATION_NOT_FOUND   = "FILE_MOVE_DESTINATION_NOT_FOUND";
+const std::string FILE_MOVE_WRONG_DESTINATION       = "FILE_MOVE_WRONG_DESTINATION";
+const std::string FILE_MOVE_NO_PERMISSIONS_SEND     = "FILE_MOVE_NO_PERMISSIONS_SEND";
+const std::string FILE_MOVE_NO_PERMISSIONS_RECEIVE  = "FILE_MOVE_NO_PERMISSIONS_RECEIVE";
+const std::string FILE_MOVE_FAILED                  = "FILE_MOVE_FAILED";
+const std::string FILE_MOVE_SUCCEEDED               = "FILE_MOVE_SUCCEEDED";
+
 
 const std::string DEFINITION =
     "<node>"
@@ -45,6 +54,11 @@ const std::string DEFINITION =
     "    <method name='" + METHOD_NOTIFY_ACTIVE_CONTAINER + "'>"
     "      <arg type='s' name='application' direction='in'/>"
     "      <arg type='s' name='message' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_FILE_MOVE_REQUEST + "'>"
+    "      <arg type='s' name='destination' direction='in'/>"
+    "      <arg type='s' name='path' direction='in'/>"
+    "      <arg type='s' name='result' direction='out'/>"
     "    </method>"
     "    <signal name='" + SIGNAL_NOTIFICATION + "'>"
     "      <arg type='s' name='container'/>"

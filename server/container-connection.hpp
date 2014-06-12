@@ -50,6 +50,11 @@ public:
                                const std::string& message
                               )> NotifyActiveContainerCallback;
 
+    typedef std::function<void(const std::string& destination,
+                               const std::string& path,
+                               dbus::MethodResultBuilder& result
+                              )> FileMoveRequestCallback;
+
     /**
      * Register notification request callback
      */
@@ -59,6 +64,11 @@ public:
      * Register callback to handle turning off the display
      */
     void setDisplayOffCallback(const DisplayOffCallback& callback);
+
+    /*
+     * Register file move request callback
+     */
+    void setFileMoveRequestCallback(const FileMoveRequestCallback& callback);
 
     /**
      * Send notification signal to this container
@@ -76,6 +86,7 @@ private:
     OnNameLostCallback mOnNameLostCallback;
     NotifyActiveContainerCallback mNotifyActiveContainerCallback;
     DisplayOffCallback mDisplayOffCallback;
+    FileMoveRequestCallback mFileMoveRequestCallback;
 
     void onNameAcquired();
     void onNameLost();

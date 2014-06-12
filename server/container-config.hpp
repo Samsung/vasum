@@ -29,6 +29,7 @@
 #include "config/fields.hpp"
 
 #include <string>
+#include <vector>
 
 
 namespace security_containers {
@@ -67,6 +68,18 @@ struct ContainerConfig {
      */
     std::string runMountPoint;
 
+    /**
+     * When you move a file out of the container (by move request)
+     * its path must match at least one of the regexps in this vector.
+     */
+    std::vector<std::string> permittedToSend;
+
+    /**
+     * When you move a file to the container (by move request)
+     * its path must match at least one of the regexps in this vector.
+     */
+    std::vector<std::string> permittedToRecv;
+
     CONFIG_REGISTER
     (
         privilege,
@@ -74,7 +87,9 @@ struct ContainerConfig {
         networkConfig,
         cpuQuotaForeground,
         cpuQuotaBackground,
-        runMountPoint
+        runMountPoint,
+        permittedToSend,
+        permittedToRecv
     )
 };
 

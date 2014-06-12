@@ -86,6 +86,10 @@ private:
                                       const std::string& appliaction,
                                       const std::string& message);
     void displayOffHandler(const std::string& caller);
+    void handleContainerMoveFileRequest(const std::string& srcContainerId,
+                                        const std::string& dstContainerId,
+                                        const std::string& path,
+                                        dbus::MethodResultBuilder& result);
 };
 
 

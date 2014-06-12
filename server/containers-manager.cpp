@@ -24,6 +24,7 @@
 
 #include "config.hpp"
 
+#include "container-dbus-definitions.hpp"
 #include "containers-manager.hpp"
 #include "container-admin.hpp"
 #include "exception.hpp"
@@ -32,6 +33,8 @@
 #include "log/logger.hpp"
 #include "config/manager.hpp"
 
+#include <boost/filesystem.hpp>
+#include <boost/regex.hpp>
 #include <cassert>
 #include <string>
 #include <climits>
@@ -39,6 +42,21 @@
 
 namespace security_containers {
 
+
+namespace {
+
+bool regexMatchVector(const std::string& str, const std::vector<boost::regex>& v)
+{
+    for (const boost::regex& toMatch: v) {
+        if (boost::regex_match(str, toMatch)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+} // namespace
 
 ContainersManager::ContainersManager(const std::string& managerConfigPath): mDetachOnExit(false)
 {
@@ -60,14 +78,13 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
         std::string id = c->getId();
         using namespace std::placeholders;
         c->setNotifyActiveContainerCallback(bind(&ContainersManager::notifyActiveContainerHandler,
-                                                 this,
-                                                 id,
-                                                 _1,
-                                                 _2));
+                                                 this, id, _1, _2));
 
         c->setDisplayOffCallback(bind(&ContainersManager::displayOffHandler,
-                                      this,
-                                      id));
+                                      this, id));
+
+        c->setFileMoveRequestCallback(std::bind(&ContainersManager::handleContainerMoveFileRequest,
+                                                this, id, _1, _2, _3));
 
         mContainers.insert(ContainerMap::value_type(id, std::move(c)));
     }
@@ -209,5 +226,85 @@ void ContainersManager::displayOffHandler(const std::string& /*caller*/)
     LOGI("Switching to default container " << mConfig.defaultId);
     focus(mConfig.defaultId);
 }
+
+void ContainersManager::handleContainerMoveFileRequest(const std::string& srcContainerId,
+                                                       const std::string& dstContainerId,
+                                                       const std::string& path,
+                                                       dbus::MethodResultBuilder& result)
+{
+    // TODO: this implementation is only a placeholder.
+    // There are too many unanswered questions and security concerns:
+    // 1. What about mount namespace, host might not see the source/destination
+    //    file. The file might be a different file from a host perspective.
+    // 2. Copy vs move (speed and security concerns over already opened FDs)
+    // 3. Access to source and destination files - DAC, uid/gig
+    // 4. Access to source and destintation files - MAC, smack
+    // 5. Destination file uid/gid assignment
+    // 6. Destination file smack label assignment
+    // 7. Verifiability of the source path
+
+    // NOTE: other possible implementations include:
+    // 1. Sending file descriptors opened directly in each container through DBUS
+    //    using something like g_dbus_message_set_unix_fd_list()
+    // 2. SCS forking and calling setns(MNT) in each container and opening files
+    //    by itself, then passing FDs to the main process
+    // Now when the main process has obtained FDs (by either of those methods)
+    // it can do the copying by itself.
+
+    LOGI("File move requested\n"
+         << "src: " << srcContainerId << "\n"
+         << "dst: " << dstContainerId << "\n"
+         << "path: " << path);
+
+    ContainerMap::const_iterator srcIter = mContainers.find(srcContainerId);
+    if (srcIter == mContainers.end()) {
+        LOGE("Source container '" << srcContainerId << "' not found");
+        return;
+    }
+    Container& srcContainer = *srcIter->second;
+
+    ContainerMap::const_iterator dstIter = mContainers.find(dstContainerId);
+    if (dstIter == mContainers.end()) {
+        LOGE("Destination container '" << dstContainerId << "' not found");
+        result.set(g_variant_new("(s)", api::FILE_MOVE_DESTINATION_NOT_FOUND.c_str()));
+        return;
+    }
+    Container& dstContanier = *dstIter->second;
+
+    if (srcContainerId == dstContainerId) {
+        LOGE("Cannot send a file to yourself");
+        result.set(g_variant_new("(s)", api::FILE_MOVE_WRONG_DESTINATION.c_str()));
+        return;
+    }
+
+    if (!regexMatchVector(path, srcContainer.getPermittedToSend())) {
+        LOGE("Source container has no permissions to send the file: " << path);
+        result.set(g_variant_new("(s)", api::FILE_MOVE_NO_PERMISSIONS_SEND.c_str()));
+        return;
+    }
+
+    if (!regexMatchVector(path, dstContanier.getPermittedToRecv())) {
+        LOGE("Destination container has no permissions to receive the file: " << path);
+        result.set(g_variant_new("(s)", api::FILE_MOVE_NO_PERMISSIONS_RECEIVE.c_str()));
+        return;
+    }
+
+    namespace fs = boost::filesystem;
+    std::string srcPath = fs::absolute(srcContainerId, mConfig.containersPath).string() + path;
+    std::string dstPath = fs::absolute(dstContainerId, mConfig.containersPath).string() + path;
+
+    if (!utils::moveFile(srcPath, dstPath)) {
+        LOGE("Failed to move the file: " << path);
+        result.set(g_variant_new("(s)", api::FILE_MOVE_FAILED.c_str()));
+    } else {
+        result.set(g_variant_new("(s)", api::FILE_MOVE_SUCCEEDED.c_str()));
+        try {
+            dstContanier.sendNotification(srcContainerId, path, api::FILE_MOVE_SUCCEEDED);
+        } catch (ServerException&) {
+            LOGE("Notification to '" << dstContainerId << "' has not been sent");
+        }
+    }
+}
+
 
 } // namespace security_containers

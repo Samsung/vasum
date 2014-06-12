@@ -41,11 +41,6 @@ const std::string CONTAINERS_MANAGER_CONFIG_PATH = "/etc/security-containers/con
 struct ContainersManagerConfig {
 
     /**
-     * Parameters describing input device used to switch between containers
-     */
-    InputConfig inputConfig;
-
-    /**
      * List of containers' configs that we manage.
      * File paths can be relative to the ContainerManager config file.
      */
@@ -61,11 +56,22 @@ struct ContainersManagerConfig {
      */
     std::string defaultId;
 
+    /**
+     * A path where the containers mount points reside.
+     */
+    std::string containersPath;
+
+    /*
+     * Parameters describing input device used to switch between containers
+     */
+    InputConfig inputConfig;
+
     CONFIG_REGISTER
     (
         containerConfigs,
         foregroundId,
         defaultId,
+        containersPath,
         inputConfig
     )
 };

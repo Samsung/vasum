@@ -101,11 +101,13 @@
       <source network='private'/>
     </interface>
     <filesystem type='mount'>
+      <!-- TODO: this directory could be generated from .conf files-->
       <source dir='/opt/usr/containers/private'/>
       <target dir='/'/>
     </filesystem>
     <!-- Enable access to the containers dbus -->
     <filesystem type='mount'>
+      <!-- TODO: this directory could be generated from .conf files-->
       <source dir='/var/run/containers/private/run'/>
       <target dir='/var/run'/>
     </filesystem>

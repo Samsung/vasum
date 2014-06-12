@@ -1,5 +1,5 @@
 <domain type="lxc">
-    <name>ut-containers-manager-console1</name>
+    <name>ut-containers-manager-console1-dbus</name>
     <uuid>58184009-b278-4d01-975d-708393690084</uuid>
     <memory>102400</memory>
     <os>

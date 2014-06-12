@@ -35,6 +35,7 @@
 #include <string>
 #include <memory>
 #include <thread>
+#include <boost/regex.hpp>
 
 
 namespace security_containers {
@@ -49,6 +50,21 @@ public:
 
     typedef ContainerConnection::NotifyActiveContainerCallback NotifyActiveContainerCallback;
     typedef ContainerConnection::DisplayOffCallback DisplayOffCallback;
+    typedef ContainerConnection::FileMoveRequestCallback FileMoveRequestCallback;
+
+    /**
+     * Returns a vector of regexps defining files permitted to be
+     * send to other containers using file move functionality
+     */
+    const std::vector<boost::regex>& getPermittedToSend() const;
+
+    /**
+     * Returns a vector of regexps defining files permitted to be
+     * send to other containers using file move functionality
+     */
+    const std::vector<boost::regex>& getPermittedToRecv() const;
+
+    // ContainerAdmin API
 
     /**
      * Get the container id
@@ -109,6 +125,8 @@ public:
      */
     bool isPaused();
 
+    // ContainerConnection API
+
     /**
      * Register notification request callback
      */
@@ -130,8 +148,15 @@ public:
                           const std::string& application,
                           const std::string& message);
 
+    /**
+     * Register file move request callback
+     */
+    void setFileMoveRequestCallback(const FileMoveRequestCallback& callback);
+
 private:
     ContainerConfig mConfig;
+    std::vector<boost::regex> mPermittedToSend;
+    std::vector<boost::regex> mPermittedToRecv;
     std::unique_ptr<ContainerConnectionTransport> mConnectionTransport;
     std::unique_ptr<NetworkAdmin> mNetworkAdmin;
     std::unique_ptr<ContainerAdmin> mAdmin;
@@ -140,6 +165,7 @@ private:
     mutable std::recursive_mutex mReconnectMutex;
     NotifyActiveContainerCallback mNotifyCallback;
     DisplayOffCallback mDisplayOffCallback;
+    FileMoveRequestCallback mFileMoveCallback;
 
     void onNameLostCallback();
     void reconnectHandler();

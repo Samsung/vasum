@@ -54,6 +54,13 @@ Container::Container(const std::string& containerConfigPath)
 {
     config::loadFromFile(containerConfigPath, mConfig);
 
+    for (std::string r: mConfig.permittedToSend) {
+        mPermittedToSend.push_back(boost::regex(r));
+    }
+    for (std::string r: mConfig.permittedToRecv) {
+        mPermittedToRecv.push_back(boost::regex(r));
+    }
+
     const std::string baseConfigPath = utils::dirName(containerConfigPath);
     mConfig.config = fs::absolute(mConfig.config, baseConfigPath).string();
     mConfig.networkConfig = fs::absolute(mConfig.networkConfig, baseConfigPath).string();
@@ -77,6 +84,16 @@ Container::~Container()
     if (mReconnectThread.joinable()) {
         mReconnectThread.join();
     }
+}
+
+const std::vector<boost::regex>& Container::getPermittedToSend() const
+{
+    return mPermittedToSend;
+}
+
+const std::vector<boost::regex>& Container::getPermittedToRecv() const
+{
+    return mPermittedToRecv;
 }
 
 const std::string& Container::getId() const
@@ -103,6 +120,9 @@ void Container::start()
     }
     if (mDisplayOffCallback) {
         mConnection->setDisplayOffCallback(mDisplayOffCallback);
+    }
+    if (mFileMoveCallback) {
+        mConnection->setFileMoveRequestCallback(mFileMoveCallback);
     }
 
     // Send to the background only after we're connected,
@@ -207,7 +227,6 @@ void Container::setNotifyActiveContainerCallback(const NotifyActiveContainerCall
     if (mConnection) {
         mConnection->setNotifyActiveContainerCallback(mNotifyCallback);
     }
-
 }
 
 void Container::sendNotification(const std::string& container,
@@ -229,6 +248,16 @@ void Container::setDisplayOffCallback(const DisplayOffCallback& callback)
     mDisplayOffCallback = callback;
     if (mConnection) {
         mConnection->setDisplayOffCallback(callback);
+    }
+}
+
+void Container::setFileMoveRequestCallback(const FileMoveRequestCallback& callback)
+{
+    Lock lock(mReconnectMutex);
+
+    mFileMoveCallback = callback;
+    if (mConnection) {
+        mConnection->setFileMoveRequestCallback(callback);
     }
 }
 

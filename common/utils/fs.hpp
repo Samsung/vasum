@@ -73,6 +73,18 @@ bool umount(const std::string& path);
  */
 bool isMountPoint(const std::string& path, bool& result);
 
+/**
+ * Checks whether the given paths are under the same mount point
+ */
+bool hasSameMountPoint(const std::string& path1, const std::string& path2, bool& result);
+
+/**
+ * Moves the file either by rename if under the same mount point
+ * or by copy&delete if under a different one.
+ * The destination has to be a full path including file name.
+ */
+bool moveFile(const std::string& src, const std::string& dst);
+
 
 } // namespace utils
 } // namespace security_containers

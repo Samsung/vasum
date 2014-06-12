@@ -8,6 +8,7 @@ License:       Apache-2.0
 Group:         Security/Other
 Summary:       Daemon for managing containers
 BuildRequires: cmake
+BuildRequires: boost-devel
 BuildRequires: libvirt-devel
 BuildRequires: libjson-devel
 BuildRequires: pkgconfig(glib-2.0)
@@ -123,8 +124,6 @@ Development package including the header files for the client library
 Summary:          Security Containers Containers Daemon
 Group:            Security/Other
 Requires:         security-containers = %{version}-%{release}
-BuildRequires:    pkgconfig(glib-2.0)
-BuildRequires:    pkgconfig(libsystemd-journal)
 
 %description container-daemon
 Daemon running inside every container.
@@ -144,7 +143,6 @@ Requires:         security-containers = %{version}-%{release}
 Requires:         security-containers-client = %{version}-%{release}
 Requires:         python
 Requires:         boost-test
-BuildRequires:    boost-devel
 
 %description tests
 Unit tests for both: server and client and integration tests.
