@@ -30,12 +30,15 @@
 #include "utils/paths.hpp"
 #include "config/manager.hpp"
 
+#include <boost/filesystem.hpp>
+
 #include <string>
 #include <thread>
 
 
 namespace security_containers {
 
+namespace fs = boost::filesystem;
 
 namespace {
 
@@ -48,16 +51,13 @@ const int RECONNECT_DELAY = 1 * 1000;
 Container::Container(const std::string& containerConfigPath)
 {
     config::loadFromFile(containerConfigPath, mConfig);
-    std::string libvirtConfigPath;
 
-    if (mConfig.config[0] == '/') {
-        libvirtConfigPath = mConfig.config;
-    } else {
-        std::string baseConfigPath = utils::dirName(containerConfigPath);
-        libvirtConfigPath = utils::createFilePath(baseConfigPath, "/", mConfig.config);
-    }
+    const std::string baseConfigPath = utils::dirName(containerConfigPath);
+    mConfig.config = fs::absolute(mConfig.config, baseConfigPath).string();
+    mConfig.networkConfig = fs::absolute(mConfig.networkConfig, baseConfigPath).string();
 
-    mConfig.config = libvirtConfigPath;
+    LOGT("Creating Network Admin " << mConfig.networkConfig);
+    mNetworkAdmin.reset(new NetworkAdmin(mConfig));
     LOGT("Creating Container Admin " << mConfig.config);
     mAdmin.reset(new ContainerAdmin(mConfig));
 }
@@ -87,6 +87,7 @@ int Container::getPrivilege() const
 void Container::start()
 {
     mConnectionTransport.reset(new ContainerConnectionTransport(mConfig.runMountPoint));
+    mNetworkAdmin->start();
     mAdmin->start();
     mConnection.reset(new ContainerConnection(mConnectionTransport->acquireAddress(),
                                               std::bind(&Container::onNameLostCallback, this)));
@@ -101,6 +102,7 @@ void Container::stop()
 {
     mConnection.reset();
     mAdmin->stop();
+    mNetworkAdmin->stop();
     mConnectionTransport.reset();
 }
 
@@ -116,6 +118,7 @@ void Container::goBackground()
 
 void Container::setDetachOnExit()
 {
+    mNetworkAdmin->setDetachOnExit();
     mAdmin->setDetachOnExit();
     mConnectionTransport->setDetachOnExit();
 }

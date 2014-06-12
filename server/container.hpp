@@ -30,6 +30,7 @@
 #include "container-admin.hpp"
 #include "container-connection.hpp"
 #include "container-connection-transport.hpp"
+#include "network-admin.hpp"
 
 #include <string>
 #include <memory>
@@ -108,6 +109,7 @@ public:
 private:
     ContainerConfig mConfig;
     std::unique_ptr<ContainerConnectionTransport> mConnectionTransport;
+    std::unique_ptr<NetworkAdmin> mNetworkAdmin;
     std::unique_ptr<ContainerAdmin> mAdmin;
     std::unique_ptr<ContainerConnection> mConnection;
     std::thread mReconnectThread;

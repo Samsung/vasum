@@ -48,6 +48,11 @@ struct ContainerConfig {
     std::string config;
 
     /**
+     * Container's libvirt (XML) network config file.
+     */
+    std::string networkConfig;
+
+    /**
      * Container's CFS quota in us when it's in the foreground
      */
     std::int64_t cpuQuotaForeground;
@@ -66,6 +71,7 @@ struct ContainerConfig {
     (
         privilege,
         config,
+        networkConfig,
         cpuQuotaForeground,
         cpuQuotaBackground,
         runMountPoint

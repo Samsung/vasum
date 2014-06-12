@@ -87,7 +87,7 @@ bool saveFileContent(const std::string& path, const std::string& content)
         LOGD(path << ": could not open for writing");
         return false;
     }
-    file.write(content.data(), content.size());
+    file.write(content.data(), static_cast<std::streamsize>(content.size()));
     if (!file) {
         LOGD(path << ": could not write to");
         return false;

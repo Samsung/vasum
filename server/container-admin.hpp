@@ -72,7 +72,7 @@ public:
      */
     typedef std::function<void()> RebootListener;
 
-    ContainerAdmin(ContainerConfig& config);
+    ContainerAdmin(const ContainerConfig& config);
     virtual ~ContainerAdmin();
 
     /**
@@ -175,7 +175,7 @@ public:
     void removeListener(const ListenerId id);
 
 private:
-    ContainerConfig& mConfig;
+    const ContainerConfig& mConfig;
     libvirt::LibvirtDomain mDom;
     const std::string mId;
     bool mDetachOnExit;

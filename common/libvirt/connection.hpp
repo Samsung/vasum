@@ -26,6 +26,7 @@
 #define COMMON_LIBVIRT_CONNECTION_HPP
 
 #include <libvirt/libvirt.h>
+#include <string>
 
 
 namespace security_containers {

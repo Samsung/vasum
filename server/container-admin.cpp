@@ -42,7 +42,6 @@
 
 namespace security_containers {
 
-
 namespace {
 
 // TODO: this should be in container's configuration file
@@ -50,10 +49,10 @@ const int SHUTDOWN_WAIT = 10 * 1000;
 
 std::string getDomainName(virDomainPtr dom)
 {
-    assert(dom != NULL);
+    assert(dom);
 
-    const char* name;
-    if ((name = virDomainGetName(dom)) == NULL) {
+    const char* name = virDomainGetName(dom);
+    if (name == nullptr) {
         LOGE("Failed to get the domain's id:\n"
              << libvirt::libvirtFormatError());
         throw ContainerOperationException();
@@ -67,7 +66,7 @@ std::string getDomainName(virDomainPtr dom)
 const std::uint64_t DEFAULT_CPU_SHARES = 1024;
 const std::uint64_t DEFAULT_VCPU_PERIOD_MS = 100000;
 
-ContainerAdmin::ContainerAdmin(ContainerConfig& config)
+ContainerAdmin::ContainerAdmin(const ContainerConfig& config)
     : mConfig(config),
       mDom(utils::readFileContent(mConfig.config)),
       mId(getDomainName(mDom.get())),

@@ -1,0 +1,11 @@
+<network>
+    <name>business</name>
+    <uuid>cc0951f9-3397-4272-ae05-66c19229accf</uuid>
+    <bridge name="virbr-business"/>
+    <forward/>
+    <ip address="192.168.102.1" netmask="255.255.255.0">
+        <dhcp>
+            <range start="192.168.102.2" end="192.168.102.254"/>
+        </dhcp>
+    </ip>
+</network>

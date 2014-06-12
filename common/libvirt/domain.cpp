@@ -34,11 +34,11 @@ namespace libvirt {
 
 
 LibvirtDomain::LibvirtDomain(const std::string& configXML)
-    : mCon(LIBVIRT_LXC_ADDRESS), mDom(NULL)
+    : mCon(LIBVIRT_LXC_ADDRESS), mDom(nullptr)
 {
     mDom = virDomainDefineXML(mCon.get(), configXML.c_str());
 
-    if (mDom == NULL) {
+    if (mDom == nullptr) {
         LOGE("Error while defining a domain:\n"
              << libvirtFormatError());
         throw LibvirtOperationException();
@@ -65,7 +65,7 @@ virDomainPtr LibvirtDomain::get()
 
 LibvirtDomain::operator bool() const
 {
-    return mDom != NULL;
+    return mDom != nullptr;
 }
 
 } // namespace libvirt

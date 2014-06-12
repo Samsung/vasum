@@ -10,5 +10,8 @@
     </os>
     <devices>
         <console type="pty"/>
+        <interface type='network'>
+            <source network='test_network'/>
+        </interface>
     </devices>
 </domain>

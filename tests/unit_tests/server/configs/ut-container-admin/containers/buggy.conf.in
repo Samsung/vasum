@@ -1,6 +1,7 @@
 {
     "privilege" : 10,
     "config" : "@SC_TEST_CONFIG_INSTALL_DIR@/server/ut-container-admin/libvirt-config/buggy.xml",
+    "networkConfig" : "",
     "cpuQuotaForeground" : -1,
     "cpuQuotaBackground" : 1000,
     "runMountPoint" : ""

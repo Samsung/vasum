@@ -34,13 +34,13 @@ namespace libvirt {
 
 
 LibvirtConnection::LibvirtConnection(const std::string& uri)
-    : mCon(NULL)
+    : mCon(nullptr)
 {
     libvirtInitialize();
 
     mCon = virConnectOpen(uri.c_str());
 
-    if (mCon == NULL) {
+    if (mCon == nullptr) {
         LOGE("Failed to open a connection to the libvirtd:\n"
              << libvirtFormatError());
         throw LibvirtOperationException();
@@ -62,7 +62,7 @@ virConnectPtr LibvirtConnection::get()
 
 LibvirtConnection::operator bool() const
 {
-    return mCon != NULL;
+    return mCon != nullptr;
 }
 
 

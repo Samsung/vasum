@@ -55,14 +55,10 @@ struct Fixture {
 
 BOOST_FIXTURE_TEST_SUITE(ContainersManagerSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(ConstructorTest)
+BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 {
-    BOOST_REQUIRE_NO_THROW(ContainersManager cm(TEST_CONFIG_PATH););
-}
-
-BOOST_AUTO_TEST_CASE(DestructorTest)
-{
-    std::unique_ptr<ContainersManager> cm(new ContainersManager(TEST_CONFIG_PATH));
+    std::unique_ptr<ContainersManager> cm;
+    BOOST_REQUIRE_NO_THROW(cm.reset(new ContainersManager(TEST_CONFIG_PATH)));
     BOOST_REQUIRE_NO_THROW(cm.reset());
 }
 
@@ -96,6 +92,19 @@ BOOST_AUTO_TEST_CASE(StopAllTest)
     BOOST_REQUIRE_NO_THROW(cm.startAll());
     BOOST_REQUIRE_NO_THROW(cm.stopAll());
     BOOST_CHECK(cm.getRunningForegroundContainerId().empty());
+}
+
+BOOST_AUTO_TEST_CASE(DetachOnExitTest)
+{
+    {
+        ContainersManager cm(TEST_CONFIG_PATH);
+        BOOST_REQUIRE_NO_THROW(cm.startAll());
+        cm.setContainersDetachOnExit();
+    }
+    {
+        ContainersManager cm(TEST_CONFIG_PATH);
+        BOOST_REQUIRE_NO_THROW(cm.startAll());
+    }
 }
 
 BOOST_AUTO_TEST_CASE(FocusTest)

@@ -1,0 +1,11 @@
+<network>
+    <name>private</name>
+    <uuid>5b25f83d-ccb6-45f0-9d5c-c05199c261bd</uuid>
+    <bridge name="virbr-private"/>
+    <forward/>
+    <ip address="192.168.101.1" netmask="255.255.255.0">
+        <dhcp>
+            <range start="192.168.101.2" end="192.168.101.254"/>
+        </dhcp>
+    </ip>
+</network>

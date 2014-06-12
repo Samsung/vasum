@@ -68,19 +68,13 @@ struct Fixture {
 
 BOOST_FIXTURE_TEST_SUITE(ContainerAdminSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(ConstructorTest)
+BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 {
     ContainerConfig config;
     config::loadFromFile(TEST_CONFIG_PATH, config);
-    BOOST_REQUIRE_NO_THROW(ContainerAdmin ca(config));
-}
-
-BOOST_AUTO_TEST_CASE(DestructorTest)
-{
-    ContainerConfig config;
-    config::loadFromFile(TEST_CONFIG_PATH, config);
-    std::unique_ptr<ContainerAdmin> ca(new ContainerAdmin(config));
-    BOOST_REQUIRE_NO_THROW(ca.reset());
+    std::unique_ptr<ContainerAdmin> admin;
+    BOOST_REQUIRE_NO_THROW(admin.reset(new ContainerAdmin(config)));
+    BOOST_REQUIRE_NO_THROW(admin.reset());
 }
 
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)

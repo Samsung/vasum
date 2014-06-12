@@ -36,6 +36,8 @@
 namespace security_containers {
 namespace log {
 
+namespace {
+
 const int TIME_COLUMN_LENGTH = 12;
 const int SEVERITY_COLUMN_LENGTH = 8;
 const int THREAD_COLUMN_LENGTH = 3;
@@ -43,6 +45,8 @@ const int FILE_COLUMN_LENGTH = 60;
 
 std::atomic<unsigned int> gNextThreadId(1);
 thread_local unsigned int gThisThreadId(0);
+
+} // namespace
 
 unsigned int LogFormatter::getCurrentThread(void)
 {

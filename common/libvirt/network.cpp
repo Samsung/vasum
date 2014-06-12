@@ -35,11 +35,11 @@ namespace libvirt {
 
 
 LibvirtNetwork::LibvirtNetwork(const std::string& configXML)
-    : mCon(LIBVIRT_LXC_ADDRESS), mNet(NULL)
+    : mCon(LIBVIRT_LXC_ADDRESS), mNet(nullptr)
 {
     mNet = virNetworkDefineXML(mCon.get(), configXML.c_str());
 
-    if (mNet == NULL) {
+    if (mNet == nullptr) {
         LOGE("Error while defining a network:\n"
              << libvirtFormatError());
         throw LibvirtOperationException();
@@ -66,7 +66,7 @@ virNetworkPtr LibvirtNetwork::get()
 
 LibvirtNetwork::operator bool() const
 {
-    return mNet != NULL;
+    return mNet != nullptr;
 }
 
 } // namespace libvirt

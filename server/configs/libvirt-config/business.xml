@@ -98,7 +98,7 @@
     </hostdev>
 
     <interface type='network'>
-      <source network='default'/>
+      <source network='business'/>
     </interface>
     <filesystem type='mount'>
       <source dir='/opt/usr/containers/business'/>

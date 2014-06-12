@@ -14,5 +14,8 @@
             <source dir='/tmp/ut-container'/>
             <target dir='/var/run'/>
         </filesystem>
+        <interface type='network'>
+            <source network='test_network'/>
+        </interface>
     </devices>
 </domain>

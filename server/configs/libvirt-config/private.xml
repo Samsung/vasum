@@ -98,7 +98,7 @@
     </hostdev>
 
     <interface type='network'>
-      <source network='default'/>
+      <source network='private'/>
     </interface>
     <filesystem type='mount'>
       <source dir='/opt/usr/containers/private'/>
