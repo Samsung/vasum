@@ -39,6 +39,7 @@ class ContainerConnection {
 
 public:
     typedef std::function<void()> OnNameLostCallback;
+    typedef std::function<void()> DisplayOffCallback;
 
     ContainerConnection(const std::string& address, const OnNameLostCallback& callback);
     ~ContainerConnection();
@@ -55,6 +56,11 @@ public:
     void setNotifyActiveContainerCallback(const NotifyActiveContainerCallback& callback);
 
     /**
+     * Register callback to handle turning off the display
+     */
+    void setDisplayOffCallback(const DisplayOffCallback& callback);
+
+    /**
      * Send notification signal to this container
      */
     void sendNotification(const std::string& container,
@@ -69,6 +75,7 @@ private:
     bool mNameLost;
     OnNameLostCallback mOnNameLostCallback;
     NotifyActiveContainerCallback mNotifyActiveContainerCallback;
+    DisplayOffCallback mDisplayOffCallback;
 
     void onNameAcquired();
     void onNameLost();
@@ -79,6 +86,11 @@ private:
                        const std::string& methodName,
                        GVariant* parameters,
                        dbus::MethodResultBuilder& result);
+    void onSignalReceived(const std::string& senderBusName,
+                          const std::string& objectPath,
+                          const std::string& interface,
+                          const std::string& signalName,
+                          GVariant* parameters);
 };
 
 

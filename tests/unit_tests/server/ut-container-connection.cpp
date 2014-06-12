@@ -29,8 +29,11 @@
 #include "container-connection.hpp"
 #include "container-connection-transport.hpp"
 #include "container-dbus-definitions.hpp"
+// TODO: Switch to real power-manager dbus defs when they will be implemented in power-manager
+#include "fake-power-manager-dbus-definitions.hpp"
 
 #include "dbus/connection.hpp"
+#include "dbus/exception.hpp"
 #include "utils/scoped-daemon.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
@@ -71,6 +74,53 @@ public:
 private:
     ContainerConnectionTransport mTransport;
     ScopedDaemon mDaemon;
+};
+
+class DbusNameSetter {
+public:
+    DbusNameSetter()
+        : mNameAcquired(false),
+          mPendingDisconnect(false)
+    {
+    }
+
+    void setName(const std::unique_ptr<DbusConnection>& conn, const std::string& name)
+    {
+        conn->setName(name,
+                      std::bind(&DbusNameSetter::onNameAcquired, this),
+                      std::bind(&DbusNameSetter::onDisconnect, this));
+
+        if(!waitForName()) {
+            throw dbus::DbusOperationException("Could not acquire name.");
+        }
+    }
+
+    bool waitForName()
+    {
+        std::unique_lock<std::mutex> lock(mMutex);
+        mNameCondition.wait(lock, [this] {return mNameAcquired || mPendingDisconnect;});
+        return mNameAcquired;
+    }
+
+    void onNameAcquired()
+    {
+        std::unique_lock<std::mutex> lock(mMutex);
+        mNameAcquired = true;
+        mNameCondition.notify_one();
+    }
+
+    void onDisconnect()
+    {
+        std::unique_lock<std::mutex> lock(mMutex);
+        mPendingDisconnect = true;
+        mNameCondition.notify_one();
+    }
+
+private:
+    bool mNameAcquired;
+    bool mPendingDisconnect;
+    std::mutex mMutex;
+    std::condition_variable mNameCondition;
 };
 
 } // namespace
@@ -149,6 +199,46 @@ BOOST_AUTO_TEST_CASE(SignalNotificationApiTest)
     connection->sendNotification("testcontainer", "testapp", "testmessage");
 
     BOOST_CHECK(signalEmitted.wait(EVENT_TIMEOUT));
+}
+
+BOOST_AUTO_TEST_CASE(SignalDisplayOffApiTest)
+{
+    ScopedGlibLoop loop;
+    ScopedDbusDaemon dbus;
+
+    Latch displayOffCalled;
+    std::unique_ptr<ContainerConnection> connection;
+
+    BOOST_REQUIRE_NO_THROW(connection.reset(new ContainerConnection(dbus.acquireAddress(),
+                                            nullptr)));
+
+    DbusConnection::Pointer client = DbusConnection::create(dbus.acquireAddress());
+
+    auto callback = [&]() {
+        displayOffCalled.set();
+    };
+
+    connection->setDisplayOffCallback(callback);
+
+    client->emitSignal(fake_power_manager_api::OBJECT_PATH,
+                       fake_power_manager_api::INTERFACE,
+                       fake_power_manager_api::SIGNAL_DISPLAY_OFF,
+                       nullptr);
+
+    // timeout should occur, since no name is set to client
+    BOOST_CHECK(!displayOffCalled.wait(EVENT_TIMEOUT));
+
+    DbusNameSetter setter;
+
+    setter.setName(client, fake_power_manager_api::BUS_NAME);
+
+    client->emitSignal(fake_power_manager_api::OBJECT_PATH,
+                       fake_power_manager_api::INTERFACE,
+                       fake_power_manager_api::SIGNAL_DISPLAY_OFF,
+                       nullptr);
+
+    // now signal should be delivered correctly
+    BOOST_CHECK(displayOffCalled.wait(EVENT_TIMEOUT));
 }
 
 

@@ -101,6 +101,10 @@ void Container::start()
     if (mNotifyCallback) {
         mConnection->setNotifyActiveContainerCallback(mNotifyCallback);
     }
+    if (mDisplayOffCallback) {
+        mConnection->setDisplayOffCallback(mDisplayOffCallback);
+    }
+
     // Send to the background only after we're connected,
     // otherwise it'd take ages.
     LOGD(getId() << ": DBUS connected, sending to the background");
@@ -217,5 +221,16 @@ void Container::sendNotification(const std::string& container,
         LOGE(getId() << ": Can't send notification, no connection to DBUS");
     }
 }
+
+void Container::setDisplayOffCallback(const DisplayOffCallback& callback)
+{
+    Lock lock(mReconnectMutex);
+
+    mDisplayOffCallback = callback;
+    if (mConnection) {
+        mConnection->setDisplayOffCallback(callback);
+    }
+}
+
 
 } // namespace security_containers

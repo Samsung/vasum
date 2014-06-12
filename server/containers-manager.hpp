@@ -85,6 +85,7 @@ private:
     void notifyActiveContainerHandler(const std::string& caller,
                                       const std::string& appliaction,
                                       const std::string& message);
+    void displayOffHandler(const std::string& caller);
 };
 
 

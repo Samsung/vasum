@@ -27,6 +27,8 @@
 #include "container-connection.hpp"
 #include "container-dbus-definitions.hpp"
 #include "exception.hpp"
+// TODO: Switch to real power-manager dbus defs when they will be implemented in power-manager
+#include "fake-power-manager-dbus-definitions.hpp"
 
 #include "log/logger.hpp"
 
@@ -77,6 +79,16 @@ ContainerConnection::ContainerConnection(const std::string& address, const OnNam
                                               _3,
                                               _4,
                                               _5));
+
+    mDbusConnection->signalSubscribe(std::bind(&ContainerConnection::onSignalReceived,
+                                               this,
+                                               _1,
+                                               _2,
+                                               _3,
+                                               _4,
+                                               _5),
+                                     std::string(fake_power_manager_api::BUS_NAME));
+
     LOGD("Connected");
 }
 
@@ -123,6 +135,11 @@ void ContainerConnection::setNotifyActiveContainerCallback(
     mNotifyActiveContainerCallback = callback;
 }
 
+void ContainerConnection::setDisplayOffCallback(const DisplayOffCallback& callback)
+{
+    mDisplayOffCallback = callback;
+}
+
 void ContainerConnection::onMessageCall(const std::string& objectPath,
                                         const std::string& interface,
                                         const std::string& methodName,
@@ -140,6 +157,23 @@ void ContainerConnection::onMessageCall(const std::string& objectPath,
         if (mNotifyActiveContainerCallback) {
             mNotifyActiveContainerCallback(application, message);
             result.setVoid();
+        }
+    }
+}
+
+void ContainerConnection::onSignalReceived(const std::string& senderBusName,
+                                           const std::string& objectPath,
+                                           const std::string& interface,
+                                           const std::string& signalName,
+                                           GVariant* /*parameters*/)
+{
+    LOGD("Received signal: " << senderBusName << "; " << objectPath << "; " << interface << "; "
+         << signalName);
+    if (objectPath == fake_power_manager_api::OBJECT_PATH &&
+        interface == fake_power_manager_api::INTERFACE) {
+        //power-manager sent us a signal, check it
+        if (signalName == fake_power_manager_api::SIGNAL_DISPLAY_OFF && mDisplayOffCallback) {
+            mDisplayOffCallback();
         }
     }
 }

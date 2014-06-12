@@ -48,6 +48,7 @@ public:
     virtual ~Container();
 
     typedef ContainerConnection::NotifyActiveContainerCallback NotifyActiveContainerCallback;
+    typedef ContainerConnection::DisplayOffCallback DisplayOffCallback;
 
     /**
      * Get the container id
@@ -114,6 +115,11 @@ public:
     void setNotifyActiveContainerCallback(const NotifyActiveContainerCallback& callback);
 
     /**
+     * Register callback used when switching to default container.
+     */
+    void setDisplayOffCallback(const DisplayOffCallback& callback);
+
+    /**
      * Send notification signal to this container
      *
      * @param container   name of container in which the notification occurred
@@ -133,6 +139,7 @@ private:
     std::thread mReconnectThread;
     mutable std::recursive_mutex mReconnectMutex;
     NotifyActiveContainerCallback mNotifyCallback;
+    DisplayOffCallback mDisplayOffCallback;
 
     void onNameLostCallback();
     void reconnectHandler();

@@ -64,7 +64,19 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
                                                  id,
                                                  _1,
                                                  _2));
+
+        c->setDisplayOffCallback(bind(&ContainersManager::displayOffHandler,
+                                      this,
+                                      id));
+
         mContainers.insert(ContainerMap::value_type(id, std::move(c)));
+    }
+
+    // check if default container exists, throw ContainerOperationException if not found
+    if (mContainers.find(mConfig.defaultId) == mContainers.end()) {
+        LOGE("Provided default container ID " << mConfig.defaultId << " is invalid.");
+        throw ContainerOperationException("Provided default container ID " + mConfig.defaultId +
+                                          " is invalid.");
     }
 
     LOGD("ContainersManager object instantiated");
@@ -190,6 +202,12 @@ void ContainersManager::notifyActiveContainerHandler(const std::string& caller,
     } catch(const SecurityContainersException&) {
         LOGE("Notification from " << caller << " hasn't been sent");
     }
+}
+
+void ContainersManager::displayOffHandler(const std::string& /*caller*/)
+{
+    LOGI("Switching to default container " << mConfig.defaultId);
+    focus(mConfig.defaultId);
 }
 
 } // namespace security_containers

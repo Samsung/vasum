@@ -28,9 +28,12 @@
 
 #include "containers-manager.hpp"
 #include "container-dbus-definitions.hpp"
+// TODO: Switch to real power-manager dbus defs when they will be implemented in power-manager
+#include "fake-power-manager-dbus-definitions.hpp"
 #include "exception.hpp"
 
 #include "dbus/connection.hpp"
+#include "dbus/exception.hpp"
 #include "utils/glib-loop.hpp"
 #include "config/exception.hpp"
 #include "utils/latch.hpp"
@@ -39,6 +42,8 @@
 #include <string>
 #include <algorithm>
 #include <functional>
+#include <mutex>
+#include <condition_variable>
 
 
 using namespace security_containers;
@@ -52,6 +57,7 @@ const std::string TEST_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-cont
 const std::string TEST_DBUS_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/test-dbus-daemon.conf";
 const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-daemon.conf";
 const std::string BUGGY_FOREGROUND_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-foreground-daemon.conf";
+const std::string BUGGY_DEFAULTID_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-default-daemon.conf";
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/missing-daemon.conf";
 const int EVENT_TIMEOUT = 5000;
 const int TEST_DBUS_CONNECTION_CONTAINERS_COUNT = 3;
@@ -63,18 +69,61 @@ class DbusAccessory {
 public:
     std::vector<std::string> mReceivedSignalsSource;
 
-    DbusAccessory(int id, Latch& signalEmittedLatch)
+    DbusAccessory(int id)
         : mId(id),
           mClient(DbusConnection::create(acquireAddress())),
-          mSignalEmittedLatch(signalEmittedLatch)
+          mNameAcquired(false),
+          mPendingDisconnect(false)
     {
     }
 
-    void signalSubscribe()
+    void setName(const std::string& name)
+    {
+        mClient->setName(name,
+                         std::bind(&DbusAccessory::onNameAcquired, this),
+                         std::bind(&DbusAccessory::onDisconnect, this));
+
+        if(!waitForName()) {
+            mClient.reset();
+            throw dbus::DbusOperationException("Could not acquire name.");
+        }
+    }
+
+    bool waitForName()
+    {
+        std::unique_lock<std::mutex> lock(mMutex);
+        mNameCondition.wait(lock, [this] {return mNameAcquired || mPendingDisconnect;});
+        return mNameAcquired;
+    }
+
+    void onNameAcquired()
+    {
+        std::unique_lock<std::mutex> lock(mMutex);
+        mNameAcquired = true;
+        mNameCondition.notify_one();
+    }
+
+    void onDisconnect()
+    {
+        std::unique_lock<std::mutex> lock(mMutex);
+        mPendingDisconnect = true;
+        mNameCondition.notify_one();
+    }
+
+    void signalSubscribe(Latch& referenceLatch)
     {
         using namespace std::placeholders;
-        mClient->signalSubscribe(std::bind(&DbusAccessory::handler, this, _1, _2, _3, _4, _5),
+        mClient->signalSubscribe(std::bind(&DbusAccessory::handler,
+                                 this, std::ref(referenceLatch), _1, _2, _3, _4, _5),
                                  api::BUS_NAME);
+    }
+
+    void emitSignal(const std::string& objectPath,
+                    const std::string& interface,
+                    const std::string& name,
+                    GVariant* parameters)
+    {
+        mClient->emitSignal(objectPath, interface, name, parameters);
     }
 
     void callMethod()
@@ -96,7 +145,10 @@ public:
 private:
     const int mId;
     DbusConnection::Pointer mClient;
-    Latch& mSignalEmittedLatch;
+    bool mNameAcquired;
+    bool mPendingDisconnect;
+    std::mutex mMutex;
+    std::condition_variable mNameCondition;
 
     std::string acquireAddress() const
     {
@@ -104,7 +156,8 @@ private:
                "-dbus/dbus/system_bus_socket";
     }
 
-    void handler(const std::string& /*senderBusName*/,
+    void handler(Latch& referenceLatch,
+                 const std::string& /*senderBusName*/,
                  const std::string& objectPath,
                  const std::string& interface,
                  const std::string& signalName,
@@ -121,7 +174,7 @@ private:
             g_variant_get(parameters, "(&s&s&s)", &container, &application, &message);
             mReceivedSignalsSource.push_back(container);
             if (application == TEST_APP_NAME && message == TEST_MESSGAE) {
-                mSignalEmittedLatch.set();
+                referenceLatch.set();
             }
         }
     }
@@ -168,6 +221,12 @@ BOOST_AUTO_TEST_CASE(BuggyForegroundTest)
     BOOST_CHECK(cm.getRunningForegroundContainerId() == "ut-containers-manager-console2");
 }
 
+BOOST_AUTO_TEST_CASE(BuggyDefaultTest)
+{
+    BOOST_REQUIRE_THROW(ContainersManager cm(BUGGY_DEFAULTID_CONFIG_PATH),
+                        ContainerOperationException);
+}
+
 BOOST_AUTO_TEST_CASE(StopAllTest)
 {
     ContainersManager cm(TEST_CONFIG_PATH);
@@ -210,10 +269,10 @@ BOOST_AUTO_TEST_CASE(NotifyActiveContainerTest)
 
     std::vector< std::unique_ptr<DbusAccessory> > dbuses;
     for (int i = 1; i <= TEST_DBUS_CONNECTION_CONTAINERS_COUNT; ++i) {
-        dbuses.push_back(std::unique_ptr<DbusAccessory>(new DbusAccessory(i, signalReceivedLatch)));
+        dbuses.push_back(std::unique_ptr<DbusAccessory>(new DbusAccessory(i)));
     }
     for (auto& dbus : dbuses) {
-        dbus->signalSubscribe();
+        dbus->signalSubscribe(signalReceivedLatch);
     }
     for (auto& dbus : dbuses) {
         dbus->callMethod();
@@ -236,6 +295,43 @@ BOOST_AUTO_TEST_CASE(NotifyActiveContainerTest)
     }
 
     dbuses.clear();
+}
+
+BOOST_AUTO_TEST_CASE(DisplayOffTest)
+{
+    ContainersManager cm(TEST_DBUS_CONFIG_PATH);
+    BOOST_REQUIRE_NO_THROW(cm.startAll());
+
+    std::vector<std::unique_ptr<DbusAccessory>> clients;
+    for (int i = 1; i <= TEST_DBUS_CONNECTION_CONTAINERS_COUNT; ++i) {
+        clients.push_back(std::unique_ptr<DbusAccessory>(new DbusAccessory(i)));
+    }
+
+    for (auto& client : clients) {
+        client->setName(fake_power_manager_api::BUS_NAME);
+    }
+
+    std::mutex Mutex;
+    std::unique_lock<std::mutex> Lock(Mutex);
+    std::condition_variable Condition;
+    auto cond = [&cm]() -> bool {
+        return cm.getRunningForegroundContainerId() == "ut-containers-manager-console1";
+    };
+
+    for (auto& client : clients) {
+        // TEST SWITCHING TO DEFAULT CONTAINER
+        // focus non-default container
+        BOOST_REQUIRE_NO_THROW(cm.focus("ut-containers-manager-console3"));
+
+        // emit signal from dbus connection
+        BOOST_REQUIRE_NO_THROW(client->emitSignal(fake_power_manager_api::OBJECT_PATH,
+                                                  fake_power_manager_api::INTERFACE,
+                                                  fake_power_manager_api::SIGNAL_DISPLAY_OFF,
+                                                  nullptr));
+
+        // check if default container has focus
+        BOOST_CHECK(Condition.wait_for(Lock, std::chrono::milliseconds(EVENT_TIMEOUT), cond));
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

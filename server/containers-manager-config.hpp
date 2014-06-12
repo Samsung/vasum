@@ -56,10 +56,16 @@ struct ContainersManagerConfig {
      */
     std::string foregroundId;
 
+    /**
+     * An ID of default container.
+     */
+    std::string defaultId;
+
     CONFIG_REGISTER
     (
         containerConfigs,
         foregroundId,
+        defaultId,
         inputConfig
     )
 };
