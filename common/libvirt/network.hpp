@@ -55,7 +55,6 @@ private:
     virNetworkPtr mNet;
 };
 
-
 } // namespace libvirt
 } // namespace security_containers
 

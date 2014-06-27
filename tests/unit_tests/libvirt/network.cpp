@@ -26,6 +26,7 @@
 #include "config.hpp"
 #include "ut.hpp"
 
+#include "libvirt/network-filter.hpp"
 #include "libvirt/network.hpp"
 #include "libvirt/exception.hpp"
 
@@ -56,12 +57,27 @@ const std::string CORRECT_CONFIG_XML =  "<network>"
                                         "   </ip>"
                                         "</network>";
 
+const std::string CORRECT_CONFIG_FILTER_XML = "<filter name='test-nwfilter' chain='root'>"
+                                              "    <rule action='reject' direction='in' priority='100'>"
+                                              "        <ip srcipaddr='192.168.121.0' srcipmask='255.255.255.0'/>"
+                                              "    </rule>"
+                                              "    <rule action='reject' direction='out' priority='100'>"
+                                              "        <ip dstipaddr='192.168.121.0' srcipmask='255.255.255.0'/>"
+                                              "    </rule>"
+                                              "</filter>";
+
 const std::string BUGGY_CONFIG_XML = "<><TRASH>";
+
+const std::string BUGGY_CONFIG_FILTER_XML = "<><TRASH";
 
 } // namespace
 
 BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 {
+    std::unique_ptr<LibvirtNWFilter> nwFilterPtr;
+    BOOST_REQUIRE_NO_THROW(nwFilterPtr.reset(new LibvirtNWFilter(CORRECT_CONFIG_FILTER_XML)));
+    BOOST_REQUIRE_NO_THROW(nwFilterPtr.reset());
+
     std::unique_ptr<LibvirtNetwork> netPtr;
     BOOST_REQUIRE_NO_THROW(netPtr.reset(new LibvirtNetwork(CORRECT_CONFIG_XML)));
     BOOST_REQUIRE_NO_THROW(netPtr.reset());
@@ -69,17 +85,24 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)
 {
+    BOOST_REQUIRE_THROW(LibvirtNWFilter filter(BUGGY_CONFIG_FILTER_XML), LibvirtOperationException);
     BOOST_REQUIRE_THROW(LibvirtNetwork net(BUGGY_CONFIG_XML), LibvirtOperationException);
 }
 
 BOOST_AUTO_TEST_CASE(DefinitionTest)
 {
+    LibvirtNWFilter filter(CORRECT_CONFIG_FILTER_XML);
+    BOOST_CHECK(filter.get() != NULL);
+
     LibvirtNetwork net(CORRECT_CONFIG_XML);
     BOOST_CHECK(net.get() != NULL);
 }
 
 BOOST_AUTO_TEST_CASE(BoolTest)
 {
+    LibvirtNWFilter filter(CORRECT_CONFIG_FILTER_XML);
+    BOOST_CHECK(filter);
+
     LibvirtNetwork net(CORRECT_CONFIG_XML);
     BOOST_CHECK(net);
 }

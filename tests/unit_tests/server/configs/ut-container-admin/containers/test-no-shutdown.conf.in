@@ -3,6 +3,7 @@
     "switchToDefaultAfterTimeout" : true,
     "config" : "@SC_TEST_CONFIG_INSTALL_DIR@/server/ut-container-admin/libvirt-config/test-no-shutdown.xml",
     "networkConfig" : "",
+    "networkFilterConfig" : "",
     "cpuQuotaForeground" : -1,
     "cpuQuotaBackground" : 1000,
     "runMountPoint" : "",

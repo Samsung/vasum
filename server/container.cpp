@@ -66,6 +66,8 @@ Container::Container(const std::string& containerConfigPath,
     const std::string baseConfigPath = utils::dirName(containerConfigPath);
     mConfig.config = fs::absolute(mConfig.config, baseConfigPath).string();
     mConfig.networkConfig = fs::absolute(mConfig.networkConfig, baseConfigPath).string();
+    mConfig.networkFilterConfig = fs::absolute(mConfig.networkFilterConfig,
+                                               baseConfigPath).string();
     if (!mConfig.runMountPoint.empty()) {
         mRunMountPoint = fs::absolute(mConfig.runMountPoint, baseRunMountPointPath).string();
     }

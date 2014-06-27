@@ -12,6 +12,7 @@
         <console type="pty"/>
         <interface type='network'>
             <source network='test-network-1'/>
+            <filterref filter='test-network-1-filter'/>
         </interface>
     </devices>
 </domain>

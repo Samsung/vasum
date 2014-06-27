@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Piotr Bartosiewicz <p.bartosiewi@partner.samsung.com>
+ *  Contact: Jan Olszak <j.olszak@samsung.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,66 +18,50 @@
 
 /**
  * @file
- * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Declaration of the class for administrating single network
+ * @author  Jan Olszak (j.olszak@samsung.com)
+ * @brief   Declaration of the class wrapping libvirt network
  */
 
+#ifndef COMMON_LIBVIRT_NETWORK_FILTER_HPP
+#define COMMON_LIBVIRT_NETWORK_FILTER_HPP
 
-#ifndef SERVER_NETWORK_ADMIN_HPP
-#define SERVER_NETWORK_ADMIN_HPP
+#include "libvirt/connection.hpp"
 
-#include "container-config.hpp"
-
-#include "libvirt/network-filter.hpp"
-#include "libvirt/network.hpp"
+#include <libvirt/libvirt.h>
 
 
 namespace security_containers {
+namespace libvirt {
 
-
-class NetworkAdmin {
+class LibvirtNWFilter {
 
 public:
-
-    NetworkAdmin(const ContainerConfig& config);
-    virtual ~NetworkAdmin();
-
-    /**
-     * Get the network id
-     */
-    const std::string& getId() const;
+    LibvirtNWFilter(const std::string& configXML);
+    ~LibvirtNWFilter();
 
     /**
-     * Start network.
+     * @return The libvirt network pointer
      */
-    void start();
+    virNWFilterPtr get();
 
     /**
-     * Stop network.
+     * @return libvirt network pointer is not NULL
      */
-    void stop();
-
-    /**
-     * @return Is the network active?
-     */
-    bool isActive();
+    operator bool() const;
 
     /**
      * Set whether container should be detached on exit.
      */
     void setDetachOnExit();
 
-
 private:
-    const ContainerConfig& mConfig;
-    libvirt::LibvirtNWFilter mNWFilter;
-    libvirt::LibvirtNetwork mNetwork;
-    const std::string mId;
+    LibvirtConnection mCon;
+    virNWFilterPtr mNetFilter;
     bool mDetachOnExit;
 };
 
-
+} // namespace libvirt
 } // namespace security_containers
 
 
-#endif // SERVER_NETWORK_ADMIN_HPP
+#endif // COMMON_LIBVIRT_NETWORK_FILTER_HPP

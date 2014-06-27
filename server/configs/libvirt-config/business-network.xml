@@ -3,9 +3,10 @@
     <uuid>cc0951f9-3397-4272-ae05-66c19229accf</uuid>
     <bridge name="virbr-business"/>
     <forward/>
-    <ip address="192.168.102.1" netmask="255.255.255.0">
+    <dns forwardPlainNames="yes"/>
+    <ip address="10.0.102.1" netmask="255.0.0.0">
         <dhcp>
-            <range start="192.168.102.2" end="192.168.102.254"/>
+            <range start="10.0.102.2" end="10.0.102.2"/>
         </dhcp>
     </ip>
 </network>

@@ -60,6 +60,12 @@ struct ContainerConfig {
     std::string networkConfig;
 
     /**
+     *
+     * Container's libvirt (XML) network filter config file.
+     */
+    std::string networkFilterConfig;
+
+    /**
      * Container's CFS quota in us when it's in the foreground
      */
     std::int64_t cpuQuotaForeground;
@@ -92,6 +98,7 @@ struct ContainerConfig {
         switchToDefaultAfterTimeout,
         config,
         networkConfig,
+        networkFilterConfig,
         cpuQuotaForeground,
         cpuQuotaBackground,
         runMountPoint,

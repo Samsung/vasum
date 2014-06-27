@@ -57,6 +57,7 @@ std::string getNetworkName(virNetworkPtr net)
 
 NetworkAdmin::NetworkAdmin(const ContainerConfig& config)
     : mConfig(config),
+      mNWFilter(utils::readFileContent(mConfig.networkFilterConfig)),
       mNetwork(utils::readFileContent(mConfig.networkConfig)),
       mId(getNetworkName(mNetwork.get())),
       mDetachOnExit(false)
@@ -143,6 +144,7 @@ bool NetworkAdmin::isActive()
 void NetworkAdmin::setDetachOnExit()
 {
     mDetachOnExit = true;
+    mNWFilter.setDetachOnExit();
 }
 
 

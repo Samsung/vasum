@@ -16,6 +16,7 @@
         </filesystem>
         <interface type='network'>
             <source network='test_network'/>
+            <filterref filter='test_network_filter'/>
         </interface>
     </devices>
 </domain>

@@ -5,12 +5,14 @@
 Security-containers integration tests launcher. Launches all integration tests.
 '''
 import unittest
+from sc_integration_tests.network_tests import *
 
 from sc_integration_tests.image_tests import *
 
 # add tests here...
 test_groups = [
-               image_tests
+               image_tests,
+               network_tests
               ]
 
 
