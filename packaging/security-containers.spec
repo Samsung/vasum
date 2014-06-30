@@ -158,5 +158,5 @@ Unit tests for both: server and client and integration tests.
 %attr(755,root,root) %{script_dir}/sc_launch_test.py
 %{script_dir}/sc_test_parser.py
 %{_datadir}/security-containers
-%{python_sitelib}/sc_integration_tests/
+%{python_sitelib}/sc_integration_tests
 
