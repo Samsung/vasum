@@ -34,8 +34,8 @@ namespace security_containers {
 const std::string DBUS_SOCKET_FILE       = "/tmp/container_socket";
 const std::string DBUS_ADDRESS           = "unix:path=" + DBUS_SOCKET_FILE;
 
-const std::string TESTAPI_BUS_NAME       = "com.samsung.tests";
-const std::string TESTAPI_OBJECT_PATH    = "/com/samsung/tests";
+const std::string TESTAPI_BUS_NAME       = "org.tizen.tests";
+const std::string TESTAPI_OBJECT_PATH    = "/org/tizen/tests";
 const std::string TESTAPI_INTERFACE      = "tests.api";
 const std::string TESTAPI_METHOD_NOOP    = "Noop";
 const std::string TESTAPI_METHOD_PROCESS = "Process";

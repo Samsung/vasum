@@ -32,9 +32,9 @@ namespace security_containers {
 namespace container_daemon {
 namespace api {
 
-const std::string BUS_NAME            = "com.samsung.container.daemon";
-const std::string OBJECT_PATH         = "/com/samsung/container/daemon";
-const std::string INTERFACE           = "com.samsung.container.daemon";
+const std::string BUS_NAME            = "org.tizen.container.daemon";
+const std::string OBJECT_PATH         = "/org/tizen/container/daemon";
+const std::string INTERFACE           = "org.tizen.container.daemon";
 
 const std::string METHOD_GAIN_FOCUS   = "GainFocus";
 const std::string METHOD_LOSE_FOCUS   = "LoseFocus";

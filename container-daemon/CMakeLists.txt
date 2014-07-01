@@ -40,5 +40,5 @@ TARGET_LINK_LIBRARIES(${CONTAINER_DAEMON_CODENAME} ${CONTAINER_DAEMON_DEPS_LIBRA
 ## Install #####################################################################
 INSTALL(TARGETS ${CONTAINER_DAEMON_CODENAME} DESTINATION bin)
 
-INSTALL(FILES       configs/com.samsung.container.daemon.conf
+INSTALL(FILES       configs/org.tizen.container.daemon.conf
         DESTINATION /etc/dbus-1/system.d/)

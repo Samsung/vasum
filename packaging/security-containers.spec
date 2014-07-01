@@ -133,7 +133,7 @@ Daemon running inside every container.
 %manifest packaging/security-containers-container-daemon.manifest
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/security-containers-container-daemon
-/etc/dbus-1/system.d/com.samsung.container.daemon.conf
+/etc/dbus-1/system.d/org.tizen.container.daemon.conf
 
 
 ## Test Package ################################################################

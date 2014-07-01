@@ -32,9 +32,9 @@ namespace security_containers {
 namespace api {
 
 
-const std::string BUS_NAME                          = "com.samsung.containers";
-const std::string OBJECT_PATH                       = "/com/samsung/containers";
-const std::string INTERFACE                         = "com.samsung.containers.manager";
+const std::string BUS_NAME                          = "org.tizen.containers";
+const std::string OBJECT_PATH                       = "/org/tizen/containers";
+const std::string INTERFACE                         = "org.tizen.containers.manager";
 
 const std::string METHOD_NOTIFY_ACTIVE_CONTAINER    = "NotifyActiveContainer";
 const std::string SIGNAL_NOTIFICATION               = "Notification";
