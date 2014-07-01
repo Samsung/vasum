@@ -224,8 +224,15 @@ void ContainersManager::notifyActiveContainerHandler(const std::string& caller,
 
 void ContainersManager::displayOffHandler(const std::string& /*caller*/)
 {
-    LOGI("Switching to default container " << mConfig.defaultId);
-    focus(mConfig.defaultId);
+    // get config of currently set container and switch if switchToDefaultAfterTimeout is true
+    const std::string activeContainerName = getRunningForegroundContainerId();
+    const auto& activeContainer = mContainers.find(activeContainerName);
+
+    if (activeContainer != mContainers.end() &&
+        activeContainer->second->isSwitchToDefaultAfterTimeoutAllowed()) {
+        LOGI("Switching to default container " << mConfig.defaultId);
+        focus(mConfig.defaultId);
+    }
 }
 
 void ContainersManager::handleContainerMoveFileRequest(const std::string& srcContainerId,

@@ -43,6 +43,12 @@ struct ContainerConfig {
     int privilege;
 
     /**
+     * Allow switching to default container after timeout.
+     * Setting this to false will disable switching to default container after timeout.
+     */
+    bool switchToDefaultAfterTimeout;
+
+    /**
      * Container's libvirt (XML) config file.
      * Location can be relative to the Container's config file.
      */
@@ -83,6 +89,7 @@ struct ContainerConfig {
     CONFIG_REGISTER
     (
         privilege,
+        switchToDefaultAfterTimeout,
         config,
         networkConfig,
         cpuQuotaForeground,

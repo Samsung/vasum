@@ -182,6 +182,11 @@ bool Container::isPaused()
     return mAdmin->isPaused();
 }
 
+bool Container::isSwitchToDefaultAfterTimeoutAllowed() const
+{
+    return mConfig.switchToDefaultAfterTimeout;
+}
+
 void Container::onNameLostCallback()
 {
     LOGI(getId() << ": A connection to the DBUS server has been lost, reconnecting...");

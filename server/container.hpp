@@ -129,6 +129,11 @@ public:
     // ContainerConnection API
 
     /**
+     * @return Is switching to default container after timeout allowed?
+     */
+    bool isSwitchToDefaultAfterTimeoutAllowed() const;
+
+    /**
      * Register notification request callback
      */
     void setNotifyActiveContainerCallback(const NotifyActiveContainerCallback& callback);

@@ -1,5 +1,6 @@
 {
     "privilege" : 10,
+    "switchToDefaultAfterTimeout" : true,
     "config" : "@SC_TEST_CONFIG_INSTALL_DIR@/server/ut-container-admin/libvirt-config/test.xml",
     "networkConfig" : "",
     "cpuQuotaForeground" : -1,

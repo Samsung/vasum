@@ -448,5 +448,53 @@ BOOST_AUTO_TEST_CASE(MoveFileTest)
     fs::remove_all(CONTAINER2PATH, ec);
 }
 
+BOOST_AUTO_TEST_CASE(AllowSwitchToDefaultTest)
+{
+    ContainersManager cm(TEST_DBUS_CONFIG_PATH);
+    BOOST_REQUIRE_NO_THROW(cm.startAll());
+
+    std::vector<std::unique_ptr<DbusAccessory>> clients;
+    for (int i = 1; i <= TEST_DBUS_CONNECTION_CONTAINERS_COUNT; ++i) {
+        clients.push_back(std::unique_ptr<DbusAccessory>(new DbusAccessory(i)));
+    }
+
+    for (auto& client : clients) {
+        client->setName(fake_power_manager_api::BUS_NAME);
+    }
+
+    std::mutex condMutex;
+    std::unique_lock<std::mutex> condLock(condMutex);
+    std::condition_variable condition;
+    auto cond = [&cm]() -> bool {
+        return cm.getRunningForegroundContainerId() == "ut-containers-manager-console1-dbus";
+    };
+
+    for (auto& client : clients) {
+        // focus non-default container with allowed switching
+        BOOST_REQUIRE_NO_THROW(cm.focus("ut-containers-manager-console3-dbus"));
+
+        // emit signal from dbus connection
+        BOOST_REQUIRE_NO_THROW(client->emitSignal(fake_power_manager_api::OBJECT_PATH,
+                                                  fake_power_manager_api::INTERFACE,
+                                                  fake_power_manager_api::SIGNAL_DISPLAY_OFF,
+                                                  nullptr));
+
+        // check if default container has focus
+        BOOST_CHECK(condition.wait_for(condLock, std::chrono::milliseconds(EVENT_TIMEOUT), cond));
+
+        // focus non-default container with disabled switching
+        BOOST_REQUIRE_NO_THROW(cm.focus("ut-containers-manager-console2-dbus"));
+
+        // emit signal from dbus connection
+        BOOST_REQUIRE_NO_THROW(client->emitSignal(fake_power_manager_api::OBJECT_PATH,
+                                                  fake_power_manager_api::INTERFACE,
+                                                  fake_power_manager_api::SIGNAL_DISPLAY_OFF,
+                                                  nullptr));
+
+        // now default container should not be focused
+        BOOST_CHECK(!condition.wait_for(condLock, std::chrono::milliseconds(EVENT_TIMEOUT), cond));
+    }
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
