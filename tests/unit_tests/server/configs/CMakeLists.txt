@@ -55,6 +55,14 @@ CONFIGURE_FILE(ut-network-admin/containers/buggy.conf.in
                ${CMAKE_BINARY_DIR}/ut-network-admin/containers/buggy.conf @ONLY)
 FILE(GLOB network_container_CONF_GEN ${CMAKE_BINARY_DIR}/ut-network-admin/containers/*.conf)
 
+CONFIGURE_FILE(ut-containers-manager/libvirt-config/console1-dbus.xml.in
+               ${CMAKE_BINARY_DIR}/ut-containers-manager/libvirt-config/console1-dbus.xml @ONLY)
+CONFIGURE_FILE(ut-containers-manager/libvirt-config/console2-dbus.xml.in
+               ${CMAKE_BINARY_DIR}/ut-containers-manager/libvirt-config/console2-dbus.xml @ONLY)
+CONFIGURE_FILE(ut-containers-manager/libvirt-config/console3-dbus.xml.in
+               ${CMAKE_BINARY_DIR}/ut-containers-manager/libvirt-config/console3-dbus.xml @ONLY)
+FILE(GLOB manager_admin_CONF_GEN ${CMAKE_BINARY_DIR}/ut-containers-manager/libvirt-config/*.xml)
+
 CONFIGURE_FILE(ut-container/libvirt-config/test-dbus.xml.in
                ${CMAKE_BINARY_DIR}/ut-container/libvirt-config/test-dbus.xml @ONLY)
 FILE(GLOB container_admin_CONF_GEN ${CMAKE_BINARY_DIR}/ut-container/libvirt-config/*.xml)
@@ -73,6 +81,8 @@ INSTALL(FILES        ${manager_manager_CONF}
 INSTALL(FILES        ${manager_container_CONF}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/containers)
 INSTALL(FILES        ${manager_admin_CONF}
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/libvirt-config)
+INSTALL(FILES        ${manager_admin_CONF_GEN}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/libvirt-config)
 
 INSTALL(FILES        ${container_CONF}
