@@ -28,7 +28,7 @@ INSTALL(FILES       daemon.conf
         DESTINATION ${SC_CONFIG_INSTALL_DIR})
 
 # TODO This file should be installed to /etc/dbus-1/system.d/ on an every container
-INSTALL(FILES       image-skel/etc/dbus-1/system.d/org.tizen.containers.conf
+INSTALL(FILES       image-skel/etc/dbus-1/system.d/org.tizen.containers.domain.conf
         DESTINATION ${SC_CONFIG_INSTALL_DIR}/image-skel/etc/dbus-1/system.d)
 
 INSTALL(FILES       ${container_CONF}
@@ -39,3 +39,6 @@ INSTALL(FILES       ${admin_CONF}
 
 INSTALL(FILES       ${SYSTEMD_SERVICES}
         DESTINATION ${SYSTEMD_UNIT_DIR})
+
+INSTALL(FILES       dbus-1/system.d/org.tizen.containers.host.conf
+        DESTINATION ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)

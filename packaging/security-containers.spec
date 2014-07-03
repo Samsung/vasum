@@ -32,6 +32,7 @@ between them. A process from inside a container can request a switch of context
 %{_unitdir}/security-containers.service
 %{_unitdir}/multi-user.target.wants/security-containers.service
 %config %attr(400,root,root) /etc/security-containers/libvirt-config/*.xml
+/etc/dbus-1/system.d/org.tizen.containers.host.conf
 /etc/security-containers/image-skel
 
 %prep
@@ -132,7 +133,7 @@ Daemon running inside every container.
 %manifest packaging/security-containers-container-daemon.manifest
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/security-containers-container-daemon
-/etc/dbus-1/system.d/org.tizen.container.daemon.conf
+/etc/dbus-1/system.d/org.tizen.containers.domain.daemon.conf
 
 
 ## Test Package ################################################################

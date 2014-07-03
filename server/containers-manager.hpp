@@ -28,6 +28,7 @@
 
 #include "container.hpp"
 #include "containers-manager-config.hpp"
+#include "host-connection.hpp"
 #include "input-monitor.hpp"
 
 #include <string>
@@ -75,6 +76,7 @@ public:
 
 private:
     ContainersManagerConfig mConfig;
+    HostConnection mHostConnection;
     // to hold InputMonitor pointer to monitor if container switching sequence is recognized
     std::unique_ptr<InputMonitor> mSwitchingSequenceMonitor;
     typedef std::unordered_map<std::string, std::unique_ptr<Container>> ContainerMap;

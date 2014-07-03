@@ -58,6 +58,14 @@ struct ContainerConnectionException: public ServerException {
 };
 
 /**
+ * Exception during performing an operation on a host connection
+ */
+struct HostConnectionException: public ServerException {
+
+    HostConnectionException(const std::string& error = "") : ServerException(error) {}
+};
+
+/**
 * Exception during performing an operation by input monitor,
 * e.g. create channel, register callback etc.
 */

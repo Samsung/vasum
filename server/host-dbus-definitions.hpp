@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Jan Olszak <j.olszak@samsung.com>
+ *  Contact: Piotr Bartosiewicz <p.bartosiewi@partner.samsung.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,41 +18,37 @@
 
 /**
  * @file
- * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   container-daemon dbus api definitions
+ * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
+ * @brief   Host dbus api definitions
  */
 
-#ifndef CONTAINER_DAEMON_DAEMON_DBUS_DEFINITIONS_HPP
-#define CONTAINER_DAEMON_DAEMON_DBUS_DEFINITIONS_HPP
+#ifndef SERVER_HOST_DBUS_DEFINITIONS_HPP
+#define SERVER_HOST_DBUS_DEFINITIONS_HPP
 
 #include <string>
 
 
 namespace security_containers {
-namespace container_daemon {
-namespace api {
+namespace hostapi {
 
-const std::string BUS_NAME            = "org.tizen.containers.domain.daemon";
-const std::string OBJECT_PATH         = "/org/tizen/containers/domain/daemon";
-const std::string INTERFACE           = "org.tizen.containers.domain.daemon";
 
-const std::string METHOD_GAIN_FOCUS   = "GainFocus";
-const std::string METHOD_LOSE_FOCUS   = "LoseFocus";
+const std::string BUS_NAME                          = "org.tizen.containers.host";
+const std::string OBJECT_PATH                       = "/org/tizen/containers/host";
+const std::string INTERFACE                         = "org.tizen.containers.host.test";
+
+const std::string METHOD_TEST                       = "Test";
 
 const std::string DEFINITION =
     "<node>"
     "  <interface name='" + INTERFACE + "'>"
-    "    <method name='" + METHOD_GAIN_FOCUS + "'>"
-    "    </method>"
-    "    <method name='" + METHOD_LOSE_FOCUS + "'>"
+    "    <method name='" + METHOD_TEST + "'>"
     "    </method>"
     "  </interface>"
     "</node>";
 
 
-} // namespace api
-} // namespace container_daemon
+} // namespace hostapi
 } // namespace security_containers
 
 
-#endif // CONTAINER_DAEMON_DAEMON_DBUS_DEFINITIONS_HPP
+#endif // SERVER_HOST_DBUS_DEFINITIONS_HPP
