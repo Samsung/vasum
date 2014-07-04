@@ -5,7 +5,7 @@ Requires=libvirtd.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/security-containers-server
+ExecStart=${CMAKE_INSTALL_PREFIX}/bin/security-containers-server
 Restart=on-failure
 ExecReload=/bin/kill -HUP $MAINPID
 

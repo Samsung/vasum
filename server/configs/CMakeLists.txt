@@ -21,9 +21,14 @@ MESSAGE(STATUS "Installing configs to " ${SC_CONFIG_INSTALL_DIR})
 
 FILE(GLOB container_CONF     containers/*.conf)
 FILE(GLOB admin_CONF         libvirt-config/*.xml)
-FILE(GLOB SYSTEMD_SERVICES   systemd/*.service)
 
-## Installations ###############################################################
+
+## Generate ####################################################################
+CONFIGURE_FILE(systemd/security-containers.service.in
+               ${CMAKE_BINARY_DIR}/systemd/security-containers.service)
+
+
+## Install #####################################################################
 INSTALL(FILES       daemon.conf
         DESTINATION ${SC_CONFIG_INSTALL_DIR})
 
@@ -46,5 +51,5 @@ INSTALL(FILES       ${container_CONF}
 INSTALL(FILES       ${admin_CONF}
         DESTINATION ${SC_CONFIG_INSTALL_DIR}/libvirt-config)
 
-INSTALL(FILES       ${SYSTEMD_SERVICES}
+INSTALL(FILES       ${CMAKE_BINARY_DIR}/systemd/security-containers.service
         DESTINATION ${SYSTEMD_UNIT_DIR})
