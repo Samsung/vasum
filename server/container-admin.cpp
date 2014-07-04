@@ -237,7 +237,7 @@ void ContainerAdmin::shutdown()
 
     setSchedulerLevel(SchedulerLevel::FOREGROUND);
 
-    if (virDomainShutdown(mDom.get()) < 0) {
+    if (virDomainShutdownFlags(mDom.get(), VIR_DOMAIN_SHUTDOWN_SIGNAL) < 0) {
         LOGE(mId << ": Error while shutting down the container:\n"
              << libvirt::libvirtFormatError());
         throw ContainerOperationException();
