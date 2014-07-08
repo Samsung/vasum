@@ -35,12 +35,6 @@ INSTALL(FILES       daemon.conf
 # preprocess d-bus configs
 CONFIGURE_FILE(dbus-1/system.d/org.tizen.containers.host.conf.in
                ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.containers.host.conf)
-CONFIGURE_FILE(image-skel/etc/dbus-1/system.d/org.tizen.containers.domain.conf.in
-               ${CMAKE_BINARY_DIR}/image-skel/etc/dbus-1/system.d/org.tizen.containers.domain.conf)
-
-# TODO This file should be installed to /etc/dbus-1/system.d/ on an every container
-INSTALL(FILES       ${CMAKE_BINARY_DIR}/image-skel/etc/dbus-1/system.d/org.tizen.containers.domain.conf
-        DESTINATION ${SC_CONFIG_INSTALL_DIR}/image-skel/etc/dbus-1/system.d)
 
 INSTALL(FILES       ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.containers.host.conf
         DESTINATION ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)

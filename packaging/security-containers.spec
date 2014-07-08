@@ -39,7 +39,6 @@ between them. A process from inside a container can request a switch of context
 %config /etc/security-containers/daemon.conf
 %config /etc/security-containers/containers/*.conf
 %config /etc/security-containers/libvirt-config/*.xml
-/etc/security-containers/image-skel
 %{_unitdir}/security-containers.service
 %{_unitdir}/multi-user.target.wants/security-containers.service
 /etc/dbus-1/system.d/org.tizen.containers.host.conf
@@ -134,11 +133,28 @@ Development package including the header files for the client library
 %{_libdir}/pkgconfig/*
 
 
+## Container Support Package ###################################################
+# TODO move to a separate repository
+%package container-support
+Summary:          Security Containers Support
+Group:            Security/Other
+Conflicts:        security-containers
+
+%description container-support
+Containers support installed inside every container.
+
+%files container-support
+%manifest packaging/security-containers-container-support.manifest
+%defattr(644,root,root,755)
+/etc/dbus-1/system.d/org.tizen.containers.domain.conf
+
+
 ## Container Daemon Package ####################################################
+# TODO move to a separate repository
 %package container-daemon
 Summary:          Security Containers Containers Daemon
 Group:            Security/Other
-Requires:         security-containers = %{version}-%{release}
+Requires:         security-containers-container-support = %{version}-%{release}
 
 %description container-daemon
 Daemon running inside every container.
