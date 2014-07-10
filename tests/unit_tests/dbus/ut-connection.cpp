@@ -51,7 +51,7 @@ using namespace security_containers::dbus;
 
 namespace {
 
-const char* DBUS_DAEMON_PROC = "/bin/dbus-daemon";
+const char* DBUS_DAEMON_PROC = "/usr/bin/dbus-daemon";
 const char* const DBUS_DAEMON_ARGS[] = {
     DBUS_DAEMON_PROC,
     "--config-file=" SC_TEST_CONFIG_INSTALL_DIR "/dbus/ut-connection/ut-dbus.conf",
