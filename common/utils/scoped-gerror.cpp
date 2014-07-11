@@ -32,7 +32,12 @@ namespace utils {
 ScopedGError::ScopedGError()
     : mError(NULL)
 {
+}
 
+ScopedGError::ScopedGError(ScopedGError&& other)
+    : mError(other.mError)
+{
+    other.mError = NULL;
 }
 
 ScopedGError::~ScopedGError()

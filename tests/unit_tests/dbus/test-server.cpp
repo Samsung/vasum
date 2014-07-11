@@ -142,7 +142,7 @@ void DbusTestServer::onMessageCall(const std::string& objectPath,
             LOGE("unknown method; should never happen");
         }
     } catch (const std::exception& e) {
-        result.setError("org.tizen.Exception", e.what());
+        result.setError("org.tizen.containers.Error.Test", e.what());
     }
 }
 

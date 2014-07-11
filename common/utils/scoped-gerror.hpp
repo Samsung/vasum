@@ -34,7 +34,11 @@ namespace utils {
 class ScopedGError {
 public:
     ScopedGError();
+    ScopedGError(ScopedGError&&);
     ~ScopedGError();
+
+    ScopedGError(const ScopedGError&) = delete;
+    ScopedGError& operator=(const ScopedGError&) = delete;
 
     /**
      * Strip the error
@@ -65,6 +69,7 @@ public:
 
 private:
     GError* mError;
+
 };
 
 } // namespace utils

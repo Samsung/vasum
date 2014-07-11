@@ -87,6 +87,28 @@ void throwDbusException(const ScopedGError& e)
     }
 }
 
+class AsyncMethodCallResultImpl : public AsyncMethodCallResult {
+public:
+    AsyncMethodCallResultImpl(GVariant* result, const ScopedGError& error)
+        : mResult(result), mError(error) {}
+    ~AsyncMethodCallResultImpl()
+    {
+        if (mResult) {
+            g_variant_unref(mResult);
+        }
+    }
+    GVariant* get()
+    {
+        if (mError) {
+            throwDbusException(mError);
+        }
+        return mResult;
+    }
+private:
+    GVariant* mResult;
+    const ScopedGError& mError;
+};
+
 } // namespace
 
 DbusConnection::Pointer DbusConnection::create(const std::string& address)
@@ -308,7 +330,8 @@ GVariantPtr DbusConnection::callMethod(const std::string& busName,
                                                    interface.c_str(),
                                                    method.c_str(),
                                                    parameters,
-                                                   G_VARIANT_TYPE(replyType.c_str()),
+                                                   replyType.empty() ? NULL
+                                                       : G_VARIANT_TYPE(replyType.c_str()),
                                                    G_DBUS_CALL_FLAGS_NONE,
                                                    CALL_METHOD_TIMEOUT_MS,
                                                    NULL,
@@ -319,6 +342,51 @@ GVariantPtr DbusConnection::callMethod(const std::string& busName,
         throwDbusException(error);
     }
     return GVariantPtr(result, g_variant_unref);
+}
+
+void DbusConnection::callMethodAsync(const std::string& busName,
+                                     const std::string& objectPath,
+                                     const std::string& interface,
+                                     const std::string& method,
+                                     GVariant* parameters,
+                                     const std::string& replyType,
+                                     const AsyncMethodCallCallback& callback)
+{
+    g_dbus_connection_call(mConnection,
+                           busName.c_str(),
+                           objectPath.c_str(),
+                           interface.c_str(),
+                           method.c_str(),
+                           parameters,
+                           replyType.empty() ? NULL
+                               : G_VARIANT_TYPE(replyType.c_str()),
+                           G_DBUS_CALL_FLAGS_NONE,
+                           CALL_METHOD_TIMEOUT_MS,
+                           NULL,
+                           &DbusConnection::onAsyncReady,
+                           utils::createCallbackWrapper(callback, mGuard.spawn()));
+}
+
+void DbusConnection::onAsyncReady(GObject* source,
+                                  GAsyncResult* asyncResult,
+                                  gpointer userData)
+{
+    std::unique_ptr<void, void(*)(void*)>
+        autoDeleteCallback(userData, &utils::deleteCallbackWrapper<AsyncMethodCallCallback>);
+    GDBusConnection* connection = reinterpret_cast<GDBusConnection*>(source);
+    const AsyncMethodCallCallback& callback =
+        utils::getCallbackFromPointer<AsyncMethodCallCallback>(userData);
+
+    ScopedGError error;
+    GVariant* result = g_dbus_connection_call_finish(connection, asyncResult, &error);
+    if (error) {
+        error.strip();
+        LOGE("Call method failed; " << error);
+    }
+    AsyncMethodCallResultImpl asyncMethodCallResult(result, error);
+    if (callback) {
+        callback(asyncMethodCallResult);
+    }
 }
 
 

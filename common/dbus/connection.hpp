@@ -51,6 +51,15 @@ public:
 };
 
 /**
+ * An interface used to get result from async response.
+ */
+class AsyncMethodCallResult {
+public:
+    virtual ~AsyncMethodCallResult() {}
+    virtual GVariant* get() = 0; // throws DbusException on error
+};
+
+/**
  * Dbus connection.
  * Provides a functionality that allows to call dbus methods,
  * register dbus interfaces, etc.
@@ -76,6 +85,9 @@ public:
                                const std::string& signalName,
                                GVariant* parameters
                               )> SignalCallback;
+
+    typedef std::function<void(AsyncMethodCallResult& asyncMethodCallResult
+                              )> AsyncMethodCallCallback;
 
     /**
      * Creates a connection to the dbus with given address.
@@ -130,6 +142,17 @@ public:
                            const std::string& replyType);
 
     /**
+     * Async call a dbus method
+     */
+    void callMethodAsync(const std::string& busName,
+                         const std::string& objectPath,
+                         const std::string& interface,
+                         const std::string& method,
+                         GVariant* parameters,
+                         const std::string& replyType,
+                         const AsyncMethodCallCallback& callback);
+
+    /**
      * Returns an xml with meta description of specified dbus object.
      */
     std::string introspect(const std::string& busName, const std::string& objectPath);
@@ -165,6 +188,9 @@ private:
                              const gchar* method,
                              GVariant* parameters,
                              GDBusMethodInvocation* invocation,
+                             gpointer userData);
+    static void onAsyncReady(GObject* source,
+                             GAsyncResult* asyncResult,
                              gpointer userData);
 };
 

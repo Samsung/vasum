@@ -325,21 +325,129 @@ BOOST_AUTO_TEST_CASE(MethodCallTest)
                       const std::string& methodName,
                       GVariant* parameters,
                       MethodResultBuilder& result) {
-        if (objectPath == TESTAPI_OBJECT_PATH &&
-            interface == TESTAPI_INTERFACE &&
-            methodName == TESTAPI_METHOD_NOOP &&
-            g_variant_is_of_type(parameters, G_VARIANT_TYPE_UNIT)) {
+        if (objectPath != TESTAPI_OBJECT_PATH || interface != TESTAPI_INTERFACE) {
+            return;
+        }
+        if (methodName == TESTAPI_METHOD_NOOP) {
             result.setVoid();
+        } else if (methodName == TESTAPI_METHOD_PROCESS) {
+            const gchar* arg = NULL;
+            g_variant_get(parameters, "(&s)", &arg);
+            std::string str = std::string("resp: ") + arg;
+            result.set(g_variant_new("(s)", str.c_str()));
+        } else if (methodName == TESTAPI_METHOD_THROW) {
+            int arg = 0;
+            g_variant_get(parameters, "(i)", &arg);
+            result.setError("org.tizen.containers.Error.Test", "msg: " + std::to_string(arg));
         }
     };
     conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler);
-    GVariantPtr result = conn2->callMethod(TESTAPI_BUS_NAME,
-                                           TESTAPI_OBJECT_PATH,
-                                           TESTAPI_INTERFACE,
-                                           TESTAPI_METHOD_NOOP,
-                                           NULL,
-                                           "()");
-    BOOST_CHECK(g_variant_is_of_type(result.get(), G_VARIANT_TYPE_UNIT));
+
+    GVariantPtr result1 = conn2->callMethod(TESTAPI_BUS_NAME,
+                                            TESTAPI_OBJECT_PATH,
+                                            TESTAPI_INTERFACE,
+                                            TESTAPI_METHOD_NOOP,
+                                            NULL,
+                                            "()");
+    BOOST_CHECK(g_variant_is_of_type(result1.get(), G_VARIANT_TYPE_UNIT));
+
+    GVariantPtr result2 = conn2->callMethod(TESTAPI_BUS_NAME,
+                                            TESTAPI_OBJECT_PATH,
+                                            TESTAPI_INTERFACE,
+                                            TESTAPI_METHOD_PROCESS,
+                                            g_variant_new("(s)", "arg"),
+                                            "(s)");
+    const gchar* ret2 = NULL;
+    g_variant_get(result2.get(), "(&s)", &ret2);
+    BOOST_CHECK_EQUAL("resp: arg", ret2);
+
+    BOOST_CHECK_THROW(conn2->callMethod(TESTAPI_BUS_NAME,
+                                        TESTAPI_OBJECT_PATH,
+                                        TESTAPI_INTERFACE,
+                                        TESTAPI_METHOD_THROW,
+                                        g_variant_new("(i)", 7),
+                                        "()"),
+                      DbusCustomException);
+}
+
+BOOST_AUTO_TEST_CASE(MethodAsyncCallTest)
+{
+    ScopedDbusDaemon daemon;
+    ScopedGlibLoop loop;
+    Latch nameAcquired;
+
+    DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
+    DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
+
+    conn1->setName(TESTAPI_BUS_NAME,
+                   [&] {nameAcquired.set();},
+                   [] {});
+    BOOST_REQUIRE(nameAcquired.wait(EVENT_TIMEOUT));
+    auto handler = [](const std::string& objectPath,
+                      const std::string& interface,
+                      const std::string& methodName,
+                      GVariant* parameters,
+                      MethodResultBuilder& result) {
+        if (objectPath != TESTAPI_OBJECT_PATH || interface != TESTAPI_INTERFACE) {
+            return;
+        }
+        if (methodName == TESTAPI_METHOD_NOOP) {
+            result.setVoid();
+        } else if (methodName == TESTAPI_METHOD_PROCESS) {
+            const gchar* arg = NULL;
+            g_variant_get(parameters, "(&s)", &arg);
+            std::string str = std::string("resp: ") + arg;
+            result.set(g_variant_new("(s)", str.c_str()));
+        } else if (methodName == TESTAPI_METHOD_THROW) {
+            int arg = 0;
+            g_variant_get(parameters, "(i)", &arg);
+            result.setError("org.tizen.containers.Error.Test", "msg: " + std::to_string(arg));
+        }
+    };
+    conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler);
+
+    Latch callDone;
+
+    auto asyncResult1 = [&](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
+        BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
+        callDone.set();
+    };
+    conn2->callMethodAsync(TESTAPI_BUS_NAME,
+                           TESTAPI_OBJECT_PATH,
+                           TESTAPI_INTERFACE,
+                           TESTAPI_METHOD_NOOP,
+                           NULL,
+                           "()",
+                           asyncResult1);
+    BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+
+    auto asyncResult2 = [&](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
+        const gchar* ret = NULL;
+        g_variant_get(asyncMethodCallResult.get(), "(&s)", &ret);
+        BOOST_CHECK_EQUAL("resp: arg", ret);
+        callDone.set();
+    };
+    conn2->callMethodAsync(TESTAPI_BUS_NAME,
+                           TESTAPI_OBJECT_PATH,
+                           TESTAPI_INTERFACE,
+                           TESTAPI_METHOD_PROCESS,
+                           g_variant_new("(s)", "arg"),
+                           "(s)",
+                           asyncResult2);
+    BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+
+    auto asyncResult3 = [&](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
+        BOOST_CHECK_THROW(asyncMethodCallResult.get(), DbusCustomException);
+        callDone.set();
+    };
+    conn2->callMethodAsync(TESTAPI_BUS_NAME,
+                           TESTAPI_OBJECT_PATH,
+                           TESTAPI_INTERFACE,
+                           TESTAPI_METHOD_THROW,
+                           g_variant_new("(i)", 7),
+                           "()",
+                           asyncResult3);
+    BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 }
 
 BOOST_AUTO_TEST_CASE(MethodCallExceptionTest)
