@@ -38,6 +38,7 @@ const std::string INTERFACE                         = "org.tizen.containers.doma
 
 const std::string METHOD_NOTIFY_ACTIVE_CONTAINER    = "NotifyActiveContainer";
 const std::string METHOD_FILE_MOVE_REQUEST          = "FileMoveRequest";
+const std::string METHOD_PROXY_CALL                 = "ProxyCall";
 const std::string SIGNAL_NOTIFICATION               = "Notification";
 
 const std::string FILE_MOVE_DESTINATION_NOT_FOUND   = "FILE_MOVE_DESTINATION_NOT_FOUND";
@@ -59,6 +60,15 @@ const std::string DEFINITION =
     "      <arg type='s' name='destination' direction='in'/>"
     "      <arg type='s' name='path' direction='in'/>"
     "      <arg type='s' name='result' direction='out'/>"
+    "    </method>"
+    "    <method name='" + METHOD_PROXY_CALL + "'>"
+    "      <arg type='s' name='target' direction='in'/>"
+    "      <arg type='s' name='busName' direction='in'/>"
+    "      <arg type='s' name='objectPath' direction='in'/>"
+    "      <arg type='s' name='interface' direction='in'/>"
+    "      <arg type='s' name='method' direction='in'/>"
+    "      <arg type='v' name='parameters' direction='in'/>"
+    "      <arg type='v' name='result' direction='out'/>"
     "    </method>"
     "    <signal name='" + SIGNAL_NOTIFICATION + "'>"
     "      <arg type='s' name='container'/>"

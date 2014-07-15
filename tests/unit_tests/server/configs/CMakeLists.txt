@@ -110,3 +110,6 @@ INSTALL(FILES        ${network_admin_CONF}
 
 INSTALL(FILES        ${connection_CONF}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container-connection)
+
+INSTALL(FILES        dbus-1/system.d/org.tizen.containers.tests.conf
+        DESTINATION  ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)

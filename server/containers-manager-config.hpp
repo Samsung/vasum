@@ -28,6 +28,7 @@
 
 #include "config/fields.hpp"
 #include "input-monitor-config.hpp"
+#include "proxy-call-config.hpp"
 
 #include <string>
 #include <vector>
@@ -71,6 +72,11 @@ struct ContainersManagerConfig {
      */
     std::string runMountPointPrefix;
 
+    /**
+     * Proxy call rules.
+     */
+    std::vector<ProxyCallRule> proxyCallRules;
+
     CONFIG_REGISTER
     (
         containerConfigs,
@@ -78,7 +84,8 @@ struct ContainersManagerConfig {
         defaultId,
         containersPath,
         inputConfig,
-        runMountPointPrefix
+        runMountPointPrefix,
+        proxyCallRules
     )
 };
 

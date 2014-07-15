@@ -28,6 +28,8 @@
 
 #include "containers-manager.hpp"
 #include "container-dbus-definitions.hpp"
+#include "host-dbus-definitions.hpp"
+#include "test-dbus-definitions.hpp"
 // TODO: Switch to real power-manager dbus defs when they will be implemented in power-manager
 #include "fake-power-manager-dbus-definitions.hpp"
 #include "exception.hpp"
@@ -73,6 +75,10 @@ const std::string FILE_CONTENT = "File content\n"
 
 class DbusAccessory {
 public:
+    typedef std::function<void(const std::string& argument,
+                               MethodResultBuilder::Pointer result
+                              )> TestApiMethodCallback;
+
     DbusAccessory(int id)
         : mId(id),
           mClient(DbusConnection::create(acquireAddress())),
@@ -153,6 +159,65 @@ public:
         return std::string(retcode);
     }
 
+    void registerTestApiObject(const TestApiMethodCallback& callback)
+    {
+        auto handler = [callback](const std::string& objectPath,
+                          const std::string& interface,
+                          const std::string& methodName,
+                          GVariant* parameters,
+                          MethodResultBuilder::Pointer result) {
+            if (objectPath == testapi::OBJECT_PATH &&
+                interface == testapi::INTERFACE &&
+                methodName == testapi::METHOD) {
+                const gchar* argument = NULL;
+                g_variant_get(parameters, "(&s)", &argument);
+                if (callback) {
+                    callback(argument, result);
+                }
+            }
+        };
+        mClient->registerObject(testapi::OBJECT_PATH, testapi::DEFINITION, handler);
+    }
+
+    std::string testApiProxyCall(const std::string& target, const std::string& argument)
+    {
+        GVariant* parameters = g_variant_new("(s)", argument.c_str());
+        GVariantPtr result = proxyCall(target,
+                                       testapi::BUS_NAME,
+                                       testapi::OBJECT_PATH,
+                                       testapi::INTERFACE,
+                                       testapi::METHOD,
+                                       parameters);
+        const gchar* ret = NULL;
+        g_variant_get(result.get(), "(&s)", &ret);
+        return ret;
+    }
+
+
+    GVariantPtr proxyCall(const std::string& target,
+                          const std::string& busName,
+                          const std::string& objectPath,
+                          const std::string& interface,
+                          const std::string& method,
+                          GVariant* parameters)
+    {
+        GVariant* packedParameters = g_variant_new("(sssssv)",
+                                                   target.c_str(),
+                                                   busName.c_str(),
+                                                   objectPath.c_str(),
+                                                   interface.c_str(),
+                                                   method.c_str(),
+                                                   parameters);
+        GVariantPtr result = mClient->callMethod(isHost() ? hostapi::BUS_NAME : api::BUS_NAME,
+                                                 isHost() ? hostapi::OBJECT_PATH : api::OBJECT_PATH,
+                                                 isHost() ? hostapi::INTERFACE : api::INTERFACE,
+                                                 isHost() ? hostapi::METHOD_PROXY_CALL : api::METHOD_PROXY_CALL,
+                                                 packedParameters,
+                                                 "(v)");
+        GVariant* unpackedResult = NULL;
+        g_variant_get(result.get(), "(v)", &unpackedResult);
+        return GVariantPtr(unpackedResult, g_variant_unref);
+    }
 private:
     const int mId;
     DbusConnection::Pointer mClient;
@@ -161,13 +226,25 @@ private:
     std::mutex mMutex;
     std::condition_variable mNameCondition;
 
+    bool isHost() const {
+        return mId == 0;
+    }
+
     std::string acquireAddress() const
     {
+        if (isHost()) {
+            return "unix:path=/var/run/dbus/system_bus_socket";
+        }
         return "unix:path=/tmp/ut-containers-manager/console" + std::to_string(mId) +
                "-dbus/dbus/system_bus_socket";
     }
 };
 
+std::function<bool(const std::exception&)> expectedMessage(const std::string& message) {
+    return [=](const std::exception& e) {
+        return e.what() == message;
+    };
+}
 
 struct Fixture {
     utils::ScopedGlibLoop mLoop;
@@ -494,6 +571,77 @@ BOOST_AUTO_TEST_CASE(AllowSwitchToDefaultTest)
         // now default container should not be focused
         BOOST_CHECK(!condition.wait_for(condLock, std::chrono::milliseconds(EVENT_TIMEOUT), cond));
     }
+}
+
+BOOST_AUTO_TEST_CASE(ProxyCallTest)
+{
+    ContainersManager cm(TEST_DBUS_CONFIG_PATH);
+    cm.startAll();
+
+    std::map<int, std::unique_ptr<DbusAccessory>> dbuses;
+    for (int i = 0; i <= TEST_DBUS_CONNECTION_CONTAINERS_COUNT; ++i) {
+        dbuses[i] = std::unique_ptr<DbusAccessory>(new DbusAccessory(i));
+    }
+
+    for (auto& dbus : dbuses) {
+        dbus.second->setName(testapi::BUS_NAME);
+
+        const int id = dbus.first;
+        auto handler = [id](const std::string& argument, MethodResultBuilder::Pointer result) {
+            if (argument.empty()) {
+                result->setError("org.tizen.containers.Error.Test", "Test error");
+            } else {
+                std::string ret = "reply from " + std::to_string(id) + ": " + argument;
+                result->set(g_variant_new("(s)", ret.c_str()));
+            }
+        };
+        dbus.second->registerTestApiObject(handler);
+    }
+
+    // host -> container2
+    BOOST_CHECK_EQUAL("reply from 2: param1",
+                      dbuses.at(0)->testApiProxyCall("ut-containers-manager-console2-dbus",
+                                                     "param1"));
+
+    // host -> host
+    BOOST_CHECK_EQUAL("reply from 0: param2",
+                      dbuses.at(0)->testApiProxyCall("host",
+                                                     "param2"));
+
+    // container1 -> host
+    BOOST_CHECK_EQUAL("reply from 0: param3",
+                      dbuses.at(1)->testApiProxyCall("host",
+                                                     "param3"));
+
+    // container1 -> container2
+    BOOST_CHECK_EQUAL("reply from 2: param4",
+                      dbuses.at(1)->testApiProxyCall("ut-containers-manager-console2-dbus",
+                                                     "param4"));
+
+    // container2 -> container2
+    BOOST_CHECK_EQUAL("reply from 2: param5",
+                      dbuses.at(2)->testApiProxyCall("ut-containers-manager-console2-dbus",
+                                                     "param5"));
+
+    // host -> unknown
+    BOOST_CHECK_EXCEPTION(dbuses.at(0)->testApiProxyCall("unknown", "param"),
+                          DbusCustomException,
+                          expectedMessage("Unknown proxy call target"));
+
+    // forwarding error
+    BOOST_CHECK_EXCEPTION(dbuses.at(0)->testApiProxyCall("host", ""),
+                          DbusCustomException,
+                          expectedMessage("Test error"));
+
+    // forbidden call
+    BOOST_CHECK_EXCEPTION(dbuses.at(0)->proxyCall("host",
+                                              "org.fake",
+                                              "/a/b",
+                                              "c.d",
+                                              "foo",
+                                              g_variant_new("(s)", "arg")),
+                          DbusCustomException,
+                          expectedMessage("Proxy call forbidden"));
 }
 
 

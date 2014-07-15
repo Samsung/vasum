@@ -146,6 +146,11 @@ void ContainerConnection::setFileMoveRequestCallback(
     mFileMoveRequestCallback = callback;
 }
 
+void ContainerConnection::setProxyCallCallback(const ProxyCallCallback& callback)
+{
+    mProxyCallCallback = callback;
+}
+
 void ContainerConnection::onMessageCall(const std::string& objectPath,
                                         const std::string& interface,
                                         const std::string& methodName,
@@ -172,6 +177,34 @@ void ContainerConnection::onMessageCall(const std::string& objectPath,
         g_variant_get(parameters, "(&s&s)", &destination, &path);
         if (mFileMoveRequestCallback) {
             mFileMoveRequestCallback(destination, path, result);
+        }
+    }
+
+    if (methodName == api::METHOD_PROXY_CALL) {
+        const gchar* target = NULL;
+        const gchar* targetBusName = NULL;
+        const gchar* targetObjectPath = NULL;
+        const gchar* targetInterface = NULL;
+        const gchar* targetMethod = NULL;
+        GVariant* rawArgs = NULL;
+        g_variant_get(parameters,
+                      "(&s&s&s&s&sv)",
+                      &target,
+                      &targetBusName,
+                      &targetObjectPath,
+                      &targetInterface,
+                      &targetMethod,
+                      &rawArgs);
+        dbus::GVariantPtr args(rawArgs, g_variant_unref);
+
+        if (mProxyCallCallback) {
+            mProxyCallCallback(target,
+                               targetBusName,
+                               targetObjectPath,
+                               targetInterface,
+                               targetMethod,
+                               args.get(),
+                               result);
         }
     }
 }
@@ -205,6 +238,22 @@ void ContainerConnection::sendNotification(const std::string& container,
                                 api::INTERFACE,
                                 api::SIGNAL_NOTIFICATION,
                                 parameters);
+}
+
+void ContainerConnection::proxyCallAsync(const std::string& busName,
+                                         const std::string& objectPath,
+                                         const std::string& interface,
+                                         const std::string& method,
+                                         GVariant* parameters,
+                                         const dbus::DbusConnection::AsyncMethodCallCallback& callback)
+{
+    mDbusConnection->callMethodAsync(busName,
+                                     objectPath,
+                                     interface,
+                                     method,
+                                     parameters,
+                                     std::string(),
+                                     callback);
 }
 
 

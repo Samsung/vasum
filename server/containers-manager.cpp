@@ -32,6 +32,7 @@
 #include "utils/paths.hpp"
 #include "log/logger.hpp"
 #include "config/manager.hpp"
+#include "dbus/exception.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
@@ -56,12 +57,23 @@ bool regexMatchVector(const std::string& str, const std::vector<boost::regex>& v
     return false;
 }
 
+const std::string HOST_ID = "host";
+const std::string DBUS_ERROR_NAME_FORBIDDEN = "org.tizen.containers.Error.Forbidden";
+const std::string DBUS_ERROR_NAME_FORWARDED = "org.tizen.containers.Error.Forwarded";
+const std::string DBUS_ERROR_NAME_UNKNOWN_TARGET = "org.tizen.containers.Error.UnknownTarget";
+
 } // namespace
 
 ContainersManager::ContainersManager(const std::string& managerConfigPath): mDetachOnExit(false)
 {
     LOGD("Instantiating ContainersManager object...");
     config::loadFromFile(managerConfigPath, mConfig);
+
+    mProxyCallPolicy.reset(new ProxyCallPolicy(mConfig.proxyCallRules));
+
+    using namespace std::placeholders;
+    mHostConnection.setProxyCallCallback(bind(&ContainersManager::handleProxyCall,
+                                              this, HOST_ID, _1, _2, _3, _4, _5, _6, _7));
 
     for (auto& containerConfig : mConfig.containerConfigs) {
         std::string containerConfigPath;
@@ -76,8 +88,11 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
         LOGD("Creating Container " << containerConfigPath);
         std::unique_ptr<Container> c(new Container(containerConfigPath,
                                                    mConfig.runMountPointPrefix));
-        std::string id = c->getId();
-        using namespace std::placeholders;
+        const std::string id = c->getId();
+        if (id == HOST_ID) {
+            throw ContainerOperationException("Cannot use reserved container ID");
+        }
+
         c->setNotifyActiveContainerCallback(bind(&ContainersManager::notifyActiveContainerHandler,
                                                  this, id, _1, _2));
 
@@ -86,6 +101,9 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
 
         c->setFileMoveRequestCallback(std::bind(&ContainersManager::handleContainerMoveFileRequest,
                                                 this, id, _1, _2, _3));
+
+        c->setProxyCallCallback(bind(&ContainersManager::handleProxyCall,
+                                     this, id, _1, _2, _3, _4, _5, _6, _7));
 
         mContainers.insert(ContainerMap::value_type(id, std::move(c)));
     }
@@ -312,6 +330,65 @@ void ContainersManager::handleContainerMoveFileRequest(const std::string& srcCon
             LOGE("Notification to '" << dstContainerId << "' has not been sent");
         }
     }
+}
+
+void ContainersManager::handleProxyCall(const std::string& caller,
+                                        const std::string& target,
+                                        const std::string& targetBusName,
+                                        const std::string& targetObjectPath,
+                                        const std::string& targetInterface,
+                                        const std::string& targetMethod,
+                                        GVariant* parameters,
+                                        dbus::MethodResultBuilder::Pointer result)
+{
+    if (!mProxyCallPolicy->isProxyCallAllowed(caller,
+                                              target,
+                                              targetBusName,
+                                              targetObjectPath,
+                                              targetInterface,
+                                              targetMethod)) {
+        LOGW("Forbidden proxy call; " << caller << " -> " << target << "; " << targetBusName
+                << "; " << targetObjectPath << "; " << targetInterface << "; " << targetMethod);
+        result->setError(DBUS_ERROR_NAME_FORBIDDEN, "Proxy call forbidden");
+        return;
+    }
+
+    LOGI("Proxy call; " << caller << " -> " << target << "; " << targetBusName
+            << "; " << targetObjectPath << "; " << targetInterface << "; " << targetMethod);
+
+    auto asyncResultCallback = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
+        try {
+            GVariant* targetResult = asyncMethodCallResult.get();
+            result->set(g_variant_new("(v)", targetResult));
+        } catch (dbus::DbusException& e) {
+            result->setError(DBUS_ERROR_NAME_FORWARDED, e.what());
+        }
+    };
+
+    if (target == HOST_ID) {
+        mHostConnection.proxyCallAsync(targetBusName,
+                                       targetObjectPath,
+                                       targetInterface,
+                                       targetMethod,
+                                       parameters,
+                                       asyncResultCallback);
+        return;
+    }
+
+    ContainerMap::const_iterator targetIter = mContainers.find(target);
+    if (targetIter == mContainers.end()) {
+        LOGE("Target container '" << target << "' not found");
+        result->setError(DBUS_ERROR_NAME_UNKNOWN_TARGET, "Unknown proxy call target");
+        return;
+    }
+
+    Container& targetContainer = *targetIter->second;
+    targetContainer.proxyCallAsync(targetBusName,
+                                   targetObjectPath,
+                                   targetInterface,
+                                   targetMethod,
+                                   parameters,
+                                   asyncResultCallback);
 }
 
 

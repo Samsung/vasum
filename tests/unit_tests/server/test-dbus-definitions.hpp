@@ -19,43 +19,37 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Host dbus api definitions
+ * @brief   Common definitions for dbus tests
  */
 
-#ifndef SERVER_HOST_DBUS_DEFINITIONS_HPP
-#define SERVER_HOST_DBUS_DEFINITIONS_HPP
+#ifndef UNIT_TESTS_SERVER_TEST_DBUS_DEFINITIONS_HPP
+#define UNIT_TESTS_SERVER_TEST_DBUS_DEFINITIONS_HPP
 
 #include <string>
 
 
 namespace security_containers {
-namespace hostapi {
+namespace testapi {
 
 
-const std::string BUS_NAME                          = "org.tizen.containers.host";
-const std::string OBJECT_PATH                       = "/org/tizen/containers/host";
-const std::string INTERFACE                         = "org.tizen.containers.host.manager";
-
-const std::string METHOD_PROXY_CALL                 = "ProxyCall";
+const std::string BUS_NAME       = "org.tizen.containers.tests";
+const std::string OBJECT_PATH    = "/org/tizen/containers/tests";
+const std::string INTERFACE      = "tests.api";
+const std::string METHOD         = "Method";
 
 const std::string DEFINITION =
     "<node>"
     "  <interface name='" + INTERFACE + "'>"
-    "    <method name='" + METHOD_PROXY_CALL + "'>"
-    "      <arg type='s' name='target' direction='in'/>"
-    "      <arg type='s' name='busName' direction='in'/>"
-    "      <arg type='s' name='objectPath' direction='in'/>"
-    "      <arg type='s' name='interface' direction='in'/>"
-    "      <arg type='s' name='method' direction='in'/>"
-    "      <arg type='v' name='parameters' direction='in'/>"
-    "      <arg type='v' name='result' direction='out'/>"
+    "    <method name='" + METHOD + "'>"
+    "      <arg type='s' name='argument' direction='in'/>"
+    "      <arg type='s' name='response' direction='out'/>"
     "    </method>"
     "  </interface>"
     "</node>";
 
 
-} // namespace hostapi
+} // namespace testapi
 } // namespace security_containers
 
 
-#endif // SERVER_HOST_DBUS_DEFINITIONS_HPP
+#endif // UNIT_TESTS_SERVER_TEST_DBUS_DEFINITIONS_HPP

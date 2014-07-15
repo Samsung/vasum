@@ -30,6 +30,7 @@
 #include "containers-manager-config.hpp"
 #include "host-connection.hpp"
 #include "input-monitor.hpp"
+#include "proxy-call-policy.hpp"
 
 #include <string>
 #include <unordered_map>
@@ -79,6 +80,7 @@ private:
     HostConnection mHostConnection;
     // to hold InputMonitor pointer to monitor if container switching sequence is recognized
     std::unique_ptr<InputMonitor> mSwitchingSequenceMonitor;
+    std::unique_ptr<ProxyCallPolicy> mProxyCallPolicy;
     typedef std::unordered_map<std::string, std::unique_ptr<Container>> ContainerMap;
     ContainerMap mContainers; // map of containers, id is the key
     bool mDetachOnExit;
@@ -92,10 +94,19 @@ private:
                                         const std::string& dstContainerId,
                                         const std::string& path,
                                         dbus::MethodResultBuilder::Pointer result);
+    void handleProxyCall(const std::string& caller,
+                         const std::string& target,
+                         const std::string& targetBusName,
+                         const std::string& targetObjectPath,
+                         const std::string& targetInterface,
+                         const std::string& targetMethod,
+                         GVariant* parameters,
+                         dbus::MethodResultBuilder::Pointer result);
+
 };
 
 
-}
+} // namespace security_containers
 
 
 #endif // SERVER_CONTAINERS_MANAGER_HPP

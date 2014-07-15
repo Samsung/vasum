@@ -43,12 +43,28 @@ public:
 
     // ------------- API --------------
 
-    typedef std::function<void()> TestCallback;
+    typedef std::function<void(const std::string& target,
+                               const std::string& targetBusName,
+                               const std::string& targetObjectPath,
+                               const std::string& targetInterface,
+                               const std::string& targetMethod,
+                               GVariant* parameters,
+                               dbus::MethodResultBuilder::Pointer result)> ProxyCallCallback;
 
     /**
-     * Register test callback
+     * Register proxy call callback
      */
-    void setTestCallback(const TestCallback& callback);
+    void setProxyCallCallback(const ProxyCallCallback& callback);
+
+    /**
+     * Make a proxy call
+     */
+    void proxyCallAsync(const std::string& busName,
+                        const std::string& objectPath,
+                        const std::string& interface,
+                        const std::string& method,
+                        GVariant* parameters,
+                        const dbus::DbusConnection::AsyncMethodCallCallback& callback);
 
 private:
     dbus::DbusConnection::Pointer mDbusConnection;
@@ -56,7 +72,7 @@ private:
     std::condition_variable mNameCondition;
     bool mNameAcquired;
     bool mNameLost;
-    TestCallback mTestCallback;
+    ProxyCallCallback mProxyCallCallback;
 
     void onNameAcquired();
     void onNameLost();

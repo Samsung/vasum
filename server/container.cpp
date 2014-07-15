@@ -128,6 +128,9 @@ void Container::start()
     if (mFileMoveCallback) {
         mConnection->setFileMoveRequestCallback(mFileMoveCallback);
     }
+    if (mProxyCallCallback) {
+        mConnection->setProxyCallCallback(mProxyCallCallback);
+    }
 
     // Send to the background only after we're connected,
     // otherwise it'd take ages.
@@ -267,6 +270,36 @@ void Container::setFileMoveRequestCallback(const FileMoveRequestCallback& callba
     mFileMoveCallback = callback;
     if (mConnection) {
         mConnection->setFileMoveRequestCallback(callback);
+    }
+}
+
+void Container::setProxyCallCallback(const ProxyCallCallback& callback)
+{
+    Lock lock(mReconnectMutex);
+
+    mProxyCallCallback = callback;
+    if (mConnection) {
+        mConnection->setProxyCallCallback(callback);
+    }
+}
+
+void Container::proxyCallAsync(const std::string& busName,
+                               const std::string& objectPath,
+                               const std::string& interface,
+                               const std::string& method,
+                               GVariant* parameters,
+                               const dbus::DbusConnection::AsyncMethodCallCallback& callback)
+{
+    Lock lock(mReconnectMutex);
+    if (mConnection) {
+        mConnection->proxyCallAsync(busName,
+                                    objectPath,
+                                    interface,
+                                    method,
+                                    parameters,
+                                    callback);
+    } else {
+        LOGE(getId() << ": Can't do a proxy call, no connection to DBUS");
     }
 }
 

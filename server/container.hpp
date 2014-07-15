@@ -52,6 +52,7 @@ public:
     typedef ContainerConnection::NotifyActiveContainerCallback NotifyActiveContainerCallback;
     typedef ContainerConnection::DisplayOffCallback DisplayOffCallback;
     typedef ContainerConnection::FileMoveRequestCallback FileMoveRequestCallback;
+    typedef ContainerConnection::ProxyCallCallback ProxyCallCallback;
 
     /**
      * Returns a vector of regexps defining files permitted to be
@@ -144,6 +145,11 @@ public:
     void setDisplayOffCallback(const DisplayOffCallback& callback);
 
     /**
+     * Register proxy call callback
+     */
+    void setProxyCallCallback(const ProxyCallCallback& callback);
+
+    /**
      * Send notification signal to this container
      *
      * @param container   name of container in which the notification occurred
@@ -159,6 +165,16 @@ public:
      */
     void setFileMoveRequestCallback(const FileMoveRequestCallback& callback);
 
+    /**
+     * Make a proxy call
+     */
+    void proxyCallAsync(const std::string& busName,
+                        const std::string& objectPath,
+                        const std::string& interface,
+                        const std::string& method,
+                        GVariant* parameters,
+                        const dbus::DbusConnection::AsyncMethodCallCallback& callback);
+
 private:
     ContainerConfig mConfig;
     std::vector<boost::regex> mPermittedToSend;
@@ -172,6 +188,7 @@ private:
     NotifyActiveContainerCallback mNotifyCallback;
     DisplayOffCallback mDisplayOffCallback;
     FileMoveRequestCallback mFileMoveCallback;
+    ProxyCallCallback mProxyCallCallback;
     std::string mRunMountPoint;
 
     void onNameLostCallback();

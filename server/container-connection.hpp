@@ -55,6 +55,15 @@ public:
                                dbus::MethodResultBuilder::Pointer result
                               )> FileMoveRequestCallback;
 
+    typedef std::function<void(const std::string& target,
+                               const std::string& targetBusName,
+                               const std::string& targetObjectPath,
+                               const std::string& targetInterface,
+                               const std::string& targetMethod,
+                               GVariant* parameters,
+                               dbus::MethodResultBuilder::Pointer result
+                               )> ProxyCallCallback;
+
     /**
      * Register notification request callback
      */
@@ -71,11 +80,26 @@ public:
     void setFileMoveRequestCallback(const FileMoveRequestCallback& callback);
 
     /**
+     * Register proxy call callback
+     */
+    void setProxyCallCallback(const ProxyCallCallback& callback);
+
+    /**
      * Send notification signal to this container
      */
     void sendNotification(const std::string& container,
                           const std::string& application,
                           const std::string& message);
+
+    /**
+     * Make a proxy call
+     */
+    void proxyCallAsync(const std::string& busName,
+                        const std::string& objectPath,
+                        const std::string& interface,
+                        const std::string& method,
+                        GVariant* parameters,
+                        const dbus::DbusConnection::AsyncMethodCallCallback& callback);
 
 private:
     dbus::DbusConnection::Pointer mDbusConnection;
@@ -87,6 +111,7 @@ private:
     NotifyActiveContainerCallback mNotifyActiveContainerCallback;
     DisplayOffCallback mDisplayOffCallback;
     FileMoveRequestCallback mFileMoveRequestCallback;
+    ProxyCallCallback mProxyCallCallback;
 
     void onNameAcquired();
     void onNameLost();

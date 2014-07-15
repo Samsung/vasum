@@ -188,3 +188,4 @@ Unit tests for both: server and client and integration tests.
 %{script_dir}/sc_test_parser.py
 %{_datadir}/security-containers
 %{python_sitelib}/sc_integration_tests
+/etc/dbus-1/system.d/org.tizen.containers.tests.conf
