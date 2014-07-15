@@ -150,7 +150,7 @@ void ContainerConnection::onMessageCall(const std::string& objectPath,
                                         const std::string& interface,
                                         const std::string& methodName,
                                         GVariant* parameters,
-                                        dbus::MethodResultBuilder& result)
+                                        dbus::MethodResultBuilder::Pointer result)
 {
     if (objectPath != api::OBJECT_PATH || interface != api::INTERFACE) {
         return;
@@ -162,7 +162,7 @@ void ContainerConnection::onMessageCall(const std::string& objectPath,
         g_variant_get(parameters, "(&s&s)", &application, &message);
         if (mNotifyActiveContainerCallback) {
             mNotifyActiveContainerCallback(application, message);
-            result.setVoid();
+            result->setVoid();
         }
     }
 

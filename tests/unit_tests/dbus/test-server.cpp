@@ -117,7 +117,7 @@ void DbusTestServer::onMessageCall(const std::string& objectPath,
                                    const std::string& interface,
                                    const std::string& methodName,
                                    GVariant* parameters,
-                                   dbus::MethodResultBuilder& result)
+                                   dbus::MethodResultBuilder::Pointer result)
 {
     try {
         if (objectPath != TESTAPI_OBJECT_PATH || interface != TESTAPI_INTERFACE) {
@@ -126,23 +126,23 @@ void DbusTestServer::onMessageCall(const std::string& objectPath,
 
         if (methodName == TESTAPI_METHOD_NOOP) {
             noop();
-            result.setVoid();
+            result->setVoid();
         } else if (methodName == TESTAPI_METHOD_PROCESS) {
             const gchar* arg;
             g_variant_get(parameters, "(&s)", &arg);
             std::string ret = process(arg);
             GVariant* variant = g_variant_new("(s)", ret.c_str());
-            result.set(variant);
+            result->set(variant);
         } else if (methodName == TESTAPI_METHOD_THROW) {
             int arg;
             g_variant_get(parameters, "(i)", &arg);
             throwException(arg);
-            result.setVoid();
+            result->setVoid();
         } else {
             LOGE("unknown method; should never happen");
         }
     } catch (const std::exception& e) {
-        result.setError("org.tizen.containers.Error.Test", e.what());
+        result->setError("org.tizen.containers.Error.Test", e.what());
     }
 }
 

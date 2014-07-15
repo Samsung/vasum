@@ -44,6 +44,8 @@ typedef std::unique_ptr<GVariant, void(*)(GVariant*)> GVariantPtr;
  */
 class MethodResultBuilder {
 public:
+    typedef std::shared_ptr<MethodResultBuilder> Pointer;
+
     virtual ~MethodResultBuilder() {}
     virtual void set(GVariant* parameters) = 0;
     virtual void setVoid() = 0;
@@ -76,7 +78,7 @@ public:
                                const std::string& interface,
                                const std::string& methodName,
                                GVariant* parameters,
-                               MethodResultBuilder& result
+                               MethodResultBuilder::Pointer result
                               )> MethodCallCallback;
 
     typedef std::function<void(const std::string& senderBusName,

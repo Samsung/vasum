@@ -47,6 +47,12 @@ class MethodResultBuilderImpl : public MethodResultBuilder {
 public:
     MethodResultBuilderImpl(GDBusMethodInvocation* invocation)
         : mInvocation(invocation), mResultSet(false) {}
+    ~MethodResultBuilderImpl()
+    {
+        if (!mResultSet) {
+            setError("org.freedesktop.DBus.Error.UnknownMethod", "Not implemented");
+        }
+    }
     void set(GVariant* parameters)
     {
         g_dbus_method_invocation_return_value(mInvocation, parameters);
@@ -60,10 +66,6 @@ public:
     {
         g_dbus_method_invocation_return_dbus_error(mInvocation, name.c_str(), message.c_str());
         mResultSet = true;
-    }
-    bool isUndefined() const
-    {
-        return !mResultSet;
     }
 private:
     GDBusMethodInvocation* mInvocation;
@@ -305,14 +307,9 @@ void DbusConnection::onMethodCall(GDBusConnection*,
 
     LOGD("MethodCall: " << objectPath << "; " << interface << "; " << method);
 
-    MethodResultBuilderImpl resultBuilder(invocation);
+    MethodResultBuilder::Pointer resultBuilder(new MethodResultBuilderImpl(invocation));
     if (callback) {
         callback(objectPath, interface, method, parameters, resultBuilder);
-    }
-
-    if (resultBuilder.isUndefined()) {
-        LOGW("Unimplemented method: " << objectPath << "; " << interface << "; " << method);
-        resultBuilder.setError("org.freedesktop.DBus.Error.UnknownMethod", "Not implemented");
     }
 }
 

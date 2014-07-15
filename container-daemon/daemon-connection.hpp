@@ -68,7 +68,7 @@ private:
                        const std::string& interface,
                        const std::string& methodName,
                        GVariant* parameters,
-                       dbus::MethodResultBuilder& result);
+                       dbus::MethodResultBuilder::Pointer result);
 };
 
 

@@ -238,7 +238,7 @@ void ContainersManager::displayOffHandler(const std::string& /*caller*/)
 void ContainersManager::handleContainerMoveFileRequest(const std::string& srcContainerId,
                                                        const std::string& dstContainerId,
                                                        const std::string& path,
-                                                       dbus::MethodResultBuilder& result)
+                                                       dbus::MethodResultBuilder::Pointer result)
 {
     // TODO: this implementation is only a placeholder.
     // There are too many unanswered questions and security concerns:
@@ -274,26 +274,26 @@ void ContainersManager::handleContainerMoveFileRequest(const std::string& srcCon
     ContainerMap::const_iterator dstIter = mContainers.find(dstContainerId);
     if (dstIter == mContainers.end()) {
         LOGE("Destination container '" << dstContainerId << "' not found");
-        result.set(g_variant_new("(s)", api::FILE_MOVE_DESTINATION_NOT_FOUND.c_str()));
+        result->set(g_variant_new("(s)", api::FILE_MOVE_DESTINATION_NOT_FOUND.c_str()));
         return;
     }
     Container& dstContanier = *dstIter->second;
 
     if (srcContainerId == dstContainerId) {
         LOGE("Cannot send a file to yourself");
-        result.set(g_variant_new("(s)", api::FILE_MOVE_WRONG_DESTINATION.c_str()));
+        result->set(g_variant_new("(s)", api::FILE_MOVE_WRONG_DESTINATION.c_str()));
         return;
     }
 
     if (!regexMatchVector(path, srcContainer.getPermittedToSend())) {
         LOGE("Source container has no permissions to send the file: " << path);
-        result.set(g_variant_new("(s)", api::FILE_MOVE_NO_PERMISSIONS_SEND.c_str()));
+        result->set(g_variant_new("(s)", api::FILE_MOVE_NO_PERMISSIONS_SEND.c_str()));
         return;
     }
 
     if (!regexMatchVector(path, dstContanier.getPermittedToRecv())) {
         LOGE("Destination container has no permissions to receive the file: " << path);
-        result.set(g_variant_new("(s)", api::FILE_MOVE_NO_PERMISSIONS_RECEIVE.c_str()));
+        result->set(g_variant_new("(s)", api::FILE_MOVE_NO_PERMISSIONS_RECEIVE.c_str()));
         return;
     }
 
@@ -303,9 +303,9 @@ void ContainersManager::handleContainerMoveFileRequest(const std::string& srcCon
 
     if (!utils::moveFile(srcPath, dstPath)) {
         LOGE("Failed to move the file: " << path);
-        result.set(g_variant_new("(s)", api::FILE_MOVE_FAILED.c_str()));
+        result->set(g_variant_new("(s)", api::FILE_MOVE_FAILED.c_str()));
     } else {
-        result.set(g_variant_new("(s)", api::FILE_MOVE_SUCCEEDED.c_str()));
+        result->set(g_variant_new("(s)", api::FILE_MOVE_SUCCEEDED.c_str()));
         try {
             dstContanier.sendNotification(srcContainerId, path, api::FILE_MOVE_SUCCEEDED);
         } catch (ServerException&) {

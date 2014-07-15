@@ -119,7 +119,7 @@ void HostConnection::onMessageCall(const std::string& objectPath,
                                         const std::string& interface,
                                         const std::string& methodName,
                                         GVariant* /*parameters*/,
-                                        dbus::MethodResultBuilder& result)
+                                        dbus::MethodResultBuilder::Pointer result)
 {
     if (objectPath != hostapi::OBJECT_PATH || interface != hostapi::INTERFACE) {
         return;
@@ -128,7 +128,7 @@ void HostConnection::onMessageCall(const std::string& objectPath,
     if (methodName == hostapi::METHOD_TEST) {
         if (mTestCallback) {
             mTestCallback();
-            result.setVoid();
+            result->setVoid();
         }
     }
 }

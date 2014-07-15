@@ -52,7 +52,7 @@ public:
 
     typedef std::function<void(const std::string& destination,
                                const std::string& path,
-                               dbus::MethodResultBuilder& result
+                               dbus::MethodResultBuilder::Pointer result
                               )> FileMoveRequestCallback;
 
     /**
@@ -96,7 +96,7 @@ private:
                        const std::string& interface,
                        const std::string& methodName,
                        GVariant* parameters,
-                       dbus::MethodResultBuilder& result);
+                       dbus::MethodResultBuilder::Pointer result);
     void onSignalReceived(const std::string& senderBusName,
                           const std::string& objectPath,
                           const std::string& interface,

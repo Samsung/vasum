@@ -91,7 +91,7 @@ private:
     void handleContainerMoveFileRequest(const std::string& srcContainerId,
                                         const std::string& dstContainerId,
                                         const std::string& path,
-                                        dbus::MethodResultBuilder& result);
+                                        dbus::MethodResultBuilder::Pointer result);
 };
 
 
