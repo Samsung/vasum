@@ -35,7 +35,7 @@
 #include "utils/file-wait.hpp"
 #include "utils/latch.hpp"
 #include "utils/fs.hpp"
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 
 #include <boost/filesystem.hpp>
 #include <thread>
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_SUITE(DbusSuite)
 
 using namespace security_containers;
 using namespace security_containers::utils;
-using namespace security_containers::dbus;
+using namespace dbus;
 
 namespace {
 

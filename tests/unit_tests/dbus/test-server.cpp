@@ -29,7 +29,7 @@
 
 #include "dbus/connection.hpp"
 #include "dbus/exception.hpp"
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 
 
 namespace security_containers {

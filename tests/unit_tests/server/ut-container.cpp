@@ -40,7 +40,7 @@
 
 
 using namespace security_containers;
-using namespace security_containers::config;
+using namespace config;
 
 namespace {
 

@@ -28,7 +28,7 @@
 #include "exception.hpp"
 
 #include "libvirt/helpers.hpp"
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 #include "utils/fs.hpp"
 #include "utils/latch.hpp"
 #include "utils/callback-wrapper.hpp"

@@ -32,9 +32,10 @@
 #include "exception.hpp"
 
 #include "utils/paths.hpp"
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 #include "config/manager.hpp"
 #include "dbus/exception.hpp"
+#include "utils/fs.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>

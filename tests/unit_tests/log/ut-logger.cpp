@@ -25,16 +25,16 @@
 
 #include "config.hpp"
 #include "ut.hpp"
-#include "log/logger.hpp"
-#include "log/formatter.hpp"
-#include "log/backend.hpp"
-#include "log/backend-stderr.hpp"
+#include "logger/logger.hpp"
+#include "logger/formatter.hpp"
+#include "logger/backend.hpp"
+#include "logger/backend-stderr.hpp"
 
 #include <stdexcept>
 
 BOOST_AUTO_TEST_SUITE(LogSuite)
 
-using namespace security_containers::log;
+using namespace logger;
 
 namespace {
 

@@ -31,7 +31,8 @@ ADD_EXECUTABLE(${CONTAINER_DAEMON_CODENAME} ${project_SRCS} ${common_SRCS})
 ## Link libraries ##############################################################
 FIND_PACKAGE (Boost COMPONENTS program_options system filesystem)
 
-PKG_CHECK_MODULES(CONTAINER_DAEMON_DEPS REQUIRED gio-2.0 libsystemd-journal libcap-ng)
+PKG_CHECK_MODULES(CONTAINER_DAEMON_DEPS REQUIRED gio-2.0 libsystemd-journal libcap-ng
+                                                 libLogger libSimpleDbus libConfig)
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${CONTAINER_DAEMON_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(${CONTAINER_DAEMON_CODENAME} ${CONTAINER_DAEMON_DEPS_LIBRARIES} ${Boost_LIBRARIES})

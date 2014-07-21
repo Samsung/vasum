@@ -28,7 +28,7 @@
 #include "input-monitor.hpp"
 #include "exception.hpp"
 
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 #include "utils/exception.hpp"
 #include "utils/fs.hpp"
 #include "utils/callback-wrapper.hpp"

@@ -25,14 +25,14 @@
 
 #include "config.hpp"
 
-#include "log/logger.hpp"
-#include "log/backend-stderr.hpp"
+#include "logger/logger.hpp"
+#include "logger/backend-stderr.hpp"
 
 #include <boost/test/included/unit_test.hpp>
 
 
 using namespace boost::unit_test;
-using namespace security_containers::log;
+using namespace logger;
 
 test_suite* init_unit_test_suite(int /*argc*/, char** /*argv*/)
 {

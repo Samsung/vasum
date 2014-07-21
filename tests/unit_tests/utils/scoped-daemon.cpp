@@ -26,7 +26,7 @@
 
 #include "utils/scoped-daemon.hpp"
 
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 
 #include <unistd.h>
 #include <sys/wait.h>

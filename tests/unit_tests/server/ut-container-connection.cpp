@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_SUITE(ContainerConnectionSuite)
 
 using namespace security_containers;
 using namespace security_containers::utils;
-using namespace security_containers::dbus;
+using namespace dbus;
 
 namespace {
 

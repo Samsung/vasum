@@ -25,8 +25,9 @@
 #include "config.hpp"
 
 #include "container.hpp"
+#include "base-exception.hpp"
 
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 #include "utils/paths.hpp"
 #include "config/manager.hpp"
 

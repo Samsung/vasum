@@ -52,9 +52,9 @@
 #include <boost/filesystem.hpp>
 
 using namespace security_containers;
-using namespace security_containers::config;
+using namespace config;
 using namespace security_containers::utils;
-using namespace security_containers::dbus;
+using namespace dbus;
 
 namespace {
 
@@ -332,7 +332,7 @@ std::function<bool(const std::exception&)> expectedMessage(const std::string& me
 }
 
 struct Fixture {
-    utils::ScopedGlibLoop mLoop;
+    security_containers::utils::ScopedGlibLoop mLoop;
 };
 
 } // namespace

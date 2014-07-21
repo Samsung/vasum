@@ -33,15 +33,15 @@
 #include "exception.hpp"
 #include "server.hpp"
 
-#include "log/logger.hpp"
-#include "log/backend-stderr.hpp"
-#include "log/backend-journal.hpp"
+#include "logger/logger.hpp"
+#include "logger/backend-stderr.hpp"
+#include "logger/backend-journal.hpp"
 #include "utils/typeinfo.hpp"
 
 #include <boost/program_options.hpp>
 #include <iostream>
 
-using namespace security_containers::log;
+using namespace logger;
 using namespace security_containers;
 
 namespace po = boost::program_options;

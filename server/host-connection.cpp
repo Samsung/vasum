@@ -28,7 +28,7 @@
 #include "host-dbus-definitions.hpp"
 #include "exception.hpp"
 
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 
 
 namespace security_containers {

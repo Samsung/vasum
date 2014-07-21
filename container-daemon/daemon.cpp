@@ -26,7 +26,7 @@
 
 #include "daemon.hpp"
 
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 
 
 namespace security_containers {

@@ -27,7 +27,7 @@
 #include "runner.hpp"
 #include "daemon.hpp"
 
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
 

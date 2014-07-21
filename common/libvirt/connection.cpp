@@ -23,7 +23,7 @@
  */
 
 #include "config.hpp"
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 #include "libvirt/helpers.hpp"
 #include "libvirt/connection.hpp"
 #include "libvirt/exception.hpp"

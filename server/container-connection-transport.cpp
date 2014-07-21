@@ -29,7 +29,7 @@
 
 #include "utils/file-wait.hpp"
 #include "utils/fs.hpp"
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/system/system_error.hpp>

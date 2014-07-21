@@ -24,7 +24,7 @@
 
 #include "config.hpp"
 #include "libvirt/helpers.hpp"
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 
 #include <mutex>
 #include <libvirt/virterror.h>

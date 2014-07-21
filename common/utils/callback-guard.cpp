@@ -24,7 +24,7 @@
 
 #include "config.hpp"
 #include "utils/callback-guard.hpp"
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 
 #include <mutex>
 #include <condition_variable>

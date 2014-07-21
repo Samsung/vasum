@@ -30,7 +30,7 @@
 // TODO: Switch to real power-manager dbus defs when they will be implemented in power-manager
 #include "fake-power-manager-dbus-definitions.hpp"
 
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 
 
 namespace security_containers {

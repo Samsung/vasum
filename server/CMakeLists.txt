@@ -30,7 +30,7 @@ ADD_EXECUTABLE(${SERVER_CODENAME} ${project_SRCS} ${common_SRCS})
 ## Link libraries ##############################################################
 FIND_PACKAGE(Boost COMPONENTS program_options system filesystem regex)
 PKG_CHECK_MODULES(SERVER_DEPS REQUIRED libvirt libvirt-glib-1.0 json gio-2.0 libsystemd-journal
-                  libcap-ng)
+                  libcap-ng libLogger libSimpleDbus libConfig)
 
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})

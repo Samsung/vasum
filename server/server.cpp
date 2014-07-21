@@ -29,9 +29,10 @@
 #include "exception.hpp"
 
 #include "config/manager.hpp"
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/environment.hpp"
+#include "utils/fs.hpp"
 
 #include <csignal>
 #include <cerrno>

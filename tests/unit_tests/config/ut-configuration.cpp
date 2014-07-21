@@ -28,8 +28,7 @@
 #include "config/fields.hpp"
 #include "config/manager.hpp"
 
-using namespace security_containers;
-using namespace security_containers::config;
+using namespace config;
 
 BOOST_AUTO_TEST_SUITE(ConfigurationSuite)
 

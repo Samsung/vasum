@@ -25,7 +25,7 @@
 #include "config.hpp"
 
 #include "utils/environment.hpp"
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 
 #include <cap-ng.h>
 #include <grp.h>

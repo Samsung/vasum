@@ -24,7 +24,7 @@
 
 #include "config.hpp"
 
-#include "log/logger.hpp"
+#include "logger/logger.hpp"
 #include "libvirt/network.hpp"
 #include "libvirt/helpers.hpp"
 #include "libvirt/exception.hpp"

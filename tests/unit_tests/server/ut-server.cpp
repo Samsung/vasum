@@ -37,7 +37,7 @@
 BOOST_AUTO_TEST_SUITE(ServerSuite)
 
 using namespace security_containers;
-using namespace security_containers::config;
+using namespace config;
 
 const std::string TEST_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-server/test-daemon.conf";
 const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-server/buggy-daemon.conf";
