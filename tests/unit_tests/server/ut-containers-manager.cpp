@@ -223,7 +223,8 @@ public:
         return GVariantPtr(unpackedResult, g_variant_unref);
     }
 
-    Dbuses callMethodGetContainerDbuses() {
+    Dbuses callMethodGetContainerDbuses()
+    {
         assert(isHost());
         Dbuses dbuses;
         GVariantPtr result = mClient->callMethod(hostapi::BUS_NAME,
@@ -244,6 +245,47 @@ public:
         }
         return dbuses;
     }
+
+    std::vector<std::string> callMethodGetContainerIds()
+    {
+        assert(isHost());
+        GVariantPtr result = mClient->callMethod(hostapi::BUS_NAME,
+                                                 hostapi::OBJECT_PATH,
+                                                 hostapi::INTERFACE,
+                                                 hostapi::METHOD_GET_CONTAINER_ID_LIST,
+                                                 NULL,
+                                                 "(as)");
+
+        GVariant* array = NULL;
+        g_variant_get(result.get(), "(*)", &array);
+
+        size_t arraySize = g_variant_n_children(array);
+        std::vector<std::string> containerIds;
+        for (size_t i = 0; i < arraySize; ++i) {
+            const char* id = NULL;
+            g_variant_get_child(array, i, "&s", &id);
+            containerIds.push_back(id);
+        }
+
+        g_variant_unref(array);
+        return containerIds;
+    }
+
+    std::string callMethodGetActiveContainerId()
+    {
+        assert(isHost());
+        GVariantPtr result = mClient->callMethod(hostapi::BUS_NAME,
+                                                 hostapi::OBJECT_PATH,
+                                                 hostapi::INTERFACE,
+                                                 hostapi::METHOD_GET_ACTIVE_CONTAINER_ID,
+                                                 NULL,
+                                                 "(s)");
+
+        const char* containerId = NULL;
+        g_variant_get(result.get(), "(&s)", &containerId);
+        return containerId;
+    }
+
 private:
     const int mId;
     DbusConnection::Pointer mClient;
@@ -748,5 +790,41 @@ BOOST_AUTO_TEST_CASE(ContainerDbusesSignalsTest)
     BOOST_CHECK(EXPECTED_DBUSES_STOPPED == collectedDbuses);
 }
 
+
+BOOST_AUTO_TEST_CASE(GetContainerIdsTest)
+{
+    ContainersManager cm(TEST_DBUS_CONFIG_PATH);
+
+    DbusAccessory dbus(DbusAccessory::HOST_ID);
+
+    std::vector<std::string> containerIds = {"ut-containers-manager-console1-dbus",
+                                             "ut-containers-manager-console2-dbus",
+                                             "ut-containers-manager-console3-dbus"};
+    std::vector<std::string> returnedIds = dbus.callMethodGetContainerIds();
+
+    BOOST_CHECK(std::is_permutation(returnedIds.begin(),
+                                    returnedIds.end(),
+                                    containerIds.begin()));
+}
+
+BOOST_AUTO_TEST_CASE(GetActiveContainerIdTest)
+{
+    ContainersManager cm(TEST_DBUS_CONFIG_PATH);
+    cm.startAll();
+
+    DbusAccessory dbus(DbusAccessory::HOST_ID);
+
+    std::vector<std::string> containerIds = {"ut-containers-manager-console1-dbus",
+                                             "ut-containers-manager-console2-dbus",
+                                             "ut-containers-manager-console3-dbus"};
+
+    for (std::string& containerId: containerIds){
+        cm.focus(containerId);
+        BOOST_CHECK(dbus.callMethodGetActiveContainerId() == containerId);
+    }
+
+    cm.stopAll();
+    BOOST_CHECK(dbus.callMethodGetActiveContainerId() == "");
+}
 
 BOOST_AUTO_TEST_SUITE_END()

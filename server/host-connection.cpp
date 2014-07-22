@@ -65,12 +65,7 @@ HostConnection::HostConnection()
     mDbusConnection->registerObject(hostapi::OBJECT_PATH,
                                     hostapi::DEFINITION,
                                     std::bind(&HostConnection::onMessageCall,
-                                              this,
-                                              _1,
-                                              _2,
-                                              _3,
-                                              _4,
-                                              _5));
+                                              this, _1, _2, _3, _4, _5));
 
     LOGD("Connected");
 }
@@ -120,6 +115,16 @@ void HostConnection::setGetContainerDbusesCallback(const GetContainerDbusesCallb
     mGetContainerDbusesCallback = callback;
 }
 
+void HostConnection::setGetContainerIdsCallback(const GetContainerIdsCallback& callback)
+{
+    mGetContainerIdsCallback = callback;
+}
+
+void HostConnection::setGetActiveContainerIdCallback(const GetActiveContainerIdCallback& callback)
+{
+    mGetActiveContainerIdCallback = callback;
+}
+
 void HostConnection::onMessageCall(const std::string& objectPath,
                                         const std::string& interface,
                                         const std::string& methodName,
@@ -162,6 +167,20 @@ void HostConnection::onMessageCall(const std::string& objectPath,
                                targetMethod,
                                args.get(),
                                result);
+        }
+        return;
+    }
+
+    if (methodName == hostapi::METHOD_GET_CONTAINER_ID_LIST){
+        if (mGetContainerIdsCallback){
+            mGetContainerIdsCallback(result);
+        }
+        return;
+    }
+
+    if (methodName == hostapi::METHOD_GET_ACTIVE_CONTAINER_ID){
+        if (mGetActiveContainerIdCallback){
+            mGetActiveContainerIdCallback(result);
         }
         return;
     }

@@ -105,6 +105,8 @@ private:
 
     void handleGetContainerDbuses(dbus::MethodResultBuilder::Pointer result);
     void handleDbusStateChanged(const std::string& containerId, const std::string& dbusAddress);
+    void handleGetContainerIdsCall(dbus::MethodResultBuilder::Pointer result);
+    void handleGetActiveContainerIdCall(dbus::MethodResultBuilder::Pointer result);
 
 };
 

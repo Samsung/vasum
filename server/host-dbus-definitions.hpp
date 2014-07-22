@@ -38,6 +38,8 @@ const std::string INTERFACE                         = "org.tizen.containers.host
 
 const std::string METHOD_PROXY_CALL                 = "ProxyCall";
 const std::string METHOD_GET_CONTAINER_DBUSES       = "GetContainerDbuses";
+const std::string METHOD_GET_CONTAINER_ID_LIST      = "GetContainerIds";
+const std::string METHOD_GET_ACTIVE_CONTAINER_ID    = "GetActiveContainerId";
 
 const std::string SIGNAL_CONTAINER_DBUS_STATE       = "ContainerDbusState";
 
@@ -55,6 +57,12 @@ const std::string DEFINITION =
     "    </method>"
     "    <method name='" + METHOD_GET_CONTAINER_DBUSES + "'>"
     "      <arg type='a{ss}' name='dbuses' direction='out'/>"
+    "    </method>"
+    "    <method name='" + METHOD_GET_CONTAINER_ID_LIST + "'>"
+    "      <arg type='as' name='result' direction='out'/>"
+    "    </method>"
+    "    <method name='" + METHOD_GET_ACTIVE_CONTAINER_ID + "'>"
+    "      <arg type='s' name='result' direction='out'/>"
     "    </method>"
     "    <signal name='" + SIGNAL_CONTAINER_DBUS_STATE + "'>"
     "      <arg type='s' name='container'/>"

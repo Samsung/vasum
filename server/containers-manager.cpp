@@ -78,6 +78,12 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
     mHostConnection.setGetContainerDbusesCallback(bind(
                 &ContainersManager::handleGetContainerDbuses, this, _1));
 
+    mHostConnection.setGetContainerIdsCallback(bind(&ContainersManager::handleGetContainerIdsCall,
+                                                    this, _1));
+
+    mHostConnection.setGetActiveContainerIdCallback(bind(&ContainersManager::handleGetActiveContainerIdCall,
+                                                         this, _1));
+
     for (auto& containerConfig : mConfig.containerConfigs) {
         std::string containerConfigPath;
 
@@ -416,5 +422,27 @@ void ContainersManager::handleDbusStateChanged(const std::string& containerId,
     mHostConnection.signalContainerDbusState(containerId, dbusAddress);
 }
 
+void ContainersManager::handleGetContainerIdsCall(dbus::MethodResultBuilder::Pointer result)
+{
+    std::vector<GVariant*> containerIds;
+    for(auto& container: mContainers){
+        containerIds.push_back(g_variant_new_string(container.first.c_str()));
+    }
+
+    GVariant* array = g_variant_new_array(G_VARIANT_TYPE("s"),
+                                          containerIds.data(),
+                                          containerIds.size());
+    result->set(g_variant_new("(*)", array));
+}
+
+void ContainersManager::handleGetActiveContainerIdCall(dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("GetActiveContainerId call");
+    if (mContainers[mConfig.foregroundId]->isRunning()){
+        result->set(g_variant_new("(s)", mConfig.foregroundId.c_str()));
+    } else {
+        result->set(g_variant_new("(s)", ""));
+    }
+}
 
 } // namespace security_containers

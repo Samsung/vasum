@@ -54,6 +54,10 @@ public:
 
     typedef std::function<void(dbus::MethodResultBuilder::Pointer result
                               )> GetContainerDbusesCallback;
+    typedef std::function<void(dbus::MethodResultBuilder::Pointer result)> GetContainerIdsCallback;
+    typedef std::function<void(dbus::MethodResultBuilder::Pointer result
+                              )> GetActiveContainerIdCallback;
+
 
     /**
      * Register proxy call callback
@@ -69,6 +73,16 @@ public:
      * Send signal describing dbus address state change
      */
     void signalContainerDbusState(const std::string& containerId, const std::string& dbusAddress);
+
+    /**
+     * Register a callback called to get a list of domain ids
+     */
+    void setGetContainerIdsCallback(const GetContainerIdsCallback& callback);
+
+    /**
+     * Register a callback called to get the active container id
+     */
+    void setGetActiveContainerIdCallback(const GetContainerIdsCallback& callback);
 
     /**
      * Make a proxy call
@@ -88,6 +102,8 @@ private:
     bool mNameLost;
     ProxyCallCallback mProxyCallCallback;
     GetContainerDbusesCallback mGetContainerDbusesCallback;
+    GetContainerIdsCallback mGetContainerIdsCallback;
+    GetActiveContainerIdCallback mGetActiveContainerIdCallback;
 
     void onNameAcquired();
     void onNameLost();
