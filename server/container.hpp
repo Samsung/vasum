@@ -54,6 +54,8 @@ public:
     typedef ContainerConnection::FileMoveRequestCallback FileMoveRequestCallback;
     typedef ContainerConnection::ProxyCallCallback ProxyCallCallback;
 
+    typedef std::function<void(const std::string& address)> DbusStateChangedCallback;
+
     /**
      * Returns a vector of regexps defining files permitted to be
      * send to other containers using file move functionality
@@ -166,6 +168,11 @@ public:
     void setFileMoveRequestCallback(const FileMoveRequestCallback& callback);
 
     /**
+     * Register dbus state changed callback
+     */
+    void setDbusStateChangedCallback(const DbusStateChangedCallback& callback);
+
+    /**
      * Make a proxy call
      */
     void proxyCallAsync(const std::string& busName,
@@ -174,6 +181,11 @@ public:
                         const std::string& method,
                         GVariant* parameters,
                         const dbus::DbusConnection::AsyncMethodCallCallback& callback);
+
+    /**
+     * Get a dbus address
+     */
+    std::string getDbusAddress();
 
 private:
     ContainerConfig mConfig;
@@ -189,10 +201,14 @@ private:
     DisplayOffCallback mDisplayOffCallback;
     FileMoveRequestCallback mFileMoveCallback;
     ProxyCallCallback mProxyCallCallback;
+    DbusStateChangedCallback mDbusStateChangedCallback;
+    std::string mDbusAddress;
     std::string mRunMountPoint;
 
     void onNameLostCallback();
     void reconnectHandler();
+    void connect();
+    void disconnect();
 };
 
 

@@ -75,6 +75,9 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
     mHostConnection.setProxyCallCallback(bind(&ContainersManager::handleProxyCall,
                                               this, HOST_ID, _1, _2, _3, _4, _5, _6, _7));
 
+    mHostConnection.setGetContainerDbusesCallback(bind(
+                &ContainersManager::handleGetContainerDbuses, this, _1));
+
     for (auto& containerConfig : mConfig.containerConfigs) {
         std::string containerConfigPath;
 
@@ -104,6 +107,9 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
 
         c->setProxyCallCallback(bind(&ContainersManager::handleProxyCall,
                                      this, id, _1, _2, _3, _4, _5, _6, _7));
+
+        c->setDbusStateChangedCallback(bind(&ContainersManager::handleDbusStateChanged,
+                                            this, id, _1));
 
         mContainers.insert(ContainerMap::value_type(id, std::move(c)));
     }
@@ -389,6 +395,25 @@ void ContainersManager::handleProxyCall(const std::string& caller,
                                    targetMethod,
                                    parameters,
                                    asyncResultCallback);
+}
+
+void ContainersManager::handleGetContainerDbuses(dbus::MethodResultBuilder::Pointer result)
+{
+    std::vector<GVariant*> entries;
+    for (auto& container : mContainers) {
+        GVariant* containerId = g_variant_new_string(container.first.c_str());
+        GVariant* dbusAddress = g_variant_new_string(container.second->getDbusAddress().c_str());
+        GVariant* entry = g_variant_new_dict_entry(containerId, dbusAddress);
+        entries.push_back(entry);
+    }
+    GVariant* dict = g_variant_new_array(G_VARIANT_TYPE("{ss}"), entries.data(), entries.size());
+    result->set(g_variant_new("(*)", dict));
+}
+
+void ContainersManager::handleDbusStateChanged(const std::string& containerId,
+                                               const std::string& dbusAddress)
+{
+    mHostConnection.signalContainerDbusState(containerId, dbusAddress);
 }
 
 

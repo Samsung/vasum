@@ -82,7 +82,7 @@ Container::~Container()
     // condition on the mReconnectThread.
     {
         Lock lock(mReconnectMutex);
-        mConnection.reset();
+        disconnect();
     }
 
     if (mReconnectThread.joinable()) {
@@ -117,7 +117,28 @@ void Container::start()
     mConnectionTransport.reset(new ContainerConnectionTransport(mRunMountPoint));
     mNetworkAdmin->start();
     mAdmin->start();
-    mConnection.reset(new ContainerConnection(mConnectionTransport->acquireAddress(),
+    connect();
+
+    // Send to the background only after we're connected,
+    // otherwise it'd take ages.
+    LOGD(getId() << ": DBUS connected, sending to the background");
+    goBackground();
+}
+
+void Container::stop()
+{
+    Lock lock(mReconnectMutex);
+    disconnect();
+    mAdmin->stop();
+    mNetworkAdmin->stop();
+    mConnectionTransport.reset();
+}
+
+void Container::connect()
+{
+    // assume called under reconnect lock
+    mDbusAddress = mConnectionTransport->acquireAddress();
+    mConnection.reset(new ContainerConnection(mDbusAddress,
                                               std::bind(&Container::onNameLostCallback, this)));
     if (mNotifyCallback) {
         mConnection->setNotifyActiveContainerCallback(mNotifyCallback);
@@ -131,20 +152,28 @@ void Container::start()
     if (mProxyCallCallback) {
         mConnection->setProxyCallCallback(mProxyCallCallback);
     }
-
-    // Send to the background only after we're connected,
-    // otherwise it'd take ages.
-    LOGD(getId() << ": DBUS connected, sending to the background");
-    goBackground();
+    if (mDbusStateChangedCallback) {
+        mDbusStateChangedCallback(mDbusAddress);
+    }
 }
 
-void Container::stop()
+void Container::disconnect()
+{
+    // assume called under reconnect lock
+    if (mConnection) {
+        mConnection.reset();
+        mDbusAddress.clear();
+        if (mDbusStateChangedCallback) {
+            // notify about invalid dbusAddress for this container
+            mDbusStateChangedCallback(std::string());
+        }
+    }
+}
+
+std::string Container::getDbusAddress()
 {
     Lock lock(mReconnectMutex);
-    mConnection.reset();
-    mAdmin->stop();
-    mNetworkAdmin->stop();
-    mConnectionTransport.reset();
+    return mDbusAddress;
 }
 
 void Container::goForeground()
@@ -204,7 +233,7 @@ void Container::reconnectHandler()
 {
     {
         Lock lock(mReconnectMutex);
-        mConnection.reset();
+        disconnect();
     }
 
     for (int i = 0; i < RECONNECT_RETRIES; ++i) {
@@ -219,8 +248,7 @@ void Container::reconnectHandler()
 
         try {
             LOGT(getId() << ": Reconnect try " << i + 1);
-            mConnection.reset(new ContainerConnection(mConnectionTransport->acquireAddress(),
-                                                      std::bind(&Container::onNameLostCallback, this)));
+            connect();
             LOGI(getId() << ": Reconnected");
             return;
         } catch (SecurityContainersException&) {
@@ -281,6 +309,11 @@ void Container::setProxyCallCallback(const ProxyCallCallback& callback)
     if (mConnection) {
         mConnection->setProxyCallCallback(callback);
     }
+}
+
+void Container::setDbusStateChangedCallback(const DbusStateChangedCallback& callback)
+{
+    mDbusStateChangedCallback = callback;
 }
 
 void Container::proxyCallAsync(const std::string& busName,

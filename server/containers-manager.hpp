@@ -103,6 +103,9 @@ private:
                          GVariant* parameters,
                          dbus::MethodResultBuilder::Pointer result);
 
+    void handleGetContainerDbuses(dbus::MethodResultBuilder::Pointer result);
+    void handleDbusStateChanged(const std::string& containerId, const std::string& dbusAddress);
+
 };
 
 

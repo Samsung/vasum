@@ -115,6 +115,11 @@ void HostConnection::setProxyCallCallback(const ProxyCallCallback& callback)
     mProxyCallCallback = callback;
 }
 
+void HostConnection::setGetContainerDbusesCallback(const GetContainerDbusesCallback& callback)
+{
+    mGetContainerDbusesCallback = callback;
+}
+
 void HostConnection::onMessageCall(const std::string& objectPath,
                                         const std::string& interface,
                                         const std::string& methodName,
@@ -122,6 +127,13 @@ void HostConnection::onMessageCall(const std::string& objectPath,
                                         dbus::MethodResultBuilder::Pointer result)
 {
     if (objectPath != hostapi::OBJECT_PATH || interface != hostapi::INTERFACE) {
+        return;
+    }
+
+    if (methodName == hostapi::METHOD_GET_CONTAINER_DBUSES) {
+        if (mGetContainerDbusesCallback) {
+            mGetContainerDbusesCallback(result);
+        }
         return;
     }
 
@@ -151,6 +163,7 @@ void HostConnection::onMessageCall(const std::string& objectPath,
                                args.get(),
                                result);
         }
+        return;
     }
 }
 
@@ -168,6 +181,16 @@ void HostConnection::proxyCallAsync(const std::string& busName,
                                      parameters,
                                      std::string(),
                                      callback);
+}
+
+void HostConnection::signalContainerDbusState(const std::string& containerId,
+                                              const std::string& dbusAddress)
+{
+    GVariant* parameters = g_variant_new("(ss)", containerId.c_str(), dbusAddress.c_str());
+    mDbusConnection->emitSignal(hostapi::OBJECT_PATH,
+                                hostapi::INTERFACE,
+                                hostapi::SIGNAL_CONTAINER_DBUS_STATE,
+                                parameters);
 }
 
 

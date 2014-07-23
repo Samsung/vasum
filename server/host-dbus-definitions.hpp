@@ -37,6 +37,9 @@ const std::string OBJECT_PATH                       = "/org/tizen/containers/hos
 const std::string INTERFACE                         = "org.tizen.containers.host.manager";
 
 const std::string METHOD_PROXY_CALL                 = "ProxyCall";
+const std::string METHOD_GET_CONTAINER_DBUSES       = "GetContainerDbuses";
+
+const std::string SIGNAL_CONTAINER_DBUS_STATE       = "ContainerDbusState";
 
 const std::string DEFINITION =
     "<node>"
@@ -50,6 +53,13 @@ const std::string DEFINITION =
     "      <arg type='v' name='parameters' direction='in'/>"
     "      <arg type='v' name='result' direction='out'/>"
     "    </method>"
+    "    <method name='" + METHOD_GET_CONTAINER_DBUSES + "'>"
+    "      <arg type='a{ss}' name='dbuses' direction='out'/>"
+    "    </method>"
+    "    <signal name='" + SIGNAL_CONTAINER_DBUS_STATE + "'>"
+    "      <arg type='s' name='container'/>"
+    "      <arg type='s' name='dbusAddress'/>"
+    "    </signal>"
     "  </interface>"
     "</node>";
 

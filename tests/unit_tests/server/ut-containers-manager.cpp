@@ -75,9 +75,13 @@ const std::string FILE_CONTENT = "File content\n"
 
 class DbusAccessory {
 public:
+    static const int HOST_ID = 0;
+
     typedef std::function<void(const std::string& argument,
                                MethodResultBuilder::Pointer result
                               )> TestApiMethodCallback;
+
+    typedef std::map<std::string, std::string> Dbuses;
 
     DbusAccessory(int id)
         : mId(id),
@@ -122,7 +126,7 @@ public:
 
     void signalSubscribe(const DbusConnection::SignalCallback& callback)
     {
-        mClient->signalSubscribe(callback, api::BUS_NAME);
+        mClient->signalSubscribe(callback, isHost() ? hostapi::BUS_NAME : api::BUS_NAME);
     }
 
     void emitSignal(const std::string& objectPath,
@@ -218,6 +222,28 @@ public:
         g_variant_get(result.get(), "(v)", &unpackedResult);
         return GVariantPtr(unpackedResult, g_variant_unref);
     }
+
+    Dbuses callMethodGetContainerDbuses() {
+        assert(isHost());
+        Dbuses dbuses;
+        GVariantPtr result = mClient->callMethod(hostapi::BUS_NAME,
+                                                 hostapi::OBJECT_PATH,
+                                                 hostapi::INTERFACE,
+                                                 hostapi::METHOD_GET_CONTAINER_DBUSES,
+                                                 NULL,
+                                                 "(a{ss})");
+        GVariant* array = NULL;
+        g_variant_get(result.get(), "(*)", &array);
+        dbus::GVariantPtr autounref(array, g_variant_unref);
+        size_t count = g_variant_n_children(array);
+        for (size_t n = 0; n < count; ++n) {
+            const char* containerId = NULL;
+            const char* dbusAddress = NULL;
+            g_variant_get_child(array, n, "{&s&s}", &containerId, &dbusAddress);
+            dbuses.insert(Dbuses::value_type(containerId, dbusAddress));
+        }
+        return dbuses;
+    }
 private:
     const int mId;
     DbusConnection::Pointer mClient;
@@ -227,7 +253,7 @@ private:
     std::condition_variable mNameCondition;
 
     bool isHost() const {
-        return mId == 0;
+        return mId == HOST_ID;
     }
 
     std::string acquireAddress() const
@@ -642,6 +668,84 @@ BOOST_AUTO_TEST_CASE(ProxyCallTest)
                                               g_variant_new("(s)", "arg")),
                           DbusCustomException,
                           expectedMessage("Proxy call forbidden"));
+}
+
+namespace {
+    const DbusAccessory::Dbuses EXPECTED_DBUSES_STOPPED = {
+        {"ut-containers-manager-console1-dbus", ""},
+        {"ut-containers-manager-console2-dbus", ""},
+        {"ut-containers-manager-console3-dbus", ""}};
+
+    const DbusAccessory::Dbuses EXPECTED_DBUSES_STARTED = {
+        {"ut-containers-manager-console1-dbus",
+         "unix:path=/tmp/ut-containers-manager/console1-dbus/dbus/system_bus_socket"},
+        {"ut-containers-manager-console2-dbus",
+         "unix:path=/tmp/ut-containers-manager/console2-dbus/dbus/system_bus_socket"},
+        {"ut-containers-manager-console3-dbus",
+         "unix:path=/tmp/ut-containers-manager/console3-dbus/dbus/system_bus_socket"}};
+} // namespace
+
+BOOST_AUTO_TEST_CASE(GetContainerDbusesTest)
+{
+    DbusAccessory host(DbusAccessory::HOST_ID);
+
+    ContainersManager cm(TEST_DBUS_CONFIG_PATH);
+
+    BOOST_CHECK(EXPECTED_DBUSES_STOPPED == host.callMethodGetContainerDbuses());
+
+    cm.startAll();
+
+    BOOST_CHECK(EXPECTED_DBUSES_STARTED == host.callMethodGetContainerDbuses());
+
+    cm.stopAll();
+
+    BOOST_CHECK(EXPECTED_DBUSES_STOPPED == host.callMethodGetContainerDbuses());
+}
+
+BOOST_AUTO_TEST_CASE(ContainerDbusesSignalsTest)
+{
+    DbusAccessory host(DbusAccessory::HOST_ID);
+
+    Latch signalLatch;
+    DbusAccessory::Dbuses collectedDbuses;
+
+    auto onSignal = [&] (const std::string& /*senderBusName*/,
+                         const std::string& objectPath,
+                         const std::string& interface,
+                         const std::string& signalName,
+                         GVariant* parameters) {
+        if (objectPath == hostapi::OBJECT_PATH &&
+            interface == hostapi::INTERFACE &&
+            signalName == hostapi::SIGNAL_CONTAINER_DBUS_STATE) {
+
+            const gchar* containerId = NULL;
+            const gchar* dbusAddress = NULL;
+            g_variant_get(parameters, "(&s&s)", &containerId, &dbusAddress);
+
+            collectedDbuses.insert(DbusAccessory::Dbuses::value_type(containerId, dbusAddress));
+            signalLatch.set();
+        }
+    };
+
+    host.signalSubscribe(onSignal);
+
+    {
+        ContainersManager cm(TEST_DBUS_CONFIG_PATH);
+
+        BOOST_CHECK(signalLatch.empty());
+        BOOST_CHECK(collectedDbuses.empty());
+
+        cm.startAll();
+
+        BOOST_CHECK(signalLatch.waitForN(TEST_DBUS_CONNECTION_CONTAINERS_COUNT, EVENT_TIMEOUT));
+        BOOST_CHECK(signalLatch.empty());
+        BOOST_CHECK(EXPECTED_DBUSES_STARTED == collectedDbuses);
+        collectedDbuses.clear();
+    }
+
+    BOOST_CHECK(signalLatch.waitForN(TEST_DBUS_CONNECTION_CONTAINERS_COUNT, EVENT_TIMEOUT));
+    BOOST_CHECK(signalLatch.empty());
+    BOOST_CHECK(EXPECTED_DBUSES_STOPPED == collectedDbuses);
 }
 
 

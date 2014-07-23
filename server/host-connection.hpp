@@ -49,12 +49,26 @@ public:
                                const std::string& targetInterface,
                                const std::string& targetMethod,
                                GVariant* parameters,
-                               dbus::MethodResultBuilder::Pointer result)> ProxyCallCallback;
+                               dbus::MethodResultBuilder::Pointer result
+                              )> ProxyCallCallback;
+
+    typedef std::function<void(dbus::MethodResultBuilder::Pointer result
+                              )> GetContainerDbusesCallback;
 
     /**
      * Register proxy call callback
      */
     void setProxyCallCallback(const ProxyCallCallback& callback);
+
+    /**
+     * Register get container dbuses callback
+     */
+    void setGetContainerDbusesCallback(const GetContainerDbusesCallback& callback);
+
+    /**
+     * Send signal describing dbus address state change
+     */
+    void signalContainerDbusState(const std::string& containerId, const std::string& dbusAddress);
 
     /**
      * Make a proxy call
@@ -73,6 +87,7 @@ private:
     bool mNameAcquired;
     bool mNameLost;
     ProxyCallCallback mProxyCallCallback;
+    GetContainerDbusesCallback mGetContainerDbusesCallback;
 
     void onNameAcquired();
     void onNameLost();
