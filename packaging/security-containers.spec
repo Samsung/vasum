@@ -7,7 +7,7 @@
 %define input_event_group video
 
 Name:           security-containers
-Version:        0.1.0
+Version:        0.1.1
 Release:        0
 Source0:        %{name}-%{version}.tar.gz
 License:        Apache-2.0
@@ -16,7 +16,7 @@ Summary:        Daemon for managing containers
 BuildRequires:  cmake
 BuildRequires:  boost-devel
 BuildRequires:  libvirt-devel
-BuildRequires:  libjson-devel
+BuildRequires:  libjson-devel >= 0.10.0
 BuildRequires:  libcap-ng-devel
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(libsystemd-journal)
