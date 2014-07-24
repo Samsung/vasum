@@ -16,7 +16,7 @@ Summary:        Daemon for managing containers
 BuildRequires:  cmake
 BuildRequires:  boost-devel
 BuildRequires:  libvirt-devel
-BuildRequires:  libjson-devel >= 0.10.0
+BuildRequires:  libjson-devel >= 0.10
 BuildRequires:  libcap-ng-devel
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(libsystemd-journal)
