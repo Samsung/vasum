@@ -72,6 +72,7 @@ const std::string TEST_MESSAGE = "testmessage";
 const std::string FILE_CONTENT = "File content\n"
                                  "Line 1\n"
                                  "Line 2\n";
+const std::string NON_EXISTANT_CONTAINER_ID = "NON_EXISTANT_CONTAINER_ID";
 
 class DbusAccessory {
 public:
@@ -126,7 +127,7 @@ public:
 
     void signalSubscribe(const DbusConnection::SignalCallback& callback)
     {
-        mClient->signalSubscribe(callback, isHost() ? hostapi::BUS_NAME : api::BUS_NAME);
+        mClient->signalSubscribe(callback, isHost() ? api::host::BUS_NAME : api::container::BUS_NAME);
     }
 
     void emitSignal(const std::string& objectPath,
@@ -140,10 +141,10 @@ public:
     void callMethodNotify()
     {
         GVariant* parameters = g_variant_new("(ss)", TEST_APP_NAME.c_str(), TEST_MESSAGE.c_str());
-        mClient->callMethod(api::BUS_NAME,
-                            api::OBJECT_PATH,
-                            api::INTERFACE,
-                            api::METHOD_NOTIFY_ACTIVE_CONTAINER,
+        mClient->callMethod(api::container::BUS_NAME,
+                            api::container::OBJECT_PATH,
+                            api::container::INTERFACE,
+                            api::container::METHOD_NOTIFY_ACTIVE_CONTAINER,
                             parameters,
                             "()");
     }
@@ -151,10 +152,10 @@ public:
     std::string callMethodMove(const std::string& dest, const std::string& path)
     {
         GVariant* parameters = g_variant_new("(ss)", dest.c_str(), path.c_str());
-        GVariantPtr result = mClient->callMethod(api::BUS_NAME,
-                                                 api::OBJECT_PATH,
-                                                 api::INTERFACE,
-                                                 api::METHOD_FILE_MOVE_REQUEST,
+        GVariantPtr result = mClient->callMethod(api::container::BUS_NAME,
+                                                 api::container::OBJECT_PATH,
+                                                 api::container::INTERFACE,
+                                                 api::container::METHOD_FILE_MOVE_REQUEST,
                                                  parameters,
                                                  "(s)");
 
@@ -212,10 +213,13 @@ public:
                                                    interface.c_str(),
                                                    method.c_str(),
                                                    parameters);
-        GVariantPtr result = mClient->callMethod(isHost() ? hostapi::BUS_NAME : api::BUS_NAME,
-                                                 isHost() ? hostapi::OBJECT_PATH : api::OBJECT_PATH,
-                                                 isHost() ? hostapi::INTERFACE : api::INTERFACE,
-                                                 isHost() ? hostapi::METHOD_PROXY_CALL : api::METHOD_PROXY_CALL,
+        GVariantPtr result = mClient->callMethod(isHost() ? api::host::BUS_NAME :
+                                                            api::container::BUS_NAME,
+                                                 isHost() ? api::host::OBJECT_PATH :
+                                                            api::container::OBJECT_PATH,
+                                                 isHost() ? api::host::INTERFACE :
+                                                            api::container::INTERFACE,
+                                                 api::METHOD_PROXY_CALL,
                                                  packedParameters,
                                                  "(v)");
         GVariant* unpackedResult = NULL;
@@ -227,10 +231,10 @@ public:
     {
         assert(isHost());
         Dbuses dbuses;
-        GVariantPtr result = mClient->callMethod(hostapi::BUS_NAME,
-                                                 hostapi::OBJECT_PATH,
-                                                 hostapi::INTERFACE,
-                                                 hostapi::METHOD_GET_CONTAINER_DBUSES,
+        GVariantPtr result = mClient->callMethod(api::host::BUS_NAME,
+                                                 api::host::OBJECT_PATH,
+                                                 api::host::INTERFACE,
+                                                 api::host::METHOD_GET_CONTAINER_DBUSES,
                                                  NULL,
                                                  "(a{ss})");
         GVariant* array = NULL;
@@ -249,10 +253,10 @@ public:
     std::vector<std::string> callMethodGetContainerIds()
     {
         assert(isHost());
-        GVariantPtr result = mClient->callMethod(hostapi::BUS_NAME,
-                                                 hostapi::OBJECT_PATH,
-                                                 hostapi::INTERFACE,
-                                                 hostapi::METHOD_GET_CONTAINER_ID_LIST,
+        GVariantPtr result = mClient->callMethod(api::host::BUS_NAME,
+                                                 api::host::OBJECT_PATH,
+                                                 api::host::INTERFACE,
+                                                 api::host::METHOD_GET_CONTAINER_ID_LIST,
                                                  NULL,
                                                  "(as)");
 
@@ -274,16 +278,29 @@ public:
     std::string callMethodGetActiveContainerId()
     {
         assert(isHost());
-        GVariantPtr result = mClient->callMethod(hostapi::BUS_NAME,
-                                                 hostapi::OBJECT_PATH,
-                                                 hostapi::INTERFACE,
-                                                 hostapi::METHOD_GET_ACTIVE_CONTAINER_ID,
+        GVariantPtr result = mClient->callMethod(api::host::BUS_NAME,
+                                                 api::host::OBJECT_PATH,
+                                                 api::host::INTERFACE,
+                                                 api::host::METHOD_GET_ACTIVE_CONTAINER_ID,
                                                  NULL,
                                                  "(s)");
 
         const char* containerId = NULL;
         g_variant_get(result.get(), "(&s)", &containerId);
         return containerId;
+    }
+
+    void callMethodSetActiveContainer(const std::string& id)
+    {
+        assert(isHost());
+        GVariant* parameters = g_variant_new("(s)", id.c_str());
+        GVariantPtr result = mClient->callMethod(api::host::BUS_NAME,
+                                                 api::host::OBJECT_PATH,
+                                                 api::host::INTERFACE,
+                                                 api::host::METHOD_SET_ACTIVE_CONTAINER,
+                                                 parameters,
+                                                 "()");
+
     }
 
 private:
@@ -413,9 +430,9 @@ BOOST_AUTO_TEST_CASE(NotifyActiveContainerTest)
                       const std::string& signalName,
                       GVariant* parameters)
         {
-            if (objectPath == api::OBJECT_PATH &&
-                interface == api::INTERFACE &&
-                signalName == api::SIGNAL_NOTIFICATION &&
+            if (objectPath == api::container::OBJECT_PATH &&
+                interface == api::container::INTERFACE &&
+                signalName == api::container::SIGNAL_NOTIFICATION &&
                 g_variant_is_of_type(parameters, G_VARIANT_TYPE("(sss)"))) {
 
                 const gchar* container = NULL;
@@ -516,9 +533,9 @@ BOOST_AUTO_TEST_CASE(MoveFileTest)
                        const std::string& signalName,
                        GVariant* parameters)
         {
-            if (objectPath == api::OBJECT_PATH &&
-                interface == api::INTERFACE &&
-                signalName == api::SIGNAL_NOTIFICATION &&
+            if (objectPath == api::container::OBJECT_PATH &&
+                interface == api::container::INTERFACE &&
+                signalName == api::container::SIGNAL_NOTIFICATION &&
                 g_variant_is_of_type(parameters, G_VARIANT_TYPE("(sss)"))) {
 
                 const gchar* source = NULL;
@@ -547,27 +564,27 @@ BOOST_AUTO_TEST_CASE(MoveFileTest)
 
     // sending to a non existing container
     BOOST_CHECK_EQUAL(dbuses.at(1)->callMethodMove(BUGGY_CONTAINER, NO_PATH),
-                      api::FILE_MOVE_DESTINATION_NOT_FOUND);
+                      api::container::FILE_MOVE_DESTINATION_NOT_FOUND);
     BOOST_CHECK(notificationLatch.empty());
 
     // sending to self
     BOOST_CHECK_EQUAL(dbuses.at(1)->callMethodMove(CONTAINER1, NO_PATH),
-                      api::FILE_MOVE_WRONG_DESTINATION);
+                      api::container::FILE_MOVE_WRONG_DESTINATION);
     BOOST_CHECK(notificationLatch.empty());
 
     // no permission to send
     BOOST_CHECK_EQUAL(dbuses.at(1)->callMethodMove(CONTAINER2, "/etc/secret1"),
-                      api::FILE_MOVE_NO_PERMISSIONS_SEND);
+                      api::container::FILE_MOVE_NO_PERMISSIONS_SEND);
     BOOST_CHECK(notificationLatch.empty());
 
     // no permission to receive
     BOOST_CHECK_EQUAL(dbuses.at(1)->callMethodMove(CONTAINER2, "/etc/secret2"),
-                      api::FILE_MOVE_NO_PERMISSIONS_RECEIVE);
+                      api::container::FILE_MOVE_NO_PERMISSIONS_RECEIVE);
     BOOST_CHECK(notificationLatch.empty());
 
     // non existing file
     BOOST_CHECK_EQUAL(dbuses.at(1)->callMethodMove(CONTAINER2, BUGGY_PATH),
-                      api::FILE_MOVE_FAILED);
+                      api::container::FILE_MOVE_FAILED);
     BOOST_CHECK(notificationLatch.empty());
 
     // a working scenario
@@ -580,12 +597,12 @@ BOOST_AUTO_TEST_CASE(MoveFileTest)
     BOOST_REQUIRE(utils::saveFileContent(CONTAINER1PATH + "/file", FILE_CONTENT));
 
     BOOST_CHECK_EQUAL(dbuses.at(1)->callMethodMove(CONTAINER2, TMP + "/file"),
-                      api::FILE_MOVE_SUCCEEDED);
+                      api::container::FILE_MOVE_SUCCEEDED);
     BOOST_CHECK(notificationLatch.wait(EVENT_TIMEOUT));
     BOOST_CHECK(notificationLatch.empty());
     BOOST_CHECK_EQUAL(notificationSource, CONTAINER1);
     BOOST_CHECK_EQUAL(notificationPath, TMP + "/file");
-    BOOST_CHECK_EQUAL(notificationRetcode, api::FILE_MOVE_SUCCEEDED);
+    BOOST_CHECK_EQUAL(notificationRetcode, api::container::FILE_MOVE_SUCCEEDED);
     BOOST_CHECK(!fs::exists(CONTAINER1PATH + "/file"));
     BOOST_CHECK_EQUAL(utils::readFileContent(CONTAINER2PATH + "/file"), FILE_CONTENT);
 
@@ -756,9 +773,9 @@ BOOST_AUTO_TEST_CASE(ContainerDbusesSignalsTest)
                          const std::string& interface,
                          const std::string& signalName,
                          GVariant* parameters) {
-        if (objectPath == hostapi::OBJECT_PATH &&
-            interface == hostapi::INTERFACE &&
-            signalName == hostapi::SIGNAL_CONTAINER_DBUS_STATE) {
+        if (objectPath == api::host::OBJECT_PATH &&
+            interface == api::host::INTERFACE &&
+            signalName == api::host::SIGNAL_CONTAINER_DBUS_STATE) {
 
             const gchar* containerId = NULL;
             const gchar* dbusAddress = NULL;
@@ -825,6 +842,30 @@ BOOST_AUTO_TEST_CASE(GetActiveContainerIdTest)
 
     cm.stopAll();
     BOOST_CHECK(dbus.callMethodGetActiveContainerId() == "");
+}
+
+BOOST_AUTO_TEST_CASE(SetActiveContainerTest)
+{
+    ContainersManager cm(TEST_DBUS_CONFIG_PATH);
+    cm.startAll();
+
+    DbusAccessory dbus(DbusAccessory::HOST_ID);
+
+    std::vector<std::string> containerIds = {"ut-containers-manager-console1-dbus",
+                                             "ut-containers-manager-console2-dbus",
+                                             "ut-containers-manager-console3-dbus"};
+
+    for (std::string& containerId: containerIds){
+        BOOST_REQUIRE_NO_THROW(dbus.callMethodSetActiveContainer(containerId));
+        BOOST_CHECK(dbus.callMethodGetActiveContainerId() == containerId);
+    }
+
+    BOOST_REQUIRE_THROW(dbus.callMethodSetActiveContainer(NON_EXISTANT_CONTAINER_ID),
+                        DbusException);
+
+    cm.stopAll();
+    BOOST_REQUIRE_THROW(dbus.callMethodSetActiveContainer("ut-containers-manager-console1-dbus"),
+                        DbusException);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -28,6 +28,7 @@
 
 #include "container-connection.hpp"
 #include "container-connection-transport.hpp"
+#include "host-dbus-definitions.hpp"
 #include "container-dbus-definitions.hpp"
 // TODO: Switch to real power-manager dbus defs when they will be implemented in power-manager
 #include "fake-power-manager-dbus-definitions.hpp"
@@ -152,10 +153,10 @@ BOOST_AUTO_TEST_CASE(NotifyActiveContainerApiTest)
     connection->setNotifyActiveContainerCallback(callback);
 
     DbusConnection::Pointer client = DbusConnection::create(dbus.acquireAddress());
-    client->callMethod(api::BUS_NAME,
-                       api::OBJECT_PATH,
-                       api::INTERFACE,
-                       api::METHOD_NOTIFY_ACTIVE_CONTAINER,
+    client->callMethod(api::container::BUS_NAME,
+                       api::container::OBJECT_PATH,
+                       api::container::INTERFACE,
+                       api::container::METHOD_NOTIFY_ACTIVE_CONTAINER,
                        g_variant_new("(ss)", "testapp", "testmessage"),
                        "()");
     BOOST_CHECK(notifyCalled.wait(EVENT_TIMEOUT));
@@ -178,9 +179,9 @@ BOOST_AUTO_TEST_CASE(SignalNotificationApiTest)
                        const std::string& interface,
                        const std::string& signalName,
                        GVariant* parameters) {
-        if (objectPath == api::OBJECT_PATH &&
-            interface == api::INTERFACE &&
-            signalName == api::SIGNAL_NOTIFICATION &&
+        if (objectPath == api::container::OBJECT_PATH &&
+            interface == api::container::INTERFACE &&
+            signalName == api::container::SIGNAL_NOTIFICATION &&
             g_variant_is_of_type(parameters, G_VARIANT_TYPE("(sss)"))) {
 
             const gchar* container = NULL;
@@ -194,7 +195,7 @@ BOOST_AUTO_TEST_CASE(SignalNotificationApiTest)
             }
         }
     };
-    client->signalSubscribe(handler, api::BUS_NAME);
+    client->signalSubscribe(handler, api::container::BUS_NAME);
 
     connection->sendNotification("testcontainer", "testapp", "testmessage");
 

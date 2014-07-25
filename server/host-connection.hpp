@@ -51,13 +51,15 @@ public:
                                GVariant* parameters,
                                dbus::MethodResultBuilder::Pointer result
                               )> ProxyCallCallback;
-
     typedef std::function<void(dbus::MethodResultBuilder::Pointer result
                               )> GetContainerDbusesCallback;
-    typedef std::function<void(dbus::MethodResultBuilder::Pointer result)> GetContainerIdsCallback;
+    typedef std::function<void(dbus::MethodResultBuilder::Pointer result
+                              )> GetContainerIdsCallback;
     typedef std::function<void(dbus::MethodResultBuilder::Pointer result
                               )> GetActiveContainerIdCallback;
-
+    typedef std::function<void(const std::string& id,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> SetActiveContainerCallback;
 
     /**
      * Register proxy call callback
@@ -85,6 +87,11 @@ public:
     void setGetActiveContainerIdCallback(const GetContainerIdsCallback& callback);
 
     /**
+     * Register a callback called to set the active container
+     */
+    void setSetActiveContainerCallback(const SetActiveContainerCallback& callback);
+
+    /**
      * Make a proxy call
      */
     void proxyCallAsync(const std::string& busName,
@@ -104,6 +111,7 @@ private:
     GetContainerDbusesCallback mGetContainerDbusesCallback;
     GetContainerIdsCallback mGetContainerIdsCallback;
     GetActiveContainerIdCallback mGetActiveContainerIdCallback;
+    SetActiveContainerCallback mSetActiveContainerCallback;
 
     void onNameAcquired();
     void onNameLost();

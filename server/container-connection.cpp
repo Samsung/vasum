@@ -59,19 +59,19 @@ ContainerConnection::ContainerConnection(const std::string& address, const OnNam
     mDbusConnection = dbus::DbusConnection::create(address);
 
     LOGT("Setting DBUS name");
-    mDbusConnection->setName(api::BUS_NAME,
+    mDbusConnection->setName(api::container::BUS_NAME,
                              std::bind(&ContainerConnection::onNameAcquired, this),
                              std::bind(&ContainerConnection::onNameLost, this));
 
     if (!waitForNameAndSetCallback(NAME_ACQUIRED_TIMEOUT, callback)) {
-        LOGE("Could not acquire dbus name: " << api::BUS_NAME);
-        throw ContainerConnectionException("Could not acquire dbus name: " + api::BUS_NAME);
+        LOGE("Could not acquire dbus name: " << api::container::BUS_NAME);
+        throw ContainerConnectionException("Could not acquire dbus name: " + api::container::BUS_NAME);
     }
 
     LOGT("Registering DBUS interface");
     using namespace std::placeholders;
-    mDbusConnection->registerObject(api::OBJECT_PATH,
-                                    api::DEFINITION,
+    mDbusConnection->registerObject(api::container::OBJECT_PATH,
+                                    api::container::DEFINITION,
                                     std::bind(&ContainerConnection::onMessageCall,
                                               this,
                                               _1,
@@ -157,11 +157,11 @@ void ContainerConnection::onMessageCall(const std::string& objectPath,
                                         GVariant* parameters,
                                         dbus::MethodResultBuilder::Pointer result)
 {
-    if (objectPath != api::OBJECT_PATH || interface != api::INTERFACE) {
+    if (objectPath != api::container::OBJECT_PATH || interface != api::container::INTERFACE) {
         return;
     }
 
-    if (methodName == api::METHOD_NOTIFY_ACTIVE_CONTAINER) {
+    if (methodName == api::container::METHOD_NOTIFY_ACTIVE_CONTAINER) {
         const gchar* application = NULL;
         const gchar* message = NULL;
         g_variant_get(parameters, "(&s&s)", &application, &message);
@@ -171,7 +171,7 @@ void ContainerConnection::onMessageCall(const std::string& objectPath,
         }
     }
 
-    if (methodName == api::METHOD_FILE_MOVE_REQUEST) {
+    if (methodName == api::container::METHOD_FILE_MOVE_REQUEST) {
         const gchar* destination = NULL;
         const gchar* path = NULL;
         g_variant_get(parameters, "(&s&s)", &destination, &path);
@@ -234,9 +234,9 @@ void ContainerConnection::sendNotification(const std::string& container,
                                          container.c_str(),
                                          application.c_str(),
                                          message.c_str());
-    mDbusConnection->emitSignal(api::OBJECT_PATH,
-                                api::INTERFACE,
-                                api::SIGNAL_NOTIFICATION,
+    mDbusConnection->emitSignal(api::container::OBJECT_PATH,
+                                api::container::INTERFACE,
+                                api::container::SIGNAL_NOTIFICATION,
                                 parameters);
 }
 

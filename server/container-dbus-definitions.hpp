@@ -25,12 +25,12 @@
 #ifndef SERVER_CONTAINER_DBUS_DEFINITIONS_HPP
 #define SERVER_CONTAINER_DBUS_DEFINITIONS_HPP
 
-#include <string>
+#include "common-dbus-definitions.hpp"
 
 
 namespace security_containers {
 namespace api {
-
+namespace container {
 
 const std::string BUS_NAME                          = "org.tizen.containers.domain";
 const std::string OBJECT_PATH                       = "/org/tizen/containers/domain";
@@ -38,7 +38,6 @@ const std::string INTERFACE                         = "org.tizen.containers.doma
 
 const std::string METHOD_NOTIFY_ACTIVE_CONTAINER    = "NotifyActiveContainer";
 const std::string METHOD_FILE_MOVE_REQUEST          = "FileMoveRequest";
-const std::string METHOD_PROXY_CALL                 = "ProxyCall";
 const std::string SIGNAL_NOTIFICATION               = "Notification";
 
 const std::string FILE_MOVE_DESTINATION_NOT_FOUND   = "FILE_MOVE_DESTINATION_NOT_FOUND";
@@ -78,7 +77,7 @@ const std::string DEFINITION =
     "  </interface>"
     "</node>";
 
-
+} // namespace container
 } // namespace api
 } // namespace security_containers
 

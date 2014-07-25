@@ -24,6 +24,8 @@
 
 #include "config.hpp"
 
+#include "host-dbus-definitions.hpp"
+#include "common-dbus-definitions.hpp"
 #include "container-dbus-definitions.hpp"
 #include "containers-manager.hpp"
 #include "container-admin.hpp"
@@ -58,9 +60,6 @@ bool regexMatchVector(const std::string& str, const std::vector<boost::regex>& v
 }
 
 const std::string HOST_ID = "host";
-const std::string DBUS_ERROR_NAME_FORBIDDEN = "org.tizen.containers.Error.Forbidden";
-const std::string DBUS_ERROR_NAME_FORWARDED = "org.tizen.containers.Error.Forwarded";
-const std::string DBUS_ERROR_NAME_UNKNOWN_TARGET = "org.tizen.containers.Error.UnknownTarget";
 
 } // namespace
 
@@ -83,6 +82,9 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
 
     mHostConnection.setGetActiveContainerIdCallback(bind(&ContainersManager::handleGetActiveContainerIdCall,
                                                          this, _1));
+
+    mHostConnection.setSetActiveContainerCallback(bind(&ContainersManager::handleSetActiveContainerCall,
+                                                       this, _1, _2));
 
     for (auto& containerConfig : mConfig.containerConfigs) {
         std::string containerConfigPath;
@@ -138,7 +140,6 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
     }
 }
 
-
 ContainersManager::~ContainersManager()
 {
     LOGD("Destroying ContainersManager object...");
@@ -154,7 +155,6 @@ ContainersManager::~ContainersManager()
     LOGD("ContainersManager object destroyed");
 }
 
-
 void ContainersManager::focus(const std::string& containerId)
 {
     /* try to access the object first to throw immediately if it doesn't exist */
@@ -168,7 +168,6 @@ void ContainersManager::focus(const std::string& containerId)
     LOGD(mConfig.foregroundId << ": being sent to foreground");
     foregroundContainer->goForeground();
 }
-
 
 void ContainersManager::startAll()
 {
@@ -198,7 +197,6 @@ void ContainersManager::startAll()
     }
 }
 
-
 void ContainersManager::stopAll()
 {
     LOGI("Stopping all containers");
@@ -207,7 +205,6 @@ void ContainersManager::stopAll()
         container.second->stop();
     }
 }
-
 
 std::string ContainersManager::getRunningForegroundContainerId()
 {
@@ -304,26 +301,26 @@ void ContainersManager::handleContainerMoveFileRequest(const std::string& srcCon
     ContainerMap::const_iterator dstIter = mContainers.find(dstContainerId);
     if (dstIter == mContainers.end()) {
         LOGE("Destination container '" << dstContainerId << "' not found");
-        result->set(g_variant_new("(s)", api::FILE_MOVE_DESTINATION_NOT_FOUND.c_str()));
+        result->set(g_variant_new("(s)", api::container::FILE_MOVE_DESTINATION_NOT_FOUND.c_str()));
         return;
     }
     Container& dstContanier = *dstIter->second;
 
     if (srcContainerId == dstContainerId) {
         LOGE("Cannot send a file to yourself");
-        result->set(g_variant_new("(s)", api::FILE_MOVE_WRONG_DESTINATION.c_str()));
+        result->set(g_variant_new("(s)", api::container::FILE_MOVE_WRONG_DESTINATION.c_str()));
         return;
     }
 
     if (!regexMatchVector(path, srcContainer.getPermittedToSend())) {
         LOGE("Source container has no permissions to send the file: " << path);
-        result->set(g_variant_new("(s)", api::FILE_MOVE_NO_PERMISSIONS_SEND.c_str()));
+        result->set(g_variant_new("(s)", api::container::FILE_MOVE_NO_PERMISSIONS_SEND.c_str()));
         return;
     }
 
     if (!regexMatchVector(path, dstContanier.getPermittedToRecv())) {
         LOGE("Destination container has no permissions to receive the file: " << path);
-        result->set(g_variant_new("(s)", api::FILE_MOVE_NO_PERMISSIONS_RECEIVE.c_str()));
+        result->set(g_variant_new("(s)", api::container::FILE_MOVE_NO_PERMISSIONS_RECEIVE.c_str()));
         return;
     }
 
@@ -333,11 +330,11 @@ void ContainersManager::handleContainerMoveFileRequest(const std::string& srcCon
 
     if (!utils::moveFile(srcPath, dstPath)) {
         LOGE("Failed to move the file: " << path);
-        result->set(g_variant_new("(s)", api::FILE_MOVE_FAILED.c_str()));
+        result->set(g_variant_new("(s)", api::container::FILE_MOVE_FAILED.c_str()));
     } else {
-        result->set(g_variant_new("(s)", api::FILE_MOVE_SUCCEEDED.c_str()));
+        result->set(g_variant_new("(s)", api::container::FILE_MOVE_SUCCEEDED.c_str()));
         try {
-            dstContanier.sendNotification(srcContainerId, path, api::FILE_MOVE_SUCCEEDED);
+            dstContanier.sendNotification(srcContainerId, path, api::container::FILE_MOVE_SUCCEEDED);
         } catch (ServerException&) {
             LOGE("Notification to '" << dstContainerId << "' has not been sent");
         }
@@ -361,7 +358,7 @@ void ContainersManager::handleProxyCall(const std::string& caller,
                                               targetMethod)) {
         LOGW("Forbidden proxy call; " << caller << " -> " << target << "; " << targetBusName
                 << "; " << targetObjectPath << "; " << targetInterface << "; " << targetMethod);
-        result->setError(DBUS_ERROR_NAME_FORBIDDEN, "Proxy call forbidden");
+        result->setError(api::ERROR_FORBIDDEN, "Proxy call forbidden");
         return;
     }
 
@@ -373,7 +370,7 @@ void ContainersManager::handleProxyCall(const std::string& caller,
             GVariant* targetResult = asyncMethodCallResult.get();
             result->set(g_variant_new("(v)", targetResult));
         } catch (dbus::DbusException& e) {
-            result->setError(DBUS_ERROR_NAME_FORWARDED, e.what());
+            result->setError(api::ERROR_FORWARDED, e.what());
         }
     };
 
@@ -390,7 +387,7 @@ void ContainersManager::handleProxyCall(const std::string& caller,
     ContainerMap::const_iterator targetIter = mContainers.find(target);
     if (targetIter == mContainers.end()) {
         LOGE("Target container '" << target << "' not found");
-        result->setError(DBUS_ERROR_NAME_UNKNOWN_TARGET, "Unknown proxy call target");
+        result->setError(api::ERROR_UNKNOWN_ID, "Unknown proxy call target");
         return;
     }
 
@@ -443,6 +440,28 @@ void ContainersManager::handleGetActiveContainerIdCall(dbus::MethodResultBuilder
     } else {
         result->set(g_variant_new("(s)", ""));
     }
+}
+
+void ContainersManager::handleSetActiveContainerCall(const std::string& id,
+                                                     dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("SetActiveContainer call; Id=" << id );
+    auto container = mContainers.find(id);
+    if (container == mContainers.end()){
+        LOGE("No container with id=" << id );
+        result->setError(api::ERROR_UNKNOWN_ID, "No such container id");
+        return;
+    }
+
+    if (container->second->isStopped()){
+        LOGE("Could not activate a stopped container");
+        result->setError(api::host::ERROR_CONTAINER_STOPPED,
+                         "Could not activate a stopped container");
+        return;
+    }
+
+    focus(id);
+    result->setVoid();
 }
 
 } // namespace security_containers

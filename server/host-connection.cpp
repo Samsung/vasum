@@ -51,19 +51,19 @@ HostConnection::HostConnection()
     mDbusConnection = dbus::DbusConnection::createSystem();
 
     LOGT("Setting DBUS name");
-    mDbusConnection->setName(hostapi::BUS_NAME,
+    mDbusConnection->setName(api::host::BUS_NAME,
                              std::bind(&HostConnection::onNameAcquired, this),
                              std::bind(&HostConnection::onNameLost, this));
 
     if (!waitForName(NAME_ACQUIRED_TIMEOUT)) {
-        LOGE("Could not acquire dbus name: " << hostapi::BUS_NAME);
-        throw HostConnectionException("Could not acquire dbus name: " + hostapi::BUS_NAME);
+        LOGE("Could not acquire dbus name: " << api::host::BUS_NAME);
+        throw HostConnectionException("Could not acquire dbus name: " + api::host::BUS_NAME);
     }
 
     LOGT("Registering DBUS interface");
     using namespace std::placeholders;
-    mDbusConnection->registerObject(hostapi::OBJECT_PATH,
-                                    hostapi::DEFINITION,
+    mDbusConnection->registerObject(api::host::OBJECT_PATH,
+                                    api::host::DEFINITION,
                                     std::bind(&HostConnection::onMessageCall,
                                               this, _1, _2, _3, _4, _5));
 
@@ -125,24 +125,39 @@ void HostConnection::setGetActiveContainerIdCallback(const GetActiveContainerIdC
     mGetActiveContainerIdCallback = callback;
 }
 
+void HostConnection::setSetActiveContainerCallback(const SetActiveContainerCallback& callback)
+{
+    mSetActiveContainerCallback = callback;
+}
+
 void HostConnection::onMessageCall(const std::string& objectPath,
                                         const std::string& interface,
                                         const std::string& methodName,
                                         GVariant* parameters,
                                         dbus::MethodResultBuilder::Pointer result)
 {
-    if (objectPath != hostapi::OBJECT_PATH || interface != hostapi::INTERFACE) {
+    if (objectPath != api::host::OBJECT_PATH || interface != api::host::INTERFACE) {
         return;
     }
 
-    if (methodName == hostapi::METHOD_GET_CONTAINER_DBUSES) {
+    if (methodName == api::host::METHOD_SET_ACTIVE_CONTAINER) {
+        const gchar* id = NULL;
+        g_variant_get(parameters, "(&s)", &id);
+
+        if (mSetActiveContainerCallback) {
+            mSetActiveContainerCallback(id, result);
+        }
+        return;
+    }
+
+    if (methodName == api::host::METHOD_GET_CONTAINER_DBUSES) {
         if (mGetContainerDbusesCallback) {
             mGetContainerDbusesCallback(result);
         }
         return;
     }
 
-    if (methodName == hostapi::METHOD_PROXY_CALL) {
+    if (methodName == api::METHOD_PROXY_CALL) {
         const gchar* target = NULL;
         const gchar* targetBusName = NULL;
         const gchar* targetObjectPath = NULL;
@@ -171,14 +186,14 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == hostapi::METHOD_GET_CONTAINER_ID_LIST){
+    if (methodName == api::host::METHOD_GET_CONTAINER_ID_LIST){
         if (mGetContainerIdsCallback){
             mGetContainerIdsCallback(result);
         }
         return;
     }
 
-    if (methodName == hostapi::METHOD_GET_ACTIVE_CONTAINER_ID){
+    if (methodName == api::host::METHOD_GET_ACTIVE_CONTAINER_ID){
         if (mGetActiveContainerIdCallback){
             mGetActiveContainerIdCallback(result);
         }
@@ -206,9 +221,9 @@ void HostConnection::signalContainerDbusState(const std::string& containerId,
                                               const std::string& dbusAddress)
 {
     GVariant* parameters = g_variant_new("(ss)", containerId.c_str(), dbusAddress.c_str());
-    mDbusConnection->emitSignal(hostapi::OBJECT_PATH,
-                                hostapi::INTERFACE,
-                                hostapi::SIGNAL_CONTAINER_DBUS_STATE,
+    mDbusConnection->emitSignal(api::host::OBJECT_PATH,
+                                api::host::INTERFACE,
+                                api::host::SIGNAL_CONTAINER_DBUS_STATE,
                                 parameters);
 }
 
