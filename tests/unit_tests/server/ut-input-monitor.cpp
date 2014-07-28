@@ -40,7 +40,6 @@
 #include <unistd.h>
 
 #include <boost/filesystem.hpp>
-#include <atomic>
 #include <chrono>
 #include <memory>
 #include <string>
@@ -114,9 +113,8 @@ BOOST_AUTO_TEST_CASE(Config_deviceFilePathNotExisting)
                         InputMonitorException);
 }
 
-void sendNEvents(unsigned int noOfEventsToSend)
+void sendNEvents(Fixture& f, unsigned int noOfEventsToSend)
 {
-    Fixture f;
     Latch eventLatch;
 
     std::unique_ptr<InputMonitor> inputMonitor;
@@ -150,17 +148,16 @@ void sendNEvents(unsigned int noOfEventsToSend)
 
 BOOST_AUTO_TEST_CASE(Event_oneAtATime)
 {
-    sendNEvents(1);
+    sendNEvents(*this, 1);
 }
 
 BOOST_AUTO_TEST_CASE(Event_tenAtATime)
 {
-    sendNEvents(10);
+    sendNEvents(*this, 10);
 }
 
-void sendNEventsWithPauses(unsigned int noOfEventsToSend)
+void sendNEventsWithPauses(Fixture& f, unsigned int noOfEventsToSend)
 {
-    Fixture f;
     Latch eventLatch;
 
     std::unique_ptr<InputMonitor> inputMonitor;
@@ -199,12 +196,12 @@ void sendNEventsWithPauses(unsigned int noOfEventsToSend)
 
 BOOST_AUTO_TEST_CASE(Event_oneAtATimeWithPauses)
 {
-    sendNEventsWithPauses(1);
+    sendNEventsWithPauses(*this, 1);
 }
 
 BOOST_AUTO_TEST_CASE(Event_tenAtATimeWithPauses)
 {
-    sendNEventsWithPauses(10);
+    sendNEventsWithPauses(*this, 10);
 }
 
 

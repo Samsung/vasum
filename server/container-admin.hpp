@@ -35,7 +35,6 @@
 
 #include <map>
 #include <mutex>
-#include <atomic>
 #include <string>
 #include <cstdint>
 #include <libvirt/libvirt.h>
