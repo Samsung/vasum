@@ -113,7 +113,13 @@ Library interface to the security-containers daemon
 
 %files client
 %manifest packaging/libsecurity-containers-client.manifest
-%attr(644,root,root) %{_libdir}/libsecurity-containers-client.so
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libsecurity-containers.so.0.0.1
+%{_libdir}/libsecurity-containers.so.0
+
+%post client -p /sbin/ldconfig
+
+%postun client -p /sbin/ldconfig
 
 
 ## Devel Package ###############################################################
@@ -129,8 +135,9 @@ Development package including the header files for the client library
 %files devel
 %manifest packaging/security-containers.manifest
 %defattr(644,root,root,755)
+%{_libdir}/libsecurity-containers.so
 %{_includedir}/security-containers
-%{_libdir}/pkgconfig/*
+%{_libdir}/pkgconfig/*.pc
 
 
 ## Container Support Package ###################################################

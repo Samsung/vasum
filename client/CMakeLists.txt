@@ -21,10 +21,14 @@ MESSAGE(STATUS "Generating makefile for the Client...")
 FILE(GLOB         project_SRCS *.cpp *.hpp)
 FILE(GLOB_RECURSE common_SRCS ${COMMON_FOLDER}/*.cpp ${COMMON_FOLDER}/*.hpp)
 
+SET(_LIB_VERSION_ "0.0.1")
+SET(_LIB_SOVERSION_ "0")
+SET(PC_FILE "${PROJECT_NAME}.pc")
 
 ## Setup target ################################################################
-SET(CLIENT_CODENAME "${PROJECT_NAME}-client")
-ADD_LIBRARY(${CLIENT_CODENAME} SHARED ${project_SRCS})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${project_SRCS})
+SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY SOVERSION ${_LIB_SOVERSION_})
+SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY   VERSION ${_LIB_VERSION_})
 
 
 ## Link libraries ##############################################################
@@ -32,17 +36,16 @@ INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 
 
 ## Generate the pc file ########################################################
-CONFIGURE_FILE(security-containers.pc.in
-               ${CMAKE_BINARY_DIR}/security-containers.pc @ONLY)
+CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_BINARY_DIR}/${PC_FILE} @ONLY)
 
 
 ## Install #####################################################################
-INSTALL(FILES       ${CMAKE_BINARY_DIR}/security-containers.pc
+INSTALL(FILES       ${CMAKE_BINARY_DIR}/${PC_FILE}
         DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
 
-INSTALL(TARGETS     ${CLIENT_CODENAME}
+INSTALL(TARGETS     ${PROJECT_NAME}
         DESTINATION ${CMAKE_INSTALL_LIBDIR}
         COMPONENT   RuntimeLibraries)
 
 INSTALL(FILES       security-containers-client.h
-        DESTINATION ${INCLUDE_INSTALL_DIR}/security-containers)
+        DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME})
