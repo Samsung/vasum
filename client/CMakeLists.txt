@@ -14,26 +14,38 @@
 #
 #
 # @file   CMakeLists.txt
-# @author Jan Olszak (j.olszak@samsung.com)
+# @author Mateusz Malicki (m.malicki2@samsung.com)
 #
 
 MESSAGE(STATUS "Generating makefile for the Client...")
-FILE(GLOB         project_SRCS *.cpp *.hpp)
-FILE(GLOB_RECURSE common_SRCS ${COMMON_FOLDER}/*.cpp ${COMMON_FOLDER}/*.hpp)
+FILE(GLOB project_SRCS *.cpp *.hpp *.h)
+FILE(GLOB common_SRCS ${COMMON_FOLDER}/utils/callback-guard.hpp
+                      ${COMMON_FOLDER}/utils/callback-guard.cpp
+                      ${COMMON_FOLDER}/utils/glib-loop.cpp
+                      ${COMMON_FOLDER}/utils/glib-loop.hpp)
 
 SET(_LIB_VERSION_ "0.0.1")
 SET(_LIB_SOVERSION_ "0")
 SET(PC_FILE "${PROJECT_NAME}.pc")
 
+## Set the default ELF image symbol visibility to hidden. Using this feature
+## can very substantially improve linking and load times of shared object
+## libraries, produce more optimized code, provide near-perfect API export
+## and prevent symbol clashes
+ADD_DEFINITIONS(-fvisibility=hidden)
+
 ## Setup target ################################################################
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${project_SRCS})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${project_SRCS} ${common_SRCS})
 SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY SOVERSION ${_LIB_SOVERSION_})
 SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY   VERSION ${_LIB_VERSION_})
 
 
 ## Link libraries ##############################################################
+PKG_CHECK_MODULES(LIB_DEPS REQUIRED gio-2.0 libSimpleDbus libLogger)
+INCLUDE_DIRECTORIES(SYSTEM ${LIB_DEPS_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
-
+INCLUDE_DIRECTORIES(${SERVER_FOLDER})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_DEPS_LIBRARIES})
 
 ## Generate the pc file ########################################################
 CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_BINARY_DIR}/${PC_FILE} @ONLY)

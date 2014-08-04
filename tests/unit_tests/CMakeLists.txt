@@ -21,6 +21,7 @@ MESSAGE(STATUS "Generating makefile for the Unit Tests...")
 FILE(GLOB_RECURSE project_SRCS *.cpp *.hpp)
 FILE(GLOB_RECURSE common_SRCS ${COMMON_FOLDER}/*.cpp ${COMMON_FOLDER}/*.hpp)
 FILE(GLOB         server_SRCS ${SERVER_FOLDER}/*.cpp ${SERVER_FOLDER}/*.hpp)
+FILE(GLOB         client_SRCS ${CLIENT_FOLDER}/*.cpp ${CLIENT_FOLDER}/*.h)
 
 FILE(GLOB         main_SRC ${SERVER_FOLDER}/main.cpp)
 LIST(REMOVE_ITEM server_SRCS ${main_SRC})
@@ -28,7 +29,7 @@ LIST(REMOVE_ITEM server_SRCS ${main_SRC})
 
 ## Setup target ################################################################
 SET(UT_SERVER_CODENAME "${PROJECT_NAME}-server-unit-tests")
-ADD_EXECUTABLE(${UT_SERVER_CODENAME} ${project_SRCS} ${common_SRCS} ${server_SRCS})
+ADD_EXECUTABLE(${UT_SERVER_CODENAME} ${project_SRCS} ${common_SRCS} ${server_SRCS} ${client_SRCS})
 
 
 ## Link libraries ##############################################################
@@ -36,7 +37,7 @@ FIND_PACKAGE (Boost COMPONENTS unit_test_framework system filesystem regex)
 
 PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED libvirt libvirt-glib-1.0 json gio-2.0
                   libsystemd-journal libcap-ng libLogger libSimpleDbus libConfig)
-INCLUDE_DIRECTORIES(${COMMON_FOLDER} ${SERVER_FOLDER} ${UNIT_TESTS_FOLDER})
+INCLUDE_DIRECTORIES(${COMMON_FOLDER} ${SERVER_FOLDER} ${UNIT_TESTS_FOLDER} ${CLIENT_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${UT_SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES})
 
@@ -48,6 +49,7 @@ ADD_DEFINITIONS(-DSC_TEST_CONFIG_INSTALL_DIR="${SC_TEST_CONFIG_INSTALL_DIR}")
 ADD_SUBDIRECTORY(dbus/configs)
 ADD_SUBDIRECTORY(server/configs)
 ADD_SUBDIRECTORY(utils/configs)
+ADD_SUBDIRECTORY(client/configs)
 
 
 ## Install #####################################################################
