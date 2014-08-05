@@ -5,6 +5,8 @@
 # The group that has read and write access to /dev/input/event* devices.
 # It may vary between platforms.
 %define input_event_group video
+# The group has access to /dev/loop* devices.
+%define disk_group disk
 
 Name:           security-containers
 Version:        0.1.1
@@ -40,9 +42,12 @@ between them. A process from inside a container can request a switch of context
 %dir /etc/security-containers
 %dir /etc/security-containers/containers
 %dir /etc/security-containers/libvirt-config
+%dir /etc/security-containers/templates
 %config /etc/security-containers/daemon.conf
 %config /etc/security-containers/containers/*.conf
 %config /etc/security-containers/libvirt-config/*.xml
+%config /etc/security-containers/templates/*.conf
+%config /etc/security-containers/templates/*.xml
 %{_unitdir}/security-containers.service
 %{_unitdir}/multi-user.target.wants/security-containers.service
 /etc/dbus-1/system.d/org.tizen.containers.host.conf
@@ -65,7 +70,8 @@ between them. A process from inside a container can request a switch of context
          -DPYTHON_SITELIB=%{python_sitelib} \
          -DSECURITY_CONTAINERS_USER=%{scs_user} \
          -DLIBVIRT_GROUP=%{libvirt_group} \
-         -DINPUT_EVENT_GROUP=%{input_event_group}
+         -DINPUT_EVENT_GROUP=%{input_event_group} \
+         -DDISK_GROUP=%{disk_group}
 make -k %{?jobs:-j%jobs}
 
 %install

@@ -56,6 +56,7 @@ public:
     typedef ContainerConnection::ProxyCallCallback ProxyCallCallback;
 
     typedef std::function<void(const std::string& address)> DbusStateChangedCallback;
+    typedef std::function<void(bool succeeded)> StartAsyncResultCallback;
 
     /**
      * Returns a vector of regexps defining files permitted to be
@@ -85,6 +86,14 @@ public:
      * Boot the container to the background.
      */
     void start();
+
+    /**
+     * Boot the container to the background in separate thread. This function immediately exits
+     * after container booting is started in another thread.
+     *
+     * @param callback Called after starting the container. Passes bool with result of starting.
+     */
+    void startAsync(const StartAsyncResultCallback& callback);
 
     /**
      * Try to shutdown the container, if failed, destroy it.
@@ -197,6 +206,7 @@ private:
     std::unique_ptr<ContainerAdmin> mAdmin;
     std::unique_ptr<ContainerConnection> mConnection;
     std::thread mReconnectThread;
+    std::thread mStartThread;
     mutable std::recursive_mutex mReconnectMutex;
     NotifyActiveContainerCallback mNotifyCallback;
     DisplayOffCallback mDisplayOffCallback;

@@ -39,6 +39,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <iostream>
+
 
 namespace security_containers {
 namespace utils {
@@ -199,6 +201,63 @@ bool moveFile(const std::string& src, const std::string& dst)
     return true;
 }
 
+namespace {
+
+bool copyDirContentsRec(const boost::filesystem::path& src, const boost::filesystem::path& dst)
+{
+    namespace fs = boost::filesystem;
+
+    // TODO: Right now this function skips files which produce error when copying. Errors show up
+    // when:
+    //   a) fs::directory_iterator file(src) is created
+    //   b) fs::copy(...) is called
+    // In both cases lack of permissions is the issue.
+    //
+    // In a) case we can't do much - SCS won't be able to read the directory and its contents. Such
+    // directories are not common in the filesystem, so they *probably* can be skipped.
+    //
+    // In b) case multiple directories have too strict permissions to be directly copied. This
+    // is a problem for some files crucial to container launch (ex. we cannot copy
+    // /usr/lib/systemd/systemd because /usr/lib has 555 permissions).
+    // To fix b) issue, copying must be done in two steps:
+    //   1. Copy file contents without permissions (this probably can be achieved by opening two
+    //      files in-code with fstream and programatically copying data from one file to another).
+    //   2. Apply all available file attributes from source (permissions, owner UID/GID, xattrs...)
+
+    try {
+        for (fs::directory_iterator file(src);
+             file != fs::directory_iterator();
+             ++file) {
+            fs::path current(file->path());
+
+            boost::system::error_code ec;
+            fs::copy(current, dst / current.filename(), ec);
+            if(ec.value() != boost::system::errc::success) {
+                LOGW("Failed to copy " << current << ": " << ec.message());
+            }
+
+            if (!fs::is_symlink(current) && fs::is_directory(current)) {
+                if (!copyDirContentsRec(current, dst / current.filename())) {
+                    return false;
+                }
+            }
+        }
+    } catch (fs::filesystem_error& e) {
+        LOGW(e.what());
+    }
+
+    return true;
+}
+
+} // namespace
+
+bool copyDirContents(const std::string& src, const std::string& dst)
+{
+    namespace fs = boost::filesystem;
+
+    return copyDirContentsRec(fs::path(src), fs::path(dst));
+}
+
 bool createDir(const std::string& path, uid_t uid, uid_t gid, boost::filesystem::perms mode)
 {
     namespace fs = boost::filesystem;
@@ -234,6 +293,36 @@ bool createDir(const std::string& path, uid_t uid, uid_t gid, boost::filesystem:
         }
         LOGE("chown() failed for path '" << path << "': " << strerror(errno));
         return false;
+    }
+
+    return true;
+}
+
+bool createEmptyDir(const std::string& path)
+{
+    namespace fs = boost::filesystem;
+
+    fs::path dirPath(path);
+    boost::system::error_code ec;
+    bool cleanDirCreated = false;
+
+    if (!fs::exists(dirPath)) {
+        if (!fs::create_directory(dirPath, ec)) {
+            LOGE("Failed to create dir. Error: " << ec.message());
+            return false;
+        }
+        cleanDirCreated = true;
+    } else if (!fs::is_directory(dirPath)) {
+        LOGE("Provided path already exists and is not a dir, cannot create.");
+        return false;
+    }
+
+    if (!cleanDirCreated) {
+        // check if directory is empty if it was already created
+        if (!fs::is_empty(dirPath)) {
+            LOGE("Directory has some data inside, cannot be used.");
+            return false;
+        }
     }
 
     return true;

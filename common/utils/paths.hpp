@@ -107,6 +107,18 @@ inline std::string dirName(std::string path)
     return path;
 }
 
+/*
+ * Gets absolute path to specified file (if needed)
+ */
+inline std::string getAbsolutePath(const std::string& path, const std::string& base)
+{
+    if (path[0] == '/') {
+        return path;
+    } else {
+        return utils::createFilePath(base, "/", path);
+    }
+}
+
 
 } // namespace utils
 } // namespace security_containers

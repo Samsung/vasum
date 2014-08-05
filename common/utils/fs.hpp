@@ -87,9 +87,21 @@ bool hasSameMountPoint(const std::string& path1, const std::string& path2, bool&
 bool moveFile(const std::string& src, const std::string& dst);
 
 /**
+ * Recursively copy contents of src dir to dst dir.
+ */
+bool copyDirContents(const std::string& src, const std::string& dst);
+
+/**
  * Creates a directory with specific UID, GID and permissions set.
  */
 bool createDir(const std::string& path, uid_t uid, uid_t gid, boost::filesystem::perms mode);
+
+/**
+ * Creates an empty directory, ready to serve as mount point.
+ * Succeeds either if path did not exist and was created successfully, or if already existing dir
+ * under the same path is empty and is not a mount point.
+ */
+bool createEmptyDir(const std::string& path);
 
 
 } // namespace utils

@@ -90,6 +90,8 @@ ContainerAdmin::ContainerAdmin(const ContainerConfig& config)
         throw ContainerOperationException(mId + ": Failed to register a libvirt lifecycle callback");
     }
 
+    LOGT(mId << ": registered lifecycle callback");
+
     mRebootCallbackId = virConnectDomainEventRegisterAny(virDomainGetConnect(mDom.get()),
                                                          mDom.get(),
                                                          VIR_DOMAIN_EVENT_ID_REBOOT,
@@ -103,6 +105,8 @@ ContainerAdmin::ContainerAdmin(const ContainerConfig& config)
                                            mLifecycleCallbackId);
         throw ContainerOperationException(mId + ": Failed to register a libvirt reboot callback");
     }
+
+    LOGT(mId << ": registered reboot callback");
 }
 
 

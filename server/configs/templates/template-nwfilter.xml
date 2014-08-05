@@ -1,0 +1,9 @@
+<filter name='nwfilter-~NAME~' chain='root'>
+    <uuid>~UUID~</uuid>
+    <rule action='reject' direction='in' priority='100'>
+        <ip srcipaddr='10.0.~IP~.0' srcipmask='255.255.255.0'/>
+    </rule>
+    <rule action='reject' direction='out' priority='100'>
+        <ip dstipaddr='10.0.~IP~.0' srcipmask='255.255.255.0'/>
+    </rule>
+</filter>

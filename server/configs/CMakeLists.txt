@@ -21,7 +21,7 @@ MESSAGE(STATUS "Installing configs to " ${SC_CONFIG_INSTALL_DIR})
 
 FILE(GLOB container_CONF     containers/*.conf)
 FILE(GLOB admin_CONF         libvirt-config/*.xml)
-
+FILE(GLOB template_CONF      templates/*.conf templates/*.xml)
 
 ## Generate ####################################################################
 CONFIGURE_FILE(systemd/security-containers.service.in
@@ -44,6 +44,9 @@ INSTALL(FILES       ${container_CONF}
 
 INSTALL(FILES       ${admin_CONF}
         DESTINATION ${SC_CONFIG_INSTALL_DIR}/libvirt-config)
+
+INSTALL(FILES       ${template_CONF}
+        DESTINATION ${SC_CONFIG_INSTALL_DIR}/templates)
 
 INSTALL(FILES       ${CMAKE_BINARY_DIR}/systemd/security-containers.service
         DESTINATION ${SYSTEMD_UNIT_DIR})

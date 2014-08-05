@@ -60,6 +60,9 @@ public:
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
                               )> SetActiveContainerCallback;
+    typedef std::function<void(const std::string& id,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> AddContainerCallback;
 
     /**
      * Register proxy call callback
@@ -92,6 +95,11 @@ public:
     void setSetActiveContainerCallback(const SetActiveContainerCallback& callback);
 
     /**
+     * Register a callback called to create new container
+     */
+    void setAddContainerCallback(const AddContainerCallback& callback);
+
+    /**
      * Make a proxy call
      */
     void proxyCallAsync(const std::string& busName,
@@ -112,6 +120,7 @@ private:
     GetContainerIdsCallback mGetContainerIdsCallback;
     GetActiveContainerIdCallback mGetActiveContainerIdCallback;
     SetActiveContainerCallback mSetActiveContainerCallback;
+    AddContainerCallback mAddContainerCallback;
 
     void onNameAcquired();
     void onNameLost();

@@ -44,6 +44,12 @@ const std::string FILE_PATH = SC_TEST_CONFIG_INSTALL_DIR "/utils/ut-fs/file.txt"
 const std::string FILE_CONTENT = "File content\n"
                                  "Line 1\n"
                                  "Line 2\n";
+const std::string FILE_CONTENT_2 = "Some other content\n"
+                                   "Just to see if\n"
+                                   "everything is copied correctly\n";
+const std::string FILE_CONTENT_3 = "More content\n"
+                                   "More and more content\n"
+                                   "That's a lot of data to test\n";
 const std::string BUGGY_FILE_PATH = "/some/missing/file/path/file.txt";
 const std::string TMP_PATH = "/tmp";
 const std::string FILE_PATH_RANDOM =
@@ -52,6 +58,12 @@ const std::string MOUNT_POINT_RANDOM_1 =
     boost::filesystem::unique_path("/tmp/mountPoint-%%%%").string();
 const std::string MOUNT_POINT_RANDOM_2 =
     boost::filesystem::unique_path("/tmp/mountPoint-%%%%").string();
+const std::string FILE_DIR_RANDOM_1 =
+    boost::filesystem::unique_path("testDir-%%%%").string();
+const std::string FILE_DIR_RANDOM_2 =
+    boost::filesystem::unique_path("testDir-%%%%").string();
+const std::string FILE_DIR_RANDOM_3 =
+    boost::filesystem::unique_path("testDir-%%%%").string();
 const std::string FILE_NAME_RANDOM_1 =
     boost::filesystem::unique_path("testFile-%%%%").string();
 const std::string FILE_NAME_RANDOM_2 =
@@ -129,6 +141,45 @@ BOOST_AUTO_TEST_CASE(MoveFileTest)
     BOOST_REQUIRE(fs::remove(dst));
     BOOST_REQUIRE(umount(MOUNT_POINT_RANDOM_2));
     BOOST_REQUIRE(fs::remove(MOUNT_POINT_RANDOM_2, ec));
+}
+
+BOOST_AUTO_TEST_CASE(CopyDirContentsTest)
+{
+    namespace fs = boost::filesystem;
+    std::string src, src_inner, dst, dst_inner;
+    boost::system::error_code ec;
+
+    src = TMP_PATH + "/" + FILE_DIR_RANDOM_1;
+    src_inner = src + "/" + FILE_DIR_RANDOM_3;
+
+    dst = TMP_PATH + "/" + FILE_DIR_RANDOM_2;
+    dst_inner = dst + "/" + FILE_DIR_RANDOM_3;
+
+    // create entire structure with files
+    BOOST_REQUIRE(fs::create_directory(src, ec));
+    BOOST_REQUIRE(ec.value() == 0);
+    BOOST_REQUIRE(fs::create_directory(src_inner, ec));
+    BOOST_REQUIRE(ec.value() == 0);
+
+    BOOST_REQUIRE(saveFileContent(src + "/" + FILE_NAME_RANDOM_1, FILE_CONTENT));
+    BOOST_REQUIRE(saveFileContent(src + "/" + FILE_NAME_RANDOM_2, FILE_CONTENT_2));
+    BOOST_REQUIRE(saveFileContent(src_inner + "/" + FILE_NAME_RANDOM_1, FILE_CONTENT_3));
+
+    BOOST_REQUIRE(fs::create_directory(dst, ec));
+    BOOST_REQUIRE(ec.value() == 0);
+
+    // copy data
+    BOOST_CHECK(copyDirContents(src, dst));
+
+    // check if copy is successful
+    BOOST_CHECK(fs::exists(dst + "/" + FILE_NAME_RANDOM_1));
+    BOOST_CHECK(fs::exists(dst + "/" + FILE_NAME_RANDOM_2));
+    BOOST_CHECK(fs::exists(dst_inner));
+    BOOST_CHECK(fs::exists(dst_inner + "/" + FILE_NAME_RANDOM_1));
+
+    BOOST_CHECK_EQUAL(readFileContent(dst + "/" + FILE_NAME_RANDOM_1), FILE_CONTENT);
+    BOOST_CHECK_EQUAL(readFileContent(dst + "/" + FILE_NAME_RANDOM_2), FILE_CONTENT_2);
+    BOOST_CHECK_EQUAL(readFileContent(dst_inner + "/" + FILE_NAME_RANDOM_1), FILE_CONTENT_3);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

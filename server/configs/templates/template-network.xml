@@ -1,0 +1,12 @@
+<network>
+    <name>~NAME~</name>
+    <uuid>~UUID~</uuid>
+    <bridge name="virbr-~NAME~"/>
+    <forward/>
+    <dns forwardPlainNames="yes"/>
+    <ip address="10.0.~IP~.1" netmask="255.255.255.0">
+        <dhcp>
+            <range start="10.0.~IP~.2" end="10.0.~IP~.2"/>
+        </dhcp>
+    </ip>
+</network>

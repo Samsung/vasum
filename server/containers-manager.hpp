@@ -48,6 +48,13 @@ public:
     ~ContainersManager();
 
     /**
+     * Add new container.
+     *
+     * @param containerConfig config of new container
+     */
+    void addContainer(const std::string& containerConfig);
+
+    /**
      * Focus this container, put it to the foreground.
      * Method blocks until the focus is switched.
      *
@@ -77,6 +84,7 @@ public:
 
 private:
     ContainersManagerConfig mConfig;
+    std::string mConfigPath;
     HostConnection mHostConnection;
     // to hold InputMonitor pointer to monitor if container switching sequence is recognized
     std::unique_ptr<InputMonitor> mSwitchingSequenceMonitor;
@@ -86,6 +94,10 @@ private:
     bool mDetachOnExit;
 
     void switchingSequenceMonitorNotify();
+    void generateNewConfig(const std::string& id,
+                           const std::string& templatePath,
+                           const std::string& resultPath);
+
     void notifyActiveContainerHandler(const std::string& caller,
                                       const std::string& appliaction,
                                       const std::string& message);
@@ -108,7 +120,8 @@ private:
     void handleGetActiveContainerIdCall(dbus::MethodResultBuilder::Pointer result);
     void handleSetActiveContainerCall(const std::string& id,
                                       dbus::MethodResultBuilder::Pointer result);
-
+    void handleAddContainerCall(const std::string& id,
+                                          dbus::MethodResultBuilder::Pointer result);
 };
 
 

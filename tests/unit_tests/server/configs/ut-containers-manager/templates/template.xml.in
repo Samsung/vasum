@@ -1,0 +1,15 @@
+<domain type="lxc">
+    <name>~NAME~</name>
+    <uuid>~UUID~</uuid>
+    <memory>102400</memory>
+    <os>
+        <type>exe</type>
+        <init>/usr/bin/dbus-daemon</init>
+        <initarg>--nofork</initarg>
+        <initarg>--config-file=@SC_TEST_CONFIG_INSTALL_DIR@/server/ut-containers-manager/ut-dbus.conf</initarg>
+        <initarg>--address=unix:path=/tmp/ut-containers-manager/~NAME~-dbus/dbus/system_bus_socket</initarg>
+    </os>
+    <devices>
+        <console type="pty"/>
+    </devices>
+</domain>

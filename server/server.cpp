@@ -58,6 +58,10 @@
 #error "LIBVIRT_GROUP must be defined!"
 #endif
 
+#ifndef DISK_GROUP
+#error "DISK_GROUP must be defined!"
+#endif
+
 extern char** environ;
 
 namespace security_containers {
@@ -165,6 +169,16 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
         }
     }
 
+    // create directory for additional container data (if needed)
+    if (!config.containerNewConfigPrefix.empty()) {
+        if (!utils::createDir(config.containerNewConfigPrefix, uid, gid,
+                              fs::perms::owner_all |
+                              fs::perms::group_read | fs::perms::group_exe |
+                              fs::perms::others_read | fs::perms::others_exe)) {
+            return false;
+        }
+    }
+
     // Omit supplementaty group setup and root drop if the user is already switched.
     // This situation will happen during daemon update triggered by SIGUSR1.
     if (!runAsRoot && geteuid() == uid) {
@@ -173,7 +187,9 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
 
     // LIBVIRT_GROUP provides access to libvirt's daemon socket.
     // INPUT_EVENT_GROUP provides access to /dev/input/event* devices used by InputMonitor.
-    if (!utils::setSuppGroups({LIBVIRT_GROUP, INPUT_EVENT_GROUP})) {
+    // DISK_GROUP provides access to /dev/loop* devices, needed when adding new container to copy
+    //            containers image
+    if (!utils::setSuppGroups({LIBVIRT_GROUP, INPUT_EVENT_GROUP, DISK_GROUP})) {
         return false;
     }
 

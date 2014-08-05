@@ -91,6 +91,10 @@ Container::~Container()
     if (mReconnectThread.joinable()) {
         mReconnectThread.join();
     }
+
+    if (mStartThread.joinable()) {
+        mStartThread.join();
+    }
 }
 
 const std::vector<boost::regex>& Container::getPermittedToSend() const
@@ -129,6 +133,30 @@ void Container::start()
     // Send to the background only after we're connected, otherwise it'd take ages.
     LOGD(getId() << ": sending to the background");
     goBackground();
+}
+
+void Container::startAsync(const StartAsyncResultCallback& callback)
+{
+    if (mStartThread.joinable()) {
+        mStartThread.join();
+    }
+
+    auto startWrapper = [this, callback]() {
+        bool succeeded = false;
+
+        try {
+            start();
+            succeeded = true;
+        } catch(std::exception& e) {
+            LOGE(getId() << ": failed to start: " << e.what());
+        }
+
+        if (callback) {
+            callback(succeeded);
+        }
+    };
+
+    mStartThread = std::thread(startWrapper);
 }
 
 void Container::stop()

@@ -40,6 +40,7 @@
 #include "config/exception.hpp"
 #include "utils/latch.hpp"
 #include "utils/fs.hpp"
+#include "utils/img.hpp"
 
 #include <vector>
 #include <map>
@@ -63,6 +64,8 @@ const std::string TEST_DBUS_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut
 const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-daemon.conf";
 const std::string BUGGY_FOREGROUND_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-foreground-daemon.conf";
 const std::string BUGGY_DEFAULTID_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-default-daemon.conf";
+const std::string TEST_CONTAINER_CONF_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/containers/";
+const std::string TEST_CONTAINER_LIBVIRT_CONF_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/libvirt-config/";
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/missing-daemon.conf";
 const int EVENT_TIMEOUT = 5000;
 const int TEST_DBUS_CONNECTION_CONTAINERS_COUNT = 3;
@@ -81,6 +84,7 @@ public:
     typedef std::function<void(const std::string& argument,
                                MethodResultBuilder::Pointer result
                               )> TestApiMethodCallback;
+    typedef std::function<void()> AddContainerResultCallback;
 
     typedef std::map<std::string, std::string> Dbuses;
 
@@ -303,6 +307,25 @@ public:
 
     }
 
+    void callAsyncMethodAddContainer(const std::string& id,
+                                     const AddContainerResultCallback& result)
+    {
+        auto asyncResult = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
+            BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
+            result();
+        };
+
+        assert(isHost());
+        GVariant* parameters = g_variant_new("(s)", id.c_str());
+        mClient->callMethodAsync(api::host::BUS_NAME,
+                                 api::host::OBJECT_PATH,
+                                 api::host::INTERFACE,
+                                 api::host::METHOD_ADD_CONTAINER,
+                                 parameters,
+                                 "()",
+                                 asyncResult);
+    }
+
 private:
     const int mId;
     DbusConnection::Pointer mClient;
@@ -330,6 +353,27 @@ std::function<bool(const std::exception&)> expectedMessage(const std::string& me
         return e.what() == message;
     };
 }
+
+class FileCleanerRAII {
+public:
+    FileCleanerRAII(const std::vector<std::string>& filePathsToClean):
+        mFilePathsToClean(filePathsToClean)
+    { }
+
+    ~FileCleanerRAII()
+    {
+        namespace fs = boost::filesystem;
+        for (const auto& file : mFilePathsToClean) {
+            fs::path f(file);
+            if (fs::exists(f)) {
+                fs::remove(f);
+            }
+        }
+    }
+
+private:
+    const std::vector<std::string> mFilePathsToClean;
+};
 
 struct Fixture {
     security_containers::utils::ScopedGlibLoop mLoop;
@@ -879,6 +923,36 @@ BOOST_AUTO_TEST_CASE(SetActiveContainerTest)
     cm.stopAll();
     BOOST_REQUIRE_THROW(dbus.callMethodSetActiveContainer("ut-containers-manager-console1-dbus"),
                         DbusException);
+}
+
+BOOST_AUTO_TEST_CASE(AddContainerTest)
+{
+    const std::string newContainerId = "test1234";
+    const std::vector<std::string> newContainerConfigs = {
+        TEST_CONTAINER_CONF_PATH + newContainerId + ".conf",
+        TEST_CONTAINER_LIBVIRT_CONF_PATH + newContainerId + ".xml",
+        TEST_CONTAINER_LIBVIRT_CONF_PATH + newContainerId + "-network.xml",
+        TEST_CONTAINER_LIBVIRT_CONF_PATH + newContainerId + "-nwfilter.xml",
+    };
+    FileCleanerRAII cleaner(newContainerConfigs);
+
+    ContainersManager cm(TEST_DBUS_CONFIG_PATH);
+    cm.startAll();
+
+    Latch callDone;
+    auto resultCallback = [&]() {
+        callDone.set();
+    };
+
+    DbusAccessory dbus(DbusAccessory::HOST_ID);
+
+    // create new container
+    dbus.callAsyncMethodAddContainer(newContainerId, resultCallback);
+    callDone.wait(EVENT_TIMEOUT);
+
+    // focus new container
+    BOOST_REQUIRE_NO_THROW(cm.focus(newContainerId));
+    BOOST_CHECK(cm.getRunningForegroundContainerId() == newContainerId);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

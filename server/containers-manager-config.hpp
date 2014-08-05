@@ -62,6 +62,22 @@ struct ContainersManagerConfig {
      */
     std::string containersPath;
 
+    /**
+     * A path where the containers image reside. Empty path means that containers image won't be
+     * copied to containersPath when creating new container.
+     */
+    std::string containerImagePath;
+
+    /**
+     * A path where template configuration files for new containers reside
+     */
+    std::string containerTemplatePath;
+
+    /**
+     * Prefix added to a path for new container configuration files
+     */
+    std::string containerNewConfigPrefix;
+
     /*
      * Parameters describing input device used to switch between containers
      */
@@ -83,6 +99,9 @@ struct ContainersManagerConfig {
         foregroundId,
         defaultId,
         containersPath,
+        containerImagePath,
+        containerTemplatePath,
+        containerNewConfigPrefix,
         inputConfig,
         runMountPointPrefix,
         proxyCallRules

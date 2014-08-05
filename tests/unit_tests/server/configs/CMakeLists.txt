@@ -26,6 +26,8 @@ FILE(GLOB server_admin_CONF         ut-server/libvirt-config/*.xml)
 FILE(GLOB manager_manager_CONF      ut-containers-manager/*.conf)
 FILE(GLOB manager_container_CONF    ut-containers-manager/containers/*.conf)
 FILE(GLOB manager_admin_CONF        ut-containers-manager/libvirt-config/*.xml)
+FILE(GLOB manager_admin_TEMPLATE    ut-containers-manager/templates/*.conf
+                                    ut-containers-manager/templates/*.xml)
 
 FILE(GLOB container_CONF            ut-container/*.conf)
 FILE(GLOB container_container_CONF  ut-container/containers/*.conf)
@@ -61,7 +63,10 @@ CONFIGURE_FILE(ut-containers-manager/libvirt-config/console2-dbus.xml.in
                ${CMAKE_BINARY_DIR}/ut-containers-manager/libvirt-config/console2-dbus.xml @ONLY)
 CONFIGURE_FILE(ut-containers-manager/libvirt-config/console3-dbus.xml.in
                ${CMAKE_BINARY_DIR}/ut-containers-manager/libvirt-config/console3-dbus.xml @ONLY)
+CONFIGURE_FILE(ut-containers-manager/templates/template.xml.in
+               ${CMAKE_BINARY_DIR}/ut-containers-manager/templates/template.xml @ONLY)
 FILE(GLOB manager_admin_CONF_GEN ${CMAKE_BINARY_DIR}/ut-containers-manager/libvirt-config/*.xml)
+FILE(GLOB manager_admin_TEMPLATE_GEN ${CMAKE_BINARY_DIR}/ut-containers-manager/templates/*.xml)
 
 CONFIGURE_FILE(ut-container/libvirt-config/test-dbus.xml.in
                ${CMAKE_BINARY_DIR}/ut-container/libvirt-config/test-dbus.xml @ONLY)
@@ -84,6 +89,10 @@ INSTALL(FILES        ${manager_admin_CONF}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/libvirt-config)
 INSTALL(FILES        ${manager_admin_CONF_GEN}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/libvirt-config)
+INSTALL(FILES        ${manager_admin_TEMPLATE}
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/templates)
+INSTALL(FILES        ${manager_admin_TEMPLATE_GEN}
+        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/templates)
 
 INSTALL(FILES        ${container_CONF}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container)

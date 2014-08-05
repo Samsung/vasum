@@ -36,9 +36,14 @@
 #include "config/manager.hpp"
 #include "dbus/exception.hpp"
 #include "utils/fs.hpp"
+#include "utils/img.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/exception/diagnostic_information.hpp>
 #include <cassert>
 #include <string>
 #include <climits>
@@ -61,13 +66,25 @@ bool regexMatchVector(const std::string& str, const std::vector<boost::regex>& v
 }
 
 const std::string HOST_ID = "host";
+const std::string CONTAINER_TEMPLATE_CONFIG_PATH = "template.conf";
+const std::string CONTAINER_TEMPLATE_LIBVIRT_CONFIG_PATH = "template.xml";
+const std::string CONTAINER_TEMPLATE_LIBVIRT_NETWORK_PATH = "template-network.xml";
+const std::string CONTAINER_TEMPLATE_LIBVIRT_NETWORK_FILTER_PATH = "template-nwfilter.xml";
+
+const boost::regex CONTAINER_NAME_REGEX("~NAME~");
+const boost::regex CONTAINER_UUID_REGEX("~UUID~");
+const boost::regex CONTAINER_IP_THIRD_OCTET_REGEX("~IP~");
+
+const unsigned int CONTAINER_IP_BASE_THIRD_OCTET = 100;
 
 } // namespace
 
 ContainersManager::ContainersManager(const std::string& managerConfigPath): mDetachOnExit(false)
 {
     LOGD("Instantiating ContainersManager object...");
-    config::loadFromFile(managerConfigPath, mConfig);
+
+    mConfigPath = managerConfigPath;
+    config::loadFromFile(mConfigPath, mConfig);
 
     mProxyCallPolicy.reset(new ProxyCallPolicy(mConfig.proxyCallRules));
 
@@ -87,40 +104,11 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
     mHostConnection.setSetActiveContainerCallback(bind(&ContainersManager::handleSetActiveContainerCall,
                                                        this, _1, _2));
 
+    mHostConnection.setAddContainerCallback(bind(&ContainersManager::handleAddContainerCall,
+                                                           this, _1, _2));
+
     for (auto& containerConfig : mConfig.containerConfigs) {
-        std::string containerConfigPath;
-
-        if (containerConfig[0] == '/') {
-            containerConfigPath = containerConfig;
-        } else {
-            std::string baseConfigPath = utils::dirName(managerConfigPath);
-            containerConfigPath = utils::createFilePath(baseConfigPath, "/", containerConfig);
-        }
-
-        LOGD("Creating Container " << containerConfigPath);
-        std::unique_ptr<Container> c(new Container(containerConfigPath,
-                                                   mConfig.runMountPointPrefix));
-        const std::string id = c->getId();
-        if (id == HOST_ID) {
-            throw ContainerOperationException("Cannot use reserved container ID");
-        }
-
-        c->setNotifyActiveContainerCallback(bind(&ContainersManager::notifyActiveContainerHandler,
-                                                 this, id, _1, _2));
-
-        c->setDisplayOffCallback(bind(&ContainersManager::displayOffHandler,
-                                      this, id));
-
-        c->setFileMoveRequestCallback(std::bind(&ContainersManager::handleContainerMoveFileRequest,
-                                                this, id, _1, _2, _3));
-
-        c->setProxyCallCallback(bind(&ContainersManager::handleProxyCall,
-                                     this, id, _1, _2, _3, _4, _5, _6, _7));
-
-        c->setDbusStateChangedCallback(bind(&ContainersManager::handleDbusStateChanged,
-                                            this, id, _1));
-
-        mContainers.insert(ContainerMap::value_type(id, std::move(c)));
+        addContainer(containerConfig);
     }
 
     // check if default container exists, throw ContainerOperationException if not found
@@ -139,6 +127,8 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
                                  std::bind(&ContainersManager::switchingSequenceMonitorNotify,
                                            this)));
     }
+
+
 }
 
 ContainersManager::~ContainersManager()
@@ -154,6 +144,38 @@ ContainersManager::~ContainersManager()
     }
 
     LOGD("ContainersManager object destroyed");
+}
+
+void ContainersManager::addContainer(const std::string& containerConfig)
+{
+    std::string baseConfigPath = utils::dirName(mConfigPath);
+    std::string containerConfigPath = utils::getAbsolutePath(containerConfig, baseConfigPath);
+
+    LOGT("Creating Container " << containerConfigPath);
+    std::unique_ptr<Container> c(new Container(containerConfigPath,
+                                               mConfig.runMountPointPrefix));
+    const std::string id = c->getId();
+    if (id == HOST_ID) {
+        throw ContainerOperationException("Cannot use reserved container ID");
+    }
+
+    using namespace std::placeholders;
+    c->setNotifyActiveContainerCallback(bind(&ContainersManager::notifyActiveContainerHandler,
+                                             this, id, _1, _2));
+
+    c->setDisplayOffCallback(bind(&ContainersManager::displayOffHandler,
+                                  this, id));
+
+    c->setFileMoveRequestCallback(bind(&ContainersManager::handleContainerMoveFileRequest,
+                                            this, id, _1, _2, _3));
+
+    c->setProxyCallCallback(bind(&ContainersManager::handleProxyCall,
+                                 this, id, _1, _2, _3, _4, _5, _6, _7));
+
+    c->setDbusStateChangedCallback(bind(&ContainersManager::handleDbusStateChanged,
+                                        this, id, _1));
+
+    mContainers.insert(ContainerMap::value_type(id, std::move(c)));
 }
 
 void ContainersManager::focus(const std::string& containerId)
@@ -463,6 +485,152 @@ void ContainersManager::handleSetActiveContainerCall(const std::string& id,
 
     focus(id);
     result->setVoid();
+}
+
+
+void ContainersManager::generateNewConfig(const std::string& id,
+                                          const std::string& templatePath,
+                                          const std::string& resultPath)
+{
+    namespace fs = boost::filesystem;
+
+    std::string resultFileDir = utils::dirName(resultPath);
+    if (!fs::exists(resultFileDir)) {
+        if (!utils::createEmptyDir(resultFileDir)) {
+            LOGE("Unable to create directory for new config.");
+            throw ContainerOperationException("Unable to create directory for new config.");
+        }
+    }
+
+    fs::path resultFile(resultPath);
+    if (fs::exists(resultFile)) {
+        LOGT(resultPath << " already exists, removing");
+        fs::remove(resultFile);
+    }
+
+    std::string config;
+    if (!utils::readFileContent(templatePath, config)) {
+        LOGE("Failed to read template config file.");
+        throw ContainerOperationException("Failed to read template config file.");
+    }
+
+    std::string resultConfig = boost::regex_replace(config, CONTAINER_NAME_REGEX, id);
+
+    boost::uuids::uuid u = boost::uuids::random_generator()();
+    std::string uuidStr = to_string(u);
+    LOGD("uuid: " << uuidStr);
+    resultConfig = boost::regex_replace(resultConfig, CONTAINER_UUID_REGEX, uuidStr);
+
+    // generate third IP octet for network config
+    std::string thirdOctetStr = std::to_string(CONTAINER_IP_BASE_THIRD_OCTET + mContainers.size() + 1);
+    LOGD("ip_third_octet: " << thirdOctetStr);
+    resultConfig = boost::regex_replace(resultConfig, CONTAINER_IP_THIRD_OCTET_REGEX, thirdOctetStr);
+
+    if (!utils::saveFileContent(resultPath, resultConfig)) {
+        LOGE("Faield to save new config file.");
+        throw ContainerOperationException("Failed to save new config file.");
+    }
+
+    // restrict new config file so that only owner (security-containers) can write it
+    fs::permissions(resultPath, fs::perms::owner_all |
+                                fs::perms::group_read |
+                                fs::perms::others_read);
+}
+
+void ContainersManager::handleAddContainerCall(const std::string& id,
+                                               dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("Adding container " << id);
+
+    // TODO: This solution is temporary. It utilizes direct access to config files when creating new
+    // containers. Update this handler when config database will appear.
+    namespace fs = boost::filesystem;
+
+    boost::system::error_code ec;
+    const std::string containerPathStr = utils::createFilePath(mConfig.containersPath, "/", id, "/");
+
+    // check if container does not exist
+    if (mContainers.find(id) != mContainers.end()) {
+        LOGE("Cannot create " << id << " container - already exists!");
+        result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED,
+                         "Cannot create " + id + " container - already exists!");
+        return;
+    }
+
+    // copy container image if config contains path to image
+    LOGT("image path: " << mConfig.containerImagePath);
+    if (!mConfig.containerImagePath.empty()) {
+        if (!utils::copyImageContents(mConfig.containerImagePath, containerPathStr)) {
+            LOGE("Failed to copy container image.");
+            result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED,
+                            "Failed to copy container image.");
+            return;
+        }
+    }
+
+    // generate paths to new configuration files
+    std::string baseDir = utils::dirName(mConfigPath);
+    std::string configDir = utils::getAbsolutePath(mConfig.containerNewConfigPrefix, baseDir);
+    std::string templateDir = utils::getAbsolutePath(mConfig.containerTemplatePath, baseDir);
+
+    std::string configPath = utils::createFilePath(templateDir, "/", CONTAINER_TEMPLATE_CONFIG_PATH);
+    std::string newConfigPath = utils::createFilePath(configDir, "/containers/", id + ".conf");
+    std::string libvirtConfigPath = utils::createFilePath(templateDir, "/", CONTAINER_TEMPLATE_LIBVIRT_CONFIG_PATH);
+    std::string newLibvirtConfigPath = utils::createFilePath(configDir, "/libvirt-config/", id + ".xml");
+    std::string libvirtNetworkPath = utils::createFilePath(templateDir, "/", CONTAINER_TEMPLATE_LIBVIRT_NETWORK_PATH);
+    std::string newLibvirtNetworkPath = utils::createFilePath(configDir, "/libvirt-config/", id + "-network.xml");
+    std::string libvirtNetworkFilterPath = utils::createFilePath(templateDir, "/", CONTAINER_TEMPLATE_LIBVIRT_NETWORK_FILTER_PATH);
+    std::string newLibvirtNetworkFilterPath = utils::createFilePath(configDir, "/libvirt-config/", id + "-nwfilter.xml");
+
+    auto removeAllWrapper = [](const std::string& path) {
+        try {
+            LOGD("Removing copied data");
+            fs::remove_all(fs::path(path));
+        } catch(const boost::exception& e) {
+            LOGW("Failed to remove data: " << boost::diagnostic_information(e));
+        }
+    };
+
+    try {
+        LOGI("Generating config from " << configPath << " to " << newConfigPath);
+        generateNewConfig(id, configPath, newConfigPath);
+
+        LOGI("Generating config from " << libvirtConfigPath << " to " << newLibvirtConfigPath);
+        generateNewConfig(id, libvirtConfigPath, newLibvirtConfigPath);
+
+        LOGI("Generating config from " << libvirtNetworkPath << " to " << newLibvirtNetworkPath);
+        generateNewConfig(id, libvirtNetworkPath, newLibvirtNetworkPath);
+
+        LOGI("Generating config from " << libvirtNetworkFilterPath << " to " << newLibvirtNetworkFilterPath);
+        generateNewConfig(id, libvirtNetworkFilterPath, newLibvirtNetworkFilterPath);
+    } catch (SecurityContainersException& e) {
+        LOGE(e.what());
+        removeAllWrapper(containerPathStr);
+        result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED, e.what());
+        return;
+    }
+
+    LOGT("Adding new container");
+    try {
+        addContainer(newConfigPath);
+    } catch (SecurityContainersException& e) {
+        LOGE(e.what());
+        removeAllWrapper(containerPathStr);
+        result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED, e.what());
+        return;
+    }
+
+    auto resultCallback = [result, containerPathStr, removeAllWrapper](bool succeeded) {
+        if (succeeded) {
+            result->setVoid();
+        } else {
+            LOGE("Failed to start container.");
+            removeAllWrapper(containerPathStr);
+            result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED,
+                             "Failed to start container.");
+        }
+    };
+    mContainers[id]->startAsync(resultCallback);
 }
 
 } // namespace security_containers
