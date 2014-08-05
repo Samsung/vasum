@@ -24,6 +24,7 @@ BuildRequires:  pkgconfig(libSimpleDbus)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(libsystemd-journal)
 BuildRequires:  pkgconfig(libvirt-glib-1.0)
+BuildRequires:  pkgconfig(sqlite3)
 Requires:       libvirt-daemon >= 1.2.4
 Requires(post): libcap-tools
 
