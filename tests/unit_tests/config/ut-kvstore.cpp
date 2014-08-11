@@ -29,6 +29,7 @@
 #include "config/kvstore.hpp"
 #include "config/exception.hpp"
 
+#include <iostream>
 #include <memory>
 #include <boost/filesystem.hpp>
 
@@ -51,6 +52,42 @@ struct Fixture {
         fs::remove(dbPath);
     }
 };
+
+class TestClass {
+public:
+    TestClass(int v): value(v) {}
+    TestClass(): value(0) {}
+    friend std::ostream& operator<< (std::ostream& out, const TestClass& cPoint);
+    friend std::istream& operator>> (std::istream& in, TestClass& cPoint);
+    friend bool operator== (const TestClass& lhs, const TestClass& rhs);
+    friend bool operator!= (const TestClass& lhs, const TestClass& rhs);
+
+private:
+    int value ;
+};
+
+bool operator==(const TestClass& lhs, const TestClass& rhs)
+{
+    return lhs.value == rhs.value;
+}
+
+bool operator!=(const TestClass& lhs, const TestClass& rhs)
+{
+    return lhs.value != rhs.value;
+}
+
+std::ostream& operator<< (std::ostream& out, const TestClass& tc)
+{
+    out << tc.value;;
+    return out;
+}
+
+std::istream& operator>> (std::istream& in, TestClass& tc)
+{
+    in >> tc.value;
+    return in;
+}
+
 } // namespace
 
 BOOST_FIXTURE_TEST_SUITE(KVStoreSuite, Fixture)
@@ -68,23 +105,6 @@ BOOST_AUTO_TEST_CASE(SimpleConstructorDestructorTest)
     BOOST_REQUIRE_NO_THROW(conPtr.reset());
     BOOST_CHECK(fs::exists(dbPath));
     fs::remove(dbPath);
-}
-
-BOOST_AUTO_TEST_CASE(SingleValueTest)
-{
-    // Set
-    BOOST_CHECK_NO_THROW(c.set(KEY, "A"));
-    BOOST_CHECK_EQUAL(c.get(KEY), "A");
-
-    // Update
-    BOOST_CHECK_NO_THROW(c.set(KEY, "B"));
-    BOOST_CHECK_EQUAL(c.get(KEY), "B");
-    BOOST_CHECK_EQUAL(c.count(KEY), 1);
-
-    // Remove
-    BOOST_CHECK_NO_THROW(c.remove(KEY));
-    BOOST_CHECK_EQUAL(c.count(KEY), 0);
-    BOOST_CHECK_THROW(c.get(KEY), ConfigException);
 }
 
 BOOST_AUTO_TEST_CASE(EscapedCharactersTest)
@@ -123,55 +143,88 @@ BOOST_AUTO_TEST_CASE(EscapedCharactersTest)
     BOOST_CHECK_EQUAL(c.size(), 2);
 }
 
-BOOST_AUTO_TEST_CASE(VectorOfValuesTest)
+namespace {
+template<typename A, typename B>
+void testSingleValue(Fixture& f, const A& a, const B& b)
 {
-    std::vector<std::string> AB = {"A", "B"};
-    std::vector<std::string> AC = {"A", "C"};
-    std::vector<std::string> ABC = {"A", "B", "C"};
-
     // Set
-    BOOST_CHECK_NO_THROW(c.set(KEY, AB));
-    BOOST_CHECK(c.list(KEY) == AB);
-    BOOST_CHECK_EQUAL(c.count(KEY), 2);
-    BOOST_CHECK_EQUAL(c.size(), 2);
-
+    BOOST_CHECK_NO_THROW(f.c.set(KEY, a));
+    BOOST_CHECK_EQUAL(f.c.get<A>(KEY), a);
 
     // Update
-    BOOST_CHECK_NO_THROW(c.set(KEY, AC));
-    BOOST_CHECK(c.list(KEY) == AC);
-    BOOST_CHECK_EQUAL(c.count(KEY), 2);
-    BOOST_CHECK_EQUAL(c.size(), 2);
-
-    // Update
-    BOOST_CHECK_NO_THROW(c.set(KEY, ABC));
-    BOOST_CHECK(c.list(KEY) == ABC);
-    BOOST_CHECK_EQUAL(c.count(KEY), 3);
-    BOOST_CHECK_EQUAL(c.size(), 3);
-
-    // Update
-    BOOST_CHECK_NO_THROW(c.set(KEY, AC));
-    BOOST_CHECK(c.list(KEY) == AC);
-    BOOST_CHECK_EQUAL(c.count(KEY), 2);
-    BOOST_CHECK_EQUAL(c.size(), 2);
+    BOOST_CHECK_NO_THROW(f.c.set(KEY, b));
+    BOOST_CHECK_EQUAL(f.c.get<B>(KEY), b);
+    BOOST_CHECK_EQUAL(f.c.count(KEY), 1);
 
     // Remove
-    BOOST_CHECK_NO_THROW(c.remove(KEY));
-    BOOST_CHECK_EQUAL(c.count(KEY), 0);
-    BOOST_CHECK_EQUAL(c.size(), 0);
-    BOOST_CHECK_THROW(c.list(KEY), ConfigException);
-    BOOST_CHECK_THROW(c.get(KEY), ConfigException);
+    BOOST_CHECK_NO_THROW(f.c.remove(KEY));
+    BOOST_CHECK_EQUAL(f.c.count(KEY), 0);
+    BOOST_CHECK_THROW(f.c.get<B>(KEY), ConfigException);
+}
+} // namespace
+
+
+BOOST_AUTO_TEST_CASE(SingleValueTest)
+{
+    testSingleValue<std::string, std::string>(*this, "A", "B");
+    testSingleValue<int, int>(*this, 1, 2);
+    testSingleValue<double, double>(*this, 1.1, 2.2);
+    testSingleValue<int, std::string>(*this, 2, "A");
+    testSingleValue<int64_t, int64_t>(*this, INT64_MAX, INT64_MAX - 2);
+    testSingleValue<TestClass, int>(*this, 11, 22);
+}
+
+namespace {
+template<typename T>
+void setVector(Fixture& f, std::vector<T> vec)
+{
+    std::vector<T> storedVec;
+    BOOST_CHECK_NO_THROW(f.c.set(KEY, vec));
+    BOOST_CHECK_NO_THROW(storedVec = f.c.get<std::vector<T> >(KEY))
+    BOOST_CHECK_EQUAL_COLLECTIONS(storedVec.begin(), storedVec.end(), vec.begin(), vec.end());
+    BOOST_CHECK_EQUAL(f.c.count(KEY), vec.size());
+    BOOST_CHECK_EQUAL(f.c.size(), vec.size());
+}
+
+template<typename T>
+void testVectorOfValues(Fixture& f,
+                        std::vector<T> a,
+                        std::vector<T> b,
+                        std::vector<T> c)
+{
+    // Set
+    setVector(f, a);
+    setVector(f, b);
+    setVector(f, c);
+
+    // Remove
+    BOOST_CHECK_NO_THROW(f.c.remove(KEY));
+    BOOST_CHECK_EQUAL(f.c.count(KEY), 0);
+    BOOST_CHECK_EQUAL(f.c.size(), 0);
+    BOOST_CHECK_THROW(f.c.get<std::vector<T> >(KEY), ConfigException);
+    BOOST_CHECK_THROW(f.c.get(KEY), ConfigException);
+}
+} // namespace
+
+BOOST_AUTO_TEST_CASE(VectorOfValuesTest)
+{
+    testVectorOfValues<std::string>(*this, {"A", "B"}, {"A", "C"}, {"A", "B", "C"});
+    testVectorOfValues<int>(*this, {1, 2}, {1, 3}, {1, 2, 3});
+    testVectorOfValues<int64_t>(*this, {INT64_MAX, 2}, {1, 3}, {INT64_MAX, 2, INT64_MAX});
+    testVectorOfValues<double>(*this, {1.1, 2.2}, {1.1, 3.3}, {1.1, 2.2, 3.3});
+    testVectorOfValues<TestClass>(*this, {1, 2}, {1, 3}, {1, 2, 3});
 }
 
 BOOST_AUTO_TEST_CASE(ClearTest)
 {
     BOOST_CHECK_NO_THROW(c.clear());
-
-    BOOST_CHECK_NO_THROW(c.set(KEY, {"A", "B"}));
+    std::vector<std::string> vec = {"A", "B"};
+    BOOST_CHECK_NO_THROW(c.set(KEY, vec));
     BOOST_CHECK_NO_THROW(c.clear());
     BOOST_CHECK_EQUAL(c.size(), 0);
 
     BOOST_CHECK_NO_THROW(c.remove(KEY));
-    BOOST_CHECK_THROW(c.list(KEY), ConfigException);
+    BOOST_CHECK_THROW(c.get<std::vector<std::string>>(KEY), ConfigException);
     BOOST_CHECK_THROW(c.get(KEY), ConfigException);
 }
 
