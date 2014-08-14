@@ -149,6 +149,11 @@ void sc_string_free(ScString string);
  ************************************************************************************************/
 
 /**
+ * Dbus state change callback function signature.
+ */
+typedef void (*ScContainerDbusStateCallback)(const char* containerId, const char* dbusAddress);
+
+/**
  * Get dbus address of each container.
  *
  * @param[in] client security-containers-server's client.
@@ -159,6 +164,78 @@ void sc_string_free(ScString string);
  */
 ScStatus sc_get_container_dbuses(ScClient client, ScArrayString* keys, ScArrayString* values);
 
+/**
+ * Get containers name.
+ *
+ * @param[in] client security-containers-server's client.
+ * @param[out] array Array of containers name.
+ * @return Status of this function call.
+ */
+ScStatus sc_get_container_ids(ScClient client, ScArrayString* array);
+
+/**
+ * Get active container name.
+ *
+ * @param[in] client security-containers-server's client.
+ * @param[out] id Active container name.
+ * @return Status of this function call.
+ */
+ScStatus sc_get_active_container_id(ScClient client, ScString* id);
+
+/**
+ * Set active container.
+ *
+ * @param client security-containers-server's client.
+ * @param id Container name.
+ * @return Status of this function call.
+ */
+ScStatus sc_set_active_container(ScClient client, const char* id);
+
+/**
+ * Register dbus state change callback function.
+ *
+ * The callback function will be invoked on a different thread
+ *
+ * @param client security-containers-server's client.
+ * @param containerDbusStateCallback Callback function.
+ * @return Status of this function call.
+ */
+ScStatus sc_container_dbus_state(ScClient client,
+                                 ScContainerDbusStateCallback containerDbusStateCallback);
+
+
+/*************************************************************************************************
+ *
+ *  org.tizen.containers.domain.manager interface
+ *
+ ************************************************************************************************/
+
+/**
+ * Notification callback function signature.
+ */
+typedef void (*ScNotificationCallback)(const char* container,
+                                       const char* application,
+                                       const char* message);
+/**
+ * Send message to active container.
+ *
+ * @param client security-containers-server's client.
+ * @param application Application name.
+ * @param message Message.
+ * @return Status of this function call.
+ */
+ScStatus sc_notify_active_container(ScClient client, const char* application, const char* message);
+
+/**
+ * Register notification callback function.
+ *
+ * The callback function will be invoked on a different thread.
+ *
+ * @param client security-containers-server's client.
+ * @param notificationCallback Callback function.
+ * @return Status of this function call.
+ */
+ScStatus sc_notification(ScClient client, ScNotificationCallback notificationCallback);
 #ifdef __cplusplus
 }
 #endif

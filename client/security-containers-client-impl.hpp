@@ -52,6 +52,7 @@ struct DbusInterfaceInfo {
  */
 class Client {
 private:
+    typedef std::function<void(GVariant* parameters)> SignalCallback;
     struct Status {
         Status(ScStatus status);
         Status(ScStatus status, const std::string& msg);
@@ -67,6 +68,9 @@ private:
                         GVariant* args_in,
                         const std::string& args_spec_out = std::string(),
                         GVariant** args_out = NULL);
+    ScStatus signalSubscribe(const DbusInterfaceInfo& info,
+                             const std::string& name,
+                             SignalCallback signalCallback);
 
 public:
     Client() noexcept;
@@ -102,6 +106,35 @@ public:
      */
     ScStatus sc_get_container_dbuses(ScArrayString* keys, ScArrayString* values) noexcept;
 
+    /**
+     *  @see ::sc_get_container_ids
+     */
+    ScStatus sc_get_container_ids(ScArrayString* array) noexcept;
+
+    /**
+     *  @see ::sc_get_active_container_id
+     */
+    ScStatus sc_get_active_container_id(ScString* id) noexcept;
+
+    /**
+     *  @see ::sc_set_active_container
+     */
+    ScStatus sc_set_active_container(const char* id) noexcept;
+
+    /**
+     *  @see ::sc_container_dbus_state
+     */
+    ScStatus sc_container_dbus_state(ScContainerDbusStateCallback containerDbusStateCallback) noexcept;
+
+    /**
+     *  @see ::sc_notify_active_container
+     */
+    ScStatus sc_notify_active_container(const char* application, const char* message) noexcept;
+
+    /**
+     *  @see ::sc_notification
+     */
+    ScStatus sc_notification(ScNotificationCallback notificationCallback) noexcept;
     /**
      *  @see ::sc_start
      */

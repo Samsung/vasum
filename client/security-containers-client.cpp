@@ -135,3 +135,36 @@ API ScStatus sc_get_container_dbuses(ScClient client, ScArrayString* keys, ScArr
 {
     return getClient(client)->sc_get_container_dbuses(keys, values);
 }
+
+API ScStatus sc_get_container_ids(ScClient client, ScArrayString* array)
+{
+    return getClient(client)->sc_get_container_ids(array);
+}
+
+API ScStatus sc_get_active_container_id(ScClient client, ScString* id)
+{
+    return getClient(client)->sc_get_active_container_id(id);
+}
+
+API ScStatus sc_set_active_container(ScClient client, const char* id)
+{
+    return getClient(client)->sc_set_active_container(id);
+}
+
+API ScStatus sc_container_dbus_state(ScClient client,
+                                 ScContainerDbusStateCallback containerDbusStateCallback)
+{
+    return getClient(client)->sc_container_dbus_state(containerDbusStateCallback);
+}
+
+API ScStatus sc_notify_active_container(ScClient client,
+                                        const char* application,
+                                        const char* message)
+{
+    return getClient(client)->sc_notify_active_container(application, message);
+}
+
+API ScStatus sc_notification(ScClient client, ScNotificationCallback notificationCallback)
+{
+    return getClient(client)->sc_notification(notificationCallback);
+}

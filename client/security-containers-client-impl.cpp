@@ -29,6 +29,7 @@
 #include <dbus/exception.hpp>
 #include <utils/glib-loop.hpp>
 #include <host-dbus-definitions.hpp>
+#include <container-dbus-definitions.hpp>
 
 #include <memory>
 #include <cstring>
@@ -47,6 +48,11 @@ const string SCCLIENT_EXCEPTION_MSG = "unspecified exception";
 const DbusInterfaceInfo hostDbusInterfaceInfo(api::host::BUS_NAME,
                                               api::host::OBJECT_PATH,
                                               api::host::INTERFACE);
+const DbusInterfaceInfo domainDbusInterfaceInfo(api::container::BUS_NAME,
+                                                api::container::OBJECT_PATH,
+                                                api::container::INTERFACE);
+
+template<typename T> struct fake_dependency: public std::false_type {};
 
 unique_ptr<ScopedGlibLoop> loop;
 
@@ -73,6 +79,45 @@ void toDict(GVariant* in, ScArrayString* keys, ScArrayString* values)
     }
     *keys = outk;
     *values = outv;
+}
+
+template<typename T>
+void toBasic(GVariant* in, T str)
+{
+    static_assert(fake_dependency<T>::value, "Must use specialization");
+    assert(!"Must use specialization");
+}
+
+template<>
+void toBasic(GVariant* in, char** str)
+{
+    assert(in);
+    assert(str);
+
+    gsize length;
+    const gchar* src = g_variant_get_string(in, &length);
+    char* buf = strndup(src, length);
+    *str = buf;
+}
+
+template<typename T>
+void toArray(GVariant* in, T** scArray)
+{
+    assert(in);
+    assert(scArray);
+
+    gsize size = g_variant_n_children(in);
+    T* ids = (T*)calloc(size + 1, sizeof(T));
+
+    GVariantIter iter;
+    GVariant* child;
+
+    g_variant_iter_init(&iter, in);
+    for (int i = 0; (child = g_variant_iter_next_value(&iter)); i++) {
+        toBasic(child, &ids[i]);
+        g_variant_unref(child);
+    }
+    *scArray = ids;
 }
 
 ScStatus toStatus(const std::exception& ex)
@@ -203,6 +248,33 @@ ScStatus Client::callMethod(const DbusInterfaceInfo& info,
     return sc_get_status();
 }
 
+ScStatus Client::signalSubscribe(const DbusInterfaceInfo& info,
+                                 const string& name,
+                                 SignalCallback signalCallback)
+{
+    auto onSignal = [=](const std::string& /*senderBusName*/,
+                        const std::string & objectPath,
+                        const std::string & interface,
+                        const std::string & signalName,
+                        GVariant * parameters) {
+        if (objectPath == info.objectPath &&
+                interface == info.interface &&
+                signalName == name) {
+
+            signalCallback(parameters);
+        }
+    };
+    try {
+        mConnection->signalSubscribe(onSignal, info.busName);
+        mStatus = Status(SCCLIENT_SUCCESS);
+    } catch (const std::exception& ex) {
+        mStatus = Status(toStatus(ex), ex.what());
+    } catch (...) {
+        mStatus = Status(SCCLIENT_EXCEPTION);
+    }
+    return sc_get_status();
+}
+
 const char* Client::sc_get_status_message() noexcept
 {
     return mStatus.mMsg.c_str();
@@ -233,4 +305,97 @@ ScStatus Client::sc_get_container_dbuses(ScArrayString* keys, ScArrayString* val
     g_variant_unref(unpacked);
     g_variant_unref(out);
     return ret;
+}
+
+ScStatus Client::sc_get_container_ids(ScArrayString* array) noexcept
+{
+    assert(array);
+
+    GVariant* out;
+    ScStatus ret = callMethod(hostDbusInterfaceInfo,
+                              api::host::METHOD_GET_CONTAINER_ID_LIST,
+                                          NULL,
+                                          "(as)",
+                                          &out);
+    if (ret != SCCLIENT_SUCCESS) {
+        return ret;
+    }
+    GVariant* unpacked;
+    g_variant_get(out, "(*)", &unpacked);
+    toArray(unpacked, array);
+    g_variant_unref(unpacked);
+    g_variant_unref(out);
+    return ret;
+}
+
+ScStatus Client::sc_get_active_container_id(ScString* id) noexcept
+{
+    assert(id);
+
+    GVariant* out;
+    ScStatus ret = callMethod(hostDbusInterfaceInfo,
+                              api::host::METHOD_GET_ACTIVE_CONTAINER_ID,
+                              NULL,
+                              "(s)",
+                              &out);
+    if (ret != SCCLIENT_SUCCESS) {
+        return ret;
+    }
+    GVariant* unpacked;
+    g_variant_get(out, "(*)", &unpacked);
+    toBasic(unpacked, id);
+    g_variant_unref(unpacked);
+    g_variant_unref(out);
+    return ret;
+}
+
+ScStatus Client::sc_set_active_container(const char* id) noexcept
+{
+    assert(id);
+
+    GVariant* args_in = g_variant_new("(s)", id);
+    return callMethod(hostDbusInterfaceInfo, api::host::METHOD_SET_ACTIVE_CONTAINER, args_in);
+}
+
+ScStatus Client::sc_container_dbus_state(ScContainerDbusStateCallback containerDbusStateCallback)
+    noexcept
+{
+    assert(containerDbusStateCallback);
+
+    auto onSigal = [ = ](GVariant * parameters) {
+        const char* container;
+        const char* dbusAddress;
+        g_variant_get(parameters, "(&s&s)", &container, &dbusAddress);
+        containerDbusStateCallback(container, dbusAddress);
+    };
+
+    return signalSubscribe(hostDbusInterfaceInfo,
+                           api::host::SIGNAL_CONTAINER_DBUS_STATE,
+                           onSigal);
+}
+
+ScStatus Client::sc_notify_active_container(const char* application, const char* message) noexcept
+{
+    assert(application);
+    assert(message);
+
+    GVariant* args_in = g_variant_new("(ss)", application, message);
+    return callMethod(domainDbusInterfaceInfo,
+                      api::container::METHOD_NOTIFY_ACTIVE_CONTAINER,
+                      args_in);
+}
+
+ScStatus Client::sc_notification(ScNotificationCallback notificationCallback) noexcept
+{
+    assert(notificationCallback);
+
+    auto onSigal = [ = ](GVariant * parameters) {
+        const char* container;
+        const char* application;
+        const char* message;
+        g_variant_get(parameters, "(&s&s&s)", &container, &application, &message);
+        notificationCallback(container, application, message);
+    };
+
+    return signalSubscribe(domainDbusInterfaceInfo, api::container::SIGNAL_NOTIFICATION, onSigal);
 }
