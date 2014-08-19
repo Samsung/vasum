@@ -82,6 +82,14 @@ class Logger(object):
         for test in self.__failedTests:
             self.error(self.__indentChar + commandPrefix + test)
 
+    def terminatedBySignal(self, bin, signum):
+        self.error("\n=========== FAILED ===========\n")
+        signame = {2:"SIGINT", 9:"SIGKILL", 11:"SIGSEGV", 15:"SIGTERM"}
+        siginfo = signame.get(signum, 'signal ' + str(signum))
+        self.error('Terminated by ' + siginfo)
+        if signum == 11: # SIGSEGV
+            self.error("\nUse following command to launch debugger:")
+            self.error(self.__indentChar + "sc_launch_test.py --gdb " + bin)
 
 
 class Parser(object):

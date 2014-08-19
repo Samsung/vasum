@@ -42,7 +42,9 @@ def launchTest(cmd=[], externalToolCmd=[], parsing=True):
 
     if parsing:
         parser = Parser()
-        p = subprocess.Popen(" ".join(externalToolCmd + cmd + _defLaunchArgs),
+        command = " ".join(externalToolCmd + cmd + _defLaunchArgs)
+        log.info("Invoking `" + command + "`")
+        p = subprocess.Popen(command,
                          shell=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
@@ -51,10 +53,14 @@ def launchTest(cmd=[], externalToolCmd=[], parsing=True):
             domResult = minidom.parseString(testResult)
             log.XMLSummary(domResult)
             log.failedTestSummary(cmd[0])
+        if p.returncode < 0:
+            log.terminatedBySignal(" ".join(cmd), -p.returncode)
     else:
         # Launching process without coloring does not require report in XML form
         # Avoid providing --report_format=XML, redirect std* by default to system's std*
-        p = subprocess.Popen(" ".join(externalToolCmd + cmd + _defLaunchArgs[1:]),
+        command = " ".join(externalToolCmd + cmd + _defLaunchArgs[1:])
+        log.info("Invoking `" + command + "`")
+        p = subprocess.Popen(command,
                              shell=True)
         p.wait()
 
