@@ -228,4 +228,17 @@ BOOST_AUTO_TEST_CASE(ClearTest)
     BOOST_CHECK_THROW(c.get(KEY), ConfigException);
 }
 
+BOOST_AUTO_TEST_CASE(KeyTest)
+{
+    BOOST_CHECK_EQUAL(key(), "");
+    BOOST_CHECK_EQUAL(key<>(), "");
+    BOOST_CHECK_EQUAL(key(""), "");
+    BOOST_CHECK_EQUAL(key("KEY"), "KEY");
+    BOOST_CHECK_EQUAL(key<>("KEY"), "KEY");
+    BOOST_CHECK_EQUAL(key("KEY", "A"), "KEY.A");
+    BOOST_CHECK_EQUAL(key("KEY", 1, 2.2), "KEY.1.2.2");
+    BOOST_CHECK_EQUAL(key("KEY", 1, "B"), "KEY.1.B");
+    BOOST_CHECK_EQUAL(key<'_'>("KEY", 1, 2.2), "KEY_1_2.2");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
