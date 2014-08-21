@@ -54,90 +54,89 @@ typedef ScString* ScArrayString;
  * Completion status of communication function.
  */
 typedef enum {
-    SCCLIENT_DBUS_CUSTOM_EXCEPTION,
-    SCCLIENT_DBUS_IO_EXCEPTION,
-    SCCLIENT_DBUS_OPERATION_EXCEPTION,
-    SCCLIENT_DBUS_INVALID_ARGUMENT_EXCEPTION,
-    SCCLIENT_DBUS_EXCEPTION,
-    SCCLIENT_NOT_ENOUGH_MEMORY,
-    SCCLIENT_RUNTIME_EXCEPTION,
-    SCCLIENT_EXCEPTION,
-    SCCLIENT_SUCCESS
+    SCCLIENT_CUSTOM_ERROR,     ///< User specified error
+    SCCLIENT_IO_ERROR,         ///< Input/Output error
+    SCCLIENT_OPERATION_FAILED, ///< Operation failed
+    SCCLIENT_INVALID_ARGUMENT, ///< Invalid argument
+    SCCLIENT_OTHER_ERROR,      ///< Other error
+    SCCLIENT_SUCCESS           ///< Success
 } ScStatus;
 
-typedef enum {
-    SCCLIENT_SYSTEM_TYPE,
-    SCCLIENT_CUSTOM_TYPE
-} ScClientType;
+/**
+ * Start glib loop.
+ *
+ * Do not call this function if the application creates glib loop itself.
+ * Otherwise call it before any other function from this library.
+ *
+ * @return status of this function call
+ */
+ScStatus sc_start_glib_loop();
 
 /**
- * Initialize communication resources.
+ * Stop glib loop.
+ *
+ * @return status of this function call
  */
-ScStatus sc_start();
+ScStatus sc_stop_glib_loop();
 
 /**
- * Release communication resources.
+ * Create a new security-containers-server's client.
  *
- * @return Status of this function call.
+ * @return created client
  */
-ScStatus sc_stop();
-
-/**
- * Create a security-containers-server's client.
- *
- * After calling this function a connection to security-containers-server is established.
- *
- * @param[out] client security-containers-server's client who will be returned.
- *                    Client can be broken. To check this you must call sc_is_failed().
- *                    Broken client can't be used to communicate with security-containers-server.
- * @param[in] type Type of client.
- * @param[in] @optional address Dbus socket address (significant only for type SCCLIENT_CUSTOM_TYPE).
- * @return Status of this function call.
- */
-ScStatus sc_get_client(ScClient* client, ScClientType type, /* const char* address */ ...);
+ScClient sc_client_create();
 
 /**
  * Release client resources.
  *
- * @param client security-containers-server's client.
+ * @param client security-containers-server's client
  */
 void sc_client_free(ScClient client);
 
 /**
- * Get status message of the last security-containers-server communication.
- *
- * @param client security-containers-server's client.
- * @return Last status message from security-containers-server communication.
- */
-const char* sc_get_status_message(ScClient client);
-
-/**
  * Get status code of last security-containers-server communication.
  *
- * @param client security-containers-server's client.
- * @return Status of this function call.
+ * @param client security-containers-server's client
+ * @return status of this function call
  */
 ScStatus sc_get_status(ScClient client);
 
 /**
- * Check if security-containers-server communication function fail.
+ * Get status message of the last security-containers-server communication.
  *
- * @param status Value returned by security-containers-server communication function.
- * @return 0 if succeeded otherwise 1.
+ * @param client security-containers-server's client
+ * @return last status message from security-containers-server communication
  */
-int sc_is_failed(ScStatus status);
+const char* sc_get_status_message(ScClient client);
+
+/**
+ * Connect client to the security-containers-server.
+ *
+ * @param client security-containers-server's client
+ * @return status of this function call
+ */
+ScStatus sc_connect(ScClient client);
+
+/**
+ * Connect client to the security-containers-server via custom address.
+ *
+ * @param client security-containers-server's client
+ * @param address dbus address
+ * @return status of this function call
+ */
+ScStatus sc_connect_custom(ScClient client, const char* address);
 
 /**
  * Release ScArrayString.
  *
- * @param astring ScArrayString.
+ * @param astring ScArrayString
  */
 void sc_array_string_free(ScArrayString astring);
 
 /**
  * Release ScString.
  *
- * @param string ScString.
+ * @param string ScString
  */
 void sc_string_free(ScString string);
 
@@ -156,38 +155,38 @@ typedef void (*ScContainerDbusStateCallback)(const char* containerId, const char
 /**
  * Get dbus address of each container.
  *
- * @param[in] client security-containers-server's client.
- * @param[out] keys Array of containers name.
- * @param[out] values Array of containers dbus address.
- * @return Status of this function call.
- * @post keys[i] corresponds to values[i].
+ * @param[in] client security-containers-server's client
+ * @param[out] keys array of containers name
+ * @param[out] values array of containers dbus address
+ * @return status of this function call
+ * @post keys[i] corresponds to values[i]
  */
 ScStatus sc_get_container_dbuses(ScClient client, ScArrayString* keys, ScArrayString* values);
 
 /**
  * Get containers name.
  *
- * @param[in] client security-containers-server's client.
- * @param[out] array Array of containers name.
- * @return Status of this function call.
+ * @param[in] client security-containers-server's client
+ * @param[out] array array of containers name
+ * @return status of this function call
  */
 ScStatus sc_get_container_ids(ScClient client, ScArrayString* array);
 
 /**
  * Get active container name.
  *
- * @param[in] client security-containers-server's client.
- * @param[out] id Active container name.
- * @return Status of this function call.
+ * @param[in] client security-containers-server's client
+ * @param[out] id active container name
+ * @return status of this function call
  */
 ScStatus sc_get_active_container_id(ScClient client, ScString* id);
 
 /**
  * Set active container.
  *
- * @param client security-containers-server's client.
- * @param id Container name.
- * @return Status of this function call.
+ * @param client security-containers-server's client
+ * @param id container name
+ * @return status of this function call
  */
 ScStatus sc_set_active_container(ScClient client, const char* id);
 
@@ -196,9 +195,9 @@ ScStatus sc_set_active_container(ScClient client, const char* id);
  *
  * The callback function will be invoked on a different thread
  *
- * @param client security-containers-server's client.
- * @param containerDbusStateCallback Callback function.
- * @return Status of this function call.
+ * @param client security-containers-server's client
+ * @param containerDbusStateCallback callback function
+ * @return status of this function call
  */
 ScStatus sc_container_dbus_state(ScClient client,
                                  ScContainerDbusStateCallback containerDbusStateCallback);
@@ -219,10 +218,10 @@ typedef void (*ScNotificationCallback)(const char* container,
 /**
  * Send message to active container.
  *
- * @param client security-containers-server's client.
- * @param application Application name.
- * @param message Message.
- * @return Status of this function call.
+ * @param client security-containers-server's client
+ * @param application application name
+ * @param message message
+ * @return status of this function call
  */
 ScStatus sc_notify_active_container(ScClient client, const char* application, const char* message);
 
@@ -231,9 +230,9 @@ ScStatus sc_notify_active_container(ScClient client, const char* application, co
  *
  * The callback function will be invoked on a different thread.
  *
- * @param client security-containers-server's client.
- * @param notificationCallback Callback function.
- * @return Status of this function call.
+ * @param client security-containers-server's client
+ * @param notificationCallback callback function
+ * @return status of this function call
  */
 ScStatus sc_notification(ScClient client, ScNotificationCallback notificationCallback);
 #ifdef __cplusplus

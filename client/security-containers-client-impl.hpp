@@ -54,7 +54,7 @@ class Client {
 private:
     typedef std::function<void(GVariant* parameters)> SignalCallback;
     struct Status {
-        Status(ScStatus status);
+        Status();
         Status(ScStatus status, const std::string& msg);
         ScStatus mScStatus;
         std::string mMsg;
@@ -79,15 +79,15 @@ public:
     /**
      * Create client with system dbus address.
      *
-     * @return Status of this function call.
+     * @return status of this function call
      */
     ScStatus createSystem() noexcept;
 
     /**
      * Create client.
      *
-     * @param address Dbus socket address.
-     * @return Status of this function call.
+     * @param address Dbus socket address
+     * @return status of this function call
      */
     ScStatus create(const std::string& address) noexcept;
 
@@ -136,14 +136,14 @@ public:
      */
     ScStatus sc_notification(ScNotificationCallback notificationCallback) noexcept;
     /**
-     *  @see ::sc_start
+     *  @see ::sc_start_glib_loop
      */
-    static ScStatus sc_start() noexcept;
+    static ScStatus sc_start_glib_loop() noexcept;
 
     /**
-     *  @see ::sc_stop
+     *  @see ::sc_stop_glib_loop
      */
-    static ScStatus sc_stop() noexcept;
+    static ScStatus sc_stop_glib_loop() noexcept;
 };
 
 #endif /* SECURITY_CONTAINERS_CLIENT_IMPL_HPP */

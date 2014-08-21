@@ -46,9 +46,19 @@ namespace {
 const std::string TEST_DBUS_CONFIG_PATH =
     SC_TEST_CONFIG_INSTALL_DIR "/client/ut-client/test-dbus-daemon.conf";
 
+struct Loop {
+    Loop() { sc_start_glib_loop(); };
+    ~Loop() { sc_stop_glib_loop(); };
+};
+
 struct Fixture {
-    Fixture() { sc_start(); };
-    ~Fixture() { sc_stop(); };
+    Loop loop;
+    ContainersManager cm;
+
+    Fixture(): cm(TEST_DBUS_CONFIG_PATH)
+    {
+        cm.startAll();
+    };
 };
 
 const int EVENT_TIMEOUT = 5000; ///< ms
@@ -64,8 +74,8 @@ void convertDictToMap(ScArrayString keys,
                       ScArrayString values,
                       std::map<std::string, std::string>& ret)
 {
-    char** iKeys;
-    char** iValues;
+    ScArrayString iKeys;
+    ScArrayString iValues;
     for (iKeys = keys, iValues = values; *iKeys && *iValues; iKeys++, iValues++) {
         ret.insert(std::make_pair(*iKeys, *iValues));
     }
@@ -73,7 +83,7 @@ void convertDictToMap(ScArrayString keys,
 
 void convertArrayToSet(ScArrayString values, std::set<std::string>& ret)
 {
-    for (char** iValues = values; *iValues; iValues++) {
+    for (ScArrayString iValues = values; *iValues; iValues++) {
         ret.insert(*iValues);
     }
 }
@@ -104,25 +114,23 @@ BOOST_FIXTURE_TEST_SUITE(Client, Fixture)
 
 BOOST_AUTO_TEST_CASE(NotRunningServerTest)
 {
-    ScClient client;
-    ScStatus status = sc_get_client(&client,
-                                    SCCLIENT_CUSTOM_TYPE,
-                                    EXPECTED_DBUSES_STARTED.begin()->second.c_str());
-    BOOST_CHECK(sc_is_failed(status));
+    cm.stopAll();
+
+    ScClient client = sc_client_create();
+    ScStatus status = sc_connect_custom(client,
+                                        EXPECTED_DBUSES_STARTED.begin()->second.c_str());
+    BOOST_CHECK_EQUAL(SCCLIENT_IO_ERROR, status);
     sc_client_free(client);
 }
 
 BOOST_AUTO_TEST_CASE(GetContainerDbusesTest)
 {
-    std::unique_ptr<ContainersManager> cm;
-    BOOST_REQUIRE_NO_THROW(cm.reset(new ContainersManager(TEST_DBUS_CONFIG_PATH)));
-    cm->startAll();
-    ScClient client;
-    ScStatus status = sc_get_client(&client, SCCLIENT_SYSTEM_TYPE);
-    BOOST_REQUIRE(!sc_is_failed(status));
+    ScClient client = sc_client_create();
+    ScStatus status = sc_connect(client);
+    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
     ScArrayString keys, values;
     status = sc_get_container_dbuses(client, &keys, &values);
-    BOOST_REQUIRE(!sc_is_failed(status));
+    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
 
     BOOST_CHECK_EQUAL(getArrayStringLength(keys, EXPECTED_DBUSES_STARTED.size() + 1),
                       EXPECTED_DBUSES_STARTED.size());
@@ -135,20 +143,16 @@ BOOST_AUTO_TEST_CASE(GetContainerDbusesTest)
     sc_array_string_free(keys);
     sc_array_string_free(values);
     sc_client_free(client);
-    BOOST_WARN_NO_THROW(cm.reset());
 }
 
 BOOST_AUTO_TEST_CASE(GetContainerIdsTest)
 {
-    std::unique_ptr<ContainersManager> cm;
-    BOOST_REQUIRE_NO_THROW(cm.reset(new ContainersManager(TEST_DBUS_CONFIG_PATH)));
-    cm->startAll();
-    ScClient client;
-    ScStatus status = sc_get_client(&client, SCCLIENT_SYSTEM_TYPE);
-    BOOST_REQUIRE(!sc_is_failed(status));
+    ScClient client = sc_client_create();
+    ScStatus status = sc_connect(client);
+    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
     ScArrayString values;
     status = sc_get_container_ids(client, &values);
-    BOOST_REQUIRE(!sc_is_failed(status));
+    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
     BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_DBUSES_STARTED.size() + 1),
                       EXPECTED_DBUSES_STARTED.size());
 
@@ -160,71 +164,54 @@ BOOST_AUTO_TEST_CASE(GetContainerIdsTest)
     }
     sc_array_string_free(values);
     sc_client_free(client);
-
-    BOOST_WARN_NO_THROW(cm.reset());
 }
 
 BOOST_AUTO_TEST_CASE(GetActiveContainerIdTest)
 {
-    std::unique_ptr<ContainersManager> cm;
-    BOOST_REQUIRE_NO_THROW(cm.reset(new ContainersManager(TEST_DBUS_CONFIG_PATH)));
-    cm->startAll();
-
-    ScClient client;
-    ScStatus status = sc_get_client(&client, SCCLIENT_SYSTEM_TYPE);
-    BOOST_REQUIRE(!sc_is_failed(status));
+    ScClient client = sc_client_create();
+    ScStatus status = sc_connect(client);
+    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
     ScString container;
     status = sc_get_active_container_id(client, &container);
-    BOOST_REQUIRE(!sc_is_failed(status));
+    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
 
-    BOOST_CHECK_EQUAL(container, cm->getRunningForegroundContainerId());
+    BOOST_CHECK_EQUAL(container, cm.getRunningForegroundContainerId());
 
     sc_string_free(container);
     sc_client_free(client);
-
-    BOOST_WARN_NO_THROW(cm.reset());
 }
 
 BOOST_AUTO_TEST_CASE(SetActiveContainerTest)
 {
-    std::string newActiveContainerId = "ut-containers-manager-console2-dbus";
+    const std::string newActiveContainerId = "ut-containers-manager-console2-dbus";
 
-    std::unique_ptr<ContainersManager> cm;
-    BOOST_REQUIRE_NO_THROW(cm.reset(new ContainersManager(TEST_DBUS_CONFIG_PATH)));
-    cm->startAll();
-    BOOST_REQUIRE_NE(newActiveContainerId, cm->getRunningForegroundContainerId());
+    BOOST_REQUIRE_NE(newActiveContainerId, cm.getRunningForegroundContainerId());
 
-    ScClient client;
-    ScStatus status = sc_get_client(&client, SCCLIENT_SYSTEM_TYPE);
-    BOOST_REQUIRE(!sc_is_failed(status));
+    ScClient client = sc_client_create();
+    ScStatus status = sc_connect(client);
+    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
     status = sc_set_active_container(client, newActiveContainerId.c_str());
-    BOOST_REQUIRE(!sc_is_failed(status));
-    BOOST_CHECK_EQUAL(newActiveContainerId, cm->getRunningForegroundContainerId());
+    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
+    BOOST_CHECK_EQUAL(newActiveContainerId, cm.getRunningForegroundContainerId());
     sc_client_free(client);
-    BOOST_WARN_NO_THROW(cm.reset());
 }
 
 BOOST_AUTO_TEST_CASE(NotificationTest)
 {
-    std::string activeContainerId = "ut-containers-manager-console1-dbus";
-    std::unique_ptr<ContainersManager> cm;
-    BOOST_REQUIRE_NO_THROW(cm.reset(new ContainersManager(TEST_DBUS_CONFIG_PATH)));
-    cm->startAll();
-
     std::map<std::string, ScClient> clients;
     for (const auto& it : EXPECTED_DBUSES_STARTED) {
-        ScClient client;
-        ScStatus status = sc_get_client(&client, SCCLIENT_CUSTOM_TYPE, it.second.c_str());
-        BOOST_REQUIRE(!sc_is_failed(status));
+        ScClient client = sc_client_create();
+        ScStatus status = sc_connect_custom(client, it.second.c_str());
+        BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
         clients[it.first] = client;
     }
     for (auto& client : clients) {
         ScStatus status = sc_notification(client.second, NotificationTestCallback);
-        BOOST_REQUIRE(!sc_is_failed(status));
+        BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
     }
     for (auto& client : clients) {
         ScStatus status = sc_notify_active_container(client.second, "app", "msg");
-        BOOST_REQUIRE(!sc_is_failed(status));
+        BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
     }
 
     BOOST_CHECK(signalReceivedLatch.waitForN(clients.size() - 1, EVENT_TIMEOUT));
@@ -233,7 +220,6 @@ BOOST_AUTO_TEST_CASE(NotificationTest)
     for (auto& client : clients) {
         sc_client_free(client.second);
     }
-    BOOST_WARN_NO_THROW(cm.reset());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -27,7 +27,6 @@
 #include "security-containers-client.h"
 #include "security-containers-client-impl.hpp"
 
-#include <cstdarg>
 #include <cassert>
 
 #ifndef API
@@ -38,63 +37,39 @@ using namespace std;
 
 namespace {
 
-typedef Client* ClientPtr;
-
-ClientPtr getClient(ScClient client)
+Client& getClient(ScClient client)
 {
     assert(client);
-    return reinterpret_cast<ClientPtr>(client);
+    return *reinterpret_cast<Client*>(client);
 }
 
 } // namespace
 
 /* external */
-API ScStatus sc_start()
+API ScStatus sc_start_glib_loop()
 {
-    return Client::sc_start();
+    return Client::sc_start_glib_loop();
 }
 
-API ScStatus sc_stop()
+API ScStatus sc_stop_glib_loop()
 {
-    return Client::sc_stop();
+    return Client::sc_stop_glib_loop();
 }
 
-API ScStatus sc_get_client(ScClient* client, ScClientType type, ...)
+API ScClient sc_client_create()
 {
-    const char* address = NULL;
-    va_list vl;
-    va_start(vl, type);
-    if (type == SCCLIENT_CUSTOM_TYPE) {
-        address = va_arg(vl, const char*);
-        assert(address);
-    }
-    va_end(vl);
-
-    assert(client);
     Client* clientPtr = new(nothrow) Client();
-    *client = reinterpret_cast<ScClient>(clientPtr);
-    if (clientPtr == NULL) {
-        return SCCLIENT_NOT_ENOUGH_MEMORY;
-    }
-
-    ScStatus status;
-    switch (type) {
-    case SCCLIENT_CUSTOM_TYPE:
-        status = clientPtr->create(address);
-        break;
-    case SCCLIENT_SYSTEM_TYPE:
-        status = clientPtr->createSystem();
-        break;
-    default:
-        assert(!"Logic error. No such ScClient type");
-        status = SCCLIENT_EXCEPTION;
-    }
-    return status;
+    return reinterpret_cast<ScClient>(clientPtr);
 }
 
-API int sc_is_failed(ScStatus status)
+API ScStatus sc_connect(ScClient client)
 {
-    return status != SCCLIENT_SUCCESS ? 1 : 0;
+    return getClient(client).createSystem();
+}
+
+API ScStatus sc_connect_custom(ScClient client, const char* address)
+{
+    return getClient(client).create(address);
 }
 
 API void sc_array_string_free(ScArrayString astring)
@@ -117,54 +92,54 @@ API void sc_string_free(ScString string)
 API void sc_client_free(ScClient client)
 {
     if (client != NULL) {
-        delete getClient(client);
+        delete &getClient(client);
     }
 }
 
 API const char* sc_get_status_message(ScClient client)
 {
-    return getClient(client)->sc_get_status_message();
+    return getClient(client).sc_get_status_message();
 }
 
 API ScStatus sc_get_status(ScClient client)
 {
-    return getClient(client)->sc_get_status();
+    return getClient(client).sc_get_status();
 }
 
 API ScStatus sc_get_container_dbuses(ScClient client, ScArrayString* keys, ScArrayString* values)
 {
-    return getClient(client)->sc_get_container_dbuses(keys, values);
+    return getClient(client).sc_get_container_dbuses(keys, values);
 }
 
 API ScStatus sc_get_container_ids(ScClient client, ScArrayString* array)
 {
-    return getClient(client)->sc_get_container_ids(array);
+    return getClient(client).sc_get_container_ids(array);
 }
 
 API ScStatus sc_get_active_container_id(ScClient client, ScString* id)
 {
-    return getClient(client)->sc_get_active_container_id(id);
+    return getClient(client).sc_get_active_container_id(id);
 }
 
 API ScStatus sc_set_active_container(ScClient client, const char* id)
 {
-    return getClient(client)->sc_set_active_container(id);
+    return getClient(client).sc_set_active_container(id);
 }
 
 API ScStatus sc_container_dbus_state(ScClient client,
                                  ScContainerDbusStateCallback containerDbusStateCallback)
 {
-    return getClient(client)->sc_container_dbus_state(containerDbusStateCallback);
+    return getClient(client).sc_container_dbus_state(containerDbusStateCallback);
 }
 
 API ScStatus sc_notify_active_container(ScClient client,
                                         const char* application,
                                         const char* message)
 {
-    return getClient(client)->sc_notify_active_container(application, message);
+    return getClient(client).sc_notify_active_container(application, message);
 }
 
 API ScStatus sc_notification(ScClient client, ScNotificationCallback notificationCallback)
 {
-    return getClient(client)->sc_notification(notificationCallback);
+    return getClient(client).sc_notification(notificationCallback);
 }

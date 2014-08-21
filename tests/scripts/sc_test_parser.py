@@ -84,10 +84,17 @@ class Logger(object):
 
     def terminatedBySignal(self, bin, signum):
         self.error("\n=========== FAILED ===========\n")
-        signame = {2:"SIGINT", 9:"SIGKILL", 11:"SIGSEGV", 15:"SIGTERM"}
+        signame = { 2: "SIGINT (Interrupt)",
+                    3: "SIGQUIT (Quit)",
+                    5: "SIGTRAP (Trace trap)",
+                    6: "SIGABRT (Abort)",
+                    8: "SIGFPE (Floating-point exception)",
+                    9: "SIGKILL (Kill)",
+                   11: "SIGSEGV (Segmentation fault)",
+                   15: "SIGTERM (Termination)"}
         siginfo = signame.get(signum, 'signal ' + str(signum))
         self.error('Terminated by ' + siginfo)
-        if signum == 11: # SIGSEGV
+        if signum in [5, 6, 8, 11]:
             self.error("\nUse following command to launch debugger:")
             self.error(self.__indentChar + "sc_launch_test.py --gdb " + bin)
 

@@ -26,15 +26,25 @@
 #include "utils/glib-loop.hpp"
 #include "utils/callback-wrapper.hpp"
 
+#include <atomic>
+#include <cassert>
 #include <glib-object.h>
 
 namespace security_containers {
 namespace utils {
 
+namespace {
+std::atomic_bool gLoopPresent(false);
+}
+
 
 ScopedGlibLoop::ScopedGlibLoop()
     : mLoop(g_main_loop_new(NULL, FALSE), g_main_loop_unref)
 {
+    if (gLoopPresent.exchange(true)) {
+        // only one loop per process
+        assert(0 && "Loop is already running");
+    }
 #if !GLIB_CHECK_VERSION(2,36,0)
     g_type_init();
 #endif
@@ -52,6 +62,7 @@ ScopedGlibLoop::~ScopedGlibLoop()
     //stop loop and wait
     g_main_loop_quit(mLoop.get());
     mLoopThread.join();
+    gLoopPresent = false;
 }
 
 void Glib::addTimerEvent(const unsigned int intervalMs,
