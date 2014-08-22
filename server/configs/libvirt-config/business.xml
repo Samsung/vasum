@@ -99,7 +99,7 @@
 
     <interface type='network'>
       <source network='business'/>
-      <filterref filter='business-nwfilter'/>
+      <filterref filter='nwfilter-business'/>
     </interface>
     <filesystem type='mount'>
       <!-- TODO: this directory could be generated from .conf files-->

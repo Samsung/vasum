@@ -1,8 +1,8 @@
-<filter name='business-nwfilter' chain='root'>
+<filter name='nwfilter-business' chain='root'>
     <rule action='reject' direction='in' priority='100'>
-        <ip srcipaddr='10.0.0.0' srcipmask='255.0.0.0'/>
+        <ip srcipaddr='10.0.102.0' srcipmask='255.255.255.0'/>
     </rule>
     <rule action='reject' direction='out' priority='100'>
-        <ip dstipaddr='10.0.0.0' srcipmask='255.0.0.0'/>
+        <ip dstipaddr='10.0.102.0' srcipmask='255.255.255.0'/>
     </rule>
 </filter>

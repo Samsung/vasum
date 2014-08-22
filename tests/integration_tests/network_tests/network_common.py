@@ -235,7 +235,7 @@ def twoNetworks():
     # 0. Test data
     containers_list      = [CONTAINER_T1, CONTAINER_T2]
     dest_containers_list = [CONTAINER_T2, CONTAINER_T1]
-    test_ip_list         = [["192.168.101.2"], ["192.168.102.2"]]
+    test_ip_list         = [["10.0.101.2"], ["10.0.102.2"]]
     test_1_expected_res  = [ 0,  0]
     test_2_expected_res  = [-1, -1]
 
