@@ -27,7 +27,9 @@
 #include "ut.hpp"
 #include "config/fields.hpp"
 #include "config/manager.hpp"
+#include <boost/filesystem.hpp>
 
+namespace fs = boost::filesystem;
 using namespace config;
 
 BOOST_AUTO_TEST_SUITE(ConfigurationSuite)
@@ -35,11 +37,23 @@ BOOST_AUTO_TEST_SUITE(ConfigurationSuite)
 struct TestConfig {
     // subtree class
     struct SubConfig {
+
+        struct SubSubConfig {
+            int intVal;
+
+            CONFIG_REGISTER
+            (
+                intVal
+            )
+        };
+
         int intVal;
+        SubSubConfig subSubObj;
 
         CONFIG_REGISTER
         (
-            intVal
+            intVal,
+            subSubObj
         )
     };
 
@@ -87,8 +101,9 @@ const std::string jsonTestString =
     "\"intVector\": [ 1, 2, 3 ], "
     "\"stringVector\": [ \"a\", \"b\" ], "
     "\"doubleVector\": [ 0.000000, 1.000000, 2.000000 ], "
-    "\"subObj\": { \"intVal\": 54321 }, "
-    "\"subVector\": [ { \"intVal\": 123 }, { \"intVal\": 456 } ] }";
+    "\"subObj\": { \"intVal\": 54321, \"subSubObj\": { \"intVal\": 234 } }, "
+    "\"subVector\": [ { \"intVal\": 123, \"subSubObj\": { \"intVal\": 345 } }, "
+                     "{ \"intVal\": 456, \"subSubObj\": { \"intVal\": 567 } } ] }";
 
 // Floating point tolerance as a number of rounding errors
 const int TOLERANCE = 1;
@@ -125,6 +140,8 @@ BOOST_AUTO_TEST_CASE(FromStringTest)
     BOOST_REQUIRE_EQUAL(2, testConfig.subVector.size());
     BOOST_CHECK_EQUAL(123, testConfig.subVector[0].intVal);
     BOOST_CHECK_EQUAL(456, testConfig.subVector[1].intVal);
+    BOOST_CHECK_EQUAL(345, testConfig.subVector[0].subSubObj.intVal);
+    BOOST_CHECK_EQUAL(567, testConfig.subVector[1].subSubObj.intVal);
 }
 
 
@@ -140,10 +157,10 @@ BOOST_AUTO_TEST_CASE(ToStringTest)
 namespace loadErrorsTest {
 
 #define DECLARE_CONFIG(name, type) \
-struct name { \
-    type field; \
-    CONFIG_REGISTER(field) \
-};
+    struct name { \
+        type field; \
+        CONFIG_REGISTER(field) \
+    };
 DECLARE_CONFIG(IntConfig, int)
 DECLARE_CONFIG(StringConfig, std::string)
 DECLARE_CONFIG(DoubleConfig, double)
@@ -266,6 +283,80 @@ BOOST_AUTO_TEST_CASE(HasVisibleInternalHelperTest)
     static_assert(!isVisitable<NotFunction>::value, "");
 
     BOOST_CHECK(isVisitable<Visitable>());
+}
+
+namespace saveLoadKVStoreTest {
+
+// This struct is like TestConfig, but without a list of structures.
+struct PoorTestConfig {
+    // subtree class
+    struct SubConfig {
+
+        struct SubSubConfig {
+            int intVal;
+
+            CONFIG_REGISTER
+            (
+                intVal
+            )
+        };
+
+        int intVal;
+        SubSubConfig subSubObj;
+
+        CONFIG_REGISTER
+        (
+            intVal,
+            subSubObj
+        )
+    };
+
+    int intVal;
+    std::int64_t int64Val;
+    std::string stringVal;
+    double doubleVal;
+    bool boolVal;
+
+    std::vector<int> intVector;
+    std::vector<std::string> stringVector;
+    std::vector<double> doubleVector;
+
+    SubConfig subObj;
+
+    CONFIG_REGISTER
+    (
+        intVal,
+        int64Val,
+        stringVal,
+        doubleVal,
+        boolVal,
+
+        intVector,
+        stringVector,
+        doubleVector,
+
+        subObj
+    )
+};
+} // saveLoadKVStoreTest
+
+
+BOOST_AUTO_TEST_CASE(FromToKVStoreTest)
+{
+    using namespace saveLoadKVStoreTest;
+
+    // TODO: Change this to TestConfig and delete PoorTestConfig when serialization is implemented
+    PoorTestConfig config;
+    loadFromString(jsonTestString, config);
+
+    std::string dbPath = fs::unique_path("/tmp/kvstore-%%%%.db3").string();
+
+    saveToKVStore(dbPath, config);
+    loadFromKVStore(dbPath, config);
+    saveToKVStore(dbPath, config, "some_config");
+    loadFromKVStore(dbPath, config, "some_config");
+
+    fs::remove(dbPath);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
