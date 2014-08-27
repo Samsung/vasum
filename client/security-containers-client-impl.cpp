@@ -345,6 +345,33 @@ ScStatus Client::sc_notify_active_container(const char* application, const char*
                       args_in);
 }
 
+ScStatus Client::sc_file_move_request(const char* destContainer, const char* path) noexcept
+{
+    assert(destContainer);
+    assert(path);
+
+    GVariant* out;
+    GVariant* args_in = g_variant_new("(ss)", destContainer, path);
+    ScStatus ret = callMethod(CONTAINER_INTERFACE,
+                              api::container::METHOD_FILE_MOVE_REQUEST,
+                              args_in,
+                              "(s)",
+                              &out);
+
+    if (ret != SCCLIENT_SUCCESS) {
+        return ret;
+    }
+    const gchar* retcode = NULL;;
+    g_variant_get(out, "(&s)", &retcode);
+    if (strcmp(retcode, api::container::FILE_MOVE_SUCCEEDED.c_str()) != 0) {
+        mStatus = Status(SCCLIENT_CUSTOM_ERROR, retcode);
+        g_variant_unref(out);
+        return sc_get_status();
+    }
+    g_variant_unref(out);
+    return ret;
+}
+
 ScStatus Client::sc_notification(ScNotificationCallback notificationCallback, void* data) noexcept
 {
     assert(notificationCallback);

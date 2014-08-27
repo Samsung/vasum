@@ -29,6 +29,7 @@
 
 #include "utils/latch.hpp"
 #include "containers-manager.hpp"
+#include "container-dbus-definitions.hpp"
 
 #include <map>
 #include <string>
@@ -184,6 +185,21 @@ BOOST_AUTO_TEST_CASE(SetActiveContainerTest)
     status = sc_set_active_container(client, newActiveContainerId.c_str());
     BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
     BOOST_CHECK_EQUAL(newActiveContainerId, cm.getRunningForegroundContainerId());
+    sc_client_free(client);
+}
+
+BOOST_AUTO_TEST_CASE(FileMoveRequestTest)
+{
+    const std::string path = "/tmp/fake_path";
+    const std::string secondContainer = "fake_container";
+
+    ScClient client = sc_client_create();
+    ScStatus status = sc_connect_custom(client, EXPECTED_DBUSES_STARTED.begin()->second.c_str());
+    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
+    status = sc_file_move_request(client, secondContainer.c_str(), path.c_str());
+    BOOST_REQUIRE_EQUAL(SCCLIENT_CUSTOM_ERROR, status);
+    BOOST_REQUIRE_EQUAL(api::container::FILE_MOVE_DESTINATION_NOT_FOUND,
+                        sc_get_status_message(client));
     sc_client_free(client);
 }
 

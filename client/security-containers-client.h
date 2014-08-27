@@ -231,6 +231,15 @@ typedef void (*ScNotificationCallback)(const char* container,
 ScStatus sc_notify_active_container(ScClient client, const char* application, const char* message);
 
 /**
+ * Move file between containers.
+ *
+ * @param client security-containers-server's client
+ * @param destContainer destination container id
+ * @param path path to moved file
+ */
+ScStatus sc_file_move_request(ScClient client, const char* destContainer, const char* path);
+
+/**
  * Register notification callback function.
  *
  * The callback function will be invoked on a different thread.

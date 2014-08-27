@@ -133,6 +133,10 @@ public:
     ScStatus sc_notify_active_container(const char* application, const char* message) noexcept;
 
     /**
+     *  @see ::sc_file_move_request
+     */
+    ScStatus sc_file_move_request(const char* destContainer, const char* path) noexcept;
+    /**
      *  @see ::sc_notification
      */
     ScStatus sc_notification(ScNotificationCallback notificationCallback, void* data) noexcept;

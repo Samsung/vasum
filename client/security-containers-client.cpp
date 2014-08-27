@@ -140,6 +140,11 @@ API ScStatus sc_notify_active_container(ScClient client,
     return getClient(client).sc_notify_active_container(application, message);
 }
 
+API ScStatus sc_file_move_request(ScClient client, const char* destContainer, const char* path)
+{
+    return getClient(client).sc_file_move_request(destContainer, path);
+}
+
 API ScStatus sc_notification(ScClient client,
                              ScNotificationCallback notificationCallback,
                              void* data)
