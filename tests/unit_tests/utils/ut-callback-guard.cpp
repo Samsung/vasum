@@ -68,9 +68,9 @@ BOOST_AUTO_TEST_CASE(SimpleTest)
 
 BOOST_AUTO_TEST_CASE(ThreadTest)
 {
-    CallbackGuard guard;
     Latch trackerCreated;
     Latch trackerCanBeDestroyed;
+    CallbackGuard guard;
 
     std::future<bool> future = std::async(std::launch::async, [&]() -> bool {
             CallbackGuard::Tracker tracker = guard.spawn();

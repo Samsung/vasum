@@ -113,6 +113,8 @@ BOOST_AUTO_TEST_CASE(Config_deviceFilePathNotExisting)
                         InputMonitorException);
 }
 
+namespace {
+
 void sendNEvents(Fixture& f, unsigned int noOfEventsToSend)
 {
     Latch eventLatch;
@@ -146,6 +148,8 @@ void sendNEvents(Fixture& f, unsigned int noOfEventsToSend)
     BOOST_CHECK(!eventLatch.wait(10));
 }
 
+} // namespace
+
 BOOST_AUTO_TEST_CASE(Event_oneAtATime)
 {
     sendNEvents(*this, 1);
@@ -155,6 +159,8 @@ BOOST_AUTO_TEST_CASE(Event_tenAtATime)
 {
     sendNEvents(*this, 10);
 }
+
+namespace {
 
 void sendNEventsWithPauses(Fixture& f, unsigned int noOfEventsToSend)
 {
@@ -193,6 +199,8 @@ void sendNEventsWithPauses(Fixture& f, unsigned int noOfEventsToSend)
     // Check if no more events are waiting
     BOOST_CHECK(!eventLatch.wait(10));
 }
+
+} // namespace
 
 BOOST_AUTO_TEST_CASE(Event_oneAtATimeWithPauses)
 {

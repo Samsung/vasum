@@ -375,6 +375,7 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallTest)
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
     Latch nameAcquired;
+    Latch callDone;
 
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
     DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
@@ -405,8 +406,6 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallTest)
         }
     };
     conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler);
-
-    Latch callDone;
 
     auto asyncResult1 = [&](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
         BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
@@ -455,6 +454,8 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallAsyncHandlerTest)
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
     Latch nameAcquired;
+    Latch handlerDone;
+    Latch callDone;
 
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
     DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
@@ -464,7 +465,6 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallAsyncHandlerTest)
                    [] {});
     BOOST_REQUIRE(nameAcquired.wait(EVENT_TIMEOUT));
 
-    Latch handlerDone;
     std::string strResult;
     MethodResultBuilder::Pointer deferredResult;
 
@@ -485,8 +485,6 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallAsyncHandlerTest)
         }
     };
     conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler);
-
-    Latch callDone;
 
     auto asyncResult = [&](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
         const gchar* ret = NULL;

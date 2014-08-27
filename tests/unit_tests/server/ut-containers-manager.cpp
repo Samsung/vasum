@@ -415,13 +415,14 @@ BOOST_AUTO_TEST_CASE(NotifyActiveContainerTest)
     ContainersManager cm(TEST_DBUS_CONFIG_PATH);
     cm.startAll();
 
+    Latch signalReceivedLatch;
+    std::map<int, std::vector<std::string>> signalReceivedSourcesMap;
+
     std::map<int, std::unique_ptr<DbusAccessory>> dbuses;
     for (int i = 1; i <= TEST_DBUS_CONNECTION_CONTAINERS_COUNT; ++i) {
         dbuses[i] = std::unique_ptr<DbusAccessory>(new DbusAccessory(i));
     }
 
-    Latch signalReceivedLatch;
-    std::map<int, std::vector<std::string>> signalReceivedSourcesMap;
     auto handler = [](Latch& latch,
                       std::vector<std::string>& receivedSignalSources,
                       const std::string& /*senderBusName*/,
@@ -518,15 +519,16 @@ BOOST_AUTO_TEST_CASE(MoveFileTest)
     ContainersManager cm(TEST_DBUS_CONFIG_PATH);
     cm.startAll();
 
+    Latch notificationLatch;
+    std::string notificationSource;
+    std::string notificationPath;
+    std::string notificationRetcode;
+
     std::map<int, std::unique_ptr<DbusAccessory>> dbuses;
     for (int i = 1; i <= 2; ++i) {
         dbuses[i] = std::unique_ptr<DbusAccessory>(new DbusAccessory(i));
     }
 
-    Latch notificationLatch;
-    std::string notificationSource;
-    std::string notificationPath;
-    std::string notificationRetcode;
     auto handler = [&](const std::string& /*senderBusName*/,
                        const std::string& objectPath,
                        const std::string& interface,
@@ -763,10 +765,10 @@ BOOST_AUTO_TEST_CASE(GetContainerDbusesTest)
 
 BOOST_AUTO_TEST_CASE(ContainerDbusesSignalsTest)
 {
-    DbusAccessory host(DbusAccessory::HOST_ID);
-
     Latch signalLatch;
     DbusAccessory::Dbuses collectedDbuses;
+
+    DbusAccessory host(DbusAccessory::HOST_ID);
 
     auto onSignal = [&] (const std::string& /*senderBusName*/,
                          const std::string& objectPath,

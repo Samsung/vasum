@@ -47,8 +47,8 @@ const std::string TEST_DBUS_CONFIG_PATH =
     SC_TEST_CONFIG_INSTALL_DIR "/client/ut-client/test-dbus-daemon.conf";
 
 struct Loop {
-    Loop() { sc_start_glib_loop(); };
-    ~Loop() { sc_stop_glib_loop(); };
+    Loop() { sc_start_glib_loop(); }
+    ~Loop() { sc_stop_glib_loop(); }
 };
 
 struct Fixture {
@@ -58,7 +58,7 @@ struct Fixture {
     Fixture(): cm(TEST_DBUS_CONFIG_PATH)
     {
         cm.startAll();
-    };
+    }
 };
 
 const int EVENT_TIMEOUT = 5000; ///< ms
@@ -97,15 +97,6 @@ int getArrayStringLength(ScArrayString astring, int max_len = -1)
         }
     }
     return i;
-}
-
-Latch signalReceivedLatch;
-std::vector< std::tuple<std::string, std::string, std::string> > receivedSignalMsg;
-
-void NotificationTestCallback(const char* container, const char* application, const char* message)
-{
-    receivedSignalMsg.push_back(std::make_tuple(container, application, message));
-    signalReceivedLatch.set();
 }
 
 } // namespace
@@ -198,6 +189,16 @@ BOOST_AUTO_TEST_CASE(SetActiveContainerTest)
 
 BOOST_AUTO_TEST_CASE(NotificationTest)
 {
+    // TODO add a void* to callback parameter and pass this two variables
+    // so that they no longer need to be global
+    static Latch signalReceivedLatch;
+    static std::vector< std::tuple<std::string, std::string, std::string> > receivedSignalMsg;
+
+    auto callback = [](const char* container, const char* application, const char* message) {
+        receivedSignalMsg.push_back(std::make_tuple(container, application, message));
+        signalReceivedLatch.set();
+    };
+
     std::map<std::string, ScClient> clients;
     for (const auto& it : EXPECTED_DBUSES_STARTED) {
         ScClient client = sc_client_create();
@@ -206,7 +207,7 @@ BOOST_AUTO_TEST_CASE(NotificationTest)
         clients[it.first] = client;
     }
     for (auto& client : clients) {
-        ScStatus status = sc_notification(client.second, NotificationTestCallback);
+        ScStatus status = sc_notification(client.second, callback);
         BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
     }
     for (auto& client : clients) {

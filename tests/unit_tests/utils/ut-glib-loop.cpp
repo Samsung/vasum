@@ -29,7 +29,7 @@
 #include "utils/latch.hpp"
 #include "utils/glib-loop.hpp"
 
-#include <memory>
+#include <atomic>
 
 BOOST_AUTO_TEST_SUITE(UtilsGlibLoopSuite)
 
@@ -48,11 +48,12 @@ const unsigned int TIMER_WAIT_FOR    = 2 * TIMER_NUMBER * TIMER_INTERVAL_MS;
 BOOST_AUTO_TEST_CASE(GlibTimerEventTest)
 {
     ScopedGlibLoop loop;
-    CallbackGuard guard;
     Latch latch;
+    std::atomic_uint counter(0);
+
+    CallbackGuard guard;
 
     Glib::OnTimerEventCallback callback = [&]()->bool {
-        static unsigned int counter = 0;
         latch.set();
         if (++counter >= TIMER_NUMBER) {
             return false;
