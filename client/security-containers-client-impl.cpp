@@ -317,16 +317,16 @@ ScStatus Client::sc_set_active_container(const char* id) noexcept
     return callMethod(HOST_INTERFACE, api::host::METHOD_SET_ACTIVE_CONTAINER, args_in);
 }
 
-ScStatus Client::sc_container_dbus_state(ScContainerDbusStateCallback containerDbusStateCallback)
-    noexcept
+ScStatus Client::sc_container_dbus_state(ScContainerDbusStateCallback containerDbusStateCallback,
+                                         void* data) noexcept
 {
     assert(containerDbusStateCallback);
 
-    auto onSigal = [ = ](GVariant * parameters) {
+    auto onSigal = [=](GVariant * parameters) {
         const char* container;
         const char* dbusAddress;
         g_variant_get(parameters, "(&s&s)", &container, &dbusAddress);
-        containerDbusStateCallback(container, dbusAddress);
+        containerDbusStateCallback(container, dbusAddress, data);
     };
 
     return signalSubscribe(HOST_INTERFACE,
@@ -345,16 +345,16 @@ ScStatus Client::sc_notify_active_container(const char* application, const char*
                       args_in);
 }
 
-ScStatus Client::sc_notification(ScNotificationCallback notificationCallback) noexcept
+ScStatus Client::sc_notification(ScNotificationCallback notificationCallback, void* data) noexcept
 {
     assert(notificationCallback);
 
-    auto onSigal = [ = ](GVariant * parameters) {
+    auto onSigal = [=](GVariant * parameters) {
         const char* container;
         const char* application;
         const char* message;
         g_variant_get(parameters, "(&s&s&s)", &container, &application, &message);
-        notificationCallback(container, application, message);
+        notificationCallback(container, application, message, data);
     };
 
     return signalSubscribe(CONTAINER_INTERFACE, api::container::SIGNAL_NOTIFICATION, onSigal);

@@ -150,7 +150,9 @@ void sc_string_free(ScString string);
 /**
  * Dbus state change callback function signature.
  */
-typedef void (*ScContainerDbusStateCallback)(const char* containerId, const char* dbusAddress);
+typedef void (*ScContainerDbusStateCallback)(const char* containerId,
+                                             const char* dbusAddress,
+                                             void* data);
 
 /**
  * Get dbus address of each container.
@@ -197,10 +199,12 @@ ScStatus sc_set_active_container(ScClient client, const char* id);
  *
  * @param client security-containers-server's client
  * @param containerDbusStateCallback callback function
+ * @param data some extra data that will be passed to callback function
  * @return status of this function call
  */
 ScStatus sc_container_dbus_state(ScClient client,
-                                 ScContainerDbusStateCallback containerDbusStateCallback);
+                                 ScContainerDbusStateCallback containerDbusStateCallback,
+                                 void* data);
 
 
 /*************************************************************************************************
@@ -214,7 +218,8 @@ ScStatus sc_container_dbus_state(ScClient client,
  */
 typedef void (*ScNotificationCallback)(const char* container,
                                        const char* application,
-                                       const char* message);
+                                       const char* message,
+                                       void* data);
 /**
  * Send message to active container.
  *
@@ -232,9 +237,10 @@ ScStatus sc_notify_active_container(ScClient client, const char* application, co
  *
  * @param client security-containers-server's client
  * @param notificationCallback callback function
+ * @param data some extra data that will be passed to callback function
  * @return status of this function call
  */
-ScStatus sc_notification(ScClient client, ScNotificationCallback notificationCallback);
+ScStatus sc_notification(ScClient client, ScNotificationCallback notificationCallback, void* data);
 #ifdef __cplusplus
 }
 #endif

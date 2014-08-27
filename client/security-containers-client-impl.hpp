@@ -124,7 +124,8 @@ public:
     /**
      *  @see ::sc_container_dbus_state
      */
-    ScStatus sc_container_dbus_state(ScContainerDbusStateCallback containerDbusStateCallback) noexcept;
+    ScStatus sc_container_dbus_state(ScContainerDbusStateCallback containerDbusStateCallback,
+                                     void* data) noexcept;
 
     /**
      *  @see ::sc_notify_active_container
@@ -134,7 +135,7 @@ public:
     /**
      *  @see ::sc_notification
      */
-    ScStatus sc_notification(ScNotificationCallback notificationCallback) noexcept;
+    ScStatus sc_notification(ScNotificationCallback notificationCallback, void* data) noexcept;
     /**
      *  @see ::sc_start_glib_loop
      */

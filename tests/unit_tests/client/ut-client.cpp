@@ -189,16 +189,25 @@ BOOST_AUTO_TEST_CASE(SetActiveContainerTest)
 
 BOOST_AUTO_TEST_CASE(NotificationTest)
 {
-    // TODO add a void* to callback parameter and pass this two variables
-    // so that they no longer need to be global
-    static Latch signalReceivedLatch;
-    static std::vector< std::tuple<std::string, std::string, std::string> > receivedSignalMsg;
+    const std::string MSG_CONTENT = "msg";
+    const std::string MSG_APP = "app";
 
-    auto callback = [](const char* container, const char* application, const char* message) {
-        receivedSignalMsg.push_back(std::make_tuple(container, application, message));
-        signalReceivedLatch.set();
+    struct CallbackData {
+        Latch signalReceivedLatch;
+        std::vector< std::tuple<std::string, std::string, std::string> > receivedSignalMsg;
     };
 
+    auto callback = [](const char* container,
+                       const char* application,
+                       const char* message,
+                       void* data)
+    {
+        CallbackData& callbackData = *reinterpret_cast<CallbackData*>(data);
+        callbackData.receivedSignalMsg.push_back(std::make_tuple(container, application, message));
+        callbackData.signalReceivedLatch.set();
+    };
+
+    CallbackData callbackData;
     std::map<std::string, ScClient> clients;
     for (const auto& it : EXPECTED_DBUSES_STARTED) {
         ScClient client = sc_client_create();
@@ -207,16 +216,24 @@ BOOST_AUTO_TEST_CASE(NotificationTest)
         clients[it.first] = client;
     }
     for (auto& client : clients) {
-        ScStatus status = sc_notification(client.second, callback);
+        ScStatus status = sc_notification(client.second, callback, &callbackData);
         BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
     }
     for (auto& client : clients) {
-        ScStatus status = sc_notify_active_container(client.second, "app", "msg");
+        ScStatus status = sc_notify_active_container(client.second,
+                                                     MSG_APP.c_str(),
+                                                     MSG_CONTENT.c_str());
         BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
     }
 
-    BOOST_CHECK(signalReceivedLatch.waitForN(clients.size() - 1, EVENT_TIMEOUT));
-    BOOST_CHECK(signalReceivedLatch.empty());
+    BOOST_CHECK(callbackData.signalReceivedLatch.waitForN(clients.size() - 1, EVENT_TIMEOUT));
+    BOOST_CHECK(callbackData.signalReceivedLatch.empty());
+
+    for (const auto& msg : callbackData.receivedSignalMsg) {
+        BOOST_CHECK(clients.count(std::get<0>(msg)) > 0);
+        BOOST_CHECK_EQUAL(std::get<1>(msg), MSG_APP);
+        BOOST_CHECK_EQUAL(std::get<2>(msg), MSG_CONTENT);
+    }
 
     for (auto& client : clients) {
         sc_client_free(client.second);

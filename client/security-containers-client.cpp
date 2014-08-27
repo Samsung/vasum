@@ -127,9 +127,10 @@ API ScStatus sc_set_active_container(ScClient client, const char* id)
 }
 
 API ScStatus sc_container_dbus_state(ScClient client,
-                                 ScContainerDbusStateCallback containerDbusStateCallback)
+                                     ScContainerDbusStateCallback containerDbusStateCallback,
+                                     void* data)
 {
-    return getClient(client).sc_container_dbus_state(containerDbusStateCallback);
+    return getClient(client).sc_container_dbus_state(containerDbusStateCallback, data);
 }
 
 API ScStatus sc_notify_active_container(ScClient client,
@@ -139,7 +140,9 @@ API ScStatus sc_notify_active_container(ScClient client,
     return getClient(client).sc_notify_active_container(application, message);
 }
 
-API ScStatus sc_notification(ScClient client, ScNotificationCallback notificationCallback)
+API ScStatus sc_notification(ScClient client,
+                             ScNotificationCallback notificationCallback,
+                             void* data)
 {
-    return getClient(client).sc_notification(notificationCallback);
+    return getClient(client).sc_notification(notificationCallback, data);
 }
