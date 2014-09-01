@@ -117,14 +117,17 @@ int Container::getPrivilege() const
 void Container::start()
 {
     Lock lock(mReconnectMutex);
-    mConnectionTransport.reset(new ContainerConnectionTransport(mRunMountPoint));
+    if (mConfig.enableDbusIntegration) {
+        mConnectionTransport.reset(new ContainerConnectionTransport(mRunMountPoint));
+    }
     mNetworkAdmin->start();
     mAdmin->start();
-    connect();
+    if (mConfig.enableDbusIntegration) {
+        connect();
+    }
 
-    // Send to the background only after we're connected,
-    // otherwise it'd take ages.
-    LOGD(getId() << ": DBUS connected, sending to the background");
+    // Send to the background only after we're connected, otherwise it'd take ages.
+    LOGD(getId() << ": sending to the background");
     goBackground();
 }
 
@@ -196,7 +199,9 @@ void Container::setDetachOnExit()
     Lock lock(mReconnectMutex);
     mNetworkAdmin->setDetachOnExit();
     mAdmin->setDetachOnExit();
-    mConnectionTransport->setDetachOnExit();
+    if (mConnectionTransport) {
+        mConnectionTransport->setDetachOnExit();
+    }
 }
 
 bool Container::isRunning()

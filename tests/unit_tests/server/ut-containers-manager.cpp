@@ -732,6 +732,11 @@ BOOST_AUTO_TEST_CASE(ProxyCallTest)
 }
 
 namespace {
+    const DbusAccessory::Dbuses EXPECTED_DBUSES_NO_DBUS = {
+        {"ut-containers-manager-console1", ""},
+        {"ut-containers-manager-console2", ""},
+        {"ut-containers-manager-console3", ""}};
+
     const DbusAccessory::Dbuses EXPECTED_DBUSES_STOPPED = {
         {"ut-containers-manager-console1-dbus", ""},
         {"ut-containers-manager-console2-dbus", ""},
@@ -749,18 +754,24 @@ namespace {
 BOOST_AUTO_TEST_CASE(GetContainerDbusesTest)
 {
     DbusAccessory host(DbusAccessory::HOST_ID);
-
     ContainersManager cm(TEST_DBUS_CONFIG_PATH);
 
     BOOST_CHECK(EXPECTED_DBUSES_STOPPED == host.callMethodGetContainerDbuses());
-
     cm.startAll();
-
     BOOST_CHECK(EXPECTED_DBUSES_STARTED == host.callMethodGetContainerDbuses());
-
     cm.stopAll();
-
     BOOST_CHECK(EXPECTED_DBUSES_STOPPED == host.callMethodGetContainerDbuses());
+}
+
+BOOST_AUTO_TEST_CASE(GetContainerDbusesNoDbusTest)
+{
+    DbusAccessory host(DbusAccessory::HOST_ID);
+    ContainersManager cm(TEST_CONFIG_PATH);
+    BOOST_CHECK(EXPECTED_DBUSES_NO_DBUS == host.callMethodGetContainerDbuses());
+    cm.startAll();
+    BOOST_CHECK(EXPECTED_DBUSES_NO_DBUS == host.callMethodGetContainerDbuses());
+    cm.stopAll();
+    BOOST_CHECK(EXPECTED_DBUSES_NO_DBUS == host.callMethodGetContainerDbuses());
 }
 
 BOOST_AUTO_TEST_CASE(ContainerDbusesSignalsTest)

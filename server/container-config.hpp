@@ -49,6 +49,12 @@ struct ContainerConfig {
     bool switchToDefaultAfterTimeout;
 
     /**
+      * Specify, if D-Bus communication with the container will be enabled.
+      * Setting this value to "false" will make the domain API not work inside the container.
+      */
+    bool enableDbusIntegration;
+
+    /**
      * Container's libvirt (XML) config file.
      * Location can be relative to the Container's config file.
      */
@@ -96,6 +102,7 @@ struct ContainerConfig {
     (
         privilege,
         switchToDefaultAfterTimeout,
+        enableDbusIntegration,
         config,
         networkConfig,
         networkFilterConfig,
