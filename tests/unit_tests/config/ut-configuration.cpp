@@ -285,76 +285,19 @@ BOOST_AUTO_TEST_CASE(HasVisibleInternalHelperTest)
     BOOST_CHECK(isVisitable<Visitable>());
 }
 
-namespace saveLoadKVStoreTest {
-
-// This struct is like TestConfig, but without a list of structures.
-struct PoorTestConfig {
-    // subtree class
-    struct SubConfig {
-
-        struct SubSubConfig {
-            int intVal;
-
-            CONFIG_REGISTER
-            (
-                intVal
-            )
-        };
-
-        int intVal;
-        SubSubConfig subSubObj;
-
-        CONFIG_REGISTER
-        (
-            intVal,
-            subSubObj
-        )
-    };
-
-    int intVal;
-    std::int64_t int64Val;
-    std::string stringVal;
-    double doubleVal;
-    bool boolVal;
-
-    std::vector<int> intVector;
-    std::vector<std::string> stringVector;
-    std::vector<double> doubleVector;
-
-    SubConfig subObj;
-
-    CONFIG_REGISTER
-    (
-        intVal,
-        int64Val,
-        stringVal,
-        doubleVal,
-        boolVal,
-
-        intVector,
-        stringVector,
-        doubleVector,
-
-        subObj
-    )
-};
-} // saveLoadKVStoreTest
-
-
 BOOST_AUTO_TEST_CASE(FromToKVStoreTest)
 {
-    using namespace saveLoadKVStoreTest;
-
-    // TODO: Change this to TestConfig and delete PoorTestConfig when serialization is implemented
-    PoorTestConfig config;
+    TestConfig config;
     loadFromString(jsonTestString, config);
 
     std::string dbPath = fs::unique_path("/tmp/kvstore-%%%%.db3").string();
 
     saveToKVStore(dbPath, config);
-    loadFromKVStore(dbPath, config);
-    saveToKVStore(dbPath, config, "some_config");
-    loadFromKVStore(dbPath, config, "some_config");
+    TestConfig outConfig;
+    loadFromKVStore(dbPath, outConfig);
+
+    std::string out = saveToString(outConfig);
+    BOOST_CHECK_EQUAL(out, jsonTestString);
 
     fs::remove(dbPath);
 }
