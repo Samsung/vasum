@@ -25,6 +25,7 @@
 
 #include <config.hpp>
 #include "security-containers-client-impl.hpp"
+#include "utils.hpp"
 #include <dbus/connection.hpp>
 #include <dbus/exception.hpp>
 #include <utils/glib-loop.hpp>
@@ -33,6 +34,7 @@
 
 #include <cstring>
 #include <cassert>
+#include <fstream>
 
 using namespace std;
 using namespace dbus;
@@ -120,6 +122,17 @@ ScStatus toStatus(const std::exception& ex)
         return SCCLIENT_OTHER_ERROR;
     }
     return SCCLIENT_OTHER_ERROR;
+}
+
+bool readFirstLineOfFile(const std::string& path, std::string& ret)
+{
+    std::ifstream file(path);
+    if (!file) {
+        return false;
+    }
+
+    std::getline(file, ret);
+    return true;
 }
 
 } //namespace
@@ -307,6 +320,29 @@ ScStatus Client::sc_get_active_container_id(ScString* id) noexcept
     g_variant_unref(unpacked);
     g_variant_unref(out);
     return ret;
+}
+
+ScStatus Client::sc_get_container_id_by_pid(int pid, ScString* id) noexcept
+{
+    assert(id);
+
+    const std::string path = "/proc/" + std::to_string(pid) + "/cpuset";
+
+    std::string cpuset;
+    if (!readFirstLineOfFile(path, cpuset)) {
+        mStatus = Status(SCCLIENT_INVALID_ARGUMENT, "Process not found");
+        return sc_get_status();
+    }
+
+    std::string containerId;
+    if (!parseContainerIdFromCpuSet(cpuset, containerId)) {
+        mStatus = Status(SCCLIENT_OTHER_ERROR, "unknown format of cpuset");
+        return sc_get_status();
+    }
+
+    *id = strdup(containerId.c_str());
+    mStatus = Status();
+    return sc_get_status();;
 }
 
 ScStatus Client::sc_set_active_container(const char* id) noexcept

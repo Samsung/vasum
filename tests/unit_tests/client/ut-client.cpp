@@ -256,4 +256,41 @@ BOOST_AUTO_TEST_CASE(NotificationTest)
     }
 }
 
+BOOST_AUTO_TEST_CASE(GetContainerIdByPidTest1)
+{
+    ScClient client = sc_client_create();
+    ScString container;
+    ScStatus status = sc_get_container_id_by_pid(client, 1, &container);
+    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
+
+    BOOST_CHECK_EQUAL(container, std::string("host"));
+
+    sc_string_free(container);
+    sc_client_free(client);
+}
+
+BOOST_AUTO_TEST_CASE(GetContainerIdByPidTest2)
+{
+    std::set<std::string> ids;
+
+    ScClient client = sc_client_create();
+    for (int n = 0; n < 100000; ++n) {
+        ScString container;
+        ScStatus status = sc_get_container_id_by_pid(client, n, &container);
+        if (status == SCCLIENT_SUCCESS) {
+            ids.insert(container);
+            sc_string_free(container);
+        } else {
+            BOOST_WARN_MESSAGE(status == SCCLIENT_INVALID_ARGUMENT, sc_get_status_message(client));
+        }
+    }
+    sc_client_free(client);
+
+    BOOST_CHECK(ids.count("host") == 1);
+
+    for (const auto& dbus : EXPECTED_DBUSES_STARTED) {
+        BOOST_CHECK(ids.count(dbus.first) == 1);
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()

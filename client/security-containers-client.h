@@ -247,6 +247,17 @@ ScStatus sc_get_container_ids(ScClient client, ScArrayString* array);
 ScStatus sc_get_active_container_id(ScClient client, ScString* id);
 
 /**
+ * Get container name of process with given pid.
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] pid process id
+ * @param[out] id active container name
+ * @return status of this function call
+ * @remark Use @p sc_string_free() to free memory occupied by @p id.
+ */
+ScStatus sc_get_container_id_by_pid(ScClient client, int pid, ScString* id);
+
+/**
  * Set active (foreground) container.
  *
  * @param[in] client security-containers-server's client

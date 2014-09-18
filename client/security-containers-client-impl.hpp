@@ -117,6 +117,11 @@ public:
     ScStatus sc_get_active_container_id(ScString* id) noexcept;
 
     /**
+     *  @see ::sc_get_container_id_by_pid
+     */
+    ScStatus sc_get_container_id_by_pid(int pid, ScString* id) noexcept;
+
+    /**
      *  @see ::sc_set_active_container
      */
     ScStatus sc_set_active_container(const char* id) noexcept;

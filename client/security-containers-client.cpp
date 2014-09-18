@@ -121,6 +121,11 @@ API ScStatus sc_get_active_container_id(ScClient client, ScString* id)
     return getClient(client).sc_get_active_container_id(id);
 }
 
+API ScStatus sc_get_container_id_by_pid(ScClient client, int pid, ScString* id)
+{
+    return getClient(client).sc_get_container_id_by_pid(pid, id);
+}
+
 API ScStatus sc_set_active_container(ScClient client, const char* id)
 {
     return getClient(client).sc_set_active_container(id);
