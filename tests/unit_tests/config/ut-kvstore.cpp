@@ -114,33 +114,29 @@ BOOST_AUTO_TEST_CASE(EscapedCharactersTest)
     std::string HARD_KEY = "[" + KEY;
     BOOST_CHECK_NO_THROW(c.set(HARD_KEY, "A"));
     BOOST_CHECK_NO_THROW(c.set(KEY, "B"));
-    BOOST_CHECK_EQUAL(c.count(HARD_KEY), 1);
-    BOOST_CHECK_EQUAL(c.count(KEY), 1);
-    BOOST_CHECK_EQUAL(c.size(), 2);
+    BOOST_CHECK(c.exists(HARD_KEY));
+    BOOST_CHECK(c.exists(KEY));
     BOOST_CHECK_NO_THROW(c.clear());
 
     HARD_KEY = "]" + KEY;
     BOOST_CHECK_NO_THROW(c.set(HARD_KEY, "A"));
     BOOST_CHECK_NO_THROW(c.set(KEY, "B"));
-    BOOST_CHECK_EQUAL(c.count(HARD_KEY), 1);
-    BOOST_CHECK_EQUAL(c.count(KEY), 1);
-    BOOST_CHECK_EQUAL(c.size(), 2);
+    BOOST_CHECK(c.exists(HARD_KEY));
+    BOOST_CHECK(c.exists(KEY));
     BOOST_CHECK_NO_THROW(c.clear());
 
     HARD_KEY = "?" + KEY;
     BOOST_CHECK_NO_THROW(c.set(HARD_KEY, "A"));
     BOOST_CHECK_NO_THROW(c.set(KEY, "B"));
-    BOOST_CHECK_EQUAL(c.count(HARD_KEY), 1);
-    BOOST_CHECK_EQUAL(c.count(KEY), 1);
-    BOOST_CHECK_EQUAL(c.size(), 2);
+    BOOST_CHECK(c.exists(HARD_KEY));
+    BOOST_CHECK(c.exists(KEY));
     BOOST_CHECK_NO_THROW(c.clear());
 
     HARD_KEY = "*" + KEY;
     BOOST_CHECK_NO_THROW(c.set(HARD_KEY, "A"));
     BOOST_CHECK_NO_THROW(c.set(KEY, "B"));
-    BOOST_CHECK_EQUAL(c.count(HARD_KEY), 1);
-    BOOST_CHECK_EQUAL(c.count(KEY), 1);
-    BOOST_CHECK_EQUAL(c.size(), 2);
+    BOOST_CHECK(c.exists(HARD_KEY));
+    BOOST_CHECK(c.exists(KEY));
 }
 
 namespace {
@@ -154,11 +150,11 @@ void testSingleValue(Fixture& f, const A& a, const B& b)
     // Update
     BOOST_CHECK_NO_THROW(f.c.set(KEY, b));
     BOOST_CHECK_EQUAL(f.c.get<B>(KEY), b);
-    BOOST_CHECK_EQUAL(f.c.count(KEY), 1);
+    BOOST_CHECK(f.c.exists(KEY));
 
     // Remove
     BOOST_CHECK_NO_THROW(f.c.remove(KEY));
-    BOOST_CHECK_EQUAL(f.c.count(KEY), 0);
+    BOOST_CHECK(!f.c.exists(KEY));
     BOOST_CHECK_THROW(f.c.get<B>(KEY), ConfigException);
 }
 } // namespace
@@ -182,8 +178,6 @@ void setVector(Fixture& f, std::vector<T> vec)
     BOOST_CHECK_NO_THROW(f.c.set(KEY, vec));
     BOOST_CHECK_NO_THROW(storedVec = f.c.get<std::vector<T> >(KEY))
     BOOST_CHECK_EQUAL_COLLECTIONS(storedVec.begin(), storedVec.end(), vec.begin(), vec.end());
-    BOOST_CHECK_EQUAL(f.c.count(KEY), vec.size());
-    BOOST_CHECK_EQUAL(f.c.size(), vec.size());
 }
 
 template<typename T>
@@ -199,8 +193,8 @@ void testVectorOfValues(Fixture& f,
 
     // Remove
     BOOST_CHECK_NO_THROW(f.c.remove(KEY));
-    BOOST_CHECK_EQUAL(f.c.count(KEY), 0);
-    BOOST_CHECK_EQUAL(f.c.size(), 0);
+    BOOST_CHECK(!f.c.exists(KEY));
+    BOOST_CHECK(f.c.isEmpty());
     BOOST_CHECK_THROW(f.c.get<std::vector<T> >(KEY), ConfigException);
     BOOST_CHECK_THROW(f.c.get(KEY), ConfigException);
 }
@@ -221,7 +215,7 @@ BOOST_AUTO_TEST_CASE(ClearTest)
     std::vector<std::string> vec = {"A", "B"};
     BOOST_CHECK_NO_THROW(c.set(KEY, vec));
     BOOST_CHECK_NO_THROW(c.clear());
-    BOOST_CHECK_EQUAL(c.size(), 0);
+    BOOST_CHECK(c.isEmpty());
 
     BOOST_CHECK_NO_THROW(c.remove(KEY));
     BOOST_CHECK_THROW(c.get<std::vector<std::string>>(KEY), ConfigException);

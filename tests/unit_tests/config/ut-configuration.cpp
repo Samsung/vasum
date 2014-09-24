@@ -48,11 +48,13 @@ struct TestConfig {
         };
 
         int intVal;
+        std::vector<int> intVector;
         SubSubConfig subSubObj;
 
         CONFIG_REGISTER
         (
             intVal,
+            intVector,
             subSubObj
         )
     };
@@ -63,6 +65,7 @@ struct TestConfig {
     double doubleVal;
     bool boolVal;
 
+    std::vector<int> emptyIntVector;
     std::vector<int> intVector;
     std::vector<std::string> stringVector;
     std::vector<double> doubleVector;
@@ -78,6 +81,7 @@ struct TestConfig {
         doubleVal,
         boolVal,
 
+        emptyIntVector,
         intVector,
         stringVector,
         doubleVector,
@@ -98,12 +102,13 @@ const std::string jsonTestString =
     "\"stringVal\": \"blah\", "
     "\"doubleVal\": -1.234000, "
     "\"boolVal\": true, "
+    "\"emptyIntVector\": [ ], "
     "\"intVector\": [ 1, 2, 3 ], "
     "\"stringVector\": [ \"a\", \"b\" ], "
     "\"doubleVector\": [ 0.000000, 1.000000, 2.000000 ], "
-    "\"subObj\": { \"intVal\": 54321, \"subSubObj\": { \"intVal\": 234 } }, "
-    "\"subVector\": [ { \"intVal\": 123, \"subSubObj\": { \"intVal\": 345 } }, "
-                     "{ \"intVal\": 456, \"subSubObj\": { \"intVal\": 567 } } ] }";
+    "\"subObj\": { \"intVal\": 54321, \"intVector\": [ 1, 2 ], \"subSubObj\": { \"intVal\": 234 } }, "
+    "\"subVector\": [ { \"intVal\": 123, \"intVector\": [ 3, 4 ], \"subSubObj\": { \"intVal\": 345 } }, "
+    "{ \"intVal\": 456, \"intVector\": [ 5, 6 ], \"subSubObj\": { \"intVal\": 567 } } ] }";
 
 // Floating point tolerance as a number of rounding errors
 const int TOLERANCE = 1;
@@ -121,6 +126,8 @@ BOOST_AUTO_TEST_CASE(FromStringTest)
     BOOST_CHECK_CLOSE(-1.234, testConfig.doubleVal, TOLERANCE);
     BOOST_CHECK_EQUAL(true, testConfig.boolVal);
 
+    BOOST_REQUIRE_EQUAL(0, testConfig.emptyIntVector.size());
+
     BOOST_REQUIRE_EQUAL(3, testConfig.intVector.size());
     BOOST_CHECK_EQUAL(1, testConfig.intVector[0]);
     BOOST_CHECK_EQUAL(2, testConfig.intVector[1]);
@@ -136,12 +143,21 @@ BOOST_AUTO_TEST_CASE(FromStringTest)
     BOOST_CHECK_CLOSE(2.0, testConfig.doubleVector[2], TOLERANCE);
 
     BOOST_CHECK_EQUAL(54321, testConfig.subObj.intVal);
+    BOOST_CHECK_EQUAL(2,     testConfig.subObj.intVector.size());
+    BOOST_CHECK_EQUAL(1,     testConfig.subObj.intVector[0]);
+    BOOST_CHECK_EQUAL(2,     testConfig.subObj.intVector[1]);
+    BOOST_CHECK_EQUAL(234,   testConfig.subObj.subSubObj.intVal);
 
     BOOST_REQUIRE_EQUAL(2, testConfig.subVector.size());
     BOOST_CHECK_EQUAL(123, testConfig.subVector[0].intVal);
     BOOST_CHECK_EQUAL(456, testConfig.subVector[1].intVal);
     BOOST_CHECK_EQUAL(345, testConfig.subVector[0].subSubObj.intVal);
     BOOST_CHECK_EQUAL(567, testConfig.subVector[1].subSubObj.intVal);
+    BOOST_CHECK_EQUAL(3,   testConfig.subVector[0].intVector[0]);
+    BOOST_CHECK_EQUAL(5,   testConfig.subVector[1].intVector[0]);
+    BOOST_CHECK_EQUAL(4,   testConfig.subVector[0].intVector[1]);
+    BOOST_CHECK_EQUAL(6,   testConfig.subVector[1].intVector[1]);
+
 }
 
 
