@@ -29,6 +29,7 @@
 
 #include "logger/logger.hpp"
 #include "utils/paths.hpp"
+#include "utils/vt.hpp"
 #include "config/manager.hpp"
 
 #include <boost/filesystem.hpp>
@@ -208,6 +209,17 @@ std::string Container::getDbusAddress()
 {
     Lock lock(mReconnectMutex);
     return mDbusAddress;
+}
+
+bool Container::activateVT()
+{
+    Lock lock(mReconnectMutex);
+
+    if (mConfig.vt >= 0) {
+        return utils::activateVT(mConfig.vt);
+    }
+
+    return true;
 }
 
 void Container::goForeground()

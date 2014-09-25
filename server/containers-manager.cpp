@@ -183,6 +183,11 @@ void ContainersManager::focus(const std::string& containerId)
     /* try to access the object first to throw immediately if it doesn't exist */
     ContainerMap::mapped_type& foregroundContainer = mContainers.at(containerId);
 
+    if (!foregroundContainer->activateVT()) {
+        LOGE("Failed to activate containers VT. Aborting focus.");
+        return;
+    }
+
     for (auto& container : mContainers) {
         LOGD(container.second->getId() << ": being sent to background");
         container.second->goBackground();
@@ -240,10 +245,31 @@ std::string ContainersManager::getRunningForegroundContainerId()
     return std::string();
 }
 
+std::string ContainersManager::getNextToForegroundContainerId()
+{
+    // handles case where there is no next container
+    if (mContainers.size() < 2) {
+        return std::string();
+    }
+
+    for (auto it = mContainers.begin(); it != mContainers.end(); ++it) {
+        if (it->first == mConfig.foregroundId &&
+            it->second->isRunning()) {
+            auto nextIt = std::next(it);
+            if (nextIt != mContainers.end()) {
+                return nextIt->first;
+            }
+        }
+    }
+    return mContainers.begin()->first;
+}
+
 void ContainersManager::switchingSequenceMonitorNotify()
 {
     LOGI("switchingSequenceMonitorNotify() called");
-    // TODO: implement
+
+    auto nextContainerId = getNextToForegroundContainerId();
+    focus(nextContainerId);
 }
 
 

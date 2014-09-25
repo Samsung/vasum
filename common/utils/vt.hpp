@@ -19,37 +19,18 @@
 /**
  * @file
  * @author  Lukasz Kostyra (l.kostyra@samsung.com)
- * @brief   Image utility functions declaration
+ * @brief   VT-related utility functions
  */
 
-#ifndef COMMON_UTILS_IMG_HPP
-#define COMMON_UTILS_IMG_HPP
+#ifndef COMMON_UTILS_VT_HPP
+#define COMMON_UTILS_VT_HPP
 
 namespace security_containers {
 namespace utils {
 
-/**
- * Returns string with first free loop device.
- */
-bool getFreeLoopDevice(std::string& ret);
-
-/**
- * Mount an ext4 image from file on a given path by using a loop device.
- */
-bool mountImage(const std::string& image, const std::string& loopdev, const std::string& path);
-
-/**
- * Umounts previously mounted image.
- * This call will also free loop device used to mount specified path.
- */
-bool umountImage(const std::string& path, const std::string& loopdev);
-
-/**
- * Mounts an image and copies its contents to dst directory.
- */
-bool copyImageContents(const std::string& img, const std::string& dst);
+bool activateVT(const int& vt);
 
 } // namespace utils
 } // namespace security_containers
 
-#endif // COMMON_UTILS_IMG_HPP
+#endif // COMMON_UTILS_VT_HPP

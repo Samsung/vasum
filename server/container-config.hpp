@@ -43,6 +43,11 @@ struct ContainerConfig {
     int privilege;
 
     /**
+     * Number of virtual terminal used by xserver inside container
+     */
+    int vt;
+
+    /**
      * Allow switching to default container after timeout.
      * Setting this to false will disable switching to default container after timeout.
      */
@@ -101,6 +106,7 @@ struct ContainerConfig {
     CONFIG_REGISTER
     (
         privilege,
+        vt,
         switchToDefaultAfterTimeout,
         enableDbusIntegration,
         config,

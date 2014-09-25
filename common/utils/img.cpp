@@ -17,7 +17,7 @@
  */
 
 /**
- * @file    img.hpp
+ * @file
  * @author  Lukasz Kostyra (l.kostyra@samsung.com)
  * @brief   Image utility functions declaration
  */

@@ -78,6 +78,12 @@ public:
     std::string getRunningForegroundContainerId();
 
     /**
+     * @return id of next to currently focused/foreground container. If currently focused container
+     *         is last in container map, id of fisrt container from map is returned.
+     */
+    std::string getNextToForegroundContainerId();
+
+    /**
      * Set whether ContainersManager should detach containers on exit
      */
     void setContainersDetachOnExit();

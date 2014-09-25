@@ -62,6 +62,10 @@
 #error "DISK_GROUP must be defined!"
 #endif
 
+#ifndef TTY_GROUP
+#error "TTY_GROUP must be defined!"
+#endif
+
 extern char** environ;
 
 namespace security_containers {
@@ -189,7 +193,7 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
     // INPUT_EVENT_GROUP provides access to /dev/input/event* devices used by InputMonitor.
     // DISK_GROUP provides access to /dev/loop* devices, needed when adding new container to copy
     //            containers image
-    if (!utils::setSuppGroups({LIBVIRT_GROUP, INPUT_EVENT_GROUP, DISK_GROUP})) {
+    if (!utils::setSuppGroups({LIBVIRT_GROUP, INPUT_EVENT_GROUP, DISK_GROUP, TTY_GROUP})) {
         return false;
     }
 
@@ -197,7 +201,10 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
     // NOTE: CAP_MAC_OVERRIDE is temporary and must be removed when "smack namespace"
     // is introduced. The capability is needed to allow modify SMACK labels of
     // "/var/run/containers/<container>/run" mount point.
-    return (runAsRoot || utils::dropRoot(uid, gid, {CAP_SYS_ADMIN, CAP_MAC_OVERRIDE}));
+    // CAP_SYS_TTY_CONFIG is needed to activate virtual terminals through ioctl calls
+    return (runAsRoot || utils::dropRoot(uid, gid, {CAP_SYS_ADMIN,
+                                                    CAP_MAC_OVERRIDE,
+                                                    CAP_SYS_TTY_CONFIG}));
 }
 
 

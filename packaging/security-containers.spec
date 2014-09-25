@@ -7,6 +7,8 @@
 %define input_event_group video
 # The group has access to /dev/loop* devices.
 %define disk_group disk
+# The group that has write access to /dev/tty* devices.
+%define tty_group tty
 
 Name:           security-containers
 Version:        0.1.1
@@ -71,7 +73,8 @@ between them. A process from inside a container can request a switch of context
          -DSECURITY_CONTAINERS_USER=%{scs_user} \
          -DLIBVIRT_GROUP=%{libvirt_group} \
          -DINPUT_EVENT_GROUP=%{input_event_group} \
-         -DDISK_GROUP=%{disk_group}
+         -DDISK_GROUP=%{disk_group} \
+         -DTTY_GROUP=%{tty_group}
 make -k %{?jobs:-j%jobs}
 
 %install
@@ -88,7 +91,7 @@ if [ $1 == 1 ]; then
     systemctl daemon-reload || :
 fi
 # set needed caps on the binary to allow restart without loosing them
-setcap CAP_SYS_ADMIN,CAP_MAC_OVERRIDE+ei %{_bindir}/security-containers-server
+setcap CAP_SYS_ADMIN,CAP_MAC_OVERRIDE,CAP_SYS_TTY_CONFIG+ei %{_bindir}/security-containers-server
 
 %preun
 # Stop the service before uninstall

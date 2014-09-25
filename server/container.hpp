@@ -101,6 +101,13 @@ public:
     void stop();
 
     /**
+     * Activate this container's VT
+     *
+     * @return Was activation successful?
+     */
+    bool activateVT();
+
+    /**
      * Setup this container to be put in the foreground.
      * I.e. set appropriate scheduler level.
      */
