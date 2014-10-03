@@ -27,6 +27,9 @@
 #include "ut.hpp"
 #include "config/fields.hpp"
 #include "config/manager.hpp"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
@@ -316,6 +319,29 @@ BOOST_AUTO_TEST_CASE(FromToKVStoreTest)
     BOOST_CHECK_EQUAL(out, jsonTestString);
 
     fs::remove(dbPath);
+    fs::remove(dbPath + "-journal");
+}
+
+BOOST_AUTO_TEST_CASE(FromToFDTest)
+{
+    TestConfig config;
+    loadFromString(jsonTestString, config);
+    // Setup fd
+    std::string fifoPath = fs::unique_path("/tmp/fdstore-%%%%").string();
+    BOOST_CHECK(::mkfifo(fifoPath.c_str(), S_IWUSR | S_IRUSR) >= 0);
+    int fd = ::open(fifoPath.c_str(), O_RDWR);
+    BOOST_REQUIRE(fd >= 0);
+
+    // The test
+    saveToFD(fd, config);
+    TestConfig outConfig;
+    loadFromFD(fd, outConfig);
+    std::string out = saveToString(outConfig);
+    BOOST_CHECK_EQUAL(out, jsonTestString);
+
+    // Cleanup
+    BOOST_CHECK(::close(fd) >= 0);
+    fs::remove(fifoPath);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

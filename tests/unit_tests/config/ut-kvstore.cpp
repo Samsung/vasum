@@ -50,6 +50,7 @@ struct Fixture {
     ~Fixture()
     {
         fs::remove(dbPath);
+        fs::remove(dbPath + "-journal");
     }
 };
 
