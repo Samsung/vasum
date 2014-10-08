@@ -30,14 +30,13 @@
 
 #include "utils/callback-guard.hpp"
 #include "utils/callback-wrapper.hpp"
-#include "libvirt/connection.hpp"
-#include "libvirt/domain.hpp"
+//#include "libvirt/connection.hpp"
+//#include "libvirt/domain.hpp"
 
 #include <map>
 #include <mutex>
 #include <string>
 #include <cstdint>
-#include <libvirt/libvirt.h>
 
 
 namespace security_containers {
@@ -175,7 +174,7 @@ public:
 
 private:
     const ContainerConfig& mConfig;
-    libvirt::LibvirtDomain mDom;
+    //libvirt::LibvirtDomain mDom;
     const std::string mId;
     bool mDetachOnExit;
 
@@ -187,17 +186,17 @@ private:
     int mLifecycleCallbackId;
     int mRebootCallbackId;
 
-    // virConnectDomainEventCallback
-    static int libvirtLifecycleCallback(virConnectPtr con,
-                                        virDomainPtr dom,
-                                        int event,
-                                        int detail,
-                                        void* opaque);
-
-    // virConnectDomainEventGenericCallback
-    static void libvirtRebootCallback(virConnectPtr con,
-                                      virDomainPtr dom,
-                                      void* opaque);
+//    // virConnectDomainEventCallback
+//    static int libvirtLifecycleCallback(virConnectPtr con,
+//                                        virDomainPtr dom,
+//                                        int event,
+//                                        int detail,
+//                                        void* opaque);
+//
+//    // virConnectDomainEventGenericCallback
+//    static void libvirtRebootCallback(virConnectPtr con,
+//                                      virDomainPtr dom,
+//                                      void* opaque);
 
     // for handling external listeners triggered from libvirt callbacks
     // TODO, the Listener type might not be unique, reimplement using proper listeners

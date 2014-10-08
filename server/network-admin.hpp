@@ -28,8 +28,8 @@
 
 #include "container-config.hpp"
 
-#include "libvirt/network-filter.hpp"
-#include "libvirt/network.hpp"
+//#include "libvirt/network-filter.hpp"
+//#include "libvirt/network.hpp"
 
 
 namespace security_containers {
@@ -70,8 +70,8 @@ public:
 
 private:
     const ContainerConfig& mConfig;
-    libvirt::LibvirtNWFilter mNWFilter;
-    libvirt::LibvirtNetwork mNetwork;
+    //libvirt::LibvirtNWFilter mNWFilter;
+    //libvirt::LibvirtNetwork mNetwork;
     const std::string mId;
     bool mDetachOnExit;
 };

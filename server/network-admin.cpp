@@ -27,7 +27,7 @@
 #include "network-admin.hpp"
 #include "exception.hpp"
 
-#include "libvirt/helpers.hpp"
+//#include "libvirt/helpers.hpp"
 #include "logger/logger.hpp"
 #include "utils/fs.hpp"
 
@@ -38,28 +38,28 @@ namespace security_containers {
 
 namespace {
 
-std::string getNetworkName(virNetworkPtr net)
-{
-    assert(net);
-
-    const char* name = virNetworkGetName(net);
-    if (name == nullptr) {
-        LOGE("Failed to get the network's id:\n"
-             << libvirt::libvirtFormatError());
-        throw ContainerOperationException();
-    }
-
-    return name;
-}
+//std::string getNetworkName(virNetworkPtr net)
+//{
+//    assert(net);
+//
+//    const char* name = virNetworkGetName(net);
+//    if (name == nullptr) {
+//        LOGE("Failed to get the network's id:\n"
+//             << libvirt::libvirtFormatError());
+//        throw ContainerOperationException();
+//    }
+//
+//    return name;
+//}
 
 } // namespace
 
 
 NetworkAdmin::NetworkAdmin(const ContainerConfig& config)
     : mConfig(config),
-      mNWFilter(utils::readFileContent(mConfig.networkFilterConfig)),
-      mNetwork(utils::readFileContent(mConfig.networkConfig)),
-      mId(getNetworkName(mNetwork.get())),
+      //mNWFilter(utils::readFileContent(mConfig.networkFilterConfig)),
+      //mNetwork(utils::readFileContent(mConfig.networkConfig)),
+      mId("TODO"),//mId(getNetworkName(mNetwork.get())),
       mDetachOnExit(false)
 {
     LOGD(mId << ": Instantiating NetworkAdmin object");
@@ -90,61 +90,62 @@ const std::string& NetworkAdmin::getId() const
 
 void NetworkAdmin::start()
 {
-    assert(mNetwork);
-
-    LOGD(mId << ": Starting...");
-    if (isActive()) {
-        LOGD(mId << ": Already running - nothing to do...");
-        return;
-    }
-
-    if (virNetworkCreate(mNetwork.get()) < 0) {
-        LOGE(mId << ": Failed to start the network\n"
-             << libvirt::libvirtFormatError());
-        throw ContainerOperationException();
-    }
-
-    LOGD(mId << ": Started");
+//    assert(mNetwork);
+//
+//    LOGD(mId << ": Starting...");
+//    if (isActive()) {
+//        LOGD(mId << ": Already running - nothing to do...");
+//        return;
+//    }
+//
+//    if (virNetworkCreate(mNetwork.get()) < 0) {
+//        LOGE(mId << ": Failed to start the network\n"
+//             << libvirt::libvirtFormatError());
+//        throw ContainerOperationException();
+//    }
+//
+//    LOGD(mId << ": Started");
 }
 
 
 void NetworkAdmin::stop()
 {
-    assert(mNetwork);
-
-    LOGD(mId << ": Stopping procedure started...");
-    if (!isActive()) {
-        LOGD(mId << ": Already crashed/down/off - nothing to do");
-        return;
-    }
-
-    if (virNetworkDestroy(mNetwork.get()) < 0) {
-        LOGE(mId << ": Failed to destroy the network\n"
-             << libvirt::libvirtFormatError());
-        throw ContainerOperationException();
-    }
-
-    LOGD(mId << ": Stopping procedure ended");
+//    assert(mNetwork);
+//
+//    LOGD(mId << ": Stopping procedure started...");
+//    if (!isActive()) {
+//        LOGD(mId << ": Already crashed/down/off - nothing to do");
+//        return;
+//    }
+//
+//    if (virNetworkDestroy(mNetwork.get()) < 0) {
+//        LOGE(mId << ": Failed to destroy the network\n"
+//             << libvirt::libvirtFormatError());
+//        throw ContainerOperationException();
+//    }
+//
+//    LOGD(mId << ": Stopping procedure ended");
 }
 
 
 bool NetworkAdmin::isActive()
 {
-    assert(mNetwork);
-    int ret = virNetworkIsActive(mNetwork.get());
-    if (ret < 0) {
-        LOGE(mId << ": Failed to get network state\n"
-            << libvirt::libvirtFormatError());
-        throw ContainerOperationException();
-    }
-    return ret > 0;
+//    assert(mNetwork);
+//    int ret = virNetworkIsActive(mNetwork.get());
+//    if (ret < 0) {
+//        LOGE(mId << ": Failed to get network state\n"
+//            << libvirt::libvirtFormatError());
+//        throw ContainerOperationException();
+//    }
+//    return ret > 0;
+    return false;
 }
 
 
 void NetworkAdmin::setDetachOnExit()
 {
-    mDetachOnExit = true;
-    mNWFilter.setDetachOnExit();
+//    mDetachOnExit = true;
+//    mNWFilter.setDetachOnExit();
 }
 
 

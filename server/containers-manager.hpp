@@ -34,7 +34,6 @@
 
 #include <string>
 #include <unordered_map>
-#include <libvirt/libvirt.h>
 #include <memory>
 
 
