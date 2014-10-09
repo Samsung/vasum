@@ -186,6 +186,20 @@ Daemon running inside every container.
 /etc/dbus-1/system.d/org.tizen.containers.domain.daemon.conf
 
 
+## Command Line Interface ######################################################
+%package cli
+Summary:          Security Containers Command Line Interface
+Group:            Security/Other
+Requires:         security-containers-client = %{version}-%{release}
+
+%description cli
+Command Line Interface for security-containers.
+
+%files cli
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/security-containers-cli
+
+
 ## Test Package ################################################################
 %package tests
 Summary:          Security Containers Tests
