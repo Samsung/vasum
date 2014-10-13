@@ -4,7 +4,7 @@
 %define libvirt_group     libvirt
 # The group that has read and write access to /dev/input/event* devices.
 # It may vary between platforms.
-%define input_event_group video
+%define input_event_group input
 # The group has access to /dev/loop* devices.
 %define disk_group disk
 # The group that has write access to /dev/tty* devices.
