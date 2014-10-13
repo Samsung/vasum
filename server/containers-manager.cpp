@@ -112,7 +112,7 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
     }
 
     // check if default container exists, throw ContainerOperationException if not found
-    if (mContainers.find(mConfig.defaultId) == mContainers.end()) {
+    if (!mConfig.defaultId.empty() && mContainers.find(mConfig.defaultId) == mContainers.end()) {
         LOGE("Provided default container ID " << mConfig.defaultId << " is invalid.");
         throw ContainerOperationException("Provided default container ID " + mConfig.defaultId +
                                           " is invalid.");
@@ -219,9 +219,11 @@ void ContainersManager::startAll()
                                                        return c1.second->getPrivilege() < c2.second->getPrivilege();
                                                    });
 
-        mConfig.foregroundId = foregroundIterator->second->getId();
-        LOGI(mConfig.foregroundId << ": no foreground container configured, setting one with highest priority");
-        foregroundIterator->second->goForeground();
+        if (foregroundIterator != mContainers.end()) {
+            mConfig.foregroundId = foregroundIterator->second->getId();
+            LOGI(mConfig.foregroundId << ": no foreground container configured, setting one with highest priority");
+            foregroundIterator->second->goForeground();
+        }
     }
 }
 
@@ -269,7 +271,10 @@ void ContainersManager::switchingSequenceMonitorNotify()
     LOGI("switchingSequenceMonitorNotify() called");
 
     auto nextContainerId = getNextToForegroundContainerId();
-    focus(nextContainerId);
+
+    if (!nextContainerId.empty()) {
+        focus(nextContainerId);
+    }
 }
 
 
