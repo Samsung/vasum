@@ -208,37 +208,55 @@ bool copyDirContentsRec(const boost::filesystem::path& src, const boost::filesys
     namespace fs = boost::filesystem;
 
     // TODO: Right now this function skips files which produce error when copying. Errors show up
-    // when:
-    //   a) fs::directory_iterator file(src) is created
-    //   b) fs::copy(...) is called
-    // In both cases lack of permissions is the issue.
+    // when fs::directory_iterator file(src) is created - lack of permissions is the issue.
     //
-    // In a) case we can't do much - SCS won't be able to read the directory and its contents. Such
-    // directories are not common in the filesystem, so they *probably* can be skipped.
-    //
-    // In b) case multiple directories have too strict permissions to be directly copied. This
-    // is a problem for some files crucial to container launch (ex. we cannot copy
-    // /usr/lib/systemd/systemd because /usr/lib has 555 permissions).
-    // To fix b) issue, copying must be done in two steps:
-    //   1. Copy file contents without permissions (this probably can be achieved by opening two
-    //      files in-code with fstream and programatically copying data from one file to another).
-    //   2. Apply all available file attributes from source (permissions, owner UID/GID, xattrs...)
+    // To fix lack of permissions, copying must be done as root. The easiest way would be to launch
+    // copyDirContents after fork() and setuid(0).
 
     try {
         for (fs::directory_iterator file(src);
              file != fs::directory_iterator();
              ++file) {
             fs::path current(file->path());
+            fs::path destination = dst / current.filename();
 
             boost::system::error_code ec;
-            fs::copy(current, dst / current.filename(), ec);
-            if(ec.value() != boost::system::errc::success) {
+
+            if (!fs::is_symlink(current) && fs::is_directory(current)) {
+                fs::create_directory(destination, ec);
+            } else {
+                fs::copy(current, destination, ec);
+            }
+
+            if (ec.value() != boost::system::errc::success) {
                 LOGW("Failed to copy " << current << ": " << ec.message());
+                continue;
             }
 
             if (!fs::is_symlink(current) && fs::is_directory(current)) {
-                if (!copyDirContentsRec(current, dst / current.filename())) {
+                if (!copyDirContentsRec(current, destination)) {
                     return false;
+                }
+
+                // apply permissions coming from source file/directory
+                fs::file_status stat = status(current);
+                fs::permissions(destination, stat.permissions(), ec);
+
+                if (ec.value() != boost::system::errc::success) {
+                    LOGW("Failed to set permissions for " << destination << ": " << ec.message());
+                }
+            }
+
+            // change owner
+            struct stat info;
+            ::stat(current.string().c_str(), &info);
+            if (fs::is_symlink(destination)) {
+                if (::lchown(destination.string().c_str(), info.st_uid, info.st_gid) < 0) {
+                    LOGW("Failed to change owner of symlink " << destination.string() << ": " << strerror(errno));
+                }
+            } else {
+                if (::chown(destination.string().c_str(), info.st_uid, info.st_gid) < 0) {
+                    LOGW("Failed to change owner of file " << destination.string() << ": " << strerror(errno));
                 }
             }
         }

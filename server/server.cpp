@@ -202,9 +202,12 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
     // is introduced. The capability is needed to allow modify SMACK labels of
     // "/var/run/containers/<container>/run" mount point.
     // CAP_SYS_TTY_CONFIG is needed to activate virtual terminals through ioctl calls
+    // CAP_CHOWN is needed when creating new container from image to set owner/group for each file,
+    // directory or symlink
     return (runAsRoot || utils::dropRoot(uid, gid, {CAP_SYS_ADMIN,
                                                     CAP_MAC_OVERRIDE,
-                                                    CAP_SYS_TTY_CONFIG}));
+                                                    CAP_SYS_TTY_CONFIG,
+                                                    CAP_CHOWN}));
 }
 
 
