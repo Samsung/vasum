@@ -207,12 +207,6 @@ bool copyDirContentsRec(const boost::filesystem::path& src, const boost::filesys
 {
     namespace fs = boost::filesystem;
 
-    // TODO: Right now this function skips files which produce error when copying. Errors show up
-    // when fs::directory_iterator file(src) is created - lack of permissions is the issue.
-    //
-    // To fix lack of permissions, copying must be done as root. The easiest way would be to launch
-    // copyDirContents after fork() and setuid(0).
-
     try {
         for (fs::directory_iterator file(src);
              file != fs::directory_iterator();

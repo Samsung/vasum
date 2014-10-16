@@ -27,6 +27,7 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 #include <sys/types.h>
 
 
@@ -43,6 +44,13 @@ bool setSuppGroups(const std::vector<std::string>& groups);
  * Set effective and permited capabilities on the current process and drop root privileges.
  */
 bool dropRoot(uid_t uid, gid_t gid, const std::vector<unsigned int>& caps);
+
+/**
+ * Launch func as root user.
+ *
+ * This function forks, sets UID 0 to child process and calls func.
+ */
+bool launchAsRoot(const std::function<void()>& func);
 
 
 } // namespace utils

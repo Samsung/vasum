@@ -30,6 +30,8 @@
 #include <cap-ng.h>
 #include <grp.h>
 #include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 #include <cstring>
 
 
@@ -76,6 +78,43 @@ bool dropRoot(uid_t uid, gid_t gid, const std::vector<unsigned int>& caps)
 
     if (::capng_change_id(uid, gid, static_cast<capng_flags_t>(CAPNG_CLEAR_BOUNDING))) {
         LOGE("Failed to change process user");
+        return false;
+    }
+
+    return true;
+}
+
+bool launchAsRoot(const std::function<void()>& func)
+{
+    pid_t pid = fork();
+    if (pid < 0) {
+        LOGE("Fork failed: " << strerror(errno));
+        return false;
+    }
+
+    if (pid == 0) {
+        if (::setuid(0) < 0) {
+            LOGW("Failed to become root: " << strerror(errno));
+            ::exit(EXIT_FAILURE);
+        }
+
+        try {
+            func();
+        } catch (std::exception& e) {
+            LOGE("Failed to successfully execute func: " << e.what());
+            ::exit(EXIT_FAILURE);
+        }
+
+        ::exit(EXIT_SUCCESS);
+    }
+
+    int result;
+    if (::waitpid(pid, &result, 0) < 0) {
+        LOGE("waitpid failed: " << strerror(errno));
+        return false;
+    }
+    if (result != 0) {
+        LOGE("Function launched as root failed with result " << result);
         return false;
     }
 

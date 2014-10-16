@@ -37,6 +37,7 @@
 #include "dbus/exception.hpp"
 #include "utils/fs.hpp"
 #include "utils/img.hpp"
+#include "utils/environment.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
@@ -591,7 +592,11 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
     // copy container image if config contains path to image
     LOGT("image path: " << mConfig.containerImagePath);
     if (!mConfig.containerImagePath.empty()) {
-        if (!utils::copyImageContents(mConfig.containerImagePath, containerPathStr)) {
+        auto copyImageContentsWrapper = std::bind(&utils::copyImageContents,
+                                                  mConfig.containerImagePath,
+                                                  containerPathStr);
+
+        if (!utils::launchAsRoot(copyImageContentsWrapper)) {
             LOGE("Failed to copy container image.");
             result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED,
                             "Failed to copy container image.");
@@ -636,7 +641,7 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
         generateNewConfig(id, libvirtNetworkFilterPath, newLibvirtNetworkFilterPath);
     } catch (SecurityContainersException& e) {
         LOGE(e.what());
-        removeAllWrapper(containerPathStr);
+        utils::launchAsRoot(std::bind(removeAllWrapper, containerPathStr));
         result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED, e.what());
         return;
     }
@@ -646,7 +651,7 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
         addContainer(newConfigPath);
     } catch (SecurityContainersException& e) {
         LOGE(e.what());
-        removeAllWrapper(containerPathStr);
+        utils::launchAsRoot(std::bind(removeAllWrapper, containerPathStr));
         result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED, e.what());
         return;
     }
@@ -656,7 +661,7 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
             result->setVoid();
         } else {
             LOGE("Failed to start container.");
-            removeAllWrapper(containerPathStr);
+            utils::launchAsRoot(std::bind(removeAllWrapper, containerPathStr));
             result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED,
                              "Failed to start container.");
         }
