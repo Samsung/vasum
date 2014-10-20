@@ -38,6 +38,12 @@ std::map<std::string, CommandLineInterface> commands = {
         "set_active_container container_id",
         "Set active (foreground) container",
         {{"container_id", "id container name"}}}
+    },
+    {"add_container", {
+        add_container,
+        "add_container container_id",
+        "Create and add container",
+        {{"container_id", "id container name"}}}
     }
 };
 

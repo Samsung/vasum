@@ -103,6 +103,13 @@ private:
  */
 void set_active_container(int pos, int argc, const char** argv);
 
+/**
+ * Parses command line arguments and call sc_add_container
+ *
+ * @see sc_add_container
+ */
+void add_container(int pos, int argc, const char** argv);
+
 } // namespace cli
 } // namespace security_containers
 

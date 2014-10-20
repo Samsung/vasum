@@ -111,5 +111,16 @@ void set_active_container(int pos, int argc, const char** argv)
     one_shot(bind(sc_set_active_container, _1, argv[pos + 1]));
 }
 
+void add_container(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 1) {
+        throw runtime_error("Not enough parameters");
+    }
+
+    one_shot(bind(sc_add_container, _1, argv[pos + 1]));
+}
+
 } // namespace cli
 } // namespace security_containers
