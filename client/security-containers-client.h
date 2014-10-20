@@ -267,6 +267,15 @@ ScStatus sc_get_container_id_by_pid(ScClient client, int pid, ScString* id);
 ScStatus sc_set_active_container(ScClient client, const char* id);
 
 /**
+ * Create and add container
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] id container id
+ * @return status of this function call
+ */
+ScStatus sc_add_container(ScClient client, const char* id);
+
+/**
  * Register dbus state change callback function.
  *
  * @note The callback function will be invoked on a different thread.

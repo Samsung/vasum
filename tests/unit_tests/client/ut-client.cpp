@@ -188,6 +188,18 @@ BOOST_AUTO_TEST_CASE(SetActiveContainerTest)
     sc_client_free(client);
 }
 
+BOOST_AUTO_TEST_CASE(AddContainerTest)
+{
+    const std::string newActiveContainerId = "";
+
+    ScClient client = sc_client_create();
+    ScStatus status = sc_connect(client);
+    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
+    status = sc_add_container(client, newActiveContainerId.c_str());
+    BOOST_REQUIRE_EQUAL(SCCLIENT_CUSTOM_ERROR, status);
+    sc_client_free(client);
+}
+
 BOOST_AUTO_TEST_CASE(FileMoveRequestTest)
 {
     const std::string path = "/tmp/fake_path";

@@ -131,6 +131,11 @@ API ScStatus sc_set_active_container(ScClient client, const char* id)
     return getClient(client).sc_set_active_container(id);
 }
 
+API ScStatus sc_add_container(ScClient client, const char* id)
+{
+    return getClient(client).sc_add_container(id);
+}
+
 API ScStatus sc_container_dbus_state(ScClient client,
                                      ScContainerDbusStateCallback containerDbusStateCallback,
                                      void* data)

@@ -127,6 +127,11 @@ public:
     ScStatus sc_set_active_container(const char* id) noexcept;
 
     /**
+     *  @see ::sc_add_container
+     */
+    ScStatus sc_add_container(const char* id) noexcept;
+
+    /**
      *  @see ::sc_container_dbus_state
      */
     ScStatus sc_container_dbus_state(ScContainerDbusStateCallback containerDbusStateCallback,

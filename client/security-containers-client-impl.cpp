@@ -353,6 +353,14 @@ ScStatus Client::sc_set_active_container(const char* id) noexcept
     return callMethod(HOST_INTERFACE, api::host::METHOD_SET_ACTIVE_CONTAINER, args_in);
 }
 
+ScStatus Client::sc_add_container(const char* id) noexcept
+{
+    assert(id);
+
+    GVariant* args_in = g_variant_new("(s)", id);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_ADD_CONTAINER, args_in);
+}
+
 ScStatus Client::sc_container_dbus_state(ScContainerDbusStateCallback containerDbusStateCallback,
                                          void* data) noexcept
 {
