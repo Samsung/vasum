@@ -490,7 +490,7 @@ void ContainersManager::handleGetContainerIdsCall(dbus::MethodResultBuilder::Poi
 void ContainersManager::handleGetActiveContainerIdCall(dbus::MethodResultBuilder::Pointer result)
 {
     LOGI("GetActiveContainerId call");
-    if (mContainers[mConfig.foregroundId]->isRunning()){
+    if (!mConfig.foregroundId.empty() && mContainers[mConfig.foregroundId]->isRunning()){
         result->set(g_variant_new("(s)", mConfig.foregroundId.c_str()));
     } else {
         result->set(g_variant_new("(s)", ""));
@@ -622,7 +622,7 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
         try {
             LOGD("Removing copied data");
             fs::remove_all(fs::path(path));
-        } catch(const boost::exception& e) {
+        } catch(const std::exception& e) {
             LOGW("Failed to remove data: " << boost::diagnostic_information(e));
         }
     };
@@ -656,8 +656,9 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
         return;
     }
 
-    auto resultCallback = [result, containerPathStr, removeAllWrapper](bool succeeded) {
+    auto resultCallback = [this, id, result, containerPathStr, removeAllWrapper](bool succeeded) {
         if (succeeded) {
+            focus(id);
             result->setVoid();
         } else {
             LOGE("Failed to start container.");
