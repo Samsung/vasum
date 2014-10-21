@@ -19,17 +19,15 @@ Group:          Security/Other
 Summary:        Daemon for managing containers
 BuildRequires:  cmake
 BuildRequires:  boost-devel
-BuildRequires:  libvirt-devel
 BuildRequires:  libjson-devel >= 0.10
 BuildRequires:  libcap-ng-devel
+BuildRequires:  lxc-devel
 BuildRequires:  pkgconfig(libConfig)
 BuildRequires:  pkgconfig(libLogger)
 BuildRequires:  pkgconfig(libSimpleDbus)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(libsystemd-journal)
-BuildRequires:  pkgconfig(libvirt-glib-1.0)
 BuildRequires:  pkgconfig(sqlite3)
-Requires:       libvirt-daemon >= 1.2.4
 Requires(post): libcap-tools
 
 %description
@@ -207,6 +205,7 @@ Group:            Development/Libraries
 Requires:         security-containers = %{version}-%{release}
 Requires:         security-containers-client = %{version}-%{release}
 Requires:         python
+Requires:         python-xml
 Requires:         boost-test
 
 %description tests
@@ -220,6 +219,7 @@ Unit tests for both: server and client and integration tests.
 %attr(755,root,root) %{script_dir}/sc_int_tests.py
 %attr(755,root,root) %{script_dir}/sc_launch_test.py
 %{script_dir}/sc_test_parser.py
-%{_datadir}/security-containers
+%{_datadir}/security-containers/tests
+%attr(755,root,root) %{_datadir}/security-containers/lxc-templates
 %{python_sitelib}/sc_integration_tests
 /etc/dbus-1/system.d/org.tizen.containers.tests.conf

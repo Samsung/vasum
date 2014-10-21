@@ -35,7 +35,7 @@ ADD_EXECUTABLE(${UT_SERVER_CODENAME} ${project_SRCS} ${common_SRCS} ${server_SRC
 ## Link libraries ##############################################################
 FIND_PACKAGE (Boost COMPONENTS unit_test_framework system filesystem regex)
 
-PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED json gio-2.0
+PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED lxc json gio-2.0
                   libsystemd-journal libcap-ng libLogger libSimpleDbus libConfig)
 INCLUDE_DIRECTORIES(${COMMON_FOLDER} ${SERVER_FOLDER} ${UNIT_TESTS_FOLDER} ${CLIENT_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${UT_SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
@@ -44,12 +44,15 @@ TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_
 
 ## Subdirectories ##############################################################
 SET(SC_TEST_CONFIG_INSTALL_DIR ${SC_DATA_INSTALL_DIR}/tests)
+SET(SC_TEST_LXC_TEMPLATES_INSTALL_DIR ${SC_DATA_INSTALL_DIR}/lxc-templates/tests)
 ADD_DEFINITIONS(-DSC_TEST_CONFIG_INSTALL_DIR="${SC_TEST_CONFIG_INSTALL_DIR}")
+ADD_DEFINITIONS(-DSC_TEST_LXC_TEMPLATES_INSTALL_DIR="${SC_TEST_LXC_TEMPLATES_INSTALL_DIR}")
 
 ADD_SUBDIRECTORY(dbus/configs)
 ADD_SUBDIRECTORY(server/configs)
 ADD_SUBDIRECTORY(utils/configs)
 ADD_SUBDIRECTORY(client/configs)
+ADD_SUBDIRECTORY(lxc/templates)
 
 
 ## Install #####################################################################

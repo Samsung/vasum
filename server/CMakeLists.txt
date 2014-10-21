@@ -29,7 +29,7 @@ ADD_EXECUTABLE(${SERVER_CODENAME} ${project_SRCS} ${common_SRCS})
 
 ## Link libraries ##############################################################
 FIND_PACKAGE(Boost COMPONENTS program_options system filesystem regex)
-PKG_CHECK_MODULES(SERVER_DEPS REQUIRED json gio-2.0 libsystemd-journal
+PKG_CHECK_MODULES(SERVER_DEPS REQUIRED lxc json gio-2.0 libsystemd-journal
                   libcap-ng libLogger libSimpleDbus libConfig)
 
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
