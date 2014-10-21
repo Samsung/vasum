@@ -207,6 +207,7 @@ Group:            Development/Libraries
 Requires:         security-containers = %{version}-%{release}
 Requires:         security-containers-client = %{version}-%{release}
 Requires:         python
+Requires:         python-xml
 Requires:         boost-test
 
 %description tests
