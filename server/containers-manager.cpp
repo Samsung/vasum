@@ -572,6 +572,13 @@ void ContainersManager::generateNewConfig(const std::string& id,
 void ContainersManager::handleAddContainerCall(const std::string& id,
                                                dbus::MethodResultBuilder::Pointer result)
 {
+    if (id.empty()) {
+        LOGE("Failed to add container - invalid name.");
+        result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED,
+                         "Failed to add container - invalid name.");
+        return;
+    }
+
     LOGI("Adding container " << id);
 
     // TODO: This solution is temporary. It utilizes direct access to config files when creating new
