@@ -17,6 +17,7 @@
 # @author Jan Olszak (j.olszak@samsung.com)
 #
 
+MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Container Daemon...")
 FILE(GLOB project_SRCS *.cpp *.hpp)
 FILE(GLOB common_SRCS ${COMMON_FOLDER}/dbus/*.cpp  ${COMMON_FOLDER}/dbus/*.hpp

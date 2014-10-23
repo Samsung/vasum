@@ -67,9 +67,6 @@ bool regexMatchVector(const std::string& str, const std::vector<boost::regex>& v
 
 const std::string HOST_ID = "host";
 const std::string CONTAINER_TEMPLATE_CONFIG_PATH = "template.conf";
-const std::string CONTAINER_TEMPLATE_LIBVIRT_CONFIG_PATH = "template.xml";
-const std::string CONTAINER_TEMPLATE_LIBVIRT_NETWORK_PATH = "template-network.xml";
-const std::string CONTAINER_TEMPLATE_LIBVIRT_NETWORK_FILTER_PATH = "template-nwfilter.xml";
 
 const boost::regex CONTAINER_NAME_REGEX("~NAME~");
 const boost::regex CONTAINER_UUID_REGEX("~UUID~");
@@ -606,12 +603,6 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
 
     std::string configPath = utils::createFilePath(templateDir, "/", CONTAINER_TEMPLATE_CONFIG_PATH);
     std::string newConfigPath = utils::createFilePath(configDir, "/containers/", id + ".conf");
-    std::string libvirtConfigPath = utils::createFilePath(templateDir, "/", CONTAINER_TEMPLATE_LIBVIRT_CONFIG_PATH);
-    std::string newLibvirtConfigPath = utils::createFilePath(configDir, "/libvirt-config/", id + ".xml");
-    std::string libvirtNetworkPath = utils::createFilePath(templateDir, "/", CONTAINER_TEMPLATE_LIBVIRT_NETWORK_PATH);
-    std::string newLibvirtNetworkPath = utils::createFilePath(configDir, "/libvirt-config/", id + "-network.xml");
-    std::string libvirtNetworkFilterPath = utils::createFilePath(templateDir, "/", CONTAINER_TEMPLATE_LIBVIRT_NETWORK_FILTER_PATH);
-    std::string newLibvirtNetworkFilterPath = utils::createFilePath(configDir, "/libvirt-config/", id + "-nwfilter.xml");
 
     auto removeAllWrapper = [](const std::string& path) {
         try {
@@ -626,14 +617,6 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
         LOGI("Generating config from " << configPath << " to " << newConfigPath);
         generateNewConfig(id, configPath, newConfigPath);
 
-        LOGI("Generating config from " << libvirtConfigPath << " to " << newLibvirtConfigPath);
-        generateNewConfig(id, libvirtConfigPath, newLibvirtConfigPath);
-
-        LOGI("Generating config from " << libvirtNetworkPath << " to " << newLibvirtNetworkPath);
-        generateNewConfig(id, libvirtNetworkPath, newLibvirtNetworkPath);
-
-        LOGI("Generating config from " << libvirtNetworkFilterPath << " to " << newLibvirtNetworkFilterPath);
-        generateNewConfig(id, libvirtNetworkFilterPath, newLibvirtNetworkFilterPath);
     } catch (SecurityContainersException& e) {
         LOGE(e.what());
         removeAllWrapper(containerPathStr);

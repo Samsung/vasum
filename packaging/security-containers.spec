@@ -1,7 +1,6 @@
 %define script_dir %{_sbindir}
 # Security Containers Server's user info - it should already exist in the system
 %define scs_user          security-containers
-%define libvirt_group     libvirt
 # The group that has read and write access to /dev/input/event* devices.
 # It may vary between platforms.
 %define input_event_group input
@@ -41,13 +40,8 @@ between them. A process from inside a container can request a switch of context
 %attr(755,root,root) %{_bindir}/security-containers-server
 %dir /etc/security-containers
 %dir /etc/security-containers/containers
-%dir /etc/security-containers/libvirt-config
-%dir /etc/security-containers/templates
 %config /etc/security-containers/daemon.conf
 %config /etc/security-containers/containers/*.conf
-%config /etc/security-containers/libvirt-config/*.xml
-%config /etc/security-containers/templates/*.conf
-%config /etc/security-containers/templates/*.xml
 %{_unitdir}/security-containers.service
 %{_unitdir}/multi-user.target.wants/security-containers.service
 /etc/dbus-1/system.d/org.tizen.containers.host.conf
@@ -69,7 +63,6 @@ between them. A process from inside a container can request a switch of context
          -DSYSTEMD_UNIT_DIR=%{_unitdir} \
          -DPYTHON_SITELIB=%{python_sitelib} \
          -DSECURITY_CONTAINERS_USER=%{scs_user} \
-         -DLIBVIRT_GROUP=%{libvirt_group} \
          -DINPUT_EVENT_GROUP=%{input_event_group} \
          -DDISK_GROUP=%{disk_group} \
          -DTTY_GROUP=%{tty_group}

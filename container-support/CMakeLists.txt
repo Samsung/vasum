@@ -17,6 +17,7 @@
 # @author Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
 #
 
+MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Container Support...")
 
 

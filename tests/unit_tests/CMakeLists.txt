@@ -17,6 +17,7 @@
 # @author Jan Olszak (j.olszak@samsung.com)
 #
 
+MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Unit Tests...")
 FILE(GLOB_RECURSE project_SRCS *.cpp *.hpp)
 FILE(GLOB_RECURSE common_SRCS ${COMMON_FOLDER}/*.cpp ${COMMON_FOLDER}/*.hpp)

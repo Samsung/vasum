@@ -17,6 +17,7 @@
 # @author Mateusz Malicki (m.malicki2@samsung.com)
 #
 
+MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Client...")
 FILE(GLOB project_SRCS *.cpp *.hpp *.h)
 FILE(GLOB common_SRCS ${COMMON_FOLDER}/utils/callback-guard.hpp

@@ -60,23 +60,6 @@ struct ContainerConfig {
     bool enableDbusIntegration;
 
     /**
-     * Container's libvirt (XML) config file.
-     * Location can be relative to the Container's config file.
-     */
-    std::string config;
-
-    /**
-     * Container's libvirt (XML) network config file.
-     */
-    std::string networkConfig;
-
-    /**
-     *
-     * Container's libvirt (XML) network filter config file.
-     */
-    std::string networkFilterConfig;
-
-    /**
      * Container's CFS quota in us when it's in the foreground
      */
     std::int64_t cpuQuotaForeground;
@@ -109,9 +92,6 @@ struct ContainerConfig {
         vt,
         switchToDefaultAfterTimeout,
         enableDbusIntegration,
-        config,
-        networkConfig,
-        networkFilterConfig,
         cpuQuotaForeground,
         cpuQuotaBackground,
         runMountPoint,

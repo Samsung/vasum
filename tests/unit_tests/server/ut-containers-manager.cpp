@@ -65,7 +65,6 @@ const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-con
 const std::string BUGGY_FOREGROUND_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-foreground-daemon.conf";
 const std::string BUGGY_DEFAULTID_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-default-daemon.conf";
 const std::string TEST_CONTAINER_CONF_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/containers/";
-const std::string TEST_CONTAINER_LIBVIRT_CONF_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/libvirt-config/";
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/missing-daemon.conf";
 const int EVENT_TIMEOUT = 5000;
 const int TEST_DBUS_CONNECTION_CONTAINERS_COUNT = 3;
@@ -930,9 +929,6 @@ BOOST_AUTO_TEST_CASE(AddContainerTest)
     const std::string newContainerId = "test1234";
     const std::vector<std::string> newContainerConfigs = {
         TEST_CONTAINER_CONF_PATH + newContainerId + ".conf",
-        TEST_CONTAINER_LIBVIRT_CONF_PATH + newContainerId + ".xml",
-        TEST_CONTAINER_LIBVIRT_CONF_PATH + newContainerId + "-network.xml",
-        TEST_CONTAINER_LIBVIRT_CONF_PATH + newContainerId + "-nwfilter.xml",
     };
     FileCleanerRAII cleaner(newContainerConfigs);
 

@@ -1,7 +1,5 @@
 [Unit]
 Description=Security Containers Server
-After=libvirtd.service
-Requires=libvirtd.service
 ConditionVirtualization=no
 
 [Service]

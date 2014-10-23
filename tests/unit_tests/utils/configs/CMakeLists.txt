@@ -17,7 +17,7 @@
 # @author Lukasz Pawelczyk (l.pawelczyk@partner.samsung.com)
 #
 
-MESSAGE(STATUS "Installing configs for the Utils Unit Tests to " ${SC_CONFIG_INSTALL_DIR})
+MESSAGE(STATUS "Installing configs for the Utils Unit Tests to " ${SC_TEST_CONFIG_INSTALL_DIR})
 FILE(GLOB fs_CONF ut-fs/*.txt)
 
 

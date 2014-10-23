@@ -17,28 +17,15 @@
 # @author Mateusz Malicki (m.malicki2@samsung.com)
 #
 
-MESSAGE(STATUS "Installing configs for the Client Unit Tests to " ${SC_CONFIG_INSTALL_DIR})
+MESSAGE(STATUS "Installing configs for the Client Unit Tests to " ${SC_TEST_CONFIG_INSTALL_DIR})
 
 FILE(GLOB client_manager_CONF       ut-client/*.conf)
 FILE(GLOB client_container_CONF     ut-client/containers/*.conf)
-FILE(GLOB client_admin_CONF         ut-client/libvirt-config/*.xml)
 
 ## Generate ####################################################################
-CONFIGURE_FILE(ut-client/libvirt-config/console1-dbus.xml.in
-               ${CMAKE_BINARY_DIR}/ut-client/libvirt-config/console1-dbus.xml @ONLY)
-CONFIGURE_FILE(ut-client/libvirt-config/console2-dbus.xml.in
-               ${CMAKE_BINARY_DIR}/ut-client/libvirt-config/console2-dbus.xml @ONLY)
-CONFIGURE_FILE(ut-client/libvirt-config/console3-dbus.xml.in
-               ${CMAKE_BINARY_DIR}/ut-client/libvirt-config/console3-dbus.xml @ONLY)
-FILE(GLOB client_admin_CONF_GEN ${CMAKE_BINARY_DIR}/ut-client/libvirt-config/*.xml)
-
 
 ## Install #####################################################################
 INSTALL(FILES        ${client_manager_CONF}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/client/ut-client)
 INSTALL(FILES        ${client_container_CONF}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/client/ut-client/containers)
-INSTALL(FILES        ${client_admin_CONF}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/client/ut-client/libvirt-config)
-INSTALL(FILES        ${client_admin_CONF_GEN}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/client/ut-client/libvirt-config)
