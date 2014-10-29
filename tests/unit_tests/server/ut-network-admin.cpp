@@ -23,63 +23,63 @@
  * @brief   Unit tests of the NetworkAdmin class
  */
 
-#include "config.hpp"
-#include "ut.hpp"
-
-#include "network-admin.hpp"
-
-#include "utils/exception.hpp"
-//#include "libvirt/exception.hpp"
-#include "config/manager.hpp"
-
-
-using namespace security_containers;
-
-namespace {
-
-const std::string TEST_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-network-admin/containers/test.conf";
-const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-network-admin/containers/buggy.conf";
-const std::string MISSING_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-network-admin/containers/missing.conf";
-
-} // namespace
-
-
-BOOST_AUTO_TEST_SUITE(NetworkAdminSuite)
-
-BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
-{
-    ContainerConfig config;
-    config::loadFromFile(TEST_CONFIG_PATH, config);
-    std::unique_ptr<NetworkAdmin> admin;
-    BOOST_REQUIRE_NO_THROW(admin.reset(new NetworkAdmin(config)));
-    BOOST_REQUIRE_NO_THROW(admin.reset());
-}
-
-//BOOST_AUTO_TEST_CASE(BuggyConfigTest)
+//#include "config.hpp"
+//#include "ut.hpp"
+//
+//#include "network-admin.hpp"
+//
+//#include "utils/exception.hpp"
+////#include "libvirt/exception.hpp"
+//#include "config/manager.hpp"
+//
+//
+//using namespace security_containers;
+//
+//namespace {
+//
+//const std::string TEST_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-network-admin/containers/test.conf";
+//const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-network-admin/containers/buggy.conf";
+//const std::string MISSING_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-network-admin/containers/missing.conf";
+//
+//} // namespace
+//
+//
+//BOOST_AUTO_TEST_SUITE(NetworkAdminSuite)
+//
+//BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 //{
 //    ContainerConfig config;
-//    config::loadFromFile(BUGGY_CONFIG_PATH, config);
-//    BOOST_REQUIRE_THROW(NetworkAdmin na(config), LibvirtOperationException);
+//    config::loadFromFile(TEST_CONFIG_PATH, config);
+//    std::unique_ptr<NetworkAdmin> admin;
+//    BOOST_REQUIRE_NO_THROW(admin.reset(new NetworkAdmin(config)));
+//    BOOST_REQUIRE_NO_THROW(admin.reset());
 //}
-
-BOOST_AUTO_TEST_CASE(MissingConfigTest)
-{
-    ContainerConfig config;
-    config::loadFromFile(MISSING_CONFIG_PATH, config);
-    BOOST_REQUIRE_THROW(NetworkAdmin na(config), UtilsException);
-}
-
-BOOST_AUTO_TEST_CASE(StartStopTest)
-{
-    ContainerConfig config;
-    config::loadFromFile(TEST_CONFIG_PATH, config);
-    NetworkAdmin net(config);
-
-    BOOST_CHECK(!net.isActive());
-    BOOST_CHECK_NO_THROW(net.start());
-    BOOST_CHECK(net.isActive());
-    BOOST_CHECK_NO_THROW(net.stop());
-    BOOST_CHECK(!net.isActive());
-}
-
-BOOST_AUTO_TEST_SUITE_END()
+//
+////BOOST_AUTO_TEST_CASE(BuggyConfigTest)
+////{
+////    ContainerConfig config;
+////    config::loadFromFile(BUGGY_CONFIG_PATH, config);
+////    BOOST_REQUIRE_THROW(NetworkAdmin na(config), LibvirtOperationException);
+////}
+//
+//BOOST_AUTO_TEST_CASE(MissingConfigTest)
+//{
+//    ContainerConfig config;
+//    config::loadFromFile(MISSING_CONFIG_PATH, config);
+//    BOOST_REQUIRE_THROW(NetworkAdmin na(config), UtilsException);
+//}
+//
+//BOOST_AUTO_TEST_CASE(StartStopTest)
+//{
+//    ContainerConfig config;
+//    config::loadFromFile(TEST_CONFIG_PATH, config);
+//    NetworkAdmin net(config);
+//
+//    BOOST_CHECK(!net.isActive());
+//    BOOST_CHECK_NO_THROW(net.start());
+//    BOOST_CHECK(net.isActive());
+//    BOOST_CHECK_NO_THROW(net.stop());
+//    BOOST_CHECK(!net.isActive());
+//}
+//
+//BOOST_AUTO_TEST_SUITE_END()

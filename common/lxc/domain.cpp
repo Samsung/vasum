@@ -96,9 +96,9 @@ void LxcDomain::destroy()
     }
 }
 
-void LxcDomain::start(const char* argv[])
+void LxcDomain::start(const char* const* argv)
 {
-    if (!mContainer->start(mContainer, false, const_cast<char**>(argv))) {
+    if (!mContainer->start(mContainer, false, const_cast<char* const*>(argv))) {
         LOGE("Could not start domain " + getName());
         throw LxcException("Could not start domain");
     }

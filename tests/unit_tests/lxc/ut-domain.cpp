@@ -28,6 +28,7 @@
 
 #include "lxc/domain.hpp"
 #include "lxc/exception.hpp"
+#include "utils/scoped-dir.hpp"
 
 #include <thread>
 #include <chrono>
@@ -37,23 +38,22 @@ namespace {
 
 using namespace security_containers;
 using namespace security_containers::lxc;
-namespace fs = boost::filesystem;
 
 const std::string LXC_PATH = "/tmp/ut-lxc/";
 const std::string DOMAIN_NAME = "ut-domain";
 const std::string TEMPLATE = SC_TEST_LXC_TEMPLATES_INSTALL_DIR "/minimal.sh";
 
 struct Fixture {
+    utils::ScopedDir mLxcDirGuard = LXC_PATH;
+
     Fixture()
     {
-        fs::create_directory(LXC_PATH);
         cleanup();
     }
 
     ~Fixture()
     {
         cleanup();
-        fs::remove_all(LXC_PATH);
     }
 
     void cleanup()

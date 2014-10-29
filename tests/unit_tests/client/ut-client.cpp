@@ -28,6 +28,7 @@
 #include <security-containers-client.h>
 
 #include "utils/latch.hpp"
+#include "utils/scoped-dir.hpp"
 #include "containers-manager.hpp"
 #include "container-dbus-definitions.hpp"
 
@@ -46,6 +47,7 @@ namespace {
 
 const std::string TEST_DBUS_CONFIG_PATH =
     SC_TEST_CONFIG_INSTALL_DIR "/client/ut-client/test-dbus-daemon.conf";
+const std::string CONTAINERS_PATH = "/tmp/ut-containers"; // the same as in daemon.conf
 
 struct Loop {
     Loop() { sc_start_glib_loop(); }
@@ -54,6 +56,11 @@ struct Loop {
 
 struct Fixture {
     Loop loop;
+    utils::ScopedDir mContainersPathGuard = CONTAINERS_PATH;
+    utils::ScopedDir mRun1Guard = utils::ScopedDir("/tmp/ut-run1");
+    utils::ScopedDir mRun2Guard = utils::ScopedDir("/tmp/ut-run2");
+    utils::ScopedDir mRun3Guard = utils::ScopedDir("/tmp/ut-run3");
+
     ContainersManager cm;
 
     Fixture(): cm(TEST_DBUS_CONFIG_PATH)
@@ -65,11 +72,11 @@ struct Fixture {
 const int EVENT_TIMEOUT = 5000; ///< ms
 const std::map<std::string, std::string> EXPECTED_DBUSES_STARTED = {
     {"ut-containers-manager-console1-dbus",
-     "unix:path=/tmp/ut-containers-manager/console1-dbus/dbus/system_bus_socket"},
+     "unix:path=/tmp/ut-run1/dbus/system_bus_socket"},
     {"ut-containers-manager-console2-dbus",
-     "unix:path=/tmp/ut-containers-manager/console2-dbus/dbus/system_bus_socket"},
+     "unix:path=/tmp/ut-run2/dbus/system_bus_socket"},
     {"ut-containers-manager-console3-dbus",
-     "unix:path=/tmp/ut-containers-manager/console3-dbus/dbus/system_bus_socket"}};
+     "unix:path=/tmp/ut-run3/dbus/system_bus_socket"}};
 
 void convertDictToMap(ScArrayString keys,
                       ScArrayString values,

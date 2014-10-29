@@ -30,8 +30,7 @@
 
 #include "utils/callback-guard.hpp"
 #include "utils/callback-wrapper.hpp"
-//#include "libvirt/connection.hpp"
-//#include "libvirt/domain.hpp"
+#include "lxc/domain.hpp"
 
 #include <map>
 #include <mutex>
@@ -70,7 +69,15 @@ public:
      */
     typedef std::function<void()> RebootListener;
 
-    ContainerAdmin(const ContainerConfig& config);
+    /**
+     * ContainerAdmin constructor
+     * @param containersPath directory where containers are defined (lxc configs, rootfs etc)
+     * @param lxcTemplatePrefix directory where templates are stored
+     * @param config containers config
+     */
+    ContainerAdmin(const std::string& containersPath,
+                   const std::string& lxcTemplatePrefix,
+                   const ContainerConfig& config);
     virtual ~ContainerAdmin();
 
     /**
@@ -174,7 +181,7 @@ public:
 
 private:
     const ContainerConfig& mConfig;
-    //libvirt::LibvirtDomain mDom;
+    lxc::LxcDomain mDom;
     const std::string mId;
     bool mDetachOnExit;
 

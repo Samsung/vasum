@@ -1,0 +1,14 @@
+{
+    "name" : "ut-containers-manager-console1-dbus",
+    "lxcTemplate" : "minimal-dbus1.sh",
+    "initWithArgs" : ["/bin/sh", "-c", "trap exit SIGTERM; /usr/bin/dbus-daemon --config-file=@SC_TEST_CONFIG_INSTALL_DIR@/server/ut-containers-manager/ut-dbus.conf --fork; read"],
+    "privilege" : 20,
+    "vt" : -1,
+    "switchToDefaultAfterTimeout" : true,
+    "enableDbusIntegration" : true,
+    "cpuQuotaForeground" : -1,
+    "cpuQuotaBackground" : 1000,
+    "runMountPoint" : "/tmp/ut-run1",
+    "permittedToSend" : [ "/tmp/.*", "/etc/secret2" ],
+    "permittedToRecv" : [ "/tmp/.*" ]
+}

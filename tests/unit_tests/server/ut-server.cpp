@@ -29,12 +29,20 @@
 #include "server.hpp"
 #include "exception.hpp"
 #include "config/exception.hpp"
+#include "utils/scoped-dir.hpp"
 
 #include <string>
 #include <future>
 
+namespace {
+const std::string CONTAINERS_PATH = "/tmp/ut-containers"; // the same as in daemon.conf
 
-BOOST_AUTO_TEST_SUITE(ServerSuite)
+struct Fixture {
+    security_containers::utils::ScopedDir mContainersPathGuard = CONTAINERS_PATH;
+};
+} // namespace
+
+BOOST_FIXTURE_TEST_SUITE(ServerSuite, Fixture)
 
 using namespace security_containers;
 using namespace config;
@@ -47,8 +55,8 @@ const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/missing-da
 BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 {
     std::unique_ptr<Server> s;
-    BOOST_REQUIRE_NO_THROW(s.reset(new Server(TEST_CONFIG_PATH)));
-    BOOST_REQUIRE_NO_THROW(s.reset());
+    s.reset(new Server(TEST_CONFIG_PATH));
+    s.reset();
 }
 
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)
@@ -64,14 +72,14 @@ BOOST_AUTO_TEST_CASE(MissingConfigTest)
 BOOST_AUTO_TEST_CASE(TerminateTest)
 {
     Server s(TEST_CONFIG_PATH);
-    BOOST_REQUIRE_NO_THROW(s.terminate());
+    s.terminate();
 }
 
 BOOST_AUTO_TEST_CASE(TerminateRunTest)
 {
     Server s(TEST_CONFIG_PATH);
-    BOOST_REQUIRE_NO_THROW(s.terminate());
-    BOOST_REQUIRE_NO_THROW(s.run());
+    s.terminate();
+    s.run();
 }
 
 BOOST_AUTO_TEST_CASE(RunTerminateTest)
@@ -82,11 +90,11 @@ BOOST_AUTO_TEST_CASE(RunTerminateTest)
     // give a chance to run a thread
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    BOOST_REQUIRE_NO_THROW(s.terminate());
+    s.terminate();
     runFuture.wait();
 
     // a potential exception from std::async thread will be delegated to this thread
-    BOOST_REQUIRE_NO_THROW(runFuture.get());
+    runFuture.get();
 }
 
 

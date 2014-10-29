@@ -19,55 +19,46 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Lxc domain
+ * @brief   Create directory in constructor, delete it in destructor
  */
 
-#ifndef COMMON_LXC_DOMAIN_HPP
-#define COMMON_LXC_DOMAIN_HPP
+#ifndef UNIT_TESTS_UTILS_SCOPED_DIR_HPP
+#define UNIT_TESTS_UTILS_SCOPED_DIR_HPP
 
 #include <string>
 
-// fwd declaration of lxc internals
-struct lxc_container;
 
 namespace security_containers {
-namespace lxc {
+namespace utils {
 
 
 /**
- * A class wwapping lxc container
+ * Scoped directory
+ * To be used in tests only
  */
-class LxcDomain {
+class ScopedDir {
 public:
-    LxcDomain(const std::string& lxcPath, const std::string& domainName);
-    ~LxcDomain();
+    ScopedDir();
+    ScopedDir(const std::string& path);
+    ~ScopedDir();
 
-    LxcDomain(const LxcDomain&) = delete;
-    LxcDomain& operator=(const LxcDomain&) = delete;
+    /**
+     * Creates a dir or if exists ensures it is empty
+     */
+    void create(const std::string& path);
 
-    std::string getName() const;
+    /**
+     * Deletes this dir with all content
+     */
+    void remove();
 
-    std::string getConfigItem(const std::string& key);
-
-    bool isDefined();
-    bool isRunning();
-
-    std::string getState();
-
-    void create(const std::string& templatePath);
-    void destroy();
-
-    void start(const char* const* argv);
-    void stop();
-    void reboot();
-    void shutdown(int timeout);
 private:
-    lxc_container* mContainer;
+    std::string mPath;
 };
 
 
-} // namespace lxc
+} // namespace utils
 } // namespace security_containers
 
 
-#endif // COMMON_LXC_DOMAIN_HPP
+#endif // UNIT_TESTS_UTILS_SCOPED_DIR_HPP

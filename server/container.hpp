@@ -45,8 +45,17 @@ namespace security_containers {
 class Container {
 
 public:
-    Container(const std::string& containerConfigPath,
-              const std::string& baseRunMountPointPath = "");
+    /**
+     * Container constructor
+     * @param containersPath directory where containers are defined (lxc configs, rootfs etc)
+     * @param containerConfigPath path for containers config
+     * @param lxcTemplatePrefix directory where templates are stored
+     * @param baseRunMountPointPath base directory for run mount point
+     */
+    Container(const std::string& containersPath,
+              const std::string& containerConfigPath,
+              const std::string& lxcTemplatePrefix,
+              const std::string& baseRunMountPointPath);
     Container(Container&&) = default;
     virtual ~Container();
 

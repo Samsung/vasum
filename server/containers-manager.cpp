@@ -149,7 +149,9 @@ void ContainersManager::addContainer(const std::string& containerConfig)
     std::string containerConfigPath = utils::getAbsolutePath(containerConfig, baseConfigPath);
 
     LOGT("Creating Container " << containerConfigPath);
-    std::unique_ptr<Container> c(new Container(containerConfigPath,
+    std::unique_ptr<Container> c(new Container(mConfig.containersPath,
+                                               containerConfigPath,
+                                               mConfig.lxcTemplatePrefix,
                                                mConfig.runMountPointPrefix));
     const std::string id = c->getId();
     if (id == HOST_ID) {

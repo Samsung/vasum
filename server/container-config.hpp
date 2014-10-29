@@ -36,6 +36,22 @@ namespace security_containers {
 
 
 struct ContainerConfig {
+
+    /**
+     * Container name
+     */
+    std::string name;
+
+    /**
+     * Lxc template name (relative to lxcTemplatePrefix)
+     */
+    std::string lxcTemplate;
+
+    /**
+     * Init program with args (empty means default /sbin/init)
+     */
+    std::vector<std::string> initWithArgs;
+
     /**
      * Privilege of the container.
      * The smaller the value the more important the container
@@ -88,6 +104,9 @@ struct ContainerConfig {
 
     CONFIG_REGISTER
     (
+        name,
+        lxcTemplate,
+        initWithArgs,
         privilege,
         vt,
         switchToDefaultAfterTimeout,

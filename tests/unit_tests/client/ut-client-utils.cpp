@@ -50,6 +50,8 @@ BOOST_AUTO_TEST_CASE(ParseContainerIdFromCpuSetTest)
     testOK("/machine/a-b.libvirt-lxc", "a-b");
     testOK("/machine.slice/machine-lxc\\x2da\\x2db.scope", "a-b");
     testOK("/machine.slice/machine-lxc\\x2da-b.scope", "a/b");
+
+    testOK("/lxc/test", "test");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

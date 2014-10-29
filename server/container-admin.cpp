@@ -27,9 +27,9 @@
 #include "container-admin.hpp"
 #include "exception.hpp"
 
-//#include "libvirt/helpers.hpp"
 #include "logger/logger.hpp"
 #include "utils/fs.hpp"
+#include "utils/paths.hpp"
 #include "utils/latch.hpp"
 #include "utils/callback-wrapper.hpp"
 
@@ -47,36 +47,62 @@ namespace {
 // TODO: this should be in container's configuration file
 const int SHUTDOWN_WAIT = 10 * 1000;
 
-//std::string getDomainName(virDomainPtr dom)
-//{
-//    assert(dom);
-//
-//    const char* name = virDomainGetName(dom);
-//    if (name == nullptr) {
-//        LOGE("Failed to get the domain's id:\n"
-//             << libvirt::libvirtFormatError());
-//        throw ContainerOperationException();
-//    }
-//
-//    return name;
-//}
+class Args {
+public:
+    Args(const std::vector<std::string>& args)
+    {
+        mArgs.reserve(args.size() + 1);
+        for (const std::string& arg : args) {
+            mArgs.push_back(arg.c_str());
+        }
+        mArgs.push_back(NULL);
+    }
+    bool empty() const
+    {
+        return mArgs.size() == 1;
+    }
+    const char* const* getAsCArray() const
+    {
+        return mArgs.data();
+    }
+    friend std::ostream& operator<<(std::ostream& os, const Args& a)
+    {
+        for (const char* arg : a.mArgs) {
+            if (arg != NULL) {
+                os << "'" << arg << "' ";
+            }
+        }
+        return os;
+    }
+private:
+    std::vector<const char*> mArgs;
+};
 
 } // namespace
 
 const std::uint64_t DEFAULT_CPU_SHARES = 1024;
 const std::uint64_t DEFAULT_VCPU_PERIOD_MS = 100000;
 
-ContainerAdmin::ContainerAdmin(const ContainerConfig& config)
+ContainerAdmin::ContainerAdmin(const std::string& containersPath,
+                               const std::string& lxcTemplatePrefix,
+                               const ContainerConfig& config)
     : mConfig(config),
-      //mDom(utils::readFileContent(mConfig.config)),
-      mId("TODO"),//mId(getDomainName(mDom.get())),
+      mDom(containersPath, config.name),
+      mId(mDom.getName()),
       mDetachOnExit(false),
       mLifecycleCallbackId(-1),
       mRebootCallbackId(-1),
       mNextIdForListener(1)
 {
-//    LOGD(mId << ": Instantiating ContainerAdmin object");
-//
+    LOGD(mId << ": Instantiating ContainerAdmin object");
+
+    if (!mDom.isDefined()) {
+
+        std::string lxcTemplate = utils::getAbsolutePath(config.lxcTemplate, lxcTemplatePrefix);
+        LOGI(mId << ": Creating domain from template: " << lxcTemplate);
+        mDom.create(lxcTemplate);
+    }
+
 //    // ContainerAdmin owns those callbacks
 //    mLifecycleCallbackId = virConnectDomainEventRegisterAny(virDomainGetConnect(mDom.get()),
 //                                                            mDom.get(),
@@ -112,8 +138,8 @@ ContainerAdmin::ContainerAdmin(const ContainerConfig& config)
 
 ContainerAdmin::~ContainerAdmin()
 {
-//    LOGD(mId << ": Destroying ContainerAdmin object...");
-//
+    LOGD(mId << ": Destroying ContainerAdmin object...");
+
 //    // Deregister callbacks
 //    if (mLifecycleCallbackId >= 0) {
 //        virConnectDomainEventDeregisterAny(virDomainGetConnect(mDom.get()),
@@ -124,16 +150,16 @@ ContainerAdmin::~ContainerAdmin()
 //                                           mRebootCallbackId);
 //    }
 //
-//    // Try to forcefully stop
-//    if (!mDetachOnExit) {
-//        try {
-//            destroy();
-//        } catch (ServerException&) {
-//            LOGE(mId << ": Failed to destroy the container");
-//        }
-//    }
-//
-//    LOGD(mId << ": ContainerAdmin object destroyed");
+    // Try to forcefully stop
+    if (!mDetachOnExit) {
+        try {
+            destroy();
+        } catch (ServerException&) {
+            LOGE(mId << ": Failed to destroy the container");
+        }
+    }
+
+    LOGD(mId << ": ContainerAdmin object destroyed");
 }
 
 
@@ -145,14 +171,20 @@ const std::string& ContainerAdmin::getId() const
 
 void ContainerAdmin::start()
 {
-//    assert(mDom);
-//
-//    LOGD(mId << ": Starting...");
-//    if (isRunning()) {
-//        LOGD(mId << ": Already running - nothing to do...");
-//        return;
-//    }
-//
+    LOGD(mId << ": Starting...");
+    if (isRunning()) {
+        LOGD(mId << ": Already running - nothing to do...");
+        return;
+    }
+
+    Args args(mConfig.initWithArgs);
+    if (args.empty()) {
+        mDom.start(NULL);
+    } else {
+        LOGD(mId << ": Init: " << args);
+        mDom.start(args.getAsCArray());
+    }
+
 //    // In order to update daemon without shutting down the containers
 //    // autodestroy option must NOT be set. It's best to create domain
 //    // without any flags.
@@ -164,20 +196,20 @@ void ContainerAdmin::start()
 //        throw ContainerOperationException();
 //    }
 //
-//    LOGD(mId << ": Started");
+    LOGD(mId << ": Started");
 }
 
 
 void ContainerAdmin::stop()
 {
-//    assert(mDom);
-//
-//    LOGD(mId << ": Stopping procedure started...");
-//    if (isStopped()) {
-//        LOGD(mId << ": Already crashed/down/off - nothing to do");
-//        return;
-//    }
-//
+    LOGD(mId << ": Stopping procedure started...");
+    if (isStopped()) {
+        LOGD(mId << ": Already crashed/down/off - nothing to do");
+        return;
+    }
+
+    mDom.stop();
+
 //    utils::Latch stoppedOccured;
 //
 //    LifecycleListener setStopped = [&](const int eventId, const int detailId) {
@@ -200,20 +232,20 @@ void ContainerAdmin::stop()
 //        destroy();
 //    }
 //
-//    LOGD(mId << ": Stopping procedure ended");
+    LOGD(mId << ": Stopping procedure ended");
 }
 
 
 void ContainerAdmin::destroy()
 {
-//    assert(mDom);
-//
-//    LOGD(mId << ": Destroying...");
-//    if (isStopped()) {
-//        LOGD(mId << ": Already crashed/down/off - nothing to do");
-//        return;
-//    }
-//
+    LOGD(mId << ": Destroying...");
+    if (isStopped()) {
+        LOGD(mId << ": Already crashed/down/off - nothing to do");
+        return;
+    }
+
+    mDom.stop();//TODO
+
 //    setSchedulerLevel(SchedulerLevel::FOREGROUND);
 //
 //    // Forceful termination of the guest
@@ -225,20 +257,20 @@ void ContainerAdmin::destroy()
 //        throw ContainerOperationException();
 //    }
 //
-//    LOGD(mId << ": Destroyed");
+    LOGD(mId << ": Destroyed");
 }
 
 
 void ContainerAdmin::shutdown()
 {
-//    assert(mDom);
-//
-//    LOGD(mId << ": Shutting down...");
-//    if (isStopped()) {
-//        LOGD(mId << ": Already crashed/down/off - nothing to do");
-//        return;
-//    }
-//
+    LOGD(mId << ": Shutting down...");
+    if (isStopped()) {
+        LOGD(mId << ": Already crashed/down/off - nothing to do");
+        return;
+    }
+
+    mDom.stop(); //TODO
+
 //    setSchedulerLevel(SchedulerLevel::FOREGROUND);
 //
 //    if (virDomainShutdownFlags(mDom.get(), VIR_DOMAIN_SHUTDOWN_SIGNAL) < 0) {
@@ -247,24 +279,19 @@ void ContainerAdmin::shutdown()
 //        throw ContainerOperationException();
 //    }
 //
-//    LOGD(mId << ": Shut down initiated (async)");
+    LOGD(mId << ": Shut down initiated (async)");
 }
 
 
 bool ContainerAdmin::isRunning()
 {
-//    return getState() == VIR_DOMAIN_RUNNING;
-    return false;
+    return mDom.isRunning();
 }
 
 
 bool ContainerAdmin::isStopped()
 {
-//    int state = getState();
-//    return state == VIR_DOMAIN_SHUTDOWN ||
-//           state == VIR_DOMAIN_SHUTOFF ||
-//           state == VIR_DOMAIN_CRASHED;
-    return false;
+    return !mDom.isRunning();//TODO
 }
 
 
@@ -311,7 +338,7 @@ void ContainerAdmin::resume()
 bool ContainerAdmin::isPaused()
 {
 //    return getState() == VIR_DOMAIN_PAUSED;
-    return false;
+    return false;//TODO
 }
 
 

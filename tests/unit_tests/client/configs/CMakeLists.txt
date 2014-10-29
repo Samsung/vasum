@@ -19,13 +19,21 @@
 
 MESSAGE(STATUS "Installing configs for the Client Unit Tests to " ${SC_TEST_CONFIG_INSTALL_DIR})
 
-FILE(GLOB client_manager_CONF       ut-client/*.conf)
-FILE(GLOB client_container_CONF     ut-client/containers/*.conf)
-
 ## Generate ####################################################################
+CONFIGURE_FILE(ut-client/test-dbus-daemon.conf.in
+              ${CMAKE_BINARY_DIR}/ut-client/test-dbus-daemon.conf @ONLY)
+FILE(GLOB client_manager_CONF_GEN ${CMAKE_BINARY_DIR}/ut-client/*.conf)
+
+CONFIGURE_FILE(ut-client/containers/console1-dbus.conf.in
+               ${CMAKE_BINARY_DIR}/ut-client/containers/console1-dbus.conf @ONLY)
+CONFIGURE_FILE(ut-client/containers/console2-dbus.conf.in
+               ${CMAKE_BINARY_DIR}/ut-client/containers/console2-dbus.conf @ONLY)
+CONFIGURE_FILE(ut-client/containers/console3-dbus.conf.in
+               ${CMAKE_BINARY_DIR}/ut-client/containers/console3-dbus.conf @ONLY)
+FILE(GLOB client_container_CONF_GEN ${CMAKE_BINARY_DIR}/ut-client/containers/*.conf)
 
 ## Install #####################################################################
-INSTALL(FILES        ${client_manager_CONF}
+INSTALL(FILES        ${client_manager_CONF_GEN}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/client/ut-client)
-INSTALL(FILES        ${client_container_CONF}
+INSTALL(FILES        ${client_container_CONF_GEN}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/client/ut-client/containers)
