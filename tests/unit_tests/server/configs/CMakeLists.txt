@@ -43,14 +43,6 @@ CONFIGURE_FILE(ut-server/buggy-daemon.conf.in
               ${CMAKE_BINARY_DIR}/ut-server/buggy-daemon.conf @ONLY)
 FILE(GLOB server_manager_CONF_GEN ${CMAKE_BINARY_DIR}/ut-server/*.conf)
 
-CONFIGURE_FILE(ut-container-admin/containers/buggy.conf.in
-               ${CMAKE_BINARY_DIR}/ut-container-admin/containers/buggy.conf @ONLY)
-CONFIGURE_FILE(ut-container-admin/containers/test.conf.in
-               ${CMAKE_BINARY_DIR}/ut-container-admin/containers/test.conf @ONLY)
-CONFIGURE_FILE(ut-container-admin/containers/test-no-shutdown.conf.in
-               ${CMAKE_BINARY_DIR}/ut-container-admin/containers/test-no-shutdown.conf @ONLY)
-FILE(GLOB admin_container_CONF_GEN ${CMAKE_BINARY_DIR}/ut-container-admin/containers/*.conf)
-
 CONFIGURE_FILE(ut-network-admin/containers/test.conf.in
                ${CMAKE_BINARY_DIR}/ut-network-admin/containers/test.conf @ONLY)
 CONFIGURE_FILE(ut-network-admin/containers/buggy.conf.in
@@ -109,8 +101,6 @@ INSTALL(FILES        ${container_container_CONF_GEN}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container/containers)
 
 INSTALL(FILES        ${admin_container_CONF}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container-admin/containers)
-INSTALL(FILES        ${admin_container_CONF_GEN}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container-admin/containers)
 
 INSTALL(FILES        ${network_container_CONF}

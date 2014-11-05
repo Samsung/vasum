@@ -28,16 +28,9 @@
 #include "exception.hpp"
 
 #include "logger/logger.hpp"
-#include "utils/fs.hpp"
 #include "utils/paths.hpp"
-#include "utils/latch.hpp"
-#include "utils/callback-wrapper.hpp"
 
 #include <cassert>
-#include <cstring>
-#include <string>
-#include <memory>
-#include <cstdint>
 
 
 namespace security_containers {
@@ -45,7 +38,7 @@ namespace security_containers {
 namespace {
 
 // TODO: this should be in container's configuration file
-const int SHUTDOWN_WAIT = 10 * 1000;
+const int SHUTDOWN_WAIT = 10;
 
 class Args {
 public:
@@ -89,50 +82,19 @@ ContainerAdmin::ContainerAdmin(const std::string& containersPath,
     : mConfig(config),
       mDom(containersPath, config.name),
       mId(mDom.getName()),
-      mDetachOnExit(false),
-      mLifecycleCallbackId(-1),
-      mRebootCallbackId(-1),
-      mNextIdForListener(1)
+      mDetachOnExit(false)
 {
     LOGD(mId << ": Instantiating ContainerAdmin object");
 
     if (!mDom.isDefined()) {
 
-        std::string lxcTemplate = utils::getAbsolutePath(config.lxcTemplate, lxcTemplatePrefix);
+        const std::string lxcTemplate = utils::getAbsolutePath(config.lxcTemplate,
+                                                               lxcTemplatePrefix);
         LOGI(mId << ": Creating domain from template: " << lxcTemplate);
-        mDom.create(lxcTemplate);
+        if (!mDom.create(lxcTemplate)) {
+            throw ContainerOperationException("Could not create domain");
+        }
     }
-
-//    // ContainerAdmin owns those callbacks
-//    mLifecycleCallbackId = virConnectDomainEventRegisterAny(virDomainGetConnect(mDom.get()),
-//                                                            mDom.get(),
-//                                                            VIR_DOMAIN_EVENT_ID_LIFECYCLE,
-//                                                            VIR_DOMAIN_EVENT_CALLBACK(&ContainerAdmin::libvirtLifecycleCallback),
-//                                                            utils::createCallbackWrapper(this, mLibvirtGuard.spawn()),
-//                                                            &utils::deleteCallbackWrapper<ContainerAdmin*>);
-//
-//    if (mLifecycleCallbackId < 0) {
-//        LOGE(mId << ": Failed to register a libvirt lifecycle callback");
-//        throw ContainerOperationException(mId + ": Failed to register a libvirt lifecycle callback");
-//    }
-//
-//    LOGT(mId << ": registered lifecycle callback");
-//
-//    mRebootCallbackId = virConnectDomainEventRegisterAny(virDomainGetConnect(mDom.get()),
-//                                                         mDom.get(),
-//                                                         VIR_DOMAIN_EVENT_ID_REBOOT,
-//                                                         VIR_DOMAIN_EVENT_CALLBACK(&ContainerAdmin::libvirtRebootCallback),
-//                                                         utils::createCallbackWrapper(this, mLibvirtGuard.spawn()),
-//                                                         &utils::deleteCallbackWrapper<ContainerAdmin*>);
-//
-//    if (mRebootCallbackId < 0) {
-//        LOGE(mId << ": Failed to register a libvirt reboot callback");
-//        virConnectDomainEventDeregisterAny(virDomainGetConnect(mDom.get()),
-//                                           mLifecycleCallbackId);
-//        throw ContainerOperationException(mId + ": Failed to register a libvirt reboot callback");
-//    }
-//
-//    LOGT(mId << ": registered reboot callback");
 }
 
 
@@ -140,22 +102,10 @@ ContainerAdmin::~ContainerAdmin()
 {
     LOGD(mId << ": Destroying ContainerAdmin object...");
 
-//    // Deregister callbacks
-//    if (mLifecycleCallbackId >= 0) {
-//        virConnectDomainEventDeregisterAny(virDomainGetConnect(mDom.get()),
-//                                           mLifecycleCallbackId);
-//    }
-//    if (mRebootCallbackId >= 0) {
-//        virConnectDomainEventDeregisterAny(virDomainGetConnect(mDom.get()),
-//                                           mRebootCallbackId);
-//    }
-//
-    // Try to forcefully stop
     if (!mDetachOnExit) {
-        try {
-            destroy();
-        } catch (ServerException&) {
-            LOGE(mId << ": Failed to destroy the container");
+        // Try to forcefully stop
+        if (!mDom.stop()) {
+            LOGE(mId << ": Failed to stop the container");
         }
     }
 
@@ -177,25 +127,19 @@ void ContainerAdmin::start()
         return;
     }
 
-    Args args(mConfig.initWithArgs);
+    const Args args(mConfig.initWithArgs);
+    bool result;
     if (args.empty()) {
-        mDom.start(NULL);
+        result = mDom.start(NULL);
     } else {
         LOGD(mId << ": Init: " << args);
-        mDom.start(args.getAsCArray());
+        result = mDom.start(args.getAsCArray());
     }
 
-//    // In order to update daemon without shutting down the containers
-//    // autodestroy option must NOT be set. It's best to create domain
-//    // without any flags.
-//    u_int flags = VIR_DOMAIN_NONE;
-//
-//    if (virDomainCreateWithFlags(mDom.get(), flags) < 0) {
-//        LOGE(mId << ": Failed to start the container\n"
-//             << libvirt::libvirtFormatError());
-//        throw ContainerOperationException();
-//    }
-//
+    if (!result) {
+        throw ContainerOperationException("Could not start container");
+    }
+
     LOGD(mId << ": Started");
 }
 
@@ -208,154 +152,64 @@ void ContainerAdmin::stop()
         return;
     }
 
-    mDom.stop();
+    if (!mDom.shutdown(SHUTDOWN_WAIT)) {
+        // force stop
+        if (!mDom.stop()) {
+            throw ContainerOperationException("Could not stop container");
+        }
+    }
 
-//    utils::Latch stoppedOccured;
-//
-//    LifecycleListener setStopped = [&](const int eventId, const int detailId) {
-//        if (eventId == VIR_DOMAIN_EVENT_STOPPED) {
-//            if (detailId != VIR_DOMAIN_EVENT_STOPPED_SHUTDOWN) {
-//                LOGW(mId << ": shutdown requested, but the container stopped with a different status: "
-//                     << libvirt::libvirtEventDetailToString(eventId, detailId));
-//            }
-//            stoppedOccured.set();
-//        }
-//    };
-//
-//    ListenerId id = registerLifecycleListener(setStopped, nullptr);
-//    shutdown();
-//    bool stopped = stoppedOccured.wait(SHUTDOWN_WAIT);
-//    removeListener(id);
-//
-//    if (!stopped) {
-//        LOGW(mId << ": Gracefull shutdown timed out, the container is still running, destroying");
-//        destroy();
-//    }
-//
     LOGD(mId << ": Stopping procedure ended");
 }
 
 
 void ContainerAdmin::destroy()
 {
-    LOGD(mId << ": Destroying...");
-    if (isStopped()) {
-        LOGD(mId << ": Already crashed/down/off - nothing to do");
-        return;
+    LOGD(mId << ": Destroying procedure started...");
+
+    if (!mDom.destroy()) {
+        throw ContainerOperationException("Could not destroy container");
     }
 
-    mDom.stop();//TODO
-
-//    setSchedulerLevel(SchedulerLevel::FOREGROUND);
-//
-//    // Forceful termination of the guest
-//    u_int flags = VIR_DOMAIN_DESTROY_DEFAULT;
-//
-//    if (virDomainDestroyFlags(mDom.get(), flags) < 0) {
-//        LOGE(mId << ": Error while destroying the container:\n"
-//             << libvirt::libvirtFormatError());
-//        throw ContainerOperationException();
-//    }
-//
-    LOGD(mId << ": Destroyed");
-}
-
-
-void ContainerAdmin::shutdown()
-{
-    LOGD(mId << ": Shutting down...");
-    if (isStopped()) {
-        LOGD(mId << ": Already crashed/down/off - nothing to do");
-        return;
-    }
-
-    mDom.stop(); //TODO
-
-//    setSchedulerLevel(SchedulerLevel::FOREGROUND);
-//
-//    if (virDomainShutdownFlags(mDom.get(), VIR_DOMAIN_SHUTDOWN_SIGNAL) < 0) {
-//        LOGE(mId << ": Error while shutting down the container:\n"
-//             << libvirt::libvirtFormatError());
-//        throw ContainerOperationException();
-//    }
-//
-    LOGD(mId << ": Shut down initiated (async)");
+    LOGD(mId << ": Destroying procedure ended");
 }
 
 
 bool ContainerAdmin::isRunning()
 {
-    return mDom.isRunning();
+    return mDom.getState() == lxc::LxcDomain::State::RUNNING;
 }
 
 
 bool ContainerAdmin::isStopped()
 {
-    return !mDom.isRunning();//TODO
+    return mDom.getState() == lxc::LxcDomain::State::STOPPED;
 }
 
 
 void ContainerAdmin::suspend()
 {
-//    assert(mDom);
-//
-//    LOGD(mId << ": Pausing...");
-//    if (isPaused()) {
-//        LOGD(mId << ": Already paused - nothing to do...");
-//        return;
-//    }
-//
-//    if (virDomainSuspend(mDom.get()) < 0) {
-//        LOGE(mId << ": Error while suspending the container:\n"
-//             << libvirt::libvirtFormatError());
-//        throw ContainerOperationException();
-//    }
-//
-//    LOGD(mId << ": Paused");
+    LOGD(mId << ": Pausing...");
+    if (!mDom.freeze()) {
+        throw ContainerOperationException("Could not pause container");
+    }
+    LOGD(mId << ": Paused");
 }
 
 
 void ContainerAdmin::resume()
 {
-//    assert(mDom);
-//
-//    LOGD(mId << ": Resuming...");
-//    if (!isPaused()) {
-//        LOGD(mId << ": Is not paused - nothing to do...");
-//        return;
-//    }
-//
-//    if (virDomainResume(mDom.get()) < 0) {
-//        LOGE(mId << ": Error while resuming the container:\n"
-//             << libvirt::libvirtFormatError());
-//        throw ContainerOperationException();
-//    }
-//
-//    LOGD(mId << ": Resumed");
+    LOGD(mId << ": Resuming...");
+    if (!mDom.unfreeze()) {
+        throw ContainerOperationException("Could not resume container");
+    }
+    LOGD(mId << ": Resumed");
 }
 
 
 bool ContainerAdmin::isPaused()
 {
-//    return getState() == VIR_DOMAIN_PAUSED;
-    return false;//TODO
-}
-
-
-int ContainerAdmin::getState()
-{
-//    assert(mDom);
-//
-//    int state;
-//
-//    if (virDomainGetState(mDom.get(), &state, NULL, 0)) {
-//        LOGE(mId << ": Error while getting the container's state:\n"
-//             << libvirt::libvirtFormatError());
-//        throw ContainerOperationException();
-//    }
-//
-//    return state;
-    return 0;
+    return mDom.getState() == lxc::LxcDomain::State::FROZEN;
 }
 
 
@@ -442,78 +296,6 @@ std::int64_t ContainerAdmin::getSchedulerQuota()
 //    return quota;
     return 0;
 }
-
-ContainerAdmin::ListenerId ContainerAdmin::registerLifecycleListener(const ContainerAdmin::LifecycleListener& listener,
-                                                                     const utils::CallbackGuard::Tracker& tracker)
-{
-
-    utils::CallbackWrapper<LifecycleListener> wrap(listener, tracker);
-
-    std::unique_lock<std::mutex> lock(mListenerMutex);
-    unsigned int id = mNextIdForListener++;
-    mLifecycleListeners.insert(LifecycleListenerMap::value_type(id, std::move(wrap)));
-
-    return id;
-}
-
-ContainerAdmin::ListenerId ContainerAdmin::registerRebootListener(const ContainerAdmin::RebootListener& listener,
-                                                                  const utils::CallbackGuard::Tracker& tracker)
-{
-
-    utils::CallbackWrapper<RebootListener> wrap(listener, tracker);
-
-    std::unique_lock<std::mutex> lock(mListenerMutex);
-    unsigned int id = mNextIdForListener++;
-    mRebootListeners.insert(RebootListenerMap::value_type(id, std::move(wrap)));
-
-    return id;
-}
-
-void ContainerAdmin::removeListener(const ContainerAdmin::ListenerId id)
-{
-    std::unique_lock<std::mutex> lock(mListenerMutex);
-    mLifecycleListeners.erase(id);
-    mRebootListeners.erase(id);
-}
-
-//int ContainerAdmin::libvirtLifecycleCallback(virConnectPtr /*con*/,
-//                                             virDomainPtr /*dom*/,
-//                                             int event,
-//                                             int detail,
-//                                             void* opaque)
-//{
-//    ContainerAdmin* thisPtr = utils::getCallbackFromPointer<ContainerAdmin*>(opaque);
-//
-//    LOGI(thisPtr->getId()
-//         << ": Lifecycle event: "
-//         << libvirt::libvirtEventToString(event)
-//         << ": "
-//         << libvirt::libvirtEventDetailToString(event, detail));
-//
-//    std::unique_lock<std::mutex> lock(thisPtr->mListenerMutex);
-//    for (auto& it : thisPtr->mLifecycleListeners) {
-//        LifecycleListener f = it.second.get();
-//        f(event, detail);
-//    }
-//
-//    // ignored, libvirt's legacy
-//    return 0;
-//}
-//
-//void ContainerAdmin::libvirtRebootCallback(virConnectPtr /*con*/,
-//                                           virDomainPtr /*dom*/,
-//                                           void* opaque)
-//{
-//    ContainerAdmin* thisPtr = utils::getCallbackFromPointer<ContainerAdmin*>(opaque);
-//
-//    LOGI(thisPtr->getId() << ": Reboot event");
-//
-//    std::unique_lock<std::mutex> lock(thisPtr->mListenerMutex);
-//    for (auto& it : thisPtr->mRebootListeners) {
-//        RebootListener f = it.second.get();
-//        f();
-//    }
-//}
 
 
 } // namespace security_containers

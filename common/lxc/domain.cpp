@@ -30,9 +30,23 @@
 #include <lxc/lxccontainer.h>
 #include <sys/stat.h>
 
+#include <map>
+
 namespace security_containers {
 namespace lxc {
 
+namespace {
+    const std::map<std::string, LxcDomain::State> STATE_MAP = {
+        {"STOPPED", LxcDomain::State::STOPPED},
+        {"STARTING", LxcDomain::State::STARTING},
+        {"RUNNING", LxcDomain::State::RUNNING},
+        {"STOPPING", LxcDomain::State::STOPPING},
+        {"ABORTING", LxcDomain::State::ABORTING},
+        {"FREEZING", LxcDomain::State::FREEZING},
+        {"FROZEN", LxcDomain::State::FROZEN},
+        {"THAWED", LxcDomain::State::THAWED}
+    };
+} // namespace
 
 LxcDomain::LxcDomain(const std::string& lxcPath, const std::string& domainName)
   : mContainer(nullptr)
@@ -70,63 +84,92 @@ bool LxcDomain::isDefined()
     return mContainer->is_defined(mContainer);
 }
 
-bool LxcDomain::isRunning()
+LxcDomain::State LxcDomain::getState()
 {
-    return mContainer->is_running(mContainer);
+    const std::string str = mContainer->state(mContainer);
+    return STATE_MAP.at(str);
 }
 
-std::string LxcDomain::getState()
-{
-    return mContainer->state(mContainer);
-}
-
-void LxcDomain::create(const std::string& templatePath)
+bool LxcDomain::create(const std::string& templatePath)
 {
     if (!mContainer->create(mContainer, templatePath.c_str(), NULL, NULL, 0, NULL)) {
         LOGE("Could not create domain " + getName());
-        throw LxcException("Could not create domain");
+        return false;
     }
+    return true;
 }
 
-void LxcDomain::destroy()
+bool LxcDomain::destroy()
 {
     if (!mContainer->destroy(mContainer)) {
         LOGE("Could not destroy domain " + getName());
-        throw LxcException("Could not destroy domain");
+        return false;
     }
+    return true;
 }
 
-void LxcDomain::start(const char* const* argv)
+bool LxcDomain::start(const char* const* argv)
 {
+    if (mContainer->is_running(mContainer)) {
+        LOGE("Already started " + getName());
+        return false;
+    }
+    if (!mContainer->want_daemonize(mContainer, true)) {
+        LOGE("Could not configure domain " + getName());
+        return false;
+    }
     if (!mContainer->start(mContainer, false, const_cast<char* const*>(argv))) {
         LOGE("Could not start domain " + getName());
-        throw LxcException("Could not start domain");
+        return false;
     }
+    return true;
 }
 
-void LxcDomain::stop()
+bool LxcDomain::stop()
 {
     if (!mContainer->stop(mContainer)) {
         LOGE("Could not stop domain " + getName());
-        throw LxcException("Stop domain failed");
+        return false;
     }
+    return true;
 }
 
-void LxcDomain::reboot()
+bool LxcDomain::reboot()
 {
     if (!mContainer->reboot(mContainer)) {
         LOGE("Could not reboot domain " + getName());
-        throw LxcException("Reboot domain failed");
+        return false;
     }
+    return true;
 }
 
-void LxcDomain::shutdown(int timeout)
+bool LxcDomain::shutdown(int timeout)
 {
     if (!mContainer->shutdown(mContainer, timeout)) {
         LOGE("Could not gracefully shutdown domain " + getName() + " in " << timeout << "s");
-        throw LxcException("Shutdown domain failed");
+        return false;
     }
+    return true;
 }
+
+bool LxcDomain::freeze()
+{
+    if (!mContainer->freeze(mContainer)) {
+        LOGE("Could not freeze domain " + getName());
+        return false;
+    }
+    return true;
+}
+
+bool LxcDomain::unfreeze()
+{
+    if (!mContainer->unfreeze(mContainer)) {
+        LOGE("Could not unfreeze domain " + getName());
+        return false;
+    }
+    return true;
+}
+
 
 } // namespace lxc
 } // namespace security_containers

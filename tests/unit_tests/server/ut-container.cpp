@@ -52,11 +52,6 @@ const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/config.con
 const std::string CONTAINERS_PATH = "/tmp/ut-containers";
 const std::string LXC_TEMPLATES_PATH = SC_TEST_LXC_TEMPLATES_INSTALL_DIR;
 
-void ensureStarted()
-{
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-}
-
 struct Fixture {
     utils::ScopedGlibLoop mLoop;
     utils::ScopedDir mContainersPathGuard = CONTAINERS_PATH;
@@ -68,6 +63,12 @@ struct Fixture {
                                                         configPath,
                                                         LXC_TEMPLATES_PATH,
                                                         ""));
+    }
+
+    void ensureStarted()
+    {
+        // wait for containers init to fully start
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 };
 
@@ -84,7 +85,7 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)
 {
-    BOOST_REQUIRE_THROW(create(BUGGY_CONFIG_PATH), std::exception);//TODO which one?
+    BOOST_REQUIRE_THROW(create(BUGGY_CONFIG_PATH), ContainerOperationException);
 }
 
 BOOST_AUTO_TEST_CASE(MissingConfigTest)

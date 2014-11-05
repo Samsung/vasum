@@ -39,6 +39,17 @@ namespace lxc {
  */
 class LxcDomain {
 public:
+    enum class State {
+        STOPPED,
+        STARTING,
+        RUNNING,
+        STOPPING,
+        ABORTING,
+        FREEZING,
+        FROZEN,
+        THAWED
+    };
+
     LxcDomain(const std::string& lxcPath, const std::string& domainName);
     ~LxcDomain();
 
@@ -50,17 +61,19 @@ public:
     std::string getConfigItem(const std::string& key);
 
     bool isDefined();
-    bool isRunning();
 
-    std::string getState();
+    State getState();
 
-    void create(const std::string& templatePath);
-    void destroy();
+    bool create(const std::string& templatePath);
+    bool destroy();
 
-    void start(const char* const* argv);
-    void stop();
-    void reboot();
-    void shutdown(int timeout);
+    bool start(const char* const* argv);
+    bool stop();
+    bool reboot();
+    bool shutdown(int timeout);
+
+    bool freeze();
+    bool unfreeze();
 private:
     lxc_container* mContainer;
 };
