@@ -39,42 +39,42 @@ namespace cli {
 namespace {
 
 /**
- * Invoke specific function on ScClient
+ * Invoke specific function on VsmClient
  *
  * @param fun Function to be called. It must not throw any exception.
  */
-void one_shot(const function<ScStatus(ScClient)>& fun)
+void one_shot(const function<VsmStatus(VsmClient)>& fun)
 {
     string msg;
-    ScStatus status;
-    ScClient client;
+    VsmStatus status;
+    VsmClient client;
 
-    status = sc_start_glib_loop();
-    if (SCCLIENT_SUCCESS != status) {
+    status = vsm_start_glib_loop();
+    if (VSMCLIENT_SUCCESS != status) {
         throw runtime_error("Can't start glib loop");
     }
 
-    client = sc_client_create();
+    client = vsm_client_create();
     if (NULL == client) {
         msg = "Can't create client";
         goto finish;
     }
 
-    status = sc_connect(client);
-    if (SCCLIENT_SUCCESS != status) {
-        msg = sc_get_status_message(client);
+    status = vsm_connect(client);
+    if (VSMCLIENT_SUCCESS != status) {
+        msg = vsm_get_status_message(client);
         goto finish;
     }
 
     status = fun(client);
-    if (SCCLIENT_SUCCESS != status) {
-        msg = sc_get_status_message(client);
+    if (VSMCLIENT_SUCCESS != status) {
+        msg = vsm_get_status_message(client);
         goto finish;
     }
 
 finish:
-    sc_client_free(client);
-    sc_stop_glib_loop();
+    vsm_client_free(client);
+    vsm_stop_glib_loop();
     if (! msg.empty()) {
         throw runtime_error(msg);
     }
@@ -108,10 +108,10 @@ void set_active_container(int pos, int argc, const char** argv)
         throw runtime_error("Not enough parameters");
     }
 
-    one_shot(bind(sc_set_active_container, _1, argv[pos + 1]));
+    one_shot(bind(vsm_set_active_container, _1, argv[pos + 1]));
 }
 
-void add_container(int pos, int argc, const char** argv)
+void create_domain(int pos, int argc, const char** argv)
 {
     using namespace std::placeholders;
 
@@ -119,7 +119,7 @@ void add_container(int pos, int argc, const char** argv)
         throw runtime_error("Not enough parameters");
     }
 
-    one_shot(bind(sc_add_container, _1, argv[pos + 1]));
+    one_shot(bind(vsm_create_domain, _1, argv[pos + 1]));
 }
 
 } // namespace cli

@@ -33,17 +33,21 @@
 using namespace security_containers::cli;
 
 std::map<std::string, CommandLineInterface> commands = {
-    {"set_active_container", {
-        set_active_container,
-        "set_active_container container_id",
-        "Set active (foreground) container",
-        {{"container_id", "id container name"}}}
+    {
+        "set_active_container", {
+            set_active_container,
+            "set_active_container container_id",
+            "Set active (foreground) container",
+            {{"container_id", "id container name"}}
+        }
     },
-    {"add_container", {
-        add_container,
-        "add_container container_id",
-        "Create and add container",
-        {{"container_id", "id container name"}}}
+    {
+        "create_domain", {
+            create_domain,
+            "create_domain container_id",
+            "Create and add container",
+            {{"container_id", "id container name"}}
+        }
     }
 };
 
@@ -70,7 +74,7 @@ int main(const int argc, const char** argv)
 
     CommandLineInterface& command = commands[argv[1]];
     try {
-         command.execute(1, argc, argv);
+        command.execute(1, argc, argv);
     } catch (const std::runtime_error& ex) {
         std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;

@@ -29,47 +29,47 @@
 
 int main(int argc, char** argv)
 {
-    ScStatus status;
-    ScClient client;
-    ScArrayString values = NULL;
+    VsmStatus status;
+    VsmClient client;
+    VsmArrayString values = NULL;
     int ret = 0;
 
-    status = sc_start_glib_loop(); // start glib loop (if not started any yet)
-    if (SCCLIENT_SUCCESS != status) {
+    status = vsm_start_glib_loop(); // start glib loop (if not started any yet)
+    if (VSMCLIENT_SUCCESS != status) {
         // error!
         return 1;
     }
 
-    client = sc_client_create(); // create client handle
+    client = vsm_client_create(); // create client handle
     if (NULL == client) {
         // error!
         ret = 1;
         goto finish;
     }
 
-    status = sc_connect(client); // connect to dbus
-    if (SCCLIENT_SUCCESS != status) {
+    status = vsm_connect(client); // connect to dbus
+    if (VSMCLIENT_SUCCESS != status) {
         // error!
         ret = 1;
         goto finish;
     }
 
-    status = sc_get_container_ids(client, &values);
-    if (SCCLIENT_SUCCESS != status) {
+    status = vsm_get_domain_ids(client, &values);
+    if (VSMCLIENT_SUCCESS != status) {
         // error!
         ret = 1;
         goto finish;
     }
 
     // print array
-    for (ScArrayString iValues = values; *iValues; iValues++) {
+    for (VsmArrayString iValues = values; *iValues; iValues++) {
         printf("%s\n", *iValues);
     }
 
 finish:
-    sc_array_string_free(values); // free memory
-    sc_client_free(client); // destroy client handle
-    sc_stop_glib_loop(); // stop the glib loop (use only with sc_start_glib_loop)
+    vsm_array_string_free(values); // free memory
+    vsm_client_free(client); // destroy client handle
+    vsm_stop_glib_loop(); // stop the glib loop (use only with vsm_start_glib_loop)
     return ret;
 }
  @endcode
@@ -86,33 +86,33 @@ extern "C"
 /**
  * security-containers-server's client pointer.
  */
-typedef void* ScClient;
+typedef void* VsmClient;
 
 /**
  * NULL-terminated string type.
  *
- * @sa sc_array_string_free
+ * @sa vsm_array_string_free
  */
-typedef char* ScString;
+typedef char* VsmString;
 
 /**
  * NULL-terminated array of strings type.
  *
- * @sa sc_string_free
+ * @sa vsm_string_free
  */
-typedef ScString* ScArrayString;
+typedef VsmString* VsmArrayString;
 
 /**
  * Completion status of communication function.
  */
 typedef enum {
-    SCCLIENT_CUSTOM_ERROR,     ///< User specified error
-    SCCLIENT_IO_ERROR,         ///< Input/Output error
-    SCCLIENT_OPERATION_FAILED, ///< Operation failed
-    SCCLIENT_INVALID_ARGUMENT, ///< Invalid argument
-    SCCLIENT_OTHER_ERROR,      ///< Other error
-    SCCLIENT_SUCCESS           ///< Success
-} ScStatus;
+    VSMCLIENT_CUSTOM_ERROR,     ///< User specified error
+    VSMCLIENT_IO_ERROR,         ///< Input/Output error
+    VSMCLIENT_OPERATION_FAILED, ///< Operation failed
+    VSMCLIENT_INVALID_ARGUMENT, ///< Invalid argument
+    VSMCLIENT_OTHER_ERROR,      ///< Other error
+    VSMCLIENT_SUCCESS           ///< Success
+} VsmStatus;
 
 /**
  * Start glib loop.
@@ -122,30 +122,30 @@ typedef enum {
  *
  * @return status of this function call
  */
-ScStatus sc_start_glib_loop();
+VsmStatus vsm_start_glib_loop();
 
 /**
  * Stop glib loop.
  *
- * Call only if sc_start_glib_loop() was called.
+ * Call only if vsm_start_glib_loop() was called.
  *
  * @return status of this function call
  */
-ScStatus sc_stop_glib_loop();
+VsmStatus vsm_stop_glib_loop();
 
 /**
  * Create a new security-containers-server's client.
  *
  * @return Created client pointer or NULL on failure.
  */
-ScClient sc_client_create();
+VsmClient vsm_client_create();
 
 /**
  * Release client resources.
  *
  * @param[in] client security-containers-server's client
  */
-void sc_client_free(ScClient client);
+void vsm_client_free(VsmClient client);
 
 /**
  * Get status code of last security-containers-server communication.
@@ -153,7 +153,7 @@ void sc_client_free(ScClient client);
  * @param[in] client security-containers-server's client
  * @return status of this function call
  */
-ScStatus sc_get_status(ScClient client);
+VsmStatus vsm_get_status(VsmClient client);
 
 /**
  * Get status message of the last security-containers-server communication.
@@ -161,7 +161,7 @@ ScStatus sc_get_status(ScClient client);
  * @param[in] client security-containers-server's client
  * @return last status message from security-containers-server communication
  */
-const char* sc_get_status_message(ScClient client);
+const char* vsm_get_status_message(VsmClient client);
 
 /**
  * Connect client to the security-containers-server.
@@ -169,7 +169,7 @@ const char* sc_get_status_message(ScClient client);
  * @param[in] client security-containers-server's client
  * @return status of this function call
  */
-ScStatus sc_connect(ScClient client);
+VsmStatus vsm_connect(VsmClient client);
 
 /**
  * Connect client to the security-containers-server via custom address.
@@ -178,21 +178,21 @@ ScStatus sc_connect(ScClient client);
  * @param[in] address dbus address
  * @return status of this function call
  */
-ScStatus sc_connect_custom(ScClient client, const char* address);
+VsmStatus vsm_connect_custom(VsmClient client, const char* address);
 
 /**
- * Release ScArrayString.
+ * Release VsmArrayString.
  *
- * @param[in] astring ScArrayString
+ * @param[in] astring VsmArrayString
  */
-void sc_array_string_free(ScArrayString astring);
+void vsm_array_string_free(VsmArrayString astring);
 
 /**
- * Release ScString.
+ * Release VsmString.
  *
- * @param string ScString
+ * @param string VsmString
  */
-void sc_string_free(ScString string);
+void vsm_string_free(VsmString string);
 
 
 /**
@@ -208,9 +208,9 @@ void sc_string_free(ScString string);
  *
  * @param[in] containerId affected container id
  * @param[in] dbusAddress new D-Bus address
- * @param data custom user's data pointer passed to sc_container_dbus_state() function
+ * @param data custom user's data pointer passed to vsm_add_state_callback() function
  */
-typedef void (*ScContainerDbusStateCallback)(const char* containerId,
+typedef void (*VsmContainerDbusStateCallback)(const char* containerId,
                                              const char* dbusAddress,
                                              void* data);
 
@@ -222,9 +222,9 @@ typedef void (*ScContainerDbusStateCallback)(const char* containerId,
  * @param[out] values array of containers dbus address
  * @return status of this function call
  * @post keys[i] corresponds to values[i]
- * @remark Use sc_array_string_free() to free memory occupied by @p keys and @p values.
+ * @remark Use vsm_array_string_free() to free memory occupied by @p keys and @p values.
  */
-ScStatus sc_get_container_dbuses(ScClient client, ScArrayString* keys, ScArrayString* values);
+VsmStatus vsm_get_container_dbuses(VsmClient client, VsmArrayString* keys, VsmArrayString* values);
 
 /**
  * Get containers name.
@@ -232,9 +232,9 @@ ScStatus sc_get_container_dbuses(ScClient client, ScArrayString* keys, ScArraySt
  * @param[in] client security-containers-server's client
  * @param[out] array array of containers name
  * @return status of this function call
- * @remark Use sc_array_string_free() to free memory occupied by @p array.
+ * @remark Use vsm_array_string_free() to free memory occupied by @p array.
  */
-ScStatus sc_get_container_ids(ScClient client, ScArrayString* array);
+VsmStatus vsm_get_domain_ids(VsmClient client, VsmArrayString* array);
 
 /**
  * Get active (foreground) container name.
@@ -242,9 +242,9 @@ ScStatus sc_get_container_ids(ScClient client, ScArrayString* array);
  * @param[in] client security-containers-server's client
  * @param[out] id active container name
  * @return status of this function call
- * @remark Use @p sc_string_free() to free memory occupied by @p id.
+ * @remark Use @p vsm_string_free() to free memory occupied by @p id.
  */
-ScStatus sc_get_active_container_id(ScClient client, ScString* id);
+VsmStatus vsm_get_active_container_id(VsmClient client, VsmString* id);
 
 /**
  * Get container name of process with given pid.
@@ -253,9 +253,9 @@ ScStatus sc_get_active_container_id(ScClient client, ScString* id);
  * @param[in] pid process id
  * @param[out] id active container name
  * @return status of this function call
- * @remark Use @p sc_string_free() to free memory occupied by @p id.
+ * @remark Use @p vsm_string_free() to free memory occupied by @p id.
  */
-ScStatus sc_get_container_id_by_pid(ScClient client, int pid, ScString* id);
+VsmStatus vsm_lookup_domain_by_pid(VsmClient client, int pid, VsmString* id);
 
 /**
  * Set active (foreground) container.
@@ -264,7 +264,7 @@ ScStatus sc_get_container_id_by_pid(ScClient client, int pid, ScString* id);
  * @param[in] id container name
  * @return status of this function call
  */
-ScStatus sc_set_active_container(ScClient client, const char* id);
+VsmStatus vsm_set_active_container(VsmClient client, const char* id);
 
 /**
  * Create and add container
@@ -273,7 +273,7 @@ ScStatus sc_set_active_container(ScClient client, const char* id);
  * @param[in] id container id
  * @return status of this function call
  */
-ScStatus sc_add_container(ScClient client, const char* id);
+VsmStatus vsm_create_domain(VsmClient client, const char* id);
 
 /**
  * Register dbus state change callback function.
@@ -285,8 +285,8 @@ ScStatus sc_add_container(ScClient client, const char* id);
  * @param[in] data some extra data that will be passed to callback function
  * @return status of this function call
  */
-ScStatus sc_container_dbus_state(ScClient client,
-                                 ScContainerDbusStateCallback containerDbusStateCallback,
+VsmStatus vsm_add_state_callback(VsmClient client,
+                                 VsmContainerDbusStateCallback containerDbusStateCallback,
                                  void* data);
 
 /** @} */ // Host API
@@ -306,9 +306,9 @@ ScStatus sc_container_dbus_state(ScClient client,
  * @param[in] container source container
  * @param[in] application sending application name
  * @param[in] message notification message
- * @param data custom user's data pointer passed to sc_notification()
+ * @param data custom user's data pointer passed to vsm_notification()
  */
-typedef void (*ScNotificationCallback)(const char* container,
+typedef void (*VsmNotificationCallback)(const char* container,
                                        const char* application,
                                        const char* message,
                                        void* data);
@@ -320,7 +320,7 @@ typedef void (*ScNotificationCallback)(const char* container,
  * @param[in] message message
  * @return status of this function call
  */
-ScStatus sc_notify_active_container(ScClient client, const char* application, const char* message);
+VsmStatus vsm_notify_active_container(VsmClient client, const char* application, const char* message);
 
 /**
  * Move file between containers.
@@ -330,7 +330,7 @@ ScStatus sc_notify_active_container(ScClient client, const char* application, co
  * @param[in] path path to moved file
  * @return status of this function call
  */
-ScStatus sc_file_move_request(ScClient client, const char* destContainer, const char* path);
+VsmStatus vsm_file_move_request(VsmClient client, const char* destContainer, const char* path);
 
 /**
  * Register notification callback function.
@@ -342,7 +342,7 @@ ScStatus sc_file_move_request(ScClient client, const char* destContainer, const 
  * @param[in] data some extra data that will be passed to callback function
  * @return status of this function call
  */
-ScStatus sc_notification(ScClient client, ScNotificationCallback notificationCallback, void* data);
+VsmStatus vsm_notification(VsmClient client, VsmNotificationCallback notificationCallback, void* data);
 
 /** @} */ // Domain API
 

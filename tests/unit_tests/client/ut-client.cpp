@@ -48,8 +48,14 @@ const std::string TEST_DBUS_CONFIG_PATH =
     SC_TEST_CONFIG_INSTALL_DIR "/client/ut-client/test-dbus-daemon.conf";
 
 struct Loop {
-    Loop() { sc_start_glib_loop(); }
-    ~Loop() { sc_stop_glib_loop(); }
+    Loop()
+    {
+        vsm_start_glib_loop();
+    }
+    ~Loop()
+    {
+        vsm_stop_glib_loop();
+    }
 };
 
 struct Fixture {
@@ -64,32 +70,39 @@ struct Fixture {
 
 const int EVENT_TIMEOUT = 5000; ///< ms
 const std::map<std::string, std::string> EXPECTED_DBUSES_STARTED = {
-    {"ut-containers-manager-console1-dbus",
-     "unix:path=/tmp/ut-containers-manager/console1-dbus/dbus/system_bus_socket"},
-    {"ut-containers-manager-console2-dbus",
-     "unix:path=/tmp/ut-containers-manager/console2-dbus/dbus/system_bus_socket"},
-    {"ut-containers-manager-console3-dbus",
-     "unix:path=/tmp/ut-containers-manager/console3-dbus/dbus/system_bus_socket"}};
+    {
+        "ut-containers-manager-console1-dbus",
+        "unix:path=/tmp/ut-containers-manager/console1-dbus/dbus/system_bus_socket"
+    },
+    {
+        "ut-containers-manager-console2-dbus",
+        "unix:path=/tmp/ut-containers-manager/console2-dbus/dbus/system_bus_socket"
+    },
+    {
+        "ut-containers-manager-console3-dbus",
+        "unix:path=/tmp/ut-containers-manager/console3-dbus/dbus/system_bus_socket"
+    }
+};
 
-void convertDictToMap(ScArrayString keys,
-                      ScArrayString values,
+void convertDictToMap(VsmArrayString keys,
+                      VsmArrayString values,
                       std::map<std::string, std::string>& ret)
 {
-    ScArrayString iKeys;
-    ScArrayString iValues;
+    VsmArrayString iKeys;
+    VsmArrayString iValues;
     for (iKeys = keys, iValues = values; *iKeys && *iValues; iKeys++, iValues++) {
         ret.insert(std::make_pair(*iKeys, *iValues));
     }
 }
 
-void convertArrayToSet(ScArrayString values, std::set<std::string>& ret)
+void convertArrayToSet(VsmArrayString values, std::set<std::string>& ret)
 {
-    for (ScArrayString iValues = values; *iValues; iValues++) {
+    for (VsmArrayString iValues = values; *iValues; iValues++) {
         ret.insert(*iValues);
     }
 }
 
-int getArrayStringLength(ScArrayString astring, int max_len = -1)
+int getArrayStringLength(VsmArrayString astring, int max_len = -1)
 {
     int i = 0;
     for (i = 0; astring[i];  i++) {
@@ -108,21 +121,21 @@ BOOST_AUTO_TEST_CASE(NotRunningServerTest)
 {
     cm.stopAll();
 
-    ScClient client = sc_client_create();
-    ScStatus status = sc_connect_custom(client,
-                                        EXPECTED_DBUSES_STARTED.begin()->second.c_str());
-    BOOST_CHECK_EQUAL(SCCLIENT_IO_ERROR, status);
-    sc_client_free(client);
+    VsmClient client = vsm_client_create();
+    VsmStatus status = vsm_connect_custom(client,
+                                          EXPECTED_DBUSES_STARTED.begin()->second.c_str());
+    BOOST_CHECK_EQUAL(VSMCLIENT_IO_ERROR, status);
+    vsm_client_free(client);
 }
 
 BOOST_AUTO_TEST_CASE(GetContainerDbusesTest)
 {
-    ScClient client = sc_client_create();
-    ScStatus status = sc_connect(client);
-    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
-    ScArrayString keys, values;
-    status = sc_get_container_dbuses(client, &keys, &values);
-    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
+    VsmClient client = vsm_client_create();
+    VsmStatus status = vsm_connect(client);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    VsmArrayString keys, values;
+    status = vsm_get_container_dbuses(client, &keys, &values);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
 
     BOOST_CHECK_EQUAL(getArrayStringLength(keys, EXPECTED_DBUSES_STARTED.size() + 1),
                       EXPECTED_DBUSES_STARTED.size());
@@ -132,19 +145,19 @@ BOOST_AUTO_TEST_CASE(GetContainerDbusesTest)
     std::map<std::string, std::string> containers;
     convertDictToMap(keys, values, containers);
     BOOST_CHECK(containers == EXPECTED_DBUSES_STARTED);
-    sc_array_string_free(keys);
-    sc_array_string_free(values);
-    sc_client_free(client);
+    vsm_array_string_free(keys);
+    vsm_array_string_free(values);
+    vsm_client_free(client);
 }
 
 BOOST_AUTO_TEST_CASE(GetContainerIdsTest)
 {
-    ScClient client = sc_client_create();
-    ScStatus status = sc_connect(client);
-    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
-    ScArrayString values;
-    status = sc_get_container_ids(client, &values);
-    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
+    VsmClient client = vsm_client_create();
+    VsmStatus status = vsm_connect(client);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    VsmArrayString values;
+    status = vsm_get_domain_ids(client, &values);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_DBUSES_STARTED.size() + 1),
                       EXPECTED_DBUSES_STARTED.size());
 
@@ -154,23 +167,23 @@ BOOST_AUTO_TEST_CASE(GetContainerIdsTest)
     for (const auto& container : containers) {
         BOOST_CHECK(EXPECTED_DBUSES_STARTED.find(container) != EXPECTED_DBUSES_STARTED.cend());
     }
-    sc_array_string_free(values);
-    sc_client_free(client);
+    vsm_array_string_free(values);
+    vsm_client_free(client);
 }
 
 BOOST_AUTO_TEST_CASE(GetActiveContainerIdTest)
 {
-    ScClient client = sc_client_create();
-    ScStatus status = sc_connect(client);
-    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
-    ScString container;
-    status = sc_get_active_container_id(client, &container);
-    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
+    VsmClient client = vsm_client_create();
+    VsmStatus status = vsm_connect(client);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    VsmString container;
+    status = vsm_get_active_container_id(client, &container);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
 
     BOOST_CHECK_EQUAL(container, cm.getRunningForegroundContainerId());
 
-    sc_string_free(container);
-    sc_client_free(client);
+    vsm_string_free(container);
+    vsm_client_free(client);
 }
 
 BOOST_AUTO_TEST_CASE(SetActiveContainerTest)
@@ -179,25 +192,25 @@ BOOST_AUTO_TEST_CASE(SetActiveContainerTest)
 
     BOOST_REQUIRE_NE(newActiveContainerId, cm.getRunningForegroundContainerId());
 
-    ScClient client = sc_client_create();
-    ScStatus status = sc_connect(client);
-    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
-    status = sc_set_active_container(client, newActiveContainerId.c_str());
-    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
+    VsmClient client = vsm_client_create();
+    VsmStatus status = vsm_connect(client);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    status = vsm_set_active_container(client, newActiveContainerId.c_str());
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     BOOST_CHECK_EQUAL(newActiveContainerId, cm.getRunningForegroundContainerId());
-    sc_client_free(client);
+    vsm_client_free(client);
 }
 
 BOOST_AUTO_TEST_CASE(AddContainerTest)
 {
     const std::string newActiveContainerId = "";
 
-    ScClient client = sc_client_create();
-    ScStatus status = sc_connect(client);
-    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
-    status = sc_add_container(client, newActiveContainerId.c_str());
-    BOOST_REQUIRE_EQUAL(SCCLIENT_CUSTOM_ERROR, status);
-    sc_client_free(client);
+    VsmClient client = vsm_client_create();
+    VsmStatus status = vsm_connect(client);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    status = vsm_create_domain(client, newActiveContainerId.c_str());
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_CUSTOM_ERROR, status);
+    vsm_client_free(client);
 }
 
 BOOST_AUTO_TEST_CASE(FileMoveRequestTest)
@@ -205,14 +218,14 @@ BOOST_AUTO_TEST_CASE(FileMoveRequestTest)
     const std::string path = "/tmp/fake_path";
     const std::string secondContainer = "fake_container";
 
-    ScClient client = sc_client_create();
-    ScStatus status = sc_connect_custom(client, EXPECTED_DBUSES_STARTED.begin()->second.c_str());
-    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
-    status = sc_file_move_request(client, secondContainer.c_str(), path.c_str());
-    BOOST_REQUIRE_EQUAL(SCCLIENT_CUSTOM_ERROR, status);
+    VsmClient client = vsm_client_create();
+    VsmStatus status = vsm_connect_custom(client, EXPECTED_DBUSES_STARTED.begin()->second.c_str());
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    status = vsm_file_move_request(client, secondContainer.c_str(), path.c_str());
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_CUSTOM_ERROR, status);
     BOOST_REQUIRE_EQUAL(api::container::FILE_MOVE_DESTINATION_NOT_FOUND,
-                        sc_get_status_message(client));
-    sc_client_free(client);
+                        vsm_get_status_message(client));
+    vsm_client_free(client);
 }
 
 BOOST_AUTO_TEST_CASE(NotificationTest)
@@ -228,30 +241,29 @@ BOOST_AUTO_TEST_CASE(NotificationTest)
     auto callback = [](const char* container,
                        const char* application,
                        const char* message,
-                       void* data)
-    {
+    void* data) {
         CallbackData& callbackData = *reinterpret_cast<CallbackData*>(data);
         callbackData.receivedSignalMsg.push_back(std::make_tuple(container, application, message));
         callbackData.signalReceivedLatch.set();
     };
 
     CallbackData callbackData;
-    std::map<std::string, ScClient> clients;
+    std::map<std::string, VsmClient> clients;
     for (const auto& it : EXPECTED_DBUSES_STARTED) {
-        ScClient client = sc_client_create();
-        ScStatus status = sc_connect_custom(client, it.second.c_str());
-        BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
+        VsmClient client = vsm_client_create();
+        VsmStatus status = vsm_connect_custom(client, it.second.c_str());
+        BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
         clients[it.first] = client;
     }
     for (auto& client : clients) {
-        ScStatus status = sc_notification(client.second, callback, &callbackData);
-        BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
+        VsmStatus status = vsm_notification(client.second, callback, &callbackData);
+        BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     }
     for (auto& client : clients) {
-        ScStatus status = sc_notify_active_container(client.second,
-                                                     MSG_APP.c_str(),
-                                                     MSG_CONTENT.c_str());
-        BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
+        VsmStatus status = vsm_notify_active_container(client.second,
+                                                       MSG_APP.c_str(),
+                                                       MSG_CONTENT.c_str());
+        BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     }
 
     BOOST_CHECK(callbackData.signalReceivedLatch.waitForN(clients.size() - 1, EVENT_TIMEOUT));
@@ -264,39 +276,39 @@ BOOST_AUTO_TEST_CASE(NotificationTest)
     }
 
     for (auto& client : clients) {
-        sc_client_free(client.second);
+        vsm_client_free(client.second);
     }
 }
 
 BOOST_AUTO_TEST_CASE(GetContainerIdByPidTest1)
 {
-    ScClient client = sc_client_create();
-    ScString container;
-    ScStatus status = sc_get_container_id_by_pid(client, 1, &container);
-    BOOST_REQUIRE_EQUAL(SCCLIENT_SUCCESS, status);
+    VsmClient client = vsm_client_create();
+    VsmString container;
+    VsmStatus status = vsm_lookup_domain_by_pid(client, 1, &container);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
 
     BOOST_CHECK_EQUAL(container, std::string("host"));
 
-    sc_string_free(container);
-    sc_client_free(client);
+    vsm_string_free(container);
+    vsm_client_free(client);
 }
 
 BOOST_AUTO_TEST_CASE(GetContainerIdByPidTest2)
 {
     std::set<std::string> ids;
 
-    ScClient client = sc_client_create();
+    VsmClient client = vsm_client_create();
     for (int n = 0; n < 100000; ++n) {
-        ScString container;
-        ScStatus status = sc_get_container_id_by_pid(client, n, &container);
-        if (status == SCCLIENT_SUCCESS) {
+        VsmString container;
+        VsmStatus status = vsm_lookup_domain_by_pid(client, n, &container);
+        if (status == VSMCLIENT_SUCCESS) {
             ids.insert(container);
-            sc_string_free(container);
+            vsm_string_free(container);
         } else {
-            BOOST_WARN_MESSAGE(status == SCCLIENT_INVALID_ARGUMENT, sc_get_status_message(client));
+            BOOST_WARN_MESSAGE(status == VSMCLIENT_INVALID_ARGUMENT, vsm_get_status_message(client));
         }
     }
-    sc_client_free(client);
+    vsm_client_free(client);
 
     BOOST_CHECK(ids.count("host") == 1);
 

@@ -55,22 +55,22 @@ private:
     typedef std::function<void(GVariant* parameters)> SignalCallback;
     struct Status {
         Status();
-        Status(ScStatus status, const std::string& msg);
-        ScStatus mScStatus;
+        Status(VsmStatus status, const std::string& msg);
+        VsmStatus mVsmStatus;
         std::string mMsg;
     };
 
     dbus::DbusConnection::Pointer mConnection;
     Status mStatus;
 
-    ScStatus callMethod(const DbusInterfaceInfo& info,
-                        const std::string& method,
-                        GVariant* args_in,
-                        const std::string& args_spec_out = std::string(),
-                        GVariant** args_out = NULL);
-    ScStatus signalSubscribe(const DbusInterfaceInfo& info,
-                             const std::string& name,
-                             SignalCallback signalCallback);
+    VsmStatus callMethod(const DbusInterfaceInfo& info,
+                         const std::string& method,
+                         GVariant* args_in,
+                         const std::string& args_spec_out = std::string(),
+                         GVariant** args_out = NULL);
+    VsmStatus signalSubscribe(const DbusInterfaceInfo& info,
+                              const std::string& name,
+                              SignalCallback signalCallback);
 
 public:
     Client() noexcept;
@@ -81,7 +81,7 @@ public:
      *
      * @return status of this function call
      */
-    ScStatus createSystem() noexcept;
+    VsmStatus createSystem() noexcept;
 
     /**
      * Create client.
@@ -89,76 +89,76 @@ public:
      * @param address Dbus socket address
      * @return status of this function call
      */
-    ScStatus create(const std::string& address) noexcept;
+    VsmStatus create(const std::string& address) noexcept;
 
     /**
-     *  @see ::sc_get_status_message
+     *  @see ::vsm_get_status_message
      */
-    const char* sc_get_status_message() noexcept;
+    const char* vsm_get_status_message() noexcept;
 
     /**
-     *  @see ::sc_get_status
+     *  @see ::vsm_get_status
      */
-    ScStatus sc_get_status() noexcept;
+    VsmStatus vsm_get_status() noexcept;
 
     /**
-     *  @see ::sc_get_container_dbuses
+     *  @see ::vsm_get_container_dbuses
      */
-    ScStatus sc_get_container_dbuses(ScArrayString* keys, ScArrayString* values) noexcept;
+    VsmStatus vsm_get_container_dbuses(VsmArrayString* keys, VsmArrayString* values) noexcept;
 
     /**
-     *  @see ::sc_get_container_ids
+     *  @see ::vsm_get_domain_ids
      */
-    ScStatus sc_get_container_ids(ScArrayString* array) noexcept;
+    VsmStatus vsm_get_domain_ids(VsmArrayString* array) noexcept;
 
     /**
-     *  @see ::sc_get_active_container_id
+     *  @see ::vsm_get_active_container_id
      */
-    ScStatus sc_get_active_container_id(ScString* id) noexcept;
+    VsmStatus vsm_get_active_container_id(VsmString* id) noexcept;
 
     /**
-     *  @see ::sc_get_container_id_by_pid
+     *  @see ::vsm_lookup_domain_by_pid
      */
-    ScStatus sc_get_container_id_by_pid(int pid, ScString* id) noexcept;
+    VsmStatus vsm_lookup_domain_by_pid(int pid, VsmString* id) noexcept;
 
     /**
-     *  @see ::sc_set_active_container
+     *  @see ::vsm_set_active_container
      */
-    ScStatus sc_set_active_container(const char* id) noexcept;
+    VsmStatus vsm_set_active_container(const char* id) noexcept;
 
     /**
-     *  @see ::sc_add_container
+     *  @see ::vsm_create_domain
      */
-    ScStatus sc_add_container(const char* id) noexcept;
+    VsmStatus vsm_create_domain(const char* id) noexcept;
 
     /**
-     *  @see ::sc_container_dbus_state
+     *  @see ::vsm_add_state_callback
      */
-    ScStatus sc_container_dbus_state(ScContainerDbusStateCallback containerDbusStateCallback,
+    VsmStatus vsm_add_state_callback(VsmContainerDbusStateCallback containerDbusStateCallback,
                                      void* data) noexcept;
 
     /**
-     *  @see ::sc_notify_active_container
+     *  @see ::vsm_notify_active_container
      */
-    ScStatus sc_notify_active_container(const char* application, const char* message) noexcept;
+    VsmStatus vsm_notify_active_container(const char* application, const char* message) noexcept;
 
     /**
-     *  @see ::sc_file_move_request
+     *  @see ::vsm_file_move_request
      */
-    ScStatus sc_file_move_request(const char* destContainer, const char* path) noexcept;
+    VsmStatus vsm_file_move_request(const char* destContainer, const char* path) noexcept;
     /**
-     *  @see ::sc_notification
+     *  @see ::vsm_notification
      */
-    ScStatus sc_notification(ScNotificationCallback notificationCallback, void* data) noexcept;
+    VsmStatus vsm_notification(VsmNotificationCallback notificationCallback, void* data) noexcept;
     /**
-     *  @see ::sc_start_glib_loop
+     *  @see ::vsm_start_glib_loop
      */
-    static ScStatus sc_start_glib_loop() noexcept;
+    static VsmStatus vsm_start_glib_loop() noexcept;
 
     /**
-     *  @see ::sc_stop_glib_loop
+     *  @see ::vsm_stop_glib_loop
      */
-    static ScStatus sc_stop_glib_loop() noexcept;
+    static VsmStatus vsm_stop_glib_loop() noexcept;
 };
 
 #endif /* SECURITY_CONTAINERS_CLIENT_IMPL_HPP */

@@ -62,9 +62,9 @@ public:
      *  @param argsSpec Description of arguments
      */
     CommandLineInterface(const ExecutorCallback& executorCallback,
-                    const std::string& usage,
-                    const std::string& usageInfo,
-                    const ArgsSpec& argsSpec)
+                         const std::string& usage,
+                         const std::string& usageInfo,
+                         const ArgsSpec& argsSpec)
         : mExecutorCallback(executorCallback),
           mUsage(usage),
           mUsageInfo(usageInfo),
@@ -97,18 +97,18 @@ private:
 };
 
 /**
- * Parses command line arguments and call sc_set_active_container
+ * Parses command line arguments and call vsm_set_active_container
  *
- * @see sc_set_active_container
+ * @see vsm_set_active_container
  */
 void set_active_container(int pos, int argc, const char** argv);
 
 /**
- * Parses command line arguments and call sc_add_container
+ * Parses command line arguments and call vsm_create_domain
  *
- * @see sc_add_container
+ * @see vsm_create_domain
  */
-void add_container(int pos, int argc, const char** argv);
+void create_domain(int pos, int argc, const char** argv);
 
 } // namespace cli
 } // namespace security_containers

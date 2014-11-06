@@ -37,7 +37,7 @@ using namespace std;
 
 namespace {
 
-Client& getClient(ScClient client)
+Client& getClient(VsmClient client)
 {
     assert(client);
     return *reinterpret_cast<Client*>(client);
@@ -46,118 +46,118 @@ Client& getClient(ScClient client)
 } // namespace
 
 /* external */
-API ScStatus sc_start_glib_loop()
+API VsmStatus vsm_start_glib_loop()
 {
-    return Client::sc_start_glib_loop();
+    return Client::vsm_start_glib_loop();
 }
 
-API ScStatus sc_stop_glib_loop()
+API VsmStatus vsm_stop_glib_loop()
 {
-    return Client::sc_stop_glib_loop();
+    return Client::vsm_stop_glib_loop();
 }
 
-API ScClient sc_client_create()
+API VsmClient vsm_client_create()
 {
     Client* clientPtr = new(nothrow) Client();
-    return reinterpret_cast<ScClient>(clientPtr);
+    return reinterpret_cast<VsmClient>(clientPtr);
 }
 
-API ScStatus sc_connect(ScClient client)
+API VsmStatus vsm_connect(VsmClient client)
 {
     return getClient(client).createSystem();
 }
 
-API ScStatus sc_connect_custom(ScClient client, const char* address)
+API VsmStatus vsm_connect_custom(VsmClient client, const char* address)
 {
     return getClient(client).create(address);
 }
 
-API void sc_array_string_free(ScArrayString astring)
+API void vsm_array_string_free(VsmArrayString astring)
 {
     if (!astring) {
         return;
     }
     for (char** ptr = astring; *ptr; ++ptr) {
-        sc_string_free(*ptr);
+        vsm_string_free(*ptr);
     }
     free(astring);
 }
 
-API void sc_string_free(ScString string)
+API void vsm_string_free(VsmString string)
 {
     free(string);
 }
 
 
-API void sc_client_free(ScClient client)
+API void vsm_client_free(VsmClient client)
 {
     if (client != NULL) {
         delete &getClient(client);
     }
 }
 
-API const char* sc_get_status_message(ScClient client)
+API const char* vsm_get_status_message(VsmClient client)
 {
-    return getClient(client).sc_get_status_message();
+    return getClient(client).vsm_get_status_message();
 }
 
-API ScStatus sc_get_status(ScClient client)
+API VsmStatus vsm_get_status(VsmClient client)
 {
-    return getClient(client).sc_get_status();
+    return getClient(client).vsm_get_status();
 }
 
-API ScStatus sc_get_container_dbuses(ScClient client, ScArrayString* keys, ScArrayString* values)
+API VsmStatus vsm_get_container_dbuses(VsmClient client, VsmArrayString* keys, VsmArrayString* values)
 {
-    return getClient(client).sc_get_container_dbuses(keys, values);
+    return getClient(client).vsm_get_container_dbuses(keys, values);
 }
 
-API ScStatus sc_get_container_ids(ScClient client, ScArrayString* array)
+API VsmStatus vsm_get_domain_ids(VsmClient client, VsmArrayString* array)
 {
-    return getClient(client).sc_get_container_ids(array);
+    return getClient(client).vsm_get_domain_ids(array);
 }
 
-API ScStatus sc_get_active_container_id(ScClient client, ScString* id)
+API VsmStatus vsm_get_active_container_id(VsmClient client, VsmString* id)
 {
-    return getClient(client).sc_get_active_container_id(id);
+    return getClient(client).vsm_get_active_container_id(id);
 }
 
-API ScStatus sc_get_container_id_by_pid(ScClient client, int pid, ScString* id)
+API VsmStatus vsm_lookup_domain_by_pid(VsmClient client, int pid, VsmString* id)
 {
-    return getClient(client).sc_get_container_id_by_pid(pid, id);
+    return getClient(client).vsm_lookup_domain_by_pid(pid, id);
 }
 
-API ScStatus sc_set_active_container(ScClient client, const char* id)
+API VsmStatus vsm_set_active_container(VsmClient client, const char* id)
 {
-    return getClient(client).sc_set_active_container(id);
+    return getClient(client).vsm_set_active_container(id);
 }
 
-API ScStatus sc_add_container(ScClient client, const char* id)
+API VsmStatus vsm_create_domain(VsmClient client, const char* id)
 {
-    return getClient(client).sc_add_container(id);
+    return getClient(client).vsm_create_domain(id);
 }
 
-API ScStatus sc_container_dbus_state(ScClient client,
-                                     ScContainerDbusStateCallback containerDbusStateCallback,
+API VsmStatus vsm_add_state_callback(VsmClient client,
+                                     VsmContainerDbusStateCallback containerDbusStateCallback,
                                      void* data)
 {
-    return getClient(client).sc_container_dbus_state(containerDbusStateCallback, data);
+    return getClient(client).vsm_add_state_callback(containerDbusStateCallback, data);
 }
 
-API ScStatus sc_notify_active_container(ScClient client,
-                                        const char* application,
-                                        const char* message)
+API VsmStatus vsm_notify_active_container(VsmClient client,
+                                          const char* application,
+                                          const char* message)
 {
-    return getClient(client).sc_notify_active_container(application, message);
+    return getClient(client).vsm_notify_active_container(application, message);
 }
 
-API ScStatus sc_file_move_request(ScClient client, const char* destContainer, const char* path)
+API VsmStatus vsm_file_move_request(VsmClient client, const char* destContainer, const char* path)
 {
-    return getClient(client).sc_file_move_request(destContainer, path);
+    return getClient(client).vsm_file_move_request(destContainer, path);
 }
 
-API ScStatus sc_notification(ScClient client,
-                             ScNotificationCallback notificationCallback,
-                             void* data)
+API VsmStatus vsm_notification(VsmClient client,
+                               VsmNotificationCallback notificationCallback,
+                               void* data)
 {
-    return getClient(client).sc_notification(notificationCallback, data);
+    return getClient(client).vsm_notification(notificationCallback, data);
 }

@@ -52,7 +52,7 @@ const DbusInterfaceInfo CONTAINER_INTERFACE(api::container::BUS_NAME,
 
 unique_ptr<ScopedGlibLoop> gGlibLoop;
 
-void toDict(GVariant* in, ScArrayString* keys, ScArrayString* values)
+void toDict(GVariant* in, VsmArrayString* keys, VsmArrayString* values)
 {
     assert(in);
     assert(keys);
@@ -108,20 +108,20 @@ void toArray(GVariant* in, T** scArray)
     *scArray = ids;
 }
 
-ScStatus toStatus(const std::exception& ex)
+VsmStatus toStatus(const std::exception& ex)
 {
     if (typeid(DbusCustomException) == typeid(ex)) {
-        return SCCLIENT_CUSTOM_ERROR;
+        return VSMCLIENT_CUSTOM_ERROR;
     } else if (typeid(DbusIOException) == typeid(ex)) {
-        return SCCLIENT_IO_ERROR;
+        return VSMCLIENT_IO_ERROR;
     } else if (typeid(DbusOperationException) == typeid(ex)) {
-        return SCCLIENT_OPERATION_FAILED;
+        return VSMCLIENT_OPERATION_FAILED;
     } else if (typeid(DbusInvalidArgumentException) == typeid(ex)) {
-        return SCCLIENT_INVALID_ARGUMENT;
+        return VSMCLIENT_INVALID_ARGUMENT;
     } else if (typeid(DbusException) == typeid(ex)) {
-        return SCCLIENT_OTHER_ERROR;
+        return VSMCLIENT_OTHER_ERROR;
     }
-    return SCCLIENT_OTHER_ERROR;
+    return VSMCLIENT_OTHER_ERROR;
 }
 
 bool readFirstLineOfFile(const std::string& path, std::string& ret)
@@ -137,36 +137,36 @@ bool readFirstLineOfFile(const std::string& path, std::string& ret)
 
 } //namespace
 
-ScStatus Client::sc_start_glib_loop() noexcept
+VsmStatus Client::vsm_start_glib_loop() noexcept
 {
     try {
         if (!gGlibLoop) {
             gGlibLoop.reset(new ScopedGlibLoop());
         }
     } catch (const exception&) {
-        return SCCLIENT_OTHER_ERROR;
+        return VSMCLIENT_OTHER_ERROR;
     }
 
-    return SCCLIENT_SUCCESS;
+    return VSMCLIENT_SUCCESS;
 }
 
-ScStatus Client::sc_stop_glib_loop() noexcept
+VsmStatus Client::vsm_stop_glib_loop() noexcept
 {
     try {
         gGlibLoop.reset();
     } catch (const exception&) {
-        return SCCLIENT_OTHER_ERROR;
+        return VSMCLIENT_OTHER_ERROR;
     }
-    return SCCLIENT_SUCCESS;
+    return VSMCLIENT_SUCCESS;
 }
 
 Client::Status::Status()
-    : mScStatus(SCCLIENT_SUCCESS), mMsg()
+    : mVsmStatus(VSMCLIENT_SUCCESS), mMsg()
 {
 }
 
-Client::Status::Status(ScStatus status, const std::string& msg)
-    : mScStatus(status), mMsg(msg)
+Client::Status::Status(VsmStatus status, const std::string& msg)
+    : mVsmStatus(status), mMsg(msg)
 {
 }
 
@@ -178,33 +178,33 @@ Client::~Client() noexcept
 {
 }
 
-ScStatus Client::createSystem() noexcept
+VsmStatus Client::createSystem() noexcept
 {
     try {
         mConnection = DbusConnection::createSystem();
         mStatus = Status();
-    } catch (const exception& ex)  {
+    } catch (const exception& ex) {
         mStatus = Status(toStatus(ex), ex.what());
     }
-    return sc_get_status();
+    return vsm_get_status();
 }
 
-ScStatus Client::create(const string& address) noexcept
+VsmStatus Client::create(const string& address) noexcept
 {
     try {
         mConnection = DbusConnection::create(address);
         mStatus = Status();
-    } catch (const exception& ex)  {
+    } catch (const exception& ex) {
         mStatus = Status(toStatus(ex), ex.what());
     }
-    return sc_get_status();
+    return vsm_get_status();
 }
 
-ScStatus Client::callMethod(const DbusInterfaceInfo& info,
-                            const string& method,
-                            GVariant* args_in,
-                            const string& args_spec_out,
-                            GVariant** args_out)
+VsmStatus Client::callMethod(const DbusInterfaceInfo& info,
+                             const string& method,
+                             GVariant* args_in,
+                             const string& args_spec_out,
+                             GVariant** args_out)
 {
     try {
         GVariantPtr ret = mConnection->callMethod(info.busName,
@@ -220,12 +220,12 @@ ScStatus Client::callMethod(const DbusInterfaceInfo& info,
     } catch (const exception& ex)  {
         mStatus = Status(toStatus(ex), ex.what());
     }
-    return sc_get_status();
+    return vsm_get_status();
 }
 
-ScStatus Client::signalSubscribe(const DbusInterfaceInfo& info,
-                                 const string& name,
-                                 SignalCallback signalCallback)
+VsmStatus Client::signalSubscribe(const DbusInterfaceInfo& info,
+                                  const string& name,
+                                  SignalCallback signalCallback)
 {
     auto onSignal = [=](const std::string& /*senderBusName*/,
                         const std::string & objectPath,
@@ -233,8 +233,8 @@ ScStatus Client::signalSubscribe(const DbusInterfaceInfo& info,
                         const std::string & signalName,
                         GVariant * parameters) {
         if (objectPath == info.objectPath &&
-                interface == info.interface &&
-                signalName == name) {
+            interface == info.interface &&
+            signalName == name) {
 
             signalCallback(parameters);
         }
@@ -245,31 +245,31 @@ ScStatus Client::signalSubscribe(const DbusInterfaceInfo& info,
     } catch (const std::exception& ex) {
         mStatus = Status(toStatus(ex), ex.what());
     }
-    return sc_get_status();
+    return vsm_get_status();
 }
 
-const char* Client::sc_get_status_message() noexcept
+const char* Client::vsm_get_status_message() noexcept
 {
     return mStatus.mMsg.c_str();
 }
 
-ScStatus Client::sc_get_status() noexcept
+VsmStatus Client::vsm_get_status() noexcept
 {
-    return mStatus.mScStatus;
+    return mStatus.mVsmStatus;
 }
 
-ScStatus Client::sc_get_container_dbuses(ScArrayString* keys, ScArrayString* values) noexcept
+VsmStatus Client::vsm_get_container_dbuses(VsmArrayString* keys, VsmArrayString* values) noexcept
 {
     assert(keys);
     assert(values);
 
     GVariant* out;
-    ScStatus ret = callMethod(HOST_INTERFACE,
-                              api::host::METHOD_GET_CONTAINER_DBUSES,
-                              NULL,
-                              "(a{ss})",
-                              &out);
-    if (ret != SCCLIENT_SUCCESS) {
+    VsmStatus ret = callMethod(HOST_INTERFACE,
+                               api::host::METHOD_GET_CONTAINER_DBUSES,
+                               NULL,
+                               "(a{ss})",
+                               &out);
+    if (ret != VSMCLIENT_SUCCESS) {
         return ret;
     }
     GVariant* unpacked;
@@ -280,17 +280,17 @@ ScStatus Client::sc_get_container_dbuses(ScArrayString* keys, ScArrayString* val
     return ret;
 }
 
-ScStatus Client::sc_get_container_ids(ScArrayString* array) noexcept
+VsmStatus Client::vsm_get_domain_ids(VsmArrayString* array) noexcept
 {
     assert(array);
 
     GVariant* out;
-    ScStatus ret = callMethod(HOST_INTERFACE,
-                              api::host::METHOD_GET_CONTAINER_ID_LIST,
-                                          NULL,
-                                          "(as)",
-                                          &out);
-    if (ret != SCCLIENT_SUCCESS) {
+    VsmStatus ret = callMethod(HOST_INTERFACE,
+                               api::host::METHOD_GET_CONTAINER_ID_LIST,
+                               NULL,
+                               "(as)",
+                               &out);
+    if (ret != VSMCLIENT_SUCCESS) {
         return ret;
     }
     GVariant* unpacked;
@@ -301,17 +301,17 @@ ScStatus Client::sc_get_container_ids(ScArrayString* array) noexcept
     return ret;
 }
 
-ScStatus Client::sc_get_active_container_id(ScString* id) noexcept
+VsmStatus Client::vsm_get_active_container_id(VsmString* id) noexcept
 {
     assert(id);
 
     GVariant* out;
-    ScStatus ret = callMethod(HOST_INTERFACE,
-                              api::host::METHOD_GET_ACTIVE_CONTAINER_ID,
-                              NULL,
-                              "(s)",
-                              &out);
-    if (ret != SCCLIENT_SUCCESS) {
+    VsmStatus ret = callMethod(HOST_INTERFACE,
+                               api::host::METHOD_GET_ACTIVE_CONTAINER_ID,
+                               NULL,
+                               "(s)",
+                               &out);
+    if (ret != VSMCLIENT_SUCCESS) {
         return ret;
     }
     GVariant* unpacked;
@@ -322,7 +322,7 @@ ScStatus Client::sc_get_active_container_id(ScString* id) noexcept
     return ret;
 }
 
-ScStatus Client::sc_get_container_id_by_pid(int pid, ScString* id) noexcept
+VsmStatus Client::vsm_lookup_domain_by_pid(int pid, VsmString* id) noexcept
 {
     assert(id);
 
@@ -330,22 +330,22 @@ ScStatus Client::sc_get_container_id_by_pid(int pid, ScString* id) noexcept
 
     std::string cpuset;
     if (!readFirstLineOfFile(path, cpuset)) {
-        mStatus = Status(SCCLIENT_INVALID_ARGUMENT, "Process not found");
-        return sc_get_status();
+        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, "Process not found");
+        return vsm_get_status();
     }
 
     std::string containerId;
     if (!parseContainerIdFromCpuSet(cpuset, containerId)) {
-        mStatus = Status(SCCLIENT_OTHER_ERROR, "unknown format of cpuset");
-        return sc_get_status();
+        mStatus = Status(VSMCLIENT_OTHER_ERROR, "unknown format of cpuset");
+        return vsm_get_status();
     }
 
     *id = strdup(containerId.c_str());
     mStatus = Status();
-    return sc_get_status();;
+    return vsm_get_status();;
 }
 
-ScStatus Client::sc_set_active_container(const char* id) noexcept
+VsmStatus Client::vsm_set_active_container(const char* id) noexcept
 {
     assert(id);
 
@@ -353,7 +353,7 @@ ScStatus Client::sc_set_active_container(const char* id) noexcept
     return callMethod(HOST_INTERFACE, api::host::METHOD_SET_ACTIVE_CONTAINER, args_in);
 }
 
-ScStatus Client::sc_add_container(const char* id) noexcept
+VsmStatus Client::vsm_create_domain(const char* id) noexcept
 {
     assert(id);
 
@@ -361,12 +361,13 @@ ScStatus Client::sc_add_container(const char* id) noexcept
     return callMethod(HOST_INTERFACE, api::host::METHOD_ADD_CONTAINER, args_in);
 }
 
-ScStatus Client::sc_container_dbus_state(ScContainerDbusStateCallback containerDbusStateCallback,
+VsmStatus Client::vsm_add_state_callback(VsmContainerDbusStateCallback containerDbusStateCallback,
                                          void* data) noexcept
 {
     assert(containerDbusStateCallback);
 
-    auto onSigal = [=](GVariant * parameters) {
+    auto onSigal = [=](GVariant * parameters)
+    {
         const char* container;
         const char* dbusAddress;
         g_variant_get(parameters, "(&s&s)", &container, &dbusAddress);
@@ -378,7 +379,7 @@ ScStatus Client::sc_container_dbus_state(ScContainerDbusStateCallback containerD
                            onSigal);
 }
 
-ScStatus Client::sc_notify_active_container(const char* application, const char* message) noexcept
+VsmStatus Client::vsm_notify_active_container(const char* application, const char* message) noexcept
 {
     assert(application);
     assert(message);
@@ -389,34 +390,34 @@ ScStatus Client::sc_notify_active_container(const char* application, const char*
                       args_in);
 }
 
-ScStatus Client::sc_file_move_request(const char* destContainer, const char* path) noexcept
+VsmStatus Client::vsm_file_move_request(const char* destContainer, const char* path) noexcept
 {
     assert(destContainer);
     assert(path);
 
     GVariant* out;
     GVariant* args_in = g_variant_new("(ss)", destContainer, path);
-    ScStatus ret = callMethod(CONTAINER_INTERFACE,
-                              api::container::METHOD_FILE_MOVE_REQUEST,
-                              args_in,
-                              "(s)",
-                              &out);
+    VsmStatus ret = callMethod(CONTAINER_INTERFACE,
+                               api::container::METHOD_FILE_MOVE_REQUEST,
+                               args_in,
+                               "(s)",
+                               &out);
 
-    if (ret != SCCLIENT_SUCCESS) {
+    if (ret != VSMCLIENT_SUCCESS) {
         return ret;
     }
     const gchar* retcode = NULL;;
     g_variant_get(out, "(&s)", &retcode);
     if (strcmp(retcode, api::container::FILE_MOVE_SUCCEEDED.c_str()) != 0) {
-        mStatus = Status(SCCLIENT_CUSTOM_ERROR, retcode);
+        mStatus = Status(VSMCLIENT_CUSTOM_ERROR, retcode);
         g_variant_unref(out);
-        return sc_get_status();
+        return vsm_get_status();
     }
     g_variant_unref(out);
     return ret;
 }
 
-ScStatus Client::sc_notification(ScNotificationCallback notificationCallback, void* data) noexcept
+VsmStatus Client::vsm_notification(VsmNotificationCallback notificationCallback, void* data) noexcept
 {
     assert(notificationCallback);
 
