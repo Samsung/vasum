@@ -225,7 +225,8 @@ VsmStatus Client::callMethod(const DbusInterfaceInfo& info,
 
 VsmStatus Client::signalSubscribe(const DbusInterfaceInfo& info,
                                   const string& name,
-                                  SignalCallback signalCallback)
+                                  SignalCallback signalCallback,
+                                  VsmSubscriptionId* subscriptionId)
 {
     auto onSignal = [=](const std::string& /*senderBusName*/,
                         const std::string & objectPath,
@@ -240,7 +241,21 @@ VsmStatus Client::signalSubscribe(const DbusInterfaceInfo& info,
         }
     };
     try {
-        mConnection->signalSubscribe(onSignal, info.busName);
+        guint id = mConnection->signalSubscribe(onSignal, info.busName);
+        if (subscriptionId) {
+            *subscriptionId = id;
+        }
+        mStatus = Status();
+    } catch (const std::exception& ex) {
+        mStatus = Status(toStatus(ex), ex.what());
+    }
+    return vsm_get_status();
+}
+
+VsmStatus Client::signalUnsubscribe(VsmSubscriptionId id)
+{
+    try {
+        mConnection->signalUnsubscribe(id);
         mStatus = Status();
     } catch (const std::exception& ex) {
         mStatus = Status(toStatus(ex), ex.what());
@@ -362,7 +377,8 @@ VsmStatus Client::vsm_create_domain(const char* id) noexcept
 }
 
 VsmStatus Client::vsm_add_state_callback(VsmContainerDbusStateCallback containerDbusStateCallback,
-                                         void* data) noexcept
+                                         void* data,
+                                         VsmSubscriptionId* subscriptionId) noexcept
 {
     assert(containerDbusStateCallback);
 
@@ -376,7 +392,13 @@ VsmStatus Client::vsm_add_state_callback(VsmContainerDbusStateCallback container
 
     return signalSubscribe(HOST_INTERFACE,
                            api::host::SIGNAL_CONTAINER_DBUS_STATE,
-                           onSigal);
+                           onSigal,
+                           subscriptionId);
+}
+
+VsmStatus Client::vsm_del_state_callback(VsmSubscriptionId subscriptionId) noexcept
+{
+    return signalUnsubscribe(subscriptionId);
 }
 
 VsmStatus Client::vsm_notify_active_container(const char* application, const char* message) noexcept
@@ -417,7 +439,9 @@ VsmStatus Client::vsm_file_move_request(const char* destContainer, const char* p
     return ret;
 }
 
-VsmStatus Client::vsm_notification(VsmNotificationCallback notificationCallback, void* data) noexcept
+VsmStatus Client::vsm_add_notification_callback(VsmNotificationCallback notificationCallback,
+                                                void* data,
+                                                VsmSubscriptionId* subscriptionId) noexcept
 {
     assert(notificationCallback);
 
@@ -429,5 +453,13 @@ VsmStatus Client::vsm_notification(VsmNotificationCallback notificationCallback,
         notificationCallback(container, application, message, data);
     };
 
-    return signalSubscribe(CONTAINER_INTERFACE, api::container::SIGNAL_NOTIFICATION, onSigal);
+    return signalSubscribe(CONTAINER_INTERFACE,
+                           api::container::SIGNAL_NOTIFICATION,
+                           onSigal,
+                           subscriptionId);
+}
+
+VsmStatus Client::vsm_del_notification_callback(VsmSubscriptionId subscriptionId) noexcept
+{
+    return signalUnsubscribe(subscriptionId);
 }

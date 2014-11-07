@@ -70,7 +70,9 @@ private:
                          GVariant** args_out = NULL);
     VsmStatus signalSubscribe(const DbusInterfaceInfo& info,
                               const std::string& name,
-                              SignalCallback signalCallback);
+                              SignalCallback signalCallback,
+                              VsmSubscriptionId* subscriptionId);
+    VsmStatus signalUnsubscribe(VsmSubscriptionId id);
 
 public:
     Client() noexcept;
@@ -135,7 +137,13 @@ public:
      *  @see ::vsm_add_state_callback
      */
     VsmStatus vsm_add_state_callback(VsmContainerDbusStateCallback containerDbusStateCallback,
-                                     void* data) noexcept;
+                                     void* data,
+                                     VsmSubscriptionId* subscriptionId) noexcept;
+
+    /**
+     *  @see ::vsm_del_state_callback
+     */
+    VsmStatus vsm_del_state_callback(VsmSubscriptionId subscriptionId) noexcept;
 
     /**
      *  @see ::vsm_notify_active_container
@@ -146,10 +154,19 @@ public:
      *  @see ::vsm_file_move_request
      */
     VsmStatus vsm_file_move_request(const char* destContainer, const char* path) noexcept;
+
     /**
-     *  @see ::vsm_notification
+     *  @see ::vsm_add_notification_callback
      */
-    VsmStatus vsm_notification(VsmNotificationCallback notificationCallback, void* data) noexcept;
+    VsmStatus vsm_add_notification_callback(VsmNotificationCallback notificationCallback,
+                                            void* data,
+                                            VsmSubscriptionId* subscriptionId) noexcept;
+
+    /**
+     *  @see ::vsm_del_notification_callback
+     */
+    VsmStatus vsm_del_notification_callback(VsmSubscriptionId subscriptionId) noexcept;
+
     /**
      *  @see ::vsm_start_glib_loop
      */

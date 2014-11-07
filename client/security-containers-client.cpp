@@ -138,9 +138,15 @@ API VsmStatus vsm_create_domain(VsmClient client, const char* id)
 
 API VsmStatus vsm_add_state_callback(VsmClient client,
                                      VsmContainerDbusStateCallback containerDbusStateCallback,
-                                     void* data)
+                                     void* data,
+                                     VsmSubscriptionId* subscriptionId)
 {
-    return getClient(client).vsm_add_state_callback(containerDbusStateCallback, data);
+    return getClient(client).vsm_add_state_callback(containerDbusStateCallback, data, subscriptionId);
+}
+
+API VsmStatus vsm_del_state_callback(VsmClient client, VsmSubscriptionId subscriptionId)
+{
+    return getClient(client).vsm_del_state_callback(subscriptionId);
 }
 
 API VsmStatus vsm_notify_active_container(VsmClient client,
@@ -155,9 +161,16 @@ API VsmStatus vsm_file_move_request(VsmClient client, const char* destContainer,
     return getClient(client).vsm_file_move_request(destContainer, path);
 }
 
-API VsmStatus vsm_notification(VsmClient client,
-                               VsmNotificationCallback notificationCallback,
-                               void* data)
+API VsmStatus vsm_add_notification_callback(VsmClient client,
+                                            VsmNotificationCallback notificationCallback,
+                                            void* data,
+                                            VsmSubscriptionId* subscriptionId)
 {
-    return getClient(client).vsm_notification(notificationCallback, data);
+    return getClient(client).vsm_add_notification_callback(notificationCallback, data, subscriptionId);
+}
+
+API VsmStatus vsm_del_notification_callback(VsmClient client,
+                                            VsmSubscriptionId subscriptionId)
+{
+    return getClient(client).vsm_del_notification_callback(subscriptionId);
 }

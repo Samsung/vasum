@@ -115,6 +115,11 @@ typedef enum {
 } VsmStatus;
 
 /**
+ * Subscription id
+ */
+typedef unsigned int VsmSubscriptionId;
+
+/**
  * Start glib loop.
  *
  * Do not call this function if an application creates a glib loop itself.
@@ -283,11 +288,24 @@ VsmStatus vsm_create_domain(VsmClient client, const char* id);
  * @param[in] client security-containers-server's client
  * @param[in] containerDbusStateCallback callback function
  * @param[in] data some extra data that will be passed to callback function
+ * @param[out] subscriptionId subscription identifier that can be used to unsubscribe signal,
+ *                      pointer can be NULL.
  * @return status of this function call
  */
 VsmStatus vsm_add_state_callback(VsmClient client,
                                  VsmContainerDbusStateCallback containerDbusStateCallback,
-                                 void* data);
+                                 void* data,
+                                 VsmSubscriptionId* subscriptionId);
+
+/**
+ * Unregister dbus state change callback function.
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] subscriptionId subscription identifier returned by vsm_add_state_callback
+ * @return status of this function call
+ */
+VsmStatus vsm_del_state_callback(VsmClient client, VsmSubscriptionId subscriptionId);
+
 
 /** @} */ // Host API
 
@@ -306,7 +324,7 @@ VsmStatus vsm_add_state_callback(VsmClient client,
  * @param[in] container source container
  * @param[in] application sending application name
  * @param[in] message notification message
- * @param data custom user's data pointer passed to vsm_notification()
+ * @param data custom user's data pointer passed to vsm_add_notification_callback()
  */
 typedef void (*VsmNotificationCallback)(const char* container,
                                        const char* application,
@@ -340,9 +358,23 @@ VsmStatus vsm_file_move_request(VsmClient client, const char* destContainer, con
  * @param[in] client security-containers-server's client
  * @param[in] notificationCallback callback function
  * @param[in] data some extra data that will be passed to callback function
+ * @param[out] subscriptionId subscription identifier that can be used to unsubscribe signal,
+ *                      pointer can be NULL.
  * @return status of this function call
  */
-VsmStatus vsm_notification(VsmClient client, VsmNotificationCallback notificationCallback, void* data);
+VsmStatus vsm_add_notification_callback(VsmClient client,
+                                        VsmNotificationCallback notificationCallback,
+                                        void* data,
+                                        VsmSubscriptionId* subscriptionId);
+
+/**
+ * Unregister notification callback function.
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] subscriptionId subscription identifier returned by vsm_add_notification_callback
+ * @return status of this function call
+ */
+VsmStatus vsm_del_notification_callback(VsmClient client, VsmSubscriptionId subscriptionId);
 
 /** @} */ // Domain API
 

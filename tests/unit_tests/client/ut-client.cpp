@@ -256,7 +256,10 @@ BOOST_AUTO_TEST_CASE(NotificationTest)
         clients[it.first] = client;
     }
     for (auto& client : clients) {
-        VsmStatus status = vsm_notification(client.second, callback, &callbackData);
+        VsmStatus status = vsm_add_notification_callback(client.second,
+                                                         callback,
+                                                         &callbackData,
+                                                         NULL);
         BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     }
     for (auto& client : clients) {
