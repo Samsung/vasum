@@ -357,7 +357,19 @@ VsmStatus Client::vsm_lookup_domain_by_pid(int pid, VsmString* id) noexcept
 
     *id = strdup(containerId.c_str());
     mStatus = Status();
-    return vsm_get_status();;
+    return vsm_get_status();
+}
+
+VsmStatus Client::vsm_lookup_domain_by_id(const char*, VsmDomain*) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
+}
+
+VsmStatus Client::vsm_lookup_domain_by_terminal_id(int, VsmString*) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
 }
 
 VsmStatus Client::vsm_set_active_container(const char* id) noexcept

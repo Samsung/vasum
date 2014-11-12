@@ -120,6 +120,38 @@ typedef enum {
 typedef unsigned int VsmSubscriptionId;
 
 /**
+ * States of domain
+ */
+typedef enum {
+    STOPPED,
+    STARTING,
+    RUNNING,
+    STOPPING,
+    ABORTING,
+    FREEZING,
+    FROZEN,
+    THAWED,
+    LOCKED,
+    MAX_STATE,
+    ACTIVATING = 128
+} VsmDomainState;
+
+/**
+ * Domain information structure
+ */
+struct VsmDomainStructure {
+    char* id;
+    int terminal;
+    VsmDomainState state;
+    char *rootfs_path;
+};
+
+/**
+ * Domain information
+ */
+typedef VsmDomainStructure* VsmDomain;
+
+/**
  * Start glib loop.
  *
  * Do not call this function if an application creates a glib loop itself.
@@ -199,6 +231,12 @@ void vsm_array_string_free(VsmArrayString astring);
  */
 void vsm_string_free(VsmString string);
 
+/**
+ * Release VsmDomain
+ *
+ * @param domain VsmDomain
+ */
+void vsm_domain_free(VsmDomain domain);
 
 /**
  * @name Host API
@@ -261,6 +299,28 @@ VsmStatus vsm_get_active_container_id(VsmClient client, VsmString* id);
  * @remark Use @p vsm_string_free() to free memory occupied by @p id.
  */
 VsmStatus vsm_lookup_domain_by_pid(VsmClient client, int pid, VsmString* id);
+
+/**
+ * Get domain informations of domain with given id.
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] id domain name
+ * @param[out] domain domain informations
+ * @return status of this function call
+ * @remark Use @p vsm_doamin_free() to free memory occupied by @p domain
+ */
+VsmStatus vsm_lookup_domain_by_id(VsmClient client, const char* id, VsmDomain* domain);
+
+/**
+ * Get domain name with given terminal.
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] terminal terminal id
+ * @param[out] id domain name with given terminal
+ * @return status of this function call
+ * @remark Use @p vsm_string_free() to free memory occupied by @p id.
+ */
+VsmStatus vsm_lookup_domain_by_terminal_id(VsmClient client, int terminal, VsmString* id);
 
 /**
  * Set active (foreground) container.

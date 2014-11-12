@@ -88,6 +88,12 @@ API void vsm_string_free(VsmString string)
     free(string);
 }
 
+API void vsm_domain_free(VsmDomain domain)
+{
+    free(domain->rootfs_path);
+    free(domain->id);
+    free(domain);
+}
 
 API void vsm_client_free(VsmClient client)
 {
@@ -124,6 +130,16 @@ API VsmStatus vsm_get_active_container_id(VsmClient client, VsmString* id)
 API VsmStatus vsm_lookup_domain_by_pid(VsmClient client, int pid, VsmString* id)
 {
     return getClient(client).vsm_lookup_domain_by_pid(pid, id);
+}
+
+API VsmStatus vsm_lookup_domain_by_id(VsmClient client, const char* id, VsmDomain* domain)
+{
+    return getClient(client).vsm_lookup_domain_by_id(id, domain);
+}
+
+API VsmStatus vsm_lookup_domain_by_terminal_id(VsmClient client, int terminal, VsmString* id)
+{
+    return getClient(client).vsm_lookup_domain_by_terminal_id(terminal, id);
 }
 
 API VsmStatus vsm_set_active_container(VsmClient client, const char* id)

@@ -124,6 +124,16 @@ public:
     VsmStatus vsm_lookup_domain_by_pid(int pid, VsmString* id) noexcept;
 
     /**
+     * @see ::vsm_lookup_domain_by_id
+     */
+    VsmStatus vsm_lookup_domain_by_id(const char* id, VsmDomain* domain) noexcept;
+
+    /**
+     * @see ::vsm_lookup_domain_by_terminal_id
+     */
+    VsmStatus vsm_lookup_domain_by_terminal_id(int terminal, VsmString* id) noexcept;
+
+    /**
      *  @see ::vsm_set_active_container
      */
     VsmStatus vsm_set_active_container(const char* id) noexcept;
