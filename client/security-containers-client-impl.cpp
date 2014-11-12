@@ -425,6 +425,66 @@ VsmStatus Client::vsm_del_state_callback(VsmSubscriptionId subscriptionId) noexc
     return signalUnsubscribe(subscriptionId);
 }
 
+VsmStatus Client::vsm_domain_grant_device(const char*, const char*, uint32_t) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
+}
+
+VsmStatus Client::vsm_revoke_device(const char*, const char*) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
+}
+
+VsmStatus Client::vsm_domain_get_netdevs(const char*, VsmArrayString*) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
+}
+
+VsmStatus Client::vsm_netdev_get_ipv4_addr(const char*, const char*, struct in_addr*) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
+}
+
+VsmStatus Client::vsm_netdev_get_ipv6_addr(const char*, const char*, struct in6_addr*) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
+}
+
+VsmStatus Client::vsm_netdev_set_ipv4_addr(const char*, const char*, struct in_addr*, int) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
+}
+
+VsmStatus Client::vsm_netdev_set_ipv6_addr(const char*, const char*, struct in6_addr*, int) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
+}
+
+VsmStatus Client::vsm_create_netdev(const char*, VsmNetdevType, const char*, const char*) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
+}
+
+VsmStatus Client::vsm_destroy_netdev(const char*, const char*) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
+}
+
+VsmStatus Client::vsm_lookup_netdev_by_name(const char*, const char*, VsmNetdev*) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
+}
+
 VsmStatus Client::vsm_notify_active_container(const char* application, const char* message) noexcept
 {
     assert(application);

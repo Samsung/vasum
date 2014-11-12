@@ -78,6 +78,8 @@ finish:
 #ifndef SECURITY_CONTAINERS_CLIENT_H
 #define SECURITY_CONTAINERS_CLIENT_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -139,17 +141,39 @@ typedef enum {
 /**
  * Domain information structure
  */
-struct VsmDomainStructure {
+typedef struct {
     char* id;
     int terminal;
     VsmDomainState state;
     char *rootfs_path;
-};
+} VsmDomainStructure;
 
 /**
  * Domain information
  */
 typedef VsmDomainStructure* VsmDomain;
+
+/**
+ * Netowrk device type
+ */
+typedef enum {
+    VETH,
+    PHYS,
+    MACVLAN
+} VsmNetdevType;
+
+/**
+ * Network device information structure
+ */
+typedef struct {
+    char* name;
+    VsmNetdevType type;
+} VsmNetdevStructure;
+
+/**
+ * Network device information
+ */
+typedef VsmNetdevStructure* VsmNetdev;
 
 /**
  * Start glib loop.
@@ -237,6 +261,13 @@ void vsm_string_free(VsmString string);
  * @param domain VsmDomain
  */
 void vsm_domain_free(VsmDomain domain);
+
+/**
+ * Release VsmNetdev
+ *
+ * @param netdev VsmNetdev
+ */
+void vsm_netdev_free(VsmNetdev netdev);
 
 /**
  * @name Host API
@@ -383,6 +414,142 @@ VsmStatus vsm_add_state_callback(VsmClient client,
  * @return status of this function call
  */
 VsmStatus vsm_del_state_callback(VsmClient client, VsmSubscriptionId subscriptionId);
+
+/**
+ * Grant access to device
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] domain domain name
+ * @param[in] device device path
+ * @param[in] flags access flags
+ * @return status of this function call
+ */
+VsmStatus vsm_domain_grant_device(VsmClient client,
+                                  const char* domain,
+                                  const char* device,
+                                  uint32_t flags);
+
+/**
+ * Revoke access to device
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] domain domain name
+ * @param[in] device device path
+ * @return status of this function call
+ */
+VsmStatus vsm_revoke_device(VsmClient client, const char* domain, const char* device);
+
+/**
+ * Get array of netdev from given domain
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] domain domain name
+ * @param[out] netdevIds array of netdev id
+ * @return status of this function call
+ * @remark Use vsm_array_string_free() to free memory occupied by @p netdevIds.
+ */
+VsmStatus vsm_domain_get_netdevs(VsmClient client, const char* domain, VsmArrayString* netdevIds);
+
+/**
+ * Get ipv4 address for given netdevId
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] domain domain name
+ * @param[in] netdevId netdev id
+ * @param[out] addr ipv4 address
+ * @return status of this function call
+ */
+VsmStatus vsm_netdev_get_ipv4_addr(VsmClient client,
+                                   const char* domain,
+                                   const char* netdevId,
+                                   struct in_addr *addr);
+
+/**
+ * Get ipv6 address for given netdevId
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] domain domain name
+ * @param[in] netdevId netdev id
+ * @param[out] addr ipv6 address
+ * @return status of this function call
+ */
+VsmStatus vsm_netdev_get_ipv6_addr(VsmClient client,
+                                   const char* domain,
+                                   const char* netdevId,
+                                   struct in6_addr *addr);
+
+/**
+ * Set ipv4 address for given netdevId
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] domain domain name
+ * @param[in] netdevId netdev id
+ * @param[in] addr ipv4 address
+ * @param[in] prefix bit-length of the network prefix
+ * @return status of this function call
+ */
+VsmStatus vsm_netdev_set_ipv4_addr(VsmClient client,
+                                   const char* domain,
+                                   const char* netdevId,
+                                   struct in_addr *addr,
+                                   int prefix);
+
+/**
+ * Set ipv6 address for given netdevId
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] domain domain name
+ * @param[in] netdevId netdev id
+ * @param[in] addr ipv6 address
+ * @param[in] prefix bit-length of the network prefix
+ * @return status of this function call
+ */
+VsmStatus vsm_netdev_set_ipv6_addr(VsmClient client,
+                                   const char* domain,
+                                   const char* netdevId,
+                                   struct in6_addr *addr,
+                                   int prefix);
+
+/**
+ * Create netdev in domain
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] domain domain name
+ * @param[in] netdevType netdev type
+ * @param[in] target TODO: this is taken form domain-control
+ * @param[in] netdevId network device id
+ * @return status of this function call
+ */
+VsmStatus vsm_create_netdev(VsmClient client,
+                            const char* domain,
+                            VsmNetdevType netdevType,
+                            const char* target,
+                            const char* netdevId);
+
+/**
+ * Remove netdev from domain
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] domain domain name
+ * @param[in] netdevId network device id
+ * @return status of this function call
+ */
+VsmStatus vsm_destroy_netdev(VsmClient client, const char* domain, const char* netdevId);
+
+/**
+ * Get netdev informations
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] domain domain name
+ * @param[in] netdevId network device id
+ * @param[out] netdev netdev informations
+ * @return status of this function call
+ * @remark Use vsm_netdev_free() to free memory occupied by @p netdev.
+ */
+VsmStatus vsm_lookup_netdev_by_name(VsmClient client,
+                                    const char* domain,
+                                    const char* netdevId,
+                                    VsmNetdev* netdev);
 
 
 /** @} */ // Host API

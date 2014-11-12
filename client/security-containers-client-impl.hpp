@@ -166,6 +166,73 @@ public:
     VsmStatus vsm_del_state_callback(VsmSubscriptionId subscriptionId) noexcept;
 
     /**
+     *  @see ::vsm_del_state_callback
+     */
+    VsmStatus vsm_domain_grant_device(const char* id,
+                                      const char* device,
+                                      uint32_t flags) noexcept;
+
+    /**
+     *  @see ::vsm_revoke_device
+     */
+    VsmStatus vsm_revoke_device(const char* id, const char* device) noexcept;
+
+    /**
+     *  @see ::vsm_domain_get_netdevs
+     */
+    VsmStatus vsm_domain_get_netdevs(const char* domain, VsmArrayString* netdevIds) noexcept;
+
+    /**
+     *  @see ::vsm_netdev_get_ipv4_addr
+     */
+    VsmStatus vsm_netdev_get_ipv4_addr(const char* domain,
+                                       const char* netdevId,
+                                       struct in_addr *addr) noexcept;
+
+    /**
+     *  @see ::vsm_netdev_get_ipv6_addr
+     */
+    VsmStatus vsm_netdev_get_ipv6_addr(const char* domain,
+                                       const char* netdevId,
+                                       struct in6_addr *addr) noexcept;
+
+    /**
+     *  @see ::vsm_netdev_set_ipv4_addr
+     */
+    VsmStatus vsm_netdev_set_ipv4_addr(const char* domain,
+                                       const char* netdevId,
+                                       struct in_addr *addr,
+                                       int prefix) noexcept;
+
+    /**
+     *  @see ::vsm_netdev_set_ipv6_addr
+     */
+    VsmStatus vsm_netdev_set_ipv6_addr(const char* domain,
+                                       const char* netdevId,
+                                       struct in6_addr *addr,
+                                       int prefix) noexcept;
+
+    /**
+     *  @see ::vsm_create_netdev
+     */
+    VsmStatus vsm_create_netdev(const char* domain,
+                                VsmNetdevType netdevType,
+                                const char* target,
+                                const char* netdevId) noexcept;
+
+    /**
+     *  @see ::vsm_destroy_netdev
+     */
+    VsmStatus vsm_destroy_netdev(const char* domain, const char* netdevId) noexcept;
+
+    /**
+     *  @see ::vsm_lookup_netdev_by_name
+     */
+    VsmStatus vsm_lookup_netdev_by_name(const char* domain,
+                                        const char* netdevId,
+                                        VsmNetdev* netdev) noexcept;
+
+    /**
      *  @see ::vsm_notify_active_container
      */
     VsmStatus vsm_notify_active_container(const char* application, const char* message) noexcept;

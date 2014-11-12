@@ -95,6 +95,12 @@ API void vsm_domain_free(VsmDomain domain)
     free(domain);
 }
 
+API void vsm_netdev_free(VsmNetdev netdev)
+{
+    free(netdev->name);
+    free(netdev);
+}
+
 API void vsm_client_free(VsmClient client)
 {
     if (client != NULL) {
@@ -173,6 +179,82 @@ API VsmStatus vsm_add_state_callback(VsmClient client,
 API VsmStatus vsm_del_state_callback(VsmClient client, VsmSubscriptionId subscriptionId)
 {
     return getClient(client).vsm_del_state_callback(subscriptionId);
+}
+
+API VsmStatus vsm_domain_grant_device(VsmClient client,
+                                      const char* id,
+                                      const char* device,
+                                      uint32_t flags)
+{
+    return getClient(client).vsm_domain_grant_device(id, device, flags);
+}
+
+API VsmStatus vsm_revoke_device(VsmClient client, const char* id, const char* device)
+{
+    return getClient(client).vsm_revoke_device(id, device);
+}
+
+API VsmStatus vsm_domain_get_netdevs(VsmClient client,
+                                     const char* domain,
+                                     VsmArrayString* netdevIds)
+{
+    return getClient(client).vsm_domain_get_netdevs(domain, netdevIds);
+}
+
+API VsmStatus vsm_netdev_get_ipv4_addr(VsmClient client,
+                                       const char* domain,
+                                       const char* netdevId,
+                                       struct in_addr *addr)
+{
+    return getClient(client).vsm_netdev_get_ipv4_addr(domain, netdevId, addr);
+}
+
+API VsmStatus vsm_netdev_get_ipv6_addr(VsmClient client,
+                                       const char* domain,
+                                       const char* netdevId,
+                                       struct in6_addr *addr)
+{
+    return getClient(client).vsm_netdev_get_ipv6_addr(domain, netdevId, addr);
+}
+
+API VsmStatus vsm_netdev_set_ipv4_addr(VsmClient client,
+                                       const char* domain,
+                                       const char* netdevId,
+                                       struct in_addr *addr,
+                                       int prefix)
+{
+    return getClient(client).vsm_netdev_set_ipv4_addr(domain, netdevId, addr, prefix);
+}
+
+API VsmStatus vsm_netdev_set_ipv6_addr(VsmClient client,
+                                       const char* domain,
+                                       const char* netdevId,
+                                       struct in6_addr *addr,
+                                       int prefix)
+{
+    return getClient(client).vsm_netdev_set_ipv6_addr(domain, netdevId, addr, prefix);
+}
+
+API VsmStatus vsm_create_netdev(VsmClient client,
+                                const char* domain,
+                                VsmNetdevType netdevType,
+                                const char* target,
+                                const char* netdevId)
+{
+    return getClient(client).vsm_create_netdev(domain, netdevType, target, netdevId);
+}
+
+API VsmStatus vsm_destroy_netdev(VsmClient client, const char* domain, const char* netdevId)
+{
+    return getClient(client).vsm_destroy_netdev(domain, netdevId);
+}
+
+API VsmStatus vsm_lookup_netdev_by_name(VsmClient client,
+                                        const char* domain,
+                                        const char* netdevId,
+                                        VsmNetdev* netdev)
+{
+    return getClient(client).vsm_lookup_netdev_by_name(domain, netdevId, netdev);
 }
 
 API VsmStatus vsm_notify_active_container(VsmClient client,
