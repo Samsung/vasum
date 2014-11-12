@@ -152,6 +152,16 @@ API VsmStatus vsm_create_domain(VsmClient client, const char* id)
     return getClient(client).vsm_create_domain(id);
 }
 
+API VsmStatus vsm_shutdown_domain(VsmClient client, const char* id)
+{
+    return getClient(client).vsm_shutdown_domain(id);
+}
+
+API VsmStatus vsm_start_domain(VsmClient client, const char* id)
+{
+    return getClient(client).vsm_start_domain(id);
+}
+
 API VsmStatus vsm_add_state_callback(VsmClient client,
                                      VsmContainerDbusStateCallback containerDbusStateCallback,
                                      void* data,

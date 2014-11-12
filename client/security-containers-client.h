@@ -341,6 +341,24 @@ VsmStatus vsm_set_active_container(VsmClient client, const char* id);
 VsmStatus vsm_create_domain(VsmClient client, const char* id);
 
 /**
+ * Shutdown domain
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] id domain name
+ * @return status of this function call
+ */
+VsmStatus vsm_shutdown_domain(VsmClient client, const char* id);
+
+/**
+ * Start domain
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] id domain name
+ * @return status of this function call
+ */
+VsmStatus vsm_start_domain(VsmClient client, const char* id);
+
+/**
  * Register dbus state change callback function.
  *
  * @note The callback function will be invoked on a different thread.

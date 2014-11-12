@@ -388,6 +388,18 @@ VsmStatus Client::vsm_create_domain(const char* id) noexcept
     return callMethod(HOST_INTERFACE, api::host::METHOD_ADD_CONTAINER, args_in);
 }
 
+VsmStatus Client::vsm_shutdown_domain(const char*) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
+}
+
+VsmStatus Client::vsm_start_domain(const char*) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
+}
+
 VsmStatus Client::vsm_add_state_callback(VsmContainerDbusStateCallback containerDbusStateCallback,
                                          void* data,
                                          VsmSubscriptionId* subscriptionId) noexcept

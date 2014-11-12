@@ -144,6 +144,16 @@ public:
     VsmStatus vsm_create_domain(const char* id) noexcept;
 
     /**
+     *  @see ::vsm_shutdown_domain
+     */
+    VsmStatus vsm_shutdown_domain(const char* id) noexcept;
+
+    /**
+     *  @see ::vsm_start_domain
+     */
+    VsmStatus vsm_start_domain(const char* id) noexcept;
+
+    /**
      *  @see ::vsm_add_state_callback
      */
     VsmStatus vsm_add_state_callback(VsmContainerDbusStateCallback containerDbusStateCallback,
