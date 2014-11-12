@@ -75,6 +75,21 @@ struct EmptyData {
     CONFIG_REGISTER_EMPTY
 };
 
+struct ThrowOnAcceptData {
+    template<typename Visitor>
+    void accept(Visitor)
+    {
+        LOGE("Serialization and parsing failed");
+        throw std::exception();
+    }
+    template<typename Visitor>
+    void accept(Visitor) const
+    {
+        LOGE("Const Serialization and parsing failed");
+        throw std::exception();
+    }
+};
+
 std::shared_ptr<EmptyData> returnEmptyCallback(std::shared_ptr<EmptyData>&)
 {
     return std::shared_ptr<EmptyData>(new EmptyData());
@@ -87,6 +102,12 @@ std::shared_ptr<SendData> returnDataCallback(std::shared_ptr<SendData>&)
 
 std::shared_ptr<SendData> echoCallback(std::shared_ptr<SendData>& data)
 {
+    return data;
+}
+
+std::shared_ptr<SendData> longEchoCallback(std::shared_ptr<SendData>& data)
+{
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     return data;
 }
 
@@ -283,7 +304,8 @@ BOOST_AUTO_TEST_CASE(AsyncClientToServiceEchoTest)
     //Async call
     std::shared_ptr<SendData> sentData(new SendData(34));
     std::shared_ptr<SendData> recvData;
-    auto dataBack = [&cv, &recvData](std::shared_ptr<SendData>& data) {
+    auto dataBack = [&cv, &recvData](ipc::Status status, std::shared_ptr<SendData>& data) {
+        BOOST_CHECK(status == ipc::Status::OK);
         recvData = data;
         cv.notify_one();
     };
@@ -324,7 +346,8 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEchoTest)
     std::shared_ptr<SendData> sentData(new SendData(56));
     std::shared_ptr<SendData> recvData;
 
-    auto dataBack = [&cv, &recvData](std::shared_ptr<SendData>& data) {
+    auto dataBack = [&cv, &recvData](ipc::Status status, std::shared_ptr<SendData>& data) {
+        BOOST_CHECK(status == ipc::Status::OK);
         recvData = data;
         cv.notify_one();
     };
@@ -343,7 +366,7 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEchoTest)
 BOOST_AUTO_TEST_CASE(SyncTimeoutTest)
 {
     Service s(socketPath);
-    s.addMethodHandler<SendData, SendData>(1, echoCallback);
+    s.addMethodHandler<SendData, SendData>(1, longEchoCallback);
 
     s.start();
     Client c(socketPath);
@@ -351,7 +374,70 @@ BOOST_AUTO_TEST_CASE(SyncTimeoutTest)
 
     std::shared_ptr<SendData> sentData(new SendData(78));
 
-    BOOST_CHECK_THROW((c.callSync<SendData, SendData>(1, sentData, 1)), IPCException);
+    BOOST_CHECK_THROW((c.callSync<SendData, SendData>(1, sentData, 10)), IPCException);
+}
+
+BOOST_AUTO_TEST_CASE(SerializationErrorTest)
+{
+    Service s(socketPath);
+    s.addMethodHandler<SendData, SendData>(1, echoCallback);
+    s.start();
+
+    Client c(socketPath);
+    c.start();
+
+    std::shared_ptr<ThrowOnAcceptData> throwingData(new ThrowOnAcceptData());
+
+    BOOST_CHECK_THROW((c.callSync<ThrowOnAcceptData, SendData>(1, throwingData)), IPCSerializationException);
+
+}
+
+BOOST_AUTO_TEST_CASE(ParseErrorTest)
+{
+    Service s(socketPath);
+    s.addMethodHandler<SendData, SendData>(1, echoCallback);
+    s.start();
+
+    Client c(socketPath);
+    c.start();
+
+    std::shared_ptr<SendData> sentData(new SendData(78));
+    BOOST_CHECK_THROW((c.callSync<SendData, ThrowOnAcceptData>(1, sentData, 10000)), IPCParsingException);
+}
+
+BOOST_AUTO_TEST_CASE(DisconnectedPeerErrorTest)
+{
+    Service s(socketPath);
+
+    auto method = [](std::shared_ptr<ThrowOnAcceptData>&) {
+        return std::shared_ptr<SendData>(new SendData(1));
+    };
+
+    // Method will throw during serialization and disconnect automatically
+    s.addMethodHandler<SendData, ThrowOnAcceptData>(1, method);
+    s.start();
+
+    Client c(socketPath);
+    c.start();
+
+    std::mutex mtx;
+    std::unique_lock<std::mutex> lck(mtx);
+    std::condition_variable cv;
+    ipc::Status retStatus = ipc::Status::UNDEFINED;
+
+    auto dataBack = [&cv, &retStatus](ipc::Status status, std::shared_ptr<SendData>&) {
+        retStatus = status;
+        cv.notify_one();
+    };
+
+    std::shared_ptr<SendData> sentData(new SendData(78));
+    c.callAsync<SendData, SendData>(1, sentData, dataBack);
+
+    // Wait for the response
+    BOOST_CHECK(cv.wait_for(lck, std::chrono::seconds(10), [&retStatus]() {
+        return retStatus != ipc::Status::UNDEFINED;
+    }));
+    BOOST_CHECK(retStatus == ipc::Status::PEER_DISCONNECTED);
 }
 
 

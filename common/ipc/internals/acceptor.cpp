@@ -103,7 +103,6 @@ void Acceptor::run()
             }
             LOGE("Error in poll: " << std::string(strerror(errno)));
             throw IPCException("Error in poll: " + std::string(strerror(errno)));
-            break;
         }
 
         // Check for incoming connections

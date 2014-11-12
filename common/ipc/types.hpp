@@ -19,17 +19,32 @@
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Handler types definitions
+ * @brief   Types definitions
  */
 
 #ifndef COMMON_IPC_HANDLERS_HPP
 #define COMMON_IPC_HANDLERS_HPP
 
+#include "ipc/exception.hpp"
+
 #include <functional>
 #include <memory>
+#include <string>
 
 namespace security_containers {
 namespace ipc {
+
+enum class Status : int {
+    OK = 0,
+    PARSING_ERROR,
+    SERIALIZATION_ERROR,
+    PEER_DISCONNECTED,
+    NAUGHTY_PEER,
+    UNDEFINED
+};
+
+std::string toString(const Status status);
+void throwOnError(const Status status);
 
 template<typename SentDataType, typename ReceivedDataType>
 struct MethodHandler {
@@ -39,7 +54,7 @@ struct MethodHandler {
 
 template <typename ReceivedDataType>
 struct ResultHandler {
-    typedef std::function<void(std::shared_ptr<ReceivedDataType>&)> type;
+    typedef std::function<void(Status, std::shared_ptr<ReceivedDataType>&)> type;
 };
 
 } // namespace ipc

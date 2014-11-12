@@ -103,7 +103,7 @@ public:
     std::shared_ptr<ReceivedDataType> callSync(const MethodID methodID,
                                                const PeerID peerID,
                                                const std::shared_ptr<SentDataType>& data,
-                                               unsigned int timeoutMS);
+                                               unsigned int timeoutMS = 500);
 
     /**
      * Asynchronous method call. The return callback will be called on
@@ -140,7 +140,7 @@ template<typename SentDataType, typename ReceivedDataType>
 std::shared_ptr<ReceivedDataType> Service::callSync(const MethodID methodID,
                                                     const PeerID peerID,
                                                     const std::shared_ptr<SentDataType>& data,
-                                                    unsigned int timeoutMS = 500)
+                                                    unsigned int timeoutMS)
 {
     LOGD("Sync calling method: " << methodID << " for user: " << peerID);
     return mProcessor.callSync<SentDataType, ReceivedDataType>(methodID, peerID, data, timeoutMS);

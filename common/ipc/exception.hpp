@@ -38,7 +38,25 @@ struct IPCException: public SecurityContainersException {
     IPCException(const std::string& error) : SecurityContainersException(error) {}
 };
 
+struct IPCParsingException: public IPCException {
+    IPCParsingException(const std::string& error) : IPCException(error) {}
+};
 
+struct IPCSerializationException: public IPCException {
+    IPCSerializationException(const std::string& error) : IPCException(error) {}
+};
+
+struct IPCPeerDisconnectedException: public IPCException {
+    IPCPeerDisconnectedException(const std::string& error) : IPCException(error) {}
+};
+
+struct IPCNaughtyPeerException: public IPCException {
+    IPCNaughtyPeerException(const std::string& error) : IPCException(error) {}
+};
+
+struct IPCTimeoutException: public IPCException {
+    IPCTimeoutException(const std::string& error) : IPCException(error) {}
+};
 }
 
 

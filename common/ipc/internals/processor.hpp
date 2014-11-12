@@ -71,6 +71,8 @@ const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
 *  - don't throw timeout if the message is already processed
 *  - naming convention or methods that just commissions the PROCESS thread to do something
 *  - removePeer API function
+*  - error handling - special message type
+*  - some mutexes may not be needed
 */
 class Processor {
 public:
@@ -214,6 +216,10 @@ private:
         ReturnCallbacks(ReturnCallbacks&&) = default;
         ReturnCallbacks& operator=(ReturnCallbacks &&) = default;
 
+        ReturnCallbacks(PeerID peerID, const ParseCallback& parse, const ResultHandler<void>::type& process)
+            : peerID(peerID), parse(parse), process(process) {}
+
+        PeerID peerID;
         ParseCallback parse;
         ResultHandler<void>::type process;
     };
@@ -225,8 +231,11 @@ private:
         SocketInfo(SocketInfo&&) = default;
         SocketInfo& operator=(SocketInfo &&) = default;
 
-        std::shared_ptr<Socket> socketPtr;
+        SocketInfo(const PeerID peerID, const std::shared_ptr<Socket>& socketPtr)
+            : peerID(peerID), socketPtr(socketPtr) {}
+
         PeerID peerID;
+        std::shared_ptr<Socket> socketPtr;
     };
 
     enum class Event : int {
@@ -268,15 +277,22 @@ private:
 
     void run();
     bool handleEvent();
-    void handleCall();
+    bool handleCall();
     bool handleLostConnections();
     bool handleInputs();
     bool handleInput(const PeerID peerID, const Socket& socket);
+    bool onReturnValue(const PeerID peerID,
+                       const Socket& socket,
+                       const MessageID messageID);
+    bool onRemoteCall(const PeerID peerID,
+                      const Socket& socket,
+                      const MethodID methodID,
+                      const MessageID messageID);
     void resetPolling();
     MessageID getNextMessageID();
     PeerID getNextPeerID();
     Call getCall();
-    void removePeer(PeerID peerID);
+    void removePeer(const PeerID peerID, Status status);
 
 };
 
@@ -352,9 +368,9 @@ void Processor::callAsync(const MethodID methodID,
         config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
     };
 
-    call.process = [process](std::shared_ptr<void>& data)->void {
+    call.process = [process](Status status, std::shared_ptr<void>& data)->void {
         std::shared_ptr<ReceivedDataType> tmpData = std::static_pointer_cast<ReceivedDataType>(data);
-        return process(tmpData);
+        return process(status, tmpData);
     };
 
     {
@@ -387,8 +403,10 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
     std::mutex mtx;
     std::unique_lock<std::mutex> lck(mtx);
     std::condition_variable cv;
+    Status returnStatus = ipc::Status::UNDEFINED;
 
-    auto process = [&result, &cv](std::shared_ptr<ReceivedDataType> returnedData) {
+    auto process = [&result, &cv, &returnStatus](Status status, std::shared_ptr<ReceivedDataType> returnedData) {
+        returnStatus = status;
         result = returnedData;
         cv.notify_one();
     };
@@ -399,14 +417,16 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
                                 data,
                                 process);
 
-    auto isResultInitialized = [&result]() {
-        return static_cast<bool>(result);
+    auto isResultInitialized = [&returnStatus]() {
+        return returnStatus != ipc::Status::UNDEFINED;
     };
 
     if (!cv.wait_for(lck, std::chrono::milliseconds(timeoutMS), isResultInitialized)) {
         LOGE("Function call timeout; methodID: " << methodID);
-        throw IPCException("Function call timeout; methodID: " + std::to_string(methodID));
+        throw IPCTimeoutException("Function call timeout; methodID: " + std::to_string(methodID));
     }
+
+    throwOnError(returnStatus);
 
     return result;
 }
