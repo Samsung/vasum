@@ -380,12 +380,22 @@ VsmStatus Client::vsm_set_active_container(const char* id) noexcept
     return callMethod(HOST_INTERFACE, api::host::METHOD_SET_ACTIVE_CONTAINER, args_in);
 }
 
-VsmStatus Client::vsm_create_domain(const char* id) noexcept
+VsmStatus Client::vsm_create_domain(const char* id, const char* tname) noexcept
 {
     assert(id);
+    if (tname) {
+        mStatus = Status(VSMCLIENT_OTHER_ERROR, "Named template isn't implemented");
+        return vsm_get_status();
+    }
 
     GVariant* args_in = g_variant_new("(s)", id);
     return callMethod(HOST_INTERFACE, api::host::METHOD_ADD_CONTAINER, args_in);
+}
+
+VsmStatus Client::vsm_destroy_domain(const char*) noexcept
+{
+    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    return vsm_get_status();
 }
 
 VsmStatus Client::vsm_shutdown_domain(const char*) noexcept

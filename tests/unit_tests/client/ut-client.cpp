@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(AddContainerTest)
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    status = vsm_create_domain(client, newActiveContainerId.c_str());
+    status = vsm_create_domain(client, newActiveContainerId.c_str(), NULL);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_CUSTOM_ERROR, status);
     vsm_client_free(client);
 }

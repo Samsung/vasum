@@ -119,7 +119,7 @@ void create_domain(int pos, int argc, const char** argv)
         throw runtime_error("Not enough parameters");
     }
 
-    one_shot(bind(vsm_create_domain, _1, argv[pos + 1]));
+    one_shot(bind(vsm_create_domain, _1, argv[pos + 1], nullptr));
 }
 
 } // namespace cli

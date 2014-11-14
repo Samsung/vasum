@@ -367,9 +367,20 @@ VsmStatus vsm_set_active_container(VsmClient client, const char* id);
  *
  * @param[in] client security-containers-server's client
  * @param[in] id container id
+ * @param[in] tname template name, NULL for default
  * @return status of this function call
  */
-VsmStatus vsm_create_domain(VsmClient client, const char* id);
+VsmStatus vsm_create_domain(VsmClient client, const char* id, const char* tname);
+
+/**
+ * Remove domain
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] id container id
+ * @param[in] force if 0 data will be kept, otherwise data will be lost
+ * @return status of this function call
+ */
+VsmStatus vsm_destroy_domain(VsmStatus clent, const char* id, int force);
 
 /**
  * Shutdown domain

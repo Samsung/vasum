@@ -153,9 +153,14 @@ API VsmStatus vsm_set_active_container(VsmClient client, const char* id)
     return getClient(client).vsm_set_active_container(id);
 }
 
-API VsmStatus vsm_create_domain(VsmClient client, const char* id)
+API VsmStatus vsm_create_domain(VsmClient client, const char* id, const char* tname)
 {
-    return getClient(client).vsm_create_domain(id);
+    return getClient(client).vsm_create_domain(id, tname);
+}
+
+API VsmStatus vsm_destroy_domain(VsmClient client, const char* id)
+{
+    return getClient(client).vsm_destroy_domain(id);
 }
 
 API VsmStatus vsm_shutdown_domain(VsmClient client, const char* id)

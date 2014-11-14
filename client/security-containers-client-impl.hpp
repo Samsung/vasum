@@ -141,7 +141,12 @@ public:
     /**
      *  @see ::vsm_create_domain
      */
-    VsmStatus vsm_create_domain(const char* id) noexcept;
+    VsmStatus vsm_create_domain(const char* id, const char* tname) noexcept;
+
+    /**
+     *  @see ::vsm_destroy_domain
+     */
+    VsmStatus vsm_destroy_domain(const char* id) noexcept;
 
     /**
      *  @see ::vsm_shutdown_domain
