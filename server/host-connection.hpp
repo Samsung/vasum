@@ -59,6 +59,9 @@ public:
                               )> GetActiveContainerIdCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
+                              )> GetContainerInfoCallback;
+    typedef std::function<void(const std::string& id,
+                               dbus::MethodResultBuilder::Pointer result
                               )> SetActiveContainerCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
@@ -90,6 +93,11 @@ public:
     void setGetActiveContainerIdCallback(const GetContainerIdsCallback& callback);
 
     /**
+     * Register a callback called to get the container informations
+     */
+    void setGetContainerInfoCallback(const GetContainerInfoCallback& callback);
+
+    /**
      * Register a callback called to set the active container
      */
     void setSetActiveContainerCallback(const SetActiveContainerCallback& callback);
@@ -119,6 +127,7 @@ private:
     GetContainerDbusesCallback mGetContainerDbusesCallback;
     GetContainerIdsCallback mGetContainerIdsCallback;
     GetActiveContainerIdCallback mGetActiveContainerIdCallback;
+    GetContainerInfoCallback mGetContainerInfoCallback;
     SetActiveContainerCallback mSetActiveContainerCallback;
     AddContainerCallback mAddContainerCallback;
 

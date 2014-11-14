@@ -125,6 +125,11 @@ void HostConnection::setGetActiveContainerIdCallback(const GetActiveContainerIdC
     mGetActiveContainerIdCallback = callback;
 }
 
+void HostConnection::setGetContainerInfoCallback(const GetContainerInfoCallback& callback)
+{
+    mGetContainerInfoCallback = callback;
+}
+
 void HostConnection::setSetActiveContainerCallback(const SetActiveContainerCallback& callback)
 {
     mSetActiveContainerCallback = callback;
@@ -201,6 +206,16 @@ void HostConnection::onMessageCall(const std::string& objectPath,
     if (methodName == api::host::METHOD_GET_ACTIVE_CONTAINER_ID){
         if (mGetActiveContainerIdCallback){
             mGetActiveContainerIdCallback(result);
+        }
+        return;
+    }
+
+    if (methodName == api::host::METHOD_GET_CONTAINER_INFO){
+        const gchar* id = NULL;
+        g_variant_get(parameters, "(&s)", &id);
+
+        if (mGetContainerInfoCallback) {
+            mGetContainerInfoCallback(id, result);
         }
         return;
     }

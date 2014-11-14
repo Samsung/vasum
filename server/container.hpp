@@ -204,6 +204,11 @@ public:
      */
     std::string getDbusAddress();
 
+    /**
+     * Get id of VT
+     */
+    int getVT() const;
+
 private:
     ContainerConfig mConfig;
     std::vector<boost::regex> mPermittedToSend;

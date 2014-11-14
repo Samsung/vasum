@@ -48,6 +48,14 @@ std::map<std::string, CommandLineInterface> commands = {
             "Create and add container",
             {{"container_id", "id container name"}}
         }
+    },
+    {
+        "lookup_domain_by_id", {
+            lookup_domain_by_id,
+            "lookup_domain_by_id container_id",
+            "Prints informations about domain",
+            {{"container_id", "id container name"}}
+        }
     }
 };
 

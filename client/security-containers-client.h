@@ -338,7 +338,7 @@ VsmStatus vsm_lookup_domain_by_pid(VsmClient client, int pid, VsmString* id);
  * @param[in] id domain name
  * @param[out] domain domain informations
  * @return status of this function call
- * @remark Use @p vsm_doamin_free() to free memory occupied by @p domain
+ * @remark Use @p vsm_domain_free() to free memory occupied by @p domain
  */
 VsmStatus vsm_lookup_domain_by_id(VsmClient client, const char* id, VsmDomain* domain);
 

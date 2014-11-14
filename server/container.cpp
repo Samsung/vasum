@@ -211,6 +211,11 @@ std::string Container::getDbusAddress()
     return mDbusAddress;
 }
 
+int Container::getVT() const
+{
+    return mConfig.vt;
+}
+
 bool Container::activateVT()
 {
     Lock lock(mReconnectMutex);

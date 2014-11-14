@@ -124,6 +124,7 @@ private:
     void handleDbusStateChanged(const std::string& containerId, const std::string& dbusAddress);
     void handleGetContainerIdsCall(dbus::MethodResultBuilder::Pointer result);
     void handleGetActiveContainerIdCall(dbus::MethodResultBuilder::Pointer result);
+    void handleGetContainerInfoCall(const std::string& id, dbus::MethodResultBuilder::Pointer result);
     void handleSetActiveContainerCall(const std::string& id,
                                       dbus::MethodResultBuilder::Pointer result);
     void handleAddContainerCall(const std::string& id,

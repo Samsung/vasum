@@ -110,6 +110,14 @@ void set_active_container(int pos, int argc, const char** argv);
  */
 void create_domain(int pos, int argc, const char** argv);
 
+/**
+ * Parses command line arguments and call vsm_lookup_domain_by_id
+ *
+ * @see vsm_lookup_domain_by_id
+ */
+void lookup_domain_by_id(int pos, int argc, const char** argv);
+
+
 } // namespace cli
 } // namespace security_containers
 

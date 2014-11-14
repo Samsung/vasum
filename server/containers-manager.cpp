@@ -102,6 +102,9 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
     mHostConnection.setGetActiveContainerIdCallback(bind(&ContainersManager::handleGetActiveContainerIdCall,
                                                          this, _1));
 
+    mHostConnection.setGetContainerInfoCallback(bind(&ContainersManager::handleGetContainerInfoCall,
+                                                     this, _1, _2));
+
     mHostConnection.setSetActiveContainerCallback(bind(&ContainersManager::handleSetActiveContainerCall,
                                                        this, _1, _2));
 
@@ -495,6 +498,37 @@ void ContainersManager::handleGetActiveContainerIdCall(dbus::MethodResultBuilder
     } else {
         result->set(g_variant_new("(s)", ""));
     }
+}
+
+void ContainersManager::handleGetContainerInfoCall(const std::string& id,
+                                                   dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("GetContainerInfo call");
+    if (mContainers.count(id) == 0) {
+        LOGE("No container with id=" << id);
+        result->setError(api::ERROR_UNKNOWN_ID, "No such container id");
+        return;
+    }
+    const auto& container = mContainers[id];
+    const char* state;
+    //TODO: Use the lookup map.
+    if (container->isRunning()) {
+        state = "RUNNING";
+    } else if (container->isStopped()) {
+        state = "STOPPED";
+    } else if (container->isPaused()) {
+        state = "FROZEN";
+    } else {
+        LOGE("Unrecognized state of container id=" << id);
+        result->setError(api::ERROR_INTERNAL, "Unrecognized state of container");
+        return;
+    }
+    const std::string rootPath = boost::filesystem::absolute(id, mConfig.containersPath).string();
+    result->set(g_variant_new("((siss))",
+                              id.c_str(),
+                              container->getVT(),
+                              state,
+                              rootPath.c_str()));
 }
 
 void ContainersManager::handleSetActiveContainerCall(const std::string& id,

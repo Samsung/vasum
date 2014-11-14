@@ -30,6 +30,7 @@
 #include <stdexcept>
 #include <functional>
 #include <ostream>
+#include <iostream>
 
 using namespace std;
 
@@ -80,6 +81,37 @@ finish:
     }
 }
 
+ostream& operator<<(ostream& out, const VsmDomainState& state)
+{
+    const char* name;
+    switch (state) {
+        case STOPPED: name = "STOPPED"; break;
+        case STARTING: name = "STARTING"; break;
+        case RUNNING: name = "RUNNING"; break;
+        case STOPPING: name = "STOPPING"; break;
+        case ABORTING: name = "ABORTING"; break;
+        case FREEZING: name = "FREEZING"; break;
+        case FROZEN: name = "FROZEN"; break;
+        case THAWED: name = "THAWED"; break;
+        case LOCKED: name = "LOCKED"; break;
+        case MAX_STATE: name = "MAX_STATE"; break;
+        case ACTIVATING: name = "ACTIVATING"; break;
+        default: name = "MAX_STATE (ERROR)";
+    }
+
+    out << name;
+    return out;
+}
+
+ostream& operator<<(ostream& out, const VsmDomain& domain)
+{
+    out << "Name: " << domain->id
+        << "\nTerminal: " << domain->terminal
+        << "\nState: " << domain->state
+        << "\nRoot: " << domain->rootfs_path;
+    return out;
+}
+
 } // namespace
 
 void CommandLineInterface::printUsage(std::ostream& out) const
@@ -120,6 +152,19 @@ void create_domain(int pos, int argc, const char** argv)
     }
 
     one_shot(bind(vsm_create_domain, _1, argv[pos + 1], nullptr));
+}
+
+void lookup_domain_by_id(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+    if (argc <= pos + 1) {
+        throw runtime_error("Not enough parameters");
+    }
+
+    VsmDomain domain;
+    one_shot(bind(vsm_lookup_domain_by_id, _1, argv[pos + 1], &domain));
+    cout << domain << endl;
+    vsm_domain_free(domain);
 }
 
 } // namespace cli

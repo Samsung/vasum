@@ -88,6 +88,50 @@ void toBasic(GVariant* in, char** str)
     *str = buf;
 }
 
+VsmDomainState getDomainState(const char* state)
+{
+    if (strcmp(state, "STOPPED") == 0) {
+        return STOPPED;
+    } else if (strcmp(state, "STARTING") == 0) {
+        return STARTING;
+    } else if (strcmp(state, "RUNNING") == 0) {
+        return RUNNING;
+    } else if (strcmp(state, "STOPPING") == 0) {
+        return STOPPING;
+    } else if (strcmp(state, "ABORTING") == 0) {
+        return ABORTING;
+    } else if (strcmp(state, "FREEZING") == 0) {
+        return FREEZING;
+    } else if (strcmp(state, "FROZEN") == 0) {
+        return FROZEN;
+    } else if (strcmp(state, "THAWED") == 0) {
+        return THAWED;
+    } else if (strcmp(state, "LOCKED") == 0) {
+        return LOCKED;
+    } else if (strcmp(state, "MAX_STATE") == 0) {
+        return MAX_STATE;
+    } else if (strcmp(state, "ACTIVATING") == 0) {
+        return ACTIVATING;
+    }
+    assert(!"UNKNOWN STATE");
+    return (VsmDomainState)-1;
+}
+
+void toBasic(GVariant* in, VsmDomain* domain)
+{
+    const char* id;
+    const char* path;
+    const char* state;
+    int terminal;
+    VsmDomain vsmDomain = (VsmDomain)malloc(sizeof(*vsmDomain));
+    g_variant_get(in, "(siss)", &id, &terminal, &state, &path);
+    vsmDomain->id = strdup(id);
+    vsmDomain->terminal = terminal;
+    vsmDomain->state = getDomainState(state);
+    vsmDomain->rootfs_path = strdup(path);
+    *domain = vsmDomain;
+}
+
 template<typename T>
 void toArray(GVariant* in, T** scArray)
 {
@@ -360,10 +404,27 @@ VsmStatus Client::vsm_lookup_domain_by_pid(int pid, VsmString* id) noexcept
     return vsm_get_status();
 }
 
-VsmStatus Client::vsm_lookup_domain_by_id(const char*, VsmDomain*) noexcept
+VsmStatus Client::vsm_lookup_domain_by_id(const char* id, VsmDomain* domain) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
+    assert(id);
+    assert(domain);
+
+    GVariant* out;
+    GVariant* args_in = g_variant_new("(s)", id);
+    VsmStatus ret = callMethod(HOST_INTERFACE,
+                               api::host::METHOD_GET_CONTAINER_INFO,
+                               args_in,
+                               "((siss))",
+                               &out);
+    if (ret != VSMCLIENT_SUCCESS) {
+        return ret;
+    }
+    GVariant* unpacked;
+    g_variant_get(out, "(*)", &unpacked);
+    toBasic(unpacked, domain);
+    g_variant_unref(unpacked);
+    g_variant_unref(out);
+    return ret;
 }
 
 VsmStatus Client::vsm_lookup_domain_by_terminal_id(int, VsmString*) noexcept

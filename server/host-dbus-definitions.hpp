@@ -42,6 +42,7 @@ const std::string ERROR_CONTAINER_CREATE_FAILED  = "org.tizen.containers.host.Er
 const std::string METHOD_GET_CONTAINER_DBUSES    = "GetContainerDbuses";
 const std::string METHOD_GET_CONTAINER_ID_LIST   = "GetContainerIds";
 const std::string METHOD_GET_ACTIVE_CONTAINER_ID = "GetActiveContainerId";
+const std::string METHOD_GET_CONTAINER_INFO      = "GetContainerInfo";
 const std::string METHOD_SET_ACTIVE_CONTAINER    = "SetActiveContainer";
 const std::string METHOD_ADD_CONTAINER           = "AddContainer";
 
@@ -68,6 +69,10 @@ const std::string DEFINITION =
     "    </method>"
     "    <method name='" + METHOD_GET_ACTIVE_CONTAINER_ID + "'>"
     "      <arg type='s' name='result' direction='out'/>"
+    "    </method>"
+    "    <method name='" + METHOD_GET_CONTAINER_INFO + "'>"
+    "      <arg type='s' name='id' direction='in'/>"
+    "      <arg type='(siss)' name='result' direction='out'/>"
     "    </method>"
     "    <method name='" + METHOD_SET_ACTIVE_CONTAINER + "'>"
     "      <arg type='s' name='id' direction='in'/>"
