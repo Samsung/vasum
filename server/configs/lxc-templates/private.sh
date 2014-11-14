@@ -27,7 +27,9 @@ cat <<EOF >> ${path}/config
 lxc.utsname = ${name}
 lxc.rootfs = ${rootfs}
 
-lxc.haltsignal = SIGTERM
+# userns 1-to-1 mapping
+#lxc.id_map = u 0 0 65536
+#lxc.id_map = g 0 0 65536
 
 lxc.pts = 256
 lxc.tty = 0

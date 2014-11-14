@@ -76,6 +76,8 @@ public:
     bool unfreeze();
 private:
     lxc_container* mContainer;
+
+    bool setRunLevel(int runLevel);
 };
 
 

@@ -30,6 +30,9 @@
 #include <lxc/lxccontainer.h>
 #include <sys/stat.h>
 
+#include <utils/initctl.hpp>
+#include <sys/wait.h>
+
 #include <map>
 
 namespace security_containers {
@@ -145,6 +148,26 @@ bool LxcDomain::reboot()
 
 bool LxcDomain::shutdown(int timeout)
 {
+    State state = getState();
+    if (state == State::STOPPED) {
+        return true;
+    }
+    if (state != State::RUNNING) {
+        LOGE("Could not gracefully shutdown domain " << getName());
+        return false;
+    }
+
+    // try shutdown by sending poweroff to init
+    if (setRunLevel(utils::RUNLEVEL_POWEROFF)) {
+        if (!mContainer->wait(mContainer, "STOPPED", timeout)) {
+            LOGE("Could not gracefully shutdown domain " + getName() + " in " << timeout << "s");
+            return false;
+        }
+        return true;
+    }
+    LOGW("SetRunLevel failed for domain " + getName());
+
+    // fallback for other inits like bash: lxc sends 'lxc.haltsignal' signal to init
     if (!mContainer->shutdown(mContainer, timeout)) {
         LOGE("Could not gracefully shutdown domain " + getName() + " in " << timeout << "s");
         return false;
@@ -168,6 +191,26 @@ bool LxcDomain::unfreeze()
         return false;
     }
     return true;
+}
+
+bool LxcDomain::setRunLevel(int runLevel)
+{
+    auto callback = [](void* param) {
+        utils::RunLevel runLevel = *reinterpret_cast<utils::RunLevel*>(param);
+        return utils::setRunLevel(runLevel) ? 0 : 1;
+    };
+
+    lxc_attach_options_t options = LXC_ATTACH_OPTIONS_DEFAULT;
+    pid_t pid;
+    int ret = mContainer->attach(mContainer, callback, &runLevel, &options, &pid);
+    if (ret != 0) {
+        return false;
+    }
+    int status;
+    if (waitpid(pid, &status, 0) < 0) {
+        return false;
+    }
+    return status == 0;
 }
 
 

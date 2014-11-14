@@ -45,10 +45,16 @@ cat <<EOF >> ${path}/config
 lxc.utsname = ${name}
 lxc.rootfs = ${rootfs}
 
+# userns 1-to-1 mapping
+lxc.id_map = u 0 0 65536
+lxc.id_map = g 0 0 65536
+
 lxc.haltsignal = SIGTERM
 
 lxc.pts = 256
 lxc.tty = 0
+
+lxc.cgroup.devices.deny = a
 
 lxc.mount.auto = proc sys cgroup
 lxc.mount.entry = /bin bin none ro,bind 0 0
@@ -56,7 +62,6 @@ lxc.mount.entry = /etc etc none ro,bind 0 0
 lxc.mount.entry = /lib lib none ro,bind 0 0
 lxc.mount.entry = /sbin sbin none ro,bind 0 0
 lxc.mount.entry = /usr usr none ro,rbind 0 0
-lxc.mount.entry = devtmpfs dev devtmpfs rw,relatime,mode=755 0 0
 lxc.mount.entry = /tmp/ut-run3 var/run none rw,bind 0 0
 EOF
 
