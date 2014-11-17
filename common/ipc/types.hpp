@@ -40,6 +40,8 @@ enum class Status : int {
     SERIALIZATION_ERROR,
     PEER_DISCONNECTED,
     NAUGHTY_PEER,
+    REMOVED_PEER,
+    CLOSING,
     UNDEFINED
 };
 

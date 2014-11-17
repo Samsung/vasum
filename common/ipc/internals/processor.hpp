@@ -65,7 +65,6 @@ const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
 * - Rest: The data written in a callback. One type per method.ReturnCallbacks
 *
 * TODO:
-*  - error codes passed to async callbacks
 *  - remove ReturnCallbacks on peer disconnect
 *  - on sync timeout erase the return callback
 *  - don't throw timeout if the message is already processed
@@ -73,12 +72,15 @@ const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
 *  - removePeer API function
 *  - error handling - special message type
 *  - some mutexes may not be needed
+*  - make addPeer synchronous like removePeer
 */
 class Processor {
 public:
     typedef std::function<void(int)> PeerCallback;
     typedef unsigned int PeerID;
     typedef unsigned int MethodID;
+    typedef unsigned int MessageID;
+
 
     /**
      * Method ID. Used to indicate a message with the return value.
@@ -120,6 +122,13 @@ public:
      * @return peerID of the new socket
      */
     PeerID addPeer(const std::shared_ptr<Socket>& socketPtr);
+
+    /**
+     * Request removing peer and wait
+     *
+     * @param peerID id of the peer
+     */
+    void removePeer(const PeerID peerID);
 
     /**
      * Saves the callbacks connected to the method id.
@@ -171,17 +180,16 @@ public:
      * @tparam ReceivedDataType data type to receive
      */
     template<typename SentDataType, typename ReceivedDataType>
-    void callAsync(const MethodID methodID,
-                   const PeerID peerID,
-                   const std::shared_ptr<SentDataType>& data,
-                   const typename ResultHandler<ReceivedDataType>::type& process);
+    MessageID callAsync(const MethodID methodID,
+                        const PeerID peerID,
+                        const std::shared_ptr<SentDataType>& data,
+                        const typename ResultHandler<ReceivedDataType>::type& process);
 
 
 private:
     typedef std::function<void(int fd, std::shared_ptr<void>& data)> SerializeCallback;
     typedef std::function<std::shared_ptr<void>(int fd)> ParseCallback;
     typedef std::lock_guard<std::mutex> Lock;
-    typedef unsigned int MessageID;
 
     struct Call {
         Call(const Call& other) = delete;
@@ -195,6 +203,7 @@ private:
         SerializeCallback serialize;
         ParseCallback parse;
         ResultHandler<void>::type process;
+        MessageID messageID;
     };
 
     struct MethodHandlers {
@@ -238,10 +247,26 @@ private:
         std::shared_ptr<Socket> socketPtr;
     };
 
+    struct RemovePeerRequest {
+        RemovePeerRequest(const RemovePeerRequest& other) = delete;
+        RemovePeerRequest& operator=(const RemovePeerRequest&) = delete;
+        RemovePeerRequest() = default;
+        RemovePeerRequest(RemovePeerRequest&&) = default;
+        RemovePeerRequest& operator=(RemovePeerRequest &&) = default;
+
+        RemovePeerRequest(const PeerID peerID,
+                          const std::shared_ptr<std::condition_variable>& conditionPtr)
+            : peerID(peerID), conditionPtr(conditionPtr) {}
+
+        PeerID peerID;
+        std::shared_ptr<std::condition_variable> conditionPtr;
+    };
+
     enum class Event : int {
         FINISH,     // Shutdown request
         CALL,       // New method call in the queue
-        NEW_PEER    // New peer in the queue
+        NEW_PEER,   // New peer in the queue
+        DELETE_PEER // Delete peer
     };
     EventQueue<Event> mEventQueue;
 
@@ -258,6 +283,7 @@ private:
     std::mutex mSocketsMutex;
     std::unordered_map<PeerID, std::shared_ptr<Socket> > mSockets;
     std::queue<SocketInfo> mNewSockets;
+    std::queue<RemovePeerRequest> mPeersToDelete;
 
     // Mutex for modifying the map with return callbacks
     std::mutex mReturnCallbacksMutex;
@@ -292,8 +318,8 @@ private:
     MessageID getNextMessageID();
     PeerID getNextPeerID();
     Call getCall();
-    void removePeer(const PeerID peerID, Status status);
-
+    void removePeerInternal(const PeerID peerID, Status status);
+    void cleanCommunication();
 };
 
 template<typename SentDataType, typename ReceivedDataType>
@@ -336,10 +362,10 @@ void Processor::addMethodHandler(const MethodID methodID,
 }
 
 template<typename SentDataType, typename ReceivedDataType>
-void Processor::callAsync(const MethodID methodID,
-                          const PeerID peerID,
-                          const std::shared_ptr<SentDataType>& data,
-                          const typename  ResultHandler<ReceivedDataType>::type& process)
+Processor::MessageID Processor::callAsync(const MethodID methodID,
+                                          const PeerID peerID,
+                                          const std::shared_ptr<SentDataType>& data,
+                                          const typename ResultHandler<ReceivedDataType>::type& process)
 {
     static_assert(config::isVisitable<SentDataType>::value,
                   "Use the libConfig library");
@@ -357,6 +383,7 @@ void Processor::callAsync(const MethodID methodID,
     call.peerID = peerID;
     call.methodID = methodID;
     call.data = data;
+    call.messageID = getNextMessageID();
 
     call.parse = [](const int fd)->std::shared_ptr<void> {
         std::shared_ptr<ReceivedDataType> data(new ReceivedDataType());
@@ -379,6 +406,8 @@ void Processor::callAsync(const MethodID methodID,
     }
 
     mEventQueue.send(Event::CALL);
+
+    return call.messageID;
 }
 
 
@@ -400,30 +429,43 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
 
     std::shared_ptr<ReceivedDataType> result;
 
-    std::mutex mtx;
-    std::unique_lock<std::mutex> lck(mtx);
+    std::mutex mutex;
     std::condition_variable cv;
     Status returnStatus = ipc::Status::UNDEFINED;
 
-    auto process = [&result, &cv, &returnStatus](Status status, std::shared_ptr<ReceivedDataType> returnedData) {
+    auto process = [&result, &mutex, &cv, &returnStatus](Status status, std::shared_ptr<ReceivedDataType> returnedData) {
+        std::unique_lock<std::mutex> lock(mutex);
         returnStatus = status;
         result = returnedData;
-        cv.notify_one();
+        cv.notify_all();
     };
 
-    callAsync<SentDataType,
-              ReceivedDataType>(methodID,
-                                peerID,
-                                data,
-                                process);
+    MessageID messageID = callAsync<SentDataType, ReceivedDataType>(methodID,
+                                                                    peerID,
+                                                                    data,
+                                                                    process);
 
     auto isResultInitialized = [&returnStatus]() {
         return returnStatus != ipc::Status::UNDEFINED;
     };
 
-    if (!cv.wait_for(lck, std::chrono::milliseconds(timeoutMS), isResultInitialized)) {
-        LOGE("Function call timeout; methodID: " << methodID);
-        throw IPCTimeoutException("Function call timeout; methodID: " + std::to_string(methodID));
+    std::unique_lock<std::mutex> lock(mutex);
+    if (!cv.wait_for(lock, std::chrono::milliseconds(timeoutMS), isResultInitialized)) {
+        bool isTimeout = false;
+        {
+            Lock lock(mReturnCallbacksMutex);
+            if (1 == mReturnCallbacks.erase(messageID)) {
+                isTimeout = true;
+            }
+        }
+        if (isTimeout) {
+            removePeer(peerID);
+            LOGE("Function call timeout; methodID: " << methodID);
+            throw IPCTimeoutException("Function call timeout; methodID: " + std::to_string(methodID));
+        } else {
+            // Timeout started during the return value processing, so wait for it to finish
+            cv.wait(lock, isResultInitialized);
+        }
     }
 
     throwOnError(returnStatus);

@@ -39,7 +39,7 @@ namespace ipc {
 
 EventFD::EventFD()
 {
-    mFD = ::eventfd(0, EFD_SEMAPHORE);
+    mFD = ::eventfd(0, EFD_SEMAPHORE | EFD_NONBLOCK);
     if (mFD == -1) {
         LOGE("Error in eventfd: " << std::string(strerror(errno)));
         throw IPCException("Error in eventfd: " + std::string(strerror(errno)));

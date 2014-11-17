@@ -71,6 +71,11 @@ public:
      */
     MessageType receive();
 
+    /**
+     * @return is the queue empty
+     */
+    bool isEmpty();
+
 private:
     typedef std::lock_guard<std::mutex> Lock;
 
@@ -104,6 +109,13 @@ MessageType EventQueue<MessageType>::receive()
     MessageType mess = mMessages.front();
     mMessages.pop();
     return mess;
+}
+
+template<typename MessageType>
+bool EventQueue<MessageType>::isEmpty()
+{
+    Lock lock(mCommunicationMutex);
+    return mMessages.empty();
 }
 
 } // namespace ipc

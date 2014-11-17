@@ -42,8 +42,9 @@ void close(int fd);
  * @param fd file descriptor
  * @param bufferPtr pointer to the data buffer
  * @param size size of data to write
+ * @param timeoutMS timeout in milliseconds
  */
-void write(int fd, const void* bufferPtr, const size_t size);
+void write(int fd, const void* bufferPtr, const size_t size, int timeoutMS = 500);
 
 /**
  * Read from a file descriptor, throw on error.
@@ -51,8 +52,9 @@ void write(int fd, const void* bufferPtr, const size_t size);
  * @param fd file descriptor
  * @param bufferPtr pointer to the data buffer
  * @param size size of the data to read
+ * @param timeoutMS timeout in milliseconds
  */
-void read(int fd, void* bufferPtr, const size_t size);
+void read(int fd, void* bufferPtr, const size_t size, int timeoutMS = 500);
 
 /**
  * @return the max number of file descriptors for this process.

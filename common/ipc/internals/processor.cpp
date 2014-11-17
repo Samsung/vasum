@@ -48,9 +48,6 @@ namespace ipc {
         LOGE("Callback threw an error: " << e.what()); \
     }
 
-
-
-
 const Processor::MethodID Processor::RETURN_METHOD_ID = std::numeric_limits<MethodID>::max();
 
 Processor::Processor(const PeerCallback& newPeerCallback,
@@ -118,9 +115,31 @@ Processor::PeerID Processor::addPeer(const std::shared_ptr<Socket>& socketPtr)
     return peerID;
 }
 
-void Processor::removePeer(const PeerID peerID, Status status)
+void Processor::removePeer(const PeerID peerID)
 {
-    LOGW("Removing naughty peer. ID: " << peerID);
+    std::shared_ptr<std::condition_variable> conditionPtr(new std::condition_variable());
+
+    {
+        Lock lock(mSocketsMutex);
+        RemovePeerRequest request(peerID, conditionPtr);
+        mPeersToDelete.push(std::move(request));
+    }
+
+    mEventQueue.send(Event::DELETE_PEER);
+
+    auto isPeerDeleted = [&peerID, this] {
+        Lock lock(mSocketsMutex);
+        return mSockets.count(peerID) == 0;
+    };
+
+    std::mutex mutex;
+    std::unique_lock<std::mutex> lock(mutex);
+    conditionPtr->wait(lock, isPeerDeleted);
+}
+
+void Processor::removePeerInternal(const PeerID peerID, Status status)
+{
+    LOGW("Removing peer. ID: " << peerID);
     {
         Lock lock(mSocketsMutex);
         mSockets.erase(peerID);
@@ -141,7 +160,47 @@ void Processor::removePeer(const PeerID peerID, Status status)
         }
     }
 
+    if (mRemovedPeerCallback) {
+        // Notify about the deletion
+        mRemovedPeerCallback(peerID);
+    }
+
     resetPolling();
+}
+
+void Processor::cleanCommunication()
+{
+    while (!mEventQueue.isEmpty()) {
+        switch (mEventQueue.receive()) {
+        case Event::FINISH: {
+            LOGD("Event FINISH after FINISH");
+            break;
+        }
+        case Event::CALL: {
+            LOGD("Event CALL after FINISH");
+            Call call = getCall();
+            IGNORE_EXCEPTIONS(call.process(Status::CLOSING, call.data));
+            break;
+        }
+
+        case Event::NEW_PEER: {
+            LOGD("Event NEW_PEER after FINISH");
+            break;
+        }
+
+        case Event::DELETE_PEER: {
+            LOGD("Event DELETE_PEER after FINISH");
+            RemovePeerRequest request;
+            {
+                Lock lock(mSocketsMutex);
+                request = std::move(mPeersToDelete.front());
+                mPeersToDelete.pop();
+            }
+            request.conditionPtr->notify_all();
+            break;
+        }
+        }
+    }
 }
 
 void Processor::resetPolling()
@@ -198,6 +257,8 @@ void Processor::run()
             continue;
         }
     }
+
+    cleanCommunication();
 }
 
 
@@ -215,11 +276,10 @@ bool Processor::handleLostConnections()
                 peersToRemove.push_back(socketIt->first);
             }
         }
-
     }
 
     for (const PeerID peerID : peersToRemove) {
-        removePeer(peerID, Status::PEER_DISCONNECTED);
+        removePeerInternal(peerID, Status::PEER_DISCONNECTED);
     }
 
     return !peersToRemove.empty();
@@ -280,7 +340,7 @@ bool Processor::onReturnValue(const PeerID peerID,
         mReturnCallbacks.erase(messageID);
     } catch (const std::out_of_range&) {
         LOGW("No return callback for messageID: " << messageID);
-        removePeer(peerID, Status::NAUGHTY_PEER);
+        removePeerInternal(peerID, Status::NAUGHTY_PEER);
         return true;
     }
 
@@ -291,7 +351,7 @@ bool Processor::onReturnValue(const PeerID peerID,
     } catch (const std::exception& e) {
         LOGE("Exception during parsing: " << e.what());
         IGNORE_EXCEPTIONS(returnCallbacks.process(Status::PARSING_ERROR, data));
-        removePeer(peerID, Status::PARSING_ERROR);
+        removePeerInternal(peerID, Status::PARSING_ERROR);
         return true;
     }
 
@@ -314,7 +374,7 @@ bool Processor::onRemoteCall(const PeerID peerID,
         methodCallbacks = mMethodsCallbacks.at(methodID);
     } catch (const std::out_of_range&) {
         LOGW("No method callback for methodID: " << methodID);
-        removePeer(peerID, Status::NAUGHTY_PEER);
+        removePeerInternal(peerID, Status::NAUGHTY_PEER);
         return true;
     }
 
@@ -324,7 +384,7 @@ bool Processor::onRemoteCall(const PeerID peerID,
         data = methodCallbacks->parse(socket.getFD());
     } catch (const std::exception& e) {
         LOGE("Exception during parsing: " << e.what());
-        removePeer(peerID, Status::PARSING_ERROR);
+        removePeerInternal(peerID, Status::PARSING_ERROR);
         return true;
     }
 
@@ -334,7 +394,7 @@ bool Processor::onRemoteCall(const PeerID peerID,
         returnData = methodCallbacks->method(data);
     } catch (const std::exception& e) {
         LOGE("Exception in method handler: " << e.what());
-        removePeer(peerID, Status::NAUGHTY_PEER);
+        removePeerInternal(peerID, Status::NAUGHTY_PEER);
         return true;
     }
 
@@ -347,7 +407,7 @@ bool Processor::onRemoteCall(const PeerID peerID,
         methodCallbacks->serialize(socket.getFD(), returnData);
     } catch (const std::exception& e) {
         LOGE("Exception during serialization: " << e.what());
-        removePeer(peerID, Status::SERIALIZATION_ERROR);
+        removePeerInternal(peerID, Status::SERIALIZATION_ERROR);
         return true;
     }
 
@@ -402,6 +462,20 @@ bool Processor::handleEvent()
         }
         return true;
     }
+
+    case Event::DELETE_PEER: {
+        LOGD("Event DELETE_PEER");
+        RemovePeerRequest request;
+        {
+            Lock lock(mSocketsMutex);
+            request = std::move(mPeersToDelete.front());
+            mPeersToDelete.pop();
+        }
+
+        removePeerInternal(request.peerID, Status::REMOVED_PEER);
+        request.conditionPtr->notify_all();
+        return true;
+    }
     }
 
     return false;
@@ -447,39 +521,37 @@ bool Processor::handleCall()
         return false;
     }
 
-    MessageID messageID = getNextMessageID();
-
     {
         // Set what to do with the return message
         Lock lock(mReturnCallbacksMutex);
-        if (mReturnCallbacks.count(messageID) != 0) {
-            LOGE("There already was a return callback for messageID: " << messageID);
+        if (mReturnCallbacks.count(call.messageID) != 0) {
+            LOGE("There already was a return callback for messageID: " << call.messageID);
         }
 
         // move insertion
-        mReturnCallbacks[messageID] = std::move(ReturnCallbacks(call.peerID,
-                                                                std::move(call.parse),
-                                                                std::move(call.process)));
+        mReturnCallbacks[call.messageID] = std::move(ReturnCallbacks(call.peerID,
+                                                                     std::move(call.parse),
+                                                                     std::move(call.process)));
     }
 
     try {
         // Send the call with the socket
         Socket::Guard guard = socketPtr->getGuard();
         socketPtr->write(&call.methodID, sizeof(call.methodID));
-        socketPtr->write(&messageID, sizeof(messageID));
+        socketPtr->write(&call.messageID, sizeof(call.messageID));
         call.serialize(socketPtr->getFD(), call.data);
     } catch (const std::exception& e) {
         LOGE("Error during sending a message: " << e.what());
 
         // Inform about the error
-        IGNORE_EXCEPTIONS(mReturnCallbacks[messageID].process(Status::SERIALIZATION_ERROR, call.data));
+        IGNORE_EXCEPTIONS(mReturnCallbacks[call.messageID].process(Status::SERIALIZATION_ERROR, call.data));
 
         {
             Lock lock(mReturnCallbacksMutex);
-            mReturnCallbacks.erase(messageID);
+            mReturnCallbacks.erase(call.messageID);
         }
 
-        removePeer(call.peerID, Status::SERIALIZATION_ERROR);
+        removePeerInternal(call.peerID, Status::SERIALIZATION_ERROR);
         return true;
     }
 

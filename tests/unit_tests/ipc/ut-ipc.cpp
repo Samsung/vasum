@@ -71,6 +71,27 @@ struct SendData {
     )
 };
 
+struct LongSendData {
+    LongSendData(int i = 0, int waitTime = 1000): mSendData(i), mWaitTime(waitTime), intVal(i) {}
+
+    template<typename Visitor>
+    void accept(Visitor visitor)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(mWaitTime));
+        mSendData.accept(visitor);
+    }
+    template<typename Visitor>
+    void accept(Visitor visitor) const
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(mWaitTime));
+        mSendData.accept(visitor);
+    }
+
+    SendData mSendData;
+    int mWaitTime;
+    int intVal;
+};
+
 struct EmptyData {
     CONFIG_REGISTER_EMPTY
 };
@@ -439,6 +460,45 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerErrorTest)
     }));
     BOOST_CHECK(retStatus == ipc::Status::PEER_DISCONNECTED);
 }
+
+
+BOOST_AUTO_TEST_CASE(ReadTimeoutTest)
+{
+    Service s(socketPath);
+    auto longEchoCallback = [](std::shared_ptr<SendData>& data) {
+        return std::shared_ptr<LongSendData>(new LongSendData(data->intVal));
+    };
+    s.addMethodHandler<LongSendData, SendData>(1, longEchoCallback);
+    s.start();
+
+    Client c(socketPath);
+    c.start();
+
+    // Test timeout on read
+    std::shared_ptr<SendData> sentData(new SendData(334));
+    BOOST_CHECK_THROW((c.callSync<SendData, SendData>(1, sentData, 100)), IPCException);
+}
+
+
+BOOST_AUTO_TEST_CASE(WriteTimeoutTest)
+{
+    Service s(socketPath);
+    s.addMethodHandler<SendData, SendData>(1, echoCallback);
+    s.start();
+
+    Client c(socketPath);
+    c.start();
+
+    // Test echo with a minimal timeout
+    std::shared_ptr<LongSendData> sentDataA(new LongSendData(34, 10 /*ms*/));
+    std::shared_ptr<SendData> recvData = c.callSync<LongSendData, SendData>(1, sentDataA, 100);
+    BOOST_CHECK_EQUAL(recvData->intVal, sentDataA->intVal);
+
+    // Test timeout on write
+    std::shared_ptr<LongSendData> sentDataB(new LongSendData(34, 1000 /*ms*/));
+    BOOST_CHECK_THROW((c.callSync<LongSendData, SendData>(1, sentDataB, 100)), IPCTimeoutException);
+}
+
 
 
 // BOOST_AUTO_TEST_CASE(ConnectionLimitTest)

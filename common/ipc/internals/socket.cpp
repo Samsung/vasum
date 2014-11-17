@@ -102,8 +102,8 @@ int Socket::getSystemdSocket(const std::string& path)
 {
     int n = ::sd_listen_fds(-1 /*Block further calls to sd_listen_fds*/);
     if (n < 0) {
-        LOGE("sd_listen_fds fails with errno: " + n);
-        throw IPCException("sd_listen_fds fails with errno: " + n);
+        LOGE("sd_listen_fds fails with errno: " << n);
+        throw IPCException("sd_listen_fds fails with errno: " + std::to_string(n));
     }
 
     for (int fd = SD_LISTEN_FDS_START;
@@ -191,6 +191,14 @@ Socket Socket::connectSocket(const std::string& path)
         ::close(fd);
         LOGE("Error in connect: " + std::string(strerror(errno)));
         throw IPCException("Error in connect: " + std::string(strerror(errno)));
+    }
+
+    // Nonblock socket
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (-1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
+        ::close(fd);
+        LOGE("Error in fcntl: " + std::string(strerror(errno)));
+        throw IPCException("Error in fcntl: " + std::string(strerror(errno)));
     }
 
     return Socket(fd);

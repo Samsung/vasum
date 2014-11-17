@@ -30,15 +30,62 @@
 
 #include <cerrno>
 #include <cstring>
+#include <chrono>
 #include <unistd.h>
-
+#include <poll.h>
 #include <sys/resource.h>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
+namespace chr = std::chrono;
 
 namespace security_containers {
 namespace ipc {
+
+namespace {
+
+void waitForEvent(int fd,
+                  short event,
+                  const chr::high_resolution_clock::time_point deadline)
+{
+    // Wait for the rest of the data
+    struct pollfd fds[1];
+    fds[0].fd = fd;
+    fds[0].events = event | POLLHUP;
+
+    for (;;) {
+        chr::milliseconds timeoutMS = chr::duration_cast<chr::milliseconds>(deadline - chr::high_resolution_clock::now());
+        if (timeoutMS.count() < 0) {
+            LOGE("Timeout in read");
+            throw IPCException("Timeout in read");
+        }
+
+        int ret = ::poll(fds, 1 /*fds size*/, timeoutMS.count());
+
+        if (ret == -1) {
+            if (errno == EINTR) {
+                continue;
+            }
+            LOGE("Error in poll: " + std::string(strerror(errno)));
+            throw IPCException("Error in poll: " + std::string(strerror(errno)));
+        }
+
+        if (ret == 0) {
+            LOGE("Timeout in read");
+            throw IPCException("Timeout in read");
+        }
+
+        if (fds[0].revents & POLLHUP) {
+            LOGE("Peer disconnected");
+            throw IPCException("Peer disconnected");
+        }
+
+        // Here Comes the Sun
+        break;
+    }
+}
+
+} // namespace
 
 void close(int fd)
 {
@@ -59,46 +106,62 @@ void close(int fd)
     }
 }
 
-void write(int fd, const void* bufferPtr, const size_t size)
+void write(int fd, const void* bufferPtr, const size_t size, int timeoutMS)
 {
+    chr::high_resolution_clock::time_point deadline = chr::high_resolution_clock::now() +
+                                                      chr::milliseconds(timeoutMS);
+
     size_t nTotal = 0;
-    int n;
-
-    do {
-        n  = ::write(fd,
-                     reinterpret_cast<const char*>(bufferPtr) + nTotal,
-                     size - nTotal);
-        if (n < 0) {
-            if (errno == EINTR) {
-                LOGD("Write interrupted by a signal, retrying");
-                continue;
-            }
-            LOGE("Error during writing: " + std::string(strerror(errno)));
-            throw IPCException("Error during witting: " + std::string(strerror(errno)));
-        }
-        nTotal += n;
-    } while (nTotal < size);
-}
-
-void read(int fd, void* bufferPtr, const size_t size)
-{
-    size_t nTotal = 0;
-    int n;
-
-    do {
-        n  = ::read(fd,
-                    reinterpret_cast<char*>(bufferPtr) + nTotal,
-                    size - nTotal);
-        if (n < 0) {
-            if (errno == EINTR) {
-                LOGD("Read interrupted by a signal, retrying");
-                continue;
-            }
+    for (;;) {
+        int n  = ::write(fd,
+                         reinterpret_cast<const char*>(bufferPtr) + nTotal,
+                         size - nTotal);
+        if (n > 0) {
+            nTotal += n;
+        } else if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+            // Neglected errors
+            LOGD("Retrying write");
+        } else {
             LOGE("Error during reading: " + std::string(strerror(errno)));
             throw IPCException("Error during reading: " + std::string(strerror(errno)));
         }
-        nTotal += n;
-    } while (nTotal < size);
+
+        if (nTotal >= size) {
+            // All data is written, break loop
+            break;
+        } else {
+            waitForEvent(fd, POLLOUT, deadline);
+        }
+    }
+}
+
+void read(int fd, void* bufferPtr, const size_t size, int timeoutMS)
+{
+    chr::high_resolution_clock::time_point deadline = chr::high_resolution_clock::now() +
+                                                      chr::milliseconds(timeoutMS);
+
+    size_t nTotal = 0;
+    for (;;) {
+        int n  = ::read(fd,
+                        reinterpret_cast<char*>(bufferPtr) + nTotal,
+                        size - nTotal);
+        if (n > 0) {
+            nTotal += n;
+        } else if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+            // Neglected errors
+            LOGD("Retrying read");
+        } else {
+            LOGE("Error during reading: " + std::string(strerror(errno)));
+            throw IPCException("Error during reading: " + std::string(strerror(errno)));
+        }
+
+        if (nTotal >= size) {
+            // All data is read, break loop
+            break;
+        } else {
+            waitForEvent(fd, POLLIN, deadline);
+        }
+    }
 }
 
 unsigned int getMaxFDNumber()
