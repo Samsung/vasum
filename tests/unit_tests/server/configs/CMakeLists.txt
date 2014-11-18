@@ -31,8 +31,6 @@ FILE(GLOB container_container_CONF  ut-container/containers/*.conf)
 
 FILE(GLOB admin_container_CONF      ut-container-admin/containers/*.conf)
 
-FILE(GLOB network_container_CONF    ut-network-admin/containers/*.conf)
-
 FILE(GLOB connection_CONF           ut-container-connection/*.conf)
 
 
@@ -42,12 +40,6 @@ CONFIGURE_FILE(ut-server/test-daemon.conf.in
 CONFIGURE_FILE(ut-server/buggy-daemon.conf.in
               ${CMAKE_BINARY_DIR}/ut-server/buggy-daemon.conf @ONLY)
 FILE(GLOB server_manager_CONF_GEN ${CMAKE_BINARY_DIR}/ut-server/*.conf)
-
-CONFIGURE_FILE(ut-network-admin/containers/test.conf.in
-               ${CMAKE_BINARY_DIR}/ut-network-admin/containers/test.conf @ONLY)
-CONFIGURE_FILE(ut-network-admin/containers/buggy.conf.in
-               ${CMAKE_BINARY_DIR}/ut-network-admin/containers/buggy.conf @ONLY)
-FILE(GLOB network_container_CONF_GEN ${CMAKE_BINARY_DIR}/ut-network-admin/containers/*.conf)
 
 CONFIGURE_FILE(ut-container/containers/test-dbus.conf.in
                ${CMAKE_BINARY_DIR}/ut-container/containers/test-dbus.conf @ONLY)
@@ -102,11 +94,6 @@ INSTALL(FILES        ${container_container_CONF_GEN}
 
 INSTALL(FILES        ${admin_container_CONF}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container-admin/containers)
-
-INSTALL(FILES        ${network_container_CONF}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-network-admin/containers)
-INSTALL(FILES        ${network_container_CONF_GEN}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-network-admin/containers)
 
 INSTALL(FILES        ${connection_CONF}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container-connection)

@@ -28,6 +28,7 @@ BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(libsystemd-journal)
 BuildRequires:  pkgconfig(sqlite3)
 Requires(post): libcap-tools
+Requires:       bridge-utils
 
 %description
 This package provides a daemon used to manage containers - start, stop and switch
