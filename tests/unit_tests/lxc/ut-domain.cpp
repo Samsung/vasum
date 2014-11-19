@@ -44,9 +44,10 @@ const std::string DOMAIN_NAME = "ut-domain";
 const std::string TEMPLATE = SC_TEST_LXC_TEMPLATES_INSTALL_DIR "/minimal.sh";
 
 struct Fixture {
-    utils::ScopedDir mLxcDirGuard = LXC_PATH;
+    utils::ScopedDir mLxcDirGuard;
 
     Fixture()
+        : mLxcDirGuard(LXC_PATH)
     {
         cleanup();
     }

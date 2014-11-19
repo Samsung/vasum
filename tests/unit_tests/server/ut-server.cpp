@@ -38,7 +38,11 @@ namespace {
 const std::string CONTAINERS_PATH = "/tmp/ut-containers"; // the same as in daemon.conf
 
 struct Fixture {
-    security_containers::utils::ScopedDir mContainersPathGuard = CONTAINERS_PATH;
+    security_containers::utils::ScopedDir mContainersPathGuard;
+
+    Fixture()
+        : mContainersPathGuard(CONTAINERS_PATH)
+    {}
 };
 } // namespace
 

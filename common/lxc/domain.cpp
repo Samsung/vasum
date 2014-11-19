@@ -195,7 +195,7 @@ bool LxcDomain::unfreeze()
 
 bool LxcDomain::setRunLevel(int runLevel)
 {
-    auto callback = [](void* param) {
+    auto callback = [](void* param) -> int {
         utils::RunLevel runLevel = *reinterpret_cast<utils::RunLevel*>(param);
         return utils::setRunLevel(runLevel) ? 0 : 1;
     };

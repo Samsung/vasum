@@ -46,9 +46,13 @@ const std::string LXC_TEMPLATES_PATH = SC_TEST_LXC_TEMPLATES_INSTALL_DIR;
 
 struct Fixture {
     utils::ScopedGlibLoop mLoop;
-    utils::ScopedDir mContainersPathGuard = CONTAINERS_PATH;
+    utils::ScopedDir mContainersPathGuard;
 
     ContainerConfig mConfig;
+
+    Fixture()
+        : mContainersPathGuard(CONTAINERS_PATH)
+    {}
 
     std::unique_ptr<ContainerAdmin> create(const std::string& configPath)
     {

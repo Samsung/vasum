@@ -56,14 +56,19 @@ struct Loop {
 
 struct Fixture {
     Loop loop;
-    utils::ScopedDir mContainersPathGuard = CONTAINERS_PATH;
-    utils::ScopedDir mRun1Guard = utils::ScopedDir("/tmp/ut-run1");
-    utils::ScopedDir mRun2Guard = utils::ScopedDir("/tmp/ut-run2");
-    utils::ScopedDir mRun3Guard = utils::ScopedDir("/tmp/ut-run3");
+    utils::ScopedDir mContainersPathGuard;
+    utils::ScopedDir mRun1Guard;
+    utils::ScopedDir mRun2Guard;
+    utils::ScopedDir mRun3Guard;
 
     ContainersManager cm;
 
-    Fixture(): cm(TEST_DBUS_CONFIG_PATH)
+    Fixture()
+        : mContainersPathGuard(CONTAINERS_PATH)
+        , mRun1Guard("/tmp/ut-run1")
+        , mRun2Guard("/tmp/ut-run2")
+        , mRun3Guard("/tmp/ut-run3")
+        , cm(TEST_DBUS_CONFIG_PATH)
     {
         cm.startAll();
     }
