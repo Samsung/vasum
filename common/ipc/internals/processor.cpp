@@ -109,7 +109,8 @@ Processor::PeerID Processor::addPeer(const std::shared_ptr<Socket>& socketPtr)
     {
         Lock lock(mSocketsMutex);
         peerID = getNextPeerID();
-        mNewSockets.emplace(peerID, std::move(socketPtr));
+        SocketInfo socketInfo(peerID, std::move(socketPtr));
+        mNewSockets.push(std::move(socketInfo));
     }
     LOGI("New peer added. Id: " << peerID);
     mEventQueue.send(Event::NEW_PEER);
@@ -392,7 +393,7 @@ bool Processor::handleEvent()
                 return false;
             }
 
-            mSockets.emplace(socketInfo.peerID, std::move(socketInfo.socketPtr));
+            mSockets[socketInfo.peerID] = std::move(socketInfo.socketPtr);
         }
         resetPolling();
         if (mNewPeerCallback) {
@@ -454,9 +455,11 @@ bool Processor::handleCall()
         if (mReturnCallbacks.count(messageID) != 0) {
             LOGE("There already was a return callback for messageID: " << messageID);
         }
-        mReturnCallbacks.emplace(messageID, ReturnCallbacks(call.peerID,
-                                                            std::move(call.parse),
-                                                            std::move(call.process)));
+
+        // move insertion
+        mReturnCallbacks[messageID] = std::move(ReturnCallbacks(call.peerID,
+                                                                std::move(call.parse),
+                                                                std::move(call.process)));
     }
 
     try {
