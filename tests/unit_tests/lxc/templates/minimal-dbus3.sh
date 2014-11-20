@@ -23,6 +23,7 @@ done
 ROOTFS_DIRS="\
 ${rootfs}/bin \
 ${rootfs}/dev \
+${rootfs}/dev/pts \
 ${rootfs}/etc \
 ${rootfs}/home \
 ${rootfs}/lib \
@@ -34,6 +35,7 @@ ${rootfs}/sbin \
 ${rootfs}/sys \
 ${rootfs}/tmp \
 ${rootfs}/usr \
+${rootfs}/opt \
 ${rootfs}/var \
 ${rootfs}/var/run
 "
@@ -62,6 +64,7 @@ lxc.mount.entry = /etc etc none ro,bind 0 0
 lxc.mount.entry = /lib lib none ro,bind 0 0
 lxc.mount.entry = /sbin sbin none ro,bind 0 0
 lxc.mount.entry = /usr usr none ro,rbind 0 0
+lxc.mount.entry = /opt opt none ro,rbind 0 0
 lxc.mount.entry = /tmp/ut-run3 var/run none rw,bind 0 0
 EOF
 

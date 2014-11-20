@@ -23,6 +23,7 @@ done
 ROOTFS_DIRS="\
 ${rootfs}/bin \
 ${rootfs}/dev \
+${rootfs}/dev/pts \
 ${rootfs}/etc \
 ${rootfs}/home \
 ${rootfs}/lib \
@@ -33,7 +34,8 @@ ${rootfs}/run \
 ${rootfs}/sbin \
 ${rootfs}/sys \
 ${rootfs}/tmp \
-${rootfs}/usr
+${rootfs}/usr \
+${rootfs}/opt
 "
 /bin/mkdir ${ROOTFS_DIRS}
 
@@ -52,6 +54,9 @@ lxc.haltsignal = SIGTERM
 lxc.pts = 256
 lxc.tty = 0
 
+#lxc.loglevel = TRACE
+#lxc.logfile = /tmp/${name}.log
+
 lxc.cgroup.devices.deny = a
 
 lxc.mount.auto = proc sys cgroup
@@ -60,6 +65,7 @@ lxc.mount.entry = /etc etc none ro,bind 0 0
 lxc.mount.entry = /lib lib none ro,bind 0 0
 lxc.mount.entry = /sbin sbin none ro,bind 0 0
 lxc.mount.entry = /usr usr none ro,rbind 0 0
+lxc.mount.entry = /opt opt none ro,rbind 0 0
 EOF
 
 if [ "$(uname -m)" = "x86_64" ]; then
