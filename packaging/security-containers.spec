@@ -1,7 +1,6 @@
 %define script_dir %{_sbindir}
 # Security Containers Server's user info - it should already exist in the system
 %define scs_user          security-containers
-%define libvirt_group     libvirt
 # The group that has read and write access to /dev/input/event* devices.
 # It may vary between platforms.
 %define input_event_group input
@@ -19,19 +18,18 @@ Group:          Security/Other
 Summary:        Daemon for managing containers
 BuildRequires:  cmake
 BuildRequires:  boost-devel
-BuildRequires:  libvirt-devel
 BuildRequires:  libjson-devel >= 0.10
 BuildRequires:  libcap-ng-devel
+BuildRequires:  lxc-devel
 BuildRequires:  pkgconfig(libConfig)
 BuildRequires:  pkgconfig(libLogger)
 BuildRequires:  pkgconfig(libSimpleDbus)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(libsystemd-journal)
 BuildRequires:  pkgconfig(libsystemd-daemon)
-BuildRequires:  pkgconfig(libvirt-glib-1.0)
 BuildRequires:  pkgconfig(sqlite3)
-Requires:       libvirt-daemon >= 1.2.4
 Requires(post): libcap-tools
+Requires:       bridge-utils
 
 %description
 This package provides a daemon used to manage containers - start, stop and switch
@@ -44,13 +42,10 @@ between them. A process from inside a container can request a switch of context
 %attr(755,root,root) %{_bindir}/security-containers-server
 %dir /etc/security-containers
 %dir /etc/security-containers/containers
-%dir /etc/security-containers/libvirt-config
-%dir /etc/security-containers/templates
+%dir /etc/security-containers/lxc-templates
 %config /etc/security-containers/daemon.conf
 %config /etc/security-containers/containers/*.conf
-%config /etc/security-containers/libvirt-config/*.xml
-%config /etc/security-containers/templates/*.conf
-%config /etc/security-containers/templates/*.xml
+%attr(755,root,root) /etc/security-containers/lxc-templates/*.sh
 %{_unitdir}/security-containers.service
 %{_unitdir}/multi-user.target.wants/security-containers.service
 /etc/dbus-1/system.d/org.tizen.containers.host.conf
@@ -72,7 +67,6 @@ between them. A process from inside a container can request a switch of context
          -DSYSTEMD_UNIT_DIR=%{_unitdir} \
          -DPYTHON_SITELIB=%{python_sitelib} \
          -DSECURITY_CONTAINERS_USER=%{scs_user} \
-         -DLIBVIRT_GROUP=%{libvirt_group} \
          -DINPUT_EVENT_GROUP=%{input_event_group} \
          -DDISK_GROUP=%{disk_group} \
          -DTTY_GROUP=%{tty_group}
@@ -222,6 +216,7 @@ Unit tests for both: server and client and integration tests.
 %attr(755,root,root) %{script_dir}/sc_int_tests.py
 %attr(755,root,root) %{script_dir}/sc_launch_test.py
 %{script_dir}/sc_test_parser.py
-%{_datadir}/security-containers
+%{_datadir}/security-containers/tests
+%attr(755,root,root) %{_datadir}/security-containers/lxc-templates
 %{python_sitelib}/sc_integration_tests
 /etc/dbus-1/system.d/org.tizen.containers.tests.conf

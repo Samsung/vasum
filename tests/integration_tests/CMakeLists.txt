@@ -17,6 +17,7 @@
 # @author Lukasz Kostyra (l.kostyra@samsung.com)
 #
 
+MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for Integration Tests...")
 
 

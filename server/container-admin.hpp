@@ -27,17 +27,7 @@
 #define SERVER_CONTAINER_ADMIN_HPP
 
 #include "container-config.hpp"
-
-#include "utils/callback-guard.hpp"
-#include "utils/callback-wrapper.hpp"
-#include "libvirt/connection.hpp"
-#include "libvirt/domain.hpp"
-
-#include <map>
-#include <mutex>
-#include <string>
-#include <cstdint>
-#include <libvirt/libvirt.h>
+#include "lxc/domain.hpp"
 
 
 namespace security_containers {
@@ -51,27 +41,16 @@ enum class SchedulerLevel {
 class ContainerAdmin {
 
 public:
-    /**
-     * A listener ID type.
-     */
-    typedef unsigned int ListenerId;
 
     /**
-     * An invalid ListenerId value.
+     * ContainerAdmin constructor
+     * @param containersPath directory where containers are defined (lxc configs, rootfs etc)
+     * @param lxcTemplatePrefix directory where templates are stored
+     * @param config containers config
      */
-    static const ListenerId LISTENER_ID_INVALID = 0;
-
-    /**
-     * A function type used for the lifecycle listener
-     */
-    typedef std::function<void(const int eventId, const int detailId)> LifecycleListener;
-
-    /**
-     * A function type used for the reboot listener
-     */
-    typedef std::function<void()> RebootListener;
-
-    ContainerAdmin(const ContainerConfig& config);
+    ContainerAdmin(const std::string& containersPath,
+                   const std::string& lxcTemplatePrefix,
+                   const ContainerConfig& config);
     virtual ~ContainerAdmin();
 
     /**
@@ -85,20 +64,14 @@ public:
     void start();
 
     /**
-     * Try to shutdown the container, if failed, destroy it.
+     * Try to shutdown the container, if failed, kill it.
      */
     void stop();
 
     /**
-     * Forcefully stop the container.
+     * Destroy stopped container. In particular it removes whole containers rootfs.
      */
     void destroy();
-
-    /**
-     * Gracefully shutdown the container.
-     * This method will NOT block until container is shut down.
-     */
-    void shutdown();
 
     /**
      * @return Is the container running?
@@ -107,7 +80,7 @@ public:
 
     /**
      * Check if the container is stopped. It's NOT equivalent to !isRunning,
-     * because it checks different internal libvirt's states. There are other states,
+     * because it checks different internal lxc states. There are other states,
      * (e.g. paused) when the container isn't running nor stopped.
      *
      * @return Is the container stopped?
@@ -148,66 +121,13 @@ public:
      */
     std::int64_t getSchedulerQuota();
 
-    /**
-     * Sets a listener for a lifecycle event.
-     * It's a caller's responsibility to remove the listener
-     * prior to destroying the object.
-     *
-     * @return listener ID that can be used to remove.
-     */
-    ListenerId registerLifecycleListener(const LifecycleListener& listener,
-                                         const utils::CallbackGuard::Tracker& tracker);
-
-    /**
-     * Sets a listener for a reboot event.
-     * It's a caller's responsibility to remove the listener
-     * prior to destroying the object.
-     *
-     * @return listener ID that can be used to remove.
-     */
-    ListenerId registerRebootListener(const RebootListener& listener,
-                                      const utils::CallbackGuard::Tracker& tracker);
-
-    /**
-     * Remove a previously registered listener.
-     */
-    void removeListener(const ListenerId id);
-
 private:
     const ContainerConfig& mConfig;
-    libvirt::LibvirtDomain mDom;
+    lxc::LxcDomain mDom;
     const std::string mId;
     bool mDetachOnExit;
 
-    int getState();   // get the libvirt's domain state
     void setSchedulerParams(std::uint64_t cpuShares, std::uint64_t vcpuPeriod, std::int64_t vcpuQuota);
-
-    // for handling libvirt callbacks
-    utils::CallbackGuard mLibvirtGuard;
-    int mLifecycleCallbackId;
-    int mRebootCallbackId;
-
-    // virConnectDomainEventCallback
-    static int libvirtLifecycleCallback(virConnectPtr con,
-                                        virDomainPtr dom,
-                                        int event,
-                                        int detail,
-                                        void* opaque);
-
-    // virConnectDomainEventGenericCallback
-    static void libvirtRebootCallback(virConnectPtr con,
-                                      virDomainPtr dom,
-                                      void* opaque);
-
-    // for handling external listeners triggered from libvirt callbacks
-    // TODO, the Listener type might not be unique, reimplement using proper listeners
-    typedef std::map<ListenerId, utils::CallbackWrapper<LifecycleListener>> LifecycleListenerMap;
-    typedef std::map<ListenerId, utils::CallbackWrapper<RebootListener>> RebootListenerMap;
-
-    std::mutex mListenerMutex;
-    unsigned int mNextIdForListener;
-    LifecycleListenerMap mLifecycleListeners;
-    RebootListenerMap mRebootListeners;
 };
 
 

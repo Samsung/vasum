@@ -78,6 +78,11 @@ struct ContainersManagerConfig {
      */
     std::string containerNewConfigPrefix;
 
+    /**
+     * Path prefix for lxc templates
+     */
+    std::string lxcTemplatePrefix;
+
     /*
      * Parameters describing input device used to switch between containers
      */
@@ -102,6 +107,7 @@ struct ContainersManagerConfig {
         containerImagePath,
         containerTemplatePath,
         containerNewConfigPrefix,
+        lxcTemplatePrefix,
         inputConfig,
         runMountPointPrefix,
         proxyCallRules

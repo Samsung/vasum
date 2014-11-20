@@ -52,7 +52,9 @@ const int RECONNECT_DELAY = 1 * 1000;
 
 } // namespace
 
-Container::Container(const std::string& containerConfigPath,
+Container::Container(const std::string& containersPath,
+                     const std::string& containerConfigPath,
+                     const std::string& lxcTemplatePrefix,
                      const std::string& baseRunMountPointPath)
 {
     config::loadFromFile(containerConfigPath, mConfig);
@@ -64,19 +66,11 @@ Container::Container(const std::string& containerConfigPath,
         mPermittedToRecv.push_back(boost::regex(r));
     }
 
-    const std::string baseConfigPath = utils::dirName(containerConfigPath);
-    mConfig.config = fs::absolute(mConfig.config, baseConfigPath).string();
-    mConfig.networkConfig = fs::absolute(mConfig.networkConfig, baseConfigPath).string();
-    mConfig.networkFilterConfig = fs::absolute(mConfig.networkFilterConfig,
-                                               baseConfigPath).string();
     if (!mConfig.runMountPoint.empty()) {
         mRunMountPoint = fs::absolute(mConfig.runMountPoint, baseRunMountPointPath).string();
     }
 
-    LOGT("Creating Network Admin " << mConfig.networkConfig);
-    mNetworkAdmin.reset(new NetworkAdmin(mConfig));
-    LOGT("Creating Container Admin " << mConfig.config);
-    mAdmin.reset(new ContainerAdmin(mConfig));
+    mAdmin.reset(new ContainerAdmin(containersPath, lxcTemplatePrefix, mConfig));
 }
 
 Container::~Container()
@@ -125,7 +119,6 @@ void Container::start()
     if (mConfig.enableDbusIntegration) {
         mConnectionTransport.reset(new ContainerConnectionTransport(mRunMountPoint));
     }
-    mNetworkAdmin->start();
     mAdmin->start();
     if (mConfig.enableDbusIntegration) {
         connect();
@@ -165,7 +158,6 @@ void Container::stop()
     Lock lock(mReconnectMutex);
     disconnect();
     mAdmin->stop();
-    mNetworkAdmin->stop();
     mConnectionTransport.reset();
 }
 
@@ -242,7 +234,6 @@ void Container::goBackground()
 void Container::setDetachOnExit()
 {
     Lock lock(mReconnectMutex);
-    mNetworkAdmin->setDetachOnExit();
     mAdmin->setDetachOnExit();
     if (mConnectionTransport) {
         mConnectionTransport->setDetachOnExit();

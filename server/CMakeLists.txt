@@ -17,6 +17,7 @@
 # @author Jan Olszak (j.olszak@samsung.com)
 #
 
+MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Server...")
 FILE(GLOB         project_SRCS *.cpp *.hpp)
 FILE(GLOB_RECURSE common_SRCS ${COMMON_FOLDER}/*.cpp ${COMMON_FOLDER}/*.hpp)
@@ -29,8 +30,8 @@ ADD_EXECUTABLE(${SERVER_CODENAME} ${project_SRCS} ${common_SRCS})
 
 ## Link libraries ##############################################################
 FIND_PACKAGE(Boost COMPONENTS program_options system filesystem regex)
-PKG_CHECK_MODULES(SERVER_DEPS REQUIRED libvirt libvirt-glib-1.0 json gio-2.0 libsystemd-journal
-                  libcap-ng libLogger libSimpleDbus libConfig libsystemd-daemon)
+PKG_CHECK_MODULES(SERVER_DEPS REQUIRED lxc json gio-2.0 libsystemd-journal libsystemd-daemon
+                  libcap-ng libLogger libSimpleDbus libConfig)
 
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})

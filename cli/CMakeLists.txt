@@ -17,6 +17,7 @@
 # @author Mateusz Malicki (m.malicki2@samsung.com)
 #
 
+MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the command line interface...")
 FILE(GLOB cli_SRCS *.cpp *.hpp)
 

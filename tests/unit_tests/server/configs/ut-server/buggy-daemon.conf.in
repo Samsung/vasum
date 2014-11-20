@@ -1,0 +1,17 @@
+{
+    "containerConfigs" : ["containers/container1.conf", "missing/file/path/missing.conf", "containers/container3.conf"],
+    "containersPath" : "/tmp/ut-containers",
+    "containerImagePath" : "",
+    "containerTemplatePath" : "no_need_for_templates_in_this_test",
+    "containerNewConfigPrefix" : "",
+    "runMountPointPrefix" : "",
+    "foregroundId" : "ut-server-container1",
+    "defaultId" : "ut-server-container1",
+    "lxcTemplatePrefix" : "@SC_TEST_LXC_TEMPLATES_INSTALL_DIR@",
+    "inputConfig" : {"enabled" : false,
+                     "device" : "/dev/doesnotexist",
+                     "code" : 139,
+                     "numberOfEvents" : 2,
+                     "timeWindowMs" : 500},
+    "proxyCallRules" : []
+}

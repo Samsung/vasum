@@ -36,6 +36,22 @@ namespace security_containers {
 
 
 struct ContainerConfig {
+
+    /**
+     * Container name
+     */
+    std::string name;
+
+    /**
+     * Lxc template name (relative to lxcTemplatePrefix)
+     */
+    std::string lxcTemplate;
+
+    /**
+     * Init program with args (empty means default /sbin/init)
+     */
+    std::vector<std::string> initWithArgs;
+
     /**
      * Privilege of the container.
      * The smaller the value the more important the container
@@ -58,23 +74,6 @@ struct ContainerConfig {
       * Setting this value to "false" will make the domain API not work inside the container.
       */
     bool enableDbusIntegration;
-
-    /**
-     * Container's libvirt (XML) config file.
-     * Location can be relative to the Container's config file.
-     */
-    std::string config;
-
-    /**
-     * Container's libvirt (XML) network config file.
-     */
-    std::string networkConfig;
-
-    /**
-     *
-     * Container's libvirt (XML) network filter config file.
-     */
-    std::string networkFilterConfig;
 
     /**
      * Container's CFS quota in us when it's in the foreground
@@ -105,13 +104,13 @@ struct ContainerConfig {
 
     CONFIG_REGISTER
     (
+        name,
+        lxcTemplate,
+        initWithArgs,
         privilege,
         vt,
         switchToDefaultAfterTimeout,
         enableDbusIntegration,
-        config,
-        networkConfig,
-        networkFilterConfig,
         cpuQuotaForeground,
         cpuQuotaBackground,
         runMountPoint,

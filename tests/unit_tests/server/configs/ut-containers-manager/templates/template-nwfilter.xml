@@ -1,3 +1,0 @@
-<filter name='nwfilter-~NAME~' chain='root'>
-    <uuid>~UUID~</uuid>
-</filter>

@@ -30,12 +30,23 @@
 namespace {
 
 const std::string CPUSET_HOST = "/";
+const std::string CPUSET_LXC_PREFIX = "/lxc/";
 const std::string CPUSET_LIBVIRT_PREFIX_OLD = "/machine/";
 const std::string CPUSET_LIBVIRT_SUFFIX_OLD = ".libvirt-lxc";
 const std::string CPUSET_LIBVIRT_PREFIX = "/machine.slice/machine-lxc\\x2d";
 const std::string CPUSET_LIBVIRT_SUFFIX = ".scope";
 
-bool parseOldFormat(const std::string& cpuset, std::string& id)
+bool parseLxcFormat(const std::string& cpuset, std::string& id)
+{
+    // /lxc/<id>
+    if (!boost::starts_with(cpuset, CPUSET_LXC_PREFIX)) {
+        return false;
+    }
+    id.assign(cpuset, CPUSET_LXC_PREFIX.size(), cpuset.size() - CPUSET_LXC_PREFIX.size());
+    return true;
+}
+
+bool parseOldLibvirtFormat(const std::string& cpuset, std::string& id)
 {
     // '/machine/<id>.libvirt-lxc'
     if (!boost::starts_with(cpuset, CPUSET_LIBVIRT_PREFIX_OLD)) {
@@ -87,7 +98,7 @@ void unescape(std::string& value)
     value.resize(outPos);
 }
 
-bool parseNewFormat(const std::string& cpuset, std::string& id)
+bool parseNewLibvirtFormat(const std::string& cpuset, std::string& id)
 {
     // '/machine.slice/machine-lxc\x2d<id>.scope'
     if (!boost::starts_with(cpuset, CPUSET_LIBVIRT_PREFIX)) {
@@ -113,6 +124,8 @@ bool parseContainerIdFromCpuSet(const std::string& cpuset, std::string& id)
         return true;
     }
 
-    return parseNewFormat(cpuset, id) || parseOldFormat(cpuset, id);
+    return parseLxcFormat(cpuset, id) ||
+           parseNewLibvirtFormat(cpuset, id) ||
+           parseOldLibvirtFormat(cpuset, id);
 }
 

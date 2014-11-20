@@ -31,6 +31,7 @@
 
 #include "utils/exception.hpp"
 #include "utils/glib-loop.hpp"
+#include "utils/scoped-dir.hpp"
 #include "config/exception.hpp"
 
 #include <memory>
@@ -48,14 +49,31 @@ const std::string TEST_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-cont
 const std::string TEST_DBUS_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container/containers/test-dbus.conf";
 const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container/containers/buggy.conf";
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/config.conf";
-
-void ensureStarted()
-{
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-}
+const std::string CONTAINERS_PATH = "/tmp/ut-containers";
+const std::string LXC_TEMPLATES_PATH = SC_TEST_LXC_TEMPLATES_INSTALL_DIR;
 
 struct Fixture {
     utils::ScopedGlibLoop mLoop;
+    utils::ScopedDir mContainersPathGuard;
+    utils::ScopedDir mRunGuard;
+
+    Fixture()
+        : mContainersPathGuard(CONTAINERS_PATH)
+    {}
+
+    std::unique_ptr<Container> create(const std::string& configPath)
+    {
+        return std::unique_ptr<Container>(new Container(CONTAINERS_PATH,
+                                                        configPath,
+                                                        LXC_TEMPLATES_PATH,
+                                                        ""));
+    }
+
+    void ensureStarted()
+    {
+        // wait for containers init to fully start
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
 };
 
 } // namespace
@@ -63,42 +81,38 @@ struct Fixture {
 
 BOOST_FIXTURE_TEST_SUITE(ContainerSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(ConstructorTest)
+BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 {
-    BOOST_REQUIRE_NO_THROW(Container c(TEST_CONFIG_PATH));
-}
-
-BOOST_AUTO_TEST_CASE(DestructorTest)
-{
-    std::unique_ptr<Container> c(new Container(TEST_CONFIG_PATH));
-    BOOST_REQUIRE_NO_THROW(c.reset());
+    auto c = create(TEST_CONFIG_PATH);
+    c.reset();
 }
 
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)
 {
-    BOOST_REQUIRE_THROW(Container c(BUGGY_CONFIG_PATH), UtilsException);
+    BOOST_REQUIRE_THROW(create(BUGGY_CONFIG_PATH), ContainerOperationException);
 }
 
 BOOST_AUTO_TEST_CASE(MissingConfigTest)
 {
-    BOOST_REQUIRE_THROW(Container c(MISSING_CONFIG_PATH), ConfigException);
+    BOOST_REQUIRE_THROW(create(MISSING_CONFIG_PATH), ConfigException);
 }
 
 BOOST_AUTO_TEST_CASE(StartStopTest)
 {
-    std::unique_ptr<Container> c(new Container(TEST_CONFIG_PATH));
-    BOOST_REQUIRE_NO_THROW(c->start());
+    auto c = create(TEST_CONFIG_PATH);
+    c->start();
     ensureStarted();
-    BOOST_REQUIRE_NO_THROW(c->stop());
+    c->stop();
 }
 
 BOOST_AUTO_TEST_CASE(DbusConnectionTest)
 {
-    std::unique_ptr<Container> c;
-    BOOST_REQUIRE_NO_THROW(c.reset(new Container(TEST_DBUS_CONFIG_PATH)));
-    BOOST_REQUIRE_NO_THROW(c->start());
+    mRunGuard.create("/tmp/ut-run1"); // the same path as in lxc template
+
+    auto c = create(TEST_DBUS_CONFIG_PATH);
+    c->start();
     ensureStarted();
-    BOOST_REQUIRE_NO_THROW(c->stop());
+    c->stop();
 }
 
 // TODO: DbusReconnectionTest

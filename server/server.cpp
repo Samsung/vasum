@@ -54,10 +54,6 @@
 #error "INPUT_EVENT_GROUP must be defined!"
 #endif
 
-#ifndef LIBVIRT_GROUP
-#error "LIBVIRT_GROUP must be defined!"
-#endif
-
 #ifndef DISK_GROUP
 #error "DISK_GROUP must be defined!"
 #endif
@@ -189,11 +185,10 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
         return true;
     }
 
-    // LIBVIRT_GROUP provides access to libvirt's daemon socket.
     // INPUT_EVENT_GROUP provides access to /dev/input/event* devices used by InputMonitor.
     // DISK_GROUP provides access to /dev/loop* devices, needed when adding new container to copy
     //            containers image
-    if (!utils::setSuppGroups({LIBVIRT_GROUP, INPUT_EVENT_GROUP, DISK_GROUP, TTY_GROUP})) {
+    if (!utils::setSuppGroups({INPUT_EVENT_GROUP, DISK_GROUP, TTY_GROUP})) {
         return false;
     }
 
