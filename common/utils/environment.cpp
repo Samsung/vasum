@@ -84,8 +84,9 @@ bool dropRoot(uid_t uid, gid_t gid, const std::vector<unsigned int>& caps)
     return true;
 }
 
-bool launchAsRoot(const std::function<void()>& func)
+bool launchAsRoot(const std::function<bool()>& func)
 {
+    // TODO optimize if getuid() == 0
     pid_t pid = fork();
     if (pid < 0) {
         LOGE("Fork failed: " << strerror(errno));
@@ -99,8 +100,11 @@ bool launchAsRoot(const std::function<void()>& func)
         }
 
         try {
-            func();
-        } catch (std::exception& e) {
+            if (!func()) {
+                LOGE("Failed to successfully execute func");
+                ::exit(EXIT_FAILURE);
+            }
+        } catch (const std::exception& e) {
             LOGE("Failed to successfully execute func: " << e.what());
             ::exit(EXIT_FAILURE);
         }

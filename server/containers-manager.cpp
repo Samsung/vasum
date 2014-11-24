@@ -41,9 +41,6 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/uuid/uuid_generators.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <cassert>
 #include <string>
@@ -70,7 +67,6 @@ const std::string HOST_ID = "host";
 const std::string CONTAINER_TEMPLATE_CONFIG_PATH = "template.conf";
 
 const boost::regex CONTAINER_NAME_REGEX("~NAME~");
-const boost::regex CONTAINER_UUID_REGEX("~UUID~");
 const boost::regex CONTAINER_IP_THIRD_OCTET_REGEX("~IP~");
 
 const unsigned int CONTAINER_IP_BASE_THIRD_OCTET = 100;
@@ -522,12 +518,15 @@ void ContainersManager::handleGetContainerInfoCall(const std::string& id,
         result->setError(api::ERROR_INTERNAL, "Unrecognized state of container");
         return;
     }
-    const std::string rootPath = boost::filesystem::absolute(id, mConfig.containersPath).string();
+    const auto containerPath = boost::filesystem::absolute(id, mConfig.containersPath);
+    const auto rootfsDir = boost::filesystem::path("rootfs");
+    const auto rootfsPath = containerPath / rootfsDir;
+
     result->set(g_variant_new("((siss))",
                               id.c_str(),
                               container->getVT(),
                               state,
-                              rootPath.c_str()));
+                              rootfsPath.string().c_str()));
 }
 
 void ContainersManager::handleSetActiveContainerCall(const std::string& id,
@@ -581,14 +580,10 @@ void ContainersManager::generateNewConfig(const std::string& id,
 
     std::string resultConfig = boost::regex_replace(config, CONTAINER_NAME_REGEX, id);
 
-    boost::uuids::uuid u = boost::uuids::random_generator()();
-    std::string uuidStr = to_string(u);
-    LOGD("uuid: " << uuidStr);
-    resultConfig = boost::regex_replace(resultConfig, CONTAINER_UUID_REGEX, uuidStr);
-
     // generate third IP octet for network config
+    // TODO change algorithm after implementing removeContainer
     std::string thirdOctetStr = std::to_string(CONTAINER_IP_BASE_THIRD_OCTET + mContainers.size() + 1);
-    LOGD("ip_third_octet: " << thirdOctetStr);
+    LOGD("IP third octet: " << thirdOctetStr);
     resultConfig = boost::regex_replace(resultConfig, CONTAINER_IP_THIRD_OCTET_REGEX, thirdOctetStr);
 
     if (!utils::saveFileContent(resultPath, resultConfig)) {
@@ -630,7 +625,7 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
     }
 
     // copy container image if config contains path to image
-    LOGT("image path: " << mConfig.containerImagePath);
+    LOGT("Image path: " << mConfig.containerImagePath);
     if (!mConfig.containerImagePath.empty()) {
         auto copyImageContentsWrapper = std::bind(&utils::copyImageContents,
                                                   mConfig.containerImagePath,
@@ -659,6 +654,7 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
         } catch(const std::exception& e) {
             LOGW("Failed to remove data: " << boost::diagnostic_information(e));
         }
+        return true;
     };
 
     try {
@@ -682,13 +678,13 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
         return;
     }
 
-    auto resultCallback = [this, id, result, containerPathStr, removeAllWrapper](bool succeeded) {
+    auto resultCallback = [this, id, result](bool succeeded) {
         if (succeeded) {
             focus(id);
             result->setVoid();
         } else {
             LOGE("Failed to start container.");
-            utils::launchAsRoot(std::bind(removeAllWrapper, containerPathStr));
+            // TODO removeContainer
             result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED,
                              "Failed to start container.");
         }

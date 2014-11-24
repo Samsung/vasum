@@ -50,7 +50,7 @@ bool dropRoot(uid_t uid, gid_t gid, const std::vector<unsigned int>& caps);
  *
  * This function forks, sets UID 0 to child process and calls func.
  */
-bool launchAsRoot(const std::function<void()>& func);
+bool launchAsRoot(const std::function<bool()>& func);
 
 
 } // namespace utils
