@@ -110,7 +110,7 @@ Processor::PeerID Processor::addPeer(const std::shared_ptr<Socket>& socketPtr)
         mNewSockets.push(std::move(socketInfo));
     }
     LOGI("New peer added. Id: " << peerID);
-    mEventQueue.send(Event::NEW_PEER);
+    mEventQueue.send(Event::ADD_PEER);
 
     return peerID;
 }
@@ -125,7 +125,7 @@ void Processor::removePeer(const PeerID peerID)
         mPeersToDelete.push(std::move(request));
     }
 
-    mEventQueue.send(Event::DELETE_PEER);
+    mEventQueue.send(Event::REMOVE_PEER);
 
     auto isPeerDeleted = [&peerID, this] {
         Lock lock(mSocketsMutex);
@@ -166,41 +166,6 @@ void Processor::removePeerInternal(const PeerID peerID, Status status)
     }
 
     resetPolling();
-}
-
-void Processor::cleanCommunication()
-{
-    while (!mEventQueue.isEmpty()) {
-        switch (mEventQueue.receive()) {
-        case Event::FINISH: {
-            LOGD("Event FINISH after FINISH");
-            break;
-        }
-        case Event::CALL: {
-            LOGD("Event CALL after FINISH");
-            Call call = getCall();
-            IGNORE_EXCEPTIONS(call.process(Status::CLOSING, call.data));
-            break;
-        }
-
-        case Event::NEW_PEER: {
-            LOGD("Event NEW_PEER after FINISH");
-            break;
-        }
-
-        case Event::DELETE_PEER: {
-            LOGD("Event DELETE_PEER after FINISH");
-            RemovePeerRequest request;
-            {
-                Lock lock(mSocketsMutex);
-                request = std::move(mPeersToDelete.front());
-                mPeersToDelete.pop();
-            }
-            request.conditionPtr->notify_all();
-            break;
-        }
-        }
-    }
 }
 
 void Processor::resetPolling()
@@ -432,53 +397,63 @@ bool Processor::handleEvent()
 
     case Event::CALL: {
         LOGD("Event CALL");
-        return handleCall();
+        return onCall();
     }
 
-    case Event::NEW_PEER: {
-        LOGD("Event NEW_PEER");
-        SocketInfo socketInfo;
-        {
-            Lock lock(mSocketsMutex);
-
-            socketInfo = std::move(mNewSockets.front());
-            mNewSockets.pop();
-
-            if (mSockets.size() > mMaxNumberOfPeers) {
-                LOGE("There are too many peers. I don't accept the connection with " << socketInfo.peerID);
-                return false;
-            }
-            if (mSockets.count(socketInfo.peerID) != 0) {
-                LOGE("There already was a socket for peerID: " << socketInfo.peerID);
-                return false;
-            }
-
-            mSockets[socketInfo.peerID] = std::move(socketInfo.socketPtr);
-        }
-        resetPolling();
-        if (mNewPeerCallback) {
-            // Notify about the new user.
-            mNewPeerCallback(socketInfo.peerID);
-        }
-        return true;
+    case Event::ADD_PEER: {
+        LOGD("Event ADD_PEER");
+        return onNewPeer();
     }
 
-    case Event::DELETE_PEER: {
-        LOGD("Event DELETE_PEER");
-        RemovePeerRequest request;
-        {
-            Lock lock(mSocketsMutex);
-            request = std::move(mPeersToDelete.front());
-            mPeersToDelete.pop();
-        }
-
-        removePeerInternal(request.peerID, Status::REMOVED_PEER);
-        request.conditionPtr->notify_all();
-        return true;
+    case Event::REMOVE_PEER: {
+        LOGD("Event REMOVE_PEER");
+        return onRemovePeer();
     }
     }
 
     return false;
+}
+
+bool Processor::onNewPeer()
+{
+    SocketInfo socketInfo;
+    {
+        Lock lock(mSocketsMutex);
+
+        socketInfo = std::move(mNewSockets.front());
+        mNewSockets.pop();
+
+        if (mSockets.size() > mMaxNumberOfPeers) {
+            LOGE("There are too many peers. I don't accept the connection with " << socketInfo.peerID);
+            return false;
+        }
+        if (mSockets.count(socketInfo.peerID) != 0) {
+            LOGE("There already was a socket for peerID: " << socketInfo.peerID);
+            return false;
+        }
+
+        mSockets[socketInfo.peerID] = std::move(socketInfo.socketPtr);
+    }
+    resetPolling();
+    if (mNewPeerCallback) {
+        // Notify about the new user.
+        mNewPeerCallback(socketInfo.peerID);
+    }
+    return true;
+}
+
+bool Processor::onRemovePeer()
+{
+    RemovePeerRequest request;
+    {
+        Lock lock(mSocketsMutex);
+        request = std::move(mPeersToDelete.front());
+        mPeersToDelete.pop();
+    }
+
+    removePeerInternal(request.peerID, Status::REMOVED_PEER);
+    request.conditionPtr->notify_all();
+    return true;
 }
 
 Processor::MessageID Processor::getNextMessageID()
@@ -505,7 +480,7 @@ Processor::Call Processor::getCall()
     return call;
 }
 
-bool Processor::handleCall()
+bool Processor::onCall()
 {
     LOGT("Handle call (from another thread) to send a message.");
     Call call = getCall();
@@ -556,6 +531,41 @@ bool Processor::handleCall()
     }
 
     return false;
+}
+
+void Processor::cleanCommunication()
+{
+    while (!mEventQueue.isEmpty()) {
+        switch (mEventQueue.receive()) {
+        case Event::FINISH: {
+            LOGD("Event FINISH after FINISH");
+            break;
+        }
+        case Event::CALL: {
+            LOGD("Event CALL after FINISH");
+            Call call = getCall();
+            IGNORE_EXCEPTIONS(call.process(Status::CLOSING, call.data));
+            break;
+        }
+
+        case Event::ADD_PEER: {
+            LOGD("Event ADD_PEER after FINISH");
+            break;
+        }
+
+        case Event::REMOVE_PEER: {
+            LOGD("Event REMOVE_PEER after FINISH");
+            RemovePeerRequest request;
+            {
+                Lock lock(mSocketsMutex);
+                request = std::move(mPeersToDelete.front());
+                mPeersToDelete.pop();
+            }
+            request.conditionPtr->notify_all();
+            break;
+        }
+        }
+    }
 }
 
 } // namespace ipc

@@ -65,14 +65,7 @@ const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
 * - Rest: The data written in a callback. One type per method.ReturnCallbacks
 *
 * TODO:
-*  - remove ReturnCallbacks on peer disconnect
-*  - on sync timeout erase the return callback
-*  - don't throw timeout if the message is already processed
-*  - naming convention or methods that just commissions the PROCESS thread to do something
-*  - removePeer API function
-*  - error handling - special message type
 *  - some mutexes may not be needed
-*  - make addPeer synchronous like removePeer
 */
 class Processor {
 public:
@@ -80,7 +73,6 @@ public:
     typedef unsigned int PeerID;
     typedef unsigned int MethodID;
     typedef unsigned int MessageID;
-
 
     /**
      * Method ID. Used to indicate a message with the return value.
@@ -265,8 +257,8 @@ private:
     enum class Event : int {
         FINISH,     // Shutdown request
         CALL,       // New method call in the queue
-        NEW_PEER,   // New peer in the queue
-        DELETE_PEER // Delete peer
+        ADD_PEER,   // New peer in the queue
+        REMOVE_PEER // Remove peer
     };
     EventQueue<Event> mEventQueue;
 
@@ -303,7 +295,9 @@ private:
 
     void run();
     bool handleEvent();
-    bool handleCall();
+    bool onCall();
+    bool onNewPeer();
+    bool onRemovePeer();
     bool handleLostConnections();
     bool handleInputs();
     bool handleInput(const PeerID peerID, const Socket& socket);
