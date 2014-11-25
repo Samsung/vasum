@@ -50,6 +50,22 @@ std::map<std::string, CommandLineInterface> commands = {
         }
     },
     {
+        "lock_domain", {
+            lock_domain,
+            "lock_domain container_id",
+            "Lock container",
+            {{"container_id", "id container name"}}
+        }
+    },
+    {
+        "unlock_domain", {
+            unlock_domain,
+            "unlock_domain container_id",
+            "Unlock container",
+            {{"container_id", "id container name"}}
+        }
+    },
+    {
         "lookup_domain_by_id", {
             lookup_domain_by_id,
             "lookup_domain_by_id container_id",

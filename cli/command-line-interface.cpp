@@ -154,6 +154,28 @@ void create_domain(int pos, int argc, const char** argv)
     one_shot(bind(vsm_create_domain, _1, argv[pos + 1], nullptr));
 }
 
+void lock_domain(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 1) {
+        throw runtime_error("Not enough parameters");
+    }
+
+    one_shot(bind(vsm_lock_domain, _1, argv[pos + 1]));
+}
+
+void unlock_domain(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 1) {
+        throw runtime_error("Not enough parameters");
+    }
+
+    one_shot(bind(vsm_unlock_domain, _1, argv[pos + 1]));
+}
+
 void lookup_domain_by_id(int pos, int argc, const char** argv)
 {
     using namespace std::placeholders;

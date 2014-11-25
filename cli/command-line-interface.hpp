@@ -111,6 +111,20 @@ void set_active_container(int pos, int argc, const char** argv);
 void create_domain(int pos, int argc, const char** argv);
 
 /**
+ * Parses command line arguments and call vsm_lock_domain
+ *
+ * @see vsm_lock_domain
+ */
+void lock_domain(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and call vsm_unlock_domain
+ *
+ * @see vsm_unlock_domain
+ */
+void unlock_domain(int pos, int argc, const char** argv);
+
+/**
  * Parses command line arguments and call vsm_lookup_domain_by_id
  *
  * @see vsm_lookup_domain_by_id
