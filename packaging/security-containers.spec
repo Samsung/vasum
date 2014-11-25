@@ -43,9 +43,11 @@ between them. A process from inside a container can request a switch of context
 %dir /etc/security-containers
 %dir /etc/security-containers/containers
 %dir /etc/security-containers/lxc-templates
+%dir /etc/security-containers/templates
 %config /etc/security-containers/daemon.conf
 %config /etc/security-containers/containers/*.conf
 %attr(755,root,root) /etc/security-containers/lxc-templates/*.sh
+%config /etc/security-containers/templates/*.conf
 %{_unitdir}/security-containers.service
 %{_unitdir}/multi-user.target.wants/security-containers.service
 /etc/dbus-1/system.d/org.tizen.containers.host.conf
