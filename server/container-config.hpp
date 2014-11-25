@@ -53,6 +53,16 @@ struct ContainerConfig {
     std::vector<std::string> initWithArgs;
 
     /**
+     * IP v4 gateway address
+     */
+    std::string ipv4Gateway;
+
+    /**
+     * IP v4 address
+     */
+    std::string ipv4;
+
+    /**
      * Privilege of the container.
      * The smaller the value the more important the container
      */
@@ -107,6 +117,8 @@ struct ContainerConfig {
         name,
         lxcTemplate,
         initWithArgs,
+        ipv4Gateway,
+        ipv4,
         privilege,
         vt,
         switchToDefaultAfterTimeout,

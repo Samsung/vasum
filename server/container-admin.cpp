@@ -91,7 +91,16 @@ ContainerAdmin::ContainerAdmin(const std::string& containersPath,
         const std::string lxcTemplate = utils::getAbsolutePath(config.lxcTemplate,
                                                                lxcTemplatePrefix);
         LOGI(mId << ": Creating domain from template: " << lxcTemplate);
-        if (!mDom.create(lxcTemplate)) {
+        std::vector<std::string> args;
+        if (!config.ipv4Gateway.empty()) {
+            args.push_back("--ipv4-gateway");
+            args.push_back(config.ipv4Gateway);
+        }
+        if (!config.ipv4.empty()) {
+            args.push_back("--ipv4");
+            args.push_back(config.ipv4);
+        }
+        if (!mDom.create(lxcTemplate, Args(args).getAsCArray())) {
             throw ContainerOperationException("Could not create domain");
         }
     }

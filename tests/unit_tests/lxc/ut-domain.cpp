@@ -42,6 +42,7 @@ using namespace security_containers::lxc;
 const std::string LXC_PATH = "/tmp/ut-lxc/";
 const std::string DOMAIN_NAME = "ut-domain";
 const std::string TEMPLATE = SC_TEST_LXC_TEMPLATES_INSTALL_DIR "/minimal.sh";
+const char* TEMPLATE_ARGS[] = {NULL};
 
 struct Fixture {
     utils::ScopedDir mLxcDirGuard;
@@ -89,7 +90,7 @@ BOOST_AUTO_TEST_CASE(CreateDestroyTest)
     LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
     BOOST_CHECK(!lxc.isDefined());
 
-    BOOST_CHECK(lxc.create(TEMPLATE));
+    BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
 
     BOOST_CHECK(lxc.isDefined());
     BOOST_CHECK_EQUAL(lxc.getConfigItem("lxc.rootfs"), LXC_PATH + DOMAIN_NAME + "/rootfs");
@@ -104,7 +105,7 @@ BOOST_AUTO_TEST_CASE(StartShutdownTest)
 {
     {
         LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
-        BOOST_CHECK(lxc.create(TEMPLATE));
+        BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
     }
     LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
     BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
@@ -127,7 +128,7 @@ BOOST_AUTO_TEST_CASE(StartStopTest)
 {
     {
         LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
-        BOOST_CHECK(lxc.create(TEMPLATE));
+        BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
     }
     LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
     BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
@@ -149,7 +150,7 @@ BOOST_AUTO_TEST_CASE(StartHasStoppedTest)
 {
     {
         LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
-        BOOST_CHECK(lxc.create(TEMPLATE));
+        BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
     }
     LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
     BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
@@ -170,7 +171,7 @@ BOOST_AUTO_TEST_CASE(StartHasStoppedTest)
 BOOST_AUTO_TEST_CASE(FreezeUnfreezeTest)
 {
     LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
-    BOOST_CHECK(lxc.create(TEMPLATE));
+    BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
     const char* argv[] = {
         "/bin/sh",
         "-c",
@@ -193,7 +194,7 @@ BOOST_AUTO_TEST_CASE(FreezeUnfreezeTest)
 BOOST_AUTO_TEST_CASE(FreezeStopTest)
 {
     LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
-    BOOST_CHECK(lxc.create(TEMPLATE));
+    BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
     const char* argv[] = {
         "/bin/sh",
         "-c",
@@ -216,8 +217,8 @@ BOOST_AUTO_TEST_CASE(FreezeStopTest)
 BOOST_AUTO_TEST_CASE(RepeatTest)
 {
     LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
-    BOOST_CHECK(lxc.create(TEMPLATE));
-    BOOST_CHECK(!lxc.create(TEMPLATE));// forbidden
+    BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
+    BOOST_CHECK(!lxc.create(TEMPLATE, TEMPLATE_ARGS));// forbidden
     const char* argv[] = {
         "/bin/sh",
         "-c",

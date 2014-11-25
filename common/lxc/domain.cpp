@@ -93,9 +93,12 @@ LxcDomain::State LxcDomain::getState()
     return STATE_MAP.at(str);
 }
 
-bool LxcDomain::create(const std::string& templatePath)
+bool LxcDomain::create(const std::string& templatePath, const char* const* argv)
 {
-    if (!mContainer->create(mContainer, templatePath.c_str(), NULL, NULL, 0, NULL)) {
+    if (!mContainer->create(mContainer,
+                            templatePath.c_str(),
+                            NULL, NULL, 0,
+                            const_cast<char* const*>(argv))) {
         LOGE("Could not create domain " + getName());
         return false;
     }

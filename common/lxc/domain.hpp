@@ -64,7 +64,7 @@ public:
 
     State getState();
 
-    bool create(const std::string& templatePath);
+    bool create(const std::string& templatePath, const char* const* argv);
     bool destroy();
 
     bool start(const char* const* argv);

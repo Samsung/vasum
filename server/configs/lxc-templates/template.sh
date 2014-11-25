@@ -2,7 +2,7 @@
 
 echo LXC template, args: $@
 
-options=$(getopt -o p:n: -l rootfs:,path:,name: -- "$@")
+options=$(getopt -o p:n: -l rootfs:,path:,name:,ipv4:,ipv4-gateway: -- "$@")
 if [ $? -ne 0 ]; then
     exit 1
 fi
@@ -14,13 +14,14 @@ do
         -p|--path)      path=$2; shift 2;;
         --rootfs)       rootfs=$2; shift 2;;
         -n|--name)      name=$2; shift 2;;
+        --ipv4)         ipv4=$2; shift 2;;
+        --ipv4-gateway) ipv4_gateway=$2; shift 2;;
         --)             shift 1; break ;;
         *)              break ;;
     esac
 done
 
 br_name="virbr-${name}"
-sub_net="103" # TODO from param
 
 # XXX assume rootfs if mounted from iso
 
@@ -40,13 +41,16 @@ lxc.tty = 0
 lxc.mount.auto = proc sys cgroup
 lxc.mount.entry = /var/run/containers/${name}/run var/run none rw,bind 0 0
 
+# create a separate network per container
+# - it forbids traffic sniffing (like macvlan in bridge mode)
+# - it enables traffic controlling from host using iptables
 lxc.network.type = veth
 lxc.network.link =  ${br_name}
 lxc.network.flags = up
 lxc.network.name = eth0
 lxc.network.veth.pair = veth-${name}
-lxc.network.ipv4.gateway = 10.0.${sub_net}.1
-lxc.network.ipv4 = 10.0.${sub_net}.2/24
+lxc.network.ipv4.gateway = ${ipv4_gateway}
+lxc.network.ipv4 = ${ipv4}/24
 
 lxc.hook.pre-start = ${path}/pre-start.sh
 
@@ -55,12 +59,13 @@ lxc.hook.pre-start = ${path}/pre-start.sh
 EOF
 
 # prepare pre start hook
+> ${path}/pre-start.sh
 cat <<EOF >> ${path}/pre-start.sh
 if [ -z "\$(/usr/sbin/brctl show | /bin/grep -P "${br_name}\t")" ]
 then
     /usr/sbin/brctl addbr ${br_name}
     /usr/sbin/brctl setfd ${br_name} 0
-    /sbin/ifconfig ${br_name} 10.0.${sub_net}.1 netmask 255.255.255.0 up
+    /sbin/ifconfig ${br_name} ${ipv4_gateway} netmask 255.255.255.0 up
 fi
 if [ -z "\$(/usr/sbin/iptables -t nat -S | /bin/grep MASQUERADE)" ]
 then
