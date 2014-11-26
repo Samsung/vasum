@@ -26,6 +26,7 @@
 #include "config.hpp"
 #include "ut.hpp"
 #include "config/fields.hpp"
+#include "config/fields-union.hpp"
 #include "config/manager.hpp"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -62,6 +63,14 @@ struct TestConfig {
         )
     };
 
+    struct SubConfigOption {
+        CONFIG_DECLARE_UNION
+        (
+            SubConfig,
+            int
+        )
+    };
+
     int intVal;
     std::int64_t int64Val;
     std::string stringVal;
@@ -75,6 +84,10 @@ struct TestConfig {
 
     SubConfig subObj;
     std::vector<SubConfig> subVector;
+
+    SubConfigOption union1;
+    SubConfigOption union2;
+    std::vector<SubConfigOption> unions;
 
     CONFIG_REGISTER
     (
@@ -90,7 +103,11 @@ struct TestConfig {
         doubleVector,
 
         subObj,
-        subVector
+        subVector,
+
+        union1,
+        union2,
+        unions
     )
 };
 
@@ -111,7 +128,14 @@ const std::string jsonTestString =
     "\"doubleVector\": [ 0.000000, 1.000000, 2.000000 ], "
     "\"subObj\": { \"intVal\": 54321, \"intVector\": [ 1, 2 ], \"subSubObj\": { \"intVal\": 234 } }, "
     "\"subVector\": [ { \"intVal\": 123, \"intVector\": [ 3, 4 ], \"subSubObj\": { \"intVal\": 345 } }, "
-    "{ \"intVal\": 456, \"intVector\": [ 5, 6 ], \"subSubObj\": { \"intVal\": 567 } } ] }";
+        "{ \"intVal\": 456, \"intVector\": [ 5, 6 ], \"subSubObj\": { \"intVal\": 567 } } ], "
+    "\"union1\": { \"type\": \"int\", \"value\": 2 }, "
+    "\"union2\": { \"type\": \"SubConfig\", \"value\": { \"intVal\": 54321, \"intVector\": [ 1 ], "
+        "\"subSubObj\": { \"intVal\": 234 } } }, "
+    "\"unions\": [ "
+        "{ \"type\": \"int\", \"value\": 2 }, "
+        "{ \"type\": \"SubConfig\", \"value\": { \"intVal\": 54321, \"intVector\": [ 1 ], "
+            "\"subSubObj\": { \"intVal\": 234 } } } ] }";
 
 // Floating point tolerance as a number of rounding errors
 const int TOLERANCE = 1;
@@ -342,6 +366,25 @@ BOOST_AUTO_TEST_CASE(FromToFDTest)
     // Cleanup
     BOOST_CHECK(::close(fd) >= 0);
     fs::remove(fifoPath);
+}
+
+BOOST_AUTO_TEST_CASE(ConfigUnion)
+{
+    TestConfig testConfig;
+    BOOST_REQUIRE_NO_THROW(loadFromString(jsonTestString, testConfig));
+
+    BOOST_CHECK(testConfig.union1.is<int>());
+    BOOST_CHECK(!testConfig.union1.is<TestConfig::SubConfig>());
+    BOOST_CHECK_EQUAL(testConfig.union1.as<int>(), 2);
+    BOOST_CHECK(!testConfig.union2.is<int>());
+    BOOST_CHECK(testConfig.union2.is<TestConfig::SubConfig>());
+    TestConfig::SubConfig& subConfig = testConfig.union2.as<TestConfig::SubConfig>();
+    BOOST_CHECK_EQUAL(subConfig.intVal, 54321);
+    BOOST_CHECK(testConfig.unions[0].is<int>());
+    BOOST_CHECK(testConfig.unions[1].is<TestConfig::SubConfig>());
+
+    std::string out = saveToString(testConfig);
+    BOOST_CHECK_EQUAL(out, jsonTestString);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
