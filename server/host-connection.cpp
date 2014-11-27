@@ -160,6 +160,17 @@ void HostConnection::setDestroyContainerCallback(const DestroyContainerCallback&
     mDestroyContainerCallback = callback;
 }
 
+void HostConnection::setLockContainerCallback(const LockContainerCallback& callback)
+{
+    mLockContainerCallback = callback;
+}
+
+void HostConnection::setUnlockContainerCallback(const UnlockContainerCallback& callback)
+{
+    mUnlockContainerCallback = callback;
+}
+
+
 void HostConnection::onMessageCall(const std::string& objectPath,
                                         const std::string& interface,
                                         const std::string& methodName,
@@ -303,6 +314,24 @@ void HostConnection::onMessageCall(const std::string& objectPath,
 
         if (mDestroyContainerCallback){
             mDestroyContainerCallback(id, result);
+        }
+    }
+
+    if (methodName == api::host::METHOD_LOCK_CONTAINER) {
+        const gchar* id = NULL;
+        g_variant_get(parameters, "(&s)", &id);
+
+        if (mLockContainerCallback){
+            mLockContainerCallback(id, result);
+        }
+    }
+
+    if (methodName == api::host::METHOD_UNLOCK_CONTAINER) {
+        const gchar* id = NULL;
+        g_variant_get(parameters, "(&s)", &id);
+
+        if (mUnlockContainerCallback){
+            mUnlockContainerCallback(id, result);
         }
     }
 }

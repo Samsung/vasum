@@ -30,10 +30,11 @@
 
 namespace security_containers {
 namespace api {
-const std::string ERROR_FORBIDDEN  = "org.tizen.containers.Error.Forbidden";
-const std::string ERROR_FORWARDED  = "org.tizen.containers.Error.Forwarded";
-const std::string ERROR_INVALID_ID = "org.tizen.containers.Error.InvalidId";
-const std::string ERROR_INTERNAL   = "org.tizen.containers.Error.Internal";
+const std::string ERROR_FORBIDDEN     = "org.tizen.containers.Error.Forbidden";
+const std::string ERROR_FORWARDED     = "org.tizen.containers.Error.Forwarded";
+const std::string ERROR_INVALID_ID    = "org.tizen.containers.Error.InvalidId";
+const std::string ERROR_INVALID_STATE = "org.tizen.containers.Error.InvalidState";
+const std::string ERROR_INTERNAL      = "org.tizen.containers.Error.Internal";
 
 const std::string METHOD_PROXY_CALL    = "ProxyCall";
 

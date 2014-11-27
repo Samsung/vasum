@@ -472,16 +472,20 @@ VsmStatus Client::vsm_start_domain(const char*) noexcept
     return vsm_get_status();
 }
 
-VsmStatus Client::vsm_lock_domain(const char*) noexcept
+VsmStatus Client::vsm_lock_domain(const char* id) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
+    assert(id);
+
+    GVariant* args_in = g_variant_new("(s)", id);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_LOCK_CONTAINER, args_in);
 }
 
-VsmStatus Client::vsm_unlock_domain(const char*) noexcept
+VsmStatus Client::vsm_unlock_domain(const char* id) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
+    assert(id);
+
+    GVariant* args_in = g_variant_new("(s)", id);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_UNLOCK_CONTAINER, args_in);
 }
 
 VsmStatus Client::vsm_add_state_callback(VsmContainerDbusStateCallback containerDbusStateCallback,

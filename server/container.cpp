@@ -258,6 +258,18 @@ bool Container::isStopped()
     return mAdmin->isStopped();
 }
 
+void Container::suspend()
+{
+    Lock lock(mReconnectMutex);
+    mAdmin->suspend();
+}
+
+void Container::resume()
+{
+    Lock lock(mReconnectMutex);
+    mAdmin->resume();
+}
+
 bool Container::isPaused()
 {
     Lock lock(mReconnectMutex);

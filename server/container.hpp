@@ -154,6 +154,16 @@ public:
     bool isStopped();
 
     /**
+     * Suspend container.
+     */
+    void suspend();
+
+    /**
+     * Resume container.
+     */
+    void resume();
+
+    /**
      * @return Is the container in a paused state?
      */
     bool isPaused();

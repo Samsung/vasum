@@ -408,6 +408,30 @@ public:
                                  asyncResult);
     }
 
+    void callMethodLockContainer(const std::string& id)
+    {
+        assert(isHost());
+        GVariant* parameters = g_variant_new("(s)", id.c_str());
+        GVariantPtr result = mClient->callMethod(api::host::BUS_NAME,
+                                                 api::host::OBJECT_PATH,
+                                                 api::host::INTERFACE,
+                                                 api::host::METHOD_LOCK_CONTAINER,
+                                                 parameters,
+                                                 "()");
+    }
+
+    void callMethodUnlockContainer(const std::string& id)
+    {
+        assert(isHost());
+        GVariant* parameters = g_variant_new("(s)", id.c_str());
+        GVariantPtr result = mClient->callMethod(api::host::BUS_NAME,
+                                                 api::host::OBJECT_PATH,
+                                                 api::host::INTERFACE,
+                                                 api::host::METHOD_UNLOCK_CONTAINER,
+                                                 parameters,
+                                                 "()");
+    }
+
 private:
     const int mId;
     DbusConnection::Pointer mClient;
@@ -1088,6 +1112,36 @@ BOOST_AUTO_TEST_CASE(DeclareLink)
     BOOST_CHECK_EXCEPTION(dbus.callMethodDeclareLink("/fake/path1", container, "/fake/path2"),
                           DbusException,
                           expectedMessage("Not implemented"));
+}
+
+BOOST_AUTO_TEST_CASE(LockUnlockContainerTest)
+{
+    ContainersManager cm(TEST_DBUS_CONFIG_PATH);
+    cm.startAll();
+
+    DbusAccessory dbus(DbusAccessory::HOST_ID);
+
+    std::vector<std::string> containerIds = {"ut-containers-manager-console1-dbus",
+                                             "ut-containers-manager-console2-dbus",
+                                             "ut-containers-manager-console3-dbus"};
+
+    for (std::string& containerId: containerIds){
+        dbus.callMethodLockContainer(containerId);
+        BOOST_CHECK(cm.isPaused(containerId));
+        dbus.callMethodUnlockContainer(containerId);
+        BOOST_CHECK(cm.isRunning(containerId));
+    }
+
+    BOOST_REQUIRE_THROW(dbus.callMethodLockContainer(NON_EXISTANT_CONTAINER_ID),
+                        DbusException);
+    BOOST_REQUIRE_THROW(dbus.callMethodUnlockContainer(NON_EXISTANT_CONTAINER_ID),
+                        DbusException);
+
+    cm.stopAll();
+    BOOST_REQUIRE_THROW(dbus.callMethodLockContainer("ut-containers-manager-console1-dbus"),
+                        DbusException);
+    BOOST_REQUIRE_THROW(dbus.callMethodUnlockContainer("ut-containers-manager-console1-dbus"),
+                        DbusException);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

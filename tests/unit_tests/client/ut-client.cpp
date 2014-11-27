@@ -225,6 +225,20 @@ BOOST_AUTO_TEST_CASE(CreateContainerTest)
     vsm_client_free(client);
 }
 
+BOOST_AUTO_TEST_CASE(LockUnlockContainerTest)
+{
+    const std::string newActiveContainerId = "ut-containers-manager-console2-dbus";
+
+    VsmClient client = vsm_client_create();
+    VsmStatus status = vsm_connect(client);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    status = vsm_lock_domain(client, newActiveContainerId.c_str());
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    status = vsm_unlock_domain(client, newActiveContainerId.c_str());
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    vsm_client_free(client);
+}
+
 BOOST_AUTO_TEST_CASE(FileMoveRequestTest)
 {
     const std::string path = "/tmp/fake_path";

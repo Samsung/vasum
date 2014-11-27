@@ -116,6 +116,12 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
     mHostConnection.setDestroyContainerCallback(bind(&ContainersManager::handleDestroyContainerCall,
                                                      this, _1, _2));
 
+    mHostConnection.setLockContainerCallback(bind(&ContainersManager::handleLockContainerCall,
+                                                  this, _1, _2));
+
+    mHostConnection.setUnlockContainerCallback(bind(&ContainersManager::handleUnlockContainerCall,
+                                                    this, _1, _2));
+
     for (auto& containerConfig : mConfig.containerConfigs) {
         createContainer(containerConfig);
     }
@@ -259,6 +265,27 @@ void ContainersManager::stopAll()
     for (auto& container : mContainers) {
         container.second->stop();
     }
+}
+
+bool ContainersManager::isPaused(const std::string& containerId)
+{
+    auto iter = mContainers.find(containerId);
+    if (iter == mContainers.end()) {
+        LOGE("No such container id: " << containerId);
+        throw ContainerOperationException("No such container");
+    }
+
+    return iter->second->isPaused();
+}
+
+bool ContainersManager::isRunning(const std::string& containerId)
+{
+    auto iter = mContainers.find(containerId);
+    if (iter == mContainers.end()) {
+        LOGE("No such container id: " << containerId);
+        throw ContainerOperationException("No such container");
+    }
+    return iter->second->isRunning();
 }
 
 std::string ContainersManager::getRunningForegroundContainerId()
@@ -772,6 +799,66 @@ void ContainersManager::handleDestroyContainerCall(const std::string& id,
 
     std::thread thread(destroyer);
     thread.detach(); //TODO fix it
+}
+
+void ContainersManager::handleLockContainerCall(const std::string& id,
+                                                dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("LockContainer call; Id=" << id );
+    auto iter = mContainers.find(id);
+    if (iter == mContainers.end()) {
+        LOGE("Failed to lock container - no such container id: " << id);
+        result->setError(api::ERROR_INVALID_ID, "No such container id");
+        return;
+    }
+
+    auto& container = *iter->second;
+    if (!container.isRunning()) {
+        LOGE("Container id=" << id << " is not running.");
+        result->setError(api::ERROR_INVALID_STATE, "Container is not running");
+        return;
+    }
+
+    LOGT("Lock container");
+    try {
+        container.suspend();
+    } catch (ContainerOperationException& e) {
+        LOGE(e.what());
+        result->setError(api::ERROR_INTERNAL, e.what());
+        return;
+    }
+
+    result->setVoid();
+}
+
+void ContainersManager::handleUnlockContainerCall(const std::string& id,
+                                                  dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("UnlockContainer call; Id=" << id );
+    auto iter = mContainers.find(id);
+    if (iter == mContainers.end()) {
+        LOGE("Failed to unlock container - no such container id: " << id);
+        result->setError(api::ERROR_INVALID_ID, "No such container id");
+        return;
+    }
+
+    auto& container = *iter->second;
+    if (!container.isPaused()) {
+        LOGE("Container id=" << id << " is not paused.");
+        result->setError(api::ERROR_INVALID_STATE, "Container is not paused");
+        return;
+    }
+
+    LOGT("Unlock container");
+    try {
+        container.resume();
+    } catch (ContainerOperationException& e) {
+        LOGE(e.what());
+        result->setError(api::ERROR_INTERNAL, e.what());
+        return;
+    }
+
+    result->setVoid();
 }
 
 } // namespace security_containers

@@ -89,6 +89,12 @@ public:
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
                               )> DestroyContainerCallback;
+    typedef std::function<void(const std::string& id,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> LockContainerCallback;
+    typedef std::function<void(const std::string& id,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> UnlockContainerCallback;
 
     /**
      * Register proxy call callback
@@ -151,6 +157,16 @@ public:
     void setDestroyContainerCallback(const DestroyContainerCallback& callback);
 
     /**
+     * Register a callback called to lock container
+     */
+    void setLockContainerCallback(const LockContainerCallback& callback);
+
+    /**
+     * Register a callback called to unlock container
+     */
+    void setUnlockContainerCallback(const UnlockContainerCallback& callback);
+
+    /**
      * Make a proxy call
      */
     void proxyCallAsync(const std::string& busName,
@@ -177,6 +193,8 @@ private:
     SetActiveContainerCallback mSetActiveContainerCallback;
     CreateContainerCallback mCreateContainerCallback;
     DestroyContainerCallback mDestroyContainerCallback;
+    LockContainerCallback mLockContainerCallback;
+    UnlockContainerCallback mUnlockContainerCallback;
 
     void onNameAcquired();
     void onNameLost();

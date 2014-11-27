@@ -79,6 +79,16 @@ public:
     void stopAll();
 
     /**
+     * @return Is the container in a paused state?
+     */
+    bool isPaused(const std::string& containerId);
+
+    /**
+     * @return Is the container running?
+     */
+    bool isRunning(const std::string& containerId);
+
+    /**
      * @return id of the currently focused/foreground container
      */
     std::string getRunningForegroundContainerId();
@@ -154,6 +164,10 @@ private:
                                    dbus::MethodResultBuilder::Pointer result);
     void handleDestroyContainerCall(const std::string& id,
                                     dbus::MethodResultBuilder::Pointer result);
+    void handleLockContainerCall(const std::string& id,
+                                 dbus::MethodResultBuilder::Pointer result);
+    void handleUnlockContainerCall(const std::string& id,
+                                   dbus::MethodResultBuilder::Pointer result);
 };
 
 

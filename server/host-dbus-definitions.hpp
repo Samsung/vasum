@@ -48,6 +48,8 @@ const std::string METHOD_DECLARE_LINK            = "DeclareLink";
 const std::string METHOD_SET_ACTIVE_CONTAINER    = "SetActiveContainer";
 const std::string METHOD_CREATE_CONTAINER        = "CreateContainer";
 const std::string METHOD_DESTROY_CONTAINER       = "DestroyContainer";
+const std::string METHOD_LOCK_CONTAINER          = "LockContainer";
+const std::string METHOD_UNLOCK_CONTAINER        = "UnlockContainer";
 
 const std::string SIGNAL_CONTAINER_DBUS_STATE    = "ContainerDbusState";
 
@@ -104,6 +106,12 @@ const std::string DEFINITION =
     "      <arg type='s' name='id' direction='in'/>"
     "    </method>"
     "    <method name='" + METHOD_DESTROY_CONTAINER + "'>"
+    "      <arg type='s' name='id' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_LOCK_CONTAINER + "'>"
+    "      <arg type='s' name='id' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_UNLOCK_CONTAINER + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "    </method>"
     "    <signal name='" + SIGNAL_CONTAINER_DBUS_STATE + "'>"
