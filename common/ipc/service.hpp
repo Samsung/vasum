@@ -48,10 +48,6 @@ namespace ipc {
  */
 class Service {
 public:
-    typedef Processor::PeerCallback PeerCallback;
-    typedef Processor::PeerID PeerID;
-    typedef Processor::MethodID MethodID;
-
     /**
      * @param path path to the socket
      */
@@ -69,9 +65,28 @@ public:
     void start();
 
     /**
+    * @return is the communication thread running
+    */
+    bool isStarted();
+
+    /**
      * Stops all working threads
      */
     void stop();
+
+    /**
+    * Set the callback called for each new connection to a peer
+    *
+    * @param newPeerCallback the callback
+    */
+    void setNewPeerCallback(const PeerCallback& newPeerCallback);
+
+    /**
+     * Set the callback called when connection to a peer is lost
+     *
+     * @param removedPeerCallback the callback
+     */
+    void setRemovedPeerCallback(const PeerCallback& removedPeerCallback);
 
     /**
      * Saves the callback connected to the method id.
@@ -84,6 +99,19 @@ public:
     template<typename SentDataType, typename ReceivedDataType>
     void addMethodHandler(const MethodID methodID,
                           const typename MethodHandler<SentDataType, ReceivedDataType>::type& method);
+
+    /**
+     * Saves the callback connected to the method id.
+     * When a message with the given method id is received
+     * the data will be parsed and passed to this callback.
+     *
+     * @param methodID API dependent id of the method
+     * @param handler handling implementation
+     * @tparam ReceivedDataType data type to serialize
+     */
+    template<typename ReceivedDataType>
+    void addSignalHandler(const MethodID methodID,
+                          const typename SignalHandler<ReceivedDataType>::type& handler);
 
     /**
      * Removes the callback
@@ -120,6 +148,18 @@ public:
                    const std::shared_ptr<SentDataType>& data,
                    const typename ResultHandler<ReceivedDataType>::type& resultCallback);
 
+    /**
+    * Send a signal to the peer.
+    * There is no return value from the peer
+    * Sends any data only if a peer registered this a signal
+    *
+    * @param methodID API dependent id of the method
+    * @param data data to sent
+    * @tparam SentDataType data type to send
+    */
+    template<typename SentDataType>
+    void signal(const MethodID methodID,
+                const std::shared_ptr<SentDataType>& data);
 private:
     typedef std::lock_guard<std::mutex> Lock;
     Processor mProcessor;
@@ -134,6 +174,15 @@ void Service::addMethodHandler(const MethodID methodID,
     LOGD("Adding method with id " << methodID);
     mProcessor.addMethodHandler<SentDataType, ReceivedDataType>(methodID, method);
     LOGD("Added method with id " << methodID);
+}
+
+template<typename ReceivedDataType>
+void Service::addSignalHandler(const MethodID methodID,
+                               const typename SignalHandler<ReceivedDataType>::type& handler)
+{
+    LOGD("Adding signal with id " << methodID);
+    mProcessor.addSignalHandler<ReceivedDataType>(methodID, handler);
+    LOGD("Added signal with id " << methodID);
 }
 
 template<typename SentDataType, typename ReceivedDataType>
@@ -161,6 +210,14 @@ void Service::callAsync(const MethodID methodID,
     LOGD("Async called method: " << methodID << "for user: " << peerID);
 }
 
+template<typename SentDataType>
+void Service::signal(const MethodID methodID,
+                     const std::shared_ptr<SentDataType>& data)
+{
+    LOGD("Signaling: " << methodID);
+    mProcessor.signal<SentDataType>(methodID, data);
+    LOGD("Signaled: " << methodID);
+}
 
 } // namespace ipc
 } // namespace security_containers

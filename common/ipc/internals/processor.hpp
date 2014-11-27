@@ -31,6 +31,7 @@
 #include "ipc/types.hpp"
 #include "config/manager.hpp"
 #include "config/is-visitable.hpp"
+#include "config/fields.hpp"
 #include "logger/logger.hpp"
 
 #include <poll.h>
@@ -43,14 +44,16 @@
 #include <vector>
 #include <thread>
 #include <string>
+#include <list>
 #include <functional>
 #include <unordered_map>
 
 namespace security_containers {
 namespace ipc {
-namespace {
+
 const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
-}
+const unsigned int DEFAULT_METHOD_TIMEOUT = 1000;
+
 /**
 * This class wraps communication via UX sockets
 *
@@ -66,18 +69,25 @@ const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
 *
 * TODO:
 *  - some mutexes may not be needed
+*  - synchronous call to many peers
+*  - implement CallQueue class
+*  - implement HandlerStore class for storing both signals and methods
+*  - API for removing signals
+*  - implement CallbackStore - thread safe calling/setting callbacks
+*  - helper function for removing from unordered map
 */
 class Processor {
 public:
-    typedef std::function<void(int)> PeerCallback;
-    typedef unsigned int PeerID;
-    typedef unsigned int MethodID;
-    typedef unsigned int MessageID;
-
     /**
-     * Method ID. Used to indicate a message with the return value.
+     * Used to indicate a message with the return value.
      */
     static const MethodID RETURN_METHOD_ID;
+
+    /**
+     * Indicates an Processor's internal request/broadcast to register a Signal
+     */
+    static const MethodID REGISTER_SIGNAL_METHOD_ID;
+
     /**
      * Constructs the Processor, but doesn't start it.
      * The object is ready to add methods.
@@ -101,10 +111,29 @@ public:
     void start();
 
     /**
+     * @return is processor running
+     */
+    bool isStarted();
+
+    /**
      * Stops the processing thread.
      * No incoming data will be handled after.
      */
     void stop();
+
+    /**
+     * Set the callback called for each new connection to a peer
+     *
+     * @param newPeerCallback the callback
+     */
+    void setNewPeerCallback(const PeerCallback& newPeerCallback);
+
+    /**
+     * Set the callback called when connection to a peer is lost
+     *
+     * @param removedPeerCallback the callback
+     */
+    void setRemovedPeerCallback(const PeerCallback& removedPeerCallback);
 
     /**
      * From now on socket is owned by the Processor object.
@@ -137,6 +166,24 @@ public:
     template<typename SentDataType, typename ReceivedDataType>
     void addMethodHandler(const MethodID methodID,
                           const typename MethodHandler<SentDataType, ReceivedDataType>::type& process);
+
+    /**
+     * Saves the callbacks connected to the method id.
+     * When a message with the given method id is received,
+     * the data will be passed to the serialization callback through file descriptor.
+     *
+     * Then the process callback will be called with the parsed data.
+     * There is no return data to send back.
+     *
+     * Adding signal sends a registering message to all peers
+     *
+     * @param methodID API dependent id of the method
+     * @param process data processing callback
+     * @tparam ReceivedDataType data type to receive
+     */
+    template<typename ReceivedDataType>
+    void addSignalHandler(const MethodID methodID,
+                          const typename SignalHandler<ReceivedDataType>::type& process);
 
     /**
      * Removes the callback
@@ -178,10 +225,41 @@ public:
                         const typename ResultHandler<ReceivedDataType>::type& process);
 
 
+    /**
+     * Send a signal to the peer.
+     * There is no return value from the peer
+     * Sends any data only if a peer registered this a signal
+     *
+     * @param methodID API dependent id of the method
+     * @param data data to sent
+     * @tparam SentDataType data type to send
+     */
+    template<typename SentDataType>
+    void signal(const MethodID methodID,
+                const std::shared_ptr<SentDataType>& data);
+
+
 private:
     typedef std::function<void(int fd, std::shared_ptr<void>& data)> SerializeCallback;
     typedef std::function<std::shared_ptr<void>(int fd)> ParseCallback;
     typedef std::lock_guard<std::mutex> Lock;
+
+    struct EmptyData {
+        CONFIG_REGISTER_EMPTY
+    };
+
+    struct RegisterSignalsMessage {
+        RegisterSignalsMessage() = default;
+        RegisterSignalsMessage(const std::vector<MethodID> ids)
+            : ids(ids) {}
+
+        std::vector<MethodID> ids;
+
+        CONFIG_REGISTER
+        (
+            ids
+        )
+    };
 
     struct Call {
         Call(const Call& other) = delete;
@@ -208,6 +286,17 @@ private:
         SerializeCallback serialize;
         ParseCallback parse;
         MethodHandler<void, void>::type method;
+    };
+
+    struct SignalHandlers {
+        SignalHandlers(const SignalHandlers& other) = delete;
+        SignalHandlers& operator=(const SignalHandlers&) = delete;
+        SignalHandlers() = default;
+        SignalHandlers(SignalHandlers&&) = default;
+        SignalHandlers& operator=(SignalHandlers &&) = default;
+
+        ParseCallback parse;
+        SignalHandler<void>::type signal;
     };
 
     struct ReturnCallbacks {
@@ -269,6 +358,8 @@ private:
     std::mutex mCallsMutex;
     std::queue<Call> mCalls;
     std::unordered_map<MethodID, std::shared_ptr<MethodHandlers>> mMethodsCallbacks;
+    std::unordered_map<MethodID, std::shared_ptr<SignalHandlers>> mSignalsCallbacks;
+    std::unordered_map<MethodID, std::list<PeerID>> mSignalsPeers;
 
     // Mutex for changing mSockets map.
     // Shouldn't be locked on any read/write, that could block. Just copy the ptr.
@@ -281,7 +372,8 @@ private:
     std::mutex mReturnCallbacksMutex;
     std::unordered_map<MessageID, ReturnCallbacks> mReturnCallbacks;
 
-
+    // Mutex for setting callbacks
+    std::mutex mCallbacksMutex;
     PeerCallback mNewPeerCallback;
     PeerCallback mRemovedPeerCallback;
 
@@ -292,6 +384,24 @@ private:
 
     std::atomic<MessageID> mMessageIDCounter;
     std::atomic<PeerID> mPeerIDCounter;
+
+    template<typename SentDataType, typename ReceivedDataType>
+    void addMethodHandlerInternal(const MethodID methodID,
+                                  const typename MethodHandler<SentDataType, ReceivedDataType>::type& process);
+
+    template<typename SentDataType>
+    MessageID callInternal(const MethodID methodID,
+                           const PeerID peerID,
+                           const std::shared_ptr<SentDataType>& data);
+
+    template<typename SentDataType, typename ReceivedDataType>
+    MessageID callInternal(const MethodID methodID,
+                           const PeerID peerID,
+                           const std::shared_ptr<SentDataType>& data,
+                           const typename ResultHandler<ReceivedDataType>::type& process);
+
+    template<typename ReceivedDataType>
+    static void discardResultHandler(Status, std::shared_ptr<ReceivedDataType>&) {}
 
     void run();
     bool handleEvent();
@@ -307,31 +417,30 @@ private:
     bool onRemoteCall(const PeerID peerID,
                       const Socket& socket,
                       const MethodID methodID,
-                      const MessageID messageID);
+                      const MessageID messageID,
+                      std::shared_ptr<MethodHandlers> methodCallbacks);
+    bool onRemoteSignal(const PeerID peerID,
+                        const Socket& socket,
+                        const MethodID methodID,
+                        const MessageID messageID,
+                        std::shared_ptr<SignalHandlers> signalCallbacks);
     void resetPolling();
     MessageID getNextMessageID();
     PeerID getNextPeerID();
     Call getCall();
     void removePeerInternal(const PeerID peerID, Status status);
+
+    std::shared_ptr<EmptyData> onNewSignals(const PeerID peerID,
+                                            std::shared_ptr<RegisterSignalsMessage>& data);
+
+
     void cleanCommunication();
 };
 
 template<typename SentDataType, typename ReceivedDataType>
-void Processor::addMethodHandler(const MethodID methodID,
-                                 const typename MethodHandler<SentDataType, ReceivedDataType>::type& method)
+void Processor::addMethodHandlerInternal(const MethodID methodID,
+                                         const typename MethodHandler<SentDataType, ReceivedDataType>::type& method)
 {
-    static_assert(config::isVisitable<SentDataType>::value,
-                  "Use the libConfig library");
-    static_assert(config::isVisitable<ReceivedDataType>::value,
-                  "Use the libConfig library");
-
-    if (methodID == RETURN_METHOD_ID) {
-        LOGE("Forbidden methodID: " << methodID);
-        throw IPCException("Forbidden methodID: " + std::to_string(methodID));
-    }
-
-    using namespace std::placeholders;
-
     MethodHandlers methodCall;
 
     methodCall.parse = [](const int fd)->std::shared_ptr<void> {
@@ -344,9 +453,9 @@ void Processor::addMethodHandler(const MethodID methodID,
         config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
     };
 
-    methodCall.method = [method](std::shared_ptr<void>& data)->std::shared_ptr<void> {
+    methodCall.method = [method](const PeerID peerID, std::shared_ptr<void>& data)->std::shared_ptr<void> {
         std::shared_ptr<ReceivedDataType> tmpData = std::static_pointer_cast<ReceivedDataType>(data);
-        return method(tmpData);
+        return method(peerID, tmpData);
     };
 
     {
@@ -356,37 +465,102 @@ void Processor::addMethodHandler(const MethodID methodID,
 }
 
 template<typename SentDataType, typename ReceivedDataType>
-Processor::MessageID Processor::callAsync(const MethodID methodID,
-                                          const PeerID peerID,
-                                          const std::shared_ptr<SentDataType>& data,
-                                          const typename ResultHandler<ReceivedDataType>::type& process)
+void Processor::addMethodHandler(const MethodID methodID,
+                                 const typename MethodHandler<SentDataType, ReceivedDataType>::type& method)
 {
-    static_assert(config::isVisitable<SentDataType>::value,
-                  "Use the libConfig library");
-    static_assert(config::isVisitable<ReceivedDataType>::value,
-                  "Use the libConfig library");
-
-    if (!mThread.joinable()) {
-        LOGE("The Processor thread is not started. Can't send any data.");
-        throw IPCException("The Processor thread is not started. Can't send any data.");
+    if (methodID == RETURN_METHOD_ID || methodID == REGISTER_SIGNAL_METHOD_ID) {
+        LOGE("Forbidden methodID: " << methodID);
+        throw IPCException("Forbidden methodID: " + std::to_string(methodID));
     }
 
-    using namespace std::placeholders;
+    {
+        Lock lock(mCallsMutex);
+        if (mSignalsCallbacks.count(methodID)) {
+            LOGE("MethodID used by a signal: " << methodID);
+            throw IPCException("MethodID used by a signal: " + std::to_string(methodID));
+        }
+    }
 
+    addMethodHandlerInternal<SentDataType, ReceivedDataType >(methodID, method);
+}
+
+template<typename ReceivedDataType>
+void Processor::addSignalHandler(const MethodID methodID,
+                                 const typename SignalHandler<ReceivedDataType>::type& handler)
+{
+    if (methodID == RETURN_METHOD_ID || methodID == REGISTER_SIGNAL_METHOD_ID) {
+        LOGE("Forbidden methodID: " << methodID);
+        throw IPCException("Forbidden methodID: " + std::to_string(methodID));
+    }
+
+    {
+        Lock lock(mCallsMutex);
+        if (mMethodsCallbacks.count(methodID)) {
+            LOGE("MethodID used by a method: " << methodID);
+            throw IPCException("MethodID used by a method: " + std::to_string(methodID));
+        }
+    }
+
+    SignalHandlers signalCall;
+
+    signalCall.parse = [](const int fd)->std::shared_ptr<void> {
+        std::shared_ptr<ReceivedDataType> data(new ReceivedDataType());
+        config::loadFromFD<ReceivedDataType>(fd, *data);
+        return data;
+    };
+
+    signalCall.signal = [handler](const PeerID peerID, std::shared_ptr<void>& data) {
+        std::shared_ptr<ReceivedDataType> tmpData = std::static_pointer_cast<ReceivedDataType>(data);
+        handler(peerID, tmpData);
+    };
+
+    {
+        Lock lock(mCallsMutex);
+        mSignalsCallbacks[methodID] = std::make_shared<SignalHandlers>(std::move(signalCall));
+    }
+
+    if (isStarted()) {
+        // Broadcast the new signal to peers
+        std::vector<MethodID> ids {methodID};
+        auto data = std::make_shared<RegisterSignalsMessage>(ids);
+
+        std::list<PeerID> peersIDs;
+        {
+            Lock lock(mSocketsMutex);
+            for (const auto kv : mSockets) {
+                peersIDs.push_back(kv.first);
+            }
+        }
+
+        for (const PeerID peerID : peersIDs) {
+            callSync<RegisterSignalsMessage, EmptyData>(REGISTER_SIGNAL_METHOD_ID,
+                                                        peerID,
+                                                        data,
+                                                        DEFAULT_METHOD_TIMEOUT);
+        }
+    }
+}
+
+template<typename SentDataType, typename ReceivedDataType>
+MessageID Processor::callInternal(const MethodID methodID,
+                                  const PeerID peerID,
+                                  const std::shared_ptr<SentDataType>& data,
+                                  const typename ResultHandler<ReceivedDataType>::type& process)
+{
     Call call;
     call.peerID = peerID;
     call.methodID = methodID;
     call.data = data;
     call.messageID = getNextMessageID();
 
+    call.serialize = [](const int fd, std::shared_ptr<void>& data)->void {
+        config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
+    };
+
     call.parse = [](const int fd)->std::shared_ptr<void> {
         std::shared_ptr<ReceivedDataType> data(new ReceivedDataType());
         config::loadFromFD<ReceivedDataType>(fd, *data);
         return data;
-    };
-
-    call.serialize = [](const int fd, std::shared_ptr<void>& data)->void {
-        config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
     };
 
     call.process = [process](Status status, std::shared_ptr<void>& data)->void {
@@ -397,11 +571,24 @@ Processor::MessageID Processor::callAsync(const MethodID methodID,
     {
         Lock lock(mCallsMutex);
         mCalls.push(std::move(call));
+        mEventQueue.send(Event::CALL);
     }
 
-    mEventQueue.send(Event::CALL);
-
     return call.messageID;
+}
+
+template<typename SentDataType, typename ReceivedDataType>
+MessageID Processor::callAsync(const MethodID methodID,
+                               const PeerID peerID,
+                               const std::shared_ptr<SentDataType>& data,
+                               const typename ResultHandler<ReceivedDataType>::type& process)
+{
+    if (!isStarted()) {
+        LOGE("The Processor thread is not started. Can't send any data.");
+        throw IPCException("The Processor thread is not started. Can't send any data.");
+    }
+
+    return callInternal<SentDataType, ReceivedDataType>(methodID, peerID, data, process);
 }
 
 
@@ -411,16 +598,6 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
                                                       const std::shared_ptr<SentDataType>& data,
                                                       unsigned int timeoutMS)
 {
-    static_assert(config::isVisitable<SentDataType>::value,
-                  "Use the libConfig library");
-    static_assert(config::isVisitable<ReceivedDataType>::value,
-                  "Use the libConfig library");
-
-    if (!mThread.joinable()) {
-        LOGE("The Processor thread is not started. Can't send any data.");
-        throw IPCException("The Processor thread is not started. Can't send any data.");
-    }
-
     std::shared_ptr<ReceivedDataType> result;
 
     std::mutex mutex;
@@ -467,6 +644,39 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
     return result;
 }
 
+template<typename SentDataType>
+void Processor::signal(const MethodID methodID,
+                       const std::shared_ptr<SentDataType>& data)
+{
+    if (!isStarted()) {
+        LOGE("The Processor thread is not started. Can't send any data.");
+        throw IPCException("The Processor thread is not started. Can't send any data.");
+    }
+
+    std::list<PeerID> peersIDs;
+    {
+        Lock lock(mSocketsMutex);
+        peersIDs = mSignalsPeers[methodID];
+    }
+
+    for (const PeerID peerID : peersIDs) {
+        Call call;
+        call.peerID = peerID;
+        call.methodID = methodID;
+        call.data = data;
+        call.messageID = getNextMessageID();
+
+        call.serialize = [](const int fd, std::shared_ptr<void>& data)->void {
+            config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
+        };
+
+        {
+            Lock lock(mCallsMutex);
+            mCalls.push(std::move(call));
+            mEventQueue.send(Event::CALL);
+        }
+    }
+}
 
 } // namespace ipc
 } // namespace security_containers

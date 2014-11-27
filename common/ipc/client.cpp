@@ -63,11 +63,26 @@ void Client::start()
     LOGD("Started client");
 }
 
+bool Client::isStarted()
+{
+    return mProcessor.isStarted();
+}
+
 void Client::stop()
 {
     LOGD("Stopping client...");
     mProcessor.stop();
     LOGD("Stopped");
+}
+
+void Client::setNewPeerCallback(const PeerCallback& newPeerCallback)
+{
+    mProcessor.setNewPeerCallback(newPeerCallback);
+}
+
+void Client::setRemovedPeerCallback(const PeerCallback& removedPeerCallback)
+{
+    mProcessor.setRemovedPeerCallback(removedPeerCallback);
 }
 
 void Client::removeMethod(const MethodID methodID)

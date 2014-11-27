@@ -25,6 +25,7 @@
 
 // TODO: Test connection limit
 // TODO: Refactor tests - function for setting up env
+// TODO: Callback wrapper that waits till the callback is called
 
 
 #include "config.hpp"
@@ -37,6 +38,7 @@
 #include "config/fields.hpp"
 #include "logger/logger.hpp"
 
+#include <atomic>
 #include <random>
 #include <string>
 #include <thread>
@@ -111,35 +113,64 @@ struct ThrowOnAcceptData {
     }
 };
 
-std::shared_ptr<EmptyData> returnEmptyCallback(std::shared_ptr<EmptyData>&)
+std::shared_ptr<EmptyData> returnEmptyCallback(const PeerID, std::shared_ptr<EmptyData>&)
 {
     return std::shared_ptr<EmptyData>(new EmptyData());
 }
 
-std::shared_ptr<SendData> returnDataCallback(std::shared_ptr<SendData>&)
+std::shared_ptr<SendData> returnDataCallback(const PeerID, std::shared_ptr<SendData>&)
 {
     return std::shared_ptr<SendData>(new SendData(1));
 }
 
-std::shared_ptr<SendData> echoCallback(std::shared_ptr<SendData>& data)
+std::shared_ptr<SendData> echoCallback(const PeerID, std::shared_ptr<SendData>& data)
 {
     return data;
 }
 
-std::shared_ptr<SendData> longEchoCallback(std::shared_ptr<SendData>& data)
+std::shared_ptr<SendData> longEchoCallback(const PeerID, std::shared_ptr<SendData>& data)
 {
     std::this_thread::sleep_for(std::chrono::seconds(1));
     return data;
 }
 
-void testEcho(Client& c, const Client::MethodID methodID)
+PeerID connect(Service& s, Client& c)
+{
+    // Connects the Client to the Service and returns Clients PeerID
+
+    std::mutex mutex;
+    std::unique_lock<std::mutex> lock(mutex);
+    std::condition_variable cv;
+
+    unsigned int peerID = 0;
+    auto newPeerCallback = [&cv, &peerID](unsigned int newPeerID) {
+        peerID = newPeerID;
+        cv.notify_one();
+    };
+
+    s.setNewPeerCallback(newPeerCallback);
+
+    if (!s.isStarted()) {
+        s.start();
+    }
+
+    c.start();
+
+    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(1000), [&peerID]() {
+        return peerID != 0;
+    }));
+
+    return peerID;
+}
+
+void testEcho(Client& c, const MethodID methodID)
 {
     std::shared_ptr<SendData> sentData(new SendData(34));
     std::shared_ptr<SendData> recvData = c.callSync<SendData, SendData>(methodID, sentData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
-void testEcho(Service& s, const Client::MethodID methodID, const Service::PeerID peerID)
+void testEcho(Service& s, const MethodID methodID, const PeerID peerID)
 {
     std::shared_ptr<SendData> sentData(new SendData(56));
     std::shared_ptr<SendData> recvData = s.callSync<SendData, SendData>(methodID, peerID, sentData);
@@ -151,13 +182,13 @@ void testEcho(Service& s, const Client::MethodID methodID, const Service::PeerID
 
 BOOST_FIXTURE_TEST_SUITE(IPCSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
+BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 {
     Service s(socketPath);
     Client c(socketPath);
 }
 
-BOOST_AUTO_TEST_CASE(ServiceAddRemoveMethodTest)
+BOOST_AUTO_TEST_CASE(ServiceAddRemoveMethod)
 {
     Service s(socketPath);
 
@@ -179,31 +210,17 @@ BOOST_AUTO_TEST_CASE(ServiceAddRemoveMethodTest)
     BOOST_CHECK_THROW(testEcho(c, 2), IPCException);
 }
 
-BOOST_AUTO_TEST_CASE(ClientAddRemoveMethodTest)
+BOOST_AUTO_TEST_CASE(ClientAddRemoveMethod)
 {
-    std::mutex mtx;
-    std::unique_lock<std::mutex> lck(mtx);
-    std::condition_variable cv;
-    unsigned int peerID = 0;
-    auto newPeerCallback = [&cv, &peerID](unsigned int newPeerID) {
-        peerID = newPeerID;
-        cv.notify_one();
-    };
-    Service s(socketPath, newPeerCallback);
-    s.start();
+    Service s(socketPath);
     Client c(socketPath);
-
     c.addMethodHandler<EmptyData, EmptyData>(1, returnEmptyCallback);
     c.addMethodHandler<SendData, SendData>(1, returnDataCallback);
 
-    c.start();
+    PeerID peerID = connect(s, c);
 
     c.addMethodHandler<SendData, SendData>(1, echoCallback);
     c.addMethodHandler<SendData, SendData>(2, returnDataCallback);
-
-    BOOST_CHECK(cv.wait_for(lck, std::chrono::milliseconds(1000), [&peerID]() {
-        return peerID != 0;
-    }));
 
     testEcho(s, 1, peerID);
 
@@ -213,7 +230,7 @@ BOOST_AUTO_TEST_CASE(ClientAddRemoveMethodTest)
     BOOST_CHECK_THROW(testEcho(s, 1, peerID), IPCException);
 }
 
-BOOST_AUTO_TEST_CASE(ServiceStartStopTest)
+BOOST_AUTO_TEST_CASE(ServiceStartStop)
 {
     Service s(socketPath);
 
@@ -228,7 +245,7 @@ BOOST_AUTO_TEST_CASE(ServiceStartStopTest)
     s.start();
 }
 
-BOOST_AUTO_TEST_CASE(ClientStartStopTest)
+BOOST_AUTO_TEST_CASE(ClientStartStop)
 {
     Service s(socketPath);
     Client c(socketPath);
@@ -246,7 +263,7 @@ BOOST_AUTO_TEST_CASE(ClientStartStopTest)
     c.stop();
 }
 
-BOOST_AUTO_TEST_CASE(SyncClientToServiceEchoTest)
+BOOST_AUTO_TEST_CASE(SyncClientToServiceEcho)
 {
     Service s(socketPath);
     s.addMethodHandler<SendData, SendData>(1, echoCallback);
@@ -259,7 +276,7 @@ BOOST_AUTO_TEST_CASE(SyncClientToServiceEchoTest)
     testEcho(c, 2);
 }
 
-BOOST_AUTO_TEST_CASE(RestartTest)
+BOOST_AUTO_TEST_CASE(Restart)
 {
     Service s(socketPath);
     s.addMethodHandler<SendData, SendData>(1, echoCallback);
@@ -284,32 +301,19 @@ BOOST_AUTO_TEST_CASE(RestartTest)
     testEcho(c, 2);
 }
 
-BOOST_AUTO_TEST_CASE(SyncServiceToClientEchoTest)
+BOOST_AUTO_TEST_CASE(SyncServiceToClientEcho)
 {
-    std::mutex mtx;
-    std::unique_lock<std::mutex> lck(mtx);
-    std::condition_variable cv;
-    unsigned int peerID = 0;
-    auto newPeerCallback = [&cv, &peerID](unsigned int newPeerID) {
-        peerID = newPeerID;
-        cv.notify_one();
-    };
-    Service s(socketPath, newPeerCallback);
-    s.start();
+    Service s(socketPath);
     Client c(socketPath);
     c.addMethodHandler<SendData, SendData>(1, echoCallback);
-    c.start();
-
-    BOOST_CHECK(cv.wait_for(lck, std::chrono::milliseconds(1000), [&peerID]() {
-        return peerID != 0;
-    }));
+    PeerID peerID = connect(s, c);
 
     std::shared_ptr<SendData> sentData(new SendData(56));
     std::shared_ptr<SendData> recvData = s.callSync<SendData, SendData>(1, peerID, sentData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
-BOOST_AUTO_TEST_CASE(AsyncClientToServiceEchoTest)
+BOOST_AUTO_TEST_CASE(AsyncClientToServiceEcho)
 {
     // Setup Service and Client
     Service s(socketPath);
@@ -340,33 +344,20 @@ BOOST_AUTO_TEST_CASE(AsyncClientToServiceEchoTest)
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
-BOOST_AUTO_TEST_CASE(AsyncServiceToClientEchoTest)
+BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
 {
-    std::mutex mtx;
-    std::unique_lock<std::mutex> lck(mtx);
-    std::condition_variable cv;
-
-    // Setup Service and Client
-    unsigned int peerID = 0;
-    auto newPeerCallback = [&cv, &peerID](unsigned int newPeerID) {
-        peerID = newPeerID;
-        cv.notify_one();
-    };
-    Service s(socketPath, newPeerCallback);
-    s.start();
+    Service s(socketPath);
     Client c(socketPath);
     c.addMethodHandler<SendData, SendData>(1, echoCallback);
-    c.start();
-
-    // Wait for the connection
-    BOOST_CHECK(cv.wait_for(lck, std::chrono::milliseconds(1000), [&peerID]() {
-        return peerID != 0;
-    }));
+    PeerID peerID = connect(s, c);
 
     // Async call
     std::shared_ptr<SendData> sentData(new SendData(56));
     std::shared_ptr<SendData> recvData;
 
+    std::mutex mtx;
+    std::unique_lock<std::mutex> lck(mtx);
+    std::condition_variable cv;
     auto dataBack = [&cv, &recvData](ipc::Status status, std::shared_ptr<SendData>& data) {
         BOOST_CHECK(status == ipc::Status::OK);
         recvData = data;
@@ -384,7 +375,7 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEchoTest)
 }
 
 
-BOOST_AUTO_TEST_CASE(SyncTimeoutTest)
+BOOST_AUTO_TEST_CASE(SyncTimeout)
 {
     Service s(socketPath);
     s.addMethodHandler<SendData, SendData>(1, longEchoCallback);
@@ -398,7 +389,7 @@ BOOST_AUTO_TEST_CASE(SyncTimeoutTest)
     BOOST_CHECK_THROW((c.callSync<SendData, SendData>(1, sentData, 10)), IPCException);
 }
 
-BOOST_AUTO_TEST_CASE(SerializationErrorTest)
+BOOST_AUTO_TEST_CASE(SerializationError)
 {
     Service s(socketPath);
     s.addMethodHandler<SendData, SendData>(1, echoCallback);
@@ -413,7 +404,7 @@ BOOST_AUTO_TEST_CASE(SerializationErrorTest)
 
 }
 
-BOOST_AUTO_TEST_CASE(ParseErrorTest)
+BOOST_AUTO_TEST_CASE(ParseError)
 {
     Service s(socketPath);
     s.addMethodHandler<SendData, SendData>(1, echoCallback);
@@ -426,11 +417,11 @@ BOOST_AUTO_TEST_CASE(ParseErrorTest)
     BOOST_CHECK_THROW((c.callSync<SendData, ThrowOnAcceptData>(1, sentData, 10000)), IPCParsingException);
 }
 
-BOOST_AUTO_TEST_CASE(DisconnectedPeerErrorTest)
+BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
 {
     Service s(socketPath);
 
-    auto method = [](std::shared_ptr<ThrowOnAcceptData>&) {
+    auto method = [](const PeerID, std::shared_ptr<ThrowOnAcceptData>&) {
         return std::shared_ptr<SendData>(new SendData(1));
     };
 
@@ -462,10 +453,10 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerErrorTest)
 }
 
 
-BOOST_AUTO_TEST_CASE(ReadTimeoutTest)
+BOOST_AUTO_TEST_CASE(ReadTimeout)
 {
     Service s(socketPath);
-    auto longEchoCallback = [](std::shared_ptr<SendData>& data) {
+    auto longEchoCallback = [](const PeerID, std::shared_ptr<SendData>& data) {
         return std::shared_ptr<LongSendData>(new LongSendData(data->intVal));
     };
     s.addMethodHandler<LongSendData, SendData>(1, longEchoCallback);
@@ -480,7 +471,7 @@ BOOST_AUTO_TEST_CASE(ReadTimeoutTest)
 }
 
 
-BOOST_AUTO_TEST_CASE(WriteTimeoutTest)
+BOOST_AUTO_TEST_CASE(WriteTimeout)
 {
     Service s(socketPath);
     s.addMethodHandler<SendData, SendData>(1, echoCallback);
@@ -499,6 +490,66 @@ BOOST_AUTO_TEST_CASE(WriteTimeoutTest)
     BOOST_CHECK_THROW((c.callSync<LongSendData, SendData>(1, sentDataB, 100)), IPCTimeoutException);
 }
 
+
+BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
+{
+    Service s(socketPath);
+    Client c(socketPath);
+    connect(s, c);
+
+    std::atomic_bool isHandlerACalled(false);
+    auto handlerA = [&isHandlerACalled](const PeerID, std::shared_ptr<SendData>&) {
+        isHandlerACalled = true;
+    };
+
+    std::atomic_bool isHandlerBCalled(false);
+    auto handlerB = [&isHandlerBCalled](const PeerID, std::shared_ptr<SendData>&) {
+        isHandlerBCalled = true;
+    };
+
+    c.addSignalHandler<SendData>(1, handlerA);
+    c.addSignalHandler<SendData>(2, handlerB);
+
+    auto data = std::make_shared<SendData>(1);
+    s.signal<SendData>(2, data);
+    s.signal<SendData>(1, data);
+
+    // Wait for the signals to arrive
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    BOOST_CHECK(isHandlerACalled && isHandlerBCalled);
+}
+
+
+BOOST_AUTO_TEST_CASE(AddSignalOffline)
+{
+    Service s(socketPath);
+    Client c(socketPath);
+
+    std::atomic_bool isHandlerACalled(false);
+    auto handlerA = [&isHandlerACalled](const PeerID, std::shared_ptr<SendData>&) {
+        isHandlerACalled = true;
+    };
+
+    std::atomic_bool isHandlerBCalled(false);
+    auto handlerB = [&isHandlerBCalled](const PeerID, std::shared_ptr<SendData>&) {
+        isHandlerBCalled = true;
+    };
+
+    c.addSignalHandler<SendData>(1, handlerA);
+    c.addSignalHandler<SendData>(2, handlerB);
+
+    connect(s, c);
+
+    // Wait for the information about the signals to propagate
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    auto data = std::make_shared<SendData>(1);
+    s.signal<SendData>(2, data);
+    s.signal<SendData>(1, data);
+
+    // Wait for the signals to arrive
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    BOOST_CHECK(isHandlerACalled && isHandlerBCalled);
+}
 
 
 // BOOST_AUTO_TEST_CASE(ConnectionLimitTest)

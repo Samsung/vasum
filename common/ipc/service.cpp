@@ -66,12 +66,27 @@ void Service::start()
     LOGD("Started server");
 }
 
+bool Service::isStarted()
+{
+    return mProcessor.isStarted();
+}
+
 void Service::stop()
 {
     LOGD("Stopping server..");
     mAcceptor.stop();
     mProcessor.stop();
     LOGD("Stopped");
+}
+
+void Service::setNewPeerCallback(const PeerCallback& newPeerCallback)
+{
+    mProcessor.setNewPeerCallback(newPeerCallback);
+}
+
+void Service::setRemovedPeerCallback(const PeerCallback& removedPeerCallback)
+{
+    mProcessor.setRemovedPeerCallback(removedPeerCallback);
 }
 
 void Service::removeMethod(const MethodID methodID)

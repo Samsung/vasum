@@ -28,7 +28,6 @@
 #include "ipc/internals/processor.hpp"
 #include "ipc/internals/utils.hpp"
 
-#include <list>
 #include <cerrno>
 #include <cstring>
 #include <stdexcept>
@@ -48,7 +47,8 @@ namespace ipc {
         LOGE("Callback threw an error: " << e.what()); \
     }
 
-const Processor::MethodID Processor::RETURN_METHOD_ID = std::numeric_limits<MethodID>::max();
+const MethodID Processor::RETURN_METHOD_ID = std::numeric_limits<MethodID>::max();
+const MethodID Processor::REGISTER_SIGNAL_METHOD_ID = std::numeric_limits<MethodID>::max() - 1;
 
 Processor::Processor(const PeerCallback& newPeerCallback,
                      const PeerCallback& removedPeerCallback,
@@ -60,6 +60,11 @@ Processor::Processor(const PeerCallback& newPeerCallback,
       mPeerIDCounter(0)
 {
     LOGT("Creating Processor");
+    using namespace std::placeholders;
+
+    addMethodHandlerInternal<EmptyData, RegisterSignalsMessage>(REGISTER_SIGNAL_METHOD_ID,
+                                                                std::bind(&Processor::onNewSignals, this, _1, _2));
+
 }
 
 Processor::~Processor()
@@ -73,10 +78,15 @@ Processor::~Processor()
     LOGT("Destroyed Processor");
 }
 
+bool Processor::isStarted()
+{
+    return mThread.joinable();
+}
+
 void Processor::start()
 {
     LOGT("Starting Processor");
-    if (!mThread.joinable()) {
+    if (!isStarted()) {
         mThread = std::thread(&Processor::run, this);
     }
     LOGT("Started Processor");
@@ -85,11 +95,23 @@ void Processor::start()
 void Processor::stop()
 {
     LOGT("Stopping Processor");
-    if (mThread.joinable()) {
+    if (isStarted()) {
         mEventQueue.send(Event::FINISH);
         mThread.join();
     }
     LOGT("Stopped Processor");
+}
+
+void Processor::setNewPeerCallback(const PeerCallback& newPeerCallback)
+{
+    Lock lock(mCallbacksMutex);
+    mNewPeerCallback = newPeerCallback;
+}
+
+void Processor::setRemovedPeerCallback(const PeerCallback& removedPeerCallback)
+{
+    Lock lock(mCallbacksMutex);
+    mRemovedPeerCallback = removedPeerCallback;
 }
 
 void Processor::removeMethod(const MethodID methodID)
@@ -99,7 +121,7 @@ void Processor::removeMethod(const MethodID methodID)
     mMethodsCallbacks.erase(methodID);
 }
 
-Processor::PeerID Processor::addPeer(const std::shared_ptr<Socket>& socketPtr)
+PeerID Processor::addPeer(const std::shared_ptr<Socket>& socketPtr)
 {
     LOGT("Adding socket");
     PeerID peerID;
@@ -127,7 +149,7 @@ void Processor::removePeer(const PeerID peerID)
 
     mEventQueue.send(Event::REMOVE_PEER);
 
-    auto isPeerDeleted = [&peerID, this] {
+    auto isPeerDeleted = [&peerID, this]()->bool {
         Lock lock(mSocketsMutex);
         return mSockets.count(peerID) == 0;
     };
@@ -143,6 +165,16 @@ void Processor::removePeerInternal(const PeerID peerID, Status status)
     {
         Lock lock(mSocketsMutex);
         mSockets.erase(peerID);
+
+        // Remove from signal addressees
+        for (auto it = mSignalsPeers.begin(); it != mSignalsPeers.end();) {
+            it->second.remove(peerID);
+            if (it->second.empty()) {
+                it = mSignalsPeers.erase(it);
+            } else {
+                ++it;
+            }
+        }
     }
 
     {
@@ -160,9 +192,13 @@ void Processor::removePeerInternal(const PeerID peerID, Status status)
         }
     }
 
-    if (mRemovedPeerCallback) {
-        // Notify about the deletion
-        mRemovedPeerCallback(peerID);
+
+    {
+        Lock lock(mCallbacksMutex);
+        if (mRemovedPeerCallback) {
+            // Notify about the deletion
+            mRemovedPeerCallback(peerID);
+        }
     }
 
     resetPolling();
@@ -284,12 +320,44 @@ bool Processor::handleInput(const PeerID peerID, const Socket& socket)
 
         if (methodID == RETURN_METHOD_ID) {
             return onReturnValue(peerID, socket, messageID);
+
         } else {
-            return onRemoteCall(peerID, socket, methodID, messageID);
+            Lock lock(mCallsMutex);
+            if (mMethodsCallbacks.count(methodID)) {
+                // Method
+                std::shared_ptr<MethodHandlers> methodCallbacks = mMethodsCallbacks.at(methodID);
+                mCallsMutex.unlock();
+                return onRemoteCall(peerID, socket, methodID, messageID, methodCallbacks);
+
+            } else if (mSignalsCallbacks.count(methodID)) {
+                // Signal
+                std::shared_ptr<SignalHandlers> signalCallbacks = mSignalsCallbacks.at(methodID);
+                mCallsMutex.unlock();
+                return onRemoteSignal(peerID, socket, methodID, messageID, signalCallbacks);
+
+            } else {
+                // Nothing
+                mCallsMutex.unlock();
+                LOGW("No method or signal callback for methodID: " << methodID);
+                removePeerInternal(peerID, Status::NAUGHTY_PEER);
+                return true;
+            }
         }
     }
 
     return false;
+}
+
+std::shared_ptr<Processor::EmptyData> Processor::onNewSignals(const PeerID peerID,
+                                                              std::shared_ptr<RegisterSignalsMessage>& data)
+{
+    LOGD("New signals for peer: " << peerID);
+    Lock lock(mSocketsMutex);
+    for (MethodID methodID : data->ids) {
+        mSignalsPeers[methodID].push_back(peerID);
+    }
+
+    return std::make_shared<EmptyData>();
 }
 
 bool Processor::onReturnValue(const PeerID peerID,
@@ -326,22 +394,43 @@ bool Processor::onReturnValue(const PeerID peerID,
     return false;
 }
 
-bool Processor::onRemoteCall(const PeerID peerID,
-                             const Socket& socket,
-                             const MethodID methodID,
-                             const MessageID messageID)
+bool Processor::onRemoteSignal(const PeerID peerID,
+                               const Socket& socket,
+                               const MethodID methodID,
+                               const MessageID messageID,
+                               std::shared_ptr<SignalHandlers> signalCallbacks)
 {
-    LOGI("Remote call; methodID: " << methodID << " messageID: " << messageID);
+    LOGI("Remote signal; methodID: " << methodID << " messageID: " << messageID);
 
-    std::shared_ptr<MethodHandlers> methodCallbacks;
+    std::shared_ptr<void> data;
     try {
-        Lock lock(mCallsMutex);
-        methodCallbacks = mMethodsCallbacks.at(methodID);
-    } catch (const std::out_of_range&) {
-        LOGW("No method callback for methodID: " << methodID);
+        LOGT("Parsing incoming data");
+        data = signalCallbacks->parse(socket.getFD());
+    } catch (const std::exception& e) {
+        LOGE("Exception during parsing: " << e.what());
+        removePeerInternal(peerID, Status::PARSING_ERROR);
+        return true;
+    }
+
+    LOGT("Signal callback for methodID: " << methodID << "; messageID: " << messageID);
+    try {
+        signalCallbacks->signal(peerID, data);
+    } catch (const std::exception& e) {
+        LOGE("Exception in method handler: " << e.what());
         removePeerInternal(peerID, Status::NAUGHTY_PEER);
         return true;
     }
+
+    return false;
+}
+
+bool Processor::onRemoteCall(const PeerID peerID,
+                             const Socket& socket,
+                             const MethodID methodID,
+                             const MessageID messageID,
+                             std::shared_ptr<MethodHandlers> methodCallbacks)
+{
+    LOGI("Remote call; methodID: " << methodID << " messageID: " << messageID);
 
     std::shared_ptr<void> data;
     try {
@@ -356,7 +445,7 @@ bool Processor::onRemoteCall(const PeerID peerID,
     LOGT("Process callback for methodID: " << methodID << "; messageID: " << messageID);
     std::shared_ptr<void> returnData;
     try {
-        returnData = methodCallbacks->method(data);
+        returnData = methodCallbacks->method(peerID, data);
     } catch (const std::exception& e) {
         LOGE("Exception in method handler: " << e.what());
         removePeerInternal(peerID, Status::NAUGHTY_PEER);
@@ -434,10 +523,44 @@ bool Processor::onNewPeer()
 
         mSockets[socketInfo.peerID] = std::move(socketInfo.socketPtr);
     }
+
+
+    // Broadcast the new signal to peers
+    LOGW("Sending handled signals");
+    std::list<PeerID> peersIDs;
+    {
+        Lock lock(mSocketsMutex);
+        for (const auto kv : mSockets) {
+            peersIDs.push_back(kv.first);
+        }
+    }
+
+    std::vector<MethodID> ids;
+    {
+        Lock lock(mSocketsMutex);
+        for (const auto kv : mSignalsCallbacks) {
+            ids.push_back(kv.first);
+        }
+    }
+    auto data = std::make_shared<RegisterSignalsMessage>(ids);
+
+    for (const PeerID peerID : peersIDs) {
+        callInternal<RegisterSignalsMessage, EmptyData>(REGISTER_SIGNAL_METHOD_ID,
+                                                        peerID,
+                                                        data,
+                                                        discardResultHandler<EmptyData>);
+    }
+    LOGW("Sent handled signals");
+
+
     resetPolling();
-    if (mNewPeerCallback) {
-        // Notify about the new user.
-        mNewPeerCallback(socketInfo.peerID);
+
+    {
+        Lock lock(mCallbacksMutex);
+        if (mNewPeerCallback) {
+            // Notify about the new user.
+            mNewPeerCallback(socketInfo.peerID);
+        }
     }
     return true;
 }
@@ -456,13 +579,13 @@ bool Processor::onRemovePeer()
     return true;
 }
 
-Processor::MessageID Processor::getNextMessageID()
+MessageID Processor::getNextMessageID()
 {
     // TODO: This method of generating UIDs is buggy. To be changed.
     return ++mMessageIDCounter;
 }
 
-Processor::PeerID Processor::getNextPeerID()
+PeerID Processor::getNextPeerID()
 {
     // TODO: This method of generating UIDs is buggy. To be changed.
     return ++mPeerIDCounter;
@@ -496,14 +619,12 @@ bool Processor::onCall()
         return false;
     }
 
-    {
-        // Set what to do with the return message
+    if (call.parse && call.process) {
+        // Set what to do with the return message, but only if needed
         Lock lock(mReturnCallbacksMutex);
         if (mReturnCallbacks.count(call.messageID) != 0) {
             LOGE("There already was a return callback for messageID: " << call.messageID);
         }
-
-        // move insertion
         mReturnCallbacks[call.messageID] = std::move(ReturnCallbacks(call.peerID,
                                                                      std::move(call.parse),
                                                                      std::move(call.process)));
@@ -544,7 +665,9 @@ void Processor::cleanCommunication()
         case Event::CALL: {
             LOGD("Event CALL after FINISH");
             Call call = getCall();
-            IGNORE_EXCEPTIONS(call.process(Status::CLOSING, call.data));
+            if (call.process) {
+                IGNORE_EXCEPTIONS(call.process(Status::CLOSING, call.data));
+            }
             break;
         }
 
