@@ -111,6 +111,15 @@ ContainerAdmin::~ContainerAdmin()
 {
     LOGD(mId << ": Destroying ContainerAdmin object...");
 
+    if (mDestroyOnExit) {
+        if (!mDom.stop()) {
+            LOGE(mId << ": Failed to stop the container");
+        }
+        if (!mDom.destroy()) {
+            LOGE(mId << ": Failed to destroy the container");
+        }
+    }
+
     if (!mDetachOnExit) {
         // Try to forcefully stop
         if (!mDom.stop()) {
@@ -269,6 +278,11 @@ void ContainerAdmin::setSchedulerParams(std::uint64_t, std::uint64_t, std::int64
 void ContainerAdmin::setDetachOnExit()
 {
     mDetachOnExit = true;
+}
+
+void ContainerAdmin::setDestroyOnExit()
+{
+    mDestroyOnExit = true;
 }
 
 std::int64_t ContainerAdmin::getSchedulerQuota()

@@ -116,6 +116,11 @@ public:
     void setDetachOnExit();
 
     /**
+     * Set if container should be destroyed on exit.
+     */
+    void setDestroyOnExit();
+
+    /**
      * @return Scheduler CFS quota,
      * TODO: this function is only for UNIT TESTS
      */
@@ -126,6 +131,7 @@ private:
     lxc::LxcDomain mDom;
     const std::string mId;
     bool mDetachOnExit;
+    bool mDestroyOnExit;
 
     void setSchedulerParams(std::uint64_t cpuShares, std::uint64_t vcpuPeriod, std::int64_t vcpuQuota);
 };

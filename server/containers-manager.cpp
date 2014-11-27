@@ -101,11 +101,14 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
     mHostConnection.setSetActiveContainerCallback(bind(&ContainersManager::handleSetActiveContainerCall,
                                                        this, _1, _2));
 
-    mHostConnection.setAddContainerCallback(bind(&ContainersManager::handleAddContainerCall,
-                                                           this, _1, _2));
+    mHostConnection.setCreateContainerCallback(bind(&ContainersManager::handleCreateContainerCall,
+                                                    this, _1, _2));
+
+    mHostConnection.setDestroyContainerCallback(bind(&ContainersManager::handleDestroyContainerCall,
+                                                     this, _1, _2));
 
     for (auto& containerConfig : mConfig.containerConfigs) {
-        addContainer(containerConfig);
+        createContainer(containerConfig);
     }
 
     // check if default container exists, throw ContainerOperationException if not found
@@ -143,7 +146,7 @@ ContainersManager::~ContainersManager()
     LOGD("ContainersManager object destroyed");
 }
 
-void ContainersManager::addContainer(const std::string& containerConfig)
+void ContainersManager::createContainer(const std::string& containerConfig)
 {
     std::string baseConfigPath = utils::dirName(mConfigPath);
     std::string containerConfigPath = utils::getAbsolutePath(containerConfig, baseConfigPath);
@@ -175,6 +178,20 @@ void ContainersManager::addContainer(const std::string& containerConfig)
                                         this, id, _1));
 
     mContainers.insert(ContainerMap::value_type(id, std::move(c)));
+}
+
+void ContainersManager::destroyContainer(const std::string& containerId)
+{
+    // TODO mutex for mContainers access
+    auto it = mContainers.find(containerId);
+    if (it == mContainers.end()) {
+        LOGE("Failed to destroy container " << containerId << ": no such container");
+        throw ContainerOperationException("No such container");
+    }
+
+    // TODO give back the focus
+    it->second->setDestroyOnExit();
+    mContainers.erase(it);
 }
 
 void ContainersManager::focus(const std::string& containerId)
@@ -440,7 +457,7 @@ void ContainersManager::handleProxyCall(const std::string& caller,
     ContainerMap::const_iterator targetIter = mContainers.find(target);
     if (targetIter == mContainers.end()) {
         LOGE("Target container '" << target << "' not found");
-        result->setError(api::ERROR_UNKNOWN_ID, "Unknown proxy call target");
+        result->setError(api::ERROR_INVALID_ID, "Unknown proxy call target");
         return;
     }
 
@@ -501,7 +518,7 @@ void ContainersManager::handleGetContainerInfoCall(const std::string& id,
     LOGI("GetContainerInfo call");
     if (mContainers.count(id) == 0) {
         LOGE("No container with id=" << id);
-        result->setError(api::ERROR_UNKNOWN_ID, "No such container id");
+        result->setError(api::ERROR_INVALID_ID, "No such container id");
         return;
     }
     const auto& container = mContainers[id];
@@ -536,7 +553,7 @@ void ContainersManager::handleSetActiveContainerCall(const std::string& id,
     auto container = mContainers.find(id);
     if (container == mContainers.end()){
         LOGE("No container with id=" << id );
-        result->setError(api::ERROR_UNKNOWN_ID, "No such container id");
+        result->setError(api::ERROR_INVALID_ID, "No such container id");
         return;
     }
 
@@ -597,32 +614,29 @@ void ContainersManager::generateNewConfig(const std::string& id,
                                 fs::perms::others_read);
 }
 
-void ContainersManager::handleAddContainerCall(const std::string& id,
-                                               dbus::MethodResultBuilder::Pointer result)
+void ContainersManager::handleCreateContainerCall(const std::string& id,
+                                                  dbus::MethodResultBuilder::Pointer result)
 {
     if (id.empty()) {
         LOGE("Failed to add container - invalid name.");
-        result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED,
-                         "Failed to add container - invalid name.");
+        result->setError(api::ERROR_INVALID_ID, "Invalid name");
         return;
     }
 
-    LOGI("Adding container " << id);
+    LOGI("Creating container " << id);
 
     // TODO: This solution is temporary. It utilizes direct access to config files when creating new
     // containers. Update this handler when config database will appear.
     namespace fs = boost::filesystem;
 
-    boost::system::error_code ec;
-    const std::string containerPathStr = utils::createFilePath(mConfig.containersPath, "/", id, "/");
-
     // check if container does not exist
     if (mContainers.find(id) != mContainers.end()) {
         LOGE("Cannot create " << id << " container - already exists!");
-        result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED,
-                         "Cannot create " + id + " container - already exists!");
+        result->setError(api::ERROR_INVALID_ID, "Already exists");
         return;
     }
+
+    const std::string containerPathStr = utils::createFilePath(mConfig.containersPath, "/", id, "/");
 
     // copy container image if config contains path to image
     LOGT("Image path: " << mConfig.containerImagePath);
@@ -633,8 +647,7 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
 
         if (!utils::launchAsRoot(copyImageContentsWrapper)) {
             LOGE("Failed to copy container image.");
-            result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED,
-                            "Failed to copy container image.");
+            result->setError(api::ERROR_INTERNAL, "Failed to copy container image.");
             return;
         }
     }
@@ -647,7 +660,7 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
     std::string configPath = utils::createFilePath(templateDir, "/", CONTAINER_TEMPLATE_CONFIG_PATH);
     std::string newConfigPath = utils::createFilePath(configDir, "/containers/", id + ".conf");
 
-    auto removeAllWrapper = [](const std::string& path) {
+    auto removeAllWrapper = [](const std::string& path) -> bool {
         try {
             LOGD("Removing copied data");
             fs::remove_all(fs::path(path));
@@ -662,19 +675,19 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
         generateNewConfig(id, configPath, newConfigPath);
 
     } catch (SecurityContainersException& e) {
-        LOGE(e.what());
+        LOGE("Generate config failed: " << e.what());
         utils::launchAsRoot(std::bind(removeAllWrapper, containerPathStr));
-        result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED, e.what());
+        result->setError(api::ERROR_INTERNAL, "Failed to generate config");
         return;
     }
 
-    LOGT("Adding new container");
+    LOGT("Creating new container");
     try {
-        addContainer(newConfigPath);
+        createContainer(newConfigPath);
     } catch (SecurityContainersException& e) {
-        LOGE(e.what());
+        LOGE("Creating new container failed: " << e.what());
         utils::launchAsRoot(std::bind(removeAllWrapper, containerPathStr));
-        result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED, e.what());
+        result->setError(api::ERROR_INTERNAL, "Failed to create container");
         return;
     }
 
@@ -685,11 +698,36 @@ void ContainersManager::handleAddContainerCall(const std::string& id,
         } else {
             LOGE("Failed to start container.");
             // TODO removeContainer
-            result->setError(api::host::ERROR_CONTAINER_CREATE_FAILED,
-                             "Failed to start container.");
+            result->setError(api::ERROR_INTERNAL, "Failed to start container");
         }
     };
     mContainers[id]->startAsync(resultCallback);
+}
+
+void ContainersManager::handleDestroyContainerCall(const std::string& id,
+                                                   dbus::MethodResultBuilder::Pointer result)
+{
+    if (mContainers.find(id) == mContainers.end()) {
+        LOGE("Failed to destroy container - no such container id: " << id);
+        result->setError(api::ERROR_INVALID_ID, "No such container id");
+        return;
+    }
+
+    LOGI("Destroying container " << id);
+
+    auto destroyer = [id, result, this] {
+        try {
+            destroyContainer(id);
+        } catch (const SecurityContainersException& e) {
+            LOGE("Error during container destruction: " << e.what());
+            result->setError(api::ERROR_INTERNAL, "Failed to destroy container");
+            return;
+        }
+        result->setVoid();
+    };
+
+    std::thread thread(destroyer);
+    thread.detach(); //TODO fix it
 }
 
 } // namespace security_containers

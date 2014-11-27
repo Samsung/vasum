@@ -24,7 +24,6 @@ FILE(GLOB server_container_CONF     ut-server/containers/*.conf)
 
 FILE(GLOB manager_manager_CONF      ut-containers-manager/*.conf)
 FILE(GLOB manager_container_CONF    ut-containers-manager/containers/*.conf)
-FILE(GLOB manager_admin_TEMPLATE    ut-containers-manager/templates/*.conf)
 
 FILE(GLOB container_CONF            ut-container/*.conf)
 FILE(GLOB container_container_CONF  ut-container/containers/*.conf)
@@ -55,6 +54,8 @@ CONFIGURE_FILE(ut-containers-manager/buggy-foreground-daemon.conf.in
                ${CMAKE_BINARY_DIR}/ut-containers-manager/buggy-foreground-daemon.conf @ONLY)
 CONFIGURE_FILE(ut-containers-manager/test-dbus-daemon.conf.in
                ${CMAKE_BINARY_DIR}/ut-containers-manager/test-dbus-daemon.conf @ONLY)
+CONFIGURE_FILE(ut-containers-manager/empty-dbus-daemon.conf.in
+               ${CMAKE_BINARY_DIR}/ut-containers-manager/empty-dbus-daemon.conf @ONLY)
 FILE(GLOB manager_manager_CONF_GEN ${CMAKE_BINARY_DIR}/ut-containers-manager/*.conf)
 
 CONFIGURE_FILE(ut-containers-manager/containers/console1-dbus.conf.in
@@ -64,6 +65,10 @@ CONFIGURE_FILE(ut-containers-manager/containers/console2-dbus.conf.in
 CONFIGURE_FILE(ut-containers-manager/containers/console3-dbus.conf.in
                ${CMAKE_BINARY_DIR}/ut-containers-manager/containers/console3-dbus.conf @ONLY)
 FILE(GLOB manager_container_CONF_GEN ${CMAKE_BINARY_DIR}/ut-containers-manager/containers/*.conf)
+
+CONFIGURE_FILE(ut-containers-manager/templates/template.conf.in
+               ${CMAKE_BINARY_DIR}/ut-containers-manager/templates/template.conf @ONLY)
+FILE(GLOB manager_container_TEMPLATE_GEN ${CMAKE_BINARY_DIR}/ut-containers-manager/templates/*.conf)
 
 
 ## Install #####################################################################
@@ -82,7 +87,7 @@ INSTALL(FILES        ${manager_container_CONF}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/containers)
 INSTALL(FILES        ${manager_container_CONF_GEN}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/containers)
-INSTALL(FILES        ${manager_admin_TEMPLATE}
+INSTALL(FILES        ${manager_container_TEMPLATE_GEN}
         DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/templates)
 
 INSTALL(FILES        ${container_CONF}

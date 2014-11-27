@@ -380,7 +380,7 @@ VsmStatus vsm_create_domain(VsmClient client, const char* id, const char* tname)
  * @param[in] force if 0 data will be kept, otherwise data will be lost
  * @return status of this function call
  */
-VsmStatus vsm_destroy_domain(VsmStatus clent, const char* id, int force);
+VsmStatus vsm_destroy_domain(VsmClient clent, const char* id, int force);
 
 /**
  * Shutdown domain

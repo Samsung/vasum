@@ -111,6 +111,13 @@ void set_active_container(int pos, int argc, const char** argv);
 void create_domain(int pos, int argc, const char** argv);
 
 /**
+ * Parses command line arguments and call vsm_destroy_domain
+ *
+ * @see vsm_destroy_domain
+ */
+void destroy_domain(int pos, int argc, const char** argv);
+
+/**
  * Parses command line arguments and call vsm_lock_domain
  *
  * @see vsm_lock_domain

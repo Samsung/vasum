@@ -50,6 +50,14 @@ std::map<std::string, CommandLineInterface> commands = {
         }
     },
     {
+        "destroy_domain", {
+            destroy_domain,
+            "destroy_domain container_id",
+            "Destroy container",
+            {{"container_id", "id container name"}}
+        }
+    },
+    {
         "lock_domain", {
             lock_domain,
             "lock_domain container_id",

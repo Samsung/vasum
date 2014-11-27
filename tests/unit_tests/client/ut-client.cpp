@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(SetActiveContainerTest)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(AddContainerTest)
+BOOST_AUTO_TEST_CASE(CreateContainerTest)
 {
     const std::string newActiveContainerId = "";
 

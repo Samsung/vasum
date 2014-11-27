@@ -65,7 +65,10 @@ public:
                               )> SetActiveContainerCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
-                              )> AddContainerCallback;
+                              )> CreateContainerCallback;
+    typedef std::function<void(const std::string& id,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> DestroyContainerCallback;
 
     /**
      * Register proxy call callback
@@ -105,7 +108,12 @@ public:
     /**
      * Register a callback called to create new container
      */
-    void setAddContainerCallback(const AddContainerCallback& callback);
+    void setCreateContainerCallback(const CreateContainerCallback& callback);
+
+    /**
+     * Register a callback called to destroy container
+     */
+    void setDestroyContainerCallback(const DestroyContainerCallback& callback);
 
     /**
      * Make a proxy call
@@ -129,7 +137,8 @@ private:
     GetActiveContainerIdCallback mGetActiveContainerIdCallback;
     GetContainerInfoCallback mGetContainerInfoCallback;
     SetActiveContainerCallback mSetActiveContainerCallback;
-    AddContainerCallback mAddContainerCallback;
+    CreateContainerCallback mCreateContainerCallback;
+    DestroyContainerCallback mDestroyContainerCallback;
 
     void onNameAcquired();
     void onNameLost();

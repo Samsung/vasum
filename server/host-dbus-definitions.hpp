@@ -37,14 +37,14 @@ const std::string OBJECT_PATH                    = "/org/tizen/containers/host";
 const std::string INTERFACE                      = "org.tizen.containers.host.manager";
 
 const std::string ERROR_CONTAINER_STOPPED        = "org.tizen.containers.host.Error.ContainersStopped";
-const std::string ERROR_CONTAINER_CREATE_FAILED  = "org.tizen.containers.host.Error.ContainerCreateFailed";
 
 const std::string METHOD_GET_CONTAINER_DBUSES    = "GetContainerDbuses";
 const std::string METHOD_GET_CONTAINER_ID_LIST   = "GetContainerIds";
 const std::string METHOD_GET_ACTIVE_CONTAINER_ID = "GetActiveContainerId";
 const std::string METHOD_GET_CONTAINER_INFO      = "GetContainerInfo";
 const std::string METHOD_SET_ACTIVE_CONTAINER    = "SetActiveContainer";
-const std::string METHOD_ADD_CONTAINER           = "AddContainer";
+const std::string METHOD_CREATE_CONTAINER        = "CreateContainer";
+const std::string METHOD_DESTROY_CONTAINER       = "DestroyContainer";
 
 const std::string SIGNAL_CONTAINER_DBUS_STATE    = "ContainerDbusState";
 
@@ -77,7 +77,10 @@ const std::string DEFINITION =
     "    <method name='" + METHOD_SET_ACTIVE_CONTAINER + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "    </method>"
-    "    <method name='" + METHOD_ADD_CONTAINER + "'>"
+    "    <method name='" + METHOD_CREATE_CONTAINER + "'>"
+    "      <arg type='s' name='id' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_DESTROY_CONTAINER + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "    </method>"
     "    <signal name='" + SIGNAL_CONTAINER_DBUS_STATE + "'>"

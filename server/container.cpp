@@ -240,6 +240,12 @@ void Container::setDetachOnExit()
     }
 }
 
+void Container::setDestroyOnExit()
+{
+    Lock lock(mReconnectMutex);
+    mAdmin->setDestroyOnExit();
+}
+
 bool Container::isRunning()
 {
     Lock lock(mReconnectMutex);

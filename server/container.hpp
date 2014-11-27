@@ -135,6 +135,11 @@ public:
     void setDetachOnExit();
 
     /**
+     * Set if container should be destroyed on exit.
+     */
+    void setDestroyOnExit();
+
+    /**
      * @return Is the container running?
      */
     bool isRunning();

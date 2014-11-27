@@ -47,11 +47,18 @@ public:
     ~ContainersManager();
 
     /**
-     * Add new container.
+     * Create new container.
      *
      * @param containerConfig config of new container
      */
-    void addContainer(const std::string& containerConfig);
+    void createContainer(const std::string& containerConfig);
+
+    /**
+     * Destroy container.
+     *
+     * @param containerId id of the container
+     */
+    void destroyContainer(const std::string& containerId);
 
     /**
      * Focus this container, put it to the foreground.
@@ -126,8 +133,10 @@ private:
     void handleGetContainerInfoCall(const std::string& id, dbus::MethodResultBuilder::Pointer result);
     void handleSetActiveContainerCall(const std::string& id,
                                       dbus::MethodResultBuilder::Pointer result);
-    void handleAddContainerCall(const std::string& id,
-                                          dbus::MethodResultBuilder::Pointer result);
+    void handleCreateContainerCall(const std::string& id,
+                                   dbus::MethodResultBuilder::Pointer result);
+    void handleDestroyContainerCall(const std::string& id,
+                                    dbus::MethodResultBuilder::Pointer result);
 };
 
 

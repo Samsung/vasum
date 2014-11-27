@@ -62,6 +62,7 @@ namespace {
 
 const std::string TEST_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/test-daemon.conf";
 const std::string TEST_DBUS_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/test-dbus-daemon.conf";
+const std::string EMPTY_DBUS_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/empty-dbus-daemon.conf";
 const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-daemon.conf";
 const std::string BUGGY_FOREGROUND_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-foreground-daemon.conf";
 const std::string BUGGY_DEFAULTID_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-default-daemon.conf";
@@ -85,7 +86,7 @@ public:
     typedef std::function<void(const std::string& argument,
                                MethodResultBuilder::Pointer result
                               )> TestApiMethodCallback;
-    typedef std::function<void()> AddContainerResultCallback;
+    typedef std::function<void()> VoidResultCallback;
 
     typedef std::map<std::string, std::string> Dbuses;
 
@@ -308,8 +309,8 @@ public:
 
     }
 
-    void callAsyncMethodAddContainer(const std::string& id,
-                                     const AddContainerResultCallback& result)
+    void callAsyncMethodCreateContainer(const std::string& id,
+                                        const VoidResultCallback& result)
     {
         auto asyncResult = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
             BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
@@ -321,7 +322,26 @@ public:
         mClient->callMethodAsync(api::host::BUS_NAME,
                                  api::host::OBJECT_PATH,
                                  api::host::INTERFACE,
-                                 api::host::METHOD_ADD_CONTAINER,
+                                 api::host::METHOD_CREATE_CONTAINER,
+                                 parameters,
+                                 "()",
+                                 asyncResult);
+    }
+
+    void callAsyncMethodDestroyContainer(const std::string& id,
+                                     const VoidResultCallback& result)
+    {
+        auto asyncResult = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
+            BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
+            result();
+        };
+
+        assert(isHost());
+        GVariant* parameters = g_variant_new("(s)", id.c_str());
+        mClient->callMethodAsync(api::host::BUS_NAME,
+                                 api::host::OBJECT_PATH,
+                                 api::host::INTERFACE,
+                                 api::host::METHOD_DESTROY_CONTAINER,
                                  parameters,
                                  "()",
                                  asyncResult);
@@ -938,32 +958,33 @@ BOOST_AUTO_TEST_CASE(SetActiveContainerTest)
                         DbusException);
 }
 
-//TODO fix it
-//BOOST_AUTO_TEST_CASE(AddContainerTest)
-//{
-//    const std::string newContainerId = "test1234";
-//    const std::vector<std::string> newContainerConfigs = {
-//        TEST_CONTAINER_CONF_PATH + newContainerId + ".conf",
-//    };
-//    FileCleanerRAII cleaner(newContainerConfigs);
-//
-//    ContainersManager cm(TEST_DBUS_CONFIG_PATH);
-//    cm.startAll();
-//
-//    Latch callDone;
-//    auto resultCallback = [&]() {
-//        callDone.set();
-//    };
-//
-//    DbusAccessory dbus(DbusAccessory::HOST_ID);
-//
-//    // create new container
-//    dbus.callAsyncMethodAddContainer(newContainerId, resultCallback);
-//    callDone.wait(EVENT_TIMEOUT);
-//
-//    // focus new container
-//    cm.focus(newContainerId);
-//    BOOST_CHECK(cm.getRunningForegroundContainerId() == newContainerId);
-//}
+BOOST_AUTO_TEST_CASE(CreateDestroyContainerTest)
+{
+    const std::string newContainerId = "test1234";
+
+    ContainersManager cm(EMPTY_DBUS_CONFIG_PATH);
+    cm.startAll();
+
+    Latch callDone;
+    auto resultCallback = [&]() {
+        callDone.set();
+    };
+
+    DbusAccessory dbus(DbusAccessory::HOST_ID);
+
+    // create new container
+    dbus.callAsyncMethodCreateContainer(newContainerId, resultCallback);
+    BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+
+    // focus new container
+    cm.focus(newContainerId);
+    BOOST_CHECK(cm.getRunningForegroundContainerId() == newContainerId);
+
+    // destroy container
+    dbus.callAsyncMethodDestroyContainer(newContainerId, resultCallback);
+    BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+
+    BOOST_CHECK(cm.getRunningForegroundContainerId() == "");
+}
 
 BOOST_AUTO_TEST_SUITE_END()

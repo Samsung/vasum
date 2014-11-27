@@ -135,9 +135,14 @@ void HostConnection::setSetActiveContainerCallback(const SetActiveContainerCallb
     mSetActiveContainerCallback = callback;
 }
 
-void HostConnection::setAddContainerCallback(const AddContainerCallback& callback)
+void HostConnection::setCreateContainerCallback(const CreateContainerCallback& callback)
 {
-    mAddContainerCallback = callback;
+    mCreateContainerCallback = callback;
+}
+
+void HostConnection::setDestroyContainerCallback(const DestroyContainerCallback& callback)
+{
+    mDestroyContainerCallback = callback;
 }
 
 void HostConnection::onMessageCall(const std::string& objectPath,
@@ -220,12 +225,21 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::host::METHOD_ADD_CONTAINER) {
+    if (methodName == api::host::METHOD_CREATE_CONTAINER) {
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
 
-        if (mAddContainerCallback){
-            mAddContainerCallback(id, result);
+        if (mCreateContainerCallback){
+            mCreateContainerCallback(id, result);
+        }
+    }
+
+    if (methodName == api::host::METHOD_DESTROY_CONTAINER) {
+        const gchar* id = NULL;
+        g_variant_get(parameters, "(&s)", &id);
+
+        if (mDestroyContainerCallback){
+            mDestroyContainerCallback(id, result);
         }
     }
 }

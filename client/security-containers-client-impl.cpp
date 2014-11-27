@@ -450,13 +450,14 @@ VsmStatus Client::vsm_create_domain(const char* id, const char* tname) noexcept
     }
 
     GVariant* args_in = g_variant_new("(s)", id);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_ADD_CONTAINER, args_in);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_CREATE_CONTAINER, args_in);
 }
 
-VsmStatus Client::vsm_destroy_domain(const char*) noexcept
+VsmStatus Client::vsm_destroy_domain(const char* id) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
+    assert(id);
+    GVariant* args_in = g_variant_new("(s)", id);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_DESTROY_CONTAINER, args_in);
 }
 
 VsmStatus Client::vsm_shutdown_domain(const char*) noexcept

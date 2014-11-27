@@ -158,7 +158,7 @@ API VsmStatus vsm_create_domain(VsmClient client, const char* id, const char* tn
     return getClient(client).vsm_create_domain(id, tname);
 }
 
-API VsmStatus vsm_destroy_domain(VsmClient client, const char* id)
+API VsmStatus vsm_destroy_domain(VsmClient client, const char* id, int /*force*/)
 {
     return getClient(client).vsm_destroy_domain(id);
 }
