@@ -248,6 +248,31 @@ public:
                                         VsmNetdev* netdev) noexcept;
 
     /**
+     *  @see ::vsm_declare_file
+     */
+    VsmStatus vsm_declare_file(const char* container,
+                               VsmFileType type,
+                               const char* path,
+                               int32_t flags,
+                               mode_t mode) noexcept;
+
+    /**
+     * @see ::vsm_declare_mount
+     */
+    VsmStatus vsm_declare_mount(const char* source,
+                                const char* container,
+                                const char* target,
+                                const char* type,
+                                uint64_t flags,
+                                const char* data) noexcept;
+    /**
+     * @see ::vsm_declare_link
+     */
+    VsmStatus vsm_declare_link(const char* source,
+                               const char* container,
+                               const char* target) noexcept;
+
+    /**
      *  @see ::vsm_notify_active_container
      */
     VsmStatus vsm_notify_active_container(const char* application, const char* message) noexcept;

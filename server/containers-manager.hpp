@@ -131,6 +131,23 @@ private:
     void handleGetContainerIdsCall(dbus::MethodResultBuilder::Pointer result);
     void handleGetActiveContainerIdCall(dbus::MethodResultBuilder::Pointer result);
     void handleGetContainerInfoCall(const std::string& id, dbus::MethodResultBuilder::Pointer result);
+    void handleDeclareFileCall(const std::string& container,
+                               const int32_t& type,
+                               const std::string& path,
+                               const int32_t& flags,
+                               const int32_t& mode,
+                               dbus::MethodResultBuilder::Pointer result);
+    void handleDeclareMountCall(const std::string& source,
+                                const std::string& container,
+                                const std::string& target,
+                                const std::string& type,
+                                const uint64_t& flags,
+                                const std::string& data,
+                                dbus::MethodResultBuilder::Pointer result);
+    void handleDeclareLinkCall(const std::string& source,
+                               const std::string& container,
+                               const std::string& target,
+                               dbus::MethodResultBuilder::Pointer result);
     void handleSetActiveContainerCall(const std::string& id,
                                       dbus::MethodResultBuilder::Pointer result);
     void handleCreateContainerCall(const std::string& id,

@@ -42,6 +42,9 @@ const std::string METHOD_GET_CONTAINER_DBUSES    = "GetContainerDbuses";
 const std::string METHOD_GET_CONTAINER_ID_LIST   = "GetContainerIds";
 const std::string METHOD_GET_ACTIVE_CONTAINER_ID = "GetActiveContainerId";
 const std::string METHOD_GET_CONTAINER_INFO      = "GetContainerInfo";
+const std::string METHOD_DECLARE_FILE            = "DeclareFile";
+const std::string METHOD_DECLARE_MOUNT           = "DeclareMount";
+const std::string METHOD_DECLARE_LINK            = "DeclareLink";
 const std::string METHOD_SET_ACTIVE_CONTAINER    = "SetActiveContainer";
 const std::string METHOD_CREATE_CONTAINER        = "CreateContainer";
 const std::string METHOD_DESTROY_CONTAINER       = "DestroyContainer";
@@ -73,6 +76,26 @@ const std::string DEFINITION =
     "    <method name='" + METHOD_GET_CONTAINER_INFO + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "      <arg type='(siss)' name='result' direction='out'/>"
+    "    </method>"
+    "    <method name='" + METHOD_DECLARE_FILE + "'>"
+    "      <arg type='s' name='container' direction='in'/>"
+    "      <arg type='i' name='type' direction='in'/>"
+    "      <arg type='s' name='path' direction='in'/>"
+    "      <arg type='i' name='flags' direction='in'/>"
+    "      <arg type='i' name='mode' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_DECLARE_MOUNT + "'>"
+    "      <arg type='s' name='source' direction='in'/>"
+    "      <arg type='s' name='container' direction='in'/>"
+    "      <arg type='s' name='target' direction='in'/>"
+    "      <arg type='s' name='type' direction='in'/>"
+    "      <arg type='t' name='flags' direction='in'/>"
+    "      <arg type='s' name='data' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_DECLARE_LINK + "'>"
+    "      <arg type='s' name='source' direction='in'/>"
+    "      <arg type='s' name='container' direction='in'/>"
+    "      <arg type='s' name='target' direction='in'/>"
     "    </method>"
     "    <method name='" + METHOD_SET_ACTIVE_CONTAINER + "'>"
     "      <arg type='s' name='id' direction='in'/>"

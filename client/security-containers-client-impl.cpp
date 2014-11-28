@@ -569,6 +569,53 @@ VsmStatus Client::vsm_lookup_netdev_by_name(const char*, const char*, VsmNetdev*
     return vsm_get_status();
 }
 
+VsmStatus Client::vsm_declare_file(const char* container,
+                                   VsmFileType type,
+                                   const char *path,
+                                   int32_t flags,
+                                   mode_t mode) noexcept
+{
+    assert(path);
+
+    GVariant* args_in = g_variant_new("(sisii)", container, type, path, flags, mode);
+    return callMethod(CONTAINER_INTERFACE,
+                      api::host::METHOD_DECLARE_FILE,
+                      args_in);
+}
+
+VsmStatus Client::vsm_declare_mount(const char *source,
+                                    const char* container,
+                                    const char *target,
+                                    const char *type,
+                                    uint64_t flags,
+                                    const char *data) noexcept
+{
+    assert(source);
+    assert(target);
+    assert(type);
+    if (!data) {
+        data = "";
+    }
+
+    GVariant* args_in = g_variant_new("(ssssts)", source, container, target, type, flags, data);
+    return callMethod(CONTAINER_INTERFACE,
+                      api::host::METHOD_DECLARE_MOUNT,
+                      args_in);
+}
+
+VsmStatus Client::vsm_declare_link(const char *source,
+                                   const char* container,
+                                   const char *target) noexcept
+{
+    assert(source);
+    assert(target);
+
+    GVariant* args_in = g_variant_new("(sss)", source, container, target);
+    return callMethod(CONTAINER_INTERFACE,
+                      api::host::METHOD_DECLARE_LINK,
+                      args_in);
+}
+
 VsmStatus Client::vsm_notify_active_container(const char* application, const char* message) noexcept
 {
     assert(application);
@@ -631,3 +678,4 @@ VsmStatus Client::vsm_del_notification_callback(VsmSubscriptionId subscriptionId
 {
     return signalUnsubscribe(subscriptionId);
 }
+

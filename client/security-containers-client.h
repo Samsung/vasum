@@ -79,6 +79,7 @@ finish:
 #define SECURITY_CONTAINERS_CLIENT_H
 
 #include <stdint.h>
+#include <sys/stat.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -174,6 +175,15 @@ typedef struct {
  * Network device information
  */
 typedef VsmNetdevStructure* VsmNetdev;
+
+/**
+ * File type
+ */
+typedef enum {
+    VSMFILE_DIRECTORY,
+    VSMFILE_FIFO,
+    VSMFILE_REGULAR,
+} VsmFileType;
 
 /**
  * Start glib loop.
@@ -579,6 +589,68 @@ VsmStatus vsm_lookup_netdev_by_name(VsmClient client,
                                     const char* domain,
                                     const char* netdevId,
                                     VsmNetdev* netdev);
+
+/**
+ * Create file, directory or pipe in container
+ *
+ * Declare file, directory or pipe that will be created while container startup
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] type file type
+ * @param[in] container container id
+ * @param[in] path path to file
+ * @param[in] flags if O_CREAT bit is set then file will be created in container,
+ *                  otherwise file will by copied from host;
+ *                  it is meaningful only when O_CREAT is set
+ * @param[in] mode mode of file
+ * @return status of this function call
+ */
+VsmStatus vsm_declare_file(VsmClient client,
+                           const char* container,
+                           VsmFileType type,
+                           const char* path,
+                           int32_t flags,
+                           mode_t mode);
+
+/**
+ * Create mount point in container
+ *
+ * Declare mount that will be created while container startup
+ * Parameters are passed to mount system function
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] source device path (path in host)
+ * @param[in] container container id
+ * @param[in] target mount point (path in container)
+ * @param[in] type filesystem type
+ * @param[in] flags mount flags as in mount function
+ * @patam[in] data additional data as in mount function
+ * @return status of this function call
+ */
+VsmStatus vsm_declare_mount(VsmClient client,
+                            const char* source,
+                            const char* container,
+                            const char* target,
+                            const char* type,
+                            uint64_t flags,
+                            const char* data);
+
+/**
+ * Create link in container
+ *
+ * Declare link that will be created while container startup
+ * Parameters are passed to link system function
+ *
+ * @param[in] client security-containers-server's client
+ * @param[in] source path to link source (in host)
+ * @param[in] container container id
+ * @param[in] target path to link name (in container)
+ * @return status of this function call
+ */
+VsmStatus vsm_declare_link(VsmClient client,
+                           const char *source,
+                           const char* container,
+                           const char *target);
 
 
 /** @} */ // Host API

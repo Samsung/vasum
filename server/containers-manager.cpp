@@ -98,6 +98,15 @@ ContainersManager::ContainersManager(const std::string& managerConfigPath): mDet
     mHostConnection.setGetContainerInfoCallback(bind(&ContainersManager::handleGetContainerInfoCall,
                                                      this, _1, _2));
 
+    mHostConnection.setDeclareFileCallback(bind(&ContainersManager::handleDeclareFileCall,
+                                                this, _1, _2, _3, _4, _5, _6));
+
+    mHostConnection.setDeclareMountCallback(bind(&ContainersManager::handleDeclareMountCall,
+                                                 this, _1, _2, _3, _4, _5, _6, _7));
+
+    mHostConnection.setDeclareLinkCallback(bind(&ContainersManager::handleDeclareLinkCall,
+                                                this, _1, _2, _3, _4));
+
     mHostConnection.setSetActiveContainerCallback(bind(&ContainersManager::handleSetActiveContainerCall,
                                                        this, _1, _2));
 
@@ -544,6 +553,41 @@ void ContainersManager::handleGetContainerInfoCall(const std::string& id,
                               container->getVT(),
                               state,
                               rootfsPath.string().c_str()));
+}
+
+void ContainersManager::handleDeclareFileCall(const std::string& /* container */,
+                                              const int32_t& /* type */,
+                                              const std::string& /* path */,
+                                              const int32_t& /* flags */,
+                                              const int32_t& /* mode */,
+                                              dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("DeclareFile call");
+    LOGE("Not implemeted method");
+    result->setError(api::ERROR_INTERNAL, "Not implemented");
+}
+
+void ContainersManager::handleDeclareMountCall(const std::string& /* source */,
+                                               const std::string& /* container */,
+                                               const std::string& /* target */,
+                                               const std::string& /* type */,
+                                               const uint64_t& /* flags */,
+                                               const std::string& /* data */,
+                                               dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("DeclareMount call");
+    LOGE("Not implemeted method");
+    result->setError(api::ERROR_INTERNAL, "Not implemented");
+}
+
+void ContainersManager::handleDeclareLinkCall(const std::string& /* source */,
+                                              const std::string& /* container */,
+                                              const std::string& /* target */,
+                                              dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("DeclareLink call");
+    LOGE("Not implemeted method");
+    result->setError(api::ERROR_INTERNAL, "Not implemented");
 }
 
 void ContainersManager::handleSetActiveContainerCall(const std::string& id,

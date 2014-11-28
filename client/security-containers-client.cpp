@@ -272,6 +272,37 @@ API VsmStatus vsm_lookup_netdev_by_name(VsmClient client,
     return getClient(client).vsm_lookup_netdev_by_name(domain, netdevId, netdev);
 }
 
+API VsmStatus vsm_declare_file(VsmClient client,
+                               const char* container,
+                               VsmFileType type,
+                               const char* path,
+                               int32_t flags,
+                               mode_t mode)
+{
+    return getClient(client).vsm_declare_file(container, type, path, flags, mode);
+}
+
+
+API VsmStatus vsm_declare_mount(VsmClient client,
+                                const char* source,
+                                const char* container,
+                                const char* target,
+                                const char* type,
+                                uint64_t flags,
+                                const char* data)
+{
+    return getClient(client).vsm_declare_mount(source, container, target, type, flags, data);
+}
+
+API VsmStatus vsm_declare_link(VsmClient client,
+                               const char* source,
+                               const char* container,
+                               const char* target)
+{
+    return getClient(client).vsm_declare_link(source, container, target);
+}
+
+
 API VsmStatus vsm_notify_active_container(VsmClient client,
                                           const char* application,
                                           const char* message)
@@ -297,3 +328,4 @@ API VsmStatus vsm_del_notification_callback(VsmClient client,
 {
     return getClient(client).vsm_del_notification_callback(subscriptionId);
 }
+

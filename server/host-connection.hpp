@@ -60,6 +60,26 @@ public:
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
                               )> GetContainerInfoCallback;
+    typedef std::function<void(const std::string& container,
+                               const int32_t& type,
+                               const std::string& path,
+                               const int32_t& flags,
+                               const int32_t& mode,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> DeclareFileCallback;
+    typedef std::function<void(const std::string& source,
+                               const std::string& container,
+                               const std::string& target,
+                               const std::string& type,
+                               const uint64_t& flags,
+                               const std::string& data,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> DeclareMountCallback;
+    typedef std::function<void(const std::string& source,
+                               const std::string& container,
+                               const std::string& target,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> DeclareLinkCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
                               )> SetActiveContainerCallback;
@@ -101,6 +121,21 @@ public:
     void setGetContainerInfoCallback(const GetContainerInfoCallback& callback);
 
     /**
+     * Register a callback called to declare file
+     */
+    void setDeclareFileCallback(const DeclareFileCallback& callback);
+
+    /**
+     * Register a callback called to declare mount point
+     */
+    void setDeclareMountCallback(const DeclareMountCallback& callback);
+
+    /**
+     * Register a callback called to declare link
+     */
+    void setDeclareLinkCallback(const DeclareLinkCallback& callback);
+
+    /**
      * Register a callback called to set the active container
      */
     void setSetActiveContainerCallback(const SetActiveContainerCallback& callback);
@@ -136,6 +171,9 @@ private:
     GetContainerIdsCallback mGetContainerIdsCallback;
     GetActiveContainerIdCallback mGetActiveContainerIdCallback;
     GetContainerInfoCallback mGetContainerInfoCallback;
+    DeclareFileCallback mDeclareFileCallback;
+    DeclareMountCallback mDeclareMountCallback;
+    DeclareLinkCallback mDeclareLinkCallback;
     SetActiveContainerCallback mSetActiveContainerCallback;
     CreateContainerCallback mCreateContainerCallback;
     DestroyContainerCallback mDestroyContainerCallback;

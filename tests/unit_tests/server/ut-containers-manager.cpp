@@ -309,6 +309,67 @@ public:
 
     }
 
+    void callMethodDeclareFile(const std::string& container,
+                               const int32_t& type,
+                               const std::string& path,
+                               const int32_t& flags,
+                               const int32_t& mode)
+    {
+        assert(isHost());
+        GVariant* parameters = g_variant_new("(sisii)",
+                                             container.c_str(),
+                                             type,
+                                             path.c_str(),
+                                             flags,
+                                             mode);
+        GVariantPtr result = mClient->callMethod(api::host::BUS_NAME,
+                                                 api::host::OBJECT_PATH,
+                                                 api::host::INTERFACE,
+                                                 api::host::METHOD_DECLARE_FILE,
+                                                 parameters,
+                                                 "()");
+    }
+
+    void callMethodDeclareMount(const std::string& source,
+                                const std::string& container,
+                                const std::string& target,
+                                const std::string& type,
+                                const uint64_t& flags,
+                                const std::string& data)
+    {
+        assert(isHost());
+        GVariant* parameters = g_variant_new("(ssssts)",
+                                             source.c_str(),
+                                             container.c_str(),
+                                             target.c_str(),
+                                             type.c_str(),
+                                             flags,
+                                             data.c_str());
+        GVariantPtr result = mClient->callMethod(api::host::BUS_NAME,
+                                                 api::host::OBJECT_PATH,
+                                                 api::host::INTERFACE,
+                                                 api::host::METHOD_DECLARE_MOUNT,
+                                                 parameters,
+                                                 "()");
+    }
+
+    void callMethodDeclareLink(const std::string& source,
+                               const std::string& container,
+                               const std::string& target)
+    {
+        assert(isHost());
+        GVariant* parameters = g_variant_new("(sss)",
+                                             source.c_str(),
+                                             container.c_str(),
+                                             target.c_str());
+        GVariantPtr result = mClient->callMethod(api::host::BUS_NAME,
+                                                 api::host::OBJECT_PATH,
+                                                 api::host::INTERFACE,
+                                                 api::host::METHOD_DECLARE_LINK,
+                                                 parameters,
+                                                 "()");
+    }
+
     void callAsyncMethodCreateContainer(const std::string& id,
                                         const VoidResultCallback& result)
     {
@@ -985,6 +1046,48 @@ BOOST_AUTO_TEST_CASE(CreateDestroyContainerTest)
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 
     BOOST_CHECK(cm.getRunningForegroundContainerId() == "");
+}
+
+BOOST_AUTO_TEST_CASE(DeclareFile)
+{
+    //TODO Fill after implementing
+    const std::string container = EXPECTED_DBUSES_NO_DBUS.begin()->first;
+
+    ContainersManager cm(TEST_CONFIG_PATH);
+    DbusAccessory dbus(DbusAccessory::HOST_ID);
+    BOOST_CHECK_EXCEPTION(dbus.callMethodDeclareFile(container, 1, "path", 747, 777),
+                          DbusException,
+                          expectedMessage("Not implemented"));
+}
+
+BOOST_AUTO_TEST_CASE(DeclareMount)
+{
+    //TODO Fill after implementing
+    const std::string container = EXPECTED_DBUSES_NO_DBUS.begin()->first;
+
+    ContainersManager cm(TEST_CONFIG_PATH);
+    DbusAccessory dbus(DbusAccessory::HOST_ID);
+    BOOST_CHECK_EXCEPTION(dbus.callMethodDeclareMount("/fake/path1",
+                                                           container,
+                                                           "/fake/path2",
+                                                           "tmpfs",
+                                                           77,
+                                                           "fake"),
+                          DbusException,
+                          expectedMessage("Not implemented"));
+
+}
+
+BOOST_AUTO_TEST_CASE(DeclareLink)
+{
+    //TODO Fill after implementing
+    const std::string container = EXPECTED_DBUSES_NO_DBUS.begin()->first;
+
+    ContainersManager cm(TEST_CONFIG_PATH);
+    DbusAccessory dbus(DbusAccessory::HOST_ID);
+    BOOST_CHECK_EXCEPTION(dbus.callMethodDeclareLink("/fake/path1", container, "/fake/path2"),
+                          DbusException,
+                          expectedMessage("Not implemented"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

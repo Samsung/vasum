@@ -130,6 +130,21 @@ void HostConnection::setGetContainerInfoCallback(const GetContainerInfoCallback&
     mGetContainerInfoCallback = callback;
 }
 
+void HostConnection::setDeclareFileCallback(const DeclareFileCallback& callback)
+{
+    mDeclareFileCallback = callback;
+}
+
+void HostConnection::setDeclareMountCallback(const DeclareMountCallback& callback)
+{
+    mDeclareMountCallback = callback;
+}
+
+void HostConnection::setDeclareLinkCallback(const DeclareLinkCallback& callback)
+{
+    mDeclareLinkCallback = callback;
+}
+
 void HostConnection::setSetActiveContainerCallback(const SetActiveContainerCallback& callback)
 {
     mSetActiveContainerCallback = callback;
@@ -221,6 +236,54 @@ void HostConnection::onMessageCall(const std::string& objectPath,
 
         if (mGetContainerInfoCallback) {
             mGetContainerInfoCallback(id, result);
+        }
+        return;
+    }
+
+    if (methodName == api::host::METHOD_DECLARE_FILE) {
+        const gchar* container;
+        int32_t type;
+        const gchar* path;
+        int32_t flags;
+        int32_t mode;
+        g_variant_get(parameters, "(&si&sii)", &container, &type, &path, &flags, &mode);
+
+        if (mDeclareFileCallback) {
+            mDeclareFileCallback(container, type, path, flags, mode, result);
+        }
+        return;
+    }
+
+    if (methodName == api::host::METHOD_DECLARE_MOUNT) {
+        const gchar* source;
+        const gchar* container;
+        const gchar* target;
+        const gchar* type;
+        uint64_t flags;
+        const gchar* data;
+        g_variant_get(parameters,
+                      "(&s&s&s&st&s)",
+                      &source,
+                      &container,
+                      &target,
+                      &type,
+                      &flags,
+                      &data);
+
+        if (mDeclareMountCallback) {
+            mDeclareMountCallback(source, container, target, type, flags, data, result);
+        }
+        return;
+    }
+
+    if (methodName == api::host::METHOD_DECLARE_LINK) {
+        const gchar* source;
+        const gchar* container;
+        const gchar* target;
+        g_variant_get(parameters, "(&s&s&s)", &source, &container, &target);
+
+        if (mDeclareLinkCallback) {
+            mDeclareLinkCallback(source, container, target, result);
         }
         return;
     }
