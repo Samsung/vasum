@@ -26,6 +26,7 @@
 
 #include "container.hpp"
 #include "base-exception.hpp"
+#include "provisioning-config.hpp"
 
 #include "logger/logger.hpp"
 #include "utils/paths.hpp"
@@ -49,6 +50,18 @@ typedef std::lock_guard<std::recursive_mutex> Lock;
 // TODO: move constants to the config file when default values are implemented there
 const int RECONNECT_RETRIES = 15;
 const int RECONNECT_DELAY = 1 * 1000;
+const std::string CONTAINER_PROVISION_FILE = "provision.conf";
+
+void declareUnit(const std::string& file, ContainerProvisioning::Unit&& unit)
+{
+     // TODO: Add to the dynamic configuration
+    ContainerProvisioning config;
+    if (fs::exists(file)) {
+        config::loadFromFile(file, config);
+    }
+    config.units.push_back(std::move(unit));
+    config::saveToFile(file, config);
+}
 
 } // namespace
 
@@ -71,6 +84,8 @@ Container::Container(const std::string& containersPath,
     }
 
     mAdmin.reset(new ContainerAdmin(containersPath, lxcTemplatePrefix, mConfig));
+    const fs::path baseProvision = fs::path(containersPath) / mAdmin->getId();
+    mProvisionConfig = fs::absolute(CONTAINER_PROVISION_FILE, baseProvision).string();
 }
 
 Container::~Container()
@@ -398,5 +413,36 @@ void Container::proxyCallAsync(const std::string& busName,
     }
 }
 
+void Container::declareFile(const int32_t& type,
+                            const std::string& path,
+                            const int32_t& flags,
+                            const int32_t& mode)
+{
+    ContainerProvisioning::Unit unit;
+    unit.set(std::move(ContainerProvisioning::File({type, path, flags, mode})));
+
+    declareUnit(mProvisionConfig, std::move(unit));
+}
+
+void Container::declareMount(const std::string& source,
+                             const std::string& target,
+                             const std::string& type,
+                             const int64_t& flags,
+                             const std::string& data)
+{
+    ContainerProvisioning::Unit unit;
+    unit.set(std::move(ContainerProvisioning::Mount({source, target, type, flags, data})));
+
+    declareUnit(mProvisionConfig, std::move(unit));
+}
+
+void Container::declareLink(const std::string& source,
+                            const std::string& target)
+{
+    ContainerProvisioning::Unit unit;
+    unit.set(std::move(ContainerProvisioning::Link({source, target})));
+
+    declareUnit(mProvisionConfig, std::move(unit));
+}
 
 } // namespace security_containers

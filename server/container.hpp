@@ -231,6 +231,27 @@ public:
      */
     int getVT() const;
 
+    /**
+     * Declare file, directory or pipe that will be created while container startup
+     */
+    void declareFile(const int32_t& type,
+                     const std::string& path,
+                     const int32_t& flags,
+                     const int32_t& mode);
+    /**
+     * Declare mount that will be created while container startup
+     */
+    void declareMount(const std::string& source,
+                      const std::string& target,
+                      const std::string& type,
+                      const int64_t& flags,
+                      const std::string& data);
+    /**
+     * Declare link that will be created while container startup
+     */
+    void declareLink(const std::string& source,
+                     const std::string& target);
+
 private:
     ContainerConfig mConfig;
     std::vector<boost::regex> mPermittedToSend;
@@ -248,6 +269,7 @@ private:
     DbusStateChangedCallback mDbusStateChangedCallback;
     std::string mDbusAddress;
     std::string mRunMountPoint;
+    std::string mProvisionConfig;
 
     void onNameLostCallback();
     void reconnectHandler();

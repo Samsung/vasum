@@ -582,39 +582,63 @@ void ContainersManager::handleGetContainerInfoCall(const std::string& id,
                               rootfsPath.string().c_str()));
 }
 
-void ContainersManager::handleDeclareFileCall(const std::string& /* container */,
-                                              const int32_t& /* type */,
-                                              const std::string& /* path */,
-                                              const int32_t& /* flags */,
-                                              const int32_t& /* mode */,
+void ContainersManager::handleDeclareFileCall(const std::string& container,
+                                              const int32_t& type,
+                                              const std::string& path,
+                                              const int32_t& flags,
+                                              const int32_t& mode,
                                               dbus::MethodResultBuilder::Pointer result)
 {
     LOGI("DeclareFile call");
-    LOGE("Not implemeted method");
-    result->setError(api::ERROR_INTERNAL, "Not implemented");
+    try {
+        mContainers.at(container)->declareFile(type, path, flags, mode);
+        result->setVoid();
+    } catch (const std::out_of_range& ex) {
+        LOGE("No container with id=" << container);
+        result->setError(api::ERROR_INVALID_ID, "No such container id");
+    } catch (const config::ConfigException& ex) {
+        LOGE("Can't declare file: " << ex.what());
+        result->setError(api::ERROR_INTERNAL, "Internal error");
+    }
 }
 
-void ContainersManager::handleDeclareMountCall(const std::string& /* source */,
-                                               const std::string& /* container */,
-                                               const std::string& /* target */,
-                                               const std::string& /* type */,
-                                               const uint64_t& /* flags */,
-                                               const std::string& /* data */,
+void ContainersManager::handleDeclareMountCall(const std::string& source,
+                                               const std::string& container,
+                                               const std::string& target,
+                                               const std::string& type,
+                                               const uint64_t& flags,
+                                               const std::string& data,
                                                dbus::MethodResultBuilder::Pointer result)
 {
     LOGI("DeclareMount call");
-    LOGE("Not implemeted method");
-    result->setError(api::ERROR_INTERNAL, "Not implemented");
+    try {
+        mContainers.at(container)->declareMount(source, target, type, flags, data);
+        result->setVoid();
+    } catch (const std::out_of_range& ex) {
+        LOGE("No container with id=" << container);
+        result->setError(api::ERROR_INVALID_ID, "No such container id");
+    } catch (const config::ConfigException& ex) {
+        LOGE("Can't declare mount: " << ex.what());
+        result->setError(api::ERROR_INTERNAL, "Internal error");
+    }
 }
 
-void ContainersManager::handleDeclareLinkCall(const std::string& /* source */,
-                                              const std::string& /* container */,
-                                              const std::string& /* target */,
+void ContainersManager::handleDeclareLinkCall(const std::string& source,
+                                              const std::string& container,
+                                              const std::string& target,
                                               dbus::MethodResultBuilder::Pointer result)
 {
     LOGI("DeclareLink call");
-    LOGE("Not implemeted method");
-    result->setError(api::ERROR_INTERNAL, "Not implemented");
+    try {
+        mContainers.at(container)->declareLink(source, target);
+        result->setVoid();
+    } catch (const std::out_of_range& ex) {
+        LOGE("No container with id=" << container);
+        result->setError(api::ERROR_INVALID_ID, "No such container id");
+    } catch (const config::ConfigException& ex) {
+        LOGE("Can't declare link: " << ex.what());
+        result->setError(api::ERROR_INTERNAL, "Internal error");
+    }
 }
 
 void ContainersManager::handleSetActiveContainerCall(const std::string& id,

@@ -27,6 +27,9 @@
 #include "ut.hpp"
 
 #include "containers-manager.hpp"
+#include "containers-manager-config.hpp"
+#include "container-config.hpp"
+#include "provisioning-config.hpp"
 #include "container-dbus-definitions.hpp"
 #include "host-dbus-definitions.hpp"
 #include "test-dbus-definitions.hpp"
@@ -37,6 +40,7 @@
 #include "dbus/connection.hpp"
 #include "dbus/exception.hpp"
 #include "utils/glib-loop.hpp"
+#include "config/manager.hpp"
 #include "config/exception.hpp"
 #include "utils/latch.hpp"
 #include "utils/fs.hpp"
@@ -78,6 +82,7 @@ const std::string FILE_CONTENT = "File content\n"
                                  "Line 2\n";
 const std::string NON_EXISTANT_CONTAINER_ID = "NON_EXISTANT_CONTAINER_ID";
 const std::string CONTAINERS_PATH = "/tmp/ut-containers"; // the same as in daemon.conf
+const std::string PROVISON_CONFIG_FILE = "provision.conf";
 
 class DbusAccessory {
 public:
@@ -471,6 +476,26 @@ struct Fixture {
         , mRunGuard("/tmp/ut-run")
     {}
 };
+
+std::string getProvisionConfigPath(const std::string& container)
+{
+    namespace fs = boost::filesystem;
+    ContainersManagerConfig managerConfig;
+    loadFromFile(TEST_CONFIG_PATH, managerConfig);
+    for (const auto& containersPath : managerConfig.containerConfigs) {
+        ContainerConfig containerConfig;
+        const fs::path configConfigPath = fs::absolute(containersPath,
+                                                       fs::path(TEST_CONFIG_PATH).parent_path());
+
+        loadFromFile(configConfigPath.string(), containerConfig);
+        if (containerConfig.name == container) {
+            const fs::path base = fs::path(managerConfig.containersPath) / fs::path(container);
+            return fs::absolute(PROVISON_CONFIG_FILE, base).string();
+        }
+    }
+    BOOST_FAIL("There is no provision config file for " + container);
+    return std::string();
+}
 
 } // namespace
 
@@ -1070,44 +1095,67 @@ BOOST_AUTO_TEST_CASE(CreateDestroyContainerTest)
 
 BOOST_AUTO_TEST_CASE(DeclareFile)
 {
-    //TODO Fill after implementing
     const std::string container = EXPECTED_DBUSES_NO_DBUS.begin()->first;
+    const std::string provisionConfigPath =  getProvisionConfigPath(container);
 
     ContainersManager cm(TEST_CONFIG_PATH);
     DbusAccessory dbus(DbusAccessory::HOST_ID);
-    BOOST_CHECK_EXCEPTION(dbus.callMethodDeclareFile(container, 1, "path", 747, 777),
-                          DbusException,
-                          expectedMessage("Not implemented"));
+    dbus.callMethodDeclareFile(container, 1, "path", 0747, 0777);
+    dbus.callMethodDeclareFile(container, 2, "path", 0747, 0777);
+
+    ContainerProvisioning config;
+    BOOST_REQUIRE_NO_THROW(loadFromFile(provisionConfigPath, config));
+    BOOST_REQUIRE_EQUAL(config.units.size(), 2);
+    BOOST_REQUIRE(config.units[0].is<ContainerProvisioning::File>());
+    BOOST_REQUIRE(config.units[1].is<ContainerProvisioning::File>());
+    const ContainerProvisioning::File& unit = config.units[0].as<ContainerProvisioning::File>();
+    BOOST_CHECK_EQUAL(unit.type, 1);
+    BOOST_CHECK_EQUAL(unit.path, "path");
+    BOOST_CHECK_EQUAL(unit.flags, 0747);
+    BOOST_CHECK_EQUAL(unit.mode, 0777);
 }
 
 BOOST_AUTO_TEST_CASE(DeclareMount)
 {
-    //TODO Fill after implementing
     const std::string container = EXPECTED_DBUSES_NO_DBUS.begin()->first;
+    const std::string provisionConfigPath =  getProvisionConfigPath(container);
 
     ContainersManager cm(TEST_CONFIG_PATH);
     DbusAccessory dbus(DbusAccessory::HOST_ID);
-    BOOST_CHECK_EXCEPTION(dbus.callMethodDeclareMount("/fake/path1",
-                                                           container,
-                                                           "/fake/path2",
-                                                           "tmpfs",
-                                                           77,
-                                                           "fake"),
-                          DbusException,
-                          expectedMessage("Not implemented"));
+    dbus.callMethodDeclareMount("/fake/path1", container, "/fake/path2", "tmpfs", 077, "fake");
+    dbus.callMethodDeclareMount("/fake/path2", container, "/fake/path2", "tmpfs", 077, "fake");
 
+    ContainerProvisioning config;
+    BOOST_REQUIRE_NO_THROW(loadFromFile(provisionConfigPath, config));
+    BOOST_REQUIRE_EQUAL(config.units.size(), 2);
+    BOOST_REQUIRE(config.units[0].is<ContainerProvisioning::Mount>());
+    BOOST_REQUIRE(config.units[1].is<ContainerProvisioning::Mount>());
+    const ContainerProvisioning::Mount& unit = config.units[0].as<ContainerProvisioning::Mount>();
+    BOOST_CHECK_EQUAL(unit.source, "/fake/path1");
+    BOOST_CHECK_EQUAL(unit.target, "/fake/path2");
+    BOOST_CHECK_EQUAL(unit.type, "tmpfs");
+    BOOST_CHECK_EQUAL(unit.flags, 077);
+    BOOST_CHECK_EQUAL(unit.data, "fake");
 }
 
 BOOST_AUTO_TEST_CASE(DeclareLink)
 {
-    //TODO Fill after implementing
     const std::string container = EXPECTED_DBUSES_NO_DBUS.begin()->first;
+    const std::string provisionConfigPath =  getProvisionConfigPath(container);
 
     ContainersManager cm(TEST_CONFIG_PATH);
     DbusAccessory dbus(DbusAccessory::HOST_ID);
-    BOOST_CHECK_EXCEPTION(dbus.callMethodDeclareLink("/fake/path1", container, "/fake/path2"),
-                          DbusException,
-                          expectedMessage("Not implemented"));
+    dbus.callMethodDeclareLink("/fake/path1", container, "/fake/path2");
+    dbus.callMethodDeclareLink("/fake/path2", container, "/fake/path2");
+
+    ContainerProvisioning config;
+    BOOST_REQUIRE_NO_THROW(loadFromFile(provisionConfigPath, config));
+    BOOST_REQUIRE_EQUAL(config.units.size(), 2);
+    BOOST_REQUIRE(config.units[0].is<ContainerProvisioning::Link>());
+    BOOST_REQUIRE(config.units[1].is<ContainerProvisioning::Link>());
+    const ContainerProvisioning::Link& unit = config.units[0].as<ContainerProvisioning::Link>();
+    BOOST_CHECK_EQUAL(unit.source, "/fake/path1");
+    BOOST_CHECK_EQUAL(unit.target, "/fake/path2");
 }
 
 BOOST_AUTO_TEST_CASE(LockUnlockContainerTest)
