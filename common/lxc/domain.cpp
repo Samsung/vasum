@@ -22,10 +22,22 @@
  * @brief   Lxc domain
  */
 
+// Define macro USE_EXEC if you are goind to use valgrind
+// TODO Consider always using exec to control lxc. Advantages:
+//      - 'ps' output is more descriptive with lxc-start
+//      - lxc library is not tested well with multithread programs
+//        (there are still some issues like using umask etc.)
+//      - it could be possible not to be uid 0 in this process
+//      - fork + unshare does not work with traced process (e.g. under valgrind)
+
 #include "config.hpp"
 #include "logger/logger.hpp"
 #include "lxc/domain.hpp"
 #include "lxc/exception.hpp"
+#ifdef USE_EXEC
+#include "utils/execute.hpp"
+#include "utils/c-array.hpp"
+#endif
 
 #include <lxc/lxccontainer.h>
 #include <sys/stat.h>
@@ -39,17 +51,35 @@ namespace security_containers {
 namespace lxc {
 
 namespace {
+#define ITEM(X) {#X, LxcDomain::State::X},
     const std::map<std::string, LxcDomain::State> STATE_MAP = {
-        {"STOPPED", LxcDomain::State::STOPPED},
-        {"STARTING", LxcDomain::State::STARTING},
-        {"RUNNING", LxcDomain::State::RUNNING},
-        {"STOPPING", LxcDomain::State::STOPPING},
-        {"ABORTING", LxcDomain::State::ABORTING},
-        {"FREEZING", LxcDomain::State::FREEZING},
-        {"FROZEN", LxcDomain::State::FROZEN},
-        {"THAWED", LxcDomain::State::THAWED}
+        ITEM(STOPPED)
+        ITEM(STARTING)
+        ITEM(RUNNING)
+        ITEM(STOPPING)
+        ITEM(ABORTING)
+        ITEM(FREEZING)
+        ITEM(FROZEN)
+        ITEM(THAWED)
     };
+#undef ITEM
 } // namespace
+
+std::string LxcDomain::toString(State state)
+{
+#define CASE(X) case LxcDomain::State::X: return #X;
+    switch (state) {
+    CASE(STOPPED)
+    CASE(STARTING)
+    CASE(RUNNING)
+    CASE(STOPPING)
+    CASE(ABORTING)
+    CASE(FREEZING)
+    CASE(FROZEN)
+    CASE(THAWED)
+    }
+#undef CASE
+}
 
 LxcDomain::LxcDomain(const std::string& lxcPath, const std::string& domainName)
   : mContainer(nullptr)
@@ -76,7 +106,7 @@ std::string LxcDomain::getConfigItem(const std::string& key)
     char buffer[1024];
     int len = mContainer->get_config_item(mContainer, key.c_str(), buffer, sizeof(buffer));
     if (len < 0) {
-        LOGE("Key '" + key + "' not found in domain " + getName());
+        LOGE("Key '" << key << "' not found in domain " << getName());
         throw LxcException("Key not found");
     }
     return buffer;
@@ -95,20 +125,40 @@ LxcDomain::State LxcDomain::getState()
 
 bool LxcDomain::create(const std::string& templatePath, const char* const* argv)
 {
+#ifdef USE_EXEC
+    utils::CStringArrayBuilder args;
+    args.add("lxc-create")
+        .add("-n").add(mContainer->name)
+        .add("-t").add(templatePath.c_str())
+        .add("-P").add(mContainer->config_path);
+
+    while (*argv) {
+        args.add(*argv++);
+    }
+
+    if (!utils::executeAndWait("/usr/bin/lxc-create", args.c_array())) {
+        LOGE("Could not create domain " << getName());
+        return false;
+    }
+
+    refresh();
+    return true;
+#else
     if (!mContainer->create(mContainer,
                             templatePath.c_str(),
                             NULL, NULL, 0,
                             const_cast<char* const*>(argv))) {
-        LOGE("Could not create domain " + getName());
+        LOGE("Could not create domain " << getName());
         return false;
     }
     return true;
+#endif
 }
 
 bool LxcDomain::destroy()
 {
     if (!mContainer->destroy(mContainer)) {
-        LOGE("Could not destroy domain " + getName());
+        LOGE("Could not destroy domain " << getName());
         return false;
     }
     return true;
@@ -116,25 +166,57 @@ bool LxcDomain::destroy()
 
 bool LxcDomain::start(const char* const* argv)
 {
+#ifdef USE_EXEC
     if (mContainer->is_running(mContainer)) {
-        LOGE("Already started " + getName());
+        LOGE("Already started " << getName());
         return false;
     }
-    if (!mContainer->want_daemonize(mContainer, true)) {
-        LOGE("Could not configure domain " + getName());
+
+    utils::CStringArrayBuilder args;
+    args.add("lxc-start")
+        .add("-d")
+        .add("-n").add(mContainer->name)
+        .add("-P").add(mContainer->config_path)
+        .add("--");
+
+    while (*argv) {
+        args.add(*argv++);
+    }
+
+    if (!utils::executeAndWait("/usr/bin/lxc-start", args.c_array())) {
+        LOGE("Could not start domain " << getName());
         return false;
     }
-    if (!mContainer->start(mContainer, false, const_cast<char* const*>(argv))) {
-        LOGE("Could not start domain " + getName());
+
+    refresh();
+
+    // we have to check status because lxc-start runs in daemonized mode
+    if (!mContainer->is_running(mContainer)) {
+        LOGE("Could not start init in domain " << getName());
         return false;
     }
     return true;
+#else
+    if (mContainer->is_running(mContainer)) {
+        LOGE("Already started " << getName());
+        return false;
+    }
+    if (!mContainer->want_daemonize(mContainer, true)) {
+        LOGE("Could not configure domain " << getName());
+        return false;
+    }
+    if (!mContainer->start(mContainer, false, const_cast<char* const*>(argv))) {
+        LOGE("Could not start domain " << getName());
+        return false;
+    }
+    return true;
+#endif
 }
 
 bool LxcDomain::stop()
 {
     if (!mContainer->stop(mContainer)) {
-        LOGE("Could not stop domain " + getName());
+        LOGE("Could not stop domain " << getName());
         return false;
     }
     return true;
@@ -143,7 +225,7 @@ bool LxcDomain::stop()
 bool LxcDomain::reboot()
 {
     if (!mContainer->reboot(mContainer)) {
-        LOGE("Could not reboot domain " + getName());
+        LOGE("Could not reboot domain " << getName());
         return false;
     }
     return true;
@@ -160,10 +242,27 @@ bool LxcDomain::shutdown(int timeout)
         return false;
     }
 
+#ifdef USE_EXEC
+    utils::CStringArrayBuilder args;
+    std::string timeoutStr = std::to_string(timeout);
+    args.add("lxc-stop")
+        .add("-n").add(mContainer->name)
+        .add("-P").add(mContainer->config_path)
+        .add("-t").add(timeoutStr.c_str())
+        .add("--nokill");
+
+    if (!utils::executeAndWait("/usr/bin/lxc-stop", args.c_array())) {
+        LOGE("Could not gracefully shutdown domain " << getName() << " in " << timeout << "s");
+        return false;
+    }
+
+    refresh();
+    return true;
+#else
     // try shutdown by sending poweroff to init
     if (setRunLevel(utils::RUNLEVEL_POWEROFF)) {
-        if (!mContainer->wait(mContainer, "STOPPED", timeout)) {
-            LOGE("Could not gracefully shutdown domain " + getName() + " in " << timeout << "s");
+        if (!waitForState(State::STOPPED, timeout)) {
+            LOGE("Could not gracefully shutdown domain " << getName() << " in " << timeout << "s");
             return false;
         }
         return true;
@@ -172,16 +271,17 @@ bool LxcDomain::shutdown(int timeout)
 
     // fallback for other inits like bash: lxc sends 'lxc.haltsignal' signal to init
     if (!mContainer->shutdown(mContainer, timeout)) {
-        LOGE("Could not gracefully shutdown domain " + getName() + " in " << timeout << "s");
+        LOGE("Could not gracefully shutdown domain " << getName() << " in " << timeout << "s");
         return false;
     }
     return true;
+#endif
 }
 
 bool LxcDomain::freeze()
 {
     if (!mContainer->freeze(mContainer)) {
-        LOGE("Could not freeze domain " + getName());
+        LOGE("Could not freeze domain " << getName());
         return false;
     }
     return true;
@@ -190,7 +290,16 @@ bool LxcDomain::freeze()
 bool LxcDomain::unfreeze()
 {
     if (!mContainer->unfreeze(mContainer)) {
-        LOGE("Could not unfreeze domain " + getName());
+        LOGE("Could not unfreeze domain " << getName());
+        return false;
+    }
+    return true;
+}
+
+bool LxcDomain::waitForState(State state, int timeout)
+{
+    if (!mContainer->wait(mContainer, toString(state).c_str(), timeout)) {
+        LOGD("Timeout while waiting for state " << toString(state) << " of domain " << getName());
         return false;
     }
     return true;
@@ -214,6 +323,15 @@ bool LxcDomain::setRunLevel(int runLevel)
         return false;
     }
     return status == 0;
+}
+
+void LxcDomain::refresh()
+{
+    //TODO Consider make LxcDomain state-less
+    std::string domainName = mContainer->name;
+    std::string lxcPath = mContainer->config_path;
+    lxc_container_put(mContainer);
+    mContainer = lxc_container_new(domainName.c_str(), lxcPath.c_str());
 }
 
 

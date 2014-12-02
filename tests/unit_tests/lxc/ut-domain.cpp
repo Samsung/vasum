@@ -161,7 +161,6 @@ BOOST_AUTO_TEST_CASE(StartHasStoppedTest)
         NULL
     };
     BOOST_CHECK(lxc.start(argv));
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::RUNNING);
     waitForInit();
     BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
 

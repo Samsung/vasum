@@ -50,34 +50,97 @@ public:
         THAWED
     };
 
+    /**
+     * LxcDomain constructor
+     * @param lxcPath path where containers lives
+     * @param domainName name of domain
+     */
     LxcDomain(const std::string& lxcPath, const std::string& domainName);
     ~LxcDomain();
 
     LxcDomain(const LxcDomain&) = delete;
     LxcDomain& operator=(const LxcDomain&) = delete;
 
+    /**
+     * Get domain name
+     */
     std::string getName() const;
 
+    /**
+     * Get item from lxc config file
+     * @throw LxcException if key not found
+     */
     std::string getConfigItem(const std::string& key);
 
+    /**
+     * Is domain defined (created)?
+     */
     bool isDefined();
 
+    /**
+     * String representation of state
+     */
+    static std::string toString(State state);
+
+    /**
+     * Get domain state
+     */
     State getState();
 
+    /**
+     * Wait till domain is in specified state
+     * @return false on timeout
+     */
+    bool waitForState(State state, int timeout);
+
+    /**
+     * Create domain
+     * @param templatePath template from which domain will be created
+     * @param argv additional template arguments
+     */
     bool create(const std::string& templatePath, const char* const* argv);
+
+    /**
+     * Destroy domain
+     */
     bool destroy();
 
+    /**
+     * Start domain
+     * @param argv init process with arguments
+     */
     bool start(const char* const* argv);
+
+    /**
+     * Immediate stop the domain
+     * It kills all processes within this domain
+     */
     bool stop();
+
+    /**
+     * Reboot domain
+     */
     bool reboot();
+
+    /**
+     * Gracefully shutdown domain.
+     */
     bool shutdown(int timeout);
 
+    /**
+     * Freeze (pause/lock) domain
+     */
     bool freeze();
+
+    /**
+     * Unfreeze domain
+     */
     bool unfreeze();
 private:
     lxc_container* mContainer;
 
     bool setRunLevel(int runLevel);
+    void refresh();
 };
 
 

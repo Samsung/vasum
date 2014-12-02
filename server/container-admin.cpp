@@ -29,6 +29,7 @@
 
 #include "logger/logger.hpp"
 #include "utils/paths.hpp"
+#include "utils/c-array.hpp"
 
 #include <cassert>
 
@@ -39,37 +40,6 @@ namespace {
 
 // TODO: this should be in container's configuration file
 const int SHUTDOWN_WAIT = 10;
-
-class Args {
-public:
-    Args(const std::vector<std::string>& args)
-    {
-        mArgs.reserve(args.size() + 1);
-        for (const std::string& arg : args) {
-            mArgs.push_back(arg.c_str());
-        }
-        mArgs.push_back(NULL);
-    }
-    bool empty() const
-    {
-        return mArgs.size() == 1;
-    }
-    const char* const* getAsCArray() const
-    {
-        return mArgs.data();
-    }
-    friend std::ostream& operator<<(std::ostream& os, const Args& a)
-    {
-        for (const char* arg : a.mArgs) {
-            if (arg != NULL) {
-                os << "'" << arg << "' ";
-            }
-        }
-        return os;
-    }
-private:
-    std::vector<const char*> mArgs;
-};
 
 } // namespace
 
@@ -82,7 +52,8 @@ ContainerAdmin::ContainerAdmin(const std::string& containersPath,
     : mConfig(config),
       mDom(containersPath, config.name),
       mId(mDom.getName()),
-      mDetachOnExit(false)
+      mDetachOnExit(false),
+      mDestroyOnExit(false)
 {
     LOGD(mId << ": Instantiating ContainerAdmin object");
 
@@ -91,16 +62,16 @@ ContainerAdmin::ContainerAdmin(const std::string& containersPath,
         const std::string lxcTemplate = utils::getAbsolutePath(config.lxcTemplate,
                                                                lxcTemplatePrefix);
         LOGI(mId << ": Creating domain from template: " << lxcTemplate);
-        std::vector<std::string> args;
+        utils::CStringArrayBuilder args;
         if (!config.ipv4Gateway.empty()) {
-            args.push_back("--ipv4-gateway");
-            args.push_back(config.ipv4Gateway);
+            args.add("--ipv4-gateway");
+            args.add(config.ipv4Gateway.c_str());
         }
         if (!config.ipv4.empty()) {
-            args.push_back("--ipv4");
-            args.push_back(config.ipv4);
+            args.add("--ipv4");
+            args.add(config.ipv4.c_str());
         }
-        if (!mDom.create(lxcTemplate, Args(args).getAsCArray())) {
+        if (!mDom.create(lxcTemplate, args.c_array())) {
             throw ContainerOperationException("Could not create domain");
         }
     }
@@ -145,16 +116,15 @@ void ContainerAdmin::start()
         return;
     }
 
-    const Args args(mConfig.initWithArgs);
-    bool result;
+    utils::CStringArrayBuilder args;
+    for (const std::string& arg : mConfig.initWithArgs) {
+        args.add(arg.c_str());
+    }
     if (args.empty()) {
-        result = mDom.start(NULL);
-    } else {
-        LOGD(mId << ": Init: " << args);
-        result = mDom.start(args.getAsCArray());
+        args.add("/sbin/init");
     }
 
-    if (!result) {
+    if (!mDom.start(args.c_array())) {
         throw ContainerOperationException("Could not start container");
     }
 
