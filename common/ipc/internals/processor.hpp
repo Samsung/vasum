@@ -27,10 +27,10 @@
 
 #include "ipc/internals/socket.hpp"
 #include "ipc/internals/event-queue.hpp"
+#include "ipc/internals/call-queue.hpp"
 #include "ipc/exception.hpp"
 #include "ipc/types.hpp"
 #include "config/manager.hpp"
-#include "config/is-visitable.hpp"
 #include "config/fields.hpp"
 #include "logger/logger.hpp"
 
@@ -70,11 +70,12 @@ const unsigned int DEFAULT_METHOD_TIMEOUT = 1000;
 * TODO:
 *  - some mutexes may not be needed
 *  - synchronous call to many peers
-*  - implement CallQueue class
 *  - implement HandlerStore class for storing both signals and methods
 *  - API for removing signals
 *  - implement CallbackStore - thread safe calling/setting callbacks
 *  - helper function for removing from unordered map
+*  - new way to generate UIDs
+*  - callbacks for serialization/parsing
 */
 class Processor {
 public:
@@ -261,21 +262,6 @@ private:
         )
     };
 
-    struct Call {
-        Call(const Call& other) = delete;
-        Call& operator=(const Call&) = delete;
-        Call() = default;
-        Call(Call&&) = default;
-
-        PeerID peerID;
-        MethodID methodID;
-        std::shared_ptr<void> data;
-        SerializeCallback serialize;
-        ParseCallback parse;
-        ResultHandler<void>::type process;
-        MessageID messageID;
-    };
-
     struct MethodHandlers {
         MethodHandlers(const MethodHandlers& other) = delete;
         MethodHandlers& operator=(const MethodHandlers&) = delete;
@@ -356,7 +342,7 @@ private:
 
     // Mutex for the Calls queue and the map of methods.
     std::mutex mCallsMutex;
-    std::queue<Call> mCalls;
+    CallQueue mCalls;
     std::unordered_map<MethodID, std::shared_ptr<MethodHandlers>> mMethodsCallbacks;
     std::unordered_map<MethodID, std::shared_ptr<SignalHandlers>> mSignalsCallbacks;
     std::unordered_map<MethodID, std::list<PeerID>> mSignalsPeers;
@@ -382,17 +368,11 @@ private:
     std::thread mThread;
     std::vector<struct pollfd> mFDs;
 
-    std::atomic<MessageID> mMessageIDCounter;
     std::atomic<PeerID> mPeerIDCounter;
 
     template<typename SentDataType, typename ReceivedDataType>
     void addMethodHandlerInternal(const MethodID methodID,
                                   const typename MethodHandler<SentDataType, ReceivedDataType>::type& process);
-
-    template<typename SentDataType>
-    MessageID callInternal(const MethodID methodID,
-                           const PeerID peerID,
-                           const std::shared_ptr<SentDataType>& data);
 
     template<typename SentDataType, typename ReceivedDataType>
     MessageID callInternal(const MethodID methodID,
@@ -425,9 +405,8 @@ private:
                         const MessageID messageID,
                         std::shared_ptr<SignalHandlers> signalCallbacks);
     void resetPolling();
-    MessageID getNextMessageID();
     PeerID getNextPeerID();
-    Call getCall();
+    CallQueue::Call getCall();
     void removePeerInternal(const PeerID peerID, Status status);
 
     std::shared_ptr<EmptyData> onNewSignals(const PeerID peerID,
@@ -547,34 +526,11 @@ MessageID Processor::callInternal(const MethodID methodID,
                                   const std::shared_ptr<SentDataType>& data,
                                   const typename ResultHandler<ReceivedDataType>::type& process)
 {
-    Call call;
-    call.peerID = peerID;
-    call.methodID = methodID;
-    call.data = data;
-    call.messageID = getNextMessageID();
+    Lock lock(mCallsMutex);
+    MessageID messageID = mCalls.push<SentDataType, ReceivedDataType>(methodID, peerID, data, process);
+    mEventQueue.send(Event::CALL);
 
-    call.serialize = [](const int fd, std::shared_ptr<void>& data)->void {
-        config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
-    };
-
-    call.parse = [](const int fd)->std::shared_ptr<void> {
-        std::shared_ptr<ReceivedDataType> data(new ReceivedDataType());
-        config::loadFromFD<ReceivedDataType>(fd, *data);
-        return data;
-    };
-
-    call.process = [process](Status status, std::shared_ptr<void>& data)->void {
-        std::shared_ptr<ReceivedDataType> tmpData = std::static_pointer_cast<ReceivedDataType>(data);
-        return process(status, tmpData);
-    };
-
-    {
-        Lock lock(mCallsMutex);
-        mCalls.push(std::move(call));
-        mEventQueue.send(Event::CALL);
-    }
-
-    return call.messageID;
+    return messageID;
 }
 
 template<typename SentDataType, typename ReceivedDataType>
@@ -660,23 +616,12 @@ void Processor::signal(const MethodID methodID,
     }
 
     for (const PeerID peerID : peersIDs) {
-        Call call;
-        call.peerID = peerID;
-        call.methodID = methodID;
-        call.data = data;
-        call.messageID = getNextMessageID();
-
-        call.serialize = [](const int fd, std::shared_ptr<void>& data)->void {
-            config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
-        };
-
-        {
-            Lock lock(mCallsMutex);
-            mCalls.push(std::move(call));
-            mEventQueue.send(Event::CALL);
-        }
+        Lock lock(mCallsMutex);
+        mCalls.push<SentDataType>(methodID, peerID, data);
+        mEventQueue.send(Event::CALL);
     }
 }
+
 
 } // namespace ipc
 } // namespace security_containers

@@ -56,7 +56,6 @@ Processor::Processor(const PeerCallback& newPeerCallback,
     : mNewPeerCallback(newPeerCallback),
       mRemovedPeerCallback(removedPeerCallback),
       mMaxNumberOfPeers(maxNumberOfPeers),
-      mMessageIDCounter(0),
       mPeerIDCounter(0)
 {
     LOGT("Creating Processor");
@@ -579,34 +578,22 @@ bool Processor::onRemovePeer()
     return true;
 }
 
-MessageID Processor::getNextMessageID()
-{
-    // TODO: This method of generating UIDs is buggy. To be changed.
-    return ++mMessageIDCounter;
-}
-
 PeerID Processor::getNextPeerID()
 {
     // TODO: This method of generating UIDs is buggy. To be changed.
     return ++mPeerIDCounter;
 }
 
-Processor::Call Processor::getCall()
+CallQueue::Call Processor::getCall()
 {
     Lock lock(mCallsMutex);
-    if (mCalls.empty()) {
-        LOGE("Calls queue empty");
-        throw IPCException("Calls queue empty");
-    }
-    Call call = std::move(mCalls.front());
-    mCalls.pop();
-    return call;
+    return mCalls.pop();
 }
 
 bool Processor::onCall()
 {
     LOGT("Handle call (from another thread) to send a message.");
-    Call call = getCall();
+    CallQueue::Call call = getCall();
 
     std::shared_ptr<Socket> socketPtr;
     try {
@@ -664,7 +651,7 @@ void Processor::cleanCommunication()
         }
         case Event::CALL: {
             LOGD("Event CALL after FINISH");
-            Call call = getCall();
+            CallQueue::Call call = getCall();
             if (call.process) {
                 IGNORE_EXCEPTIONS(call.process(Status::CLOSING, call.data));
             }
