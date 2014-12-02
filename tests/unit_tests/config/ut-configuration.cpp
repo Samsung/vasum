@@ -382,8 +382,17 @@ BOOST_AUTO_TEST_CASE(ConfigUnion)
     BOOST_CHECK_EQUAL(subConfig.intVal, 54321);
     BOOST_CHECK(testConfig.unions[0].is<int>());
     BOOST_CHECK(testConfig.unions[1].is<TestConfig::SubConfig>());
-
     std::string out = saveToString(testConfig);
+    BOOST_CHECK_EQUAL(out, jsonTestString);
+
+    //Check move and copy
+    std::vector<TestConfig::SubConfigOption> unions(2);
+    unions[0].set<int>(2);
+    unions[1].set(std::move(testConfig.unions[1].as<TestConfig::SubConfig>()));
+    BOOST_CHECK(testConfig.unions[1].as<TestConfig::SubConfig>().intVector.empty());
+    testConfig.unions.clear();
+    testConfig.unions = unions;
+    out = saveToString(testConfig);
     BOOST_CHECK_EQUAL(out, jsonTestString);
 }
 
