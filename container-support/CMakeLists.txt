@@ -23,8 +23,8 @@ MESSAGE(STATUS "Generating makefile for the Container Support...")
 
 ## Install #####################################################################
 
-CONFIGURE_FILE(configs/org.tizen.containers.domain.conf.in
-               ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.containers.domain.conf)
+CONFIGURE_FILE(configs/org.tizen.containers.zone.conf.in
+               ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.containers.zone.conf)
 
-INSTALL(FILES       ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.containers.domain.conf
+INSTALL(FILES       ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.containers.zone.conf
         DESTINATION /etc/dbus-1/system.d/)

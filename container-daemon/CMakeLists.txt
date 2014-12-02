@@ -42,8 +42,8 @@ TARGET_LINK_LIBRARIES(${CONTAINER_DAEMON_CODENAME} ${CONTAINER_DAEMON_DEPS_LIBRA
 ## Install #####################################################################
 INSTALL(TARGETS ${CONTAINER_DAEMON_CODENAME} DESTINATION bin)
 
-CONFIGURE_FILE(configs/org.tizen.containers.domain.daemon.conf.in
-               ${CMAKE_BINARY_DIR}/configs/org.tizen.containers.domain.daemon.conf)
+CONFIGURE_FILE(configs/org.tizen.containers.zone.daemon.conf.in
+               ${CMAKE_BINARY_DIR}/configs/org.tizen.containers.zone.daemon.conf)
 
-INSTALL(FILES       ${CMAKE_BINARY_DIR}/configs/org.tizen.containers.domain.daemon.conf
+INSTALL(FILES       ${CMAKE_BINARY_DIR}/configs/org.tizen.containers.zone.daemon.conf
         DESTINATION /etc/dbus-1/system.d/)

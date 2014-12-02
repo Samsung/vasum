@@ -81,7 +81,7 @@ finish:
     }
 }
 
-ostream& operator<<(ostream& out, const VsmDomainState& state)
+ostream& operator<<(ostream& out, const VsmZoneState& state)
 {
     const char* name;
     switch (state) {
@@ -103,12 +103,12 @@ ostream& operator<<(ostream& out, const VsmDomainState& state)
     return out;
 }
 
-ostream& operator<<(ostream& out, const VsmDomain& domain)
+ostream& operator<<(ostream& out, const VsmZone& zone)
 {
-    out << "Name: " << domain->id
-        << "\nTerminal: " << domain->terminal
-        << "\nState: " << domain->state
-        << "\nRoot: " << domain->rootfs_path;
+    out << "Name: " << zone->id
+        << "\nTerminal: " << zone->terminal
+        << "\nState: " << zone->state
+        << "\nRoot: " << zone->rootfs_path;
     return out;
 }
 
@@ -143,7 +143,7 @@ void set_active_container(int pos, int argc, const char** argv)
     one_shot(bind(vsm_set_active_container, _1, argv[pos + 1]));
 }
 
-void create_domain(int pos, int argc, const char** argv)
+void create_zone(int pos, int argc, const char** argv)
 {
     using namespace std::placeholders;
 
@@ -151,10 +151,10 @@ void create_domain(int pos, int argc, const char** argv)
         throw runtime_error("Not enough parameters");
     }
 
-    one_shot(bind(vsm_create_domain, _1, argv[pos + 1], nullptr));
+    one_shot(bind(vsm_create_zone, _1, argv[pos + 1], nullptr));
 }
 
-void destroy_domain(int pos, int argc, const char** argv)
+void destroy_zone(int pos, int argc, const char** argv)
 {
     using namespace std::placeholders;
 
@@ -162,10 +162,10 @@ void destroy_domain(int pos, int argc, const char** argv)
         throw runtime_error("Not enough parameters");
     }
 
-    one_shot(bind(vsm_destroy_domain, _1, argv[pos + 1], 1));
+    one_shot(bind(vsm_destroy_zone, _1, argv[pos + 1], 1));
 }
 
-void lock_domain(int pos, int argc, const char** argv)
+void lock_zone(int pos, int argc, const char** argv)
 {
     using namespace std::placeholders;
 
@@ -173,10 +173,10 @@ void lock_domain(int pos, int argc, const char** argv)
         throw runtime_error("Not enough parameters");
     }
 
-    one_shot(bind(vsm_lock_domain, _1, argv[pos + 1]));
+    one_shot(bind(vsm_lock_zone, _1, argv[pos + 1]));
 }
 
-void unlock_domain(int pos, int argc, const char** argv)
+void unlock_zone(int pos, int argc, const char** argv)
 {
     using namespace std::placeholders;
 
@@ -184,20 +184,20 @@ void unlock_domain(int pos, int argc, const char** argv)
         throw runtime_error("Not enough parameters");
     }
 
-    one_shot(bind(vsm_unlock_domain, _1, argv[pos + 1]));
+    one_shot(bind(vsm_unlock_zone, _1, argv[pos + 1]));
 }
 
-void lookup_domain_by_id(int pos, int argc, const char** argv)
+void lookup_zone_by_id(int pos, int argc, const char** argv)
 {
     using namespace std::placeholders;
     if (argc <= pos + 1) {
         throw runtime_error("Not enough parameters");
     }
 
-    VsmDomain domain;
-    one_shot(bind(vsm_lookup_domain_by_id, _1, argv[pos + 1], &domain));
-    cout << domain << endl;
-    vsm_domain_free(domain);
+    VsmZone zone;
+    one_shot(bind(vsm_lookup_zone_by_id, _1, argv[pos + 1], &zone));
+    cout << zone << endl;
+    vsm_zone_free(zone);
 }
 
 } // namespace cli

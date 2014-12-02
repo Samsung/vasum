@@ -54,7 +54,7 @@ int main(int argc, char** argv)
         goto finish;
     }
 
-    status = vsm_get_domain_ids(client, &values);
+    status = vsm_get_zone_ids(client, &values);
     if (VSMCLIENT_SUCCESS != status) {
         // error!
         ret = 1;
@@ -123,7 +123,7 @@ typedef enum {
 typedef unsigned int VsmSubscriptionId;
 
 /**
- * States of domain
+ * States of zone
  */
 typedef enum {
     STOPPED,
@@ -137,22 +137,22 @@ typedef enum {
     LOCKED,
     MAX_STATE,
     ACTIVATING = 128
-} VsmDomainState;
+} VsmZoneState;
 
 /**
- * Domain information structure
+ * Zone information structure
  */
 typedef struct {
     char* id;
     int terminal;
-    VsmDomainState state;
+    VsmZoneState state;
     char *rootfs_path;
-} VsmDomainStructure;
+} VsmZoneStructure;
 
 /**
- * Domain information
+ * Zone information
  */
-typedef VsmDomainStructure* VsmDomain;
+typedef VsmZoneStructure* VsmZone;
 
 /**
  * Netowrk device type
@@ -266,11 +266,11 @@ void vsm_array_string_free(VsmArrayString astring);
 void vsm_string_free(VsmString string);
 
 /**
- * Release VsmDomain
+ * Release VsmZone
  *
- * @param domain VsmDomain
+ * @param zone VsmZone
  */
-void vsm_domain_free(VsmDomain domain);
+void vsm_zone_free(VsmZone zone);
 
 /**
  * Release VsmNetdev
@@ -318,7 +318,7 @@ VsmStatus vsm_get_container_dbuses(VsmClient client, VsmArrayString* keys, VsmAr
  * @return status of this function call
  * @remark Use vsm_array_string_free() to free memory occupied by @p array.
  */
-VsmStatus vsm_get_domain_ids(VsmClient client, VsmArrayString* array);
+VsmStatus vsm_get_zone_ids(VsmClient client, VsmArrayString* array);
 
 /**
  * Get active (foreground) container name.
@@ -339,29 +339,29 @@ VsmStatus vsm_get_active_container_id(VsmClient client, VsmString* id);
  * @return status of this function call
  * @remark Use @p vsm_string_free() to free memory occupied by @p id.
  */
-VsmStatus vsm_lookup_domain_by_pid(VsmClient client, int pid, VsmString* id);
+VsmStatus vsm_lookup_zone_by_pid(VsmClient client, int pid, VsmString* id);
 
 /**
- * Get domain informations of domain with given id.
+ * Get zone informations of zone with given id.
  *
  * @param[in] client security-containers-server's client
- * @param[in] id domain name
- * @param[out] domain domain informations
+ * @param[in] id zone name
+ * @param[out] zone zone informations
  * @return status of this function call
- * @remark Use @p vsm_domain_free() to free memory occupied by @p domain
+ * @remark Use @p vsm_zone_free() to free memory occupied by @p zone
  */
-VsmStatus vsm_lookup_domain_by_id(VsmClient client, const char* id, VsmDomain* domain);
+VsmStatus vsm_lookup_zone_by_id(VsmClient client, const char* id, VsmZone* zone);
 
 /**
- * Get domain name with given terminal.
+ * Get zone name with given terminal.
  *
  * @param[in] client security-containers-server's client
  * @param[in] terminal terminal id
- * @param[out] id domain name with given terminal
+ * @param[out] id zone name with given terminal
  * @return status of this function call
  * @remark Use @p vsm_string_free() to free memory occupied by @p id.
  */
-VsmStatus vsm_lookup_domain_by_terminal_id(VsmClient client, int terminal, VsmString* id);
+VsmStatus vsm_lookup_zone_by_terminal_id(VsmClient client, int terminal, VsmString* id);
 
 /**
  * Set active (foreground) container.
@@ -380,53 +380,53 @@ VsmStatus vsm_set_active_container(VsmClient client, const char* id);
  * @param[in] tname template name, NULL for default
  * @return status of this function call
  */
-VsmStatus vsm_create_domain(VsmClient client, const char* id, const char* tname);
+VsmStatus vsm_create_zone(VsmClient client, const char* id, const char* tname);
 
 /**
- * Remove domain
+ * Remove zone
  *
  * @param[in] client security-containers-server's client
  * @param[in] id container id
  * @param[in] force if 0 data will be kept, otherwise data will be lost
  * @return status of this function call
  */
-VsmStatus vsm_destroy_domain(VsmClient clent, const char* id, int force);
+VsmStatus vsm_destroy_zone(VsmClient clent, const char* id, int force);
 
 /**
- * Shutdown domain
+ * Shutdown zone
  *
  * @param[in] client security-containers-server's client
- * @param[in] id domain name
+ * @param[in] id zone name
  * @return status of this function call
  */
-VsmStatus vsm_shutdown_domain(VsmClient client, const char* id);
+VsmStatus vsm_shutdown_zone(VsmClient client, const char* id);
 
 /**
- * Start domain
+ * Start zone
  *
  * @param[in] client security-containers-server's client
- * @param[in] id domain name
+ * @param[in] id zone name
  * @return status of this function call
  */
-VsmStatus vsm_start_domain(VsmClient client, const char* id);
+VsmStatus vsm_start_zone(VsmClient client, const char* id);
 
 /**
- * Lock domain
+ * Lock zone
  *
  * @param[in] client security-containers-server's client
- * @param[in] id domain name
+ * @param[in] id zone name
  * @return status of this function call
  */
-VsmStatus vsm_lock_domain(VsmClient client, const char* id);
+VsmStatus vsm_lock_zone(VsmClient client, const char* id);
 
 /**
- * Unlock domain
+ * Unlock zone
  *
  * @param[in] client security-containers-server's client
- * @param[in] id domain name
+ * @param[in] id zone name
  * @return status of this function call
  */
-VsmStatus vsm_unlock_domain(VsmClient client, const char* id);
+VsmStatus vsm_unlock_zone(VsmClient client, const char* id);
 
 /**
  * Register dbus state change callback function.
@@ -458,13 +458,13 @@ VsmStatus vsm_del_state_callback(VsmClient client, VsmSubscriptionId subscriptio
  * Grant access to device
  *
  * @param[in] client security-containers-server's client
- * @param[in] domain domain name
+ * @param[in] zone zone name
  * @param[in] device device path
  * @param[in] flags access flags
  * @return status of this function call
  */
-VsmStatus vsm_domain_grant_device(VsmClient client,
-                                  const char* domain,
+VsmStatus vsm_zone_grant_device(VsmClient client,
+                                  const char* zone,
                                   const char* device,
                                   uint32_t flags);
 
@@ -472,34 +472,34 @@ VsmStatus vsm_domain_grant_device(VsmClient client,
  * Revoke access to device
  *
  * @param[in] client security-containers-server's client
- * @param[in] domain domain name
+ * @param[in] zone zone name
  * @param[in] device device path
  * @return status of this function call
  */
-VsmStatus vsm_revoke_device(VsmClient client, const char* domain, const char* device);
+VsmStatus vsm_revoke_device(VsmClient client, const char* zone, const char* device);
 
 /**
- * Get array of netdev from given domain
+ * Get array of netdev from given zone
  *
  * @param[in] client security-containers-server's client
- * @param[in] domain domain name
+ * @param[in] zone zone name
  * @param[out] netdevIds array of netdev id
  * @return status of this function call
  * @remark Use vsm_array_string_free() to free memory occupied by @p netdevIds.
  */
-VsmStatus vsm_domain_get_netdevs(VsmClient client, const char* domain, VsmArrayString* netdevIds);
+VsmStatus vsm_zone_get_netdevs(VsmClient client, const char* zone, VsmArrayString* netdevIds);
 
 /**
  * Get ipv4 address for given netdevId
  *
  * @param[in] client security-containers-server's client
- * @param[in] domain domain name
+ * @param[in] zone zone name
  * @param[in] netdevId netdev id
  * @param[out] addr ipv4 address
  * @return status of this function call
  */
 VsmStatus vsm_netdev_get_ipv4_addr(VsmClient client,
-                                   const char* domain,
+                                   const char* zone,
                                    const char* netdevId,
                                    struct in_addr *addr);
 
@@ -507,13 +507,13 @@ VsmStatus vsm_netdev_get_ipv4_addr(VsmClient client,
  * Get ipv6 address for given netdevId
  *
  * @param[in] client security-containers-server's client
- * @param[in] domain domain name
+ * @param[in] zone zone name
  * @param[in] netdevId netdev id
  * @param[out] addr ipv6 address
  * @return status of this function call
  */
 VsmStatus vsm_netdev_get_ipv6_addr(VsmClient client,
-                                   const char* domain,
+                                   const char* zone,
                                    const char* netdevId,
                                    struct in6_addr *addr);
 
@@ -521,14 +521,14 @@ VsmStatus vsm_netdev_get_ipv6_addr(VsmClient client,
  * Set ipv4 address for given netdevId
  *
  * @param[in] client security-containers-server's client
- * @param[in] domain domain name
+ * @param[in] zone zone name
  * @param[in] netdevId netdev id
  * @param[in] addr ipv4 address
  * @param[in] prefix bit-length of the network prefix
  * @return status of this function call
  */
 VsmStatus vsm_netdev_set_ipv4_addr(VsmClient client,
-                                   const char* domain,
+                                   const char* zone,
                                    const char* netdevId,
                                    struct in_addr *addr,
                                    int prefix);
@@ -537,56 +537,56 @@ VsmStatus vsm_netdev_set_ipv4_addr(VsmClient client,
  * Set ipv6 address for given netdevId
  *
  * @param[in] client security-containers-server's client
- * @param[in] domain domain name
+ * @param[in] zone zone name
  * @param[in] netdevId netdev id
  * @param[in] addr ipv6 address
  * @param[in] prefix bit-length of the network prefix
  * @return status of this function call
  */
 VsmStatus vsm_netdev_set_ipv6_addr(VsmClient client,
-                                   const char* domain,
+                                   const char* zone,
                                    const char* netdevId,
                                    struct in6_addr *addr,
                                    int prefix);
 
 /**
- * Create netdev in domain
+ * Create netdev in zone
  *
  * @param[in] client security-containers-server's client
- * @param[in] domain domain name
+ * @param[in] zone zone name
  * @param[in] netdevType netdev type
- * @param[in] target TODO: this is taken form domain-control
+ * @param[in] target TODO: this is taken form zone-control
  * @param[in] netdevId network device id
  * @return status of this function call
  */
 VsmStatus vsm_create_netdev(VsmClient client,
-                            const char* domain,
+                            const char* zone,
                             VsmNetdevType netdevType,
                             const char* target,
                             const char* netdevId);
 
 /**
- * Remove netdev from domain
+ * Remove netdev from zone
  *
  * @param[in] client security-containers-server's client
- * @param[in] domain domain name
+ * @param[in] zone zone name
  * @param[in] netdevId network device id
  * @return status of this function call
  */
-VsmStatus vsm_destroy_netdev(VsmClient client, const char* domain, const char* netdevId);
+VsmStatus vsm_destroy_netdev(VsmClient client, const char* zone, const char* netdevId);
 
 /**
  * Get netdev informations
  *
  * @param[in] client security-containers-server's client
- * @param[in] domain domain name
+ * @param[in] zone zone name
  * @param[in] netdevId network device id
  * @param[out] netdev netdev informations
  * @return status of this function call
  * @remark Use vsm_netdev_free() to free memory occupied by @p netdev.
  */
 VsmStatus vsm_lookup_netdev_by_name(VsmClient client,
-                                    const char* domain,
+                                    const char* zone,
                                     const char* netdevId,
                                     VsmNetdev* netdev);
 
@@ -657,9 +657,9 @@ VsmStatus vsm_declare_link(VsmClient client,
 
 
 /**
- * @name Domain API
+ * @name Zone API
  *
- * Functions using org.tizen.containers.domain.manager D-Bus interface.
+ * Functions using org.tizen.containers.zone.manager D-Bus interface.
  *
  * @{
  */
@@ -722,7 +722,7 @@ VsmStatus vsm_add_notification_callback(VsmClient client,
  */
 VsmStatus vsm_del_notification_callback(VsmClient client, VsmSubscriptionId subscriptionId);
 
-/** @} */ // Domain API
+/** @} */ // Zone API
 
 #ifdef __cplusplus
 }

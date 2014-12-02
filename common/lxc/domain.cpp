@@ -19,7 +19,7 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Lxc domain
+ * @brief   Lxc zone
  */
 
 // Define macro USE_EXEC if you are goind to use valgrind
@@ -51,8 +51,8 @@ namespace security_containers {
 namespace lxc {
 
 namespace {
-#define ITEM(X) {#X, LxcDomain::State::X},
-    const std::map<std::string, LxcDomain::State> STATE_MAP = {
+#define ITEM(X) {#X, LxcZone::State::X},
+    const std::map<std::string, LxcZone::State> STATE_MAP = {
         ITEM(STOPPED)
         ITEM(STARTING)
         ITEM(RUNNING)
@@ -65,9 +65,9 @@ namespace {
 #undef ITEM
 } // namespace
 
-std::string LxcDomain::toString(State state)
+std::string LxcZone::toString(State state)
 {
-#define CASE(X) case LxcDomain::State::X: return #X;
+#define CASE(X) case LxcZone::State::X: return #X;
     switch (state) {
     CASE(STOPPED)
     CASE(STARTING)
@@ -82,49 +82,49 @@ std::string LxcDomain::toString(State state)
     throw LxcException("Invalid state");
 }
 
-LxcDomain::LxcDomain(const std::string& lxcPath, const std::string& domainName)
+LxcZone::LxcZone(const std::string& lxcPath, const std::string& zoneName)
   : mContainer(nullptr)
 {
-    mContainer = lxc_container_new(domainName.c_str(), lxcPath.c_str());
+    mContainer = lxc_container_new(zoneName.c_str(), lxcPath.c_str());
     if (!mContainer) {
-        LOGE("Could not initialize lxc domain " << domainName << " in path " << lxcPath);
-        throw LxcException("Could not initialize lxc domain");
+        LOGE("Could not initialize lxc zone " << zoneName << " in path " << lxcPath);
+        throw LxcException("Could not initialize lxc zone");
     }
 }
 
-LxcDomain::~LxcDomain()
+LxcZone::~LxcZone()
 {
     lxc_container_put(mContainer);
 }
 
-std::string LxcDomain::getName() const
+std::string LxcZone::getName() const
 {
     return mContainer->name;
 }
 
-std::string LxcDomain::getConfigItem(const std::string& key)
+std::string LxcZone::getConfigItem(const std::string& key)
 {
     char buffer[1024];
     int len = mContainer->get_config_item(mContainer, key.c_str(), buffer, sizeof(buffer));
     if (len < 0) {
-        LOGE("Key '" << key << "' not found in domain " << getName());
+        LOGE("Key '" << key << "' not found in zone " << getName());
         throw LxcException("Key not found");
     }
     return buffer;
 }
 
-bool LxcDomain::isDefined()
+bool LxcZone::isDefined()
 {
     return mContainer->is_defined(mContainer);
 }
 
-LxcDomain::State LxcDomain::getState()
+LxcZone::State LxcZone::getState()
 {
     const std::string str = mContainer->state(mContainer);
     return STATE_MAP.at(str);
 }
 
-bool LxcDomain::create(const std::string& templatePath, const char* const* argv)
+bool LxcZone::create(const std::string& templatePath, const char* const* argv)
 {
 #ifdef USE_EXEC
     utils::CStringArrayBuilder args;
@@ -138,7 +138,7 @@ bool LxcDomain::create(const std::string& templatePath, const char* const* argv)
     }
 
     if (!utils::executeAndWait("/usr/bin/lxc-create", args.c_array())) {
-        LOGE("Could not create domain " << getName());
+        LOGE("Could not create zone " << getName());
         return false;
     }
 
@@ -149,23 +149,23 @@ bool LxcDomain::create(const std::string& templatePath, const char* const* argv)
                             templatePath.c_str(),
                             NULL, NULL, 0,
                             const_cast<char* const*>(argv))) {
-        LOGE("Could not create domain " << getName());
+        LOGE("Could not create zone " << getName());
         return false;
     }
     return true;
 #endif
 }
 
-bool LxcDomain::destroy()
+bool LxcZone::destroy()
 {
     if (!mContainer->destroy(mContainer)) {
-        LOGE("Could not destroy domain " << getName());
+        LOGE("Could not destroy zone " << getName());
         return false;
     }
     return true;
 }
 
-bool LxcDomain::start(const char* const* argv)
+bool LxcZone::start(const char* const* argv)
 {
 #ifdef USE_EXEC
     if (mContainer->is_running(mContainer)) {
@@ -185,7 +185,7 @@ bool LxcDomain::start(const char* const* argv)
     }
 
     if (!utils::executeAndWait("/usr/bin/lxc-start", args.c_array())) {
-        LOGE("Could not start domain " << getName());
+        LOGE("Could not start zone " << getName());
         return false;
     }
 
@@ -193,7 +193,7 @@ bool LxcDomain::start(const char* const* argv)
 
     // we have to check status because lxc-start runs in daemonized mode
     if (!mContainer->is_running(mContainer)) {
-        LOGE("Could not start init in domain " << getName());
+        LOGE("Could not start init in zone " << getName());
         return false;
     }
     return true;
@@ -203,43 +203,43 @@ bool LxcDomain::start(const char* const* argv)
         return false;
     }
     if (!mContainer->want_daemonize(mContainer, true)) {
-        LOGE("Could not configure domain " << getName());
+        LOGE("Could not configure zone " << getName());
         return false;
     }
     if (!mContainer->start(mContainer, false, const_cast<char* const*>(argv))) {
-        LOGE("Could not start domain " << getName());
+        LOGE("Could not start zone " << getName());
         return false;
     }
     return true;
 #endif
 }
 
-bool LxcDomain::stop()
+bool LxcZone::stop()
 {
     if (!mContainer->stop(mContainer)) {
-        LOGE("Could not stop domain " << getName());
+        LOGE("Could not stop zone " << getName());
         return false;
     }
     return true;
 }
 
-bool LxcDomain::reboot()
+bool LxcZone::reboot()
 {
     if (!mContainer->reboot(mContainer)) {
-        LOGE("Could not reboot domain " << getName());
+        LOGE("Could not reboot zone " << getName());
         return false;
     }
     return true;
 }
 
-bool LxcDomain::shutdown(int timeout)
+bool LxcZone::shutdown(int timeout)
 {
     State state = getState();
     if (state == State::STOPPED) {
         return true;
     }
     if (state != State::RUNNING) {
-        LOGE("Could not gracefully shutdown domain " << getName());
+        LOGE("Could not gracefully shutdown zone " << getName());
         return false;
     }
 
@@ -253,7 +253,7 @@ bool LxcDomain::shutdown(int timeout)
         .add("--nokill");
 
     if (!utils::executeAndWait("/usr/bin/lxc-stop", args.c_array())) {
-        LOGE("Could not gracefully shutdown domain " << getName() << " in " << timeout << "s");
+        LOGE("Could not gracefully shutdown zone " << getName() << " in " << timeout << "s");
         return false;
     }
 
@@ -263,50 +263,50 @@ bool LxcDomain::shutdown(int timeout)
     // try shutdown by sending poweroff to init
     if (setRunLevel(utils::RUNLEVEL_POWEROFF)) {
         if (!waitForState(State::STOPPED, timeout)) {
-            LOGE("Could not gracefully shutdown domain " << getName() << " in " << timeout << "s");
+            LOGE("Could not gracefully shutdown zone " << getName() << " in " << timeout << "s");
             return false;
         }
         return true;
     }
-    LOGW("SetRunLevel failed for domain " + getName());
+    LOGW("SetRunLevel failed for zone " + getName());
 
     // fallback for other inits like bash: lxc sends 'lxc.haltsignal' signal to init
     if (!mContainer->shutdown(mContainer, timeout)) {
-        LOGE("Could not gracefully shutdown domain " << getName() << " in " << timeout << "s");
+        LOGE("Could not gracefully shutdown zone " << getName() << " in " << timeout << "s");
         return false;
     }
     return true;
 #endif
 }
 
-bool LxcDomain::freeze()
+bool LxcZone::freeze()
 {
     if (!mContainer->freeze(mContainer)) {
-        LOGE("Could not freeze domain " << getName());
+        LOGE("Could not freeze zone " << getName());
         return false;
     }
     return true;
 }
 
-bool LxcDomain::unfreeze()
+bool LxcZone::unfreeze()
 {
     if (!mContainer->unfreeze(mContainer)) {
-        LOGE("Could not unfreeze domain " << getName());
+        LOGE("Could not unfreeze zone " << getName());
         return false;
     }
     return true;
 }
 
-bool LxcDomain::waitForState(State state, int timeout)
+bool LxcZone::waitForState(State state, int timeout)
 {
     if (!mContainer->wait(mContainer, toString(state).c_str(), timeout)) {
-        LOGD("Timeout while waiting for state " << toString(state) << " of domain " << getName());
+        LOGD("Timeout while waiting for state " << toString(state) << " of zone " << getName());
         return false;
     }
     return true;
 }
 
-bool LxcDomain::setRunLevel(int runLevel)
+bool LxcZone::setRunLevel(int runLevel)
 {
     auto callback = [](void* param) -> int {
         utils::RunLevel runLevel = *reinterpret_cast<utils::RunLevel*>(param);
@@ -326,13 +326,13 @@ bool LxcDomain::setRunLevel(int runLevel)
     return status == 0;
 }
 
-void LxcDomain::refresh()
+void LxcZone::refresh()
 {
-    //TODO Consider make LxcDomain state-less
-    std::string domainName = mContainer->name;
+    //TODO Consider make LxcZone state-less
+    std::string zoneName = mContainer->name;
     std::string lxcPath = mContainer->config_path;
     lxc_container_put(mContainer);
-    mContainer = lxc_container_new(domainName.c_str(), lxcPath.c_str());
+    mContainer = lxc_container_new(zoneName.c_str(), lxcPath.c_str());
 }
 
 

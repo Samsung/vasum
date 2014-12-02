@@ -32,9 +32,9 @@ namespace security_containers {
 namespace container_daemon {
 namespace api {
 
-const std::string BUS_NAME            = "org.tizen.containers.domain.daemon";
-const std::string OBJECT_PATH         = "/org/tizen/containers/domain/daemon";
-const std::string INTERFACE           = "org.tizen.containers.domain.daemon";
+const std::string BUS_NAME            = "org.tizen.containers.zone.daemon";
+const std::string OBJECT_PATH         = "/org/tizen/containers/zone/daemon";
+const std::string INTERFACE           = "org.tizen.containers.zone.daemon";
 
 const std::string METHOD_GAIN_FOCUS   = "GainFocus";
 const std::string METHOD_LOSE_FOCUS   = "LoseFocus";

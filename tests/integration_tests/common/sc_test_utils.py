@@ -1,4 +1,4 @@
-'''! Module containing utilities for domain-tests
+'''! Module containing utilities for zone-tests
 
 @author Lukasz Kostyra (l.kostyra@samsung.com)
 '''

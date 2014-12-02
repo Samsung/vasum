@@ -88,7 +88,7 @@ void toBasic(GVariant* in, char** str)
     *str = buf;
 }
 
-VsmDomainState getDomainState(const char* state)
+VsmZoneState getZoneState(const char* state)
 {
     if (strcmp(state, "STOPPED") == 0) {
         return STOPPED;
@@ -114,22 +114,22 @@ VsmDomainState getDomainState(const char* state)
         return ACTIVATING;
     }
     assert(!"UNKNOWN STATE");
-    return (VsmDomainState)-1;
+    return (VsmZoneState)-1;
 }
 
-void toBasic(GVariant* in, VsmDomain* domain)
+void toBasic(GVariant* in, VsmZone* zone)
 {
     const char* id;
     const char* path;
     const char* state;
     int terminal;
-    VsmDomain vsmDomain = (VsmDomain)malloc(sizeof(*vsmDomain));
+    VsmZone vsmZone = (VsmZone)malloc(sizeof(*vsmZone));
     g_variant_get(in, "(siss)", &id, &terminal, &state, &path);
-    vsmDomain->id = strdup(id);
-    vsmDomain->terminal = terminal;
-    vsmDomain->state = getDomainState(state);
-    vsmDomain->rootfs_path = strdup(path);
-    *domain = vsmDomain;
+    vsmZone->id = strdup(id);
+    vsmZone->terminal = terminal;
+    vsmZone->state = getZoneState(state);
+    vsmZone->rootfs_path = strdup(path);
+    *zone = vsmZone;
 }
 
 template<typename T>
@@ -339,7 +339,7 @@ VsmStatus Client::vsm_get_container_dbuses(VsmArrayString* keys, VsmArrayString*
     return ret;
 }
 
-VsmStatus Client::vsm_get_domain_ids(VsmArrayString* array) noexcept
+VsmStatus Client::vsm_get_zone_ids(VsmArrayString* array) noexcept
 {
     assert(array);
 
@@ -381,7 +381,7 @@ VsmStatus Client::vsm_get_active_container_id(VsmString* id) noexcept
     return ret;
 }
 
-VsmStatus Client::vsm_lookup_domain_by_pid(int pid, VsmString* id) noexcept
+VsmStatus Client::vsm_lookup_zone_by_pid(int pid, VsmString* id) noexcept
 {
     assert(id);
 
@@ -404,10 +404,10 @@ VsmStatus Client::vsm_lookup_domain_by_pid(int pid, VsmString* id) noexcept
     return vsm_get_status();
 }
 
-VsmStatus Client::vsm_lookup_domain_by_id(const char* id, VsmDomain* domain) noexcept
+VsmStatus Client::vsm_lookup_zone_by_id(const char* id, VsmZone* zone) noexcept
 {
     assert(id);
-    assert(domain);
+    assert(zone);
 
     GVariant* out;
     GVariant* args_in = g_variant_new("(s)", id);
@@ -421,13 +421,13 @@ VsmStatus Client::vsm_lookup_domain_by_id(const char* id, VsmDomain* domain) noe
     }
     GVariant* unpacked;
     g_variant_get(out, "(*)", &unpacked);
-    toBasic(unpacked, domain);
+    toBasic(unpacked, zone);
     g_variant_unref(unpacked);
     g_variant_unref(out);
     return ret;
 }
 
-VsmStatus Client::vsm_lookup_domain_by_terminal_id(int, VsmString*) noexcept
+VsmStatus Client::vsm_lookup_zone_by_terminal_id(int, VsmString*) noexcept
 {
     mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
     return vsm_get_status();
@@ -441,7 +441,7 @@ VsmStatus Client::vsm_set_active_container(const char* id) noexcept
     return callMethod(HOST_INTERFACE, api::host::METHOD_SET_ACTIVE_CONTAINER, args_in);
 }
 
-VsmStatus Client::vsm_create_domain(const char* id, const char* tname) noexcept
+VsmStatus Client::vsm_create_zone(const char* id, const char* tname) noexcept
 {
     assert(id);
     if (tname) {
@@ -453,26 +453,26 @@ VsmStatus Client::vsm_create_domain(const char* id, const char* tname) noexcept
     return callMethod(HOST_INTERFACE, api::host::METHOD_CREATE_CONTAINER, args_in);
 }
 
-VsmStatus Client::vsm_destroy_domain(const char* id) noexcept
+VsmStatus Client::vsm_destroy_zone(const char* id) noexcept
 {
     assert(id);
     GVariant* args_in = g_variant_new("(s)", id);
     return callMethod(HOST_INTERFACE, api::host::METHOD_DESTROY_CONTAINER, args_in);
 }
 
-VsmStatus Client::vsm_shutdown_domain(const char*) noexcept
+VsmStatus Client::vsm_shutdown_zone(const char*) noexcept
 {
     mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
     return vsm_get_status();
 }
 
-VsmStatus Client::vsm_start_domain(const char*) noexcept
+VsmStatus Client::vsm_start_zone(const char*) noexcept
 {
     mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
     return vsm_get_status();
 }
 
-VsmStatus Client::vsm_lock_domain(const char* id) noexcept
+VsmStatus Client::vsm_lock_zone(const char* id) noexcept
 {
     assert(id);
 
@@ -480,7 +480,7 @@ VsmStatus Client::vsm_lock_domain(const char* id) noexcept
     return callMethod(HOST_INTERFACE, api::host::METHOD_LOCK_CONTAINER, args_in);
 }
 
-VsmStatus Client::vsm_unlock_domain(const char* id) noexcept
+VsmStatus Client::vsm_unlock_zone(const char* id) noexcept
 {
     assert(id);
 
@@ -513,7 +513,7 @@ VsmStatus Client::vsm_del_state_callback(VsmSubscriptionId subscriptionId) noexc
     return signalUnsubscribe(subscriptionId);
 }
 
-VsmStatus Client::vsm_domain_grant_device(const char*, const char*, uint32_t) noexcept
+VsmStatus Client::vsm_zone_grant_device(const char*, const char*, uint32_t) noexcept
 {
     mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
     return vsm_get_status();
@@ -525,7 +525,7 @@ VsmStatus Client::vsm_revoke_device(const char*, const char*) noexcept
     return vsm_get_status();
 }
 
-VsmStatus Client::vsm_domain_get_netdevs(const char*, VsmArrayString*) noexcept
+VsmStatus Client::vsm_zone_get_netdevs(const char*, VsmArrayString*) noexcept
 {
     mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
     return vsm_get_status();

@@ -128,7 +128,7 @@ public:
 
 private:
     const ContainerConfig& mConfig;
-    lxc::LxcDomain mDom;
+    lxc::LxcZone mDom;
     const std::string mId;
     bool mDetachOnExit;
     bool mDestroyOnExit;

@@ -42,42 +42,42 @@ std::map<std::string, CommandLineInterface> commands = {
         }
     },
     {
-        "create_domain", {
-            create_domain,
-            "create_domain container_id",
+        "create_zone", {
+            create_zone,
+            "create_zone container_id",
             "Create and add container",
             {{"container_id", "id container name"}}
         }
     },
     {
-        "destroy_domain", {
-            destroy_domain,
-            "destroy_domain container_id",
+        "destroy_zone", {
+            destroy_zone,
+            "destroy_zone container_id",
             "Destroy container",
             {{"container_id", "id container name"}}
         }
     },
     {
-        "lock_domain", {
-            lock_domain,
-            "lock_domain container_id",
+        "lock_zone", {
+            lock_zone,
+            "lock_zone container_id",
             "Lock container",
             {{"container_id", "id container name"}}
         }
     },
     {
-        "unlock_domain", {
-            unlock_domain,
-            "unlock_domain container_id",
+        "unlock_zone", {
+            unlock_zone,
+            "unlock_zone container_id",
             "Unlock container",
             {{"container_id", "id container name"}}
         }
     },
     {
-        "lookup_domain_by_id", {
-            lookup_domain_by_id,
-            "lookup_domain_by_id container_id",
-            "Prints informations about domain",
+        "lookup_zone_by_id", {
+            lookup_zone_by_id,
+            "lookup_zone_by_id container_id",
+            "Prints informations about zone",
             {{"container_id", "id container name"}}
         }
     }

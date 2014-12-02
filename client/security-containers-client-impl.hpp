@@ -109,9 +109,9 @@ public:
     VsmStatus vsm_get_container_dbuses(VsmArrayString* keys, VsmArrayString* values) noexcept;
 
     /**
-     *  @see ::vsm_get_domain_ids
+     *  @see ::vsm_get_zone_ids
      */
-    VsmStatus vsm_get_domain_ids(VsmArrayString* array) noexcept;
+    VsmStatus vsm_get_zone_ids(VsmArrayString* array) noexcept;
 
     /**
      *  @see ::vsm_get_active_container_id
@@ -119,19 +119,19 @@ public:
     VsmStatus vsm_get_active_container_id(VsmString* id) noexcept;
 
     /**
-     *  @see ::vsm_lookup_domain_by_pid
+     *  @see ::vsm_lookup_zone_by_pid
      */
-    VsmStatus vsm_lookup_domain_by_pid(int pid, VsmString* id) noexcept;
+    VsmStatus vsm_lookup_zone_by_pid(int pid, VsmString* id) noexcept;
 
     /**
-     * @see ::vsm_lookup_domain_by_id
+     * @see ::vsm_lookup_zone_by_id
      */
-    VsmStatus vsm_lookup_domain_by_id(const char* id, VsmDomain* domain) noexcept;
+    VsmStatus vsm_lookup_zone_by_id(const char* id, VsmZone* zone) noexcept;
 
     /**
-     * @see ::vsm_lookup_domain_by_terminal_id
+     * @see ::vsm_lookup_zone_by_terminal_id
      */
-    VsmStatus vsm_lookup_domain_by_terminal_id(int terminal, VsmString* id) noexcept;
+    VsmStatus vsm_lookup_zone_by_terminal_id(int terminal, VsmString* id) noexcept;
 
     /**
      *  @see ::vsm_set_active_container
@@ -139,34 +139,34 @@ public:
     VsmStatus vsm_set_active_container(const char* id) noexcept;
 
     /**
-     *  @see ::vsm_create_domain
+     *  @see ::vsm_create_zone
      */
-    VsmStatus vsm_create_domain(const char* id, const char* tname) noexcept;
+    VsmStatus vsm_create_zone(const char* id, const char* tname) noexcept;
 
     /**
-     *  @see ::vsm_destroy_domain
+     *  @see ::vsm_destroy_zone
      */
-    VsmStatus vsm_destroy_domain(const char* id) noexcept;
+    VsmStatus vsm_destroy_zone(const char* id) noexcept;
 
     /**
-     *  @see ::vsm_shutdown_domain
+     *  @see ::vsm_shutdown_zone
      */
-    VsmStatus vsm_shutdown_domain(const char* id) noexcept;
+    VsmStatus vsm_shutdown_zone(const char* id) noexcept;
 
     /**
-     *  @see ::vsm_start_domain
+     *  @see ::vsm_start_zone
      */
-    VsmStatus vsm_start_domain(const char* id) noexcept;
+    VsmStatus vsm_start_zone(const char* id) noexcept;
 
     /**
-     *  @see ::vsm_lock_domain
+     *  @see ::vsm_lock_zone
      */
-    VsmStatus vsm_lock_domain(const char* id) noexcept;
+    VsmStatus vsm_lock_zone(const char* id) noexcept;
 
     /**
-     *  @see ::vsm_unlock_domain
+     *  @see ::vsm_unlock_zone
      */
-    VsmStatus vsm_unlock_domain(const char* id) noexcept;
+    VsmStatus vsm_unlock_zone(const char* id) noexcept;
 
     /**
      *  @see ::vsm_add_state_callback
@@ -183,7 +183,7 @@ public:
     /**
      *  @see ::vsm_del_state_callback
      */
-    VsmStatus vsm_domain_grant_device(const char* id,
+    VsmStatus vsm_zone_grant_device(const char* id,
                                       const char* device,
                                       uint32_t flags) noexcept;
 
@@ -193,28 +193,28 @@ public:
     VsmStatus vsm_revoke_device(const char* id, const char* device) noexcept;
 
     /**
-     *  @see ::vsm_domain_get_netdevs
+     *  @see ::vsm_zone_get_netdevs
      */
-    VsmStatus vsm_domain_get_netdevs(const char* domain, VsmArrayString* netdevIds) noexcept;
+    VsmStatus vsm_zone_get_netdevs(const char* zone, VsmArrayString* netdevIds) noexcept;
 
     /**
      *  @see ::vsm_netdev_get_ipv4_addr
      */
-    VsmStatus vsm_netdev_get_ipv4_addr(const char* domain,
+    VsmStatus vsm_netdev_get_ipv4_addr(const char* zone,
                                        const char* netdevId,
                                        struct in_addr *addr) noexcept;
 
     /**
      *  @see ::vsm_netdev_get_ipv6_addr
      */
-    VsmStatus vsm_netdev_get_ipv6_addr(const char* domain,
+    VsmStatus vsm_netdev_get_ipv6_addr(const char* zone,
                                        const char* netdevId,
                                        struct in6_addr *addr) noexcept;
 
     /**
      *  @see ::vsm_netdev_set_ipv4_addr
      */
-    VsmStatus vsm_netdev_set_ipv4_addr(const char* domain,
+    VsmStatus vsm_netdev_set_ipv4_addr(const char* zone,
                                        const char* netdevId,
                                        struct in_addr *addr,
                                        int prefix) noexcept;
@@ -222,7 +222,7 @@ public:
     /**
      *  @see ::vsm_netdev_set_ipv6_addr
      */
-    VsmStatus vsm_netdev_set_ipv6_addr(const char* domain,
+    VsmStatus vsm_netdev_set_ipv6_addr(const char* zone,
                                        const char* netdevId,
                                        struct in6_addr *addr,
                                        int prefix) noexcept;
@@ -230,7 +230,7 @@ public:
     /**
      *  @see ::vsm_create_netdev
      */
-    VsmStatus vsm_create_netdev(const char* domain,
+    VsmStatus vsm_create_netdev(const char* zone,
                                 VsmNetdevType netdevType,
                                 const char* target,
                                 const char* netdevId) noexcept;
@@ -238,12 +238,12 @@ public:
     /**
      *  @see ::vsm_destroy_netdev
      */
-    VsmStatus vsm_destroy_netdev(const char* domain, const char* netdevId) noexcept;
+    VsmStatus vsm_destroy_netdev(const char* zone, const char* netdevId) noexcept;
 
     /**
      *  @see ::vsm_lookup_netdev_by_name
      */
-    VsmStatus vsm_lookup_netdev_by_name(const char* domain,
+    VsmStatus vsm_lookup_netdev_by_name(const char* zone,
                                         const char* netdevId,
                                         VsmNetdev* netdev) noexcept;
 

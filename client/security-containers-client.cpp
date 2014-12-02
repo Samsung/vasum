@@ -88,11 +88,11 @@ API void vsm_string_free(VsmString string)
     free(string);
 }
 
-API void vsm_domain_free(VsmDomain domain)
+API void vsm_zone_free(VsmZone zone)
 {
-    free(domain->rootfs_path);
-    free(domain->id);
-    free(domain);
+    free(zone->rootfs_path);
+    free(zone->id);
+    free(zone);
 }
 
 API void vsm_netdev_free(VsmNetdev netdev)
@@ -123,9 +123,9 @@ API VsmStatus vsm_get_container_dbuses(VsmClient client, VsmArrayString* keys, V
     return getClient(client).vsm_get_container_dbuses(keys, values);
 }
 
-API VsmStatus vsm_get_domain_ids(VsmClient client, VsmArrayString* array)
+API VsmStatus vsm_get_zone_ids(VsmClient client, VsmArrayString* array)
 {
-    return getClient(client).vsm_get_domain_ids(array);
+    return getClient(client).vsm_get_zone_ids(array);
 }
 
 API VsmStatus vsm_get_active_container_id(VsmClient client, VsmString* id)
@@ -133,19 +133,19 @@ API VsmStatus vsm_get_active_container_id(VsmClient client, VsmString* id)
     return getClient(client).vsm_get_active_container_id(id);
 }
 
-API VsmStatus vsm_lookup_domain_by_pid(VsmClient client, int pid, VsmString* id)
+API VsmStatus vsm_lookup_zone_by_pid(VsmClient client, int pid, VsmString* id)
 {
-    return getClient(client).vsm_lookup_domain_by_pid(pid, id);
+    return getClient(client).vsm_lookup_zone_by_pid(pid, id);
 }
 
-API VsmStatus vsm_lookup_domain_by_id(VsmClient client, const char* id, VsmDomain* domain)
+API VsmStatus vsm_lookup_zone_by_id(VsmClient client, const char* id, VsmZone* zone)
 {
-    return getClient(client).vsm_lookup_domain_by_id(id, domain);
+    return getClient(client).vsm_lookup_zone_by_id(id, zone);
 }
 
-API VsmStatus vsm_lookup_domain_by_terminal_id(VsmClient client, int terminal, VsmString* id)
+API VsmStatus vsm_lookup_zone_by_terminal_id(VsmClient client, int terminal, VsmString* id)
 {
-    return getClient(client).vsm_lookup_domain_by_terminal_id(terminal, id);
+    return getClient(client).vsm_lookup_zone_by_terminal_id(terminal, id);
 }
 
 API VsmStatus vsm_set_active_container(VsmClient client, const char* id)
@@ -153,34 +153,34 @@ API VsmStatus vsm_set_active_container(VsmClient client, const char* id)
     return getClient(client).vsm_set_active_container(id);
 }
 
-API VsmStatus vsm_create_domain(VsmClient client, const char* id, const char* tname)
+API VsmStatus vsm_create_zone(VsmClient client, const char* id, const char* tname)
 {
-    return getClient(client).vsm_create_domain(id, tname);
+    return getClient(client).vsm_create_zone(id, tname);
 }
 
-API VsmStatus vsm_destroy_domain(VsmClient client, const char* id, int /*force*/)
+API VsmStatus vsm_destroy_zone(VsmClient client, const char* id, int /*force*/)
 {
-    return getClient(client).vsm_destroy_domain(id);
+    return getClient(client).vsm_destroy_zone(id);
 }
 
-API VsmStatus vsm_shutdown_domain(VsmClient client, const char* id)
+API VsmStatus vsm_shutdown_zone(VsmClient client, const char* id)
 {
-    return getClient(client).vsm_shutdown_domain(id);
+    return getClient(client).vsm_shutdown_zone(id);
 }
 
-API VsmStatus vsm_start_domain(VsmClient client, const char* id)
+API VsmStatus vsm_start_zone(VsmClient client, const char* id)
 {
-    return getClient(client).vsm_start_domain(id);
+    return getClient(client).vsm_start_zone(id);
 }
 
-API VsmStatus vsm_lock_domain(VsmClient client, const char* id)
+API VsmStatus vsm_lock_zone(VsmClient client, const char* id)
 {
-    return getClient(client).vsm_lock_domain(id);
+    return getClient(client).vsm_lock_zone(id);
 }
 
-API VsmStatus vsm_unlock_domain(VsmClient client, const char* id)
+API VsmStatus vsm_unlock_zone(VsmClient client, const char* id)
 {
-    return getClient(client).vsm_unlock_domain(id);
+    return getClient(client).vsm_unlock_zone(id);
 }
 
 API VsmStatus vsm_add_state_callback(VsmClient client,
@@ -196,12 +196,12 @@ API VsmStatus vsm_del_state_callback(VsmClient client, VsmSubscriptionId subscri
     return getClient(client).vsm_del_state_callback(subscriptionId);
 }
 
-API VsmStatus vsm_domain_grant_device(VsmClient client,
+API VsmStatus vsm_zone_grant_device(VsmClient client,
                                       const char* id,
                                       const char* device,
                                       uint32_t flags)
 {
-    return getClient(client).vsm_domain_grant_device(id, device, flags);
+    return getClient(client).vsm_zone_grant_device(id, device, flags);
 }
 
 API VsmStatus vsm_revoke_device(VsmClient client, const char* id, const char* device)
@@ -209,67 +209,67 @@ API VsmStatus vsm_revoke_device(VsmClient client, const char* id, const char* de
     return getClient(client).vsm_revoke_device(id, device);
 }
 
-API VsmStatus vsm_domain_get_netdevs(VsmClient client,
-                                     const char* domain,
+API VsmStatus vsm_zone_get_netdevs(VsmClient client,
+                                     const char* zone,
                                      VsmArrayString* netdevIds)
 {
-    return getClient(client).vsm_domain_get_netdevs(domain, netdevIds);
+    return getClient(client).vsm_zone_get_netdevs(zone, netdevIds);
 }
 
 API VsmStatus vsm_netdev_get_ipv4_addr(VsmClient client,
-                                       const char* domain,
+                                       const char* zone,
                                        const char* netdevId,
                                        struct in_addr *addr)
 {
-    return getClient(client).vsm_netdev_get_ipv4_addr(domain, netdevId, addr);
+    return getClient(client).vsm_netdev_get_ipv4_addr(zone, netdevId, addr);
 }
 
 API VsmStatus vsm_netdev_get_ipv6_addr(VsmClient client,
-                                       const char* domain,
+                                       const char* zone,
                                        const char* netdevId,
                                        struct in6_addr *addr)
 {
-    return getClient(client).vsm_netdev_get_ipv6_addr(domain, netdevId, addr);
+    return getClient(client).vsm_netdev_get_ipv6_addr(zone, netdevId, addr);
 }
 
 API VsmStatus vsm_netdev_set_ipv4_addr(VsmClient client,
-                                       const char* domain,
+                                       const char* zone,
                                        const char* netdevId,
                                        struct in_addr *addr,
                                        int prefix)
 {
-    return getClient(client).vsm_netdev_set_ipv4_addr(domain, netdevId, addr, prefix);
+    return getClient(client).vsm_netdev_set_ipv4_addr(zone, netdevId, addr, prefix);
 }
 
 API VsmStatus vsm_netdev_set_ipv6_addr(VsmClient client,
-                                       const char* domain,
+                                       const char* zone,
                                        const char* netdevId,
                                        struct in6_addr *addr,
                                        int prefix)
 {
-    return getClient(client).vsm_netdev_set_ipv6_addr(domain, netdevId, addr, prefix);
+    return getClient(client).vsm_netdev_set_ipv6_addr(zone, netdevId, addr, prefix);
 }
 
 API VsmStatus vsm_create_netdev(VsmClient client,
-                                const char* domain,
+                                const char* zone,
                                 VsmNetdevType netdevType,
                                 const char* target,
                                 const char* netdevId)
 {
-    return getClient(client).vsm_create_netdev(domain, netdevType, target, netdevId);
+    return getClient(client).vsm_create_netdev(zone, netdevType, target, netdevId);
 }
 
-API VsmStatus vsm_destroy_netdev(VsmClient client, const char* domain, const char* netdevId)
+API VsmStatus vsm_destroy_netdev(VsmClient client, const char* zone, const char* netdevId)
 {
-    return getClient(client).vsm_destroy_netdev(domain, netdevId);
+    return getClient(client).vsm_destroy_netdev(zone, netdevId);
 }
 
 API VsmStatus vsm_lookup_netdev_by_name(VsmClient client,
-                                        const char* domain,
+                                        const char* zone,
                                         const char* netdevId,
                                         VsmNetdev* netdev)
 {
-    return getClient(client).vsm_lookup_netdev_by_name(domain, netdevId, netdev);
+    return getClient(client).vsm_lookup_netdev_by_name(zone, netdevId, netdev);
 }
 
 API VsmStatus vsm_declare_file(VsmClient client,

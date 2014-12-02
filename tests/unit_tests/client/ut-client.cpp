@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(GetContainerIdsTest)
     VsmStatus status = vsm_connect(client);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     VsmArrayString values;
-    status = vsm_get_domain_ids(client, &values);
+    status = vsm_get_zone_ids(client, &values);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_DBUSES_STARTED.size() + 1),
                       EXPECTED_DBUSES_STARTED.size());
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(CreateContainerTest)
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    status = vsm_create_domain(client, newActiveContainerId.c_str(), NULL);
+    status = vsm_create_zone(client, newActiveContainerId.c_str(), NULL);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_CUSTOM_ERROR, status);
     vsm_client_free(client);
 }
@@ -232,9 +232,9 @@ BOOST_AUTO_TEST_CASE(LockUnlockContainerTest)
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    status = vsm_lock_domain(client, newActiveContainerId.c_str());
+    status = vsm_lock_zone(client, newActiveContainerId.c_str());
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    status = vsm_unlock_domain(client, newActiveContainerId.c_str());
+    status = vsm_unlock_zone(client, newActiveContainerId.c_str());
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     vsm_client_free(client);
 }
@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_CASE(GetContainerIdByPidTest1)
 {
     VsmClient client = vsm_client_create();
     VsmString container;
-    VsmStatus status = vsm_lookup_domain_by_pid(client, 1, &container);
+    VsmStatus status = vsm_lookup_zone_by_pid(client, 1, &container);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
 
     BOOST_CHECK_EQUAL(container, std::string("host"));
@@ -329,7 +329,7 @@ BOOST_AUTO_TEST_CASE(GetContainerIdByPidTest2)
     VsmClient client = vsm_client_create();
     for (int n = 0; n < 100000; ++n) {
         VsmString container;
-        VsmStatus status = vsm_lookup_domain_by_pid(client, n, &container);
+        VsmStatus status = vsm_lookup_zone_by_pid(client, n, &container);
         if (status == VSMCLIENT_SUCCESS) {
             ids.insert(container);
             vsm_string_free(container);

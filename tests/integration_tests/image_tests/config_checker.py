@@ -17,7 +17,7 @@ class ConfigChecker:
     def __parseLibvirtXML(self, path):
         '''! Parses libvirt's configuration in order to extract container name and path.
 
-         @param path    Libvirt's domain configuration path
+         @param path    Libvirt's zone configuration path
         '''
         tree = ET.parse(path)
         root = tree.getroot()

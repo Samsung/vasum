@@ -112,7 +112,7 @@ public:
     void signalContainerDbusState(const std::string& containerId, const std::string& dbusAddress);
 
     /**
-     * Register a callback called to get a list of domain ids
+     * Register a callback called to get a list of zone ids
      */
     void setGetContainerIdsCallback(const GetContainerIdsCallback& callback);
 

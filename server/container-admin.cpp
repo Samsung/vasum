@@ -61,7 +61,7 @@ ContainerAdmin::ContainerAdmin(const std::string& containersPath,
 
         const std::string lxcTemplate = utils::getAbsolutePath(config.lxcTemplate,
                                                                lxcTemplatePrefix);
-        LOGI(mId << ": Creating domain from template: " << lxcTemplate);
+        LOGI(mId << ": Creating zone from template: " << lxcTemplate);
         utils::CStringArrayBuilder args;
         if (!config.ipv4Gateway.empty()) {
             args.add("--ipv4-gateway");
@@ -72,7 +72,7 @@ ContainerAdmin::ContainerAdmin(const std::string& containersPath,
             args.add(config.ipv4.c_str());
         }
         if (!mDom.create(lxcTemplate, args.c_array())) {
-            throw ContainerOperationException("Could not create domain");
+            throw ContainerOperationException("Could not create zone");
         }
     }
 }
@@ -165,13 +165,13 @@ void ContainerAdmin::destroy()
 
 bool ContainerAdmin::isRunning()
 {
-    return mDom.getState() == lxc::LxcDomain::State::RUNNING;
+    return mDom.getState() == lxc::LxcZone::State::RUNNING;
 }
 
 
 bool ContainerAdmin::isStopped()
 {
-    return mDom.getState() == lxc::LxcDomain::State::STOPPED;
+    return mDom.getState() == lxc::LxcZone::State::STOPPED;
 }
 
 
@@ -197,7 +197,7 @@ void ContainerAdmin::resume()
 
 bool ContainerAdmin::isPaused()
 {
-    return mDom.getState() == lxc::LxcDomain::State::FROZEN;
+    return mDom.getState() == lxc::LxcZone::State::FROZEN;
 }
 
 

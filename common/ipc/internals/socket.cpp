@@ -117,7 +117,7 @@ int Socket::getSystemdSocket(const std::string& path)
     return -1;
 }
 
-int Socket::createDomainSocket(const std::string& path)
+int Socket::createZoneSocket(const std::string& path)
 {
     // Isn't the path too long?
     if (path.size() >= sizeof(sockaddr_un::sun_path)) {
@@ -162,7 +162,7 @@ Socket Socket::createSocket(const std::string& path)
 {
     // Initialize a socket
     int fd = getSystemdSocket(path);
-    fd = fd != -1 ? fd : createDomainSocket(path);
+    fd = fd != -1 ? fd : createZoneSocket(path);
 
     return Socket(fd);
 }

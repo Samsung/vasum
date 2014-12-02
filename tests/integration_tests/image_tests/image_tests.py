@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 SCS_USER_NAME = "security-containers"
 SCS_UID = 377
 
-DAEMON_DBUS_SOCKET_NAME = "org.tizen.containers.domain"
+DAEMON_DBUS_SOCKET_NAME = "org.tizen.containers.zone"
 
 # dbus config file path relative to container's root
 DBUS_CONFIG_PATH = "etc/dbus-1/system.d/" + DAEMON_DBUS_SOCKET_NAME + ".conf"

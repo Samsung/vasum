@@ -104,39 +104,39 @@ private:
 void set_active_container(int pos, int argc, const char** argv);
 
 /**
- * Parses command line arguments and call vsm_create_domain
+ * Parses command line arguments and call vsm_create_zone
  *
- * @see vsm_create_domain
+ * @see vsm_create_zone
  */
-void create_domain(int pos, int argc, const char** argv);
+void create_zone(int pos, int argc, const char** argv);
 
 /**
- * Parses command line arguments and call vsm_destroy_domain
+ * Parses command line arguments and call vsm_destroy_zone
  *
- * @see vsm_destroy_domain
+ * @see vsm_destroy_zone
  */
-void destroy_domain(int pos, int argc, const char** argv);
+void destroy_zone(int pos, int argc, const char** argv);
 
 /**
- * Parses command line arguments and call vsm_lock_domain
+ * Parses command line arguments and call vsm_lock_zone
  *
- * @see vsm_lock_domain
+ * @see vsm_lock_zone
  */
-void lock_domain(int pos, int argc, const char** argv);
+void lock_zone(int pos, int argc, const char** argv);
 
 /**
- * Parses command line arguments and call vsm_unlock_domain
+ * Parses command line arguments and call vsm_unlock_zone
  *
- * @see vsm_unlock_domain
+ * @see vsm_unlock_zone
  */
-void unlock_domain(int pos, int argc, const char** argv);
+void unlock_zone(int pos, int argc, const char** argv);
 
 /**
- * Parses command line arguments and call vsm_lookup_domain_by_id
+ * Parses command line arguments and call vsm_lookup_zone_by_id
  *
- * @see vsm_lookup_domain_by_id
+ * @see vsm_lookup_zone_by_id
  */
-void lookup_domain_by_id(int pos, int argc, const char** argv);
+void lookup_zone_by_id(int pos, int argc, const char** argv);
 
 
 } // namespace cli

@@ -20,7 +20,7 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Unit tests of LxcDomain class
+ * @brief   Unit tests of LxcZone class
  */
 
 #include "config.hpp"
@@ -40,7 +40,7 @@ using namespace security_containers;
 using namespace security_containers::lxc;
 
 const std::string LXC_PATH = "/tmp/ut-lxc/";
-const std::string DOMAIN_NAME = "ut-domain";
+const std::string ZONE_NAME = "ut-zone";
 const std::string TEMPLATE = SC_TEST_LXC_TEMPLATES_INSTALL_DIR "/minimal.sh";
 const char* TEMPLATE_ARGS[] = {NULL};
 
@@ -60,9 +60,9 @@ struct Fixture {
 
     void cleanup()
     {
-        LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
+        LxcZone lxc(LXC_PATH, ZONE_NAME);
         if (lxc.isDefined()) {
-            if (lxc.getState() != LxcDomain::State::STOPPED) {
+            if (lxc.getState() != LxcZone::State::STOPPED) {
                 lxc.stop();
             }
             lxc.destroy();
@@ -78,22 +78,22 @@ struct Fixture {
 
 } // namespace
 
-BOOST_FIXTURE_TEST_SUITE(LxcDomainSuite, Fixture)
+BOOST_FIXTURE_TEST_SUITE(LxcZoneSuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 {
-    LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
+    LxcZone lxc(LXC_PATH, ZONE_NAME);
 }
 
 BOOST_AUTO_TEST_CASE(CreateDestroyTest)
 {
-    LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
+    LxcZone lxc(LXC_PATH, ZONE_NAME);
     BOOST_CHECK(!lxc.isDefined());
 
     BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
 
     BOOST_CHECK(lxc.isDefined());
-    BOOST_CHECK_EQUAL(lxc.getConfigItem("lxc.rootfs"), LXC_PATH + DOMAIN_NAME + "/rootfs");
+    BOOST_CHECK_EQUAL(lxc.getConfigItem("lxc.rootfs"), LXC_PATH + ZONE_NAME + "/rootfs");
     BOOST_CHECK_THROW(lxc.getConfigItem("xxx"), LxcException);
 
     BOOST_CHECK(lxc.destroy());
@@ -104,11 +104,11 @@ BOOST_AUTO_TEST_CASE(CreateDestroyTest)
 BOOST_AUTO_TEST_CASE(StartShutdownTest)
 {
     {
-        LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
+        LxcZone lxc(LXC_PATH, ZONE_NAME);
         BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
     }
-    LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
+    LxcZone lxc(LXC_PATH, ZONE_NAME);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
     const char* argv[] = {
         "/bin/sh",
         "-c",
@@ -116,10 +116,10 @@ BOOST_AUTO_TEST_CASE(StartShutdownTest)
         NULL
     };
     BOOST_CHECK(lxc.start(argv));
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::RUNNING);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::RUNNING);
     waitForInit();
     BOOST_CHECK(lxc.shutdown(2));
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
 
     BOOST_CHECK(lxc.destroy());
 }
@@ -127,21 +127,21 @@ BOOST_AUTO_TEST_CASE(StartShutdownTest)
 BOOST_AUTO_TEST_CASE(StartStopTest)
 {
     {
-        LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
+        LxcZone lxc(LXC_PATH, ZONE_NAME);
         BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
     }
-    LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
+    LxcZone lxc(LXC_PATH, ZONE_NAME);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
     const char* argv[] = {
         "/bin/sh",
         NULL
     };
     BOOST_CHECK(lxc.start(argv));
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::RUNNING);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::RUNNING);
     BOOST_CHECK(!lxc.shutdown(1));
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::RUNNING);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::RUNNING);
     BOOST_CHECK(lxc.stop());
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
 
     BOOST_CHECK(lxc.destroy());
 }
@@ -149,11 +149,11 @@ BOOST_AUTO_TEST_CASE(StartStopTest)
 BOOST_AUTO_TEST_CASE(StartHasStoppedTest)
 {
     {
-        LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
+        LxcZone lxc(LXC_PATH, ZONE_NAME);
         BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
     }
-    LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
+    LxcZone lxc(LXC_PATH, ZONE_NAME);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
     const char* argv[] = {
         "/bin/sh",
         "-c",
@@ -162,14 +162,14 @@ BOOST_AUTO_TEST_CASE(StartHasStoppedTest)
     };
     BOOST_CHECK(lxc.start(argv));
     waitForInit();
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
 
     BOOST_CHECK(lxc.destroy());
 }
 
 BOOST_AUTO_TEST_CASE(FreezeUnfreezeTest)
 {
-    LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
+    LxcZone lxc(LXC_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
     const char* argv[] = {
         "/bin/sh",
@@ -178,21 +178,21 @@ BOOST_AUTO_TEST_CASE(FreezeUnfreezeTest)
         NULL
     };
     BOOST_CHECK(lxc.start(argv));
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::RUNNING);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::RUNNING);
     waitForInit();
     BOOST_CHECK(lxc.freeze());
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::FROZEN);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::FROZEN);
     BOOST_CHECK(lxc.unfreeze());
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::RUNNING);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::RUNNING);
     BOOST_CHECK(lxc.shutdown(2));
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
 
     BOOST_CHECK(lxc.destroy());
 }
 
 BOOST_AUTO_TEST_CASE(FreezeStopTest)
 {
-    LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
+    LxcZone lxc(LXC_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
     const char* argv[] = {
         "/bin/sh",
@@ -201,21 +201,21 @@ BOOST_AUTO_TEST_CASE(FreezeStopTest)
         NULL
     };
     BOOST_CHECK(lxc.start(argv));
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::RUNNING);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::RUNNING);
     waitForInit();
     BOOST_CHECK(lxc.freeze());
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::FROZEN);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::FROZEN);
     BOOST_CHECK(!lxc.shutdown(1));
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::FROZEN);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::FROZEN);
     BOOST_CHECK(lxc.stop());
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
 
     BOOST_CHECK(lxc.destroy());
 }
 
 BOOST_AUTO_TEST_CASE(RepeatTest)
 {
-    LxcDomain lxc(LXC_PATH, DOMAIN_NAME);
+    LxcZone lxc(LXC_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
     BOOST_CHECK(!lxc.create(TEMPLATE, TEMPLATE_ARGS));// forbidden
     const char* argv[] = {
@@ -225,21 +225,21 @@ BOOST_AUTO_TEST_CASE(RepeatTest)
         NULL
     };
     BOOST_CHECK(lxc.start(argv));
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::RUNNING);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::RUNNING);
     waitForInit();
     BOOST_CHECK(!lxc.start(argv)); // forbidden
     BOOST_CHECK(lxc.freeze());
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::FROZEN);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::FROZEN);
     BOOST_CHECK(lxc.freeze()); // repeat is nop
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::FROZEN);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::FROZEN);
     BOOST_CHECK(lxc.unfreeze());
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::RUNNING);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::RUNNING);
     BOOST_CHECK(lxc.unfreeze()); // repeat is nop
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::RUNNING);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::RUNNING);
     BOOST_CHECK(lxc.stop());
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
     BOOST_CHECK(lxc.stop()); // repeat is nop
-    BOOST_CHECK(lxc.getState() == LxcDomain::State::STOPPED);
+    BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
 
     BOOST_CHECK(lxc.destroy());
     BOOST_CHECK(!lxc.isDefined());

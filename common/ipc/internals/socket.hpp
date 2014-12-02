@@ -106,7 +106,7 @@ private:
     int mFD;
     mutable std::recursive_mutex  mCommunicationMutex;
 
-    static int createDomainSocket(const std::string& path);
+    static int createZoneSocket(const std::string& path);
     static int getSystemdSocket(const std::string& path);
 };
 

@@ -19,7 +19,7 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Lxc domain
+ * @brief   Lxc zone
  */
 
 #ifndef COMMON_LXC_DOMAIN_HPP
@@ -37,7 +37,7 @@ namespace lxc {
 /**
  * A class wwapping lxc container
  */
-class LxcDomain {
+class LxcZone {
 public:
     enum class State {
         STOPPED,
@@ -51,18 +51,18 @@ public:
     };
 
     /**
-     * LxcDomain constructor
+     * LxcZone constructor
      * @param lxcPath path where containers lives
-     * @param domainName name of domain
+     * @param zoneName name of zone
      */
-    LxcDomain(const std::string& lxcPath, const std::string& domainName);
-    ~LxcDomain();
+    LxcZone(const std::string& lxcPath, const std::string& zoneName);
+    ~LxcZone();
 
-    LxcDomain(const LxcDomain&) = delete;
-    LxcDomain& operator=(const LxcDomain&) = delete;
+    LxcZone(const LxcZone&) = delete;
+    LxcZone& operator=(const LxcZone&) = delete;
 
     /**
-     * Get domain name
+     * Get zone name
      */
     std::string getName() const;
 
@@ -73,7 +73,7 @@ public:
     std::string getConfigItem(const std::string& key);
 
     /**
-     * Is domain defined (created)?
+     * Is zone defined (created)?
      */
     bool isDefined();
 
@@ -83,57 +83,57 @@ public:
     static std::string toString(State state);
 
     /**
-     * Get domain state
+     * Get zone state
      */
     State getState();
 
     /**
-     * Wait till domain is in specified state
+     * Wait till zone is in specified state
      * @return false on timeout
      */
     bool waitForState(State state, int timeout);
 
     /**
-     * Create domain
-     * @param templatePath template from which domain will be created
+     * Create zone
+     * @param templatePath template from which zone will be created
      * @param argv additional template arguments
      */
     bool create(const std::string& templatePath, const char* const* argv);
 
     /**
-     * Destroy domain
+     * Destroy zone
      */
     bool destroy();
 
     /**
-     * Start domain
+     * Start zone
      * @param argv init process with arguments
      */
     bool start(const char* const* argv);
 
     /**
-     * Immediate stop the domain
-     * It kills all processes within this domain
+     * Immediate stop the zone
+     * It kills all processes within this zone
      */
     bool stop();
 
     /**
-     * Reboot domain
+     * Reboot zone
      */
     bool reboot();
 
     /**
-     * Gracefully shutdown domain.
+     * Gracefully shutdown zone.
      */
     bool shutdown(int timeout);
 
     /**
-     * Freeze (pause/lock) domain
+     * Freeze (pause/lock) zone
      */
     bool freeze();
 
     /**
-     * Unfreeze domain
+     * Unfreeze zone
      */
     bool unfreeze();
 private:

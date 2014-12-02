@@ -81,7 +81,7 @@ struct ContainerConfig {
 
     /**
       * Specify, if D-Bus communication with the container will be enabled.
-      * Setting this value to "false" will make the domain API not work inside the container.
+      * Setting this value to "false" will make the zone API not work inside the container.
       */
     bool enableDbusIntegration;
 
