@@ -79,6 +79,7 @@ std::string LxcDomain::toString(State state)
     CASE(THAWED)
     }
 #undef CASE
+    throw LxcException("Invalid state");
 }
 
 LxcDomain::LxcDomain(const std::string& lxcPath, const std::string& domainName)
