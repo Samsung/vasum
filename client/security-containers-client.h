@@ -182,7 +182,7 @@ typedef VsmNetdevStructure* VsmNetdev;
 typedef enum {
     VSMFILE_DIRECTORY,
     VSMFILE_FIFO,
-    VSMFILE_REGULAR,
+    VSMFILE_REGULAR
 } VsmFileType;
 
 /**
