@@ -22,8 +22,8 @@
  * @brief   Lxc zone
  */
 
-#ifndef COMMON_LXC_DOMAIN_HPP
-#define COMMON_LXC_DOMAIN_HPP
+#ifndef COMMON_LXC_ZONE_HPP
+#define COMMON_LXC_ZONE_HPP
 
 #include <string>
 
@@ -148,4 +148,4 @@ private:
 } // namespace security_containers
 
 
-#endif // COMMON_LXC_DOMAIN_HPP
+#endif // COMMON_LXC_ZONE_HPP

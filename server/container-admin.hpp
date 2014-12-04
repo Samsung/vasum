@@ -27,7 +27,7 @@
 #define SERVER_CONTAINER_ADMIN_HPP
 
 #include "container-config.hpp"
-#include "lxc/domain.hpp"
+#include "lxc/zone.hpp"
 
 
 namespace security_containers {

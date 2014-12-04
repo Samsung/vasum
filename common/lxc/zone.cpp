@@ -32,7 +32,7 @@
 
 #include "config.hpp"
 #include "logger/logger.hpp"
-#include "lxc/domain.hpp"
+#include "lxc/zone.hpp"
 #include "lxc/exception.hpp"
 #ifdef USE_EXEC
 #include "utils/execute.hpp"

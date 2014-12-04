@@ -26,7 +26,7 @@
 #include "config.hpp"
 #include "ut.hpp"
 
-#include "lxc/domain.hpp"
+#include "lxc/zone.hpp"
 #include "lxc/exception.hpp"
 #include "utils/scoped-dir.hpp"
 
