@@ -63,17 +63,13 @@ struct Loop {
 struct Fixture {
     Loop loop;
     utils::ScopedDir mContainersPathGuard;
-    utils::ScopedDir mRun1Guard;
-    utils::ScopedDir mRun2Guard;
-    utils::ScopedDir mRun3Guard;
+    utils::ScopedDir mRunGuard;
 
     ContainersManager cm;
 
     Fixture()
         : mContainersPathGuard(CONTAINERS_PATH)
-        , mRun1Guard("/tmp/ut-run1")
-        , mRun2Guard("/tmp/ut-run2")
-        , mRun3Guard("/tmp/ut-run3")
+        , mRunGuard("/tmp/ut-run")
         , cm(TEST_DBUS_CONFIG_PATH)
     {
         cm.startAll();
@@ -84,15 +80,15 @@ const int EVENT_TIMEOUT = 5000; ///< ms
 const std::map<std::string, std::string> EXPECTED_DBUSES_STARTED = {
     {
         "ut-containers-manager-console1-dbus",
-        "unix:path=/tmp/ut-run1/dbus/system_bus_socket"
+        "unix:path=/tmp/ut-run/ut-containers-manager-console1-dbus/dbus/system_bus_socket"
     },
     {
         "ut-containers-manager-console2-dbus",
-        "unix:path=/tmp/ut-run2/dbus/system_bus_socket"
+        "unix:path=/tmp/ut-run/ut-containers-manager-console2-dbus/dbus/system_bus_socket"
     },
     {
         "ut-containers-manager-console3-dbus",
-        "unix:path=/tmp/ut-run3/dbus/system_bus_socket"
+        "unix:path=/tmp/ut-run/ut-containers-manager-console3-dbus/dbus/system_bus_socket"
     }
 };
 

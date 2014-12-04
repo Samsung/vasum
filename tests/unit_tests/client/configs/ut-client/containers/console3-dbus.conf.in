@@ -1,6 +1,6 @@
 {
     "name" : "ut-containers-manager-console3-dbus",
-    "lxcTemplate" : "minimal-dbus3.sh",
+    "lxcTemplate" : "minimal-dbus.sh",
     "initWithArgs" : ["/bin/sh", "-c", "trap exit SIGTERM; /usr/bin/dbus-daemon --config-file=@SC_TEST_CONFIG_INSTALL_DIR@/server/ut-containers-manager/ut-dbus.conf --fork; read"],
     "ipv4Gateway" : "",
     "ipv4" : "",
@@ -10,7 +10,7 @@
     "enableDbusIntegration" : true,
     "cpuQuotaForeground" : -1,
     "cpuQuotaBackground" : 1000,
-    "runMountPoint" : "/tmp/ut-run3",
+    "runMountPoint" : "/tmp/ut-run/ut-containers-manager-console3-dbus",
     "permittedToSend" : [ "/tmp/.*" ],
     "permittedToRecv" : [ "/tmp/.*" ]
 }

@@ -1,6 +1,6 @@
 {
     "name" : "ut-container-test-dbus",
-    "lxcTemplate" : "minimal-dbus1.sh",
+    "lxcTemplate" : "minimal-dbus.sh",
     "initWithArgs" : ["/bin/sh", "-c", "trap exit SIGTERM; /usr/bin/dbus-daemon --config-file=@SC_TEST_CONFIG_INSTALL_DIR@/server/ut-container/ut-dbus.conf --fork; read"],
     "ipv4Gateway" : "",
     "ipv4" : "",
@@ -10,7 +10,7 @@
     "enableDbusIntegration" : true,
     "cpuQuotaForeground" : -1,
     "cpuQuotaBackground" : 1000,
-    "runMountPoint" : "/tmp/ut-run1",
+    "runMountPoint" : "/tmp/ut-run/ut-container-test-dbus",
     "permittedToSend" : [],
     "permittedToRecv" : []
 }

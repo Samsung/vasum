@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(StartStopTest)
 
 BOOST_AUTO_TEST_CASE(DbusConnectionTest)
 {
-    mRunGuard.create("/tmp/ut-run1"); // the same path as in lxc template
+    mRunGuard.create("/tmp/ut-run"); // the same path as in lxc template
 
     auto c = create(TEST_DBUS_CONFIG_PATH);
     c->start();

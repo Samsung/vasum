@@ -449,8 +449,8 @@ private:
         if (isHost()) {
             return "unix:path=/var/run/dbus/system_bus_socket";
         }
-        return "unix:path=/tmp/ut-run" + std::to_string(mId) +
-               "/dbus/system_bus_socket";
+        return "unix:path=/tmp/ut-run/ut-containers-manager-console" + std::to_string(mId) +
+               "-dbus/dbus/system_bus_socket";
     }
 };
 
@@ -485,15 +485,11 @@ struct Fixture {
     security_containers::utils::ScopedGlibLoop mLoop;
 
     utils::ScopedDir mContainersPathGuard;
-    utils::ScopedDir mRun1Guard;
-    utils::ScopedDir mRun2Guard;
-    utils::ScopedDir mRun3Guard;
+    utils::ScopedDir mRunGuard;
 
     Fixture()
         : mContainersPathGuard(CONTAINERS_PATH)
-        , mRun1Guard("/tmp/ut-run1")
-        , mRun2Guard("/tmp/ut-run2")
-        , mRun3Guard("/tmp/ut-run3")
+        , mRunGuard("/tmp/ut-run")
     {}
 };
 
@@ -906,11 +902,11 @@ namespace {
 
     const DbusAccessory::Dbuses EXPECTED_DBUSES_STARTED = {
         {"ut-containers-manager-console1-dbus",
-         "unix:path=/tmp/ut-run1/dbus/system_bus_socket"},
+         "unix:path=/tmp/ut-run/ut-containers-manager-console1-dbus/dbus/system_bus_socket"},
         {"ut-containers-manager-console2-dbus",
-         "unix:path=/tmp/ut-run2/dbus/system_bus_socket"},
+         "unix:path=/tmp/ut-run/ut-containers-manager-console2-dbus/dbus/system_bus_socket"},
         {"ut-containers-manager-console3-dbus",
-         "unix:path=/tmp/ut-run3/dbus/system_bus_socket"}};
+         "unix:path=/tmp/ut-run/ut-containers-manager-console3-dbus/dbus/system_bus_socket"}};
 } // namespace
 
 BOOST_AUTO_TEST_CASE(GetContainerDbusesTest)
