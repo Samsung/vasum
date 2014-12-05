@@ -29,7 +29,7 @@
 #include <cxxabi.h>
 #include <stdexcept>
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 std::string getTypeName(const std::type_info& ti)
@@ -47,4 +47,4 @@ std::string getTypeName(const std::type_info& ti)
 }
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum

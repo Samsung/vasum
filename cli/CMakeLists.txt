@@ -27,7 +27,7 @@ ADD_EXECUTABLE(${CLI_CODENAME} ${cli_SRCS})
 
 
 ## Link libraries ##############################################################
-PKG_CHECK_MODULES(LIB_DEPS REQUIRED security-containers)
+PKG_CHECK_MODULES(LIB_DEPS REQUIRED vasum)
 
 INCLUDE_DIRECTORIES(${CLIENT_FOLDER})
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})

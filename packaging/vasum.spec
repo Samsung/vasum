@@ -1,6 +1,6 @@
 %define script_dir %{_sbindir}
-# Security Containers Server's user info - it should already exist in the system
-%define scs_user          security-containers
+# Vasum Server's user info - it should already exist in the system
+%define vsm_user          security-containers
 # The group that has read and write access to /dev/input/event* devices.
 # It may vary between platforms.
 %define input_event_group input
@@ -9,7 +9,7 @@
 # The group that has write access to /dev/tty* devices.
 %define tty_group tty
 
-Name:           security-containers
+Name:           vasum
 Version:        0.1.1
 Release:        0
 Source0:        %{name}-%{version}.tar.gz
@@ -37,19 +37,19 @@ between them. A process from inside a container can request a switch of context
 (display, input devices) to the other container.
 
 %files
-%manifest packaging/security-containers.manifest
+%manifest packaging/vasum.manifest
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/security-containers-server
-%dir /etc/security-containers
-%dir /etc/security-containers/containers
-%dir /etc/security-containers/lxc-templates
-%dir /etc/security-containers/templates
-%config /etc/security-containers/daemon.conf
-%config /etc/security-containers/containers/*.conf
-%attr(755,root,root) /etc/security-containers/lxc-templates/*.sh
-%config /etc/security-containers/templates/*.conf
-%{_unitdir}/security-containers.service
-%{_unitdir}/multi-user.target.wants/security-containers.service
+%attr(755,root,root) %{_bindir}/vasum-server
+%dir /etc/vasum
+%dir /etc/vasum/containers
+%dir /etc/vasum/lxc-templates
+%dir /etc/vasum/templates
+%config /etc/vasum/daemon.conf
+%config /etc/vasum/containers/*.conf
+%attr(755,root,root) /etc/vasum/lxc-templates/*.sh
+%config /etc/vasum/templates/*.conf
+%{_unitdir}/vasum.service
+%{_unitdir}/multi-user.target.wants/vasum.service
 /etc/dbus-1/system.d/org.tizen.containers.host.conf
 
 %prep
@@ -68,7 +68,7 @@ between them. A process from inside a container can request a switch of context
          -DSCRIPT_INSTALL_DIR=%{script_dir} \
          -DSYSTEMD_UNIT_DIR=%{_unitdir} \
          -DPYTHON_SITELIB=%{python_sitelib} \
-         -DSECURITY_CONTAINERS_USER=%{scs_user} \
+         -DVASUM_USER=%{vsm_user} \
          -DINPUT_EVENT_GROUP=%{input_event_group} \
          -DDISK_GROUP=%{disk_group} \
          -DTTY_GROUP=%{tty_group}
@@ -77,7 +77,7 @@ make -k %{?jobs:-j%jobs}
 %install
 %make_install
 mkdir -p %{buildroot}/%{_unitdir}/multi-user.target.wants
-ln -s ../security-containers.service %{buildroot}/%{_unitdir}/multi-user.target.wants/security-containers.service
+ln -s ../vasum.service %{buildroot}/%{_unitdir}/multi-user.target.wants/vasum.service
 
 %clean
 rm -rf %{buildroot}
@@ -88,12 +88,12 @@ if [ $1 == 1 ]; then
     systemctl daemon-reload || :
 fi
 # set needed caps on the binary to allow restart without loosing them
-setcap CAP_SYS_ADMIN,CAP_MAC_OVERRIDE,CAP_SYS_TTY_CONFIG+ei %{_bindir}/security-containers-server
+setcap CAP_SYS_ADMIN,CAP_MAC_OVERRIDE,CAP_SYS_TTY_CONFIG+ei %{_bindir}/vasum-server
 
 %preun
 # Stop the service before uninstall
 if [ $1 == 0 ]; then
-     systemctl stop security-containers.service || :
+     systemctl stop vasum.service || :
 fi
 
 %postun
@@ -101,31 +101,31 @@ fi
 systemctl daemon-reload || :
 if [ $1 -ge 1 ]; then
     # TODO: at this point an appropriate notification should show up
-    eval `systemctl show security-containers --property=MainPID`
+    eval `systemctl show vasum --property=MainPID`
     if [ -n "$MainPID" -a "$MainPID" != "0" ]; then
         kill -USR1 $MainPID
     fi
-    echo "Security Containers updated. Reboot is required for the changes to take effect..."
+    echo "Vasum updated. Reboot is required for the changes to take effect..."
 else
-    echo "Security Containers removed. Reboot is required for the changes to take effect..."
+    echo "Vasum removed. Reboot is required for the changes to take effect..."
 fi
 
 ## Client Package ##############################################################
 %package client
-Summary:          Security Containers Client
+Summary:          Vasum Client
 Group:            Development/Libraries
-Requires:         security-containers = %{version}-%{release}
+Requires:         vasum = %{version}-%{release}
 Requires(post):   /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
 %description client
-Library interface to the security-containers daemon
+Library interface to the vasum daemon
 
 %files client
-%manifest packaging/libsecurity-containers-client.manifest
+%manifest packaging/libvasum-client.manifest
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libsecurity-containers.so.0.0.1
-%{_libdir}/libsecurity-containers.so.0
+%attr(755,root,root) %{_libdir}/libvasum.so.0.0.1
+%{_libdir}/libvasum.so.0
 
 %post client -p /sbin/ldconfig
 
@@ -134,34 +134,34 @@ Library interface to the security-containers daemon
 
 ## Devel Package ###############################################################
 %package devel
-Summary:          Security Containers Client Devel
+Summary:          Vasum Client Devel
 Group:            Development/Libraries
-Requires:         security-containers = %{version}-%{release}
-Requires:         security-containers-client = %{version}-%{release}
+Requires:         vasum = %{version}-%{release}
+Requires:         vasum-client = %{version}-%{release}
 
 %description devel
 Development package including the header files for the client library
 
 %files devel
-%manifest packaging/security-containers.manifest
+%manifest packaging/vasum.manifest
 %defattr(644,root,root,755)
-%{_libdir}/libsecurity-containers.so
-%{_includedir}/security-containers
+%{_libdir}/libvasum.so
+%{_includedir}/vasum
 %{_libdir}/pkgconfig/*.pc
 
 
 ## Container Support Package ###################################################
 # TODO move to a separate repository
 %package container-support
-Summary:          Security Containers Support
+Summary:          Vasum Support
 Group:            Security/Other
-Conflicts:        security-containers
+Conflicts:        vasum
 
 %description container-support
 Containers support installed inside every container.
 
 %files container-support
-%manifest packaging/security-containers-container-support.manifest
+%manifest packaging/vasum-container-support.manifest
 %defattr(644,root,root,755)
 /etc/dbus-1/system.d/org.tizen.containers.zone.conf
 
@@ -169,40 +169,40 @@ Containers support installed inside every container.
 ## Container Daemon Package ####################################################
 # TODO move to a separate repository
 %package container-daemon
-Summary:          Security Containers Containers Daemon
+Summary:          Vasum Containers Daemon
 Group:            Security/Other
-Requires:         security-containers-container-support = %{version}-%{release}
+Requires:         vasum-container-support = %{version}-%{release}
 
 %description container-daemon
 Daemon running inside every container.
 
 %files container-daemon
-%manifest packaging/security-containers-container-daemon.manifest
+%manifest packaging/vasum-container-daemon.manifest
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/security-containers-container-daemon
+%attr(755,root,root) %{_bindir}/vasum-container-daemon
 /etc/dbus-1/system.d/org.tizen.containers.zone.daemon.conf
 
 
 ## Command Line Interface ######################################################
 %package cli
-Summary:          Security Containers Command Line Interface
+Summary:          Vasum Command Line Interface
 Group:            Security/Other
-Requires:         security-containers-client = %{version}-%{release}
+Requires:         vasum-client = %{version}-%{release}
 
 %description cli
-Command Line Interface for security-containers.
+Command Line Interface for vasum.
 
 %files cli
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/security-containers-cli
+%attr(755,root,root) %{_bindir}/vasum-cli
 
 
 ## Test Package ################################################################
 %package tests
-Summary:          Security Containers Tests
+Summary:          Vasum Tests
 Group:            Development/Libraries
-Requires:         security-containers = %{version}-%{release}
-Requires:         security-containers-client = %{version}-%{release}
+Requires:         vasum = %{version}-%{release}
+Requires:         vasum-client = %{version}-%{release}
 Requires:         python
 Requires:         python-xml
 Requires:         boost-test
@@ -211,14 +211,14 @@ Requires:         boost-test
 Unit tests for both: server and client and integration tests.
 
 %files tests
-%manifest packaging/security-containers-server-tests.manifest
+%manifest packaging/vasum-server-tests.manifest
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/security-containers-server-unit-tests
-%attr(755,root,root) %{script_dir}/sc_all_tests.py
-%attr(755,root,root) %{script_dir}/sc_int_tests.py
-%attr(755,root,root) %{script_dir}/sc_launch_test.py
-%{script_dir}/sc_test_parser.py
-%{_datadir}/security-containers/tests
-%attr(755,root,root) %{_datadir}/security-containers/lxc-templates
-%{python_sitelib}/sc_integration_tests
+%attr(755,root,root) %{_bindir}/vasum-server-unit-tests
+%attr(755,root,root) %{script_dir}/vsm_all_tests.py
+%attr(755,root,root) %{script_dir}/vsm_int_tests.py
+%attr(755,root,root) %{script_dir}/vsm_launch_test.py
+%{script_dir}/vsm_test_parser.py
+%{_datadir}/vasum/tests
+%attr(755,root,root) %{_datadir}/vasum/lxc-templates
+%{python_sitelib}/vsm_integration_tests
 /etc/dbus-1/system.d/org.tizen.containers.tests.conf

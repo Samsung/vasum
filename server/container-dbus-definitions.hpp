@@ -28,7 +28,7 @@
 #include "common-dbus-definitions.hpp"
 
 
-namespace security_containers {
+namespace vasum {
 namespace api {
 namespace container {
 
@@ -79,7 +79,7 @@ const std::string DEFINITION =
 
 } // namespace container
 } // namespace api
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // SERVER_CONTAINER_DBUS_DEFINITIONS_HPP

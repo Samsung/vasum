@@ -45,8 +45,8 @@
 #include <chrono>
 #include <boost/filesystem.hpp>
 
-using namespace security_containers;
-using namespace security_containers::ipc;
+using namespace vasum;
+using namespace vasum::ipc;
 namespace fs = boost::filesystem;
 
 namespace {

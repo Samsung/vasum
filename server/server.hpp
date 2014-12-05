@@ -31,7 +31,7 @@
 #include <string>
 
 
-namespace security_containers {
+namespace vasum {
 
 
 class Server {
@@ -64,7 +64,7 @@ private:
 };
 
 
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // SERVER_SERVER_HPP

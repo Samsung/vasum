@@ -31,7 +31,7 @@
 #include <memory>
 
 
-namespace security_containers {
+namespace vasum {
 namespace container_daemon {
 
 class Daemon {
@@ -48,7 +48,7 @@ private:
 
 
 } // namespace container_daemon
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // CONTAINER_DAEMON_DAEMON_HPP

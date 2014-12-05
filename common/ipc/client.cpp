@@ -28,7 +28,7 @@
 #include "ipc/internals/socket.hpp"
 #include "ipc/exception.hpp"
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 Client::Client(const std::string& socketPath)
@@ -92,4 +92,4 @@ void Client::removeMethod(const MethodID methodID)
 }
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum

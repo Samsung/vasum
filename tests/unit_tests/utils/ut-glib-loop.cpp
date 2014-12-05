@@ -33,8 +33,8 @@
 
 BOOST_AUTO_TEST_SUITE(UtilsGlibLoopSuite)
 
-using namespace security_containers;
-using namespace security_containers::utils;
+using namespace vasum;
+using namespace vasum::utils;
 
 
 namespace {

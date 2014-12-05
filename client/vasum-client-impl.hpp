@@ -20,13 +20,13 @@
 /**
  * @file
  * @author  Mateusz Malicki (m.malicki2@samsung.com)
- * @brief   This file contains security-containers-server's client definition
+ * @brief   This file contains vasum-server's client definition
  */
 
-#ifndef SECURITY_CONTAINERS_CLIENT_IMPL_HPP
-#define SECURITY_CONTAINERS_CLIENT_IMPL_HPP
+#ifndef VASUM_CLIENT_IMPL_HPP
+#define VASUM_CLIENT_IMPL_HPP
 
-#include "security-containers-client.h"
+#include "vasum-client.h"
 #include <dbus/connection.hpp>
 #include <exception>
 
@@ -46,7 +46,7 @@ struct DbusInterfaceInfo {
 };
 
 /**
- * security-containers's client definition.
+ * vasum's client definition.
  *
  * Client uses dbus API.
  */
@@ -305,4 +305,4 @@ public:
     static VsmStatus vsm_stop_glib_loop() noexcept;
 };
 
-#endif /* SECURITY_CONTAINERS_CLIENT_IMPL_HPP */
+#endif /* VASUM_CLIENT_IMPL_HPP */

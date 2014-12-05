@@ -28,14 +28,14 @@
 
 #include "base-exception.hpp"
 
-namespace security_containers {
+namespace vasum {
 
 
 /**
  * Base class for exceptions in IPC
  */
-struct IPCException: public SecurityContainersException {
-    IPCException(const std::string& error) : SecurityContainersException(error) {}
+struct IPCException: public VasumException {
+    IPCException(const std::string& error) : VasumException(error) {}
 };
 
 struct IPCParsingException: public IPCException {

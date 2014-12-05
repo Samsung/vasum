@@ -1,2 +1,2 @@
-__all__ = ["sc_test_utils",
+__all__ = ["vsm_test_utils",
           ]

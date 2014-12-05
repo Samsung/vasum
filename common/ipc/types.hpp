@@ -31,7 +31,7 @@
 #include <memory>
 #include <string>
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 typedef int FileDescriptor;
@@ -73,6 +73,6 @@ struct ResultHandler {
 };
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum
 
 #endif // COMMON_IPC_HANDLERS_HPP

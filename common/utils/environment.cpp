@@ -36,7 +36,7 @@
 #include <cstring>
 
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 
@@ -127,4 +127,4 @@ bool launchAsRoot(const std::function<bool()>& func)
 
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum

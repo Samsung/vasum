@@ -34,7 +34,7 @@
 #include <cstring>
 #include <cstdint>
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 EventFD::EventFD()
@@ -74,4 +74,4 @@ void EventFD::receive()
 
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum

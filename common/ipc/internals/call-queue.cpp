@@ -28,7 +28,7 @@
 #include "ipc/exception.hpp"
 #include "logger/logger.hpp"
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 CallQueue::CallQueue()
@@ -63,4 +63,4 @@ CallQueue::Call CallQueue::pop()
 }
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum

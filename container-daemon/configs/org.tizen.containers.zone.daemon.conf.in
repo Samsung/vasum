@@ -2,7 +2,7 @@
         "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
 
 <busconfig>
-        <policy user="${SECURITY_CONTAINERS_USER}">
+        <policy user="${VASUM_USER}">
                 <allow own="org.tizen.containers.zone.daemon"/>
                 <allow send_destination="org.tizen.containers.zone.daemon"/>
                 <allow receive_sender="org.tizen.containers.zone.daemon"/>

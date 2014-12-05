@@ -35,7 +35,7 @@
 #include <chrono>
 #include <vector>
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 Acceptor::Acceptor(const std::string& socketPath, const NewConnectionCallback& newConnectionCallback)
@@ -127,4 +127,4 @@ void Acceptor::run()
 }
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum

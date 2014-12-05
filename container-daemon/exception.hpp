@@ -29,20 +29,20 @@
 #include "base-exception.hpp"
 
 
-namespace security_containers {
+namespace vasum {
 namespace container_daemon {
 
 /**
- * Base class for exceptions in Security Containers Container Daemon
+ * Base class for exceptions in Vasum Container Daemon
  */
-struct ContainerDaemonException: public SecurityContainersException {
+struct ContainerDaemonException: public VasumException {
 
-    ContainerDaemonException(const std::string& error = "") : SecurityContainersException(error) {}
+    ContainerDaemonException(const std::string& error = "") : VasumException(error) {}
 };
 
 
 } // container_daemon
-} // security_containers
+} // vasum
 
 
 #endif // CONTAINER_DAEMON_EXCEPTION_HPP

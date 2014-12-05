@@ -38,7 +38,7 @@ namespace {
 const std::string CONTAINERS_PATH = "/tmp/ut-containers"; // the same as in daemon.conf
 
 struct Fixture {
-    security_containers::utils::ScopedDir mContainersPathGuard;
+    vasum::utils::ScopedDir mContainersPathGuard;
 
     Fixture()
         : mContainersPathGuard(CONTAINERS_PATH)
@@ -48,11 +48,11 @@ struct Fixture {
 
 BOOST_FIXTURE_TEST_SUITE(ServerSuite, Fixture)
 
-using namespace security_containers;
+using namespace vasum;
 using namespace config;
 
-const std::string TEST_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-server/test-daemon.conf";
-const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-server/buggy-daemon.conf";
+const std::string TEST_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-server/test-daemon.conf";
+const std::string BUGGY_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-server/buggy-daemon.conf";
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/missing-daemon.conf";
 
 

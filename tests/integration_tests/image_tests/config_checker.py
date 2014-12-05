@@ -1,16 +1,16 @@
-'''! Module used to collect list of containers based on the security-containers configuration files.
+'''! Module used to collect list of containers based on the vasum configuration files.
 
 @author: Michal Witanowski (m.witanowski@samsung.com)
 '''
 import os
 import json
 import xml.etree.ElementTree as ET
-from sc_integration_tests.common import sc_test_utils
+from vsm_integration_tests.common import vsm_test_utils
 from pprint import pprint
 
 
 class ConfigChecker:
-    '''! This class verifies security-containers configuration files and collects dictionary with
+    '''! This class verifies vasum configuration files and collects dictionary with
          containers existing in the system (name and rootfs path).
     '''
 
@@ -61,7 +61,7 @@ class ConfigChecker:
         # load main daemon JSON config file
         if not os.path.isfile(mainConfigPath):
             raise Exception(mainConfigPath + " not found. " +
-                            "Please verify that security containers is properly installed.")
+                            "Please verify that vasum is properly installed.")
         with open(mainConfigPath) as daemonConfigStr:
             daemonConfigData = json.load(daemonConfigStr)
             daemonConfigDir = os.path.dirname(os.path.abspath(mainConfigPath))
@@ -74,7 +74,7 @@ class ConfigChecker:
                 containerConfigPath = os.path.join(daemonConfigDir, configPath)
                 if not os.path.isfile(containerConfigPath):
                     raise Exception(containerConfigPath + " not found. " +
-                                    "Please verify that security containers is properly installed.")
+                                    "Please verify that vasum is properly installed.")
                 with open(containerConfigPath) as containerConfigStr:
                     containerConfigData = json.load(containerConfigStr)
 
@@ -82,7 +82,7 @@ class ConfigChecker:
                     libvirtConfigPath = os.path.join(daemonConfigDir, "containers",
                                                      containerConfigData["config"])
 
-                    output, ret = sc_test_utils.launchProc("virt-xml-validate " + libvirtConfigPath)
+                    output, ret = vsm_test_utils.launchProc("virt-xml-validate " + libvirtConfigPath)
                     if ret == 0:
                         self.__parseLibvirtXML(libvirtConfigPath)
                     else:

@@ -24,7 +24,7 @@
 
 #include "config.hpp"
 #include "command-line-interface.hpp"
-#include <security-containers-client.h>
+#include <vasum-client.h>
 
 #include <map>
 #include <stdexcept>
@@ -34,7 +34,7 @@
 
 using namespace std;
 
-namespace security_containers {
+namespace vasum {
 namespace cli {
 
 namespace {
@@ -201,4 +201,4 @@ void lookup_zone_by_id(int pos, int argc, const char** argv)
 }
 
 } // namespace cli
-} // namespace security_containers
+} // namespace vasum

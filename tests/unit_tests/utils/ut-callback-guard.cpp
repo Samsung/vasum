@@ -35,7 +35,7 @@
 
 BOOST_AUTO_TEST_SUITE(CallbackGuardSuite)
 
-using namespace security_containers::utils;
+using namespace vasum::utils;
 
 const int unsigned TIMEOUT = 1000;
 

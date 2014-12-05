@@ -17,7 +17,7 @@
 # @author Jan Olszak (j.olszak@samsung.com)
 #
 
-MESSAGE(STATUS "Installing configs for the Server Unit Tests to " ${SC_TEST_CONFIG_INSTALL_DIR})
+MESSAGE(STATUS "Installing configs for the Server Unit Tests to " ${VSM_TEST_CONFIG_INSTALL_DIR})
 
 FILE(GLOB server_manager_CONF       ut-server/*.conf)
 FILE(GLOB server_container_CONF     ut-server/containers/*.conf)
@@ -73,35 +73,35 @@ FILE(GLOB manager_container_TEMPLATE_GEN ${CMAKE_BINARY_DIR}/ut-containers-manag
 
 ## Install #####################################################################
 INSTALL(FILES        ${server_manager_CONF}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-server)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-server)
 INSTALL(FILES        ${server_manager_CONF_GEN}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-server)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-server)
 INSTALL(FILES        ${server_container_CONF}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-server/containers)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-server/containers)
 
 INSTALL(FILES        ${manager_manager_CONF}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager)
 INSTALL(FILES        ${manager_manager_CONF_GEN}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager)
 INSTALL(FILES        ${manager_container_CONF}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/containers)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/containers)
 INSTALL(FILES        ${manager_container_CONF_GEN}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/containers)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/containers)
 INSTALL(FILES        ${manager_container_TEMPLATE_GEN}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/templates)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/templates)
 
 INSTALL(FILES        ${container_CONF}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-container)
 INSTALL(FILES        ${container_container_CONF}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container/containers)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-container/containers)
 INSTALL(FILES        ${container_container_CONF_GEN}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container/containers)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-container/containers)
 
 INSTALL(FILES        ${admin_container_CONF}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container-admin/containers)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-container-admin/containers)
 
 INSTALL(FILES        ${connection_CONF}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/server/ut-container-connection)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-container-connection)
 
 INSTALL(FILES        dbus-1/system.d/org.tizen.containers.tests.conf
         DESTINATION  ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)

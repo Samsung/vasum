@@ -28,7 +28,7 @@
 #include <string>
 
 
-namespace security_containers {
+namespace vasum {
 namespace testapi {
 
 
@@ -49,7 +49,7 @@ const std::string DEFINITION =
 
 
 } // namespace testapi
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // UNIT_TESTS_SERVER_TEST_DBUS_DEFINITIONS_HPP

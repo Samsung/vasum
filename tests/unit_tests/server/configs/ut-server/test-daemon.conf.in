@@ -7,7 +7,7 @@
     "runMountPointPrefix" : "",
     "foregroundId" : "ut-server-container1",
     "defaultId" : "ut-server-container1",
-    "lxcTemplatePrefix" : "@SC_TEST_LXC_TEMPLATES_INSTALL_DIR@",
+    "lxcTemplatePrefix" : "@VSM_TEST_LXC_TEMPLATES_INSTALL_DIR@",
     "inputConfig" : {"enabled" : false,
                      "device" : "gpio-keys.4",
                      "code" : 139,

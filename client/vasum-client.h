@@ -20,12 +20,12 @@
 /**
  * @file
  * @author  Mateusz Malicki (m.malicki2@samsung.com)
- * @brief   This file contains the public API for Security Containers Client
+ * @brief   This file contains the public API for Vasum Client
  *
  * @par Example usage:
  * @code
 #include <stdio.h>
-#include "client/security-containers-client.h"
+#include "client/vasum-client.h"
 
 int main(int argc, char** argv)
 {
@@ -75,8 +75,8 @@ finish:
  @endcode
  */
 
-#ifndef SECURITY_CONTAINERS_CLIENT_H
-#define SECURITY_CONTAINERS_CLIENT_H
+#ifndef VASUM_CLIENT_H
+#define VASUM_CLIENT_H
 
 #include <stdint.h>
 #include <sys/stat.h>
@@ -87,7 +87,7 @@ extern "C"
 #endif
 
 /**
- * security-containers-server's client pointer.
+ * vasum-server's client pointer.
  */
 typedef void* VsmClient;
 
@@ -205,7 +205,7 @@ VsmStatus vsm_start_glib_loop();
 VsmStatus vsm_stop_glib_loop();
 
 /**
- * Create a new security-containers-server's client.
+ * Create a new vasum-server's client.
  *
  * @return Created client pointer or NULL on failure.
  */
@@ -214,38 +214,38 @@ VsmClient vsm_client_create();
 /**
  * Release client resources.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  */
 void vsm_client_free(VsmClient client);
 
 /**
- * Get status code of last security-containers-server communication.
+ * Get status code of last vasum-server communication.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @return status of this function call
  */
 VsmStatus vsm_get_status(VsmClient client);
 
 /**
- * Get status message of the last security-containers-server communication.
+ * Get status message of the last vasum-server communication.
  *
- * @param[in] client security-containers-server's client
- * @return last status message from security-containers-server communication
+ * @param[in] client vasum-server's client
+ * @return last status message from vasum-server communication
  */
 const char* vsm_get_status_message(VsmClient client);
 
 /**
- * Connect client to the security-containers-server.
+ * Connect client to the vasum-server.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @return status of this function call
  */
 VsmStatus vsm_connect(VsmClient client);
 
 /**
- * Connect client to the security-containers-server via custom address.
+ * Connect client to the vasum-server via custom address.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] address dbus address
  * @return status of this function call
  */
@@ -301,7 +301,7 @@ typedef void (*VsmContainerDbusStateCallback)(const char* containerId,
 /**
  * Get dbus address of each container.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[out] keys array of containers name
  * @param[out] values array of containers dbus address
  * @return status of this function call
@@ -313,7 +313,7 @@ VsmStatus vsm_get_container_dbuses(VsmClient client, VsmArrayString* keys, VsmAr
 /**
  * Get containers name.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[out] array array of containers name
  * @return status of this function call
  * @remark Use vsm_array_string_free() to free memory occupied by @p array.
@@ -323,7 +323,7 @@ VsmStatus vsm_get_zone_ids(VsmClient client, VsmArrayString* array);
 /**
  * Get active (foreground) container name.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[out] id active container name
  * @return status of this function call
  * @remark Use @p vsm_string_free() to free memory occupied by @p id.
@@ -333,7 +333,7 @@ VsmStatus vsm_get_active_container_id(VsmClient client, VsmString* id);
 /**
  * Get container name of process with given pid.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] pid process id
  * @param[out] id active container name
  * @return status of this function call
@@ -344,7 +344,7 @@ VsmStatus vsm_lookup_zone_by_pid(VsmClient client, int pid, VsmString* id);
 /**
  * Get zone informations of zone with given id.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] id zone name
  * @param[out] zone zone informations
  * @return status of this function call
@@ -355,7 +355,7 @@ VsmStatus vsm_lookup_zone_by_id(VsmClient client, const char* id, VsmZone* zone)
 /**
  * Get zone name with given terminal.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] terminal terminal id
  * @param[out] id zone name with given terminal
  * @return status of this function call
@@ -366,7 +366,7 @@ VsmStatus vsm_lookup_zone_by_terminal_id(VsmClient client, int terminal, VsmStri
 /**
  * Set active (foreground) container.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] id container name
  * @return status of this function call
  */
@@ -375,7 +375,7 @@ VsmStatus vsm_set_active_container(VsmClient client, const char* id);
 /**
  * Create and add container
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] id container id
  * @param[in] tname template name, NULL for default
  * @return status of this function call
@@ -385,7 +385,7 @@ VsmStatus vsm_create_zone(VsmClient client, const char* id, const char* tname);
 /**
  * Remove zone
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] id container id
  * @param[in] force if 0 data will be kept, otherwise data will be lost
  * @return status of this function call
@@ -395,7 +395,7 @@ VsmStatus vsm_destroy_zone(VsmClient clent, const char* id, int force);
 /**
  * Shutdown zone
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] id zone name
  * @return status of this function call
  */
@@ -404,7 +404,7 @@ VsmStatus vsm_shutdown_zone(VsmClient client, const char* id);
 /**
  * Start zone
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] id zone name
  * @return status of this function call
  */
@@ -413,7 +413,7 @@ VsmStatus vsm_start_zone(VsmClient client, const char* id);
 /**
  * Lock zone
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] id zone name
  * @return status of this function call
  */
@@ -422,7 +422,7 @@ VsmStatus vsm_lock_zone(VsmClient client, const char* id);
 /**
  * Unlock zone
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] id zone name
  * @return status of this function call
  */
@@ -433,7 +433,7 @@ VsmStatus vsm_unlock_zone(VsmClient client, const char* id);
  *
  * @note The callback function will be invoked on a different thread.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] containerDbusStateCallback callback function
  * @param[in] data some extra data that will be passed to callback function
  * @param[out] subscriptionId subscription identifier that can be used to unsubscribe signal,
@@ -448,7 +448,7 @@ VsmStatus vsm_add_state_callback(VsmClient client,
 /**
  * Unregister dbus state change callback function.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] subscriptionId subscription identifier returned by vsm_add_state_callback
  * @return status of this function call
  */
@@ -457,7 +457,7 @@ VsmStatus vsm_del_state_callback(VsmClient client, VsmSubscriptionId subscriptio
 /**
  * Grant access to device
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] zone zone name
  * @param[in] device device path
  * @param[in] flags access flags
@@ -471,7 +471,7 @@ VsmStatus vsm_zone_grant_device(VsmClient client,
 /**
  * Revoke access to device
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] zone zone name
  * @param[in] device device path
  * @return status of this function call
@@ -481,7 +481,7 @@ VsmStatus vsm_revoke_device(VsmClient client, const char* zone, const char* devi
 /**
  * Get array of netdev from given zone
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] zone zone name
  * @param[out] netdevIds array of netdev id
  * @return status of this function call
@@ -492,7 +492,7 @@ VsmStatus vsm_zone_get_netdevs(VsmClient client, const char* zone, VsmArrayStrin
 /**
  * Get ipv4 address for given netdevId
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] zone zone name
  * @param[in] netdevId netdev id
  * @param[out] addr ipv4 address
@@ -506,7 +506,7 @@ VsmStatus vsm_netdev_get_ipv4_addr(VsmClient client,
 /**
  * Get ipv6 address for given netdevId
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] zone zone name
  * @param[in] netdevId netdev id
  * @param[out] addr ipv6 address
@@ -520,7 +520,7 @@ VsmStatus vsm_netdev_get_ipv6_addr(VsmClient client,
 /**
  * Set ipv4 address for given netdevId
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] zone zone name
  * @param[in] netdevId netdev id
  * @param[in] addr ipv4 address
@@ -536,7 +536,7 @@ VsmStatus vsm_netdev_set_ipv4_addr(VsmClient client,
 /**
  * Set ipv6 address for given netdevId
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] zone zone name
  * @param[in] netdevId netdev id
  * @param[in] addr ipv6 address
@@ -552,7 +552,7 @@ VsmStatus vsm_netdev_set_ipv6_addr(VsmClient client,
 /**
  * Create netdev in zone
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] zone zone name
  * @param[in] netdevType netdev type
  * @param[in] target TODO: this is taken form zone-control
@@ -568,7 +568,7 @@ VsmStatus vsm_create_netdev(VsmClient client,
 /**
  * Remove netdev from zone
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] zone zone name
  * @param[in] netdevId network device id
  * @return status of this function call
@@ -578,7 +578,7 @@ VsmStatus vsm_destroy_netdev(VsmClient client, const char* zone, const char* net
 /**
  * Get netdev informations
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] zone zone name
  * @param[in] netdevId network device id
  * @param[out] netdev netdev informations
@@ -595,7 +595,7 @@ VsmStatus vsm_lookup_netdev_by_name(VsmClient client,
  *
  * Declare file, directory or pipe that will be created while container startup
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] type file type
  * @param[in] container container id
  * @param[in] path path to file
@@ -618,7 +618,7 @@ VsmStatus vsm_declare_file(VsmClient client,
  * Declare mount that will be created while container startup
  * Parameters are passed to mount system function
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] source device path (path in host)
  * @param[in] container container id
  * @param[in] target mount point (path in container)
@@ -641,7 +641,7 @@ VsmStatus vsm_declare_mount(VsmClient client,
  * Declare link that will be created while container startup
  * Parameters are passed to link system function
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] source path to link source (in host)
  * @param[in] container container id
  * @param[in] target path to link name (in container)
@@ -679,7 +679,7 @@ typedef void (*VsmNotificationCallback)(const char* container,
 /**
  * Send message to active container.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] application application name
  * @param[in] message message
  * @return status of this function call
@@ -689,7 +689,7 @@ VsmStatus vsm_notify_active_container(VsmClient client, const char* application,
 /**
  * Move file between containers.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] destContainer destination container id
  * @param[in] path path to moved file
  * @return status of this function call
@@ -701,7 +701,7 @@ VsmStatus vsm_file_move_request(VsmClient client, const char* destContainer, con
  *
  * @note The callback function will be invoked on a different thread.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] notificationCallback callback function
  * @param[in] data some extra data that will be passed to callback function
  * @param[out] subscriptionId subscription identifier that can be used to unsubscribe signal,
@@ -716,7 +716,7 @@ VsmStatus vsm_add_notification_callback(VsmClient client,
 /**
  * Unregister notification callback function.
  *
- * @param[in] client security-containers-server's client
+ * @param[in] client vasum-server's client
  * @param[in] subscriptionId subscription identifier returned by vsm_add_notification_callback
  * @return status of this function call
  */
@@ -728,4 +728,4 @@ VsmStatus vsm_del_notification_callback(VsmClient client, VsmSubscriptionId subs
 }
 #endif
 
-#endif /* SECRITY_CONTAINERS_CLIENT_H */
+#endif /* VASUM_CLIENT_H */

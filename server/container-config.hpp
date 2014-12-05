@@ -32,7 +32,7 @@
 #include <vector>
 
 
-namespace security_containers {
+namespace vasum {
 
 
 struct ContainerConfig {
@@ -132,7 +132,6 @@ struct ContainerConfig {
 };
 
 
-}
-
+} // namespace vasum
 
 #endif // SERVER_CONTAINER_CONFIG_HPP

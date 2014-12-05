@@ -34,7 +34,7 @@
 #include <csignal>
 
 
-namespace security_containers {
+namespace vasum {
 namespace container_daemon {
 
 
@@ -87,4 +87,4 @@ void Runner::terminate()
 }
 
 } // namespace container_daemon
-} // namespace security_containers
+} // namespace vasum

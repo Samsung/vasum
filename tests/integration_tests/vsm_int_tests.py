@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-'''@package: sc_integration_tests
+'''@package: vsm_integration_tests
 @author: Lukasz Kostyra (l.kostyra@samsung.com)
 
-Security-containers integration tests launcher. Launches all integration tests.
+Vasum integration tests launcher. Launches all integration tests.
 '''
 import unittest
-from sc_integration_tests.network_tests import *
+from vsm_integration_tests.network_tests import *
 
-from sc_integration_tests.image_tests import *
+from vsm_integration_tests.image_tests import *
 
 # add tests here...
 test_groups = [

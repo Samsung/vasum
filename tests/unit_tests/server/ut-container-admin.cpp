@@ -33,16 +33,16 @@
 #include "utils/scoped-dir.hpp"
 #include "config/manager.hpp"
 
-using namespace security_containers;
+using namespace vasum;
 
 namespace {
 
-const std::string TEST_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container-admin/containers/test.conf";
-const std::string TEST_NO_SHUTDOWN_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container-admin/containers/test-no-shutdown.conf";
-const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container-admin/containers/buggy.conf";
-const std::string MISSING_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container-admin/containers/missing.conf";
+const std::string TEST_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-container-admin/containers/test.conf";
+const std::string TEST_NO_SHUTDOWN_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-container-admin/containers/test-no-shutdown.conf";
+const std::string BUGGY_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-container-admin/containers/buggy.conf";
+const std::string MISSING_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-container-admin/containers/missing.conf";
 const std::string CONTAINERS_PATH = "/tmp/ut-containers";
-const std::string LXC_TEMPLATES_PATH = SC_TEST_LXC_TEMPLATES_INSTALL_DIR;
+const std::string LXC_TEMPLATES_PATH = VSM_TEST_LXC_TEMPLATES_INSTALL_DIR;
 
 struct Fixture {
     utils::ScopedGlibLoop mLoop;

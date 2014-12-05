@@ -32,7 +32,7 @@
 
 BOOST_AUTO_TEST_SUITE(UtilsPathsSuite)
 
-using namespace security_containers::utils;
+using namespace vasum::utils;
 
 BOOST_AUTO_TEST_CASE(CreateFilePathTest)
 {

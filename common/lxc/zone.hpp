@@ -30,7 +30,7 @@
 // fwd declaration of lxc internals
 struct lxc_container;
 
-namespace security_containers {
+namespace vasum {
 namespace lxc {
 
 
@@ -145,7 +145,7 @@ private:
 
 
 } // namespace lxc
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // COMMON_LXC_ZONE_HPP

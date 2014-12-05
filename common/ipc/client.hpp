@@ -31,7 +31,7 @@
 
 #include <string>
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 /**
@@ -212,6 +212,6 @@ void Client::signal(const MethodID methodID,
 }
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum
 
 #endif // COMMON_IPC_CLIENT_HPP

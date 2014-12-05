@@ -27,7 +27,7 @@
 
 #include <vector>
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 template<typename T>
@@ -67,7 +67,7 @@ private:
 typedef CArrayBuilder<const char*> CStringArrayBuilder;
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // COMMON_UTILS_C_ARRAY_HPP

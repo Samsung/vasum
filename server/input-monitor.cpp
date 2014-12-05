@@ -49,10 +49,10 @@
 #include <vector>
 #include <functional>
 
-using namespace security_containers::utils;
+using namespace vasum::utils;
 namespace fs = boost::filesystem;
 
-namespace security_containers {
+namespace vasum {
 
 namespace {
 const int MAX_TIME_WINDOW_SEC = 10;
@@ -292,4 +292,4 @@ bool InputMonitor::isExpectedEventSequence(const struct input_event& ie)
     LOGT("Event sequence not detected");
     return false;
 }
-} // namespace security_containers
+} // namespace vasum

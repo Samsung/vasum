@@ -28,7 +28,7 @@
 #include <string>
 
 
-namespace security_containers {
+namespace vasum {
 
 
 const std::string DBUS_SOCKET_FILE       = "/tmp/container_socket";
@@ -60,7 +60,7 @@ const std::string TESTAPI_DEFINITION =
     "</node>";
 
 
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // UNIT_TESTS_DBUS_TEST_COMMON_HPP

@@ -28,7 +28,7 @@
 #include "proxy-call-policy.hpp"
 
 
-namespace security_containers {
+namespace vasum {
 
 namespace {
 const std::string ANY = "*";
@@ -68,4 +68,4 @@ bool ProxyCallPolicy::isProxyCallAllowed(const std::string& caller,
 }
 
 
-} // namespace security_containers
+} // namespace vasum

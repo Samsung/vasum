@@ -32,7 +32,7 @@
 #include "logger/logger.hpp"
 
 
-namespace security_containers {
+namespace vasum {
 
 
 DbusTestServer::DbusTestServer()
@@ -147,4 +147,4 @@ void DbusTestServer::onMessageCall(const std::string& objectPath,
 }
 
 
-} // namespace security_containers
+} // namespace vasum

@@ -28,7 +28,7 @@
 #include <string>
 #include <typeinfo>
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 std::string getTypeName(const std::type_info& ti);
@@ -39,7 +39,7 @@ template<class T> std::string getTypeName(const T& t)
 }
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // COMMON_TYPE_INFO_HPP

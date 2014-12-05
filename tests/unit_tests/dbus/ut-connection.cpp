@@ -45,8 +45,8 @@
 
 BOOST_AUTO_TEST_SUITE(DbusSuite)
 
-using namespace security_containers;
-using namespace security_containers::utils;
+using namespace vasum;
+using namespace vasum::utils;
 using namespace dbus;
 
 namespace {
@@ -54,7 +54,7 @@ namespace {
 const char* DBUS_DAEMON_PROC = "/usr/bin/dbus-daemon";
 const char* const DBUS_DAEMON_ARGS[] = {
     DBUS_DAEMON_PROC,
-    "--config-file=" SC_TEST_CONFIG_INSTALL_DIR "/dbus/ut-connection/ut-dbus.conf",
+    "--config-file=" VSM_TEST_CONFIG_INSTALL_DIR "/dbus/ut-connection/ut-dbus.conf",
     "--nofork",
     NULL
 };

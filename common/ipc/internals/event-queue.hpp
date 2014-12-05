@@ -33,7 +33,7 @@
 #include <mutex>
 #include <queue>
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 
@@ -119,6 +119,6 @@ bool EventQueue<MessageType>::isEmpty()
 }
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_EVENT_QUEUE_HPP

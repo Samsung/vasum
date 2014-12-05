@@ -35,7 +35,7 @@
 #include <sys/socket.h>
 #include <limits>
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 #define IGNORE_EXCEPTIONS(expr)                        \
@@ -667,4 +667,4 @@ void Processor::cleanCommunication()
 }
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum

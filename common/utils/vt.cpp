@@ -39,7 +39,7 @@ const std::string TTY_DEV = "/dev/tty0";
 
 } // namespace
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 bool activateVT(const int& vt)
@@ -83,4 +83,4 @@ bool activateVT(const int& vt)
 }
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum

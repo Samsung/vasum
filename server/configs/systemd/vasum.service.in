@@ -1,10 +1,10 @@
 [Unit]
-Description=Security Containers Server
+Description=Vasum Server
 ConditionVirtualization=no
 
 [Service]
 Type=simple
-ExecStart=${CMAKE_INSTALL_PREFIX}/bin/security-containers-server
+ExecStart=${CMAKE_INSTALL_PREFIX}/bin/vasum-server
 Restart=on-failure
 ExecReload=/bin/kill -HUP $MAINPID
 

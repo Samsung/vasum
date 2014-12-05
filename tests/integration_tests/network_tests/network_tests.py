@@ -21,7 +21,7 @@
 @author: Jacek Pielaszkiewicz (j.pielaszkie@samsung.com)
 '''
 import unittest
-from sc_integration_tests.common import sc_test_utils
+from vsm_integration_tests.common import vsm_test_utils
 from network_common import *
 
 class NetworkTestCase(unittest.TestCase):

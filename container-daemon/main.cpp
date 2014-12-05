@@ -20,7 +20,7 @@
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Main file for the Security Containers Daemon
+ * @brief   Main file for the Vasum Daemon
  */
 
 // Always log to console in DEBUG mode
@@ -42,7 +42,7 @@
 #include <iostream>
 
 using namespace logger;
-using namespace security_containers;
+using namespace vasum;
 
 namespace po = boost::program_options;
 
@@ -50,7 +50,7 @@ namespace po = boost::program_options;
 namespace {
 
 const std::string PROGRAM_NAME_AND_VERSION =
-    "Security Containers Containers Daemon " PROGRAM_VERSION;
+    "Vasum Containers Daemon " PROGRAM_VERSION;
 
 } // namespace
 

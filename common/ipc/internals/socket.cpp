@@ -39,7 +39,7 @@
 #include <cstring>
 
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 namespace {
@@ -205,4 +205,4 @@ Socket Socket::connectSocket(const std::string& path)
 }
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum

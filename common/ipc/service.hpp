@@ -32,7 +32,7 @@
 
 #include <string>
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 
@@ -220,6 +220,6 @@ void Service::signal(const MethodID methodID,
 }
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum
 
 #endif // COMMON_IPC_SERVICE_HPP

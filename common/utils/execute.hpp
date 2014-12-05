@@ -27,7 +27,7 @@
 
 #include <sys/types.h>
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 bool executeAndWait(const char* fname, const char* const* argv);
@@ -37,7 +37,7 @@ bool executeAndWait(const char* fname, const char* const* argv, int& status);
 bool waitPid(pid_t pid, int& status);
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // COMMON_UTILS_EXECUTE_HPP

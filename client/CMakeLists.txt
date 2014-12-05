@@ -60,5 +60,5 @@ INSTALL(TARGETS     ${PROJECT_NAME}
         DESTINATION ${CMAKE_INSTALL_LIBDIR}
         COMPONENT   RuntimeLibraries)
 
-INSTALL(FILES       security-containers-client.h
+INSTALL(FILES       vasum-client.h
         DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME})

@@ -31,7 +31,7 @@
 #include <atomic>
 #include <queue>
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 /**
@@ -145,6 +145,6 @@ MessageID CallQueue::push(const MethodID methodID,
 }
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_CALL_QUEUE_HPP

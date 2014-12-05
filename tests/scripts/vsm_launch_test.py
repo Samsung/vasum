@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from xml.dom import minidom
-from sc_test_parser import Logger, Parser
+from vsm_test_parser import Logger, Parser
 import subprocess
 import argparse
 import os
@@ -72,7 +72,7 @@ _valgrindCmd = ["valgrind"]
 _gdbCmd = ["gdb", "--args"]
 
 def main():
-    argparser = argparse.ArgumentParser(description="Test binary launcher for security-containers.")
+    argparser = argparse.ArgumentParser(description="Test binary launcher for vasum.")
     group = argparser.add_mutually_exclusive_group()
     group.add_argument('--valgrind', action='store_true',
                         help='Launch test binary inside Valgrind (assuming it is installed).')

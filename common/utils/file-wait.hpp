@@ -28,7 +28,7 @@
 #include <string>
 
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 
@@ -38,7 +38,7 @@ void waitForFile(const std::string& filename, const unsigned int timeoutMs);
 
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // COMMON_UTILS_FILE_WAIT_HPP

@@ -39,7 +39,7 @@
 #include <thread>
 
 
-namespace security_containers {
+namespace vasum {
 
 namespace fs = boost::filesystem;
 
@@ -328,7 +328,7 @@ void Container::reconnectHandler()
             connect();
             LOGI(getId() << ": Reconnected");
             return;
-        } catch (SecurityContainersException&) {
+        } catch (VasumException&) {
             LOGT(getId() << ": Reconnect try " << i + 1 << " has been unsuccessful");
         }
     }
@@ -445,4 +445,4 @@ void Container::declareLink(const std::string& source,
     declareUnit(mProvisionConfig, std::move(unit));
 }
 
-} // namespace security_containers
+} // namespace vasum

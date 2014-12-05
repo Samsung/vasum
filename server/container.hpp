@@ -37,7 +37,7 @@
 #include <boost/regex.hpp>
 
 
-namespace security_containers {
+namespace vasum {
 
 
 class Container {
@@ -278,7 +278,6 @@ private:
 };
 
 
-}
-
+} // namespace vasum
 
 #endif // SERVER_CONTAINER_HPP

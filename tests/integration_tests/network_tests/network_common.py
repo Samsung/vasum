@@ -16,7 +16,7 @@
 # @author Jacek Pielaszkiewicz (j.pielaszkie@samsung.com)
 #
 
-from sc_integration_tests.common import sc_test_utils
+from vsm_integration_tests.common import vsm_test_utils
 import subprocess
 import string
 import sys
@@ -94,7 +94,7 @@ def runCommand(cmd, blockDebug=False):
 
     rc=0
     try:
-        out=sc_test_utils.launchProc(run_cmd)
+        out=vsm_test_utils.launchProc(run_cmd)
     except Exception:
         rc=1
 

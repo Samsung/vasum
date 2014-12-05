@@ -9,7 +9,7 @@
     "containerTemplatePath" : "",
     "containerNewConfigPrefix" : "",
     "runMountPointPrefix" : "",
-    "lxcTemplatePrefix" : "@SC_TEST_LXC_TEMPLATES_INSTALL_DIR@",
+    "lxcTemplatePrefix" : "@VSM_TEST_LXC_TEMPLATES_INSTALL_DIR@",
     "inputConfig" : {"enabled" : false,
                      "device" : "/dev/doesnotexist",
                      "code" : 139,

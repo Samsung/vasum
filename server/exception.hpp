@@ -29,15 +29,15 @@
 #include "base-exception.hpp"
 
 
-namespace security_containers {
+namespace vasum {
 
 
 /**
- * Base class for exceptions in Security Containers Server
+ * Base class for exceptions in Vasum Server
  */
-struct ServerException: public SecurityContainersException {
+struct ServerException: public VasumException {
 
-    ServerException(const std::string& error = "") : SecurityContainersException(error) {}
+    ServerException(const std::string& error = "") : VasumException(error) {}
 };
 
 /**

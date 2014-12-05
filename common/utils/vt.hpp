@@ -25,12 +25,12 @@
 #ifndef COMMON_UTILS_VT_HPP
 #define COMMON_UTILS_VT_HPP
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 bool activateVT(const int& vt);
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum
 
 #endif // COMMON_UTILS_VT_HPP

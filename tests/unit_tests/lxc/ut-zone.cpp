@@ -36,12 +36,12 @@
 
 namespace {
 
-using namespace security_containers;
-using namespace security_containers::lxc;
+using namespace vasum;
+using namespace vasum::lxc;
 
 const std::string LXC_PATH = "/tmp/ut-lxc/";
 const std::string ZONE_NAME = "ut-zone";
-const std::string TEMPLATE = SC_TEST_LXC_TEMPLATES_INSTALL_DIR "/minimal.sh";
+const std::string TEMPLATE = VSM_TEST_LXC_TEMPLATES_INSTALL_DIR "/minimal.sh";
 const char* TEMPLATE_ARGS[] = {NULL};
 
 struct Fixture {

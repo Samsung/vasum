@@ -37,7 +37,7 @@
 #include <memory>
 
 
-namespace security_containers {
+namespace vasum {
 
 
 class ContainersManager final {
@@ -171,7 +171,7 @@ private:
 };
 
 
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // SERVER_CONTAINERS_MANAGER_HPP

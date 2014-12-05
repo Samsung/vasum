@@ -17,7 +17,7 @@
 # @author Mateusz Malicki (m.malicki2@samsung.com)
 #
 
-MESSAGE(STATUS "Installing configs for the Client Unit Tests to " ${SC_TEST_CONFIG_INSTALL_DIR})
+MESSAGE(STATUS "Installing configs for the Client Unit Tests to " ${VSM_TEST_CONFIG_INSTALL_DIR})
 
 ## Generate ####################################################################
 CONFIGURE_FILE(ut-client/test-dbus-daemon.conf.in
@@ -34,6 +34,6 @@ FILE(GLOB client_container_CONF_GEN ${CMAKE_BINARY_DIR}/ut-client/containers/*.c
 
 ## Install #####################################################################
 INSTALL(FILES        ${client_manager_CONF_GEN}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/client/ut-client)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/client/ut-client)
 INSTALL(FILES        ${client_container_CONF_GEN}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/client/ut-client/containers)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/client/ut-client/containers)

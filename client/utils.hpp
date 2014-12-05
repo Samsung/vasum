@@ -22,11 +22,11 @@
  * @brief   Utility functions declaration
  */
 
-#ifndef SECURITY_CONTAINERS_CLIENT_UTILS_HPP
-#define SECURITY_CONTAINERS_CLIENT_UTILS_HPP
+#ifndef VASUM_CLIENT_UTILS_HPP
+#define VASUM_CLIENT_UTILS_HPP
 
 #include <string>
 
 bool parseContainerIdFromCpuSet(const std::string& cpuset, std::string& id);
 
-#endif // SECURITY_CONTAINERS_CLIENT_UTILS_HPP
+#endif // VASUM_CLIENT_UTILS_HPP

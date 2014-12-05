@@ -34,7 +34,7 @@
 #include <cassert>
 
 
-namespace security_containers {
+namespace vasum {
 
 namespace {
 
@@ -50,14 +50,14 @@ ContainerAdmin::ContainerAdmin(const std::string& containersPath,
                                const std::string& lxcTemplatePrefix,
                                const ContainerConfig& config)
     : mConfig(config),
-      mDom(containersPath, config.name),
-      mId(mDom.getName()),
+      mZone(containersPath, config.name),
+      mId(mZone.getName()),
       mDetachOnExit(false),
       mDestroyOnExit(false)
 {
     LOGD(mId << ": Instantiating ContainerAdmin object");
 
-    if (!mDom.isDefined()) {
+    if (!mZone.isDefined()) {
 
         const std::string lxcTemplate = utils::getAbsolutePath(config.lxcTemplate,
                                                                lxcTemplatePrefix);
@@ -71,7 +71,7 @@ ContainerAdmin::ContainerAdmin(const std::string& containersPath,
             args.add("--ipv4");
             args.add(config.ipv4.c_str());
         }
-        if (!mDom.create(lxcTemplate, args.c_array())) {
+        if (!mZone.create(lxcTemplate, args.c_array())) {
             throw ContainerOperationException("Could not create zone");
         }
     }
@@ -83,17 +83,17 @@ ContainerAdmin::~ContainerAdmin()
     LOGD(mId << ": Destroying ContainerAdmin object...");
 
     if (mDestroyOnExit) {
-        if (!mDom.stop()) {
+        if (!mZone.stop()) {
             LOGE(mId << ": Failed to stop the container");
         }
-        if (!mDom.destroy()) {
+        if (!mZone.destroy()) {
             LOGE(mId << ": Failed to destroy the container");
         }
     }
 
     if (!mDetachOnExit) {
         // Try to forcefully stop
-        if (!mDom.stop()) {
+        if (!mZone.stop()) {
             LOGE(mId << ": Failed to stop the container");
         }
     }
@@ -124,7 +124,7 @@ void ContainerAdmin::start()
         args.add("/sbin/init");
     }
 
-    if (!mDom.start(args.c_array())) {
+    if (!mZone.start(args.c_array())) {
         throw ContainerOperationException("Could not start container");
     }
 
@@ -140,9 +140,9 @@ void ContainerAdmin::stop()
         return;
     }
 
-    if (!mDom.shutdown(SHUTDOWN_WAIT)) {
+    if (!mZone.shutdown(SHUTDOWN_WAIT)) {
         // force stop
-        if (!mDom.stop()) {
+        if (!mZone.stop()) {
             throw ContainerOperationException("Could not stop container");
         }
     }
@@ -155,7 +155,7 @@ void ContainerAdmin::destroy()
 {
     LOGD(mId << ": Destroying procedure started...");
 
-    if (!mDom.destroy()) {
+    if (!mZone.destroy()) {
         throw ContainerOperationException("Could not destroy container");
     }
 
@@ -165,20 +165,20 @@ void ContainerAdmin::destroy()
 
 bool ContainerAdmin::isRunning()
 {
-    return mDom.getState() == lxc::LxcZone::State::RUNNING;
+    return mZone.getState() == lxc::LxcZone::State::RUNNING;
 }
 
 
 bool ContainerAdmin::isStopped()
 {
-    return mDom.getState() == lxc::LxcZone::State::STOPPED;
+    return mZone.getState() == lxc::LxcZone::State::STOPPED;
 }
 
 
 void ContainerAdmin::suspend()
 {
     LOGD(mId << ": Pausing...");
-    if (!mDom.freeze()) {
+    if (!mZone.freeze()) {
         throw ContainerOperationException("Could not pause container");
     }
     LOGD(mId << ": Paused");
@@ -188,7 +188,7 @@ void ContainerAdmin::suspend()
 void ContainerAdmin::resume()
 {
     LOGD(mId << ": Resuming...");
-    if (!mDom.unfreeze()) {
+    if (!mZone.unfreeze()) {
         throw ContainerOperationException("Could not resume container");
     }
     LOGD(mId << ": Resumed");
@@ -197,7 +197,7 @@ void ContainerAdmin::resume()
 
 bool ContainerAdmin::isPaused()
 {
-    return mDom.getState() == lxc::LxcZone::State::FROZEN;
+    return mZone.getState() == lxc::LxcZone::State::FROZEN;
 }
 
 
@@ -225,7 +225,7 @@ void ContainerAdmin::setSchedulerLevel(SchedulerLevel sched)
 void ContainerAdmin::setSchedulerParams(std::uint64_t, std::uint64_t, std::int64_t)
 //void ContainerAdmin::setSchedulerParams(std::uint64_t cpuShares, std::uint64_t vcpuPeriod, std::int64_t vcpuQuota)
 {
-//    assert(mDom);
+//    assert(mZone);
 //
 //    int maxParams = 3;
 //    int numParamsBuff = 0;
@@ -238,7 +238,7 @@ void ContainerAdmin::setSchedulerParams(std::uint64_t, std::uint64_t, std::int64
 //    virTypedParamsAddULLong(&paramsTmp, &numParamsBuff, &maxParams, VIR_DOMAIN_SCHEDULER_VCPU_PERIOD, vcpuPeriod);
 //    virTypedParamsAddLLong(&paramsTmp, &numParamsBuff, &maxParams, VIR_DOMAIN_SCHEDULER_VCPU_QUOTA, vcpuQuota);
 //
-//    if (virDomainSetSchedulerParameters(mDom.get(), params.get(), numParamsBuff) < 0) {
+//    if (virDomainSetSchedulerParameters(mZone.get(), params.get(), numParamsBuff) < 0) {
 //        LOGE(mId << ": Error while setting the container's scheduler params:\n"
 //             << libvirt::libvirtFormatError());
 //        throw ContainerOperationException();
@@ -257,10 +257,10 @@ void ContainerAdmin::setDestroyOnExit()
 
 std::int64_t ContainerAdmin::getSchedulerQuota()
 {
-//    assert(mDom);
+//    assert(mZone);
 //
 //    int numParamsBuff;
-//    std::unique_ptr<char, void(*)(void*)> type(virDomainGetSchedulerType(mDom.get(), &numParamsBuff), free);
+//    std::unique_ptr<char, void(*)(void*)> type(virDomainGetSchedulerType(mZone.get(), &numParamsBuff), free);
 //
 //    if (type == NULL || numParamsBuff <= 0 || strcmp(type.get(), "posix") != 0) {
 //        LOGE(mId << ": Error while getting the container's scheduler type:\n"
@@ -270,7 +270,7 @@ std::int64_t ContainerAdmin::getSchedulerQuota()
 //
 //    std::unique_ptr<virTypedParameter[]> params(new virTypedParameter[numParamsBuff]);
 //
-//    if (virDomainGetSchedulerParameters(mDom.get(), params.get(), &numParamsBuff) < 0) {
+//    if (virDomainGetSchedulerParameters(mZone.get(), params.get(), &numParamsBuff) < 0) {
 //        LOGE(mId << ": Error while getting the container's scheduler params:\n"
 //             << libvirt::libvirtFormatError());
 //        throw ContainerOperationException();
@@ -291,4 +291,4 @@ std::int64_t ContainerAdmin::getSchedulerQuota()
 }
 
 
-} // namespace security_containers
+} // namespace vasum

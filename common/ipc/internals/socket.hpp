@@ -29,7 +29,7 @@
 #include <mutex>
 #include <memory>
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 /**
@@ -111,6 +111,6 @@ private:
 };
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_SOCKET_HPP

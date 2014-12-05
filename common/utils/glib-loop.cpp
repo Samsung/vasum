@@ -30,7 +30,7 @@
 #include <cassert>
 #include <glib-object.h>
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 namespace {
@@ -87,4 +87,4 @@ gboolean Glib::onTimerEvent(gpointer data)
 
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum

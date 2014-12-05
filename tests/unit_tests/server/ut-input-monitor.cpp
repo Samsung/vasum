@@ -45,8 +45,8 @@
 #include <string>
 
 
-using namespace security_containers;
-using namespace security_containers::utils;
+using namespace vasum;
+using namespace vasum::utils;
 
 namespace {
 

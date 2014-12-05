@@ -20,7 +20,7 @@
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Main file for the Security Containers Daemon unit tests
+ * @brief   Main file for the Vasum Daemon unit tests
  */
 
 #include "config.hpp"

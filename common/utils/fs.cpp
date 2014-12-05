@@ -42,7 +42,7 @@
 #include <iostream>
 
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 
@@ -341,4 +341,4 @@ bool createEmptyDir(const std::string& path)
 }
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum

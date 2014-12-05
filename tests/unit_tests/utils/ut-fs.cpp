@@ -35,12 +35,12 @@
 
 BOOST_AUTO_TEST_SUITE(UtilsFSSuite)
 
-using namespace security_containers;
-using namespace security_containers::utils;
+using namespace vasum;
+using namespace vasum::utils;
 
 namespace {
 
-const std::string FILE_PATH = SC_TEST_CONFIG_INSTALL_DIR "/utils/ut-fs/file.txt";
+const std::string FILE_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/utils/ut-fs/file.txt";
 const std::string FILE_CONTENT = "File content\n"
                                  "Line 1\n"
                                  "Line 2\n";

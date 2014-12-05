@@ -28,7 +28,7 @@
 #include <string>
 
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 
@@ -58,7 +58,7 @@ private:
 
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // UNIT_TESTS_UTILS_SCOPED_DIR_HPP

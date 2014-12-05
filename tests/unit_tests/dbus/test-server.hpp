@@ -33,7 +33,7 @@
 #include <condition_variable>
 
 
-namespace security_containers {
+namespace vasum {
 
 
 /**
@@ -77,7 +77,7 @@ private:
 };
 
 
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // UNIT_TESTS_DBUS_TEST_SERVER_HPP

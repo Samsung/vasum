@@ -29,7 +29,7 @@
 #include <ostream>
 #include <string>
 
-namespace security_containers {
+namespace vasum {
 namespace cli {
 
 /**
@@ -140,6 +140,6 @@ void lookup_zone_by_id(int pos, int argc, const char** argv);
 
 
 } // namespace cli
-} // namespace security_containers
+} // namespace vasum
 
 #endif /* CLI_COMMAND_LINE_INTERFACE_HPP */

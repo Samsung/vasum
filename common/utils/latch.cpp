@@ -28,7 +28,7 @@
 #include <cassert>
 
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 
@@ -81,4 +81,4 @@ bool Latch::empty()
 
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum

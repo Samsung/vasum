@@ -29,7 +29,7 @@
 #include <boost/filesystem.hpp>
 
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 namespace fs = boost::filesystem;
@@ -67,4 +67,4 @@ void ScopedDir::remove()
 }
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum

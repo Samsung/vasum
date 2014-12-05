@@ -46,8 +46,8 @@
 #include <boost/filesystem.hpp>
 
 
-#ifndef SECURITY_CONTAINERS_USER
-#error "SECURITY_CONTAINERS_USER must be defined!"
+#ifndef VASUM_USER
+#error "VASUM_USER must be defined!"
 #endif
 
 #ifndef INPUT_EVENT_GROUP
@@ -64,7 +64,7 @@
 
 extern char** environ;
 
-namespace security_containers {
+namespace vasum {
 
 
 Server::Server(const std::string& configPath, bool runAsRoot)
@@ -150,14 +150,14 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
     ContainersManagerConfig config;
     config::loadFromFile(configPath, config);
 
-    struct passwd* pwd = ::getpwnam(SECURITY_CONTAINERS_USER);
+    struct passwd* pwd = ::getpwnam(VASUM_USER);
     if (pwd == NULL) {
-        LOGE("getpwnam failed to find user '" << SECURITY_CONTAINERS_USER << "'");
+        LOGE("getpwnam failed to find user '" << VASUM_USER << "'");
         return false;
     }
     uid_t uid = pwd->pw_uid;
     gid_t gid = pwd->pw_gid;
-    LOGD("security-containers UID = " << uid << ", GID = " << gid);
+    LOGD("vasum UID = " << uid << ", GID = " << gid);
 
     // create directory for dbus socket (if needed)
     if (!config.runMountPointPrefix.empty()) {
@@ -208,4 +208,4 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
 }
 
 
-} // namespace security_containers
+} // namespace vasum

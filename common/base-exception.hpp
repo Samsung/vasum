@@ -19,7 +19,7 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Security containers base exception
+ * @brief   Vasum base exception
  */
 
 
@@ -30,19 +30,19 @@
 #include <string>
 
 
-namespace security_containers {
+namespace vasum {
 
 
 /**
- * Base class security containers exceptions
+ * Base class vasum exceptions
  */
-struct SecurityContainersException: public std::runtime_error {
+struct VasumException: public std::runtime_error {
 
-    SecurityContainersException(const std::string& error = "") : std::runtime_error(error) {}
+    VasumException(const std::string& error = "") : std::runtime_error(error) {}
 };
 
 
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // COMMON_BASE_EXCEPTION_HPP

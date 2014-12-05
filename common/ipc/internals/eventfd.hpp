@@ -25,7 +25,7 @@
 #ifndef COMMON_IPC_INTERNALS_EVENTFD_HPP
 #define COMMON_IPC_INTERNALS_EVENTFD_HPP
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 class EventFD {
@@ -57,6 +57,6 @@ private:
 };
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_EVENTFD_HPP

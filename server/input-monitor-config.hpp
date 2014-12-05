@@ -32,7 +32,7 @@
 #include <string>
 
 
-namespace security_containers {
+namespace vasum {
 
 struct InputConfig {
 
@@ -73,6 +73,6 @@ struct InputConfig {
 
 };
 
-} // namespace security_containers
+} // namespace vasum
 
 #endif /* SERVER_INPUT_MONITOR_CONFIG_HPP */

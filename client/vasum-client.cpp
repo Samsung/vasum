@@ -20,12 +20,12 @@
 /**
  * @file
  * @author  Mateusz Malicki (m.malicki2@samsung.com)
- * @brief   This file contains the public API for Security Containers Client
+ * @brief   This file contains the public API for Vasum Client
  */
 
 #include <config.hpp>
-#include "security-containers-client.h"
-#include "security-containers-client-impl.hpp"
+#include "vasum-client.h"
+#include "vasum-client-impl.hpp"
 
 #include <cassert>
 

@@ -30,7 +30,7 @@
 #include <string>
 #include <iostream>
 
-using namespace security_containers::cli;
+using namespace vasum::cli;
 
 std::map<std::string, CommandLineInterface> commands = {
     {

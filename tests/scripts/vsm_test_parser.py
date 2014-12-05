@@ -77,7 +77,7 @@ class Logger(object):
         if not self.__failedTests:
             return
 
-        commandPrefix = "sc_launch_test.py " + bin + " -t "
+        commandPrefix = "vsm_launch_test.py " + bin + " -t "
         self.infoTitle("Some tests failed. Use following command(s) to launch them explicitly:")
         for test in self.__failedTests:
             self.error(self.__indentChar + commandPrefix + test)
@@ -96,7 +96,7 @@ class Logger(object):
         self.error('Terminated by ' + siginfo)
         if signum in [5, 6, 8, 11]:
             self.error("\nUse following command to launch debugger:")
-            self.error(self.__indentChar + "sc_launch_test.py --gdb " + bin)
+            self.error(self.__indentChar + "vsm_launch_test.py --gdb " + bin)
 
 
 class Parser(object):

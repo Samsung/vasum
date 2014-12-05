@@ -33,7 +33,7 @@
 #include <string>
 #include <thread>
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 /**
@@ -82,6 +82,6 @@ private:
 };
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_ACCEPTOR_HPP

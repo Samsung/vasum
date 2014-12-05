@@ -17,10 +17,10 @@
 # @author Lukasz Pawelczyk (l.pawelczyk@partner.samsung.com)
 #
 
-MESSAGE(STATUS "Installing configs for the DBus Unit Tests to " ${SC_TEST_CONFIG_INSTALL_DIR})
+MESSAGE(STATUS "Installing configs for the DBus Unit Tests to " ${VSM_TEST_CONFIG_INSTALL_DIR})
 FILE(GLOB dbus_CONF                 ut-connection/*.conf)
 
 
 ## Install #####################################################################
 INSTALL(FILES        ${dbus_CONF}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/dbus/ut-connection)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/dbus/ut-connection)

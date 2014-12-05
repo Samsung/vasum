@@ -31,7 +31,7 @@
 #include <vector>
 
 
-namespace security_containers {
+namespace vasum {
 
 
 class ProxyCallPolicy {
@@ -51,7 +51,7 @@ private:
 };
 
 
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // SERVER_PROXY_CALL_POLICY_HPP

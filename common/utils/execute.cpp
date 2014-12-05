@@ -30,7 +30,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 namespace {
@@ -94,4 +94,4 @@ bool waitPid(pid_t pid, int& status)
 }
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum

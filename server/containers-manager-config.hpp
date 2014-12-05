@@ -34,10 +34,10 @@
 #include <vector>
 
 
-namespace security_containers {
+namespace vasum {
 
 
-const std::string CONTAINERS_MANAGER_CONFIG_PATH = "/etc/security-containers/config/daemon.conf";
+const std::string CONTAINERS_MANAGER_CONFIG_PATH = "/etc/vasum/config/daemon.conf";
 
 struct ContainersManagerConfig {
 
@@ -115,7 +115,7 @@ struct ContainersManagerConfig {
 };
 
 
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // SERVER_CONTAINERS_MANAGER_CONFIG_HPP

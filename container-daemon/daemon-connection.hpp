@@ -32,7 +32,7 @@
 #include <condition_variable>
 
 
-namespace security_containers {
+namespace vasum {
 namespace container_daemon {
 
 
@@ -73,7 +73,7 @@ private:
 
 
 } // namespace container_daemon
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // CONTAINER_DAEMON_DAEMON_CONNECTION_HPP

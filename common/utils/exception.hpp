@@ -29,19 +29,18 @@
 #include "base-exception.hpp"
 
 
-namespace security_containers {
+namespace vasum {
 
 
 /**
  * Base class for exceptions in utils
  */
-struct UtilsException: public SecurityContainersException {
+struct UtilsException: public VasumException {
 
-    UtilsException(const std::string& error = "") : SecurityContainersException(error) {}
+    UtilsException(const std::string& error = "") : VasumException(error) {}
 };
 
 
-}
-
+} // namespace vasum
 
 #endif // COMMON_UTILS_EXCEPTION_HPP

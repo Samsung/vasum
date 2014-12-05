@@ -34,7 +34,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/system/system_error.hpp>
 
-namespace security_containers {
+namespace vasum {
 
 namespace {
 
@@ -120,4 +120,4 @@ void ContainerConnectionTransport::setDetachOnExit()
     mDetachOnExit = true;
 }
 
-} // namespace security_containers
+} // namespace vasum

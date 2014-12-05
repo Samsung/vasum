@@ -32,7 +32,7 @@
 #include <string>
 
 
-namespace security_containers {
+namespace vasum {
 
 /**
  * A single allow rule for proxy call dispatching.
@@ -58,6 +58,6 @@ struct ProxyCallRule {
 
 };
 
-} // namespace security_containers
+} // namespace vasum
 
 #endif /* SERVER_PROXY_CALL_CONFIG_HPP */

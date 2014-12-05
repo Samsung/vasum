@@ -20,7 +20,7 @@
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Main file for the Security Containers Daemon
+ * @brief   Main file for the Vasum Daemon
  */
 
 // Always log to console in DEBUG mode
@@ -42,7 +42,7 @@
 #include <iostream>
 
 using namespace logger;
-using namespace security_containers;
+using namespace vasum;
 
 namespace po = boost::program_options;
 
@@ -50,7 +50,7 @@ namespace po = boost::program_options;
 namespace {
 
 const std::string PROGRAM_NAME_AND_VERSION =
-    "Security Containers Server " PROGRAM_VERSION;
+    "Vasum Server " PROGRAM_VERSION;
 
 } // namespace
 
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
         ("root,r", "Don't drop root privileges at startup")
         ("version,v", "show application version")
         ("log-level,l", po::value<std::string>()->default_value("DEBUG"), "set log level")
-        ("config,c", po::value<std::string>()->default_value("/etc/security-containers/daemon.conf"), "server configuration file")
+        ("config,c", po::value<std::string>()->default_value("/etc/vasum/daemon.conf"), "server configuration file")
         ;
 
         po::variables_map vm;

@@ -22,12 +22,12 @@ MESSAGE(STATUS "Generating makefile for Integration Tests...")
 
 
 ## Defines for further package installation ####################################
-SET(TEST_DEST_DIR "${PYTHON_SITELIB}/sc_integration_tests")
+SET(TEST_DEST_DIR "${PYTHON_SITELIB}/vsm_integration_tests")
 
 
 ## Search for .py files available ##############################################
 FILE(GLOB py_SCRIPTS *.py)
-FILE(GLOB main_SCRIPT sc_int_tests.py)
+FILE(GLOB main_SCRIPT vsm_int_tests.py)
 LIST(REMOVE_ITEM py_SCRIPTS ${main_SCRIPT})
 
 

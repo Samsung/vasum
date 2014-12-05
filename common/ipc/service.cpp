@@ -30,7 +30,7 @@
 
 using namespace std::placeholders;
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 Service::Service(const std::string& socketPath,
@@ -98,4 +98,4 @@ void Service::removeMethod(const MethodID methodID)
 
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum

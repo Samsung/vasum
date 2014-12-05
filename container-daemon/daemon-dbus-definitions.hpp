@@ -28,7 +28,7 @@
 #include <string>
 
 
-namespace security_containers {
+namespace vasum {
 namespace container_daemon {
 namespace api {
 
@@ -52,7 +52,7 @@ const std::string DEFINITION =
 
 } // namespace api
 } // namespace container_daemon
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // CONTAINER_DAEMON_DAEMON_DBUS_DEFINITIONS_HPP

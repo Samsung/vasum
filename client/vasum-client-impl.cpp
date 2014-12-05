@@ -20,11 +20,11 @@
 /**
  * @file
  * @author  Mateusz Malicki (m.malicki2@samsung.com)
- * @brief   This file contains security-containers-server's client implementation
+ * @brief   This file contains vasum-server's client implementation
  */
 
 #include <config.hpp>
-#include "security-containers-client-impl.hpp"
+#include "vasum-client-impl.hpp"
 #include "utils.hpp"
 #include <dbus/connection.hpp>
 #include <dbus/exception.hpp>
@@ -38,8 +38,8 @@
 
 using namespace std;
 using namespace dbus;
-using namespace security_containers;
-using namespace security_containers::utils;
+using namespace vasum;
+using namespace vasum::utils;
 
 namespace {
 

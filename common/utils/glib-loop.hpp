@@ -32,7 +32,7 @@
 #include <glib.h>
 
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 
@@ -81,7 +81,7 @@ private:
 };
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // COMMON_UTILS_GLIB_LOOP_HPP

@@ -1,7 +1,7 @@
 {
     "name" : "ut-container-test-dbus",
     "lxcTemplate" : "minimal-dbus.sh",
-    "initWithArgs" : ["/bin/sh", "-c", "trap exit SIGTERM; /usr/bin/dbus-daemon --config-file=@SC_TEST_CONFIG_INSTALL_DIR@/server/ut-container/ut-dbus.conf --fork; read"],
+    "initWithArgs" : ["/bin/sh", "-c", "trap exit SIGTERM; /usr/bin/dbus-daemon --config-file=@VSM_TEST_CONFIG_INSTALL_DIR@/server/ut-container/ut-dbus.conf --fork; read"],
     "ipv4Gateway" : "",
     "ipv4" : "",
     "privilege" : 10,

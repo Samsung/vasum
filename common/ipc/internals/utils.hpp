@@ -27,7 +27,7 @@
 
 #include <cstddef>
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 /**
@@ -74,6 +74,6 @@ void setMaxFDNumber(unsigned int limit);
 unsigned int getFDNumber();
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_UTILS_HPP

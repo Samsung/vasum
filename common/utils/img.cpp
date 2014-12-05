@@ -32,7 +32,7 @@
 #include <fcntl.h>
 #include <linux/loop.h>
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 namespace {
@@ -237,4 +237,4 @@ bool copyImageContents(const std::string& img, const std::string& dst)
 }
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum

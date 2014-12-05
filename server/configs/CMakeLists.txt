@@ -17,20 +17,20 @@
 # @author Lukasz Pawelczyk (l.pawelczyk@partner.samsung.com)
 #
 
-MESSAGE(STATUS "Installing configs to " ${SC_CONFIG_INSTALL_DIR})
+MESSAGE(STATUS "Installing configs to " ${VSM_CONFIG_INSTALL_DIR})
 
 FILE(GLOB container_CONF     containers/*.conf)
 FILE(GLOB admin_CONF         lxc-templates/*.sh)
 FILE(GLOB template_CONF      templates/*.conf)
 
 ## Generate ####################################################################
-CONFIGURE_FILE(systemd/security-containers.service.in
-               ${CMAKE_BINARY_DIR}/systemd/security-containers.service)
+CONFIGURE_FILE(systemd/vasum.service.in
+               ${CMAKE_BINARY_DIR}/systemd/vasum.service)
 
 
 ## Install #####################################################################
 INSTALL(FILES       daemon.conf
-        DESTINATION ${SC_CONFIG_INSTALL_DIR})
+        DESTINATION ${VSM_CONFIG_INSTALL_DIR})
 
 # preprocess d-bus configs
 CONFIGURE_FILE(dbus-1/system.d/org.tizen.containers.host.conf.in
@@ -40,13 +40,13 @@ INSTALL(FILES       ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.containers.hos
         DESTINATION ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)
 
 INSTALL(FILES       ${container_CONF}
-        DESTINATION ${SC_CONFIG_INSTALL_DIR}/containers)
+        DESTINATION ${VSM_CONFIG_INSTALL_DIR}/containers)
 
 INSTALL(PROGRAMS    ${admin_CONF}
-        DESTINATION ${SC_CONFIG_INSTALL_DIR}/lxc-templates)
+        DESTINATION ${VSM_CONFIG_INSTALL_DIR}/lxc-templates)
 
 INSTALL(PROGRAMS    ${template_CONF}
-        DESTINATION ${SC_CONFIG_INSTALL_DIR}/templates)
+        DESTINATION ${VSM_CONFIG_INSTALL_DIR}/templates)
 
-INSTALL(FILES       ${CMAKE_BINARY_DIR}/systemd/security-containers.service
+INSTALL(FILES       ${CMAKE_BINARY_DIR}/systemd/vasum.service
         DESTINATION ${SYSTEMD_UNIT_DIR})

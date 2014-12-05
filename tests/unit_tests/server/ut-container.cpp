@@ -40,17 +40,17 @@
 #include <chrono>
 
 
-using namespace security_containers;
+using namespace vasum;
 using namespace config;
 
 namespace {
 
-const std::string TEST_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container/containers/test.conf";
-const std::string TEST_DBUS_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container/containers/test-dbus.conf";
-const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-container/containers/buggy.conf";
+const std::string TEST_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-container/containers/test.conf";
+const std::string TEST_DBUS_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-container/containers/test-dbus.conf";
+const std::string BUGGY_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-container/containers/buggy.conf";
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/config.conf";
 const std::string CONTAINERS_PATH = "/tmp/ut-containers";
-const std::string LXC_TEMPLATES_PATH = SC_TEST_LXC_TEMPLATES_INSTALL_DIR;
+const std::string LXC_TEMPLATES_PATH = VSM_TEST_LXC_TEMPLATES_INSTALL_DIR;
 
 struct Fixture {
     utils::ScopedGlibLoop mLoop;

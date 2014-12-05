@@ -29,7 +29,7 @@
 #include "dbus/connection.hpp"
 
 
-namespace security_containers {
+namespace vasum {
 
 
 /**
@@ -57,7 +57,7 @@ private:
 };
 
 
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // SERVER_CONTAINER_CONNECTION_TRANSPORT_HPP

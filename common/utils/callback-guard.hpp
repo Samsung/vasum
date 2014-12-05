@@ -29,7 +29,7 @@
 #include <memory>
 
 
-namespace security_containers {
+namespace vasum {
 namespace utils {
 
 /**
@@ -73,7 +73,7 @@ private:
 };
 
 } // namespace utils
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // COMMON_UTILS_CALLBACK_GUARD_HPP

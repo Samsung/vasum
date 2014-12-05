@@ -27,7 +27,7 @@
 #define CONTAINER_DAEMON_RUNNER_HPP
 
 
-namespace security_containers {
+namespace vasum {
 namespace container_daemon {
 
 
@@ -50,7 +50,7 @@ public:
 
 
 } // namespace container_daemon
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // CONTAINER_DAEMON_RUNNER_HPP

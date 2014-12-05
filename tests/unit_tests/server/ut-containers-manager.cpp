@@ -57,20 +57,20 @@
 #include <condition_variable>
 #include <boost/filesystem.hpp>
 
-using namespace security_containers;
+using namespace vasum;
 using namespace config;
-using namespace security_containers::utils;
+using namespace vasum::utils;
 using namespace dbus;
 
 namespace {
 
-const std::string TEST_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/test-daemon.conf";
-const std::string TEST_DBUS_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/test-dbus-daemon.conf";
-const std::string EMPTY_DBUS_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/empty-dbus-daemon.conf";
-const std::string BUGGY_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-daemon.conf";
-const std::string BUGGY_FOREGROUND_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-foreground-daemon.conf";
-const std::string BUGGY_DEFAULTID_CONFIG_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-default-daemon.conf";
-const std::string TEST_CONTAINER_CONF_PATH = SC_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/containers/";
+const std::string TEST_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/test-daemon.conf";
+const std::string TEST_DBUS_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/test-dbus-daemon.conf";
+const std::string EMPTY_DBUS_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/empty-dbus-daemon.conf";
+const std::string BUGGY_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-daemon.conf";
+const std::string BUGGY_FOREGROUND_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-foreground-daemon.conf";
+const std::string BUGGY_DEFAULTID_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/buggy-default-daemon.conf";
+const std::string TEST_CONTAINER_CONF_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-containers-manager/containers/";
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/missing-daemon.conf";
 const int EVENT_TIMEOUT = 5000;
 const int TEST_DBUS_CONNECTION_CONTAINERS_COUNT = 3;
@@ -466,7 +466,7 @@ std::function<bool(const std::exception&)> expectedMessage(const std::string& me
 }
 
 struct Fixture {
-    security_containers::utils::ScopedGlibLoop mLoop;
+    vasum::utils::ScopedGlibLoop mLoop;
 
     utils::ScopedDir mContainersPathGuard;
     utils::ScopedDir mRunGuard;

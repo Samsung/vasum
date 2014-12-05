@@ -29,7 +29,7 @@
 #include "logger/logger.hpp"
 
 
-namespace security_containers {
+namespace vasum {
 namespace container_daemon {
 
 
@@ -63,4 +63,4 @@ void Daemon::onLoseFocusCallback()
 }
 
 } // namespace container_daemon
-} // namespace security_containers
+} // namespace vasum

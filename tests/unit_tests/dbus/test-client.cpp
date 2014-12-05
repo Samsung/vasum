@@ -30,7 +30,7 @@
 #include "dbus/connection.hpp"
 
 
-namespace security_containers {
+namespace vasum {
 
 
 DbusTestClient::DbusTestClient()
@@ -100,4 +100,4 @@ void DbusTestClient::throwException(int arg)
 }
 
 
-} // namespace security_containers
+} // namespace vasum

@@ -47,7 +47,7 @@
 #include <climits>
 
 
-namespace security_containers {
+namespace vasum {
 
 
 namespace {
@@ -350,7 +350,7 @@ void ContainersManager::notifyActiveContainerHandler(const std::string& caller,
         if (!activeContainer.empty() && caller != activeContainer) {
             mContainers[activeContainer]->sendNotification(caller, application, message);
         }
-    } catch(const SecurityContainersException&) {
+    } catch(const VasumException&) {
         LOGE("Notification from " << caller << " hasn't been sent");
     }
 }
@@ -387,7 +387,7 @@ void ContainersManager::handleContainerMoveFileRequest(const std::string& srcCon
     // NOTE: other possible implementations include:
     // 1. Sending file descriptors opened directly in each container through DBUS
     //    using something like g_dbus_message_set_unix_fd_list()
-    // 2. SCS forking and calling setns(MNT) in each container and opening files
+    // 2. VSM forking and calling setns(MNT) in each container and opening files
     //    by itself, then passing FDs to the main process
     // Now when the main process has obtained FDs (by either of those methods)
     // it can do the copying by itself.
@@ -703,7 +703,7 @@ void ContainersManager::generateNewConfig(const std::string& id,
         throw ContainerOperationException("Failed to save new config file.");
     }
 
-    // restrict new config file so that only owner (security-containers) can write it
+    // restrict new config file so that only owner (vasum) can write it
     fs::permissions(resultPath, fs::perms::owner_all |
                                 fs::perms::group_read |
                                 fs::perms::others_read);
@@ -769,7 +769,7 @@ void ContainersManager::handleCreateContainerCall(const std::string& id,
         LOGI("Generating config from " << configPath << " to " << newConfigPath);
         generateNewConfig(id, configPath, newConfigPath);
 
-    } catch (SecurityContainersException& e) {
+    } catch (VasumException& e) {
         LOGE("Generate config failed: " << e.what());
         utils::launchAsRoot(std::bind(removeAllWrapper, containerPathStr));
         result->setError(api::ERROR_INTERNAL, "Failed to generate config");
@@ -779,7 +779,7 @@ void ContainersManager::handleCreateContainerCall(const std::string& id,
     LOGT("Creating new container");
     try {
         createContainer(newConfigPath);
-    } catch (SecurityContainersException& e) {
+    } catch (VasumException& e) {
         LOGE("Creating new container failed: " << e.what());
         utils::launchAsRoot(std::bind(removeAllWrapper, containerPathStr));
         result->setError(api::ERROR_INTERNAL, "Failed to create container");
@@ -813,7 +813,7 @@ void ContainersManager::handleDestroyContainerCall(const std::string& id,
     auto destroyer = [id, result, this] {
         try {
             destroyContainer(id);
-        } catch (const SecurityContainersException& e) {
+        } catch (const VasumException& e) {
             LOGE("Error during container destruction: " << e.what());
             result->setError(api::ERROR_INTERNAL, "Failed to destroy container");
             return;
@@ -885,4 +885,4 @@ void ContainersManager::handleUnlockContainerCall(const std::string& id,
     result->setVoid();
 }
 
-} // namespace security_containers
+} // namespace vasum

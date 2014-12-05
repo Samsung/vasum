@@ -47,7 +47,7 @@
 
 #include <map>
 
-namespace security_containers {
+namespace vasum {
 namespace lxc {
 
 namespace {
@@ -337,4 +337,4 @@ void LxcZone::refresh()
 
 
 } // namespace lxc
-} // namespace security_containers
+} // namespace vasum

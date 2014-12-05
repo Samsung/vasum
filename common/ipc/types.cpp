@@ -26,7 +26,7 @@
 #include "logger/logger.hpp"
 
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 std::string toString(const Status status)
@@ -65,4 +65,4 @@ void throwOnError(const Status status)
     }
 }
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum

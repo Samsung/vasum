@@ -32,7 +32,7 @@
 #include <condition_variable>
 
 
-namespace security_containers {
+namespace vasum {
 
 
 class ContainerConnection {
@@ -130,7 +130,7 @@ private:
 };
 
 
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // SERVER_CONTAINER_CONNECTION_HPP

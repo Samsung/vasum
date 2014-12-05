@@ -31,7 +31,7 @@
 #include <memory>
 
 
-namespace security_containers {
+namespace vasum {
 
 
 /**
@@ -61,7 +61,7 @@ private:
 };
 
 
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // UNIT_TESTS_DBUS_TEST_CLIENT_HPP

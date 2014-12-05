@@ -31,7 +31,7 @@
 #include "logger/logger.hpp"
 
 
-namespace security_containers {
+namespace vasum {
 
 namespace {
 
@@ -363,4 +363,4 @@ void HostConnection::signalContainerDbusState(const std::string& containerId,
 }
 
 
-} // namespace security_containers
+} // namespace vasum

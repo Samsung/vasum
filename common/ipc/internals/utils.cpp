@@ -39,7 +39,7 @@
 namespace fs = boost::filesystem;
 namespace chr = std::chrono;
 
-namespace security_containers {
+namespace vasum {
 namespace ipc {
 
 namespace {
@@ -193,5 +193,5 @@ unsigned int getFDNumber()
 }
 
 } // namespace ipc
-} // namespace security_containers
+} // namespace vasum
 

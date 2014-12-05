@@ -30,7 +30,7 @@
 #include "lxc/zone.hpp"
 
 
-namespace security_containers {
+namespace vasum {
 
 
 enum class SchedulerLevel {
@@ -128,7 +128,7 @@ public:
 
 private:
     const ContainerConfig& mConfig;
-    lxc::LxcZone mDom;
+    lxc::LxcZone mZone;
     const std::string mId;
     bool mDetachOnExit;
     bool mDestroyOnExit;
@@ -137,7 +137,7 @@ private:
 };
 
 
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // SERVER_CONTAINER_ADMIN_HPP

@@ -31,7 +31,7 @@
 #include "logger/logger.hpp"
 
 
-namespace security_containers {
+namespace vasum {
 namespace container_daemon {
 
 namespace {
@@ -139,4 +139,4 @@ void DaemonConnection::onMessageCall(const std::string& objectPath,
 }
 
 } // namespace container_daemon
-} // namespace security_containers
+} // namespace vasum

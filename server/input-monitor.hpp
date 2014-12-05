@@ -37,7 +37,7 @@
 #include <list>
 
 
-namespace security_containers {
+namespace vasum {
 
 class InputMonitor {
 public:
@@ -67,7 +67,7 @@ private:
     guint mSourceId;
 };
 
-} // namespace security_containers
+} // namespace vasum
 
 
 #endif // SERVER_INPUT_MONITOR_HPP

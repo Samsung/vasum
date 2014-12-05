@@ -25,7 +25,7 @@
 
 #include <config.hpp>
 #include "ut.hpp"
-#include <security-containers-client.h>
+#include <vasum-client.h>
 
 #include "utils/latch.hpp"
 #include "utils/scoped-dir.hpp"
@@ -40,13 +40,13 @@
 #include <tuple>
 #include <utility>
 
-using namespace security_containers;
-using namespace security_containers::utils;
+using namespace vasum;
+using namespace vasum::utils;
 
 namespace {
 
 const std::string TEST_DBUS_CONFIG_PATH =
-    SC_TEST_CONFIG_INSTALL_DIR "/client/ut-client/test-dbus-daemon.conf";
+    VSM_TEST_CONFIG_INSTALL_DIR "/client/ut-client/test-dbus-daemon.conf";
 const std::string CONTAINERS_PATH = "/tmp/ut-containers"; // the same as in daemon.conf
 
 struct Loop {

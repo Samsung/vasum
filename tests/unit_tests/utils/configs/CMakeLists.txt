@@ -17,10 +17,10 @@
 # @author Lukasz Pawelczyk (l.pawelczyk@partner.samsung.com)
 #
 
-MESSAGE(STATUS "Installing configs for the Utils Unit Tests to " ${SC_TEST_CONFIG_INSTALL_DIR})
+MESSAGE(STATUS "Installing configs for the Utils Unit Tests to " ${VSM_TEST_CONFIG_INSTALL_DIR})
 FILE(GLOB fs_CONF ut-fs/*.txt)
 
 
 ## Install #####################################################################
 INSTALL(FILES        ${fs_CONF}
-        DESTINATION  ${SC_TEST_CONFIG_INSTALL_DIR}/utils/ut-fs)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/utils/ut-fs)
