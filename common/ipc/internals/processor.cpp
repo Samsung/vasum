@@ -325,18 +325,18 @@ bool Processor::handleInput(const PeerID peerID, const Socket& socket)
             if (mMethodsCallbacks.count(methodID)) {
                 // Method
                 std::shared_ptr<MethodHandlers> methodCallbacks = mMethodsCallbacks.at(methodID);
-                mCallsMutex.unlock();
+                lock.unlock();
                 return onRemoteCall(peerID, socket, methodID, messageID, methodCallbacks);
 
             } else if (mSignalsCallbacks.count(methodID)) {
                 // Signal
                 std::shared_ptr<SignalHandlers> signalCallbacks = mSignalsCallbacks.at(methodID);
-                mCallsMutex.unlock();
+                lock.unlock();
                 return onRemoteSignal(peerID, socket, methodID, messageID, signalCallbacks);
 
             } else {
                 // Nothing
-                mCallsMutex.unlock();
+                lock.unlock();
                 LOGW("No method or signal callback for methodID: " << methodID);
                 removePeerInternal(peerID, Status::NAUGHTY_PEER);
                 return true;

@@ -243,7 +243,7 @@ public:
 private:
     typedef std::function<void(int fd, std::shared_ptr<void>& data)> SerializeCallback;
     typedef std::function<std::shared_ptr<void>(int fd)> ParseCallback;
-    typedef std::lock_guard<std::mutex> Lock;
+    typedef std::unique_lock<std::mutex> Lock;
 
     struct EmptyData {
         CONFIG_REGISTER_EMPTY

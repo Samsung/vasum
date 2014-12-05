@@ -102,14 +102,12 @@ struct ThrowOnAcceptData {
     template<typename Visitor>
     void accept(Visitor)
     {
-        LOGE("Serialization and parsing failed");
-        throw std::exception();
+        throw std::runtime_error("intentional failure in accept");
     }
     template<typename Visitor>
     void accept(Visitor) const
     {
-        LOGE("Const Serialization and parsing failed");
-        throw std::exception();
+        throw std::runtime_error("intentional failure in accept const");
     }
 };
 
@@ -139,11 +137,11 @@ PeerID connect(Service& s, Client& c)
     // Connects the Client to the Service and returns Clients PeerID
 
     std::mutex mutex;
-    std::unique_lock<std::mutex> lock(mutex);
     std::condition_variable cv;
 
-    unsigned int peerID = 0;
-    auto newPeerCallback = [&cv, &peerID](unsigned int newPeerID) {
+    PeerID peerID = 0;
+    auto newPeerCallback = [&cv, &peerID, &mutex](const PeerID newPeerID) {
+        std::unique_lock<std::mutex> lock(mutex);
         peerID = newPeerID;
         cv.notify_one();
     };
@@ -156,6 +154,7 @@ PeerID connect(Service& s, Client& c)
 
     c.start();
 
+    std::unique_lock<std::mutex> lock(mutex);
     BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(1000), [&peerID]() {
         return peerID != 0;
     }));
@@ -322,22 +321,23 @@ BOOST_AUTO_TEST_CASE(AsyncClientToServiceEcho)
     Client c(socketPath);
     c.start();
 
-    std::mutex mtx;
-    std::unique_lock<std::mutex> lck(mtx);
+    std::mutex mutex;
     std::condition_variable cv;
 
     //Async call
     std::shared_ptr<SendData> sentData(new SendData(34));
     std::shared_ptr<SendData> recvData;
-    auto dataBack = [&cv, &recvData](ipc::Status status, std::shared_ptr<SendData>& data) {
+    auto dataBack = [&cv, &recvData, &mutex](ipc::Status status, std::shared_ptr<SendData>& data) {
         BOOST_CHECK(status == ipc::Status::OK);
+        std::unique_lock<std::mutex> lock(mutex);
         recvData = data;
         cv.notify_one();
     };
     c.callAsync<SendData, SendData>(1, sentData, dataBack);
 
     // Wait for the response
-    BOOST_CHECK(cv.wait_for(lck, std::chrono::milliseconds(100), [&recvData]() {
+    std::unique_lock<std::mutex> lock(mutex);
+    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(100), [&recvData]() {
         return static_cast<bool>(recvData);
     }));
 
@@ -355,11 +355,11 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
     std::shared_ptr<SendData> sentData(new SendData(56));
     std::shared_ptr<SendData> recvData;
 
-    std::mutex mtx;
-    std::unique_lock<std::mutex> lck(mtx);
+    std::mutex mutex;
     std::condition_variable cv;
-    auto dataBack = [&cv, &recvData](ipc::Status status, std::shared_ptr<SendData>& data) {
+    auto dataBack = [&cv, &recvData, &mutex](ipc::Status status, std::shared_ptr<SendData>& data) {
         BOOST_CHECK(status == ipc::Status::OK);
+        std::unique_lock<std::mutex> lock(mutex);
         recvData = data;
         cv.notify_one();
     };
@@ -367,7 +367,8 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
     s.callAsync<SendData, SendData>(1, peerID, sentData, dataBack);
 
     // Wait for the response
-    BOOST_CHECK(cv.wait_for(lck, std::chrono::milliseconds(1000), [&recvData]() {
+    std::unique_lock<std::mutex> lock(mutex);
+    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(1000), [&recvData]() {
         return recvData.get() != nullptr;
     }));
 
@@ -386,7 +387,7 @@ BOOST_AUTO_TEST_CASE(SyncTimeout)
 
     std::shared_ptr<SendData> sentData(new SendData(78));
 
-    BOOST_CHECK_THROW((c.callSync<SendData, SendData>(1, sentData, 10)), IPCException);
+    BOOST_CHECK_THROW((c.callSync<SendData, SendData>(1, sentData, 10)), IPCException); //TODO it fails from time to time
 }
 
 BOOST_AUTO_TEST_CASE(SerializationError)
@@ -432,12 +433,12 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
     Client c(socketPath);
     c.start();
 
-    std::mutex mtx;
-    std::unique_lock<std::mutex> lck(mtx);
+    std::mutex mutex;
     std::condition_variable cv;
     ipc::Status retStatus = ipc::Status::UNDEFINED;
 
-    auto dataBack = [&cv, &retStatus](ipc::Status status, std::shared_ptr<SendData>&) {
+    auto dataBack = [&cv, &retStatus, &mutex](ipc::Status status, std::shared_ptr<SendData>&) {
+        std::unique_lock<std::mutex> lock(mutex);
         retStatus = status;
         cv.notify_one();
     };
@@ -446,10 +447,11 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
     c.callAsync<SendData, SendData>(1, sentData, dataBack);
 
     // Wait for the response
-    BOOST_CHECK(cv.wait_for(lck, std::chrono::seconds(10), [&retStatus]() {
+    std::unique_lock<std::mutex> lock(mutex);
+    BOOST_CHECK(cv.wait_for(lock, std::chrono::seconds(10), [&retStatus]() {
         return retStatus != ipc::Status::UNDEFINED;
     }));
-    BOOST_CHECK(retStatus == ipc::Status::PEER_DISCONNECTED);
+    BOOST_CHECK(retStatus == ipc::Status::PEER_DISCONNECTED); //TODO it fails from time to time
 }
 
 
@@ -515,7 +517,7 @@ BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
     s.signal<SendData>(1, data);
 
     // Wait for the signals to arrive
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //TODO wait_for
     BOOST_CHECK(isHandlerACalled && isHandlerBCalled);
 }
 
@@ -547,7 +549,7 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
     s.signal<SendData>(1, data);
 
     // Wait for the signals to arrive
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //TODO wait_for
     BOOST_CHECK(isHandlerACalled && isHandlerBCalled);
 }
 
