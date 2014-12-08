@@ -29,8 +29,8 @@
 
 #include "utils/latch.hpp"
 #include "utils/scoped-dir.hpp"
-#include "containers-manager.hpp"
-#include "container-dbus-definitions.hpp"
+#include "zones-manager.hpp"
+#include "zone-dbus-definitions.hpp"
 
 #include <map>
 #include <string>
@@ -47,7 +47,7 @@ namespace {
 
 const std::string TEST_DBUS_CONFIG_PATH =
     VSM_TEST_CONFIG_INSTALL_DIR "/client/ut-client/test-dbus-daemon.conf";
-const std::string CONTAINERS_PATH = "/tmp/ut-containers"; // the same as in daemon.conf
+const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
 
 struct Loop {
     Loop()
@@ -62,13 +62,13 @@ struct Loop {
 
 struct Fixture {
     Loop loop;
-    utils::ScopedDir mContainersPathGuard;
+    utils::ScopedDir mZonesPathGuard;
     utils::ScopedDir mRunGuard;
 
-    ContainersManager cm;
+    ZonesManager cm;
 
     Fixture()
-        : mContainersPathGuard(CONTAINERS_PATH)
+        : mZonesPathGuard(ZONES_PATH)
         , mRunGuard("/tmp/ut-run")
         , cm(TEST_DBUS_CONFIG_PATH)
     {
@@ -79,16 +79,16 @@ struct Fixture {
 const int EVENT_TIMEOUT = 5000; ///< ms
 const std::map<std::string, std::string> EXPECTED_DBUSES_STARTED = {
     {
-        "ut-containers-manager-console1-dbus",
-        "unix:path=/tmp/ut-run/ut-containers-manager-console1-dbus/dbus/system_bus_socket"
+        "ut-zones-manager-console1-dbus",
+        "unix:path=/tmp/ut-run/ut-zones-manager-console1-dbus/dbus/system_bus_socket"
     },
     {
-        "ut-containers-manager-console2-dbus",
-        "unix:path=/tmp/ut-run/ut-containers-manager-console2-dbus/dbus/system_bus_socket"
+        "ut-zones-manager-console2-dbus",
+        "unix:path=/tmp/ut-run/ut-zones-manager-console2-dbus/dbus/system_bus_socket"
     },
     {
-        "ut-containers-manager-console3-dbus",
-        "unix:path=/tmp/ut-run/ut-containers-manager-console3-dbus/dbus/system_bus_socket"
+        "ut-zones-manager-console3-dbus",
+        "unix:path=/tmp/ut-run/ut-zones-manager-console3-dbus/dbus/system_bus_socket"
     }
 };
 
@@ -136,13 +136,13 @@ BOOST_AUTO_TEST_CASE(NotRunningServerTest)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(GetContainerDbusesTest)
+BOOST_AUTO_TEST_CASE(GetZoneDbusesTest)
 {
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     VsmArrayString keys, values;
-    status = vsm_get_container_dbuses(client, &keys, &values);
+    status = vsm_get_zone_dbuses(client, &keys, &values);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
 
     BOOST_CHECK_EQUAL(getArrayStringLength(keys, EXPECTED_DBUSES_STARTED.size() + 1),
@@ -150,15 +150,15 @@ BOOST_AUTO_TEST_CASE(GetContainerDbusesTest)
     BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_DBUSES_STARTED.size() + 1),
                       EXPECTED_DBUSES_STARTED.size());
 
-    std::map<std::string, std::string> containers;
-    convertDictToMap(keys, values, containers);
-    BOOST_CHECK(containers == EXPECTED_DBUSES_STARTED);
+    std::map<std::string, std::string> zones;
+    convertDictToMap(keys, values, zones);
+    BOOST_CHECK(zones == EXPECTED_DBUSES_STARTED);
     vsm_array_string_free(keys);
     vsm_array_string_free(values);
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(GetContainerIdsTest)
+BOOST_AUTO_TEST_CASE(GetZoneIdsTest)
 {
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
@@ -169,68 +169,68 @@ BOOST_AUTO_TEST_CASE(GetContainerIdsTest)
     BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_DBUSES_STARTED.size() + 1),
                       EXPECTED_DBUSES_STARTED.size());
 
-    std::set<std::string> containers;
-    convertArrayToSet(values, containers);
+    std::set<std::string> zones;
+    convertArrayToSet(values, zones);
 
-    for (const auto& container : containers) {
-        BOOST_CHECK(EXPECTED_DBUSES_STARTED.find(container) != EXPECTED_DBUSES_STARTED.cend());
+    for (const auto& zone : zones) {
+        BOOST_CHECK(EXPECTED_DBUSES_STARTED.find(zone) != EXPECTED_DBUSES_STARTED.cend());
     }
     vsm_array_string_free(values);
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(GetActiveContainerIdTest)
+BOOST_AUTO_TEST_CASE(GetActiveZoneIdTest)
 {
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    VsmString container;
-    status = vsm_get_active_container_id(client, &container);
+    VsmString zone;
+    status = vsm_get_active_zone_id(client, &zone);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
 
-    BOOST_CHECK_EQUAL(container, cm.getRunningForegroundContainerId());
+    BOOST_CHECK_EQUAL(zone, cm.getRunningForegroundZoneId());
 
-    vsm_string_free(container);
+    vsm_string_free(zone);
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(SetActiveContainerTest)
+BOOST_AUTO_TEST_CASE(SetActiveZoneTest)
 {
-    const std::string newActiveContainerId = "ut-containers-manager-console2-dbus";
+    const std::string newActiveZoneId = "ut-zones-manager-console2-dbus";
 
-    BOOST_REQUIRE_NE(newActiveContainerId, cm.getRunningForegroundContainerId());
+    BOOST_REQUIRE_NE(newActiveZoneId, cm.getRunningForegroundZoneId());
 
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    status = vsm_set_active_container(client, newActiveContainerId.c_str());
+    status = vsm_set_active_zone(client, newActiveZoneId.c_str());
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    BOOST_CHECK_EQUAL(newActiveContainerId, cm.getRunningForegroundContainerId());
+    BOOST_CHECK_EQUAL(newActiveZoneId, cm.getRunningForegroundZoneId());
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(CreateContainerTest)
+BOOST_AUTO_TEST_CASE(CreateZoneTest)
 {
-    const std::string newActiveContainerId = "";
+    const std::string newActiveZoneId = "";
 
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    status = vsm_create_zone(client, newActiveContainerId.c_str(), NULL);
+    status = vsm_create_zone(client, newActiveZoneId.c_str(), NULL);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_CUSTOM_ERROR, status);
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(LockUnlockContainerTest)
+BOOST_AUTO_TEST_CASE(LockUnlockZoneTest)
 {
-    const std::string newActiveContainerId = "ut-containers-manager-console2-dbus";
+    const std::string newActiveZoneId = "ut-zones-manager-console2-dbus";
 
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    status = vsm_lock_zone(client, newActiveContainerId.c_str());
+    status = vsm_lock_zone(client, newActiveZoneId.c_str());
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    status = vsm_unlock_zone(client, newActiveContainerId.c_str());
+    status = vsm_unlock_zone(client, newActiveZoneId.c_str());
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     vsm_client_free(client);
 }
@@ -238,14 +238,14 @@ BOOST_AUTO_TEST_CASE(LockUnlockContainerTest)
 BOOST_AUTO_TEST_CASE(FileMoveRequestTest)
 {
     const std::string path = "/tmp/fake_path";
-    const std::string secondContainer = "fake_container";
+    const std::string secondZone = "fake_zone";
 
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect_custom(client, EXPECTED_DBUSES_STARTED.begin()->second.c_str());
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    status = vsm_file_move_request(client, secondContainer.c_str(), path.c_str());
+    status = vsm_file_move_request(client, secondZone.c_str(), path.c_str());
     BOOST_REQUIRE_EQUAL(VSMCLIENT_CUSTOM_ERROR, status);
-    BOOST_REQUIRE_EQUAL(api::container::FILE_MOVE_DESTINATION_NOT_FOUND,
+    BOOST_REQUIRE_EQUAL(api::zone::FILE_MOVE_DESTINATION_NOT_FOUND,
                         vsm_get_status_message(client));
     vsm_client_free(client);
 }
@@ -260,12 +260,12 @@ BOOST_AUTO_TEST_CASE(NotificationTest)
         std::vector< std::tuple<std::string, std::string, std::string> > receivedSignalMsg;
     };
 
-    auto callback = [](const char* container,
+    auto callback = [](const char* zone,
                        const char* application,
                        const char* message,
     void* data) {
         CallbackData& callbackData = *reinterpret_cast<CallbackData*>(data);
-        callbackData.receivedSignalMsg.push_back(std::make_tuple(container, application, message));
+        callbackData.receivedSignalMsg.push_back(std::make_tuple(zone, application, message));
         callbackData.signalReceivedLatch.set();
     };
 
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(NotificationTest)
         BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     }
     for (auto& client : clients) {
-        VsmStatus status = vsm_notify_active_container(client.second,
+        VsmStatus status = vsm_notify_active_zone(client.second,
                                                        MSG_APP.c_str(),
                                                        MSG_CONTENT.c_str());
         BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
@@ -305,30 +305,30 @@ BOOST_AUTO_TEST_CASE(NotificationTest)
     }
 }
 
-BOOST_AUTO_TEST_CASE(GetContainerIdByPidTest1)
+BOOST_AUTO_TEST_CASE(GetZoneIdByPidTest1)
 {
     VsmClient client = vsm_client_create();
-    VsmString container;
-    VsmStatus status = vsm_lookup_zone_by_pid(client, 1, &container);
+    VsmString zone;
+    VsmStatus status = vsm_lookup_zone_by_pid(client, 1, &zone);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
 
-    BOOST_CHECK_EQUAL(container, std::string("host"));
+    BOOST_CHECK_EQUAL(zone, std::string("host"));
 
-    vsm_string_free(container);
+    vsm_string_free(zone);
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(GetContainerIdByPidTest2)
+BOOST_AUTO_TEST_CASE(GetZoneIdByPidTest2)
 {
     std::set<std::string> ids;
 
     VsmClient client = vsm_client_create();
     for (int n = 0; n < 100000; ++n) {
-        VsmString container;
-        VsmStatus status = vsm_lookup_zone_by_pid(client, n, &container);
+        VsmString zone;
+        VsmStatus status = vsm_lookup_zone_by_pid(client, n, &zone);
         if (status == VSMCLIENT_SUCCESS) {
-            ids.insert(container);
-            vsm_string_free(container);
+            ids.insert(zone);
+            vsm_string_free(zone);
         } else {
             BOOST_WARN_MESSAGE(status == VSMCLIENT_INVALID_ARGUMENT, vsm_get_status_message(client));
         }

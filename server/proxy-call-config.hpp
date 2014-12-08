@@ -39,8 +39,8 @@ namespace vasum {
  */
 struct ProxyCallRule {
 
-    std::string caller; ///< caller id (container id or host)
-    std::string target; ///< target id (container id or host)
+    std::string caller; ///< caller id (zone id or host)
+    std::string target; ///< target id (zone id or host)
     std::string targetBusName; ///< target dbus bus name
     std::string targetObjectPath; ///< target dbus object path
     std::string targetInterface; ///< target dbus interface

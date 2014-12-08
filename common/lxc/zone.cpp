@@ -83,10 +83,10 @@ std::string LxcZone::toString(State state)
 }
 
 LxcZone::LxcZone(const std::string& lxcPath, const std::string& zoneName)
-  : mContainer(nullptr)
+  : mLxcContainer(nullptr)
 {
-    mContainer = lxc_container_new(zoneName.c_str(), lxcPath.c_str());
-    if (!mContainer) {
+    mLxcContainer = lxc_container_new(zoneName.c_str(), lxcPath.c_str());
+    if (!mLxcContainer) {
         LOGE("Could not initialize lxc zone " << zoneName << " in path " << lxcPath);
         throw LxcException("Could not initialize lxc zone");
     }
@@ -94,18 +94,18 @@ LxcZone::LxcZone(const std::string& lxcPath, const std::string& zoneName)
 
 LxcZone::~LxcZone()
 {
-    lxc_container_put(mContainer);
+    lxc_container_put(mLxcContainer);
 }
 
 std::string LxcZone::getName() const
 {
-    return mContainer->name;
+    return mLxcContainer->name;
 }
 
 std::string LxcZone::getConfigItem(const std::string& key)
 {
     char buffer[1024];
-    int len = mContainer->get_config_item(mContainer, key.c_str(), buffer, sizeof(buffer));
+    int len = mLxcContainer->get_config_item(mLxcContainer, key.c_str(), buffer, sizeof(buffer));
     if (len < 0) {
         LOGE("Key '" << key << "' not found in zone " << getName());
         throw LxcException("Key not found");
@@ -115,12 +115,12 @@ std::string LxcZone::getConfigItem(const std::string& key)
 
 bool LxcZone::isDefined()
 {
-    return mContainer->is_defined(mContainer);
+    return mLxcContainer->is_defined(mLxcContainer);
 }
 
 LxcZone::State LxcZone::getState()
 {
-    const std::string str = mContainer->state(mContainer);
+    const std::string str = mLxcContainer->state(mLxcContainer);
     return STATE_MAP.at(str);
 }
 
@@ -129,9 +129,9 @@ bool LxcZone::create(const std::string& templatePath, const char* const* argv)
 #ifdef USE_EXEC
     utils::CStringArrayBuilder args;
     args.add("lxc-create")
-        .add("-n").add(mContainer->name)
+        .add("-n").add(mLxcContainer->name)
         .add("-t").add(templatePath.c_str())
-        .add("-P").add(mContainer->config_path);
+        .add("-P").add(mLxcContainer->config_path);
 
     while (*argv) {
         args.add(*argv++);
@@ -145,10 +145,10 @@ bool LxcZone::create(const std::string& templatePath, const char* const* argv)
     refresh();
     return true;
 #else
-    if (!mContainer->create(mContainer,
-                            templatePath.c_str(),
-                            NULL, NULL, 0,
-                            const_cast<char* const*>(argv))) {
+    if (!mLxcContainer->create(mLxcContainer,
+                               templatePath.c_str(),
+                               NULL, NULL, 0,
+                               const_cast<char* const*>(argv))) {
         LOGE("Could not create zone " << getName());
         return false;
     }
@@ -158,7 +158,7 @@ bool LxcZone::create(const std::string& templatePath, const char* const* argv)
 
 bool LxcZone::destroy()
 {
-    if (!mContainer->destroy(mContainer)) {
+    if (!mLxcContainer->destroy(mLxcContainer)) {
         LOGE("Could not destroy zone " << getName());
         return false;
     }
@@ -168,7 +168,7 @@ bool LxcZone::destroy()
 bool LxcZone::start(const char* const* argv)
 {
 #ifdef USE_EXEC
-    if (mContainer->is_running(mContainer)) {
+    if (mLxcContainer->is_running(mLxcContainer)) {
         LOGE("Already started " << getName());
         return false;
     }
@@ -176,8 +176,8 @@ bool LxcZone::start(const char* const* argv)
     utils::CStringArrayBuilder args;
     args.add("lxc-start")
         .add("-d")
-        .add("-n").add(mContainer->name)
-        .add("-P").add(mContainer->config_path)
+        .add("-n").add(mLxcContainer->name)
+        .add("-P").add(mLxcContainer->config_path)
         .add("--");
 
     while (*argv) {
@@ -192,21 +192,21 @@ bool LxcZone::start(const char* const* argv)
     refresh();
 
     // we have to check status because lxc-start runs in daemonized mode
-    if (!mContainer->is_running(mContainer)) {
+    if (!mLxcContainer->is_running(mLxcContainer)) {
         LOGE("Could not start init in zone " << getName());
         return false;
     }
     return true;
 #else
-    if (mContainer->is_running(mContainer)) {
+    if (mLxcContainer->is_running(mLxcContainer)) {
         LOGE("Already started " << getName());
         return false;
     }
-    if (!mContainer->want_daemonize(mContainer, true)) {
+    if (!mLxcContainer->want_daemonize(mLxcContainer, true)) {
         LOGE("Could not configure zone " << getName());
         return false;
     }
-    if (!mContainer->start(mContainer, false, const_cast<char* const*>(argv))) {
+    if (!mLxcContainer->start(mLxcContainer, false, const_cast<char* const*>(argv))) {
         LOGE("Could not start zone " << getName());
         return false;
     }
@@ -216,7 +216,7 @@ bool LxcZone::start(const char* const* argv)
 
 bool LxcZone::stop()
 {
-    if (!mContainer->stop(mContainer)) {
+    if (!mLxcContainer->stop(mLxcContainer)) {
         LOGE("Could not stop zone " << getName());
         return false;
     }
@@ -225,7 +225,7 @@ bool LxcZone::stop()
 
 bool LxcZone::reboot()
 {
-    if (!mContainer->reboot(mContainer)) {
+    if (!mLxcContainer->reboot(mLxcContainer)) {
         LOGE("Could not reboot zone " << getName());
         return false;
     }
@@ -247,8 +247,8 @@ bool LxcZone::shutdown(int timeout)
     utils::CStringArrayBuilder args;
     std::string timeoutStr = std::to_string(timeout);
     args.add("lxc-stop")
-        .add("-n").add(mContainer->name)
-        .add("-P").add(mContainer->config_path)
+        .add("-n").add(mLxcContainer->name)
+        .add("-P").add(mLxcContainer->config_path)
         .add("-t").add(timeoutStr.c_str())
         .add("--nokill");
 
@@ -271,7 +271,7 @@ bool LxcZone::shutdown(int timeout)
     LOGW("SetRunLevel failed for zone " + getName());
 
     // fallback for other inits like bash: lxc sends 'lxc.haltsignal' signal to init
-    if (!mContainer->shutdown(mContainer, timeout)) {
+    if (!mLxcContainer->shutdown(mLxcContainer, timeout)) {
         LOGE("Could not gracefully shutdown zone " << getName() << " in " << timeout << "s");
         return false;
     }
@@ -281,7 +281,7 @@ bool LxcZone::shutdown(int timeout)
 
 bool LxcZone::freeze()
 {
-    if (!mContainer->freeze(mContainer)) {
+    if (!mLxcContainer->freeze(mLxcContainer)) {
         LOGE("Could not freeze zone " << getName());
         return false;
     }
@@ -290,7 +290,7 @@ bool LxcZone::freeze()
 
 bool LxcZone::unfreeze()
 {
-    if (!mContainer->unfreeze(mContainer)) {
+    if (!mLxcContainer->unfreeze(mLxcContainer)) {
         LOGE("Could not unfreeze zone " << getName());
         return false;
     }
@@ -299,7 +299,7 @@ bool LxcZone::unfreeze()
 
 bool LxcZone::waitForState(State state, int timeout)
 {
-    if (!mContainer->wait(mContainer, toString(state).c_str(), timeout)) {
+    if (!mLxcContainer->wait(mLxcContainer, toString(state).c_str(), timeout)) {
         LOGD("Timeout while waiting for state " << toString(state) << " of zone " << getName());
         return false;
     }
@@ -315,7 +315,7 @@ bool LxcZone::setRunLevel(int runLevel)
 
     lxc_attach_options_t options = LXC_ATTACH_OPTIONS_DEFAULT;
     pid_t pid;
-    int ret = mContainer->attach(mContainer, callback, &runLevel, &options, &pid);
+    int ret = mLxcContainer->attach(mLxcContainer, callback, &runLevel, &options, &pid);
     if (ret != 0) {
         return false;
     }
@@ -329,10 +329,10 @@ bool LxcZone::setRunLevel(int runLevel)
 void LxcZone::refresh()
 {
     //TODO Consider make LxcZone state-less
-    std::string zoneName = mContainer->name;
-    std::string lxcPath = mContainer->config_path;
-    lxc_container_put(mContainer);
-    mContainer = lxc_container_new(zoneName.c_str(), lxcPath.c_str());
+    std::string zoneName = mLxcContainer->name;
+    std::string lxcPath = mLxcContainer->config_path;
+    lxc_container_put(mLxcContainer);
+    mLxcContainer = lxc_container_new(zoneName.c_str(), lxcPath.c_str());
 }
 
 

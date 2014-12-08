@@ -32,8 +32,8 @@ namespace vasum {
 namespace testapi {
 
 
-const std::string BUS_NAME       = "org.tizen.containers.tests";
-const std::string OBJECT_PATH    = "/org/tizen/containers/tests";
+const std::string BUS_NAME       = "org.tizen.vasum.tests";
+const std::string OBJECT_PATH    = "/org/tizen/vasum/tests";
 const std::string INTERFACE      = "tests.api";
 const std::string METHOD         = "Method";
 

@@ -28,18 +28,18 @@ DEBUG_COMMAND=False
 # Test urls
 TEST_URL_INTERNET=["www.samsung.com", "www.google.com", "www.oracle.com"]
 
-# Path to test container
-TEST_CONTAINER_PATH="/opt/usr/containers/private"
+# Path to test zone
+TEST_ZONE_PATH="/opt/usr/zones/private"
 
 # Device Ethernet device
 ETHERNET_DEVICE="usb0"
 ETHERNET_DEVICE_DETECT=False
 
-# Test containers
-CONTAINER_T1="business"
-CONTAINER_T2="private"
+# Test zones
+ZONE_T1="business"
+ZONE_T2="private"
 
-containers=[CONTAINER_T1, CONTAINER_T2]
+zones=[ZONE_T1, ZONE_T2]
 
 # Null device
 OUTPUT_TO_NULL_DEVICE=" >/dev/null 2>&1 "
@@ -125,10 +125,10 @@ def runCommandAndReadOutput(cmd):
             break
 
 # ----------------------------------------------------------
-# The function checks whether test container image is present in system
+# The function checks whether test zone image is present in system
 #
 def test_guest_image():
-    rc = runCommand("/usr/bin/chroot " + TEST_CONTAINER_PATH + " /bin/true")
+    rc = runCommand("/usr/bin/chroot " + TEST_ZONE_PATH + " /bin/true")
     if( rc != 0 ):
         return 1
     return 0
@@ -154,7 +154,7 @@ def getActiveEthernetDevice():
 def test_mandatory_toos():
 
     tools     =["/usr/bin/ping"]
-    root_tools=[TEST_CONTAINER_PATH]
+    root_tools=[TEST_ZONE_PATH]
 
     for i in range(len(tools)):
         rc = runCommand("/usr/bin/ls " + root_tools[i] + tools[i])
@@ -180,11 +180,11 @@ def test_result(expected_result, result):
 # ----------------------------------------------------------
 # The function performs single internet access test
 #
-def internetAccessTest(container):
+def internetAccessTest(zone):
     count=0
     for item in TEST_URL_INTERNET:
         LOG_INFO("           Test for URL : " + item);
-        rc = virshCmd("lxc-enter-namespace " + container + \
+        rc = virshCmd("lxc-enter-namespace " + zone + \
                     " --noseclabel -- /usr/bin/ping -c 3 -W " + \
                     str(PING_TIME_OUT) + " " + item)
         if(rc != 0):
@@ -198,14 +198,14 @@ def internetAccessTest(container):
 # ----------------------------------------------------------
 # The function performs single internet access test
 #
-def networkVisibiltyTest(container, dest_ip):
-    return virshCmd("lxc-enter-namespace " + container + \
+def networkVisibiltyTest(zone, dest_ip):
+    return virshCmd("lxc-enter-namespace " + zone + \
                     " --noseclabel -- /usr/bin/ping -c 3 -W " + \
                     str(PING_TIME_OUT) + " " + dest_ip)
 
-def printInternetAccessTestStatus(container, testInfo1):
+def printInternetAccessTestStatus(zone, testInfo1):
 
-    text = "          Internet access for container: " + container + \
+    text = "          Internet access for zone: " + zone + \
            "; TCS = " + testInfo1.testItemResult[len(testInfo1.testItemResult)-1]
 
     if(testInfo1.testItemResult[len(testInfo1.testItemResult)-1] == "Success"):
@@ -215,7 +215,7 @@ def printInternetAccessTestStatus(container, testInfo1):
 
 def networkVisibiltyTestStatus(src, dest, ip, testInfo2):
 
-    text = "          Container access: " + src + \
+    text = "          Zone access: " + src + \
           " -> " + dest + \
           " [" + ip + "]" + \
           "; TCS = " + testInfo2.testItemResult[len(testInfo2.testItemResult)-1]
@@ -226,15 +226,15 @@ def networkVisibiltyTestStatus(src, dest, ip, testInfo2):
         LOG_ERROR(text)
 
 # ----------------------------------------------------------
-# The function performs test case for two containers - Business and Private.
-# Both containers are mutually isolated and have access to the Internet.
+# The function performs test case for two zones - Business and Private.
+# Both zones are mutually isolated and have access to the Internet.
 #
 def twoNetworks():
     ltestInfo = TestNetworkInfo("Two networks tests")
 
     # 0. Test data
-    containers_list      = [CONTAINER_T1, CONTAINER_T2]
-    dest_containers_list = [CONTAINER_T2, CONTAINER_T1]
+    zones_list      = [ZONE_T1, ZONE_T2]
+    dest_zones_list = [ZONE_T2, ZONE_T1]
     test_ip_list         = [["10.0.101.2"], ["10.0.102.2"]]
     test_1_expected_res  = [ 0,  0]
     test_2_expected_res  = [-1, -1]
@@ -243,17 +243,17 @@ def twoNetworks():
     LOG_INFO("   - Setup device")
 
     # 2. Internet access
-    LOG_INFO("   - Two containers environment network test case execution")
+    LOG_INFO("   - Two zones environment network test case execution")
     LOG_INFO("     - Internet access test")
-    for i in range(len(containers_list)):
+    for i in range(len(zones_list)):
 
         # - Test case info
         ltestInfo.testItemType.append("[Two nets] Internet access")
-        ltestInfo.testItemName.append(containers_list[i])
-        ltestInfo.testItemDescription.append("Internet access test for : " + containers_list[i])
+        ltestInfo.testItemName.append(zones_list[i])
+        ltestInfo.testItemDescription.append("Internet access test for : " + zones_list[i])
 
         # - Perform test
-        rc = internetAccessTest(containers_list[i])
+        rc = internetAccessTest(zones_list[i])
 
         # - Test status store
         if(test_result(test_1_expected_res[i], rc) == 0):
@@ -264,22 +264,22 @@ def twoNetworks():
             ltestInfo.testItemResult.append("Error")
 
         # - Print status
-        printInternetAccessTestStatus(containers_list[i], ltestInfo)
+        printInternetAccessTestStatus(zones_list[i], ltestInfo)
 
-    # 3. Mutual containers visibility
-    LOG_INFO("     - Containers isolation")
-    for i in range(len(containers_list)):
+    # 3. Mutual zones visibility
+    LOG_INFO("     - Zones isolation")
+    for i in range(len(zones_list)):
         # Interate over destynation ips
         dest_ips = test_ip_list[i]
 
         for j in range(len(dest_ips)):
             # - Test case info
             ltestInfo.testItemType.append("[Two nets] Visibility")
-            ltestInfo.testItemName.append(containers_list[i] + "->" + dest_containers_list[i])
-            ltestInfo.testItemDescription.append("Container access for : " + containers_list[i])
+            ltestInfo.testItemName.append(zones_list[i] + "->" + dest_zones_list[i])
+            ltestInfo.testItemDescription.append("Zone access for : " + zones_list[i])
 
             # Perform test
-            rc = networkVisibiltyTest(containers_list[i], dest_ips[j])
+            rc = networkVisibiltyTest(zones_list[i], dest_ips[j])
 
             # - Test status store
             if(test_result(test_2_expected_res[i], rc) == 0):
@@ -290,7 +290,7 @@ def twoNetworks():
                 ltestInfo.testItemResult.append("Error")
 
             # - Print status
-            networkVisibiltyTestStatus(containers_list[i], dest_containers_list[i], dest_ips[j], ltestInfo)
+            networkVisibiltyTestStatus(zones_list[i], dest_zones_list[i], dest_ips[j], ltestInfo)
 
     LOG_INFO("   - Clean environment")
 

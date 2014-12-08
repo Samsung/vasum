@@ -20,17 +20,17 @@
 MESSAGE(STATUS "Installing configs for the Server Unit Tests to " ${VSM_TEST_CONFIG_INSTALL_DIR})
 
 FILE(GLOB server_manager_CONF       ut-server/*.conf)
-FILE(GLOB server_container_CONF     ut-server/containers/*.conf)
+FILE(GLOB server_zone_CONF     ut-server/zones/*.conf)
 
-FILE(GLOB manager_manager_CONF      ut-containers-manager/*.conf)
-FILE(GLOB manager_container_CONF    ut-containers-manager/containers/*.conf)
+FILE(GLOB manager_manager_CONF      ut-zones-manager/*.conf)
+FILE(GLOB manager_zone_CONF    ut-zones-manager/zones/*.conf)
 
-FILE(GLOB container_CONF            ut-container/*.conf)
-FILE(GLOB container_container_CONF  ut-container/containers/*.conf)
+FILE(GLOB zone_CONF            ut-zone/*.conf)
+FILE(GLOB zone_zone_CONF  ut-zone/zones/*.conf)
 
-FILE(GLOB admin_container_CONF      ut-container-admin/containers/*.conf)
+FILE(GLOB admin_zone_CONF      ut-zone-admin/zones/*.conf)
 
-FILE(GLOB connection_CONF           ut-container-connection/*.conf)
+FILE(GLOB connection_CONF           ut-zone-connection/*.conf)
 
 
 ## Generate ####################################################################
@@ -40,35 +40,35 @@ CONFIGURE_FILE(ut-server/buggy-daemon.conf.in
               ${CMAKE_BINARY_DIR}/ut-server/buggy-daemon.conf @ONLY)
 FILE(GLOB server_manager_CONF_GEN ${CMAKE_BINARY_DIR}/ut-server/*.conf)
 
-CONFIGURE_FILE(ut-container/containers/test-dbus.conf.in
-               ${CMAKE_BINARY_DIR}/ut-container/containers/test-dbus.conf @ONLY)
-FILE(GLOB container_container_CONF_GEN ${CMAKE_BINARY_DIR}/ut-container/containers/*.conf)
+CONFIGURE_FILE(ut-zone/zones/test-dbus.conf.in
+               ${CMAKE_BINARY_DIR}/ut-zone/zones/test-dbus.conf @ONLY)
+FILE(GLOB zone_zone_CONF_GEN ${CMAKE_BINARY_DIR}/ut-zone/zones/*.conf)
 
-CONFIGURE_FILE(ut-containers-manager/test-daemon.conf.in
-               ${CMAKE_BINARY_DIR}/ut-containers-manager/test-daemon.conf @ONLY)
-CONFIGURE_FILE(ut-containers-manager/buggy-daemon.conf.in
-               ${CMAKE_BINARY_DIR}/ut-containers-manager/buggy-daemon.conf @ONLY)
-CONFIGURE_FILE(ut-containers-manager/buggy-default-daemon.conf.in
-               ${CMAKE_BINARY_DIR}/ut-containers-manager/buggy-default-daemon.conf @ONLY)
-CONFIGURE_FILE(ut-containers-manager/buggy-foreground-daemon.conf.in
-               ${CMAKE_BINARY_DIR}/ut-containers-manager/buggy-foreground-daemon.conf @ONLY)
-CONFIGURE_FILE(ut-containers-manager/test-dbus-daemon.conf.in
-               ${CMAKE_BINARY_DIR}/ut-containers-manager/test-dbus-daemon.conf @ONLY)
-CONFIGURE_FILE(ut-containers-manager/empty-dbus-daemon.conf.in
-               ${CMAKE_BINARY_DIR}/ut-containers-manager/empty-dbus-daemon.conf @ONLY)
-FILE(GLOB manager_manager_CONF_GEN ${CMAKE_BINARY_DIR}/ut-containers-manager/*.conf)
+CONFIGURE_FILE(ut-zones-manager/test-daemon.conf.in
+               ${CMAKE_BINARY_DIR}/ut-zones-manager/test-daemon.conf @ONLY)
+CONFIGURE_FILE(ut-zones-manager/buggy-daemon.conf.in
+               ${CMAKE_BINARY_DIR}/ut-zones-manager/buggy-daemon.conf @ONLY)
+CONFIGURE_FILE(ut-zones-manager/buggy-default-daemon.conf.in
+               ${CMAKE_BINARY_DIR}/ut-zones-manager/buggy-default-daemon.conf @ONLY)
+CONFIGURE_FILE(ut-zones-manager/buggy-foreground-daemon.conf.in
+               ${CMAKE_BINARY_DIR}/ut-zones-manager/buggy-foreground-daemon.conf @ONLY)
+CONFIGURE_FILE(ut-zones-manager/test-dbus-daemon.conf.in
+               ${CMAKE_BINARY_DIR}/ut-zones-manager/test-dbus-daemon.conf @ONLY)
+CONFIGURE_FILE(ut-zones-manager/empty-dbus-daemon.conf.in
+               ${CMAKE_BINARY_DIR}/ut-zones-manager/empty-dbus-daemon.conf @ONLY)
+FILE(GLOB manager_manager_CONF_GEN ${CMAKE_BINARY_DIR}/ut-zones-manager/*.conf)
 
-CONFIGURE_FILE(ut-containers-manager/containers/console1-dbus.conf.in
-               ${CMAKE_BINARY_DIR}/ut-containers-manager/containers/console1-dbus.conf @ONLY)
-CONFIGURE_FILE(ut-containers-manager/containers/console2-dbus.conf.in
-               ${CMAKE_BINARY_DIR}/ut-containers-manager/containers/console2-dbus.conf @ONLY)
-CONFIGURE_FILE(ut-containers-manager/containers/console3-dbus.conf.in
-               ${CMAKE_BINARY_DIR}/ut-containers-manager/containers/console3-dbus.conf @ONLY)
-FILE(GLOB manager_container_CONF_GEN ${CMAKE_BINARY_DIR}/ut-containers-manager/containers/*.conf)
+CONFIGURE_FILE(ut-zones-manager/zones/console1-dbus.conf.in
+               ${CMAKE_BINARY_DIR}/ut-zones-manager/zones/console1-dbus.conf @ONLY)
+CONFIGURE_FILE(ut-zones-manager/zones/console2-dbus.conf.in
+               ${CMAKE_BINARY_DIR}/ut-zones-manager/zones/console2-dbus.conf @ONLY)
+CONFIGURE_FILE(ut-zones-manager/zones/console3-dbus.conf.in
+               ${CMAKE_BINARY_DIR}/ut-zones-manager/zones/console3-dbus.conf @ONLY)
+FILE(GLOB manager_zone_CONF_GEN ${CMAKE_BINARY_DIR}/ut-zones-manager/zones/*.conf)
 
-CONFIGURE_FILE(ut-containers-manager/templates/template.conf.in
-               ${CMAKE_BINARY_DIR}/ut-containers-manager/templates/template.conf @ONLY)
-FILE(GLOB manager_container_TEMPLATE_GEN ${CMAKE_BINARY_DIR}/ut-containers-manager/templates/*.conf)
+CONFIGURE_FILE(ut-zones-manager/templates/template.conf.in
+               ${CMAKE_BINARY_DIR}/ut-zones-manager/templates/template.conf @ONLY)
+FILE(GLOB manager_zone_TEMPLATE_GEN ${CMAKE_BINARY_DIR}/ut-zones-manager/templates/*.conf)
 
 
 ## Install #####################################################################
@@ -76,32 +76,32 @@ INSTALL(FILES        ${server_manager_CONF}
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-server)
 INSTALL(FILES        ${server_manager_CONF_GEN}
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-server)
-INSTALL(FILES        ${server_container_CONF}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-server/containers)
+INSTALL(FILES        ${server_zone_CONF}
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-server/zones)
 
 INSTALL(FILES        ${manager_manager_CONF}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zones-manager)
 INSTALL(FILES        ${manager_manager_CONF_GEN}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager)
-INSTALL(FILES        ${manager_container_CONF}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/containers)
-INSTALL(FILES        ${manager_container_CONF_GEN}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/containers)
-INSTALL(FILES        ${manager_container_TEMPLATE_GEN}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-containers-manager/templates)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zones-manager)
+INSTALL(FILES        ${manager_zone_CONF}
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zones-manager/zones)
+INSTALL(FILES        ${manager_zone_CONF_GEN}
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zones-manager/zones)
+INSTALL(FILES        ${manager_zone_TEMPLATE_GEN}
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zones-manager/templates)
 
-INSTALL(FILES        ${container_CONF}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-container)
-INSTALL(FILES        ${container_container_CONF}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-container/containers)
-INSTALL(FILES        ${container_container_CONF_GEN}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-container/containers)
+INSTALL(FILES        ${zone_CONF}
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zone)
+INSTALL(FILES        ${zone_zone_CONF}
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zone/zones)
+INSTALL(FILES        ${zone_zone_CONF_GEN}
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zone/zones)
 
-INSTALL(FILES        ${admin_container_CONF}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-container-admin/containers)
+INSTALL(FILES        ${admin_zone_CONF}
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zone-admin/zones)
 
 INSTALL(FILES        ${connection_CONF}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-container-connection)
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zone-connection)
 
-INSTALL(FILES        dbus-1/system.d/org.tizen.containers.tests.conf
+INSTALL(FILES        dbus-1/system.d/org.tizen.vasum.tests.conf
         DESTINATION  ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)

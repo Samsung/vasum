@@ -24,16 +24,16 @@ CONFIGURE_FILE(ut-client/test-dbus-daemon.conf.in
               ${CMAKE_BINARY_DIR}/ut-client/test-dbus-daemon.conf @ONLY)
 FILE(GLOB client_manager_CONF_GEN ${CMAKE_BINARY_DIR}/ut-client/*.conf)
 
-CONFIGURE_FILE(ut-client/containers/console1-dbus.conf.in
-               ${CMAKE_BINARY_DIR}/ut-client/containers/console1-dbus.conf @ONLY)
-CONFIGURE_FILE(ut-client/containers/console2-dbus.conf.in
-               ${CMAKE_BINARY_DIR}/ut-client/containers/console2-dbus.conf @ONLY)
-CONFIGURE_FILE(ut-client/containers/console3-dbus.conf.in
-               ${CMAKE_BINARY_DIR}/ut-client/containers/console3-dbus.conf @ONLY)
-FILE(GLOB client_container_CONF_GEN ${CMAKE_BINARY_DIR}/ut-client/containers/*.conf)
+CONFIGURE_FILE(ut-client/zones/console1-dbus.conf.in
+               ${CMAKE_BINARY_DIR}/ut-client/zones/console1-dbus.conf @ONLY)
+CONFIGURE_FILE(ut-client/zones/console2-dbus.conf.in
+               ${CMAKE_BINARY_DIR}/ut-client/zones/console2-dbus.conf @ONLY)
+CONFIGURE_FILE(ut-client/zones/console3-dbus.conf.in
+               ${CMAKE_BINARY_DIR}/ut-client/zones/console3-dbus.conf @ONLY)
+FILE(GLOB client_zone_CONF_GEN ${CMAKE_BINARY_DIR}/ut-client/zones/*.conf)
 
 ## Install #####################################################################
 INSTALL(FILES        ${client_manager_CONF_GEN}
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/client/ut-client)
-INSTALL(FILES        ${client_container_CONF_GEN}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/client/ut-client/containers)
+INSTALL(FILES        ${client_zone_CONF_GEN}
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/client/ut-client/zones)

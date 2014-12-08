@@ -15,7 +15,7 @@ Release:        0
 Source0:        %{name}-%{version}.tar.gz
 License:        Apache-2.0
 Group:          Security/Other
-Summary:        Daemon for managing containers
+Summary:        Daemon for managing zones
 BuildRequires:  cmake
 BuildRequires:  boost-devel
 BuildRequires:  libjson-devel >= 0.10
@@ -32,25 +32,25 @@ Requires(post): libcap-tools
 Requires:       bridge-utils
 
 %description
-This package provides a daemon used to manage containers - start, stop and switch
-between them. A process from inside a container can request a switch of context
-(display, input devices) to the other container.
+This package provides a daemon used to manage zones - start, stop and switch
+between them. A process from inside a zone can request a switch of context
+(display, input devices) to the other zone.
 
 %files
 %manifest packaging/vasum.manifest
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/vasum-server
 %dir /etc/vasum
-%dir /etc/vasum/containers
+%dir /etc/vasum/zones
 %dir /etc/vasum/lxc-templates
 %dir /etc/vasum/templates
 %config /etc/vasum/daemon.conf
-%config /etc/vasum/containers/*.conf
+%config /etc/vasum/zones/*.conf
 %attr(755,root,root) /etc/vasum/lxc-templates/*.sh
 %config /etc/vasum/templates/*.conf
 %{_unitdir}/vasum.service
 %{_unitdir}/multi-user.target.wants/vasum.service
-/etc/dbus-1/system.d/org.tizen.containers.host.conf
+/etc/dbus-1/system.d/org.tizen.vasum.host.conf
 
 %prep
 %setup -q
@@ -150,37 +150,37 @@ Development package including the header files for the client library
 %{_libdir}/pkgconfig/*.pc
 
 
-## Container Support Package ###################################################
+## Zone Support Package ###################################################
 # TODO move to a separate repository
-%package container-support
+%package zone-support
 Summary:          Vasum Support
 Group:            Security/Other
 Conflicts:        vasum
 
-%description container-support
-Containers support installed inside every container.
+%description zone-support
+Zones support installed inside every zone.
 
-%files container-support
-%manifest packaging/vasum-container-support.manifest
+%files zone-support
+%manifest packaging/vasum-zone-support.manifest
 %defattr(644,root,root,755)
-/etc/dbus-1/system.d/org.tizen.containers.zone.conf
+/etc/dbus-1/system.d/org.tizen.vasum.zone.conf
 
 
-## Container Daemon Package ####################################################
+## Zone Daemon Package ####################################################
 # TODO move to a separate repository
-%package container-daemon
-Summary:          Vasum Containers Daemon
+%package zone-daemon
+Summary:          Vasum Zones Daemon
 Group:            Security/Other
-Requires:         vasum-container-support = %{version}-%{release}
+Requires:         vasum-zone-support = %{version}-%{release}
 
-%description container-daemon
-Daemon running inside every container.
+%description zone-daemon
+Daemon running inside every zone.
 
-%files container-daemon
-%manifest packaging/vasum-container-daemon.manifest
+%files zone-daemon
+%manifest packaging/vasum-zone-daemon.manifest
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/vasum-container-daemon
-/etc/dbus-1/system.d/org.tizen.containers.zone.daemon.conf
+%attr(755,root,root) %{_bindir}/vasum-zone-daemon
+/etc/dbus-1/system.d/org.tizen.vasum.zone.daemon.conf
 
 
 ## Command Line Interface ######################################################
@@ -221,4 +221,4 @@ Unit tests for both: server and client and integration tests.
 %{_datadir}/vasum/tests
 %attr(755,root,root) %{_datadir}/vasum/lxc-templates
 %{python_sitelib}/vsm_integration_tests
-/etc/dbus-1/system.d/org.tizen.containers.tests.conf
+/etc/dbus-1/system.d/org.tizen.vasum.tests.conf

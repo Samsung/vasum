@@ -35,7 +35,7 @@ namespace lxc {
 
 
 /**
- * A class wwapping lxc container
+ * A class wrapping lxc container
  */
 class LxcZone {
 public:
@@ -52,7 +52,7 @@ public:
 
     /**
      * LxcZone constructor
-     * @param lxcPath path where containers lives
+     * @param lxcPath path where zones lives
      * @param zoneName name of zone
      */
     LxcZone(const std::string& lxcPath, const std::string& zoneName);
@@ -137,7 +137,7 @@ public:
      */
     bool unfreeze();
 private:
-    lxc_container* mContainer;
+    lxc_container* mLxcContainer;
 
     bool setRunLevel(int runLevel);
     void refresh();

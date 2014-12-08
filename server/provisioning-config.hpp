@@ -19,7 +19,7 @@
 /**
  * @file
  * @author  Mateusz Malicki (m.malicki2@samsung.com)
- * @brief   Declaration of the class for storing container provisioning configuration
+ * @brief   Declaration of the class for storing zone provisioning configuration
  */
 
 
@@ -32,9 +32,9 @@
 #include <vector>
 
 
-namespace security_containers {
+namespace vasum {
 
-struct ContainerProvisioning
+struct ZoneProvisioning
 {
 
     struct File
@@ -101,6 +101,6 @@ struct ContainerProvisioning
     )
 };
 
-}
+} // namespace vasum
 
 #endif // SERVER_PROVISIONING_CONFIG_HPP

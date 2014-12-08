@@ -25,7 +25,7 @@ br_name="virbr-${name}"
 
 # XXX assume rootfs if mounted from iso
 
-# Prepare container configuration file
+# Prepare zone configuration file
 > ${path}/config
 cat <<EOF >> ${path}/config
 lxc.utsname = ${name}
@@ -39,9 +39,9 @@ lxc.pts = 256
 lxc.tty = 0
 
 lxc.mount.auto = proc sys cgroup
-lxc.mount.entry = /var/run/containers/${name}/run var/run none rw,bind 0 0
+lxc.mount.entry = /var/run/zones/${name}/run var/run none rw,bind 0 0
 
-# create a separate network per container
+# create a separate network per zone
 # - it forbids traffic sniffing (like macvlan in bridge mode)
 # - it enables traffic controlling from host using iptables
 lxc.network.type = veth

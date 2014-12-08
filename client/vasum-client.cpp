@@ -118,9 +118,9 @@ API VsmStatus vsm_get_status(VsmClient client)
     return getClient(client).vsm_get_status();
 }
 
-API VsmStatus vsm_get_container_dbuses(VsmClient client, VsmArrayString* keys, VsmArrayString* values)
+API VsmStatus vsm_get_zone_dbuses(VsmClient client, VsmArrayString* keys, VsmArrayString* values)
 {
-    return getClient(client).vsm_get_container_dbuses(keys, values);
+    return getClient(client).vsm_get_zone_dbuses(keys, values);
 }
 
 API VsmStatus vsm_get_zone_ids(VsmClient client, VsmArrayString* array)
@@ -128,9 +128,9 @@ API VsmStatus vsm_get_zone_ids(VsmClient client, VsmArrayString* array)
     return getClient(client).vsm_get_zone_ids(array);
 }
 
-API VsmStatus vsm_get_active_container_id(VsmClient client, VsmString* id)
+API VsmStatus vsm_get_active_zone_id(VsmClient client, VsmString* id)
 {
-    return getClient(client).vsm_get_active_container_id(id);
+    return getClient(client).vsm_get_active_zone_id(id);
 }
 
 API VsmStatus vsm_lookup_zone_by_pid(VsmClient client, int pid, VsmString* id)
@@ -148,9 +148,9 @@ API VsmStatus vsm_lookup_zone_by_terminal_id(VsmClient client, int terminal, Vsm
     return getClient(client).vsm_lookup_zone_by_terminal_id(terminal, id);
 }
 
-API VsmStatus vsm_set_active_container(VsmClient client, const char* id)
+API VsmStatus vsm_set_active_zone(VsmClient client, const char* id)
 {
-    return getClient(client).vsm_set_active_container(id);
+    return getClient(client).vsm_set_active_zone(id);
 }
 
 API VsmStatus vsm_create_zone(VsmClient client, const char* id, const char* tname)
@@ -184,11 +184,11 @@ API VsmStatus vsm_unlock_zone(VsmClient client, const char* id)
 }
 
 API VsmStatus vsm_add_state_callback(VsmClient client,
-                                     VsmContainerDbusStateCallback containerDbusStateCallback,
+                                     VsmZoneDbusStateCallback zoneDbusStateCallback,
                                      void* data,
                                      VsmSubscriptionId* subscriptionId)
 {
-    return getClient(client).vsm_add_state_callback(containerDbusStateCallback, data, subscriptionId);
+    return getClient(client).vsm_add_state_callback(zoneDbusStateCallback, data, subscriptionId);
 }
 
 API VsmStatus vsm_del_state_callback(VsmClient client, VsmSubscriptionId subscriptionId)
@@ -273,46 +273,46 @@ API VsmStatus vsm_lookup_netdev_by_name(VsmClient client,
 }
 
 API VsmStatus vsm_declare_file(VsmClient client,
-                               const char* container,
+                               const char* zone,
                                VsmFileType type,
                                const char* path,
                                int32_t flags,
                                mode_t mode)
 {
-    return getClient(client).vsm_declare_file(container, type, path, flags, mode);
+    return getClient(client).vsm_declare_file(zone, type, path, flags, mode);
 }
 
 
 API VsmStatus vsm_declare_mount(VsmClient client,
                                 const char* source,
-                                const char* container,
+                                const char* zone,
                                 const char* target,
                                 const char* type,
                                 uint64_t flags,
                                 const char* data)
 {
-    return getClient(client).vsm_declare_mount(source, container, target, type, flags, data);
+    return getClient(client).vsm_declare_mount(source, zone, target, type, flags, data);
 }
 
 API VsmStatus vsm_declare_link(VsmClient client,
                                const char* source,
-                               const char* container,
+                               const char* zone,
                                const char* target)
 {
-    return getClient(client).vsm_declare_link(source, container, target);
+    return getClient(client).vsm_declare_link(source, zone, target);
 }
 
 
-API VsmStatus vsm_notify_active_container(VsmClient client,
+API VsmStatus vsm_notify_active_zone(VsmClient client,
                                           const char* application,
                                           const char* message)
 {
-    return getClient(client).vsm_notify_active_container(application, message);
+    return getClient(client).vsm_notify_active_zone(application, message);
 }
 
-API VsmStatus vsm_file_move_request(VsmClient client, const char* destContainer, const char* path)
+API VsmStatus vsm_file_move_request(VsmClient client, const char* destZone, const char* path)
 {
-    return getClient(client).vsm_file_move_request(destContainer, path);
+    return getClient(client).vsm_file_move_request(destZone, path);
 }
 
 API VsmStatus vsm_add_notification_callback(VsmClient client,

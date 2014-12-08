@@ -1,0 +1,17 @@
+{
+    "zoneConfigs" : ["zones/console1.conf", "zones/console2.conf", "zones/console3.conf"],
+    "runMountPointPrefix" : "",
+    "foregroundId" : "this_id_does_not_exist",
+    "defaultId" : "ut-zones-manager-console1",
+    "zonesPath" : "/tmp/ut-zones",
+    "zoneImagePath" : "",
+    "zoneTemplatePath" : "templates",
+    "zoneNewConfigPrefix" : "@VSM_TEST_CONFIG_INSTALL_DIR@/server/ut-zones-manager/",
+    "lxcTemplatePrefix" : "@VSM_TEST_LXC_TEMPLATES_INSTALL_DIR@",
+    "inputConfig" : {"enabled" : false,
+                     "device" : "/dev/doesnotexist",
+                     "code" : 139,
+                     "numberOfEvents" : 2,
+                     "timeWindowMs" : 500},
+    "proxyCallRules" : []
+}

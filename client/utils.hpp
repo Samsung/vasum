@@ -27,6 +27,6 @@
 
 #include <string>
 
-bool parseContainerIdFromCpuSet(const std::string& cpuset, std::string& id);
+bool parseZoneIdFromCpuSet(const std::string& cpuset, std::string& id);
 
 #endif // VASUM_CLIENT_UTILS_HPP

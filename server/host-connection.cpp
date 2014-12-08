@@ -110,24 +110,24 @@ void HostConnection::setProxyCallCallback(const ProxyCallCallback& callback)
     mProxyCallCallback = callback;
 }
 
-void HostConnection::setGetContainerDbusesCallback(const GetContainerDbusesCallback& callback)
+void HostConnection::setGetZoneDbusesCallback(const GetZoneDbusesCallback& callback)
 {
-    mGetContainerDbusesCallback = callback;
+    mGetZoneDbusesCallback = callback;
 }
 
-void HostConnection::setGetContainerIdsCallback(const GetContainerIdsCallback& callback)
+void HostConnection::setGetZoneIdsCallback(const GetZoneIdsCallback& callback)
 {
-    mGetContainerIdsCallback = callback;
+    mGetZoneIdsCallback = callback;
 }
 
-void HostConnection::setGetActiveContainerIdCallback(const GetActiveContainerIdCallback& callback)
+void HostConnection::setGetActiveZoneIdCallback(const GetActiveZoneIdCallback& callback)
 {
-    mGetActiveContainerIdCallback = callback;
+    mGetActiveZoneIdCallback = callback;
 }
 
-void HostConnection::setGetContainerInfoCallback(const GetContainerInfoCallback& callback)
+void HostConnection::setGetZoneInfoCallback(const GetZoneInfoCallback& callback)
 {
-    mGetContainerInfoCallback = callback;
+    mGetZoneInfoCallback = callback;
 }
 
 void HostConnection::setDeclareFileCallback(const DeclareFileCallback& callback)
@@ -145,29 +145,29 @@ void HostConnection::setDeclareLinkCallback(const DeclareLinkCallback& callback)
     mDeclareLinkCallback = callback;
 }
 
-void HostConnection::setSetActiveContainerCallback(const SetActiveContainerCallback& callback)
+void HostConnection::setSetActiveZoneCallback(const SetActiveZoneCallback& callback)
 {
-    mSetActiveContainerCallback = callback;
+    mSetActiveZoneCallback = callback;
 }
 
-void HostConnection::setCreateContainerCallback(const CreateContainerCallback& callback)
+void HostConnection::setCreateZoneCallback(const CreateZoneCallback& callback)
 {
-    mCreateContainerCallback = callback;
+    mCreateZoneCallback = callback;
 }
 
-void HostConnection::setDestroyContainerCallback(const DestroyContainerCallback& callback)
+void HostConnection::setDestroyZoneCallback(const DestroyZoneCallback& callback)
 {
-    mDestroyContainerCallback = callback;
+    mDestroyZoneCallback = callback;
 }
 
-void HostConnection::setLockContainerCallback(const LockContainerCallback& callback)
+void HostConnection::setLockZoneCallback(const LockZoneCallback& callback)
 {
-    mLockContainerCallback = callback;
+    mLockZoneCallback = callback;
 }
 
-void HostConnection::setUnlockContainerCallback(const UnlockContainerCallback& callback)
+void HostConnection::setUnlockZoneCallback(const UnlockZoneCallback& callback)
 {
-    mUnlockContainerCallback = callback;
+    mUnlockZoneCallback = callback;
 }
 
 
@@ -181,19 +181,19 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::host::METHOD_SET_ACTIVE_CONTAINER) {
+    if (methodName == api::host::METHOD_SET_ACTIVE_ZONE) {
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
 
-        if (mSetActiveContainerCallback) {
-            mSetActiveContainerCallback(id, result);
+        if (mSetActiveZoneCallback) {
+            mSetActiveZoneCallback(id, result);
         }
         return;
     }
 
-    if (methodName == api::host::METHOD_GET_CONTAINER_DBUSES) {
-        if (mGetContainerDbusesCallback) {
-            mGetContainerDbusesCallback(result);
+    if (methodName == api::host::METHOD_GET_ZONE_DBUSES) {
+        if (mGetZoneDbusesCallback) {
+            mGetZoneDbusesCallback(result);
         }
         return;
     }
@@ -227,47 +227,47 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::host::METHOD_GET_CONTAINER_ID_LIST){
-        if (mGetContainerIdsCallback){
-            mGetContainerIdsCallback(result);
+    if (methodName == api::host::METHOD_GET_ZONE_ID_LIST){
+        if (mGetZoneIdsCallback){
+            mGetZoneIdsCallback(result);
         }
         return;
     }
 
-    if (methodName == api::host::METHOD_GET_ACTIVE_CONTAINER_ID){
-        if (mGetActiveContainerIdCallback){
-            mGetActiveContainerIdCallback(result);
+    if (methodName == api::host::METHOD_GET_ACTIVE_ZONE_ID){
+        if (mGetActiveZoneIdCallback){
+            mGetActiveZoneIdCallback(result);
         }
         return;
     }
 
-    if (methodName == api::host::METHOD_GET_CONTAINER_INFO){
+    if (methodName == api::host::METHOD_GET_ZONE_INFO){
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
 
-        if (mGetContainerInfoCallback) {
-            mGetContainerInfoCallback(id, result);
+        if (mGetZoneInfoCallback) {
+            mGetZoneInfoCallback(id, result);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_DECLARE_FILE) {
-        const gchar* container;
+        const gchar* zone;
         int32_t type;
         const gchar* path;
         int32_t flags;
         int32_t mode;
-        g_variant_get(parameters, "(&si&sii)", &container, &type, &path, &flags, &mode);
+        g_variant_get(parameters, "(&si&sii)", &zone, &type, &path, &flags, &mode);
 
         if (mDeclareFileCallback) {
-            mDeclareFileCallback(container, type, path, flags, mode, result);
+            mDeclareFileCallback(zone, type, path, flags, mode, result);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_DECLARE_MOUNT) {
         const gchar* source;
-        const gchar* container;
+        const gchar* zone;
         const gchar* target;
         const gchar* type;
         uint64_t flags;
@@ -275,63 +275,63 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         g_variant_get(parameters,
                       "(&s&s&s&st&s)",
                       &source,
-                      &container,
+                      &zone,
                       &target,
                       &type,
                       &flags,
                       &data);
 
         if (mDeclareMountCallback) {
-            mDeclareMountCallback(source, container, target, type, flags, data, result);
+            mDeclareMountCallback(source, zone, target, type, flags, data, result);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_DECLARE_LINK) {
         const gchar* source;
-        const gchar* container;
+        const gchar* zone;
         const gchar* target;
-        g_variant_get(parameters, "(&s&s&s)", &source, &container, &target);
+        g_variant_get(parameters, "(&s&s&s)", &source, &zone, &target);
 
         if (mDeclareLinkCallback) {
-            mDeclareLinkCallback(source, container, target, result);
+            mDeclareLinkCallback(source, zone, target, result);
         }
         return;
     }
 
-    if (methodName == api::host::METHOD_CREATE_CONTAINER) {
+    if (methodName == api::host::METHOD_CREATE_ZONE) {
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
 
-        if (mCreateContainerCallback){
-            mCreateContainerCallback(id, result);
+        if (mCreateZoneCallback){
+            mCreateZoneCallback(id, result);
         }
     }
 
-    if (methodName == api::host::METHOD_DESTROY_CONTAINER) {
+    if (methodName == api::host::METHOD_DESTROY_ZONE) {
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
 
-        if (mDestroyContainerCallback){
-            mDestroyContainerCallback(id, result);
+        if (mDestroyZoneCallback){
+            mDestroyZoneCallback(id, result);
         }
     }
 
-    if (methodName == api::host::METHOD_LOCK_CONTAINER) {
+    if (methodName == api::host::METHOD_LOCK_ZONE) {
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
 
-        if (mLockContainerCallback){
-            mLockContainerCallback(id, result);
+        if (mLockZoneCallback){
+            mLockZoneCallback(id, result);
         }
     }
 
-    if (methodName == api::host::METHOD_UNLOCK_CONTAINER) {
+    if (methodName == api::host::METHOD_UNLOCK_ZONE) {
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
 
-        if (mUnlockContainerCallback){
-            mUnlockContainerCallback(id, result);
+        if (mUnlockZoneCallback){
+            mUnlockZoneCallback(id, result);
         }
     }
 }
@@ -352,13 +352,13 @@ void HostConnection::proxyCallAsync(const std::string& busName,
                                      callback);
 }
 
-void HostConnection::signalContainerDbusState(const std::string& containerId,
+void HostConnection::signalZoneDbusState(const std::string& zoneId,
                                               const std::string& dbusAddress)
 {
-    GVariant* parameters = g_variant_new("(ss)", containerId.c_str(), dbusAddress.c_str());
+    GVariant* parameters = g_variant_new("(ss)", zoneId.c_str(), dbusAddress.c_str());
     mDbusConnection->emitSignal(api::host::OBJECT_PATH,
                                 api::host::INTERFACE,
-                                api::host::SIGNAL_CONTAINER_DBUS_STATE,
+                                api::host::SIGNAL_ZONE_DBUS_STATE,
                                 parameters);
 }
 

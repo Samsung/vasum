@@ -22,17 +22,17 @@ usage()
 {
     cat <<EOF
 usage:
-    $1 -n|--name=<container_name>
+    $1 -n|--name=<zone_name>
         [-p|--path=<path>] [-r|--rootfs=<rootfs>] [-v|--vt=<vt>]
         [--ipv4=<ipv4>] [--ipv4-gateway=<ipv4_gateway>] [-h|--help]
 Mandatory args:
-  -n,--name         container name
+  -n,--name         zone name
 Optional args:
-  -p,--path         path to container config files, defaults to /var/lib/lxc
-  --rootfs          path to container rootfs, defaults to /var/lib/lxc/[NAME]/rootfs
-  -v,--vt           container virtual terminal
-  --ipv4            container IP address
-  --ipv4-gateway    container gateway
+  -p,--path         path to zone config files, defaults to /var/lib/lxc
+  --rootfs          path to zone rootfs, defaults to /var/lib/lxc/[NAME]/rootfs
+  -v,--vt           zone virtual terminal
+  --ipv4            zone IP address
+  --ipv4-gateway    zone gateway
   -h,--help         print help
 EOF
     return 0
@@ -66,7 +66,7 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 if [ -z $name ]; then
-    echo "Container name must be given"
+    echo "Zone name must be given"
     exit 1
 fi
 
@@ -77,7 +77,7 @@ fi
 
 br_name="virbr-${name}"
 
-# Prepare container rootfs
+# Prepare zone rootfs
 ROOTFS_DIRS="\
 ${rootfs}/bin \
 ${rootfs}/dev \
@@ -181,7 +181,7 @@ XDG_CONFIG_HOME=/etc/systemd/system
 EOF
 
 cat <<EOF >>${path}/systemd/system/weston.ini
-# Weston config for container.
+# Weston config for zone.
 [core]
 modules=desktop-shell.so
 
@@ -290,7 +290,7 @@ RestartSec=10
 WantedBy=graphical.target
 EOF
 
-# Prepare container configuration file
+# Prepare zone configuration file
 cat <<EOF >>${path}/config
 lxc.utsname = ${name}
 lxc.rootfs = ${rootfs}
@@ -343,7 +343,7 @@ lxc.kmsg = 0
 lxc.mount.auto = proc sys:rw cgroup
 lxc.mount = ${path}/fstab
 
-# create a separate network per container
+# create a separate network per zone
 # - it forbids traffic sniffing (like macvlan in bridge mode)
 # - it enables traffic controlling from host using iptables
 lxc.network.type = veth
@@ -358,7 +358,7 @@ lxc.hook.pre-start = ${path}/hooks/pre-start.sh
 #lxc.hook.post-stop = ${path}/hooks/post-stop.sh
 EOF
 
-# Prepare container hook files
+# Prepare zone hook files
 cat <<EOF >>${path}/hooks/pre-start.sh
 if [ -z "\$(/usr/sbin/brctl show | /bin/grep -P "${br_name}\t")" ]
 then
@@ -375,7 +375,7 @@ EOF
 
 chmod 770 ${path}/hooks/pre-start.sh
 
-# Prepare container fstab file
+# Prepare zone fstab file
 cat <<EOF >>${path}/fstab
 /bin bin none ro,bind 0 0
 /etc etc none ro,bind 0 0

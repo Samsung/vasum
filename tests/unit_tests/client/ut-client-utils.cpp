@@ -30,16 +30,16 @@
 
 BOOST_AUTO_TEST_SUITE(ClientUtils)
 
-BOOST_AUTO_TEST_CASE(ParseContainerIdFromCpuSetTest)
+BOOST_AUTO_TEST_CASE(ParseZoneIdFromCpuSetTest)
 {
     auto testBad = [](const std::string& input) {
         std::string ret;
-        BOOST_CHECK(!parseContainerIdFromCpuSet(input, ret));
+        BOOST_CHECK(!parseZoneIdFromCpuSet(input, ret));
     };
 
     auto testOK = [](const std::string& input, const std::string& expected) {
         std::string ret;
-        BOOST_CHECK(parseContainerIdFromCpuSet(input, ret));
+        BOOST_CHECK(parseZoneIdFromCpuSet(input, ret));
         BOOST_CHECK_EQUAL(expected, ret);
     };
 

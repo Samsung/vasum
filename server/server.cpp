@@ -25,7 +25,7 @@
 #include "config.hpp"
 
 #include "server.hpp"
-#include "containers-manager.hpp"
+#include "zones-manager.hpp"
 #include "exception.hpp"
 
 #include "config/manager.hpp"
@@ -109,16 +109,16 @@ void Server::run()
     LOGI("Starting daemon...");
     {
         utils::ScopedGlibLoop loop;
-        ContainersManager manager(mConfigPath);
+        ZonesManager manager(mConfigPath);
 
         manager.startAll();
         LOGI("Daemon started");
 
         gSignalLatch.wait();
 
-        // Detach containers if we triggered an update
+        // Detach zones if we triggered an update
         if (gUpdateTriggered) {
-            manager.setContainersDetachOnExit();
+            manager.setZonesDetachOnExit();
         }
 
         LOGI("Stopping daemon...");
@@ -146,8 +146,8 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
 {
     namespace fs = boost::filesystem;
 
-    // TODO: currently this config is loaded twice: here and in ContainerManager
-    ContainersManagerConfig config;
+    // TODO: currently this config is loaded twice: here and in ZonesManager
+    ZonesManagerConfig config;
     config::loadFromFile(configPath, config);
 
     struct passwd* pwd = ::getpwnam(VASUM_USER);
@@ -169,9 +169,9 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
         }
     }
 
-    // create directory for additional container data (if needed)
-    if (!config.containerNewConfigPrefix.empty()) {
-        if (!utils::createDir(config.containerNewConfigPrefix, uid, gid,
+    // create directory for additional zone data (if needed)
+    if (!config.zoneNewConfigPrefix.empty()) {
+        if (!utils::createDir(config.zoneNewConfigPrefix, uid, gid,
                               fs::perms::owner_all |
                               fs::perms::group_read | fs::perms::group_exe |
                               fs::perms::others_read | fs::perms::others_exe)) {
@@ -186,8 +186,8 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
     }
 
     // INPUT_EVENT_GROUP provides access to /dev/input/event* devices used by InputMonitor.
-    // DISK_GROUP provides access to /dev/loop* devices, needed when adding new container to copy
-    //            containers image
+    // DISK_GROUP provides access to /dev/loop* devices, needed when adding new zone to copy
+    //            zones image
     if (!utils::setSuppGroups({INPUT_EVENT_GROUP, DISK_GROUP, TTY_GROUP})) {
         return false;
     }
@@ -195,9 +195,9 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
     // CAP_SYS_ADMIN allows to mount tmpfs' for dbus communication at the runtime.
     // NOTE: CAP_MAC_OVERRIDE is temporary and must be removed when "smack namespace"
     // is introduced. The capability is needed to allow modify SMACK labels of
-    // "/var/run/containers/<container>/run" mount point.
+    // "/var/run/zones/<zone>/run" mount point.
     // CAP_SYS_TTY_CONFIG is needed to activate virtual terminals through ioctl calls
-    // CAP_CHOWN is needed when creating new container from image to set owner/group for each file,
+    // CAP_CHOWN is needed when creating new zone from image to set owner/group for each file,
     // directory or symlink
     // CAP_SETUID is needed to launch specific funtions as root (see environment.cpp)
     return (runAsRoot || utils::dropRoot(uid, gid, {CAP_SYS_ADMIN,

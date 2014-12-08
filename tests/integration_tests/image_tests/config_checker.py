@@ -1,4 +1,4 @@
-'''! Module used to collect list of containers based on the vasum configuration files.
+'''! Module used to collect list of zones based on the vasum configuration files.
 
 @author: Michal Witanowski (m.witanowski@samsung.com)
 '''
@@ -11,11 +11,11 @@ from pprint import pprint
 
 class ConfigChecker:
     '''! This class verifies vasum configuration files and collects dictionary with
-         containers existing in the system (name and rootfs path).
+         zones existing in the system (name and rootfs path).
     '''
 
     def __parseLibvirtXML(self, path):
-        '''! Parses libvirt's configuration in order to extract container name and path.
+        '''! Parses libvirt's configuration in order to extract zone name and path.
 
          @param path    Libvirt's zone configuration path
         '''
@@ -43,20 +43,20 @@ class ConfigChecker:
                 if rootFound:
                     raise Exception("Multiple root fs mounts found in file: " + path)
                 else:
-                    self.containers[name] = source
-                    print "    Container '" + name + "' found at: " + source
+                    self.zones[name] = source
+                    print "    Zone '" + name + "' found at: " + source
                     rootFound = True
 
         if not rootFound:
-            raise Exception("Root directory of '" + name + "' container not specified in XML")
+            raise Exception("Root directory of '" + name + "' zone not specified in XML")
 
     def __init__(self, mainConfigPath):
         '''! Parses daemon's JSON configuration files.
 
          @param mainConfigPath    Path to the main config "daemon.conf"
         '''
-        self.containers = {}
-        print "Looking for container IDs..."
+        self.zones = {}
+        print "Looking for zone IDs..."
 
         # load main daemon JSON config file
         if not os.path.isfile(mainConfigPath):
@@ -66,21 +66,21 @@ class ConfigChecker:
             daemonConfigData = json.load(daemonConfigStr)
             daemonConfigDir = os.path.dirname(os.path.abspath(mainConfigPath))
 
-            # get dictionary with containers
-            containerConfigPaths = daemonConfigData["containerConfigs"]
-            for configPath in containerConfigPaths:
+            # get dictionary with zones
+            zoneConfigPaths = daemonConfigData["zoneConfigs"]
+            for configPath in zoneConfigPaths:
 
-                # open container config file
-                containerConfigPath = os.path.join(daemonConfigDir, configPath)
-                if not os.path.isfile(containerConfigPath):
-                    raise Exception(containerConfigPath + " not found. " +
+                # open zone config file
+                zoneConfigPath = os.path.join(daemonConfigDir, configPath)
+                if not os.path.isfile(zoneConfigPath):
+                    raise Exception(zoneConfigPath + " not found. " +
                                     "Please verify that vasum is properly installed.")
-                with open(containerConfigPath) as containerConfigStr:
-                    containerConfigData = json.load(containerConfigStr)
+                with open(zoneConfigPath) as zoneConfigStr:
+                    zoneConfigData = json.load(zoneConfigStr)
 
                     # extract XML config path for libvirt
-                    libvirtConfigPath = os.path.join(daemonConfigDir, "containers",
-                                                     containerConfigData["config"])
+                    libvirtConfigPath = os.path.join(daemonConfigDir, "zones",
+                                                     zoneConfigData["config"])
 
                     output, ret = vsm_test_utils.launchProc("virt-xml-validate " + libvirtConfigPath)
                     if ret == 0:

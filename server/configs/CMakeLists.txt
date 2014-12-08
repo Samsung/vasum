@@ -19,7 +19,7 @@
 
 MESSAGE(STATUS "Installing configs to " ${VSM_CONFIG_INSTALL_DIR})
 
-FILE(GLOB container_CONF     containers/*.conf)
+FILE(GLOB zone_CONF          zones/*.conf)
 FILE(GLOB admin_CONF         lxc-templates/*.sh)
 FILE(GLOB template_CONF      templates/*.conf)
 
@@ -33,14 +33,14 @@ INSTALL(FILES       daemon.conf
         DESTINATION ${VSM_CONFIG_INSTALL_DIR})
 
 # preprocess d-bus configs
-CONFIGURE_FILE(dbus-1/system.d/org.tizen.containers.host.conf.in
-               ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.containers.host.conf)
+CONFIGURE_FILE(dbus-1/system.d/org.tizen.vasum.host.conf.in
+               ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.vasum.host.conf)
 
-INSTALL(FILES       ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.containers.host.conf
+INSTALL(FILES       ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.vasum.host.conf
         DESTINATION ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)
 
-INSTALL(FILES       ${container_CONF}
-        DESTINATION ${VSM_CONFIG_INSTALL_DIR}/containers)
+INSTALL(FILES       ${zone_CONF}
+        DESTINATION ${VSM_CONFIG_INSTALL_DIR}/zones)
 
 INSTALL(PROGRAMS    ${admin_CONF}
         DESTINATION ${VSM_CONFIG_INSTALL_DIR}/lxc-templates)

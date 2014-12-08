@@ -34,51 +34,51 @@ using namespace vasum::cli;
 
 std::map<std::string, CommandLineInterface> commands = {
     {
-        "set_active_container", {
-            set_active_container,
-            "set_active_container container_id",
-            "Set active (foreground) container",
-            {{"container_id", "id container name"}}
+        "set_active_zone", {
+            set_active_zone,
+            "set_active_zone zone_id",
+            "Set active (foreground) zone",
+            {{"zone_id", "id zone name"}}
         }
     },
     {
         "create_zone", {
             create_zone,
-            "create_zone container_id",
-            "Create and add container",
-            {{"container_id", "id container name"}}
+            "create_zone zone_id",
+            "Create and add zone",
+            {{"zone_id", "id zone name"}}
         }
     },
     {
         "destroy_zone", {
             destroy_zone,
-            "destroy_zone container_id",
-            "Destroy container",
-            {{"container_id", "id container name"}}
+            "destroy_zone zone_id",
+            "Destroy zone",
+            {{"zone_id", "id zone name"}}
         }
     },
     {
         "lock_zone", {
             lock_zone,
-            "lock_zone container_id",
-            "Lock container",
-            {{"container_id", "id container name"}}
+            "lock_zone zone_id",
+            "Lock zone",
+            {{"zone_id", "id zone name"}}
         }
     },
     {
         "unlock_zone", {
             unlock_zone,
-            "unlock_zone container_id",
-            "Unlock container",
-            {{"container_id", "id container name"}}
+            "unlock_zone zone_id",
+            "Unlock zone",
+            {{"zone_id", "id zone name"}}
         }
     },
     {
         "lookup_zone_by_id", {
             lookup_zone_by_id,
-            "lookup_zone_by_id container_id",
+            "lookup_zone_by_id zone_id",
             "Prints informations about zone",
-            {{"container_id", "id container name"}}
+            {{"zone_id", "id zone name"}}
         }
     }
 };

@@ -20,7 +20,7 @@
  * @file    fake-power-manager-dbus-definitions.h
  * @author  Lukasz Kostyra (l.kostyra@samsung.com)
  * @brief   Declaration of fake dbus definitions from power-manager. Made only to test API in
- *          ContainerConnection.
+ *          ZoneConnection.
  */
 
 #ifndef FAKE_POWER_MANAGER_DBUS_DEFINITIONS_H
@@ -29,7 +29,7 @@
 /**
  * !!WARNING!!
  *
- * This header file is created only to test if API in ContainerConnection works correctly. It should
+ * This header file is created only to test if API in ZoneConnection works correctly. It should
  * be removed when power-managers API will be created.
  */
 

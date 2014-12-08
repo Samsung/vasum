@@ -97,11 +97,11 @@ private:
 };
 
 /**
- * Parses command line arguments and call vsm_set_active_container
+ * Parses command line arguments and call vsm_set_active_zone
  *
- * @see vsm_set_active_container
+ * @see vsm_set_active_zone
  */
-void set_active_container(int pos, int argc, const char** argv);
+void set_active_zone(int pos, int argc, const char** argv);
 
 /**
  * Parses command line arguments and call vsm_create_zone

@@ -32,26 +32,26 @@ namespace vasum {
 namespace api {
 namespace host {
 
-const std::string BUS_NAME                       = "org.tizen.containers.host";
-const std::string OBJECT_PATH                    = "/org/tizen/containers/host";
-const std::string INTERFACE                      = "org.tizen.containers.host.manager";
+const std::string BUS_NAME                       = "org.tizen.vasum.host";
+const std::string OBJECT_PATH                    = "/org/tizen/vasum/host";
+const std::string INTERFACE                      = "org.tizen.vasum.host.manager";
 
-const std::string ERROR_CONTAINER_STOPPED        = "org.tizen.containers.host.Error.ContainersStopped";
+const std::string ERROR_ZONE_STOPPED        = "org.tizen.vasum.host.Error.ZonesStopped";
 
-const std::string METHOD_GET_CONTAINER_DBUSES    = "GetContainerDbuses";
-const std::string METHOD_GET_CONTAINER_ID_LIST   = "GetContainerIds";
-const std::string METHOD_GET_ACTIVE_CONTAINER_ID = "GetActiveContainerId";
-const std::string METHOD_GET_CONTAINER_INFO      = "GetContainerInfo";
+const std::string METHOD_GET_ZONE_DBUSES    = "GetZoneDbuses";
+const std::string METHOD_GET_ZONE_ID_LIST   = "GetZoneIds";
+const std::string METHOD_GET_ACTIVE_ZONE_ID = "GetActiveZoneId";
+const std::string METHOD_GET_ZONE_INFO      = "GetZoneInfo";
 const std::string METHOD_DECLARE_FILE            = "DeclareFile";
 const std::string METHOD_DECLARE_MOUNT           = "DeclareMount";
 const std::string METHOD_DECLARE_LINK            = "DeclareLink";
-const std::string METHOD_SET_ACTIVE_CONTAINER    = "SetActiveContainer";
-const std::string METHOD_CREATE_CONTAINER        = "CreateContainer";
-const std::string METHOD_DESTROY_CONTAINER       = "DestroyContainer";
-const std::string METHOD_LOCK_CONTAINER          = "LockContainer";
-const std::string METHOD_UNLOCK_CONTAINER        = "UnlockContainer";
+const std::string METHOD_SET_ACTIVE_ZONE    = "SetActiveZone";
+const std::string METHOD_CREATE_ZONE        = "CreateZone";
+const std::string METHOD_DESTROY_ZONE       = "DestroyZone";
+const std::string METHOD_LOCK_ZONE          = "LockZone";
+const std::string METHOD_UNLOCK_ZONE        = "UnlockZone";
 
-const std::string SIGNAL_CONTAINER_DBUS_STATE    = "ContainerDbusState";
+const std::string SIGNAL_ZONE_DBUS_STATE    = "ZoneDbusState";
 
 
 const std::string DEFINITION =
@@ -66,21 +66,21 @@ const std::string DEFINITION =
     "      <arg type='v' name='parameters' direction='in'/>"
     "      <arg type='v' name='result' direction='out'/>"
     "    </method>"
-    "    <method name='" + METHOD_GET_CONTAINER_DBUSES + "'>"
+    "    <method name='" + METHOD_GET_ZONE_DBUSES + "'>"
     "      <arg type='a{ss}' name='dbuses' direction='out'/>"
     "    </method>"
-    "    <method name='" + METHOD_GET_CONTAINER_ID_LIST + "'>"
+    "    <method name='" + METHOD_GET_ZONE_ID_LIST + "'>"
     "      <arg type='as' name='result' direction='out'/>"
     "    </method>"
-    "    <method name='" + METHOD_GET_ACTIVE_CONTAINER_ID + "'>"
+    "    <method name='" + METHOD_GET_ACTIVE_ZONE_ID + "'>"
     "      <arg type='s' name='result' direction='out'/>"
     "    </method>"
-    "    <method name='" + METHOD_GET_CONTAINER_INFO + "'>"
+    "    <method name='" + METHOD_GET_ZONE_INFO + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "      <arg type='(siss)' name='result' direction='out'/>"
     "    </method>"
     "    <method name='" + METHOD_DECLARE_FILE + "'>"
-    "      <arg type='s' name='container' direction='in'/>"
+    "      <arg type='s' name='zone' direction='in'/>"
     "      <arg type='i' name='type' direction='in'/>"
     "      <arg type='s' name='path' direction='in'/>"
     "      <arg type='i' name='flags' direction='in'/>"
@@ -88,7 +88,7 @@ const std::string DEFINITION =
     "    </method>"
     "    <method name='" + METHOD_DECLARE_MOUNT + "'>"
     "      <arg type='s' name='source' direction='in'/>"
-    "      <arg type='s' name='container' direction='in'/>"
+    "      <arg type='s' name='zone' direction='in'/>"
     "      <arg type='s' name='target' direction='in'/>"
     "      <arg type='s' name='type' direction='in'/>"
     "      <arg type='t' name='flags' direction='in'/>"
@@ -96,26 +96,26 @@ const std::string DEFINITION =
     "    </method>"
     "    <method name='" + METHOD_DECLARE_LINK + "'>"
     "      <arg type='s' name='source' direction='in'/>"
-    "      <arg type='s' name='container' direction='in'/>"
+    "      <arg type='s' name='zone' direction='in'/>"
     "      <arg type='s' name='target' direction='in'/>"
     "    </method>"
-    "    <method name='" + METHOD_SET_ACTIVE_CONTAINER + "'>"
+    "    <method name='" + METHOD_SET_ACTIVE_ZONE + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "    </method>"
-    "    <method name='" + METHOD_CREATE_CONTAINER + "'>"
+    "    <method name='" + METHOD_CREATE_ZONE + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "    </method>"
-    "    <method name='" + METHOD_DESTROY_CONTAINER + "'>"
+    "    <method name='" + METHOD_DESTROY_ZONE + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "    </method>"
-    "    <method name='" + METHOD_LOCK_CONTAINER + "'>"
+    "    <method name='" + METHOD_LOCK_ZONE + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "    </method>"
-    "    <method name='" + METHOD_UNLOCK_CONTAINER + "'>"
+    "    <method name='" + METHOD_UNLOCK_ZONE + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "    </method>"
-    "    <signal name='" + SIGNAL_CONTAINER_DBUS_STATE + "'>"
-    "      <arg type='s' name='container'/>"
+    "    <signal name='" + SIGNAL_ZONE_DBUS_STATE + "'>"
+    "      <arg type='s' name='zone'/>"
     "      <arg type='s' name='dbusAddress'/>"
     "    </signal>"
     "  </interface>"

@@ -117,7 +117,7 @@ bool parseNewLibvirtFormat(const std::string& cpuset, std::string& id)
 
 } // namespace
 
-bool parseContainerIdFromCpuSet(const std::string& cpuset, std::string& id)
+bool parseZoneIdFromCpuSet(const std::string& cpuset, std::string& id)
 {
     if (cpuset == CPUSET_HOST) {
         id = "host";

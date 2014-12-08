@@ -30,7 +30,7 @@
 #include <dbus/exception.hpp>
 #include <utils/glib-loop.hpp>
 #include <host-dbus-definitions.hpp>
-#include <container-dbus-definitions.hpp>
+#include <zone-dbus-definitions.hpp>
 
 #include <cstring>
 #include <cassert>
@@ -46,9 +46,9 @@ namespace {
 const DbusInterfaceInfo HOST_INTERFACE(api::host::BUS_NAME,
                                        api::host::OBJECT_PATH,
                                        api::host::INTERFACE);
-const DbusInterfaceInfo CONTAINER_INTERFACE(api::container::BUS_NAME,
-                                            api::container::OBJECT_PATH,
-                                            api::container::INTERFACE);
+const DbusInterfaceInfo ZONE_INTERFACE(api::zone::BUS_NAME,
+                                            api::zone::OBJECT_PATH,
+                                            api::zone::INTERFACE);
 
 unique_ptr<ScopedGlibLoop> gGlibLoop;
 
@@ -317,14 +317,14 @@ VsmStatus Client::vsm_get_status() noexcept
     return mStatus.mVsmStatus;
 }
 
-VsmStatus Client::vsm_get_container_dbuses(VsmArrayString* keys, VsmArrayString* values) noexcept
+VsmStatus Client::vsm_get_zone_dbuses(VsmArrayString* keys, VsmArrayString* values) noexcept
 {
     assert(keys);
     assert(values);
 
     GVariant* out;
     VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_GET_CONTAINER_DBUSES,
+                               api::host::METHOD_GET_ZONE_DBUSES,
                                NULL,
                                "(a{ss})",
                                &out);
@@ -345,7 +345,7 @@ VsmStatus Client::vsm_get_zone_ids(VsmArrayString* array) noexcept
 
     GVariant* out;
     VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_GET_CONTAINER_ID_LIST,
+                               api::host::METHOD_GET_ZONE_ID_LIST,
                                NULL,
                                "(as)",
                                &out);
@@ -360,13 +360,13 @@ VsmStatus Client::vsm_get_zone_ids(VsmArrayString* array) noexcept
     return ret;
 }
 
-VsmStatus Client::vsm_get_active_container_id(VsmString* id) noexcept
+VsmStatus Client::vsm_get_active_zone_id(VsmString* id) noexcept
 {
     assert(id);
 
     GVariant* out;
     VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_GET_ACTIVE_CONTAINER_ID,
+                               api::host::METHOD_GET_ACTIVE_ZONE_ID,
                                NULL,
                                "(s)",
                                &out);
@@ -393,13 +393,13 @@ VsmStatus Client::vsm_lookup_zone_by_pid(int pid, VsmString* id) noexcept
         return vsm_get_status();
     }
 
-    std::string containerId;
-    if (!parseContainerIdFromCpuSet(cpuset, containerId)) {
+    std::string zoneId;
+    if (!parseZoneIdFromCpuSet(cpuset, zoneId)) {
         mStatus = Status(VSMCLIENT_OTHER_ERROR, "unknown format of cpuset");
         return vsm_get_status();
     }
 
-    *id = strdup(containerId.c_str());
+    *id = strdup(zoneId.c_str());
     mStatus = Status();
     return vsm_get_status();
 }
@@ -412,7 +412,7 @@ VsmStatus Client::vsm_lookup_zone_by_id(const char* id, VsmZone* zone) noexcept
     GVariant* out;
     GVariant* args_in = g_variant_new("(s)", id);
     VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_GET_CONTAINER_INFO,
+                               api::host::METHOD_GET_ZONE_INFO,
                                args_in,
                                "((siss))",
                                &out);
@@ -433,12 +433,12 @@ VsmStatus Client::vsm_lookup_zone_by_terminal_id(int, VsmString*) noexcept
     return vsm_get_status();
 }
 
-VsmStatus Client::vsm_set_active_container(const char* id) noexcept
+VsmStatus Client::vsm_set_active_zone(const char* id) noexcept
 {
     assert(id);
 
     GVariant* args_in = g_variant_new("(s)", id);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_SET_ACTIVE_CONTAINER, args_in);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_SET_ACTIVE_ZONE, args_in);
 }
 
 VsmStatus Client::vsm_create_zone(const char* id, const char* tname) noexcept
@@ -450,14 +450,14 @@ VsmStatus Client::vsm_create_zone(const char* id, const char* tname) noexcept
     }
 
     GVariant* args_in = g_variant_new("(s)", id);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_CREATE_CONTAINER, args_in);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_CREATE_ZONE, args_in);
 }
 
 VsmStatus Client::vsm_destroy_zone(const char* id) noexcept
 {
     assert(id);
     GVariant* args_in = g_variant_new("(s)", id);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_DESTROY_CONTAINER, args_in);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_DESTROY_ZONE, args_in);
 }
 
 VsmStatus Client::vsm_shutdown_zone(const char*) noexcept
@@ -477,7 +477,7 @@ VsmStatus Client::vsm_lock_zone(const char* id) noexcept
     assert(id);
 
     GVariant* args_in = g_variant_new("(s)", id);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_LOCK_CONTAINER, args_in);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_LOCK_ZONE, args_in);
 }
 
 VsmStatus Client::vsm_unlock_zone(const char* id) noexcept
@@ -485,25 +485,25 @@ VsmStatus Client::vsm_unlock_zone(const char* id) noexcept
     assert(id);
 
     GVariant* args_in = g_variant_new("(s)", id);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_UNLOCK_CONTAINER, args_in);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_UNLOCK_ZONE, args_in);
 }
 
-VsmStatus Client::vsm_add_state_callback(VsmContainerDbusStateCallback containerDbusStateCallback,
+VsmStatus Client::vsm_add_state_callback(VsmZoneDbusStateCallback zoneDbusStateCallback,
                                          void* data,
                                          VsmSubscriptionId* subscriptionId) noexcept
 {
-    assert(containerDbusStateCallback);
+    assert(zoneDbusStateCallback);
 
     auto onSigal = [=](GVariant * parameters)
     {
-        const char* container;
+        const char* zone;
         const char* dbusAddress;
-        g_variant_get(parameters, "(&s&s)", &container, &dbusAddress);
-        containerDbusStateCallback(container, dbusAddress, data);
+        g_variant_get(parameters, "(&s&s)", &zone, &dbusAddress);
+        zoneDbusStateCallback(zone, dbusAddress, data);
     };
 
     return signalSubscribe(HOST_INTERFACE,
-                           api::host::SIGNAL_CONTAINER_DBUS_STATE,
+                           api::host::SIGNAL_ZONE_DBUS_STATE,
                            onSigal,
                            subscriptionId);
 }
@@ -573,7 +573,7 @@ VsmStatus Client::vsm_lookup_netdev_by_name(const char*, const char*, VsmNetdev*
     return vsm_get_status();
 }
 
-VsmStatus Client::vsm_declare_file(const char* container,
+VsmStatus Client::vsm_declare_file(const char* zone,
                                    VsmFileType type,
                                    const char *path,
                                    int32_t flags,
@@ -581,14 +581,14 @@ VsmStatus Client::vsm_declare_file(const char* container,
 {
     assert(path);
 
-    GVariant* args_in = g_variant_new("(sisii)", container, type, path, flags, mode);
-    return callMethod(CONTAINER_INTERFACE,
+    GVariant* args_in = g_variant_new("(sisii)", zone, type, path, flags, mode);
+    return callMethod(ZONE_INTERFACE,
                       api::host::METHOD_DECLARE_FILE,
                       args_in);
 }
 
 VsmStatus Client::vsm_declare_mount(const char *source,
-                                    const char* container,
+                                    const char* zone,
                                     const char *target,
                                     const char *type,
                                     uint64_t flags,
@@ -601,45 +601,45 @@ VsmStatus Client::vsm_declare_mount(const char *source,
         data = "";
     }
 
-    GVariant* args_in = g_variant_new("(ssssts)", source, container, target, type, flags, data);
-    return callMethod(CONTAINER_INTERFACE,
+    GVariant* args_in = g_variant_new("(ssssts)", source, zone, target, type, flags, data);
+    return callMethod(ZONE_INTERFACE,
                       api::host::METHOD_DECLARE_MOUNT,
                       args_in);
 }
 
 VsmStatus Client::vsm_declare_link(const char *source,
-                                   const char* container,
+                                   const char* zone,
                                    const char *target) noexcept
 {
     assert(source);
     assert(target);
 
-    GVariant* args_in = g_variant_new("(sss)", source, container, target);
-    return callMethod(CONTAINER_INTERFACE,
+    GVariant* args_in = g_variant_new("(sss)", source, zone, target);
+    return callMethod(ZONE_INTERFACE,
                       api::host::METHOD_DECLARE_LINK,
                       args_in);
 }
 
-VsmStatus Client::vsm_notify_active_container(const char* application, const char* message) noexcept
+VsmStatus Client::vsm_notify_active_zone(const char* application, const char* message) noexcept
 {
     assert(application);
     assert(message);
 
     GVariant* args_in = g_variant_new("(ss)", application, message);
-    return callMethod(CONTAINER_INTERFACE,
-                      api::container::METHOD_NOTIFY_ACTIVE_CONTAINER,
+    return callMethod(ZONE_INTERFACE,
+                      api::zone::METHOD_NOTIFY_ACTIVE_ZONE,
                       args_in);
 }
 
-VsmStatus Client::vsm_file_move_request(const char* destContainer, const char* path) noexcept
+VsmStatus Client::vsm_file_move_request(const char* destZone, const char* path) noexcept
 {
-    assert(destContainer);
+    assert(destZone);
     assert(path);
 
     GVariant* out;
-    GVariant* args_in = g_variant_new("(ss)", destContainer, path);
-    VsmStatus ret = callMethod(CONTAINER_INTERFACE,
-                               api::container::METHOD_FILE_MOVE_REQUEST,
+    GVariant* args_in = g_variant_new("(ss)", destZone, path);
+    VsmStatus ret = callMethod(ZONE_INTERFACE,
+                               api::zone::METHOD_FILE_MOVE_REQUEST,
                                args_in,
                                "(s)",
                                &out);
@@ -649,7 +649,7 @@ VsmStatus Client::vsm_file_move_request(const char* destContainer, const char* p
     }
     const gchar* retcode = NULL;;
     g_variant_get(out, "(&s)", &retcode);
-    if (strcmp(retcode, api::container::FILE_MOVE_SUCCEEDED.c_str()) != 0) {
+    if (strcmp(retcode, api::zone::FILE_MOVE_SUCCEEDED.c_str()) != 0) {
         mStatus = Status(VSMCLIENT_CUSTOM_ERROR, retcode);
         g_variant_unref(out);
         return vsm_get_status();
@@ -665,15 +665,15 @@ VsmStatus Client::vsm_add_notification_callback(VsmNotificationCallback notifica
     assert(notificationCallback);
 
     auto onSigal = [=](GVariant * parameters) {
-        const char* container;
+        const char* zone;
         const char* application;
         const char* message;
-        g_variant_get(parameters, "(&s&s&s)", &container, &application, &message);
-        notificationCallback(container, application, message, data);
+        g_variant_get(parameters, "(&s&s&s)", &zone, &application, &message);
+        notificationCallback(zone, application, message, data);
     };
 
-    return signalSubscribe(CONTAINER_INTERFACE,
-                           api::container::SIGNAL_NOTIFICATION,
+    return signalSubscribe(ZONE_INTERFACE,
+                           api::zone::SIGNAL_NOTIFICATION,
                            onSigal,
                            subscriptionId);
 }

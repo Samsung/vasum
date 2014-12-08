@@ -65,7 +65,7 @@ class ScopedDbusDaemon {
 public:
     ScopedDbusDaemon()
     {
-        boost::filesystem::remove("/tmp/container_socket");
+        boost::filesystem::remove("/tmp/zone_socket");
         mDaemon.start(DBUS_DAEMON_PROC, DBUS_DAEMON_ARGS);
         waitForFile(DBUS_SOCKET_FILE, DBUS_DAEMON_TIMEOUT);
     }
@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE(MethodCallTest)
         } else if (methodName == TESTAPI_METHOD_THROW) {
             int arg = 0;
             g_variant_get(parameters, "(i)", &arg);
-            result->setError("org.tizen.containers.Error.Test", "msg: " + std::to_string(arg));
+            result->setError("org.tizen.vasum.Error.Test", "msg: " + std::to_string(arg));
         }
     };
     conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler);
@@ -402,7 +402,7 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallTest)
         } else if (methodName == TESTAPI_METHOD_THROW) {
             int arg = 0;
             g_variant_get(parameters, "(i)", &arg);
-            result->setError("org.tizen.containers.Error.Test", "msg: " + std::to_string(arg));
+            result->setError("org.tizen.vasum.Error.Test", "msg: " + std::to_string(arg));
         }
     };
     conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler);

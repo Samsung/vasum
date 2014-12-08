@@ -132,7 +132,7 @@ void CommandLineInterface::execute(int pos, int argc, const char** argv)
 }
 
 
-void set_active_container(int pos, int argc, const char** argv)
+void set_active_zone(int pos, int argc, const char** argv)
 {
     using namespace std::placeholders;
 
@@ -140,7 +140,7 @@ void set_active_container(int pos, int argc, const char** argv)
         throw runtime_error("Not enough parameters");
     }
 
-    one_shot(bind(vsm_set_active_container, _1, argv[pos + 1]));
+    one_shot(bind(vsm_set_active_zone, _1, argv[pos + 1]));
 }
 
 void create_zone(int pos, int argc, const char** argv)

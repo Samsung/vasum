@@ -35,13 +35,13 @@
 #include <future>
 
 namespace {
-const std::string CONTAINERS_PATH = "/tmp/ut-containers"; // the same as in daemon.conf
+const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
 
 struct Fixture {
-    vasum::utils::ScopedDir mContainersPathGuard;
+    vasum::utils::ScopedDir mZonesPathGuard;
 
     Fixture()
-        : mContainersPathGuard(CONTAINERS_PATH)
+        : mZonesPathGuard(ZONES_PATH)
     {}
 };
 } // namespace

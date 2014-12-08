@@ -19,7 +19,7 @@ do
     esac
 done
 
-# Prepare container rootfs
+# Prepare zone rootfs
 ROOTFS_DIRS="\
 ${rootfs}/bin \
 ${rootfs}/dev \
@@ -41,7 +41,7 @@ ${rootfs}/var/run
 "
 /bin/mkdir ${ROOTFS_DIRS}
 
-# Prepare container configuration file
+# Prepare zone configuration file
 > ${path}/config
 cat <<EOF >> ${path}/config
 lxc.utsname = ${name}

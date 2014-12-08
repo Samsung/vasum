@@ -16,7 +16,7 @@
 # @author Jacek Pielaszkiewicz (j.pielaszkie@samsung.com)
 #
 
-'''! Module used to test network in containers
+'''! Module used to test network in zones
 
 @author: Jacek Pielaszkiewicz (j.pielaszkie@samsung.com)
 '''
@@ -35,9 +35,9 @@ class NetworkTestCase(unittest.TestCase):
             self.assertTrue(False, "ROOT user is required to run the test")
             return
 
-        # 2. Test container images
+        # 2. Test zone images
         if(test_guest_image() == 1):
-            self.assertTrue(False, "No test container in path :" + TEST_CONTAINER_PATH)
+            self.assertTrue(False, "No test zone in path :" + TEST_ZONE_PATH)
             return
 
         # 3. Test mandatory tools

@@ -41,20 +41,20 @@ struct ServerException: public VasumException {
 };
 
 /**
- * Error occurred during an attempt to perform an operation on a container,
- * e.g. start, stop a container
+ * Error occurred during an attempt to perform an operation on a zone,
+ * e.g. start, stop a zone
  */
-struct ContainerOperationException: public ServerException {
+struct ZoneOperationException: public ServerException {
 
-    ContainerOperationException(const std::string& error = "") : ServerException(error) {}
+    ZoneOperationException(const std::string& error = "") : ServerException(error) {}
 };
 
 /**
- * Exception during performing an operation on a container connection
+ * Exception during performing an operation on a zone connection
  */
-struct ContainerConnectionException: public ServerException {
+struct ZoneConnectionException: public ServerException {
 
-    ContainerConnectionException(const std::string& error = "") : ServerException(error) {}
+    ZoneConnectionException(const std::string& error = "") : ServerException(error) {}
 };
 
 /**

@@ -1,0 +1,20 @@
+<!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
+        "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+
+<busconfig>
+        <policy user="${VASUM_USER}">
+                <allow own="org.tizen.vasum.host"/>
+                <allow send_destination="org.tizen.vasum.host"/>
+                <allow receive_sender="org.tizen.vasum.host"/>
+        </policy>
+        <!-- temporary -->
+        <policy user="root">
+                <allow own="org.tizen.vasum.host"/>
+                <allow send_destination="org.tizen.vasum.host"/>
+                <allow receive_sender="org.tizen.vasum.host"/>
+        </policy>
+        <policy context="default">
+                <allow send_destination="org.tizen.vasum.host"/>
+                <allow receive_sender="org.tizen.vasum.host"/>
+        </policy>
+</busconfig>

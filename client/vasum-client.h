@@ -282,60 +282,60 @@ void vsm_netdev_free(VsmNetdev netdev);
 /**
  * @name Host API
  *
- * Functions using org.tizen.containers.host.manager D-Bus interface.
+ * Functions using org.tizen.vasum.host.manager D-Bus interface.
  *
  * @{
  */
 
 /**
- * Container's D-Bus state change callback function signature.
+ * Zone's D-Bus state change callback function signature.
  *
- * @param[in] containerId affected container id
+ * @param[in] zoneId affected zone id
  * @param[in] dbusAddress new D-Bus address
  * @param data custom user's data pointer passed to vsm_add_state_callback() function
  */
-typedef void (*VsmContainerDbusStateCallback)(const char* containerId,
+typedef void (*VsmZoneDbusStateCallback)(const char* zoneId,
                                              const char* dbusAddress,
                                              void* data);
 
 /**
- * Get dbus address of each container.
+ * Get dbus address of each zone.
  *
  * @param[in] client vasum-server's client
- * @param[out] keys array of containers name
- * @param[out] values array of containers dbus address
+ * @param[out] keys array of zones name
+ * @param[out] values array of zones dbus address
  * @return status of this function call
  * @post keys[i] corresponds to values[i]
  * @remark Use vsm_array_string_free() to free memory occupied by @p keys and @p values.
  */
-VsmStatus vsm_get_container_dbuses(VsmClient client, VsmArrayString* keys, VsmArrayString* values);
+VsmStatus vsm_get_zone_dbuses(VsmClient client, VsmArrayString* keys, VsmArrayString* values);
 
 /**
- * Get containers name.
+ * Get zones name.
  *
  * @param[in] client vasum-server's client
- * @param[out] array array of containers name
+ * @param[out] array array of zones name
  * @return status of this function call
  * @remark Use vsm_array_string_free() to free memory occupied by @p array.
  */
 VsmStatus vsm_get_zone_ids(VsmClient client, VsmArrayString* array);
 
 /**
- * Get active (foreground) container name.
+ * Get active (foreground) zone name.
  *
  * @param[in] client vasum-server's client
- * @param[out] id active container name
+ * @param[out] id active zone name
  * @return status of this function call
  * @remark Use @p vsm_string_free() to free memory occupied by @p id.
  */
-VsmStatus vsm_get_active_container_id(VsmClient client, VsmString* id);
+VsmStatus vsm_get_active_zone_id(VsmClient client, VsmString* id);
 
 /**
- * Get container name of process with given pid.
+ * Get zone name of process with given pid.
  *
  * @param[in] client vasum-server's client
  * @param[in] pid process id
- * @param[out] id active container name
+ * @param[out] id active zone name
  * @return status of this function call
  * @remark Use @p vsm_string_free() to free memory occupied by @p id.
  */
@@ -364,19 +364,19 @@ VsmStatus vsm_lookup_zone_by_id(VsmClient client, const char* id, VsmZone* zone)
 VsmStatus vsm_lookup_zone_by_terminal_id(VsmClient client, int terminal, VsmString* id);
 
 /**
- * Set active (foreground) container.
+ * Set active (foreground) zone.
  *
  * @param[in] client vasum-server's client
- * @param[in] id container name
+ * @param[in] id zone name
  * @return status of this function call
  */
-VsmStatus vsm_set_active_container(VsmClient client, const char* id);
+VsmStatus vsm_set_active_zone(VsmClient client, const char* id);
 
 /**
- * Create and add container
+ * Create and add zone
  *
  * @param[in] client vasum-server's client
- * @param[in] id container id
+ * @param[in] id zone id
  * @param[in] tname template name, NULL for default
  * @return status of this function call
  */
@@ -386,7 +386,7 @@ VsmStatus vsm_create_zone(VsmClient client, const char* id, const char* tname);
  * Remove zone
  *
  * @param[in] client vasum-server's client
- * @param[in] id container id
+ * @param[in] id zone id
  * @param[in] force if 0 data will be kept, otherwise data will be lost
  * @return status of this function call
  */
@@ -434,14 +434,14 @@ VsmStatus vsm_unlock_zone(VsmClient client, const char* id);
  * @note The callback function will be invoked on a different thread.
  *
  * @param[in] client vasum-server's client
- * @param[in] containerDbusStateCallback callback function
+ * @param[in] zoneDbusStateCallback callback function
  * @param[in] data some extra data that will be passed to callback function
  * @param[out] subscriptionId subscription identifier that can be used to unsubscribe signal,
  *                      pointer can be NULL.
  * @return status of this function call
  */
 VsmStatus vsm_add_state_callback(VsmClient client,
-                                 VsmContainerDbusStateCallback containerDbusStateCallback,
+                                 VsmZoneDbusStateCallback zoneDbusStateCallback,
                                  void* data,
                                  VsmSubscriptionId* subscriptionId);
 
@@ -591,37 +591,37 @@ VsmStatus vsm_lookup_netdev_by_name(VsmClient client,
                                     VsmNetdev* netdev);
 
 /**
- * Create file, directory or pipe in container
+ * Create file, directory or pipe in zone
  *
- * Declare file, directory or pipe that will be created while container startup
+ * Declare file, directory or pipe that will be created while zone startup
  *
  * @param[in] client vasum-server's client
  * @param[in] type file type
- * @param[in] container container id
+ * @param[in] zone zone id
  * @param[in] path path to file
- * @param[in] flags if O_CREAT bit is set then file will be created in container,
+ * @param[in] flags if O_CREAT bit is set then file will be created in zone,
  *                  otherwise file will by copied from host;
  *                  it is meaningful only when O_CREAT is set
  * @param[in] mode mode of file
  * @return status of this function call
  */
 VsmStatus vsm_declare_file(VsmClient client,
-                           const char* container,
+                           const char* zone,
                            VsmFileType type,
                            const char* path,
                            int32_t flags,
                            mode_t mode);
 
 /**
- * Create mount point in container
+ * Create mount point in zone
  *
- * Declare mount that will be created while container startup
+ * Declare mount that will be created while zone startup
  * Parameters are passed to mount system function
  *
  * @param[in] client vasum-server's client
  * @param[in] source device path (path in host)
- * @param[in] container container id
- * @param[in] target mount point (path in container)
+ * @param[in] zone zone id
+ * @param[in] target mount point (path in zone)
  * @param[in] type filesystem type
  * @param[in] flags mount flags as in mount function
  * @patam[in] data additional data as in mount function
@@ -629,27 +629,27 @@ VsmStatus vsm_declare_file(VsmClient client,
  */
 VsmStatus vsm_declare_mount(VsmClient client,
                             const char* source,
-                            const char* container,
+                            const char* zone,
                             const char* target,
                             const char* type,
                             uint64_t flags,
                             const char* data);
 
 /**
- * Create link in container
+ * Create link in zone
  *
- * Declare link that will be created while container startup
+ * Declare link that will be created while zone startup
  * Parameters are passed to link system function
  *
  * @param[in] client vasum-server's client
  * @param[in] source path to link source (in host)
- * @param[in] container container id
- * @param[in] target path to link name (in container)
+ * @param[in] zone zone id
+ * @param[in] target path to link name (in zone)
  * @return status of this function call
  */
 VsmStatus vsm_declare_link(VsmClient client,
                            const char *source,
-                           const char* container,
+                           const char* zone,
                            const char *target);
 
 
@@ -659,7 +659,7 @@ VsmStatus vsm_declare_link(VsmClient client,
 /**
  * @name Zone API
  *
- * Functions using org.tizen.containers.zone.manager D-Bus interface.
+ * Functions using org.tizen.vasum.zone.manager D-Bus interface.
  *
  * @{
  */
@@ -667,34 +667,34 @@ VsmStatus vsm_declare_link(VsmClient client,
 /**
  * Notification callback function signature.
  *
- * @param[in] container source container
+ * @param[in] zone source zone
  * @param[in] application sending application name
  * @param[in] message notification message
  * @param data custom user's data pointer passed to vsm_add_notification_callback()
  */
-typedef void (*VsmNotificationCallback)(const char* container,
+typedef void (*VsmNotificationCallback)(const char* zone,
                                        const char* application,
                                        const char* message,
                                        void* data);
 /**
- * Send message to active container.
+ * Send message to active zone.
  *
  * @param[in] client vasum-server's client
  * @param[in] application application name
  * @param[in] message message
  * @return status of this function call
  */
-VsmStatus vsm_notify_active_container(VsmClient client, const char* application, const char* message);
+VsmStatus vsm_notify_active_zone(VsmClient client, const char* application, const char* message);
 
 /**
- * Move file between containers.
+ * Move file between zones.
  *
  * @param[in] client vasum-server's client
- * @param[in] destContainer destination container id
+ * @param[in] destZone destination zone id
  * @param[in] path path to moved file
  * @return status of this function call
  */
-VsmStatus vsm_file_move_request(VsmClient client, const char* destContainer, const char* path);
+VsmStatus vsm_file_move_request(VsmClient client, const char* destZone, const char* path);
 
 /**
  * Register notification callback function.

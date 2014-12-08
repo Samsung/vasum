@@ -31,7 +31,7 @@
 namespace vasum {
 
 
-const std::string DBUS_SOCKET_FILE       = "/tmp/container_socket";
+const std::string DBUS_SOCKET_FILE       = "/tmp/zone_socket";
 const std::string DBUS_ADDRESS           = "unix:path=" + DBUS_SOCKET_FILE;
 
 const std::string TESTAPI_BUS_NAME       = "org.tizen.tests";

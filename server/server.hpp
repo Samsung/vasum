@@ -45,7 +45,7 @@ public:
     static bool prepareEnvironment(const std::string& configPath, bool runAsRoot);
 
     /**
-     * Starts all the containers and blocks until SIGINT, SIGTERM or SIGUSR1
+     * Starts all the zones and blocks until SIGINT, SIGTERM or SIGUSR1
      */
     void run();
 

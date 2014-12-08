@@ -52,15 +52,15 @@ public:
                                dbus::MethodResultBuilder::Pointer result
                               )> ProxyCallCallback;
     typedef std::function<void(dbus::MethodResultBuilder::Pointer result
-                              )> GetContainerDbusesCallback;
+                              )> GetZoneDbusesCallback;
     typedef std::function<void(dbus::MethodResultBuilder::Pointer result
-                              )> GetContainerIdsCallback;
+                              )> GetZoneIdsCallback;
     typedef std::function<void(dbus::MethodResultBuilder::Pointer result
-                              )> GetActiveContainerIdCallback;
+                              )> GetActiveZoneIdCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
-                              )> GetContainerInfoCallback;
-    typedef std::function<void(const std::string& container,
+                              )> GetZoneInfoCallback;
+    typedef std::function<void(const std::string& zone,
                                const int32_t& type,
                                const std::string& path,
                                const int32_t& flags,
@@ -68,7 +68,7 @@ public:
                                dbus::MethodResultBuilder::Pointer result
                               )> DeclareFileCallback;
     typedef std::function<void(const std::string& source,
-                               const std::string& container,
+                               const std::string& zone,
                                const std::string& target,
                                const std::string& type,
                                const uint64_t& flags,
@@ -76,25 +76,25 @@ public:
                                dbus::MethodResultBuilder::Pointer result
                               )> DeclareMountCallback;
     typedef std::function<void(const std::string& source,
-                               const std::string& container,
+                               const std::string& zone,
                                const std::string& target,
                                dbus::MethodResultBuilder::Pointer result
                               )> DeclareLinkCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
-                              )> SetActiveContainerCallback;
+                              )> SetActiveZoneCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
-                              )> CreateContainerCallback;
+                              )> CreateZoneCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
-                              )> DestroyContainerCallback;
+                              )> DestroyZoneCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
-                              )> LockContainerCallback;
+                              )> LockZoneCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
-                              )> UnlockContainerCallback;
+                              )> UnlockZoneCallback;
 
     /**
      * Register proxy call callback
@@ -102,29 +102,29 @@ public:
     void setProxyCallCallback(const ProxyCallCallback& callback);
 
     /**
-     * Register get container dbuses callback
+     * Register get zone dbuses callback
      */
-    void setGetContainerDbusesCallback(const GetContainerDbusesCallback& callback);
+    void setGetZoneDbusesCallback(const GetZoneDbusesCallback& callback);
 
     /**
      * Send signal describing dbus address state change
      */
-    void signalContainerDbusState(const std::string& containerId, const std::string& dbusAddress);
+    void signalZoneDbusState(const std::string& zoneId, const std::string& dbusAddress);
 
     /**
      * Register a callback called to get a list of zone ids
      */
-    void setGetContainerIdsCallback(const GetContainerIdsCallback& callback);
+    void setGetZoneIdsCallback(const GetZoneIdsCallback& callback);
 
     /**
-     * Register a callback called to get the active container id
+     * Register a callback called to get the active zone id
      */
-    void setGetActiveContainerIdCallback(const GetContainerIdsCallback& callback);
+    void setGetActiveZoneIdCallback(const GetZoneIdsCallback& callback);
 
     /**
-     * Register a callback called to get the container informations
+     * Register a callback called to get the zone informations
      */
-    void setGetContainerInfoCallback(const GetContainerInfoCallback& callback);
+    void setGetZoneInfoCallback(const GetZoneInfoCallback& callback);
 
     /**
      * Register a callback called to declare file
@@ -142,29 +142,29 @@ public:
     void setDeclareLinkCallback(const DeclareLinkCallback& callback);
 
     /**
-     * Register a callback called to set the active container
+     * Register a callback called to set the active zone
      */
-    void setSetActiveContainerCallback(const SetActiveContainerCallback& callback);
+    void setSetActiveZoneCallback(const SetActiveZoneCallback& callback);
 
     /**
-     * Register a callback called to create new container
+     * Register a callback called to create new zone
      */
-    void setCreateContainerCallback(const CreateContainerCallback& callback);
+    void setCreateZoneCallback(const CreateZoneCallback& callback);
 
     /**
-     * Register a callback called to destroy container
+     * Register a callback called to destroy zone
      */
-    void setDestroyContainerCallback(const DestroyContainerCallback& callback);
+    void setDestroyZoneCallback(const DestroyZoneCallback& callback);
 
     /**
-     * Register a callback called to lock container
+     * Register a callback called to lock zone
      */
-    void setLockContainerCallback(const LockContainerCallback& callback);
+    void setLockZoneCallback(const LockZoneCallback& callback);
 
     /**
-     * Register a callback called to unlock container
+     * Register a callback called to unlock zone
      */
-    void setUnlockContainerCallback(const UnlockContainerCallback& callback);
+    void setUnlockZoneCallback(const UnlockZoneCallback& callback);
 
     /**
      * Make a proxy call
@@ -183,18 +183,18 @@ private:
     bool mNameAcquired;
     bool mNameLost;
     ProxyCallCallback mProxyCallCallback;
-    GetContainerDbusesCallback mGetContainerDbusesCallback;
-    GetContainerIdsCallback mGetContainerIdsCallback;
-    GetActiveContainerIdCallback mGetActiveContainerIdCallback;
-    GetContainerInfoCallback mGetContainerInfoCallback;
+    GetZoneDbusesCallback mGetZoneDbusesCallback;
+    GetZoneIdsCallback mGetZoneIdsCallback;
+    GetActiveZoneIdCallback mGetActiveZoneIdCallback;
+    GetZoneInfoCallback mGetZoneInfoCallback;
     DeclareFileCallback mDeclareFileCallback;
     DeclareMountCallback mDeclareMountCallback;
     DeclareLinkCallback mDeclareLinkCallback;
-    SetActiveContainerCallback mSetActiveContainerCallback;
-    CreateContainerCallback mCreateContainerCallback;
-    DestroyContainerCallback mDestroyContainerCallback;
-    LockContainerCallback mLockContainerCallback;
-    UnlockContainerCallback mUnlockContainerCallback;
+    SetActiveZoneCallback mSetActiveZoneCallback;
+    CreateZoneCallback mCreateZoneCallback;
+    DestroyZoneCallback mDestroyZoneCallback;
+    LockZoneCallback mLockZoneCallback;
+    UnlockZoneCallback mUnlockZoneCallback;
 
     void onNameAcquired();
     void onNameLost();

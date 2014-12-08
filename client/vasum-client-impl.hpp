@@ -104,9 +104,9 @@ public:
     VsmStatus vsm_get_status() noexcept;
 
     /**
-     *  @see ::vsm_get_container_dbuses
+     *  @see ::vsm_get_zone_dbuses
      */
-    VsmStatus vsm_get_container_dbuses(VsmArrayString* keys, VsmArrayString* values) noexcept;
+    VsmStatus vsm_get_zone_dbuses(VsmArrayString* keys, VsmArrayString* values) noexcept;
 
     /**
      *  @see ::vsm_get_zone_ids
@@ -114,9 +114,9 @@ public:
     VsmStatus vsm_get_zone_ids(VsmArrayString* array) noexcept;
 
     /**
-     *  @see ::vsm_get_active_container_id
+     *  @see ::vsm_get_active_zone_id
      */
-    VsmStatus vsm_get_active_container_id(VsmString* id) noexcept;
+    VsmStatus vsm_get_active_zone_id(VsmString* id) noexcept;
 
     /**
      *  @see ::vsm_lookup_zone_by_pid
@@ -134,9 +134,9 @@ public:
     VsmStatus vsm_lookup_zone_by_terminal_id(int terminal, VsmString* id) noexcept;
 
     /**
-     *  @see ::vsm_set_active_container
+     *  @see ::vsm_set_active_zone
      */
-    VsmStatus vsm_set_active_container(const char* id) noexcept;
+    VsmStatus vsm_set_active_zone(const char* id) noexcept;
 
     /**
      *  @see ::vsm_create_zone
@@ -171,7 +171,7 @@ public:
     /**
      *  @see ::vsm_add_state_callback
      */
-    VsmStatus vsm_add_state_callback(VsmContainerDbusStateCallback containerDbusStateCallback,
+    VsmStatus vsm_add_state_callback(VsmZoneDbusStateCallback zoneDbusStateCallback,
                                      void* data,
                                      VsmSubscriptionId* subscriptionId) noexcept;
 
@@ -250,7 +250,7 @@ public:
     /**
      *  @see ::vsm_declare_file
      */
-    VsmStatus vsm_declare_file(const char* container,
+    VsmStatus vsm_declare_file(const char* zone,
                                VsmFileType type,
                                const char* path,
                                int32_t flags,
@@ -260,7 +260,7 @@ public:
      * @see ::vsm_declare_mount
      */
     VsmStatus vsm_declare_mount(const char* source,
-                                const char* container,
+                                const char* zone,
                                 const char* target,
                                 const char* type,
                                 uint64_t flags,
@@ -269,18 +269,18 @@ public:
      * @see ::vsm_declare_link
      */
     VsmStatus vsm_declare_link(const char* source,
-                               const char* container,
+                               const char* zone,
                                const char* target) noexcept;
 
     /**
-     *  @see ::vsm_notify_active_container
+     *  @see ::vsm_notify_active_zone
      */
-    VsmStatus vsm_notify_active_container(const char* application, const char* message) noexcept;
+    VsmStatus vsm_notify_active_zone(const char* application, const char* message) noexcept;
 
     /**
      *  @see ::vsm_file_move_request
      */
-    VsmStatus vsm_file_move_request(const char* destContainer, const char* path) noexcept;
+    VsmStatus vsm_file_move_request(const char* destZone, const char* path) noexcept;
 
     /**
      *  @see ::vsm_add_notification_callback
