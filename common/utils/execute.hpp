@@ -25,6 +25,7 @@
 #ifndef COMMON_UTILS_EXECUTE_HPP
 #define COMMON_UTILS_EXECUTE_HPP
 
+#include <sys/types.h>
 
 namespace security_containers {
 namespace utils {
@@ -32,6 +33,8 @@ namespace utils {
 bool executeAndWait(const char* fname, const char* const* argv);
 
 bool executeAndWait(const char* fname, const char* const* argv, int& status);
+
+bool waitPid(pid_t pid, int& status);
 
 } // namespace utils
 } // namespace security_containers

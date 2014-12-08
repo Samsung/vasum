@@ -50,7 +50,7 @@ public:
      * @param argv arguments passed to the daemon
      * @param useLauncher use additional launcher process
      */
-    void start(const char* path, const char* const argv[], const bool useLauncher = true);
+    void start(const char* path, const char* const argv[], const bool useLauncher = false);
 
     /**
      * Stops a daemon by sending SIGTERM and waits for a process.

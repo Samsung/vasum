@@ -61,12 +61,7 @@ bool executeAndWait(const char* fname, const char* const* argv, int& status)
         execv(fname, const_cast<char* const*>(argv));
         _exit(EXIT_FAILURE);
     }
-    int ret = waitpid(pid, &status, 0);
-    if (ret != pid) {
-        LOGE("Waitpid failed");
-        return false;
-    }
-    return true;
+    return waitPid(pid, status);
 }
 
 bool executeAndWait(const char* fname, const char* const* argv)
@@ -84,6 +79,16 @@ bool executeAndWait(const char* fname, const char* const* argv)
             LOGW("Process " << fname << " was stopped by signal " << WSTOPSIG(status));
         }
         return false;
+    }
+    return true;
+}
+
+bool waitPid(pid_t pid, int& status)
+{
+    while (waitpid(pid, &status, 0) == -1) {
+        if (errno != EINTR) {
+            return false;
+        }
     }
     return true;
 }

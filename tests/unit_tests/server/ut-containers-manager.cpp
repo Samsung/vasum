@@ -460,27 +460,6 @@ std::function<bool(const std::exception&)> expectedMessage(const std::string& me
     };
 }
 
-class FileCleanerRAII {
-public:
-    FileCleanerRAII(const std::vector<std::string>& filePathsToClean):
-        mFilePathsToClean(filePathsToClean)
-    { }
-
-    ~FileCleanerRAII()
-    {
-        namespace fs = boost::filesystem;
-        for (const auto& file : mFilePathsToClean) {
-            fs::path f(file);
-            if (fs::exists(f)) {
-                fs::remove(f);
-            }
-        }
-    }
-
-private:
-    const std::vector<std::string> mFilePathsToClean;
-};
-
 struct Fixture {
     security_containers::utils::ScopedGlibLoop mLoop;
 
@@ -1041,10 +1020,14 @@ BOOST_AUTO_TEST_CASE(SetActiveContainerTest)
 
 BOOST_AUTO_TEST_CASE(CreateDestroyContainerTest)
 {
-    const std::string newContainerId = "test1234";
+    const std::string container1 = "test1";
+    const std::string container2 = "test2";
+    const std::string container3 = "test3";
 
     ContainersManager cm(EMPTY_DBUS_CONFIG_PATH);
     cm.startAll();
+
+    BOOST_CHECK_EQUAL(cm.getRunningForegroundContainerId(), "");
 
     Latch callDone;
     auto resultCallback = [&]() {
@@ -1053,19 +1036,36 @@ BOOST_AUTO_TEST_CASE(CreateDestroyContainerTest)
 
     DbusAccessory dbus(DbusAccessory::HOST_ID);
 
-    // create new container
-    dbus.callAsyncMethodCreateContainer(newContainerId, resultCallback);
+    // create container1
+    dbus.callAsyncMethodCreateContainer(container1, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 
-    // focus new container
-    cm.focus(newContainerId);
-    BOOST_CHECK(cm.getRunningForegroundContainerId() == newContainerId);
+    BOOST_CHECK_EQUAL(cm.getRunningForegroundContainerId(), container1);
 
-    // destroy container
-    dbus.callAsyncMethodDestroyContainer(newContainerId, resultCallback);
+    // create container2
+    dbus.callAsyncMethodCreateContainer(container2, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+    BOOST_CHECK_EQUAL(cm.getRunningForegroundContainerId(), container2); //TODO is this valid?
 
-    BOOST_CHECK(cm.getRunningForegroundContainerId() == "");
+    // create container3
+    dbus.callAsyncMethodCreateContainer(container3, resultCallback);
+    BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+    BOOST_CHECK_EQUAL(cm.getRunningForegroundContainerId(), container3);
+
+    // destroy container2
+    dbus.callAsyncMethodDestroyContainer(container2, resultCallback);
+    BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+    BOOST_CHECK_EQUAL(cm.getRunningForegroundContainerId(), container3);
+
+    // destroy container3
+    dbus.callAsyncMethodDestroyContainer(container3, resultCallback);
+    BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+    //BOOST_CHECK_EQUAL(cm.getRunningForegroundContainerId(), container1);//TODO fix it
+
+    // destroy container1
+    dbus.callAsyncMethodDestroyContainer(container1, resultCallback);
+    BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+    BOOST_CHECK_EQUAL(cm.getRunningForegroundContainerId(), "");
 }
 
 BOOST_AUTO_TEST_CASE(DeclareFile)

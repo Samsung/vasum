@@ -25,6 +25,7 @@
 #include "config.hpp"
 
 #include "utils/scoped-daemon.hpp"
+#include "utils/execute.hpp"
 
 #include "logger/logger.hpp"
 
@@ -69,17 +70,17 @@ namespace {
 
 volatile pid_t daemonPid = -1;// available in launcher process only;
 
-void startDaemon(const char* path, const char* const argv[])
+bool startDaemon(const char* path, const char* const argv[])
 {
     execv(path, const_cast<char* const*>(argv));
     perror("exec failed");
+    return false;
 }
 
-void waitForDaemon()
+bool waitForDaemon()
 {
-    if (waitpid(daemonPid, NULL, 0) == -1) {
-        perror("wait for daemon failed");
-    }
+    int status;
+    return waitPid(daemonPid, status);
 }
 
 void launcherSignalHandler(int sig)
@@ -108,21 +109,22 @@ void cleanupProcess()
     signal(SIGHUP, SIG_DFL);
 }
 
-void startByLauncher(const char* path, const char* const argv[])
+bool startByLauncher(const char* path, const char* const argv[])
 {
     cleanupProcess();
     daemonPid = fork();
     if (daemonPid == -1) {
         perror("fork failed");
-        return;
+        return false;
     }
     if (daemonPid == 0) {
-        startDaemon(path, argv);
-        _exit(1);
+        if (!startDaemon(path, argv)) {
+            return false;
+        }
     }
     registerLauncherSignalHandler();
     registerParentDiedNotification();
-    waitForDaemon();
+    return waitForDaemon();
 }
 
 } // namespace
@@ -147,12 +149,13 @@ void ScopedDaemon::start(const char* path, const char* const argv[], const bool 
         throw std::runtime_error("fork failed");
     }
     if (mPid == 0) {
+        bool ret;
         if (useLauncher) {
-            startByLauncher(path, argv);
+            ret = startByLauncher(path, argv);
         } else {
-            startDaemon(path, argv);
+            ret = startDaemon(path, argv);
         }
-        _exit(0);
+        _exit(ret ? EXIT_SUCCESS : EXIT_FAILURE);
     }
 }
 
@@ -164,8 +167,12 @@ void ScopedDaemon::stop()
     if (kill(mPid, SIGTERM) == -1) {
         LOGE("kill failed");
     }
-    if (waitpid(mPid, NULL, 0) == -1) {
-        LOGE("waitpid failed");
+    int status;
+    if (!waitPid(mPid, status)) {
+        throw std::runtime_error("waitpid failed");
+    }
+    if (status != EXIT_SUCCESS) {
+        LOGW("process exit with status " << status);
     }
     mPid = -1;
 }

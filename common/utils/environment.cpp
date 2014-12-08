@@ -25,6 +25,7 @@
 #include "config.hpp"
 
 #include "utils/environment.hpp"
+#include "utils/execute.hpp"
 #include "logger/logger.hpp"
 
 #include <cap-ng.h>
@@ -96,29 +97,28 @@ bool launchAsRoot(const std::function<bool()>& func)
     if (pid == 0) {
         if (::setuid(0) < 0) {
             LOGW("Failed to become root: " << strerror(errno));
-            ::exit(EXIT_FAILURE);
+            _exit(EXIT_FAILURE);
         }
 
         try {
             if (!func()) {
                 LOGE("Failed to successfully execute func");
-                ::exit(EXIT_FAILURE);
+                _exit(EXIT_FAILURE);
             }
         } catch (const std::exception& e) {
             LOGE("Failed to successfully execute func: " << e.what());
-            ::exit(EXIT_FAILURE);
+            _exit(EXIT_FAILURE);
         }
 
-        ::exit(EXIT_SUCCESS);
+        _exit(EXIT_SUCCESS);
     }
 
-    int result;
-    if (::waitpid(pid, &result, 0) < 0) {
-        LOGE("waitpid failed: " << strerror(errno));
+    int status;
+    if (!waitPid(pid, status)) {
         return false;
     }
-    if (result != 0) {
-        LOGE("Function launched as root failed with result " << result);
+    if (status != 0) {
+        LOGE("Function launched as root exited with status " << status);
         return false;
     }
 

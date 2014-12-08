@@ -34,8 +34,8 @@
 #include "logger/logger.hpp"
 #include "lxc/zone.hpp"
 #include "lxc/exception.hpp"
-#ifdef USE_EXEC
 #include "utils/execute.hpp"
+#ifdef USE_EXEC
 #include "utils/c-array.hpp"
 #endif
 
@@ -320,7 +320,7 @@ bool LxcZone::setRunLevel(int runLevel)
         return false;
     }
     int status;
-    if (waitpid(pid, &status, 0) < 0) {
+    if (!utils::waitPid(pid, status)) {
         return false;
     }
     return status == 0;
