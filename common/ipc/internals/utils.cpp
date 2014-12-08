@@ -122,8 +122,8 @@ void write(int fd, const void* bufferPtr, const size_t size, int timeoutMS)
             // Neglected errors
             LOGD("Retrying write");
         } else {
-            LOGE("Error during reading: " + std::string(strerror(errno)));
-            throw IPCException("Error during reading: " + std::string(strerror(errno)));
+            LOGE("Error during writing: " + std::string(strerror(errno)));
+            throw IPCException("Error during writing: " + std::string(strerror(errno)));
         }
 
         if (nTotal >= size) {

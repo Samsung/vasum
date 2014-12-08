@@ -25,21 +25,20 @@
 #include "config.hpp"
 
 #include "ipc/exception.hpp"
-#include "ipc/internals/utils.hpp"
 #include "ipc/internals/acceptor.hpp"
 #include "logger/logger.hpp"
 
 #include <poll.h>
 #include <cerrno>
 #include <cstring>
-#include <chrono>
 #include <vector>
 
 namespace vasum {
 namespace ipc {
 
 Acceptor::Acceptor(const std::string& socketPath, const NewConnectionCallback& newConnectionCallback)
-    : mNewConnectionCallback(newConnectionCallback),
+    : mIsRunning(false),
+      mNewConnectionCallback(newConnectionCallback),
       mSocket(Socket::createSocket(socketPath))
 {
     LOGT("Creating Acceptor for socket " << socketPath);
@@ -88,9 +87,8 @@ void Acceptor::run()
     fds[1].fd = mSocket.getFD();
     fds[1].events = POLLIN;
 
-    // Main loop
-    bool isRunning = true;
-    while (isRunning) {
+    mIsRunning = true;
+    while (mIsRunning) {
         LOGT("Waiting for new connections...");
 
         int ret = ::poll(fds.data(), fds.size(), -1 /*blocking call*/);
@@ -108,22 +106,40 @@ void Acceptor::run()
         // Check for incoming connections
         if (fds[1].revents & POLLIN) {
             fds[1].revents = 0;
-            std::shared_ptr<Socket> tmpSocket = mSocket.accept();
-            mNewConnectionCallback(tmpSocket);
+            handleConnection();
         }
 
         // Check for incoming events
         if (fds[0].revents & POLLIN) {
             fds[0].revents = 0;
-
-            if (mEventQueue.receive() == Event::FINISH) {
-                LOGD("Event FINISH");
-                isRunning = false;
-                break;
-            }
+            handleEvent();
         }
     }
     LOGT("Exiting run");
+}
+
+void Acceptor::handleConnection()
+{
+    std::shared_ptr<Socket> tmpSocket = mSocket.accept();
+    mNewConnectionCallback(tmpSocket);
+}
+
+void Acceptor::handleEvent()
+{
+    if (mEventQueue.receive() == Event::FINISH) {
+        LOGD("Event FINISH");
+        mIsRunning = false;
+    }
+}
+
+FileDescriptor Acceptor::getEventFD()
+{
+    return mEventQueue.getFD();
+}
+
+FileDescriptor Acceptor::getConnectionFD()
+{
+    return mSocket.getFD();
 }
 
 } // namespace ipc

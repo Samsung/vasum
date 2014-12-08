@@ -79,6 +79,41 @@ void Service::stop()
     LOGD("Stopped");
 }
 
+std::vector<FileDescriptor> Service::getFDs()
+{
+    std::vector<FileDescriptor> fds;
+    fds.push_back(mAcceptor.getEventFD());
+    fds.push_back(mAcceptor.getConnectionFD());
+    fds.push_back(mProcessor.getEventFD());
+
+    return fds;
+}
+
+void Service::handle(const FileDescriptor fd, const short pollEvent)
+{
+    if (fd == mProcessor.getEventFD() && pollEvent & POLLIN) {
+        mProcessor.handleEvent();
+        return;
+
+    } else if (fd == mAcceptor.getConnectionFD() && pollEvent & POLLIN) {
+        mAcceptor.handleConnection();
+        return;
+
+    } else if (fd == mAcceptor.getEventFD() && pollEvent & POLLIN) {
+        mAcceptor.handleEvent();
+        return;
+
+    } else if (pollEvent & POLLIN) {
+        mProcessor.handleInput(fd);
+        return;
+
+    } else if (pollEvent & POLLHUP) {
+        mProcessor.handleLostConnection(fd);
+        return;
+    }
+}
+
+
 void Service::setNewPeerCallback(const PeerCallback& newPeerCallback)
 {
     mProcessor.setNewPeerCallback(newPeerCallback);

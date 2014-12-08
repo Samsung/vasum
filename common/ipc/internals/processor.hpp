@@ -75,6 +75,7 @@ const unsigned int DEFAULT_METHOD_TIMEOUT = 1000;
 *  - new way to generate UIDs
 *  - callbacks for serialization/parsing
 *  - store Sockets in a vector, maybe SocketStore?
+*  - fix valgrind tests
 *
 *
 */
@@ -240,6 +241,35 @@ public:
     void signal(const MethodID methodID,
                 const std::shared_ptr<SentDataType>& data);
 
+    /**
+     * Removes one peer.
+     * Handler used in external polling.
+     *
+     * @param peerFD file description identifying the peer
+     * @return should the polling structure be rebuild
+     */
+    bool handleLostConnection(const FileDescriptor peerFD);
+
+    /**
+     * Handles input from one peer.
+     * Handler used in external polling.
+     *
+     * @param peerFD file description identifying the peer
+     * @return should the polling structure be rebuild
+     */
+    bool handleInput(const FileDescriptor peerFD);
+
+    /**
+     * Handle one event from the internal event's queue
+     *
+     * @return should the polling structure be rebuild
+     */
+    bool handleEvent();
+
+    /**
+     * @return file descriptor for the internal event's queue
+     */
+    FileDescriptor getEventFD();
 
 private:
     typedef std::function<void(int fd, std::shared_ptr<void>& data)> SerializeCallback;
@@ -383,13 +413,12 @@ private:
     static void discardResultHandler(Status, std::shared_ptr<ReceivedDataType>&) {}
 
     void run();
-    bool handleEvent();
     bool onCall();
     bool onNewPeer();
     bool onRemovePeer();
     bool handleLostConnections();
     bool handleInputs();
-    bool handleInput(const Socket& socket);
+
     bool onReturnValue(const Socket& socket,
                        const MessageID messageID);
     bool onRemoteCall(const Socket& socket,
@@ -494,26 +523,24 @@ void Processor::addSignalHandler(const MethodID methodID,
         mSignalsCallbacks[methodID] = std::make_shared<SignalHandlers>(std::move(signalCall));
     }
 
-    if (isStarted()) {
-        // Broadcast the new signal to peers
-        std::vector<MethodID> ids {methodID};
-        auto data = std::make_shared<RegisterSignalsMessage>(ids);
+    std::vector<MethodID> ids {methodID};
+    auto data = std::make_shared<RegisterSignalsMessage>(ids);
 
-        std::list<FileDescriptor> peersIDs;
-        {
-            Lock lock(mSocketsMutex);
-            for (const auto kv : mSockets) {
-                peersIDs.push_back(kv.first);
-            }
-        }
-
-        for (const FileDescriptor peerFD : peersIDs) {
-            callSync<RegisterSignalsMessage, EmptyData>(REGISTER_SIGNAL_METHOD_ID,
-                                                        peerFD,
-                                                        data,
-                                                        DEFAULT_METHOD_TIMEOUT);
+    std::list<FileDescriptor> peersFDs;
+    {
+        Lock lock(mSocketsMutex);
+        for (const auto kv : mSockets) {
+            peersFDs.push_back(kv.first);
         }
     }
+
+    for (const FileDescriptor peerFD : peersFDs) {
+        callSync<RegisterSignalsMessage, EmptyData>(REGISTER_SIGNAL_METHOD_ID,
+                                                    peerFD,
+                                                    data,
+                                                    DEFAULT_METHOD_TIMEOUT);
+    }
+
 }
 
 template<typename SentDataType, typename ReceivedDataType>
@@ -535,11 +562,6 @@ MessageID Processor::callAsync(const MethodID methodID,
                                const std::shared_ptr<SentDataType>& data,
                                const typename ResultHandler<ReceivedDataType>::type& process)
 {
-    if (!isStarted()) {
-        LOGE("The Processor thread is not started. Can't send any data.");
-        throw IPCException("The Processor thread is not started. Can't send any data.");
-    }
-
     return callInternal<SentDataType, ReceivedDataType>(methodID, peerFD, data, process);
 }
 
@@ -600,18 +622,13 @@ template<typename SentDataType>
 void Processor::signal(const MethodID methodID,
                        const std::shared_ptr<SentDataType>& data)
 {
-    if (!isStarted()) {
-        LOGE("The Processor thread is not started. Can't send any data.");
-        throw IPCException("The Processor thread is not started. Can't send any data.");
-    }
-
-    std::list<FileDescriptor> peersIDs;
+    std::list<FileDescriptor> peersFDs;
     {
         Lock lock(mSocketsMutex);
-        peersIDs = mSignalsPeers[methodID];
+        peersFDs = mSignalsPeers[methodID];
     }
 
-    for (const FileDescriptor peerFD : peersIDs) {
+    for (const FileDescriptor peerFD : peersFDs) {
         Lock lock(mCallsMutex);
         mCalls.push<SentDataType>(methodID, peerFD, data);
         mEventQueue.send(Event::CALL);

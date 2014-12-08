@@ -22,6 +22,8 @@
  * @brief   Types definitions and helper functions
  */
 
+#include "config.hpp"
+
 #include "ipc/types.hpp"
 #include "logger/logger.hpp"
 

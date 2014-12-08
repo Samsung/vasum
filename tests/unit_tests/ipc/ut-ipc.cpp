@@ -33,7 +33,9 @@
 
 #include "ipc/service.hpp"
 #include "ipc/client.hpp"
+#include "ipc/ipc-gsource.hpp"
 #include "ipc/types.hpp"
+#include "utils/glib-loop.hpp"
 
 #include "config/fields.hpp"
 #include "logger/logger.hpp"
@@ -47,6 +49,8 @@
 
 using namespace vasum;
 using namespace vasum::ipc;
+using namespace vasum::utils;
+using namespace std::placeholders;
 namespace fs = boost::filesystem;
 
 namespace {
@@ -132,30 +136,48 @@ std::shared_ptr<SendData> longEchoCallback(const FileDescriptor, std::shared_ptr
     return data;
 }
 
-FileDescriptor connect(Service& s, Client& c)
+FileDescriptor connect(Service& s, Client& c, bool serviceUsesGlib = false)
 {
     // Connects the Client to the Service and returns Clients FileDescriptor
-
     std::mutex mutex;
     std::condition_variable cv;
 
     FileDescriptor peerFD = 0;
-    auto newPeerCallback = [&cv, &peerFD, &mutex](const FileDescriptor newFileDescriptor) {
+    auto newPeerCallback = [&cv, &peerFD, &mutex](const FileDescriptor newFD) {
         std::unique_lock<std::mutex> lock(mutex);
-        peerFD = newFileDescriptor;
-        cv.notify_one();
+        peerFD = newFD;
+        cv.notify_all();
     };
 
-    s.setNewPeerCallback(newPeerCallback);
 
-    if (!s.isStarted()) {
-        s.start();
+    if (!serviceUsesGlib) {
+        s.setNewPeerCallback(newPeerCallback);
+
+        if (!s.isStarted()) {
+            s.start();
+        }
+    } else {
+#if GLIB_CHECK_VERSION(2,36,0)
+
+        IPCGSource* serviceGSourcePtr = IPCGSource::create(s.getFDs(), std::bind(&Service::handle, &s, _1, _2));
+
+        auto agregateCallback = [&newPeerCallback, &serviceGSourcePtr](const FileDescriptor newFD) {
+            serviceGSourcePtr->addFD(newFD);
+            newPeerCallback(newFD);
+        };
+
+        s.setNewPeerCallback(agregateCallback);
+        s.setRemovedPeerCallback(std::bind(&IPCGSource::removeFD, serviceGSourcePtr, _1));
+
+        serviceGSourcePtr->attach();
+#endif // GLIB_CHECK_VERSION
+
     }
 
     c.start();
 
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(1000), [&peerFD]() {
+    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(2000), [&peerFD]() {
         return peerFD != 0;
     }));
 
@@ -165,7 +187,7 @@ FileDescriptor connect(Service& s, Client& c)
 void testEcho(Client& c, const MethodID methodID)
 {
     std::shared_ptr<SendData> sentData(new SendData(34));
-    std::shared_ptr<SendData> recvData = c.callSync<SendData, SendData>(methodID, sentData);
+    std::shared_ptr<SendData> recvData = c.callSync<SendData, SendData>(methodID, sentData, 1000);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
@@ -553,6 +575,35 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
     BOOST_CHECK(isHandlerACalled && isHandlerBCalled);
 }
 
+
+#if GLIB_CHECK_VERSION(2,36,0)
+
+BOOST_AUTO_TEST_CASE(ServiceGSource)
+{
+    ScopedGlibLoop loop;
+
+    std::atomic_bool isSignalCalled(false);
+    auto signalHandler = [&isSignalCalled](const FileDescriptor, std::shared_ptr<SendData>&) {
+        isSignalCalled = true;
+    };
+
+    Service s(socketPath);
+    s.addMethodHandler<SendData, SendData>(1, echoCallback);
+
+    Client c(socketPath);
+    s.addSignalHandler<SendData>(2, signalHandler);
+    connect(s, c, true);
+
+    testEcho(c, 1);
+
+    auto data = std::make_shared<SendData>(1);
+    c.signal<SendData>(2, data);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //TODO wait_for
+    BOOST_CHECK(isSignalCalled);
+}
+
+#endif // GLIB_CHECK_VERSION
 
 // BOOST_AUTO_TEST_CASE(ConnectionLimitTest)
 // {
