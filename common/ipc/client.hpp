@@ -156,7 +156,7 @@ public:
                 const std::shared_ptr<SentDataType>& data);
 
 private:
-    PeerID mServiceID;
+    FileDescriptor mServiceFD;
     Processor mProcessor;
     std::string mSocketPath;
 };
@@ -185,7 +185,7 @@ std::shared_ptr<ReceivedDataType> Client::callSync(const MethodID methodID,
                                                    unsigned int timeoutMS)
 {
     LOGD("Sync calling method: " << methodID);
-    return mProcessor.callSync<SentDataType, ReceivedDataType>(methodID, mServiceID, data, timeoutMS);
+    return mProcessor.callSync<SentDataType, ReceivedDataType>(methodID, mServiceFD, data, timeoutMS);
 }
 
 template<typename SentDataType, typename ReceivedDataType>
@@ -196,7 +196,7 @@ void Client::callAsync(const MethodID methodID,
     LOGD("Async calling method: " << methodID);
     mProcessor.callAsync<SentDataType,
                          ReceivedDataType>(methodID,
-                                           mServiceID,
+                                           mServiceFD,
                                            data,
                                            resultCallback);
     LOGD("Async called method: " << methodID);

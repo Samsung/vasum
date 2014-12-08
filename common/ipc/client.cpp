@@ -55,7 +55,7 @@ void Client::start()
     // Initialize the connection with the server
     LOGD("Connecting to " + mSocketPath);
     auto socketPtr = std::make_shared<Socket>(Socket::connectSocket(mSocketPath));
-    mServiceID = mProcessor.addPeer(socketPtr);
+    mServiceFD = mProcessor.addPeer(socketPtr);
 
     // Start listening
     mProcessor.start();

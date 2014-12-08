@@ -35,8 +35,6 @@
 #include "logger/logger.hpp"
 
 #include <poll.h>
-
-#include <atomic>
 #include <condition_variable>
 #include <queue>
 #include <mutex>
@@ -76,6 +74,9 @@ const unsigned int DEFAULT_METHOD_TIMEOUT = 1000;
 *  - helper function for removing from unordered map
 *  - new way to generate UIDs
 *  - callbacks for serialization/parsing
+*  - store Sockets in a vector, maybe SocketStore?
+*
+*
 */
 class Processor {
 public:
@@ -141,16 +142,16 @@ public:
      * Calls the newPeerCallback.
      *
      * @param socketPtr pointer to the new socket
-     * @return peerID of the new socket
+     * @return peerFD of the new socket
      */
-    PeerID addPeer(const std::shared_ptr<Socket>& socketPtr);
+    FileDescriptor addPeer(const std::shared_ptr<Socket>& socketPtr);
 
     /**
      * Request removing peer and wait
      *
-     * @param peerID id of the peer
+     * @param peerFD id of the peer
      */
-    void removePeer(const PeerID peerID);
+    void removePeer(const FileDescriptor peerFD);
 
     /**
      * Saves the callbacks connected to the method id.
@@ -197,7 +198,7 @@ public:
      * Synchronous method call.
      *
      * @param methodID API dependent id of the method
-     * @param peerID id of the peer
+     * @param peerFD id of the peer
      * @param data data to sent
      * @param timeoutMS how long to wait for the return value before throw
      * @tparam SentDataType data type to send
@@ -205,7 +206,7 @@ public:
      */
     template<typename SentDataType, typename ReceivedDataType>
     std::shared_ptr<ReceivedDataType> callSync(const MethodID methodID,
-                                               const PeerID peerID,
+                                               const FileDescriptor peerFD,
                                                const std::shared_ptr<SentDataType>& data,
                                                unsigned int timeoutMS = 500);
 
@@ -213,7 +214,7 @@ public:
      * Asynchronous method call
      *
      * @param methodID API dependent id of the method
-     * @param peerID id of the peer
+     * @param peerFD id of the peer
      * @param data data to sent
      * @param process callback processing the return data
      * @tparam SentDataType data type to send
@@ -221,7 +222,7 @@ public:
      */
     template<typename SentDataType, typename ReceivedDataType>
     MessageID callAsync(const MethodID methodID,
-                        const PeerID peerID,
+                        const FileDescriptor peerFD,
                         const std::shared_ptr<SentDataType>& data,
                         const typename ResultHandler<ReceivedDataType>::type& process);
 
@@ -292,10 +293,10 @@ private:
         ReturnCallbacks(ReturnCallbacks&&) = default;
         ReturnCallbacks& operator=(ReturnCallbacks &&) = default;
 
-        ReturnCallbacks(PeerID peerID, const ParseCallback& parse, const ResultHandler<void>::type& process)
-            : peerID(peerID), parse(parse), process(process) {}
+        ReturnCallbacks(FileDescriptor peerFD, const ParseCallback& parse, const ResultHandler<void>::type& process)
+            : peerFD(peerFD), parse(parse), process(process) {}
 
-        PeerID peerID;
+        FileDescriptor peerFD;
         ParseCallback parse;
         ResultHandler<void>::type process;
     };
@@ -307,10 +308,10 @@ private:
         SocketInfo(SocketInfo&&) = default;
         SocketInfo& operator=(SocketInfo &&) = default;
 
-        SocketInfo(const PeerID peerID, const std::shared_ptr<Socket>& socketPtr)
-            : peerID(peerID), socketPtr(socketPtr) {}
+        SocketInfo(const FileDescriptor peerFD, const std::shared_ptr<Socket>& socketPtr)
+            : peerFD(peerFD), socketPtr(socketPtr) {}
 
-        PeerID peerID;
+        FileDescriptor peerFD;
         std::shared_ptr<Socket> socketPtr;
     };
 
@@ -321,11 +322,11 @@ private:
         RemovePeerRequest(RemovePeerRequest&&) = default;
         RemovePeerRequest& operator=(RemovePeerRequest &&) = default;
 
-        RemovePeerRequest(const PeerID peerID,
+        RemovePeerRequest(const FileDescriptor peerFD,
                           const std::shared_ptr<std::condition_variable>& conditionPtr)
-            : peerID(peerID), conditionPtr(conditionPtr) {}
+            : peerFD(peerFD), conditionPtr(conditionPtr) {}
 
-        PeerID peerID;
+        FileDescriptor peerFD;
         std::shared_ptr<std::condition_variable> conditionPtr;
     };
 
@@ -345,12 +346,13 @@ private:
     CallQueue mCalls;
     std::unordered_map<MethodID, std::shared_ptr<MethodHandlers>> mMethodsCallbacks;
     std::unordered_map<MethodID, std::shared_ptr<SignalHandlers>> mSignalsCallbacks;
-    std::unordered_map<MethodID, std::list<PeerID>> mSignalsPeers;
+    std::unordered_map<MethodID, std::list<FileDescriptor>> mSignalsPeers;
 
     // Mutex for changing mSockets map.
     // Shouldn't be locked on any read/write, that could block. Just copy the ptr.
     std::mutex mSocketsMutex;
-    std::unordered_map<PeerID, std::shared_ptr<Socket> > mSockets;
+    std::unordered_map<FileDescriptor, std::shared_ptr<Socket> > mSockets;
+    std::vector<struct pollfd> mFDs;
     std::queue<SocketInfo> mNewSockets;
     std::queue<RemovePeerRequest> mPeersToDelete;
 
@@ -366,9 +368,6 @@ private:
     unsigned int mMaxNumberOfPeers;
 
     std::thread mThread;
-    std::vector<struct pollfd> mFDs;
-
-    std::atomic<PeerID> mPeerIDCounter;
 
     template<typename SentDataType, typename ReceivedDataType>
     void addMethodHandlerInternal(const MethodID methodID,
@@ -376,7 +375,7 @@ private:
 
     template<typename SentDataType, typename ReceivedDataType>
     MessageID callInternal(const MethodID methodID,
-                           const PeerID peerID,
+                           const FileDescriptor peerFD,
                            const std::shared_ptr<SentDataType>& data,
                            const typename ResultHandler<ReceivedDataType>::type& process);
 
@@ -390,26 +389,23 @@ private:
     bool onRemovePeer();
     bool handleLostConnections();
     bool handleInputs();
-    bool handleInput(const PeerID peerID, const Socket& socket);
-    bool onReturnValue(const PeerID peerID,
-                       const Socket& socket,
+    bool handleInput(const Socket& socket);
+    bool onReturnValue(const Socket& socket,
                        const MessageID messageID);
-    bool onRemoteCall(const PeerID peerID,
-                      const Socket& socket,
+    bool onRemoteCall(const Socket& socket,
                       const MethodID methodID,
                       const MessageID messageID,
                       std::shared_ptr<MethodHandlers> methodCallbacks);
-    bool onRemoteSignal(const PeerID peerID,
-                        const Socket& socket,
+    bool onRemoteSignal(const Socket& socket,
                         const MethodID methodID,
                         const MessageID messageID,
                         std::shared_ptr<SignalHandlers> signalCallbacks);
     void resetPolling();
-    PeerID getNextPeerID();
+    FileDescriptor getNextFileDescriptor();
     CallQueue::Call getCall();
-    void removePeerInternal(const PeerID peerID, Status status);
+    void removePeerInternal(const FileDescriptor peerFD, Status status);
 
-    std::shared_ptr<EmptyData> onNewSignals(const PeerID peerID,
+    std::shared_ptr<EmptyData> onNewSignals(const FileDescriptor peerFD,
                                             std::shared_ptr<RegisterSignalsMessage>& data);
 
 
@@ -432,9 +428,9 @@ void Processor::addMethodHandlerInternal(const MethodID methodID,
         config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
     };
 
-    methodCall.method = [method](const PeerID peerID, std::shared_ptr<void>& data)->std::shared_ptr<void> {
+    methodCall.method = [method](const FileDescriptor peerFD, std::shared_ptr<void>& data)->std::shared_ptr<void> {
         std::shared_ptr<ReceivedDataType> tmpData = std::static_pointer_cast<ReceivedDataType>(data);
-        return method(peerID, tmpData);
+        return method(peerFD, tmpData);
     };
 
     {
@@ -488,9 +484,9 @@ void Processor::addSignalHandler(const MethodID methodID,
         return data;
     };
 
-    signalCall.signal = [handler](const PeerID peerID, std::shared_ptr<void>& data) {
+    signalCall.signal = [handler](const FileDescriptor peerFD, std::shared_ptr<void>& data) {
         std::shared_ptr<ReceivedDataType> tmpData = std::static_pointer_cast<ReceivedDataType>(data);
-        handler(peerID, tmpData);
+        handler(peerFD, tmpData);
     };
 
     {
@@ -503,7 +499,7 @@ void Processor::addSignalHandler(const MethodID methodID,
         std::vector<MethodID> ids {methodID};
         auto data = std::make_shared<RegisterSignalsMessage>(ids);
 
-        std::list<PeerID> peersIDs;
+        std::list<FileDescriptor> peersIDs;
         {
             Lock lock(mSocketsMutex);
             for (const auto kv : mSockets) {
@@ -511,9 +507,9 @@ void Processor::addSignalHandler(const MethodID methodID,
             }
         }
 
-        for (const PeerID peerID : peersIDs) {
+        for (const FileDescriptor peerFD : peersIDs) {
             callSync<RegisterSignalsMessage, EmptyData>(REGISTER_SIGNAL_METHOD_ID,
-                                                        peerID,
+                                                        peerFD,
                                                         data,
                                                         DEFAULT_METHOD_TIMEOUT);
         }
@@ -522,12 +518,12 @@ void Processor::addSignalHandler(const MethodID methodID,
 
 template<typename SentDataType, typename ReceivedDataType>
 MessageID Processor::callInternal(const MethodID methodID,
-                                  const PeerID peerID,
+                                  const FileDescriptor peerFD,
                                   const std::shared_ptr<SentDataType>& data,
                                   const typename ResultHandler<ReceivedDataType>::type& process)
 {
     Lock lock(mCallsMutex);
-    MessageID messageID = mCalls.push<SentDataType, ReceivedDataType>(methodID, peerID, data, process);
+    MessageID messageID = mCalls.push<SentDataType, ReceivedDataType>(methodID, peerFD, data, process);
     mEventQueue.send(Event::CALL);
 
     return messageID;
@@ -535,7 +531,7 @@ MessageID Processor::callInternal(const MethodID methodID,
 
 template<typename SentDataType, typename ReceivedDataType>
 MessageID Processor::callAsync(const MethodID methodID,
-                               const PeerID peerID,
+                               const FileDescriptor peerFD,
                                const std::shared_ptr<SentDataType>& data,
                                const typename ResultHandler<ReceivedDataType>::type& process)
 {
@@ -544,13 +540,13 @@ MessageID Processor::callAsync(const MethodID methodID,
         throw IPCException("The Processor thread is not started. Can't send any data.");
     }
 
-    return callInternal<SentDataType, ReceivedDataType>(methodID, peerID, data, process);
+    return callInternal<SentDataType, ReceivedDataType>(methodID, peerFD, data, process);
 }
 
 
 template<typename SentDataType, typename ReceivedDataType>
 std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
-                                                      const PeerID peerID,
+                                                      const FileDescriptor peerFD,
                                                       const std::shared_ptr<SentDataType>& data,
                                                       unsigned int timeoutMS)
 {
@@ -568,7 +564,7 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
     };
 
     MessageID messageID = callAsync<SentDataType, ReceivedDataType>(methodID,
-                                                                    peerID,
+                                                                    peerFD,
                                                                     data,
                                                                     process);
 
@@ -586,7 +582,7 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
             }
         }
         if (isTimeout) {
-            removePeer(peerID);
+            removePeer(peerFD);
             LOGE("Function call timeout; methodID: " << methodID);
             throw IPCTimeoutException("Function call timeout; methodID: " + std::to_string(methodID));
         } else {
@@ -609,15 +605,15 @@ void Processor::signal(const MethodID methodID,
         throw IPCException("The Processor thread is not started. Can't send any data.");
     }
 
-    std::list<PeerID> peersIDs;
+    std::list<FileDescriptor> peersIDs;
     {
         Lock lock(mSocketsMutex);
         peersIDs = mSignalsPeers[methodID];
     }
 
-    for (const PeerID peerID : peersIDs) {
+    for (const FileDescriptor peerFD : peersIDs) {
         Lock lock(mCallsMutex);
-        mCalls.push<SentDataType>(methodID, peerID, data);
+        mCalls.push<SentDataType>(methodID, peerFD, data);
         mEventQueue.send(Event::CALL);
     }
 }

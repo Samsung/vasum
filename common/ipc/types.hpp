@@ -34,10 +34,11 @@
 namespace security_containers {
 namespace ipc {
 
-typedef std::function<void(int)> PeerCallback;
-typedef unsigned int PeerID;
+typedef int FileDescriptor;
 typedef unsigned int MethodID;
 typedef unsigned int MessageID;
+
+typedef std::function<void(FileDescriptor)> PeerCallback;
 
 enum class Status : int {
     OK = 0,
@@ -55,17 +56,20 @@ void throwOnError(const Status status);
 
 template<typename SentDataType, typename ReceivedDataType>
 struct MethodHandler {
-    typedef std::function<std::shared_ptr<SentDataType>(PeerID, std::shared_ptr<ReceivedDataType>&)> type;
+    typedef std::function<std::shared_ptr<SentDataType>(FileDescriptor peerFD,
+                                                        std::shared_ptr<ReceivedDataType>& data)> type;
 };
 
 template<typename ReceivedDataType>
 struct SignalHandler {
-    typedef std::function<void(PeerID, std::shared_ptr<ReceivedDataType>&)> type;
+    typedef std::function<void(FileDescriptor peerFD,
+                               std::shared_ptr<ReceivedDataType>& data)> type;
 };
 
 template <typename ReceivedDataType>
 struct ResultHandler {
-    typedef std::function<void(Status, std::shared_ptr<ReceivedDataType>&)> type;
+    typedef std::function<void(Status status,
+                               std::shared_ptr<ReceivedDataType>& resultData)> type;
 };
 
 } // namespace ipc

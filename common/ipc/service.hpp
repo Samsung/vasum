@@ -129,7 +129,7 @@ public:
      */
     template<typename SentDataType, typename ReceivedDataType>
     std::shared_ptr<ReceivedDataType> callSync(const MethodID methodID,
-                                               const PeerID peerID,
+                                               const FileDescriptor peerFD,
                                                const std::shared_ptr<SentDataType>& data,
                                                unsigned int timeoutMS = 500);
 
@@ -144,7 +144,7 @@ public:
      */
     template<typename SentDataType, typename ReceivedDataType>
     void callAsync(const MethodID methodID,
-                   const PeerID peerID,
+                   const FileDescriptor peerFD,
                    const std::shared_ptr<SentDataType>& data,
                    const typename ResultHandler<ReceivedDataType>::type& resultCallback);
 
@@ -187,27 +187,27 @@ void Service::addSignalHandler(const MethodID methodID,
 
 template<typename SentDataType, typename ReceivedDataType>
 std::shared_ptr<ReceivedDataType> Service::callSync(const MethodID methodID,
-                                                    const PeerID peerID,
+                                                    const FileDescriptor peerFD,
                                                     const std::shared_ptr<SentDataType>& data,
                                                     unsigned int timeoutMS)
 {
-    LOGD("Sync calling method: " << methodID << " for user: " << peerID);
-    return mProcessor.callSync<SentDataType, ReceivedDataType>(methodID, peerID, data, timeoutMS);
+    LOGD("Sync calling method: " << methodID << " for user: " << peerFD);
+    return mProcessor.callSync<SentDataType, ReceivedDataType>(methodID, peerFD, data, timeoutMS);
 }
 
 template<typename SentDataType, typename ReceivedDataType>
 void Service::callAsync(const MethodID methodID,
-                        const PeerID peerID,
+                        const FileDescriptor peerFD,
                         const std::shared_ptr<SentDataType>& data,
                         const typename ResultHandler<ReceivedDataType>::type& resultCallback)
 {
-    LOGD("Async calling method: " << methodID << " for user: " << peerID);
+    LOGD("Async calling method: " << methodID << " for user: " << peerFD);
     mProcessor.callAsync<SentDataType,
                          ReceivedDataType>(methodID,
-                                           peerID,
+                                           peerFD,
                                            data,
                                            resultCallback);
-    LOGD("Async called method: " << methodID << "for user: " << peerID);
+    LOGD("Async called method: " << methodID << "for user: " << peerFD);
 }
 
 template<typename SentDataType>

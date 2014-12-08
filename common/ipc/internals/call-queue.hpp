@@ -48,7 +48,7 @@ public:
         Call() = default;
         Call(Call&&) = default;
 
-        PeerID peerID;
+        FileDescriptor peerFD;
         MethodID methodID;
         MessageID messageID;
         std::shared_ptr<void> data;
@@ -66,14 +66,14 @@ public:
 
     template<typename SentDataType, typename ReceivedDataType>
     MessageID push(const MethodID methodID,
-                   const PeerID peerID,
+                   const FileDescriptor peerFD,
                    const std::shared_ptr<SentDataType>& data,
                    const typename ResultHandler<ReceivedDataType>::type& process);
 
 
     template<typename SentDataType>
     MessageID push(const MethodID methodID,
-                   const PeerID peerID,
+                   const FileDescriptor peerFD,
                    const std::shared_ptr<SentDataType>& data);
 
     Call pop();
@@ -90,13 +90,13 @@ private:
 
 template<typename SentDataType, typename ReceivedDataType>
 MessageID CallQueue::push(const MethodID methodID,
-                          const PeerID peerID,
+                          const FileDescriptor peerFD,
                           const std::shared_ptr<SentDataType>& data,
                           const typename ResultHandler<ReceivedDataType>::type& process)
 {
     Call call;
     call.methodID = methodID;
-    call.peerID = peerID;
+    call.peerFD = peerFD;
     call.data = data;
 
     MessageID messageID = getNextMessageID();
@@ -124,12 +124,12 @@ MessageID CallQueue::push(const MethodID methodID,
 
 template<typename SentDataType>
 MessageID CallQueue::push(const MethodID methodID,
-                          const PeerID peerID,
+                          const FileDescriptor peerFD,
                           const std::shared_ptr<SentDataType>& data)
 {
     Call call;
     call.methodID = methodID;
-    call.peerID = peerID;
+    call.peerFD = peerFD;
     call.data = data;
 
     MessageID messageID = getNextMessageID();
