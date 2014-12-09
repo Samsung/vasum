@@ -51,6 +51,20 @@ SET(CMAKE_CXX_FLAGS_RELEASE    "-g -std=${CXX_11_STD} -O2 -DNDEBUG")
 SET(CMAKE_C_FLAGS_CCOV         "-g -O2 --coverage")
 SET(CMAKE_CXX_FLAGS_CCOV       "-g -std=${CXX_11_STD} -O2 --coverage")
 
+IF(DEFINED SANITIZE)
+    # Enable sanitize build.
+    # It works with clang and gcc>=4.8
+    # Possible arguments: address, thread and others (see doc.)
+    # Note on thread sanitizer bugs left in out code:
+    #  - we use non thread save boost test library
+    #  - there are some mysterious problems with glib
+    SET(SANITIZE_FLAGS "-fsanitize=${SANITIZE}")
+    MESSAGE(STATUS "Sanitize flags: ${SANITIZE_FLAGS}")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZE_FLAGS} -fPIE -fno-omit-frame-pointer")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SANITIZE_FLAGS} -fPIE -fno-omit-frame-pointer")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pie ${SANITIZE_FLAGS}")
+ENDIF(DEFINED SANITIZE)
+
 ADD_DEFINITIONS("-fPIC")   # Position Independent Code
 ADD_DEFINITIONS("-Werror") # Make all warnings into errors
 ADD_DEFINITIONS("-Wall")   # Generate all warnings
@@ -59,6 +73,24 @@ ADD_DEFINITIONS("-pedantic") # Be pedantic
 ADD_DEFINITIONS("-pedantic-errors") # Make pedantic warnings into errors
 ADD_DEFINITIONS(-DPROGRAM_VERSION="${VERSION}")
 ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+
+IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    # Warn about documentation problems
+    ADD_DEFINITIONS("-Wdocumentation")
+    ADD_DEFINITIONS("-Wno-error=documentation")
+
+    IF(ALL_WARNINGS)
+        # turn on every -W flags except a few explicitly mentioned
+        ADD_DEFINITIONS("-Wno-error")
+        ADD_DEFINITIONS("-Weverything")
+        ADD_DEFINITIONS("-Wno-c++98-compat")
+        ADD_DEFINITIONS("-Wno-c++98-compat-pedantic")
+        ADD_DEFINITIONS("-Wno-padded")
+        ADD_DEFINITIONS("-Wno-global-constructors")
+        ADD_DEFINITIONS("-Wno-exit-time-destructors")
+        ADD_DEFINITIONS("-Wno-weak-vtables")
+    ENDIF(ALL_WARNINGS)
+ENDIF()
 
 IF(NOT DEFINED VASUM_USER)
     SET(VASUM_USER "security-containers")
