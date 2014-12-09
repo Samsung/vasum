@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Piotr Bartosiewicz <p.bartosiewi@partner.samsung.com>
+ *  Contact: Mateusz Malicki  <m.malicki2@samsung.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,36 +18,24 @@
 
 /**
  * @file
- * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Vasum base exception
+ * @author  Mateusz Malicki (m.malicki2@samsung.com)
+ * @brief   Vasum base exception implementation
  */
 
+#include "base-exception.hpp"
 
-#ifndef COMMON_BASE_EXCEPTION_HPP
-#define COMMON_BASE_EXCEPTION_HPP
-
-#include <stdexcept>
 #include <string>
-
+#include <cstring>
+#include <cerrno>
 
 namespace vasum {
 
+const int ERROR_MESSAGE_BUFFER_CAPACITY = 256;
 
-/**
- * Base class vasum exceptions
- */
-struct VasumException: public std::runtime_error {
-
-    VasumException(const std::string& error = "") : std::runtime_error(error) {}
-};
-
-/**
- * Return string describing error number
- * it is wrapper for strerror_r
- */
-std::string getSystemErrorMessage();
+std::string getSystemErrorMessage()
+{
+    char buf[ERROR_MESSAGE_BUFFER_CAPACITY];
+    return strerror_r(errno, buf, sizeof(buf));
+}
 
 } // namespace vasum
-
-
-#endif // COMMON_BASE_EXCEPTION_HPP

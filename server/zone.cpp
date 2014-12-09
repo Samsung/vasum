@@ -26,7 +26,6 @@
 
 #include "zone.hpp"
 #include "base-exception.hpp"
-#include "provisioning-config.hpp"
 
 #include "logger/logger.hpp"
 #include "utils/paths.hpp"
@@ -37,7 +36,6 @@
 
 #include <string>
 #include <thread>
-
 
 namespace vasum {
 
@@ -50,18 +48,6 @@ typedef std::lock_guard<std::recursive_mutex> Lock;
 // TODO: move constants to the config file when default values are implemented there
 const int RECONNECT_RETRIES = 15;
 const int RECONNECT_DELAY = 1 * 1000;
-const std::string ZONE_PROVISION_FILE = "provision.conf";
-
-void declareUnit(const std::string& file, ZoneProvisioning::Unit&& unit)
-{
-     // TODO: Add to the dynamic configuration
-    ZoneProvisioning config;
-    if (fs::exists(file)) {
-        config::loadFromFile(file, config);
-    }
-    config.units.push_back(std::move(unit));
-    config::saveToFile(file, config);
-}
 
 } // namespace
 
@@ -86,8 +72,8 @@ Zone::Zone(const utils::Worker::Pointer& worker,
     }
 
     mAdmin.reset(new ZoneAdmin(zonesPath, lxcTemplatePrefix, mConfig));
-    const fs::path baseProvision = fs::path(zonesPath) / mAdmin->getId();
-    mProvisionConfig = fs::absolute(ZONE_PROVISION_FILE, baseProvision).string();
+    const fs::path zonePath = fs::path(zonesPath) / mAdmin->getId();
+    mProvision.reset(new ZoneProvision(zonePath.string(), mConfig.validLinkPrefixes));
 }
 
 Zone::~Zone()
@@ -123,6 +109,7 @@ int Zone::getPrivilege() const
 void Zone::start()
 {
     Lock lock(mReconnectMutex);
+    mProvision->start();
     if (mConfig.enableDbusIntegration) {
         mConnectionTransport.reset(new ZoneConnectionTransport(mRunMountPoint));
     }
@@ -162,6 +149,7 @@ void Zone::stop()
     disconnect();
     mAdmin->stop();
     mConnectionTransport.reset();
+    mProvision->stop();
 }
 
 void Zone::connect()
@@ -210,6 +198,12 @@ int Zone::getVT() const
 {
     return mConfig.vt;
 }
+
+std::string Zone::getRootPath() const
+{
+    return mProvision->getRootPath();
+}
+
 
 bool Zone::activateVT()
 {
@@ -399,35 +393,26 @@ void Zone::proxyCallAsync(const std::string& busName,
 }
 
 void Zone::declareFile(const int32_t& type,
-                            const std::string& path,
-                            const int32_t& flags,
-                            const int32_t& mode)
+                       const std::string& path,
+                       const int32_t& flags,
+                       const int32_t& mode)
 {
-    ZoneProvisioning::Unit unit;
-    unit.set(std::move(ZoneProvisioning::File({type, path, flags, mode})));
-
-    declareUnit(mProvisionConfig, std::move(unit));
+    mProvision->declareFile(type, path, flags, mode);
 }
 
 void Zone::declareMount(const std::string& source,
-                             const std::string& target,
-                             const std::string& type,
-                             const int64_t& flags,
-                             const std::string& data)
+                        const std::string& target,
+                        const std::string& type,
+                        const int64_t& flags,
+                        const std::string& data)
 {
-    ZoneProvisioning::Unit unit;
-    unit.set(std::move(ZoneProvisioning::Mount({source, target, type, flags, data})));
-
-    declareUnit(mProvisionConfig, std::move(unit));
+    mProvision->declareMount(source, target, type, flags, data);
 }
 
 void Zone::declareLink(const std::string& source,
-                            const std::string& target)
+                       const std::string& target)
 {
-    ZoneProvisioning::Unit unit;
-    unit.set(std::move(ZoneProvisioning::Link({source, target})));
-
-    declareUnit(mProvisionConfig, std::move(unit));
+    mProvision->declareLink(source, target);
 }
 
 } // namespace vasum

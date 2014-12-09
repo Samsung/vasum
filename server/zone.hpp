@@ -30,6 +30,7 @@
 #include "zone-admin.hpp"
 #include "zone-connection.hpp"
 #include "zone-connection-transport.hpp"
+#include "zone-provision.hpp"
 #include "utils/worker.hpp"
 
 #include <string>
@@ -254,6 +255,11 @@ public:
     void declareLink(const std::string& source,
                      const std::string& target);
 
+   /**
+     * Get zone root path
+     */
+    std::string getRootPath() const;
+
 private:
     utils::Worker::Pointer mWorker;
     ZoneConfig mConfig;
@@ -262,6 +268,7 @@ private:
     std::unique_ptr<ZoneConnectionTransport> mConnectionTransport;
     std::unique_ptr<ZoneAdmin> mAdmin;
     std::unique_ptr<ZoneConnection> mConnection;
+    std::unique_ptr<ZoneProvision> mProvision;
     mutable std::recursive_mutex mReconnectMutex;
     NotifyActiveZoneCallback mNotifyCallback;
     DisplayOffCallback mDisplayOffCallback;
@@ -270,7 +277,6 @@ private:
     DbusStateChangedCallback mDbusStateChangedCallback;
     std::string mDbusAddress;
     std::string mRunMountPoint;
-    std::string mProvisionConfig;
 
     void onNameLostCallback();
     void reconnectHandler();

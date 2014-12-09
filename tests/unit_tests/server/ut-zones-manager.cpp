@@ -27,9 +27,6 @@
 #include "ut.hpp"
 
 #include "zones-manager.hpp"
-#include "zones-manager-config.hpp"
-#include "zone-config.hpp"
-#include "provisioning-config.hpp"
 #include "zone-dbus-definitions.hpp"
 #include "host-dbus-definitions.hpp"
 #include "test-dbus-definitions.hpp"
@@ -40,7 +37,6 @@
 #include "dbus/connection.hpp"
 #include "dbus/exception.hpp"
 #include "utils/glib-loop.hpp"
-#include "config/manager.hpp"
 #include "config/exception.hpp"
 #include "utils/latch.hpp"
 #include "utils/fs.hpp"
@@ -82,7 +78,6 @@ const std::string FILE_CONTENT = "File content\n"
                                  "Line 2\n";
 const std::string NON_EXISTANT_ZONE_ID = "NON_EXISTANT_ZONE_ID";
 const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
-const std::string PROVISON_CONFIG_FILE = "provision.conf";
 
 class DbusAccessory {
 public:
@@ -314,67 +309,6 @@ public:
 
     }
 
-    void callMethodDeclareFile(const std::string& zone,
-                               const int32_t& type,
-                               const std::string& path,
-                               const int32_t& flags,
-                               const int32_t& mode)
-    {
-        assert(isHost());
-        GVariant* parameters = g_variant_new("(sisii)",
-                                             zone.c_str(),
-                                             type,
-                                             path.c_str(),
-                                             flags,
-                                             mode);
-        GVariantPtr result = mClient->callMethod(api::host::BUS_NAME,
-                                                 api::host::OBJECT_PATH,
-                                                 api::host::INTERFACE,
-                                                 api::host::METHOD_DECLARE_FILE,
-                                                 parameters,
-                                                 "()");
-    }
-
-    void callMethodDeclareMount(const std::string& source,
-                                const std::string& zone,
-                                const std::string& target,
-                                const std::string& type,
-                                const uint64_t& flags,
-                                const std::string& data)
-    {
-        assert(isHost());
-        GVariant* parameters = g_variant_new("(ssssts)",
-                                             source.c_str(),
-                                             zone.c_str(),
-                                             target.c_str(),
-                                             type.c_str(),
-                                             flags,
-                                             data.c_str());
-        GVariantPtr result = mClient->callMethod(api::host::BUS_NAME,
-                                                 api::host::OBJECT_PATH,
-                                                 api::host::INTERFACE,
-                                                 api::host::METHOD_DECLARE_MOUNT,
-                                                 parameters,
-                                                 "()");
-    }
-
-    void callMethodDeclareLink(const std::string& source,
-                               const std::string& zone,
-                               const std::string& target)
-    {
-        assert(isHost());
-        GVariant* parameters = g_variant_new("(sss)",
-                                             source.c_str(),
-                                             zone.c_str(),
-                                             target.c_str());
-        GVariantPtr result = mClient->callMethod(api::host::BUS_NAME,
-                                                 api::host::OBJECT_PATH,
-                                                 api::host::INTERFACE,
-                                                 api::host::METHOD_DECLARE_LINK,
-                                                 parameters,
-                                                 "()");
-    }
-
     void callAsyncMethodCreateZone(const std::string& id,
                                         const VoidResultCallback& result)
     {
@@ -476,26 +410,6 @@ struct Fixture {
         , mRunGuard("/tmp/ut-run")
     {}
 };
-
-std::string getProvisionConfigPath(const std::string& zone)
-{
-    namespace fs = boost::filesystem;
-    ZonesManagerConfig managerConfig;
-    loadFromFile(TEST_CONFIG_PATH, managerConfig);
-    for (const auto& zonesPath : managerConfig.zoneConfigs) {
-        ZoneConfig zoneConfig;
-        const fs::path configConfigPath = fs::absolute(zonesPath,
-                                                       fs::path(TEST_CONFIG_PATH).parent_path());
-
-        loadFromFile(configConfigPath.string(), zoneConfig);
-        if (zoneConfig.name == zone) {
-            const fs::path base = fs::path(managerConfig.zonesPath) / fs::path(zone);
-            return fs::absolute(PROVISON_CONFIG_FILE, base).string();
-        }
-    }
-    BOOST_FAIL("There is no provision config file for " + zone);
-    return std::string();
-}
 
 } // namespace
 
@@ -1091,71 +1005,6 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZoneTest)
     dbus.callAsyncMethodDestroyZone(zone1, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "");
-}
-
-BOOST_AUTO_TEST_CASE(DeclareFile)
-{
-    const std::string zone = EXPECTED_DBUSES_NO_DBUS.begin()->first;
-    const std::string provisionConfigPath =  getProvisionConfigPath(zone);
-
-    ZonesManager cm(TEST_CONFIG_PATH);
-    DbusAccessory dbus(DbusAccessory::HOST_ID);
-    dbus.callMethodDeclareFile(zone, 1, "path", 0747, 0777);
-    dbus.callMethodDeclareFile(zone, 2, "path", 0747, 0777);
-
-    ZoneProvisioning config;
-    BOOST_REQUIRE_NO_THROW(loadFromFile(provisionConfigPath, config));
-    BOOST_REQUIRE_EQUAL(config.units.size(), 2);
-    BOOST_REQUIRE(config.units[0].is<ZoneProvisioning::File>());
-    BOOST_REQUIRE(config.units[1].is<ZoneProvisioning::File>());
-    const ZoneProvisioning::File& unit = config.units[0].as<ZoneProvisioning::File>();
-    BOOST_CHECK_EQUAL(unit.type, 1);
-    BOOST_CHECK_EQUAL(unit.path, "path");
-    BOOST_CHECK_EQUAL(unit.flags, 0747);
-    BOOST_CHECK_EQUAL(unit.mode, 0777);
-}
-
-BOOST_AUTO_TEST_CASE(DeclareMount)
-{
-    const std::string zone = EXPECTED_DBUSES_NO_DBUS.begin()->first;
-    const std::string provisionConfigPath =  getProvisionConfigPath(zone);
-
-    ZonesManager cm(TEST_CONFIG_PATH);
-    DbusAccessory dbus(DbusAccessory::HOST_ID);
-    dbus.callMethodDeclareMount("/fake/path1", zone, "/fake/path2", "tmpfs", 077, "fake");
-    dbus.callMethodDeclareMount("/fake/path2", zone, "/fake/path2", "tmpfs", 077, "fake");
-
-    ZoneProvisioning config;
-    BOOST_REQUIRE_NO_THROW(loadFromFile(provisionConfigPath, config));
-    BOOST_REQUIRE_EQUAL(config.units.size(), 2);
-    BOOST_REQUIRE(config.units[0].is<ZoneProvisioning::Mount>());
-    BOOST_REQUIRE(config.units[1].is<ZoneProvisioning::Mount>());
-    const ZoneProvisioning::Mount& unit = config.units[0].as<ZoneProvisioning::Mount>();
-    BOOST_CHECK_EQUAL(unit.source, "/fake/path1");
-    BOOST_CHECK_EQUAL(unit.target, "/fake/path2");
-    BOOST_CHECK_EQUAL(unit.type, "tmpfs");
-    BOOST_CHECK_EQUAL(unit.flags, 077);
-    BOOST_CHECK_EQUAL(unit.data, "fake");
-}
-
-BOOST_AUTO_TEST_CASE(DeclareLink)
-{
-    const std::string zone = EXPECTED_DBUSES_NO_DBUS.begin()->first;
-    const std::string provisionConfigPath =  getProvisionConfigPath(zone);
-
-    ZonesManager cm(TEST_CONFIG_PATH);
-    DbusAccessory dbus(DbusAccessory::HOST_ID);
-    dbus.callMethodDeclareLink("/fake/path1", zone, "/fake/path2");
-    dbus.callMethodDeclareLink("/fake/path2", zone, "/fake/path2");
-
-    ZoneProvisioning config;
-    BOOST_REQUIRE_NO_THROW(loadFromFile(provisionConfigPath, config));
-    BOOST_REQUIRE_EQUAL(config.units.size(), 2);
-    BOOST_REQUIRE(config.units[0].is<ZoneProvisioning::Link>());
-    BOOST_REQUIRE(config.units[1].is<ZoneProvisioning::Link>());
-    const ZoneProvisioning::Link& unit = config.units[0].as<ZoneProvisioning::Link>();
-    BOOST_CHECK_EQUAL(unit.source, "/fake/path1");
-    BOOST_CHECK_EQUAL(unit.target, "/fake/path2");
 }
 
 BOOST_AUTO_TEST_CASE(LockUnlockZoneTest)

@@ -70,6 +70,15 @@ bool listDir(const std::string& path, std::vector<std::string>& files);
 bool mountRun(const std::string& path);
 
 /**
+ * Creates mount point
+ */
+bool mount(const std::string& source,
+           const std::string& target,
+           const std::string& filesystemtype,
+           unsigned long mountflags,
+           const std::string& data);
+
+/**
  * Umounts a filesystem
  */
 bool umount(const std::string& path);
@@ -102,12 +111,36 @@ bool copyDirContents(const std::string& src, const std::string& dst);
 bool createDir(const std::string& path, uid_t uid, uid_t gid, boost::filesystem::perms mode);
 
 /**
+ * Recursively creates a directory with specific permissions set.
+ */
+bool createDirs(const std::string& path, mode_t mode);
+
+/**
  * Creates an empty directory, ready to serve as mount point.
  * Succeeds either if path did not exist and was created successfully, or if already existing dir
  * under the same path is empty and is not a mount point.
  */
 bool createEmptyDir(const std::string& path);
 
+/**
+ * Creates an empty file
+ */
+bool createFile(const std::string& path, int flags, mode_t mode);
+
+/**
+ * Creates an FIFO special file
+ */
+bool createFifo(const std::string& path, mode_t mode);
+
+/**
+ * Copy an file
+ */
+bool copyFile(const std::string& src, const std::string& dest);
+
+/**
+ * Create hard link
+ */
+bool createLink(const std::string& src, const std::string& dest);
 
 } // namespace utils
 } // namespace vasum

@@ -12,5 +12,6 @@
     "cpuQuotaBackground" : 1000,
     "runMountPoint" : "/tmp/ut-run/~NAME~",
     "permittedToSend" : [ "/tmp/.*" ],
-    "permittedToRecv" : [ "/tmp/.*" ]
+    "permittedToRecv" : [ "/tmp/.*" ],
+    "validLinkPrefixes" : []
 }

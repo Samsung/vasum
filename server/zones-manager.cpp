@@ -628,15 +628,12 @@ void ZonesManager::handleGetZoneInfoCall(const std::string& id,
         result->setError(api::ERROR_INTERNAL, "Unrecognized state of zone");
         return;
     }
-    const auto zonePath = boost::filesystem::absolute(id, mConfig.zonesPath);
-    const auto rootfsDir = boost::filesystem::path("rootfs");
-    const auto rootfsPath = zonePath / rootfsDir;
 
     result->set(g_variant_new("((siss))",
                               id.c_str(),
                               zone->getVT(),
                               state,
-                              rootfsPath.string().c_str()));
+                              zone->getRootPath().c_str()));
 }
 
 void ZonesManager::handleDeclareFileCall(const std::string& zone,

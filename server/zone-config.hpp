@@ -112,6 +112,11 @@ struct ZoneConfig {
      */
     std::vector<std::string> permittedToRecv;
 
+    /**
+     * Valid hard link prefixes.
+     */
+    std::vector<std::string> validLinkPrefixes;
+
     CONFIG_REGISTER
     (
         name,
@@ -127,7 +132,8 @@ struct ZoneConfig {
         cpuQuotaBackground,
         runMountPoint,
         permittedToSend,
-        permittedToRecv
+        permittedToRecv,
+        validLinkPrefixes
     )
 };
 

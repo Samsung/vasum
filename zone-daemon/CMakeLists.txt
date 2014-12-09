@@ -22,7 +22,8 @@ MESSAGE(STATUS "Generating makefile for the Zone Daemon...")
 FILE(GLOB project_SRCS *.cpp *.hpp)
 FILE(GLOB common_SRCS ${COMMON_FOLDER}/dbus/*.cpp  ${COMMON_FOLDER}/dbus/*.hpp
                       ${COMMON_FOLDER}/log/*.cpp   ${COMMON_FOLDER}/log/*.hpp
-                      ${COMMON_FOLDER}/utils/*.cpp ${COMMON_FOLDER}/utils/*.hpp)
+                      ${COMMON_FOLDER}/utils/*.cpp ${COMMON_FOLDER}/utils/*.hpp
+                      ${COMMON_FOLDER}/*.cpp)
 
 ## Setup target ################################################################
 SET(ZONE_DAEMON_CODENAME "${PROJECT_NAME}-zone-daemon")

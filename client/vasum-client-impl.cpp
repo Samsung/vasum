@@ -322,7 +322,7 @@ VsmStatus Client::vsm_get_zone_dbuses(VsmArrayString* keys, VsmArrayString* valu
     assert(keys);
     assert(values);
 
-    GVariant* out;
+    GVariant* out = NULL;
     VsmStatus ret = callMethod(HOST_INTERFACE,
                                api::host::METHOD_GET_ZONE_DBUSES,
                                NULL,
@@ -343,7 +343,7 @@ VsmStatus Client::vsm_get_zone_ids(VsmArrayString* array) noexcept
 {
     assert(array);
 
-    GVariant* out;
+    GVariant* out = NULL;
     VsmStatus ret = callMethod(HOST_INTERFACE,
                                api::host::METHOD_GET_ZONE_ID_LIST,
                                NULL,

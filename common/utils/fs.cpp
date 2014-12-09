@@ -38,9 +38,12 @@
 #include <sys/mount.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include <iostream>
 
+
+namespace fs = boost::filesystem;
 
 namespace vasum {
 namespace utils {
@@ -140,6 +143,36 @@ bool mountRun(const std::string& path)
            || utils::mountTmpfs(path, RUN_MOUNT_POINT_FLAGS, RUN_MOUNT_POINT_OPTIONS_NO_SMACK);
 }
 
+bool mount(const std::string& source,
+           const std::string& target,
+           const std::string& filesystemtype,
+           unsigned long mountflags,
+           const std::string& data)
+{
+    int ret = ::mount(source.c_str(),
+                      target.c_str(),
+                      filesystemtype.c_str(),
+                      mountflags,
+                      data.c_str());
+    if (ret < 0) {
+        LOGE("Mount operation failure: "
+             << "source path: "
+             << source
+             << ", target path: "
+             << target
+             << ", filesystemtype: "
+             << filesystemtype
+             << ", mountflags: "
+             << mountflags
+             << ", data: "
+             << data
+             << ", msg: "
+             << getSystemErrorMessage());
+        return false;
+    }
+    return true;
+}
+
 bool umount(const std::string& path)
 {
     if (::umount(path.c_str()) != 0) {
@@ -181,7 +214,6 @@ bool moveFile(const std::string& src, const std::string& dst)
 {
     bool bResult;
 
-    namespace fs = boost::filesystem;
     boost::system::error_code error;
 
     // The destination has to be a full path (including a file name)
@@ -218,8 +250,6 @@ namespace {
 
 bool copyDirContentsRec(const boost::filesystem::path& src, const boost::filesystem::path& dst)
 {
-    namespace fs = boost::filesystem;
-
     try {
         for (fs::directory_iterator file(src);
              file != fs::directory_iterator();
@@ -274,26 +304,34 @@ bool copyDirContentsRec(const boost::filesystem::path& src, const boost::filesys
     return true;
 }
 
+boost::filesystem::perms getPerms(const mode_t& mode)
+{
+    return static_cast<boost::filesystem::perms>(mode);
+}
+
+bool copySmackLabel(const std::string& /* src */, const std::string& /* dst */)
+{
+    //TODO: fill copySmackLabel function
+    return true;
+}
+
+
 } // namespace
 
 bool copyDirContents(const std::string& src, const std::string& dst)
 {
-    namespace fs = boost::filesystem;
-
     return copyDirContentsRec(fs::path(src), fs::path(dst));
 }
 
 bool createDir(const std::string& path, uid_t uid, uid_t gid, boost::filesystem::perms mode)
 {
-    namespace fs = boost::filesystem;
-
     fs::path dirPath(path);
-    boost::system::error_code ec;
+    boost::system::error_code errorCode;
     bool runDirCreated = false;
     if (!fs::exists(dirPath)) {
-        if (!fs::create_directory(dirPath, ec)) {
+        if (!fs::create_directory(dirPath, errorCode)) {
             LOGE("Failed to create directory '" << path << "': "
-                 << ec.message());
+                 << errorCode.message());
             return false;
         }
         runDirCreated = true;
@@ -303,10 +341,10 @@ bool createDir(const std::string& path, uid_t uid, uid_t gid, boost::filesystem:
     }
 
     // set permissions
-    fs::permissions(dirPath, mode, ec);
+    fs::permissions(dirPath, mode, errorCode);
     if (fs::status(dirPath).permissions() != mode) {
         LOGE("Failed to set permissions to '" << path << "': "
-             << ec.message());
+             << errorCode.message());
         return false;
     }
 
@@ -323,10 +361,36 @@ bool createDir(const std::string& path, uid_t uid, uid_t gid, boost::filesystem:
     return true;
 }
 
+bool createDirs(const std::string& path, mode_t mode)
+{
+    boost::filesystem::perms perms = getPerms(mode);
+    std::vector<fs::path> dirs;
+    fs::path prefix;
+    fs::path dirPath = fs::path(path);
+    for (const auto dir : dirPath) {
+        prefix /= dir;
+        if (!fs::exists(prefix)) {
+            bool created = createDir(prefix.string(), -1, -1, perms);
+            if (created) {
+                dirs.push_back(prefix);
+            } else {
+                LOGE("Failed to create dir");
+                for (auto dir = dirs.rbegin(); dir != dirs.rend(); ++dir) {
+                    boost::system::error_code errorCode;
+                    fs::remove(*dir, errorCode);
+                    if (errorCode) {
+                        LOGE("Error during cleaning: dir: " << *dir << ", msg: " << errorCode.message());
+                    }
+                }
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 bool createEmptyDir(const std::string& path)
 {
-    namespace fs = boost::filesystem;
-
     fs::path dirPath(path);
     boost::system::error_code ec;
     bool cleanDirCreated = false;
@@ -350,6 +414,96 @@ bool createEmptyDir(const std::string& path)
         }
     }
 
+    return true;
+}
+
+bool createFile(const std::string& path, int flags, mode_t mode)
+{
+    // TODO: Check if we really need *flags* in the API
+    int ret = ::open(path.c_str(), flags, mode);
+    if (ret < 0) {
+        LOGE("Failed to create file: path=host:"
+             << path
+             << ", msg: "
+             << getSystemErrorMessage());
+        return false;
+    }
+    close(ret);
+    return true;
+}
+
+bool createFifo(const std::string& path, mode_t mode)
+{
+   int ret = ::mkfifo(path.c_str(), mode);
+   if (ret < 0) {
+       LOGE("Failed to make fifo: path=host:" << path);
+       return false;
+   }
+   return true;
+}
+
+bool copyFile(const std::string& src, const std::string& dest)
+{
+    boost::system::error_code errorCode;
+    fs::copy_file(src, dest, errorCode);
+    if (errorCode) {
+        LOGE("Failed to copy file: msg: "
+             << errorCode.message()
+             << ", path=host:"
+             << src
+             << ", path=host:"
+             << dest);
+        return false;
+    }
+    bool retSmack = copySmackLabel(src, dest);
+    if (!retSmack) {
+        LOGE("Failed to copy file: msg: (can't copy smacklabel) "
+             << ", path=host:"
+             << src
+             << ", path=host:"
+             << dest);
+        fs::remove(src, errorCode);
+        if (errorCode) {
+            LOGE("Failed to clean after copy failure: path=host:"
+                 << src
+                 << ", msg: "
+                 << errorCode.message());
+        }
+        return false;
+    }
+    return true;
+}
+
+bool createLink(const std::string& src, const std::string& dest)
+{
+    int retLink = ::link(src.c_str(), dest.c_str());
+    if (retLink < 0) {
+        LOGE("Failed to hard link: path=host:"
+             << src
+             << ", path=host:"
+             << dest
+             << ", msg:"
+             << getSystemErrorMessage());
+        return false;
+    }
+    bool retSmack = copySmackLabel(src, dest);
+    if (!retSmack) {
+        LOGE("Failed to copy smack label: path=host:"
+              << src
+              << ", path=host:"
+              << dest);
+        boost::system::error_code ec;
+        fs::remove(dest, ec);
+        if (!ec) {
+            LOGE("Failed to clean after hard link creation failure: path=host:"
+                 << src
+                 << ", to: "
+                 << dest
+                 << ", msg: "
+                 << ec.message());
+        }
+        return false;
+    }
     return true;
 }
 
