@@ -113,7 +113,7 @@ VsmZoneState getZoneState(const char* state)
     } else if (strcmp(state, "ACTIVATING") == 0) {
         return ACTIVATING;
     }
-    assert(!"UNKNOWN STATE");
+    assert(0 && "UNKNOWN STATE");
     return (VsmZoneState)-1;
 }
 

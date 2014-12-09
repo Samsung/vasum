@@ -340,8 +340,6 @@ bool Processor::handleInput(const Socket& socket)
             }
         }
     }
-
-    return false;
 }
 
 std::shared_ptr<Processor::EmptyData> Processor::onNewSignals(const FileDescriptor peerFD,

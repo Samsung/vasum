@@ -87,8 +87,8 @@ void unescape(std::string& value)
         if (c == '-') {
             value[outPos++] = '/';
         } else if (c == '\\' && value[inPos] == 'x') {
-            const char a = unhex(value[inPos+1]);
-            const char b = unhex(value[inPos+2]);
+            const int a = unhex(value[inPos+1]);
+            const int b = unhex(value[inPos+2]);
             value[outPos++] = (char) ((a << 4) | b);
             inPos += 3;
         } else {

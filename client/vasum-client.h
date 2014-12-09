@@ -390,7 +390,7 @@ VsmStatus vsm_create_zone(VsmClient client, const char* id, const char* tname);
  * @param[in] force if 0 data will be kept, otherwise data will be lost
  * @return status of this function call
  */
-VsmStatus vsm_destroy_zone(VsmClient clent, const char* id, int force);
+VsmStatus vsm_destroy_zone(VsmClient client, const char* id, int force);
 
 /**
  * Shutdown zone
@@ -624,7 +624,7 @@ VsmStatus vsm_declare_file(VsmClient client,
  * @param[in] target mount point (path in zone)
  * @param[in] type filesystem type
  * @param[in] flags mount flags as in mount function
- * @patam[in] data additional data as in mount function
+ * @param[in] data additional data as in mount function
  * @return status of this function call
  */
 VsmStatus vsm_declare_mount(VsmClient client,

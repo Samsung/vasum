@@ -77,7 +77,6 @@ ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     # Warn about documentation problems
     ADD_DEFINITIONS("-Wdocumentation")
-    ADD_DEFINITIONS("-Wno-error=documentation")
 
     IF(ALL_WARNINGS)
         # turn on every -W flags except a few explicitly mentioned

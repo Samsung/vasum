@@ -57,14 +57,14 @@ public:
     int getFD() const;
 
     /**
-     * Send an event of a given value
+     * Send an event
      *
-     * @param value size of the buffer
+     * @param message mesage to send
      */
-    void send(const MessageType& mess);
+    void send(const MessageType& message);
 
     /**
-     * Receives the signal.
+     * Receives the event.
      * Blocks if there is no event.
      *
      * @return event's value

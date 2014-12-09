@@ -94,7 +94,7 @@ public:
      * the data will be parsed and passed to this callback.
      *
      * @param methodID API dependent id of the method
-     * @param methodCallback method handling implementation
+     * @param method method handling implementation
      */
     template<typename SentDataType, typename ReceivedDataType>
     void addMethodHandler(const MethodID methodID,
@@ -139,7 +139,7 @@ public:
      *
      *
      * @param methodID API dependent id of the method
-     * @param sendCallback callback for data serialization
+     * @param data data to send
      * @param resultCallback callback for result serialization and handling
      */
     template<typename SentDataType, typename ReceivedDataType>

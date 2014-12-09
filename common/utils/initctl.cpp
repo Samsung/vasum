@@ -54,7 +54,7 @@ namespace {
                 }
                 return false;
             }
-            size -= r;
+            size -= static_cast<size_t>(r);
             data = reinterpret_cast<const char*>(data) + r;
         }
         return true;

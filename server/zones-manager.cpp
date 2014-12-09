@@ -593,7 +593,7 @@ void ZonesManager::handleDeclareFileCall(const std::string& zone,
     try {
         mZones.at(zone)->declareFile(type, path, flags, mode);
         result->setVoid();
-    } catch (const std::out_of_range& ex) {
+    } catch (const std::out_of_range&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const config::ConfigException& ex) {
@@ -614,7 +614,7 @@ void ZonesManager::handleDeclareMountCall(const std::string& source,
     try {
         mZones.at(zone)->declareMount(source, target, type, flags, data);
         result->setVoid();
-    } catch (const std::out_of_range& ex) {
+    } catch (const std::out_of_range&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const config::ConfigException& ex) {
@@ -632,7 +632,7 @@ void ZonesManager::handleDeclareLinkCall(const std::string& source,
     try {
         mZones.at(zone)->declareLink(source, target);
         result->setVoid();
-    } catch (const std::out_of_range& ex) {
+    } catch (const std::out_of_range&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const config::ConfigException& ex) {

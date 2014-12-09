@@ -145,9 +145,9 @@ BOOST_AUTO_TEST_CASE(GetZoneDbusesTest)
     status = vsm_get_zone_dbuses(client, &keys, &values);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
 
-    BOOST_CHECK_EQUAL(getArrayStringLength(keys, EXPECTED_DBUSES_STARTED.size() + 1),
+    BOOST_CHECK_EQUAL(getArrayStringLength(keys, EXPECTED_DBUSES_STARTED.size() + 1u),
                       EXPECTED_DBUSES_STARTED.size());
-    BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_DBUSES_STARTED.size() + 1),
+    BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_DBUSES_STARTED.size() + 1u),
                       EXPECTED_DBUSES_STARTED.size());
 
     std::map<std::string, std::string> zones;
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(GetZoneIdsTest)
     VsmArrayString values;
     status = vsm_get_zone_ids(client, &values);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_DBUSES_STARTED.size() + 1),
+    BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_DBUSES_STARTED.size() + 1u),
                       EXPECTED_DBUSES_STARTED.size());
 
     std::set<std::string> zones;
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE(NotificationTest)
         BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     }
 
-    BOOST_CHECK(callbackData.signalReceivedLatch.waitForN(clients.size() - 1, EVENT_TIMEOUT));
+    BOOST_CHECK(callbackData.signalReceivedLatch.waitForN(clients.size() - 1u, EVENT_TIMEOUT));
     BOOST_CHECK(callbackData.signalReceivedLatch.empty());
 
     for (const auto& msg : callbackData.receivedSignalMsg) {

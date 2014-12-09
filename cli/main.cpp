@@ -32,6 +32,8 @@
 
 using namespace vasum::cli;
 
+namespace {
+
 std::map<std::string, CommandLineInterface> commands = {
     {
         "set_active_zone", {
@@ -92,6 +94,8 @@ void printUsage(std::ostream& out, const std::string& name)
         command.second.printUsage(out);
     }
 }
+
+} // namespace
 
 int main(const int argc, const char** argv)
 {

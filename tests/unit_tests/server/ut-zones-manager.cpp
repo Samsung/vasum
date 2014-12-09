@@ -620,7 +620,7 @@ BOOST_AUTO_TEST_CASE(NotifyActiveZoneTest)
         dbus.second->callMethodNotify();
     }
 
-    BOOST_CHECK(signalReceivedLatch.waitForN(dbuses.size() - 1, EVENT_TIMEOUT));
+    BOOST_CHECK(signalReceivedLatch.waitForN(dbuses.size() - 1u, EVENT_TIMEOUT));
     BOOST_CHECK(signalReceivedLatch.empty());
 
     //check if there are no signals that was received more than once
