@@ -44,11 +44,31 @@ struct TestConfig {
 
         struct SubSubConfig {
             int intVal;
+            bool moved;
 
             CONFIG_REGISTER
             (
                 intVal
             )
+            SubSubConfig() : moved(false) {}
+            SubSubConfig(const SubSubConfig& config) : intVal(config.intVal), moved(false) {}
+            SubSubConfig(SubSubConfig&& config) : intVal(std::move(config.intVal)), moved(false) {
+                config.moved = true;
+            }
+            SubSubConfig& operator=(const SubSubConfig& config) {
+                intVal = config.intVal;
+                moved = false;
+                return *this;
+            }
+            SubSubConfig& operator=(SubSubConfig&& config) {
+                intVal = std::move(config.intVal);
+                moved = false;
+                config.moved = true;
+                return *this;
+            }
+            bool isMoved() const {
+                return moved;
+            }
         };
 
         int intVal;
@@ -368,7 +388,7 @@ BOOST_AUTO_TEST_CASE(FromToFDTest)
     fs::remove(fifoPath);
 }
 
-BOOST_AUTO_TEST_CASE(ConfigUnion)
+BOOST_AUTO_TEST_CASE(ConfigUnionTest)
 {
     TestConfig testConfig;
     BOOST_REQUIRE_NO_THROW(loadFromString(jsonTestString, testConfig));
@@ -385,11 +405,29 @@ BOOST_AUTO_TEST_CASE(ConfigUnion)
     std::string out = saveToString(testConfig);
     BOOST_CHECK_EQUAL(out, jsonTestString);
 
-    //Check move and copy
+    //Check copy
+
     std::vector<TestConfig::SubConfigOption> unions(2);
     unions[0].set<int>(2);
+    //set from const lvalue reference (copy)
+    unions[1].set(testConfig.unions[1].as<const TestConfig::SubConfig>());
+    BOOST_CHECK(!testConfig.unions[1].as<TestConfig::SubConfig>().subSubObj.isMoved());
+    //set from lvalue reference (copy)
+    unions[1].set(testConfig.unions[1].as<TestConfig::SubConfig>());
+    BOOST_CHECK(!testConfig.unions[1].as<TestConfig::SubConfig>().subSubObj.isMoved());
+    //set from const rvalue reference (copy)
+    unions[1].set(std::move(testConfig.unions[1].as<const TestConfig::SubConfig>()));
+    BOOST_CHECK(!testConfig.unions[1].as<TestConfig::SubConfig>().subSubObj.isMoved());
+    //set rvalue reference (copy -- move is disabled)
     unions[1].set(std::move(testConfig.unions[1].as<TestConfig::SubConfig>()));
-    BOOST_CHECK(testConfig.unions[1].as<TestConfig::SubConfig>().intVector.empty());
+    BOOST_CHECK(!testConfig.unions[1].as<TestConfig::SubConfig>().subSubObj.isMoved());
+    //assign lvalue reference (copy)
+    testConfig.unions[1] = unions[1];
+    BOOST_CHECK(!unions[1].as<TestConfig::SubConfig>().subSubObj.isMoved());
+    //assign rvalue reference (copy -- move is disabled)
+    testConfig.unions[1] = std::move(unions[1]);
+    BOOST_CHECK(!unions[1].as<TestConfig::SubConfig>().subSubObj.isMoved());
+
     testConfig.unions.clear();
     testConfig.unions = unions;
     out = saveToString(testConfig);
