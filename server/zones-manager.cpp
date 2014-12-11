@@ -74,7 +74,8 @@ const unsigned int ZONE_IP_BASE_THIRD_OCTET = 100;
 
 } // namespace
 
-ZonesManager::ZonesManager(const std::string& managerConfigPath): mDetachOnExit(false)
+ZonesManager::ZonesManager(const std::string& managerConfigPath)
+    : mWorker(utils::Worker::create()), mDetachOnExit(false)
 {
     LOGD("Instantiating ZonesManager object...");
 
@@ -168,32 +169,33 @@ void ZonesManager::createZone(const std::string& zoneConfig)
     std::string zoneConfigPath = utils::getAbsolutePath(zoneConfig, baseConfigPath);
 
     LOGT("Creating Zone " << zoneConfigPath);
-    std::unique_ptr<Zone> c(new Zone(mConfig.zonesPath,
-                                               zoneConfigPath,
-                                               mConfig.lxcTemplatePrefix,
-                                               mConfig.runMountPointPrefix));
-    const std::string id = c->getId();
+    std::unique_ptr<Zone> zone(new Zone(mWorker->createSubWorker(),
+                                        mConfig.zonesPath,
+                                        zoneConfigPath,
+                                        mConfig.lxcTemplatePrefix,
+                                        mConfig.runMountPointPrefix));
+    const std::string id = zone->getId();
     if (id == HOST_ID) {
         throw ZoneOperationException("Cannot use reserved zone ID");
     }
 
     using namespace std::placeholders;
-    c->setNotifyActiveZoneCallback(bind(&ZonesManager::notifyActiveZoneHandler,
-                                             this, id, _1, _2));
+    zone->setNotifyActiveZoneCallback(bind(&ZonesManager::notifyActiveZoneHandler,
+                                           this, id, _1, _2));
 
-    c->setDisplayOffCallback(bind(&ZonesManager::displayOffHandler,
-                                  this, id));
+    zone->setDisplayOffCallback(bind(&ZonesManager::displayOffHandler,
+                                     this, id));
 
-    c->setFileMoveRequestCallback(bind(&ZonesManager::handleZoneMoveFileRequest,
-                                            this, id, _1, _2, _3));
+    zone->setFileMoveRequestCallback(bind(&ZonesManager::handleZoneMoveFileRequest,
+                                          this, id, _1, _2, _3));
 
-    c->setProxyCallCallback(bind(&ZonesManager::handleProxyCall,
-                                 this, id, _1, _2, _3, _4, _5, _6, _7));
+    zone->setProxyCallCallback(bind(&ZonesManager::handleProxyCall,
+                                    this, id, _1, _2, _3, _4, _5, _6, _7));
 
-    c->setDbusStateChangedCallback(bind(&ZonesManager::handleDbusStateChanged,
-                                        this, id, _1));
+    zone->setDbusStateChangedCallback(bind(&ZonesManager::handleDbusStateChanged,
+                                           this, id, _1));
 
-    mZones.insert(ZoneMap::value_type(id, std::move(c)));
+    mZones.insert(ZoneMap::value_type(id, std::move(zone)));
 
     // after zone is created successfully, put a file informing that zones are enabled
     if (mZones.size() == 1) {
@@ -836,8 +838,7 @@ void ZonesManager::handleDestroyZoneCall(const std::string& id,
         result->setVoid();
     };
 
-    std::thread thread(destroyer);
-    thread.detach(); //TODO fix it
+    mWorker->addTask(destroyer);
 }
 
 void ZonesManager::handleLockZoneCall(const std::string& id,

@@ -31,6 +31,7 @@
 #include "host-connection.hpp"
 #include "input-monitor.hpp"
 #include "proxy-call-policy.hpp"
+#include "utils/worker.hpp"
 
 #include <string>
 #include <unordered_map>
@@ -105,6 +106,7 @@ public:
     void setZonesDetachOnExit();
 
 private:
+    utils::Worker::Pointer mWorker;
     ZonesManagerConfig mConfig;
     std::string mConfigPath;
     HostConnection mHostConnection;

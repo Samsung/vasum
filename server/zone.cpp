@@ -65,10 +65,12 @@ void declareUnit(const std::string& file, ZoneProvisioning::Unit&& unit)
 
 } // namespace
 
-Zone::Zone(const std::string& zonesPath,
-                     const std::string& zoneConfigPath,
-                     const std::string& lxcTemplatePrefix,
-                     const std::string& baseRunMountPointPath)
+Zone::Zone(const utils::Worker::Pointer& worker,
+           const std::string& zonesPath,
+           const std::string& zoneConfigPath,
+           const std::string& lxcTemplatePrefix,
+           const std::string& baseRunMountPointPath)
+    : mWorker(worker)
 {
     config::loadFromFile(zoneConfigPath, mConfig);
 
@@ -92,19 +94,9 @@ Zone::~Zone()
 {
     // Make sure all OnNameLostCallbacks get finished and no new will
     // get called before proceeding further. This guarantees no race
-    // condition on the mReconnectThread.
-    {
-        Lock lock(mReconnectMutex);
-        disconnect();
-    }
-
-    if (mReconnectThread.joinable()) {
-        mReconnectThread.join();
-    }
-
-    if (mStartThread.joinable()) {
-        mStartThread.join();
-    }
+    // condition on the reconnect thread.
+    Lock lock(mReconnectMutex);
+    disconnect();
 }
 
 const std::vector<boost::regex>& Zone::getPermittedToSend() const
@@ -146,10 +138,6 @@ void Zone::start()
 
 void Zone::startAsync(const StartAsyncResultCallback& callback)
 {
-    if (mStartThread.joinable()) {
-        mStartThread.join();
-    }
-
     auto startWrapper = [this, callback]() {
         bool succeeded = false;
 
@@ -165,7 +153,7 @@ void Zone::startAsync(const StartAsyncResultCallback& callback)
         }
     };
 
-    mStartThread = std::thread(startWrapper);
+    mWorker->addTask(startWrapper);
 }
 
 void Zone::stop()
@@ -300,10 +288,7 @@ void Zone::onNameLostCallback()
 {
     LOGI(getId() << ": A connection to the DBUS server has been lost, reconnecting...");
 
-    if (mReconnectThread.joinable()) {
-        mReconnectThread.join();
-    }
-    mReconnectThread = std::thread(std::bind(&Zone::reconnectHandler, this));
+    mWorker->addTask(std::bind(&Zone::reconnectHandler, this));
 }
 
 void Zone::reconnectHandler()

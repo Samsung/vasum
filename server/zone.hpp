@@ -30,6 +30,7 @@
 #include "zone-admin.hpp"
 #include "zone-connection.hpp"
 #include "zone-connection-transport.hpp"
+#include "utils/worker.hpp"
 
 #include <string>
 #include <memory>
@@ -50,10 +51,11 @@ public:
      * @param lxcTemplatePrefix directory where templates are stored
      * @param baseRunMountPointPath base directory for run mount point
      */
-    Zone(const std::string& zonesPath,
-              const std::string& zoneConfigPath,
-              const std::string& lxcTemplatePrefix,
-              const std::string& baseRunMountPointPath);
+    Zone(const utils::Worker::Pointer& worker,
+         const std::string& zonesPath,
+         const std::string& zoneConfigPath,
+         const std::string& lxcTemplatePrefix,
+         const std::string& baseRunMountPointPath);
     Zone(Zone&&) = default;
     virtual ~Zone();
 
@@ -253,14 +255,13 @@ public:
                      const std::string& target);
 
 private:
+    utils::Worker::Pointer mWorker;
     ZoneConfig mConfig;
     std::vector<boost::regex> mPermittedToSend;
     std::vector<boost::regex> mPermittedToRecv;
     std::unique_ptr<ZoneConnectionTransport> mConnectionTransport;
     std::unique_ptr<ZoneAdmin> mAdmin;
     std::unique_ptr<ZoneConnection> mConnection;
-    std::thread mReconnectThread;
-    std::thread mStartThread;
     mutable std::recursive_mutex mReconnectMutex;
     NotifyActiveZoneCallback mNotifyCallback;
     DisplayOffCallback mDisplayOffCallback;

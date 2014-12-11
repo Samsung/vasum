@@ -63,10 +63,11 @@ struct Fixture {
 
     std::unique_ptr<Zone> create(const std::string& configPath)
     {
-        return std::unique_ptr<Zone>(new Zone(ZONES_PATH,
-                                                        configPath,
-                                                        LXC_TEMPLATES_PATH,
-                                                        ""));
+        return std::unique_ptr<Zone>(new Zone(utils::Worker::create(),
+                                              ZONES_PATH,
+                                              configPath,
+                                              LXC_TEMPLATES_PATH,
+                                              ""));
     }
 
     void ensureStarted()
