@@ -364,7 +364,7 @@ VsmStatus Client::vsm_get_active_zone_id(VsmString* id) noexcept
 {
     assert(id);
 
-    GVariant* out;
+    GVariant* out = NULL;
     VsmStatus ret = callMethod(HOST_INTERFACE,
                                api::host::METHOD_GET_ACTIVE_ZONE_ID,
                                NULL,
@@ -409,7 +409,7 @@ VsmStatus Client::vsm_lookup_zone_by_id(const char* id, VsmZone* zone) noexcept
     assert(id);
     assert(zone);
 
-    GVariant* out;
+    GVariant* out = NULL;
     GVariant* args_in = g_variant_new("(s)", id);
     VsmStatus ret = callMethod(HOST_INTERFACE,
                                api::host::METHOD_GET_ZONE_INFO,
@@ -636,7 +636,7 @@ VsmStatus Client::vsm_file_move_request(const char* destZone, const char* path) 
     assert(destZone);
     assert(path);
 
-    GVariant* out;
+    GVariant* out = NULL;
     GVariant* args_in = g_variant_new("(ss)", destZone, path);
     VsmStatus ret = callMethod(ZONE_INTERFACE,
                                api::zone::METHOD_FILE_MOVE_REQUEST,
