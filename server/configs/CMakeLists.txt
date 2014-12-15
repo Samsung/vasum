@@ -29,7 +29,10 @@ CONFIGURE_FILE(systemd/vasum.service.in
 
 
 ## Install #####################################################################
-INSTALL(FILES       daemon.conf
+CONFIGURE_FILE(daemon.conf.in
+               ${CMAKE_BINARY_DIR}/daemon.conf)
+
+INSTALL(FILES       ${CMAKE_BINARY_DIR}/daemon.conf
         DESTINATION ${VSM_CONFIG_INSTALL_DIR})
 
 # preprocess d-bus configs

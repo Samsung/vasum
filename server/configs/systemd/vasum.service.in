@@ -4,7 +4,7 @@ ConditionVirtualization=no
 
 [Service]
 Type=simple
-ExecStart=${CMAKE_INSTALL_PREFIX}/bin/vasum-server
+ExecStart=${CMAKE_INSTALL_PREFIX}/bin/vasum-server -r
 Restart=on-failure
 ExecReload=/bin/kill -HUP $MAINPID
 

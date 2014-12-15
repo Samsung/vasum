@@ -51,6 +51,7 @@ between them. A process from inside a zone can request a switch of context
 %{_unitdir}/vasum.service
 %{_unitdir}/multi-user.target.wants/vasum.service
 /etc/dbus-1/system.d/org.tizen.vasum.host.conf
+%dir %{_datadir}/.zones
 
 %prep
 %setup -q
@@ -67,6 +68,7 @@ between them. A process from inside a zone can request a switch of context
          -DCMAKE_BUILD_TYPE=%{build_type} \
          -DSCRIPT_INSTALL_DIR=%{script_dir} \
          -DSYSTEMD_UNIT_DIR=%{_unitdir} \
+         -DDATA_DIR=%{_datadir} \
          -DPYTHON_SITELIB=%{python_sitelib} \
          -DVASUM_USER=%{vsm_user} \
          -DINPUT_EVENT_GROUP=%{input_event_group} \
@@ -78,6 +80,7 @@ make -k %{?jobs:-j%jobs}
 %make_install
 mkdir -p %{buildroot}/%{_unitdir}/multi-user.target.wants
 ln -s ../vasum.service %{buildroot}/%{_unitdir}/multi-user.target.wants/vasum.service
+mkdir -p %{buildroot}/%{_datadir}/.zones
 
 %clean
 rm -rf %{buildroot}
