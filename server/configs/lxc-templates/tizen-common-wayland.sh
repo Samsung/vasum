@@ -23,14 +23,14 @@ usage()
     cat <<EOF
 usage:
     $1 -n|--name=<zone_name>
-        [-p|--path=<path>] [-r|--rootfs=<rootfs>] [-v|--vt=<vt>]
+        [-p|--path=<path>] [--rootfs=<rootfs>] [--vt=<vt>]
         [--ipv4=<ipv4>] [--ipv4-gateway=<ipv4_gateway>] [-h|--help]
 Mandatory args:
   -n,--name         zone name
 Optional args:
-  -p,--path         path to zone config files, defaults to /var/lib/lxc
-  --rootfs          path to zone rootfs, defaults to /var/lib/lxc/[NAME]/rootfs
-  -v,--vt           zone virtual terminal
+  -p,--path         path to zone config files
+  --rootfs          path to zone rootfs
+  --vt              zone virtual terminal
   --ipv4            zone IP address
   --ipv4-gateway    zone gateway
   -h,--help         print help
@@ -38,7 +38,7 @@ EOF
     return 0
 }
 
-options=$(getopt -o hp:v:n: -l help,rootfs:,path:,vt:,name:,ipv4:,ipv4-gateway: -- "$@")
+options=$(getopt -o hp:n: -l help,rootfs:,path:,vt:,name:,ipv4:,ipv4-gateway: -- "$@")
 if [ $? -ne 0 ]; then
     usage $(basename $0)
     exit 1
@@ -51,7 +51,7 @@ do
         -h|--help)      usage $0 && exit 0;;
         --rootfs)       rootfs=$2; shift 2;;
         -p|--path)      path=$2; shift 2;;
-        -v|--vt)        vt=$2; shift 2;;
+        --vt)           vt=$2; shift 2;;
         -n|--name)      name=$2; shift 2;;
         --ipv4)         ipv4=$2; shift 2;;
         --ipv4-gateway) ipv4_gateway=$2; shift 2;;
@@ -94,14 +94,12 @@ ${rootfs}/opt \
 ${rootfs}/proc \
 ${rootfs}/root \
 ${rootfs}/run \
-${rootfs}/run/dbus \
-${rootfs}/run/memory \
-${rootfs}/run/systemd \
-${rootfs}/run/udev \
 ${rootfs}/sbin \
 ${rootfs}/sys \
 ${rootfs}/tmp \
 ${rootfs}/usr \
+${rootfs}/var \
+${rootfs}/var/run \
 ${path}/hooks \
 ${path}/scripts \
 ${path}/systemd \
@@ -389,10 +387,7 @@ ${path}/systemd/user etc/systemd/user none ro,bind 0 0
 /opt opt none rw,rbind 0 0
 devtmpfs dev devtmpfs rw,relatime,mode=755 0 0
 devpts dev/pts devpts rw,relatime,gid=5,mode=620,ptmxmode=000 0 0
-/run/dbus run/dbus none rw,bind 0 0
-/run/memory run/memory none rw,bind 0 0
-/run/systemd run/systemd none rw,bind 0 0
-/run/udev run/udev none rw,bind 0 0
 /sys/fs/smackfs sys/fs/smackfs none rw,bind 0 0
+/var/run/zones/${name}/run var/run none rw,bind 0 0
 #tmpfs run tmpfs rw,nosuid,nodev,mode=755 0 0
 EOF
