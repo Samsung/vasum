@@ -98,6 +98,19 @@ bool saveFileContent(const std::string& path, const std::string& content)
     return true;
 }
 
+bool removeFile(const std::string& path)
+{
+    LOGD(path << ": exists, removing.");
+    if (::remove(path.c_str())) {
+        if (errno != ENOENT) {
+            LOGE(path << ": failed to delete: " << ::strerror(errno));
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool isCharDevice(const std::string& path)
 {
     struct stat s;

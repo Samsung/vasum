@@ -88,6 +88,13 @@ BOOST_AUTO_TEST_CASE(SaveFileContentTest)
     boost::filesystem::remove(FILE_PATH_RANDOM, ec);
 }
 
+BOOST_AUTO_TEST_CASE(RemoveFileTest)
+{
+    BOOST_REQUIRE(saveFileContent(FILE_PATH_RANDOM, FILE_CONTENT));
+    BOOST_REQUIRE(removeFile(FILE_PATH_RANDOM));
+    BOOST_REQUIRE(!boost::filesystem::exists(FILE_PATH_RANDOM));
+}
+
 BOOST_AUTO_TEST_CASE(MountPointTest)
 {
     bool result;

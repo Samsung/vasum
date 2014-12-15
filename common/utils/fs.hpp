@@ -50,6 +50,11 @@ bool readFileContent(const std::string& path, std::string& content);
 bool saveFileContent(const std::string& path, const std::string& content);
 
 /**
+ * Remove file
+ */
+bool removeFile(const std::string& path);
+
+/**
  * Checks if a char device exists
  */
 bool isCharDevice(const std::string& path);

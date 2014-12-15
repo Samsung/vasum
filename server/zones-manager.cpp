@@ -65,6 +65,7 @@ bool regexMatchVector(const std::string& str, const std::vector<boost::regex>& v
 
 const std::string HOST_ID = "host";
 const std::string ZONE_TEMPLATE_CONFIG_PATH = "template.conf";
+const std::string ENABLED_FILE_NAME = "enabled";
 
 const boost::regex ZONE_NAME_REGEX("~NAME~");
 const boost::regex ZONE_IP_THIRD_OCTET_REGEX("~IP~");
@@ -193,6 +194,14 @@ void ZonesManager::createZone(const std::string& zoneConfig)
                                         this, id, _1));
 
     mZones.insert(ZoneMap::value_type(id, std::move(c)));
+
+    // after zone is created successfully, put a file informing that zones are enabled
+    if (mZones.size() == 1) {
+        if (!utils::saveFileContent(
+                utils::createFilePath(mConfig.zonesPath, "/", ENABLED_FILE_NAME), "")) {
+            throw ZoneOperationException(ENABLED_FILE_NAME + ": cannot create.");
+        }
+    }
 }
 
 void ZonesManager::destroyZone(const std::string& zoneId)
@@ -207,6 +216,12 @@ void ZonesManager::destroyZone(const std::string& zoneId)
     // TODO give back the focus
     it->second->setDestroyOnExit();
     mZones.erase(it);
+
+    if (mZones.size() == 0) {
+        if (!utils::removeFile(utils::createFilePath(mConfig.zonesPath, "/", ENABLED_FILE_NAME))) {
+            LOGE("Failed to remove enabled file.");
+        }
+    }
 }
 
 void ZonesManager::focus(const std::string& zoneId)
