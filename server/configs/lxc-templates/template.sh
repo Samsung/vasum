@@ -2,7 +2,7 @@
 
 echo LXC template, args: $@
 
-options=$(getopt -o p:n: -l rootfs:,path:,name:,ipv4:,ipv4-gateway: -- "$@")
+options=$(getopt -o p:n: -l path:,rootfs:,name:,vt:,ipv4:,ipv4-gateway: -- "$@")
 if [ $? -ne 0 ]; then
     exit 1
 fi
@@ -14,6 +14,7 @@ do
         -p|--path)      path=$2; shift 2;;
         --rootfs)       rootfs=$2; shift 2;;
         -n|--name)      name=$2; shift 2;;
+        --vt)           vt=$2; shift 2;;
         --ipv4)         ipv4=$2; shift 2;;
         --ipv4-gateway) ipv4_gateway=$2; shift 2;;
         --)             shift 1; break ;;

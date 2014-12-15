@@ -71,6 +71,11 @@ ZoneAdmin::ZoneAdmin(const std::string& zonesPath,
             args.add("--ipv4");
             args.add(config.ipv4.c_str());
         }
+        const std::string vt = std::to_string(config.vt);
+        if (config.vt > 0) {
+            args.add("--vt");
+            args.add(vt.c_str());
+        }
         if (!mZone.create(lxcTemplate, args.c_array())) {
             throw ZoneOperationException("Could not create zone");
         }
