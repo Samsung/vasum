@@ -305,7 +305,7 @@ bool ZonesManager::isRunning(const std::string& zoneId)
     return iter->second->isRunning();
 }
 
-std::string ZonesManager::getRunningForegroundZoneId()
+std::string ZonesManager::getRunningForegroundZoneId() const
 {
     for (auto& zone : mZones) {
         if (zone.first == mConfig.foregroundId &&
@@ -523,7 +523,7 @@ void ZonesManager::handleProxyCall(const std::string& caller,
                                    asyncResultCallback);
 }
 
-void ZonesManager::handleGetZoneDbuses(dbus::MethodResultBuilder::Pointer result)
+void ZonesManager::handleGetZoneDbuses(dbus::MethodResultBuilder::Pointer result) const
 {
     std::vector<GVariant*> entries;
     for (auto& zone : mZones) {
@@ -542,7 +542,7 @@ void ZonesManager::handleDbusStateChanged(const std::string& zoneId,
     mHostConnection.signalZoneDbusState(zoneId, dbusAddress);
 }
 
-void ZonesManager::handleGetZoneIdsCall(dbus::MethodResultBuilder::Pointer result)
+void ZonesManager::handleGetZoneIdsCall(dbus::MethodResultBuilder::Pointer result) const
 {
     std::vector<GVariant*> zoneIds;
     for(auto& zone: mZones){

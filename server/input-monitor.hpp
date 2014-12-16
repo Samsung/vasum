@@ -56,7 +56,7 @@ private:
     std::list<struct timeval> mEventTimes;
     GIOChannel* mChannelPtr;
 
-    std::string getDevicePath();
+    std::string getDevicePath() const;
     void createGIOChannel(const std::string& devicePath);
 
     // Internal callback to be registered at glib g_io_add_watch()

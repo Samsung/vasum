@@ -51,7 +51,7 @@ bool ProxyCallPolicy::isProxyCallAllowed(const std::string& caller,
                                          const std::string& targetBusName,
                                          const std::string& targetObjectPath,
                                          const std::string& targetInterface,
-                                         const std::string& targetMethod)
+                                         const std::string& targetMethod) const
 {
     for (const ProxyCallRule& rule : mProxyCallRules) {
         if (match(rule.caller, caller)

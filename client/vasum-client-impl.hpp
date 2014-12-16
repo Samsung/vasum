@@ -96,12 +96,12 @@ public:
     /**
      *  @see ::vsm_get_status_message
      */
-    const char* vsm_get_status_message() noexcept;
+    const char* vsm_get_status_message() const noexcept;
 
     /**
      *  @see ::vsm_get_status
      */
-    VsmStatus vsm_get_status() noexcept;
+    VsmStatus vsm_get_status() const noexcept;
 
     /**
      *  @see ::vsm_get_zone_dbuses

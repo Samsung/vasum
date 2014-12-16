@@ -226,7 +226,7 @@ public:
     /**
      * Get a dbus address
      */
-    std::string getDbusAddress();
+    std::string getDbusAddress() const;
 
     /**
      * Get id of VT

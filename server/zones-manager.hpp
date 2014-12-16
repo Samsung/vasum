@@ -92,7 +92,7 @@ public:
     /**
      * @return id of the currently focused/foreground zone
      */
-    std::string getRunningForegroundZoneId();
+    std::string getRunningForegroundZoneId() const;
 
     /**
      * @return id of next to currently focused/foreground zone. If currently focused zone
@@ -138,9 +138,9 @@ private:
                          const std::string& targetMethod,
                          GVariant* parameters,
                          dbus::MethodResultBuilder::Pointer result);
-    void handleGetZoneDbuses(dbus::MethodResultBuilder::Pointer result);
+    void handleGetZoneDbuses(dbus::MethodResultBuilder::Pointer result) const;
     void handleDbusStateChanged(const std::string& zoneId, const std::string& dbusAddress);
-    void handleGetZoneIdsCall(dbus::MethodResultBuilder::Pointer result);
+    void handleGetZoneIdsCall(dbus::MethodResultBuilder::Pointer result) const;
     void handleGetActiveZoneIdCall(dbus::MethodResultBuilder::Pointer result);
     void handleGetZoneInfoCall(const std::string& id, dbus::MethodResultBuilder::Pointer result);
     void handleDeclareFileCall(const std::string& zone,

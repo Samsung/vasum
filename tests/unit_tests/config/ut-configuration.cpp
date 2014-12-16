@@ -50,7 +50,7 @@ struct TestConfig {
             (
                 intVal
             )
-            SubSubConfig() : moved(false) {}
+            SubSubConfig() : intVal(), moved(false) {}
             SubSubConfig(const SubSubConfig& config) : intVal(config.intVal), moved(false) {}
             SubSubConfig(SubSubConfig&& config) : intVal(std::move(config.intVal)), moved(false) {
                 config.moved = true;

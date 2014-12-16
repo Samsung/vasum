@@ -44,7 +44,7 @@ public:
     /**
      * Gets dbus addres. Will block until address is available.
      */
-    std::string acquireAddress();
+    std::string acquireAddress() const;
 
     /**
      * Set whether object should detach from transport filesystem on exit

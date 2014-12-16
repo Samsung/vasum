@@ -57,8 +57,6 @@ const std::string PROGRAM_NAME_AND_VERSION =
 
 int main(int argc, char* argv[])
 {
-    std::string configPath ;
-
     try {
         po::options_description desc("Allowed options");
 

@@ -200,7 +200,7 @@ void Zone::disconnect()
     }
 }
 
-std::string Zone::getDbusAddress()
+std::string Zone::getDbusAddress() const
 {
     Lock lock(mReconnectMutex);
     return mDbusAddress;

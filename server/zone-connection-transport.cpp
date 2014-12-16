@@ -100,7 +100,7 @@ ZoneConnectionTransport::~ZoneConnectionTransport()
 }
 
 
-std::string ZoneConnectionTransport::acquireAddress()
+std::string ZoneConnectionTransport::acquireAddress() const
 {
     if (mRunMountPoint.empty()) {
         return std::string();

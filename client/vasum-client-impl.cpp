@@ -307,12 +307,12 @@ VsmStatus Client::signalUnsubscribe(VsmSubscriptionId id)
     return vsm_get_status();
 }
 
-const char* Client::vsm_get_status_message() noexcept
+const char* Client::vsm_get_status_message() const noexcept
 {
     return mStatus.mMsg.c_str();
 }
 
-VsmStatus Client::vsm_get_status() noexcept
+VsmStatus Client::vsm_get_status() const noexcept
 {
     return mStatus.mVsmStatus;
 }

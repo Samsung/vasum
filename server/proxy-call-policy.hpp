@@ -44,7 +44,7 @@ public:
                             const std::string& targetBusName,
                             const std::string& targetObjectPath,
                             const std::string& targetInterface,
-                            const std::string& targetMethod);
+                            const std::string& targetMethod) const;
 
 private:
     std::vector<ProxyCallRule> mProxyCallRules;

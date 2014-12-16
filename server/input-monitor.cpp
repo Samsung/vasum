@@ -148,7 +148,7 @@ bool isDeviceWithName(const boost::regex& deviceNameRegex,
 }
 } // namespace
 
-std::string InputMonitor::getDevicePath()
+std::string InputMonitor::getDevicePath() const
 {
     std::string device = mConfig.device;
     if (fs::path(device).is_absolute()
