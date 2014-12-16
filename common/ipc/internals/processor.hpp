@@ -76,6 +76,11 @@ const unsigned int DEFAULT_METHOD_TIMEOUT = 1000;
 *  - callbacks for serialization/parsing
 *  - store Sockets in a vector, maybe SocketStore?
 *  - fix valgrind tests
+*  - poll loop outside.
+*  - waiting till the EventQueue is empty before leaving stop()
+*  - no new events added after stop() called
+*  - when using IPCGSource: addFD and removeFD can be called from addPeer removePeer callbacks, but
+*    there is no mechanism to ensure the IPCSource exists.. therefore SIGSEGV :)
 *
 *
 */
@@ -414,6 +419,8 @@ private:
 
     void run();
     bool onCall();
+    bool onSignalCall(CallQueue::Call& call);
+    bool onMethodCall(CallQueue::Call& call);
     bool onNewPeer();
     bool onRemovePeer();
     bool handleLostConnections();

@@ -57,12 +57,10 @@ IPCGSource::IPCGSource(const std::vector<FileDescriptor> fds,
 IPCGSource::~IPCGSource()
 {
     LOGD("Destroying IPCGSource");
-    g_source_destroy(&mGSource);
-
 }
 
-IPCGSource* IPCGSource::create(const std::vector<FileDescriptor>& fds,
-                               const HandlerCallback& handlerCallback)
+IPCGSource::Pointer IPCGSource::create(const std::vector<FileDescriptor>& fds,
+                                       const HandlerCallback& handlerCallback)
 {
     LOGD("Creating IPCGSource");
 
@@ -80,9 +78,19 @@ IPCGSource* IPCGSource::create(const std::vector<FileDescriptor>& fds,
 
     // Fill additional data
     IPCGSource* source = reinterpret_cast<IPCGSource*>(gSource);
-    return new(source) IPCGSource(fds, handlerCallback);
-}
+    new(source)IPCGSource(fds, handlerCallback);
 
+    auto deleter = [](IPCGSource * ptr) {
+        LOGD("Deleter");
+
+        if (!g_source_is_destroyed(&(ptr->mGSource))) {
+            // This way finalize method will be run in glib loop's thread
+            g_source_destroy(&(ptr->mGSource));
+        }
+    };
+
+    return std::shared_ptr<IPCGSource>(source, deleter);
+}
 
 void IPCGSource::addFD(const FileDescriptor fd)
 {
@@ -119,7 +127,9 @@ void IPCGSource::removeFD(const FileDescriptor fd)
 guint IPCGSource::attach(GMainContext* context)
 {
     LOGD("Attaching to GMainContext");
-    return g_source_attach(&mGSource, context);
+    guint ret = g_source_attach(&mGSource, context);
+    g_source_unref(&mGSource);
+    return ret;
 }
 
 gboolean IPCGSource::prepare(GSource* gSource, gint* timeout)
@@ -148,6 +158,11 @@ gboolean IPCGSource::dispatch(GSource* gSource,
                               GSourceFunc /*callback*/,
                               gpointer /*userData*/)
 {
+    if (!gSource || g_source_is_destroyed(gSource)) {
+        // Remove the GSource from the GMainContext
+        return FALSE;
+    }
+
     IPCGSource* source = reinterpret_cast<IPCGSource*>(gSource);
 
     for (const FDInfo fdInfo : source->mFDInfos) {
@@ -157,7 +172,7 @@ gboolean IPCGSource::dispatch(GSource* gSource,
         }
     }
 
-    return TRUE; // Don't remove the GSource from the GMainContext
+    return TRUE;
 }
 
 void  IPCGSource::finalize(GSource* gSource)

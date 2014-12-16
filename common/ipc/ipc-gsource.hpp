@@ -30,7 +30,7 @@
 
 #include "ipc/service.hpp"
 #include "ipc/types.hpp"
-#include "utils/callback-wrapper.hpp"
+
 #include <memory>
 
 
@@ -43,10 +43,17 @@ namespace ipc {
  *
  * It's supposed to be constructed ONLY with the static create method
  * and destructed in a glib callback.
+ *
+ * TODO:
+ * - waiting till the managed object (Client or Service) is destroyed
+ *   before IPCGSource stops operating. For now programmer has to ensure this.
  */
 struct IPCGSource {
 public:
     typedef std::function<void(FileDescriptor fd, short pollEvent)> HandlerCallback;
+    typedef std::shared_ptr<IPCGSource> Pointer;
+
+    ~IPCGSource();
 
     IPCGSource() = delete;
     IPCGSource(const IPCGSource&) = delete;
@@ -83,8 +90,8 @@ public:
      *
      * @return pointer to the IPCGSource
      */
-    static IPCGSource* create(const std::vector<FileDescriptor>& fds,
-                              const HandlerCallback& handlerCallback);
+    static Pointer create(const std::vector<FileDescriptor>& fds,
+                          const HandlerCallback& handlerCallback);
 
 private:
 
@@ -115,9 +122,6 @@ private:
     // Called only from IPCGSource::create
     IPCGSource(const std::vector<FileDescriptor> fds,
                const HandlerCallback& handlerCallback);
-
-    // Called only from IPCGSource::finalize
-    ~IPCGSource();
 
     struct FDInfo {
         FDInfo(gpointer tag, FileDescriptor fd)

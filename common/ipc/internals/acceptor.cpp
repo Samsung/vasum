@@ -67,12 +67,13 @@ void Acceptor::start()
 void Acceptor::stop()
 {
     LOGT("Stopping Acceptor");
+
     if (mThread.joinable()) {
-        LOGT("Event::FINISH -> Acceptor");
         mEventQueue.send(Event::FINISH);
         LOGT("Waiting for Acceptor to finish");
         mThread.join();
     }
+
     LOGT("Stopped Acceptor");
 }
 

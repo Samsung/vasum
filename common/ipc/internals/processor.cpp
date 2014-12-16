@@ -27,9 +27,11 @@
 #include "ipc/exception.hpp"
 #include "ipc/internals/processor.hpp"
 #include "ipc/internals/utils.hpp"
+#include "utils/signal.hpp"
 
 #include <cerrno>
 #include <cstring>
+#include <csignal>
 #include <stdexcept>
 
 #include <sys/socket.h>
@@ -58,8 +60,9 @@ Processor::Processor(const PeerCallback& newPeerCallback,
       mMaxNumberOfPeers(maxNumberOfPeers)
 {
     LOGT("Creating Processor");
-    using namespace std::placeholders;
 
+    utils::signalBlock(SIGPIPE);
+    using namespace std::placeholders;
     addMethodHandlerInternal<EmptyData, RegisterSignalsMessage>(REGISTER_SIGNAL_METHOD_ID,
                                                                 std::bind(&Processor::onNewSignals, this, _1, _2));
 
@@ -73,6 +76,7 @@ Processor::~Processor()
     } catch (IPCException& e) {
         LOGE("Error in Processor's destructor: " << e.what());
     }
+
     LOGT("Destroyed Processor");
 }
 
@@ -93,10 +97,12 @@ void Processor::start()
 void Processor::stop()
 {
     LOGT("Stopping Processor");
+
     if (isStarted()) {
         mEventQueue.send(Event::FINISH);
         mThread.join();
     }
+
     LOGT("Stopped Processor");
 }
 
@@ -167,7 +173,10 @@ void Processor::removePeerInternal(const FileDescriptor peerFD, Status status)
     LOGW("Removing peer. ID: " << peerFD);
     {
         Lock lock(mSocketsMutex);
-        mSockets.erase(peerFD);
+        if (!mSockets.erase(peerFD)) {
+            LOGW("No such peer. Another thread called removePeerInternal");
+            return;
+        }
 
         // Remove from signal addressees
         for (auto it = mSignalsPeers.begin(); it != mSignalsPeers.end();) {
@@ -269,8 +278,6 @@ void Processor::run()
         }
 
     }
-
-    cleanCommunication();
 }
 
 bool Processor::handleLostConnections()
@@ -327,6 +334,8 @@ bool Processor::handleInput(const FileDescriptor peerFD)
 
     std::shared_ptr<Socket> socketPtr;
     try {
+        // Get the peer's socket
+        Lock lock(mSocketsMutex);
         socketPtr = mSockets.at(peerFD);
     } catch (const std::out_of_range&) {
         LOGE("No such peer: " << peerFD);
@@ -497,7 +506,10 @@ bool Processor::handleEvent()
     switch (mEventQueue.receive()) {
     case Event::FINISH: {
         LOGD("Event FINISH");
+
         mIsRunning = false;
+        cleanCommunication();
+
         return false;
     }
 
@@ -607,6 +619,15 @@ bool Processor::onCall()
     LOGT("Handle call (from another thread) to send a message.");
     CallQueue::Call call = getCall();
 
+    if (call.parse && call.process) {
+        return onMethodCall(call);
+    } else {
+        return onSignalCall(call);
+    }
+}
+
+bool Processor::onSignalCall(CallQueue::Call& call)
+{
     std::shared_ptr<Socket> socketPtr;
     try {
         // Get the peer's socket
@@ -614,11 +635,43 @@ bool Processor::onCall()
         socketPtr = mSockets.at(call.peerFD);
     } catch (const std::out_of_range&) {
         LOGE("Peer disconnected. No socket with a peerFD: " << call.peerFD);
-        IGNORE_EXCEPTIONS(call.process(Status::PEER_DISCONNECTED, call.data));
         return false;
     }
 
-    if (call.parse && call.process) {
+    try {
+        // Send the call with the socket
+        Socket::Guard guard = socketPtr->getGuard();
+        socketPtr->write(&call.methodID, sizeof(call.methodID));
+        socketPtr->write(&call.messageID, sizeof(call.messageID));
+        call.serialize(socketPtr->getFD(), call.data);
+    } catch (const std::exception& e) {
+        LOGE("Error during sending a signal: " << e.what());
+
+        removePeerInternal(call.peerFD, Status::SERIALIZATION_ERROR);
+        return true;
+    }
+
+    return false;
+
+}
+
+bool Processor::onMethodCall(CallQueue::Call& call)
+{
+    std::shared_ptr<Socket> socketPtr;
+    try {
+        // Get the peer's socket
+        Lock lock(mSocketsMutex);
+        socketPtr = mSockets.at(call.peerFD);
+    } catch (const std::out_of_range&) {
+        LOGE("Peer disconnected. No socket with a peerFD: " << call.peerFD);
+
+        // Pass the error to the processing callback
+        IGNORE_EXCEPTIONS(call.process(Status::PEER_DISCONNECTED, call.data));
+
+        return false;
+    }
+
+    {
         // Set what to do with the return message, but only if needed
         Lock lock(mReturnCallbacksMutex);
         if (mReturnCallbacks.count(call.messageID) != 0) {
@@ -636,9 +689,9 @@ bool Processor::onCall()
         socketPtr->write(&call.messageID, sizeof(call.messageID));
         call.serialize(socketPtr->getFD(), call.data);
     } catch (const std::exception& e) {
-        LOGE("Error during sending a message: " << e.what());
+        LOGE("Error during sending a method: " << e.what());
 
-        // Inform about the error
+        // Inform about the error,
         IGNORE_EXCEPTIONS(mReturnCallbacks[call.messageID].process(Status::SERIALIZATION_ERROR, call.data));
 
         {

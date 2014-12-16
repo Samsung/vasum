@@ -54,7 +54,7 @@ public:
     void wait();
 
     /**
-     * Waits for a single occurence of event with timeout.
+     * Waits for a single occurrence of event with timeout.
      *
      * @param timeoutMs  timeout in ms to wait for
      * @return           false on timeout
@@ -64,14 +64,14 @@ public:
     /**
      * Waits for @ref n occurrences of event.
      *
-     * @param n  number of occurences to wait for
+     * @param n  number of occurrences to wait for
      */
     void waitForN(const unsigned int n);
 
     /**
-     * Waits for @ref n occurences of event with timeout.
+     * Waits for @ref n occurrences of event with timeout.
      *
-     * @param n          number of occurences to wait for
+     * @param n          number of occurrences to wait for
      * @param timeoutMs  timeout in ms to wait for
      * @return           false on timeout
      */

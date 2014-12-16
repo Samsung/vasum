@@ -91,15 +91,15 @@ std::vector<FileDescriptor> Service::getFDs()
 
 void Service::handle(const FileDescriptor fd, const short pollEvent)
 {
-    if (fd == mProcessor.getEventFD() && pollEvent & POLLIN) {
+    if (fd == mProcessor.getEventFD() && (pollEvent & POLLIN)) {
         mProcessor.handleEvent();
         return;
 
-    } else if (fd == mAcceptor.getConnectionFD() && pollEvent & POLLIN) {
+    } else if (fd == mAcceptor.getConnectionFD() && (pollEvent & POLLIN)) {
         mAcceptor.handleConnection();
         return;
 
-    } else if (fd == mAcceptor.getEventFD() && pollEvent & POLLIN) {
+    } else if (fd == mAcceptor.getEventFD() && (pollEvent & POLLIN)) {
         mAcceptor.handleEvent();
         return;
 

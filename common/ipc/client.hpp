@@ -55,6 +55,13 @@ public:
     Client& operator=(const Client&) = delete;
 
     /**
+     * Places a connection request in the internal event queue.
+     *
+     * Used with an external polling loop.
+     */
+    void connect();
+
+    /**
      * Starts the worker thread
      */
     void start();
@@ -68,6 +75,23 @@ public:
      * Stops all worker thread
      */
     void stop();
+
+    /**
+    * Used with an external polling loop
+    *
+    * @return vector of internal file descriptors
+    */
+    std::vector<FileDescriptor> getFDs();
+
+    /**
+     * Used with an external polling loop.
+     * Handles one event from the file descriptor.
+     *
+     * @param fd file descriptor
+     * @param pollEvent event on the fd. Defined in poll.h
+     *
+     */
+    void handle(const FileDescriptor fd, const short pollEvent);
 
     /**
      * Set the callback called for each new connection to a peer

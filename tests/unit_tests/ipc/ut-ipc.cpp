@@ -45,6 +45,7 @@
 #include <string>
 #include <thread>
 #include <chrono>
+#include <utility>
 #include <boost/filesystem.hpp>
 
 using namespace vasum;
@@ -136,7 +137,7 @@ std::shared_ptr<SendData> longEchoCallback(const FileDescriptor, std::shared_ptr
     return data;
 }
 
-FileDescriptor connect(Service& s, Client& c, bool serviceUsesGlib = false)
+FileDescriptor connect(Service& s, Client& c)
 {
     // Connects the Client to the Service and returns Clients FileDescriptor
     std::mutex mutex;
@@ -149,40 +150,101 @@ FileDescriptor connect(Service& s, Client& c, bool serviceUsesGlib = false)
         cv.notify_all();
     };
 
+    // TODO: On timeout remove the callback
+    s.setNewPeerCallback(newPeerCallback);
 
-    if (!serviceUsesGlib) {
-        s.setNewPeerCallback(newPeerCallback);
-
-        if (!s.isStarted()) {
-            s.start();
-        }
-    } else {
-#if GLIB_CHECK_VERSION(2,36,0)
-
-        IPCGSource* serviceGSourcePtr = IPCGSource::create(s.getFDs(), std::bind(&Service::handle, &s, _1, _2));
-
-        auto agregateCallback = [&newPeerCallback, &serviceGSourcePtr](const FileDescriptor newFD) {
-            serviceGSourcePtr->addFD(newFD);
-            newPeerCallback(newFD);
-        };
-
-        s.setNewPeerCallback(agregateCallback);
-        s.setRemovedPeerCallback(std::bind(&IPCGSource::removeFD, serviceGSourcePtr, _1));
-
-        serviceGSourcePtr->attach();
-#endif // GLIB_CHECK_VERSION
-
+    if (!s.isStarted()) {
+        s.start();
     }
 
     c.start();
 
+
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(2000), [&peerFD]() {
+    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(2000), [&peerFD]() {
         return peerFD != 0;
     }));
 
     return peerFD;
 }
+
+
+
+#if GLIB_CHECK_VERSION(2,36,0)
+
+std::pair<FileDescriptor, IPCGSource::Pointer> connectServiceGSource(Service& s, Client& c)
+{
+    std::mutex mutex;
+    std::condition_variable cv;
+
+    FileDescriptor peerFD = 0;
+    IPCGSource::Pointer ipcGSourcePtr = IPCGSource::create(s.getFDs(), std::bind(&Service::handle, &s, _1, _2));
+
+    auto newPeerCallback = [&cv, &peerFD, &mutex, ipcGSourcePtr](const FileDescriptor newFD) {
+        if (ipcGSourcePtr) {
+            //TODO: Remove this if
+            ipcGSourcePtr->addFD(newFD);
+        }
+        std::unique_lock<std::mutex> lock(mutex);
+        peerFD = newFD;
+        cv.notify_all();
+    };
+
+
+    // TODO: On timeout remove the callback
+    s.setNewPeerCallback(newPeerCallback);
+    s.setRemovedPeerCallback(std::bind(&IPCGSource::removeFD, ipcGSourcePtr, _1));
+
+    // Service starts to process
+    ipcGSourcePtr->attach();
+
+    c.start();
+
+    std::unique_lock<std::mutex> lock(mutex);
+    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(2000), [&peerFD]() {
+        return peerFD != 0;
+    }));
+
+    return std::make_pair(peerFD, ipcGSourcePtr);
+}
+
+std::pair<FileDescriptor, IPCGSource::Pointer> connectClientGSource(Service& s, Client& c)
+{
+    // Connects the Client to the Service and returns Clients FileDescriptor
+    std::mutex mutex;
+    std::condition_variable cv;
+
+    FileDescriptor peerFD = 0;
+    auto newPeerCallback = [&cv, &peerFD, &mutex](const FileDescriptor newFD) {
+        std::unique_lock<std::mutex> lock(mutex);
+        peerFD = newFD;
+        cv.notify_all();
+    };
+    // TODO: On timeout remove the callback
+    s.setNewPeerCallback(newPeerCallback);
+
+    if (!s.isStarted()) {
+        // Service starts to process
+        s.start();
+    }
+
+
+    c.connect();
+    IPCGSource::Pointer ipcGSourcePtr = IPCGSource::create(c.getFDs(),
+                                                           std::bind(&Client::handle, &c, _1, _2));
+
+    ipcGSourcePtr->attach();
+
+    std::unique_lock<std::mutex> lock(mutex);
+    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(2000), [&peerFD]() {
+        return peerFD != 0;
+    }));
+
+    return std::make_pair(peerFD, ipcGSourcePtr);
+}
+
+#endif // GLIB_CHECK_VERSION
+
 
 void testEcho(Client& c, const MethodID methodID)
 {
@@ -194,7 +256,7 @@ void testEcho(Client& c, const MethodID methodID)
 void testEcho(Service& s, const MethodID methodID, const FileDescriptor peerFD)
 {
     std::shared_ptr<SendData> sentData(new SendData(56));
-    std::shared_ptr<SendData> recvData = s.callSync<SendData, SendData>(methodID, peerFD, sentData);
+    std::shared_ptr<SendData> recvData = s.callSync<SendData, SendData>(methodID, peerFD, sentData, 1000);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
@@ -481,17 +543,16 @@ BOOST_AUTO_TEST_CASE(ReadTimeout)
 {
     Service s(socketPath);
     auto longEchoCallback = [](const FileDescriptor, std::shared_ptr<SendData>& data) {
-        return std::shared_ptr<LongSendData>(new LongSendData(data->intVal));
+        return std::shared_ptr<LongSendData>(new LongSendData(data->intVal, 4000 /*ms*/));
     };
     s.addMethodHandler<LongSendData, SendData>(1, longEchoCallback);
-    s.start();
 
     Client c(socketPath);
-    c.start();
+    connect(s, c);
 
     // Test timeout on read
     std::shared_ptr<SendData> sentData(new SendData(334));
-    BOOST_CHECK_THROW((c.callSync<SendData, SendData>(1, sentData, 100)), IPCException);
+    BOOST_CHECK_THROW((c.callSync<SendData, SendData>(1, sentData, 10)), IPCException);
 }
 
 
@@ -587,17 +648,50 @@ BOOST_AUTO_TEST_CASE(ServiceGSource)
         isSignalCalled = true;
     };
 
+    IPCGSource::Pointer serviceGSource;
     Service s(socketPath);
     s.addMethodHandler<SendData, SendData>(1, echoCallback);
 
     Client c(socketPath);
     s.addSignalHandler<SendData>(2, signalHandler);
-    connect(s, c, true);
+
+    auto ret = connectServiceGSource(s, c);
+    serviceGSource = ret.second;
 
     testEcho(c, 1);
 
     auto data = std::make_shared<SendData>(1);
     c.signal<SendData>(2, data);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //TODO wait_for
+    BOOST_CHECK(isSignalCalled);
+}
+
+BOOST_AUTO_TEST_CASE(ClientGSource)
+{
+    ScopedGlibLoop loop;
+
+    std::atomic_bool isSignalCalled(false);
+    auto signalHandler = [&isSignalCalled](const FileDescriptor, std::shared_ptr<SendData>&) {
+        isSignalCalled = true;
+    };
+
+    Service s(socketPath);
+    s.start();
+
+    IPCGSource::Pointer clientGSource;
+    Client c(socketPath);
+    c.addMethodHandler<SendData, SendData>(1, echoCallback);
+    c.addSignalHandler<SendData>(2, signalHandler);
+
+    auto ret = connectClientGSource(s, c);
+    FileDescriptor peerFD = ret.first;
+    clientGSource = ret.second;
+
+    testEcho(s, 1, peerFD);
+
+    auto data = std::make_shared<SendData>(1);
+    s.signal<SendData>(2, data);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100)); //TODO wait_for
     BOOST_CHECK(isSignalCalled);

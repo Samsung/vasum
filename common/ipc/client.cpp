@@ -48,16 +48,21 @@ Client::~Client()
     LOGD("Destroyed client");
 }
 
-void Client::start()
+void Client::connect()
 {
-    LOGD("Starting client...");
-
     // Initialize the connection with the server
     LOGD("Connecting to " + mSocketPath);
     auto socketPtr = std::make_shared<Socket>(Socket::connectSocket(mSocketPath));
     mServiceFD = mProcessor.addPeer(socketPtr);
+}
 
-    // Start listening
+void Client::start()
+{
+    LOGD("Starting client...");
+
+    connect();
+
+    // Start polling thread
     mProcessor.start();
 
     LOGD("Started client");
@@ -73,6 +78,31 @@ void Client::stop()
     LOGD("Stopping client...");
     mProcessor.stop();
     LOGD("Stopped");
+}
+
+std::vector<FileDescriptor> Client::getFDs()
+{
+    std::vector<FileDescriptor> fds;
+    fds.push_back(mProcessor.getEventFD());
+    fds.push_back(mServiceFD);
+
+    return fds;
+}
+
+void Client::handle(const FileDescriptor fd, const short pollEvent)
+{
+    if (fd == mProcessor.getEventFD() && (pollEvent & POLLIN)) {
+        mProcessor.handleEvent();
+        return;
+
+    } else if (pollEvent & POLLIN) {
+        mProcessor.handleInput(fd);
+        return;
+
+    } else if (pollEvent & POLLHUP) {
+        mProcessor.handleLostConnection(fd);
+        return;
+    }
 }
 
 void Client::setNewPeerCallback(const PeerCallback& newPeerCallback)
