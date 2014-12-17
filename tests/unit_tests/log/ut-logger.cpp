@@ -26,6 +26,7 @@
 #include "config.hpp"
 #include "ut.hpp"
 #include "logger/logger.hpp"
+#include "logger/logger-scope.hpp"
 #include "logger/formatter.hpp"
 #include "logger/backend.hpp"
 #include "logger/backend-stderr.hpp"
@@ -197,6 +198,19 @@ BOOST_AUTO_TEST_CASE(TestLogsTrace)
     BOOST_CHECK(tf.logContains("[TRACE]") == true);
 }
 
+BOOST_AUTO_TEST_CASE(TestLoggerScope)
+{
+    LOGS("Main function scope");
+
+    {
+        LOGS("Scope inside function");
+        LOGD("Some additional information in-between scoped logs");
+        {
+            LOGS("Additional scope with " << "stringstream" << ' ' << "test" << 3 << ' ' << 3.42);
+            LOGD("More additional information in-between scoped logs");
+        }
+    }
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 
