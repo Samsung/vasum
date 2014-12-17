@@ -1065,16 +1065,16 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZoneTest)
     dbus.callAsyncMethodCreateZone(zone1, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 
-    BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone1);
-
     // create zone2
     dbus.callAsyncMethodCreateZone(zone2, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
-    BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone2); //TODO is this valid?
 
     // create zone3
     dbus.callAsyncMethodCreateZone(zone3, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+
+    cm.startAll();
+
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone3);
 
     // destroy zone2

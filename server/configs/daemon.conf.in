@@ -1,7 +1,7 @@
 {
     "zoneConfigs" : ["zones/private.conf", "zones/business.conf"],
     "zonesPath" : "${DATA_DIR}/.zones",
-    "zoneImagePath" : "${DATA_DIR}/.zones/img/system-data.img",
+    "zoneImagePath" : "",
     "zoneTemplatePath" : "templates",
     "zoneNewConfigPrefix" : "/var/lib/vasum",
     "runMountPointPrefix" : "/var/run/zones",

@@ -69,8 +69,10 @@ const std::string ENABLED_FILE_NAME = "enabled";
 
 const boost::regex ZONE_NAME_REGEX("~NAME~");
 const boost::regex ZONE_IP_THIRD_OCTET_REGEX("~IP~");
+const boost::regex ZONE_VT_REGEX("~VT~");
 
 const unsigned int ZONE_IP_BASE_THIRD_OCTET = 100;
+const unsigned int ZONE_VT_BASE = 1;
 
 } // namespace
 
@@ -764,6 +766,12 @@ void ZonesManager::generateNewConfig(const std::string& id,
     LOGD("IP third octet: " << thirdOctetStr);
     resultConfig = boost::regex_replace(resultConfig, ZONE_IP_THIRD_OCTET_REGEX, thirdOctetStr);
 
+    // generate first free VT number
+    // TODO change algorithm after implementing removeZone
+    std::string freeVT = std::to_string(ZONE_VT_BASE + mZones.size() + 1);
+    LOGD("VT number: " << freeVT);
+    resultConfig = boost::regex_replace(resultConfig, ZONE_VT_REGEX, freeVT);
+
     if (!utils::saveFileContent(resultPath, resultConfig)) {
         LOGE("Faield to save new config file.");
         throw ZoneOperationException("Failed to save new config file.");
@@ -854,17 +862,7 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
         return;
     }
 
-    auto resultCallback = [this, id, result](bool succeeded) {
-        if (succeeded) {
-            focus(id);
-            result->setVoid();
-        } else {
-            LOGE("Failed to start zone.");
-            // TODO removeZone
-            result->setError(api::ERROR_INTERNAL, "Failed to start zone");
-        }
-    };
-    mZones[id]->startAsync(resultCallback);
+    result->setVoid();
 }
 
 void ZonesManager::handleDestroyZoneCall(const std::string& id,
