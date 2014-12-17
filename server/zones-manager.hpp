@@ -106,7 +106,11 @@ public:
     void setZonesDetachOnExit();
 
 private:
+    typedef std::recursive_mutex Mutex;
+    typedef std::unique_lock<Mutex> Lock;
+
     utils::Worker::Pointer mWorker;
+    mutable Mutex mMutex; // used to protect mZones
     ZonesManagerConfig mConfig;
     std::string mConfigPath;
     HostConnection mHostConnection;

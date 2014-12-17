@@ -195,6 +195,8 @@ void ZonesManager::createZone(const std::string& zoneConfig)
     zone->setDbusStateChangedCallback(bind(&ZonesManager::handleDbusStateChanged,
                                            this, id, _1));
 
+    Lock lock(mMutex);
+
     mZones.insert(ZoneMap::value_type(id, std::move(zone)));
 
     // after zone is created successfully, put a file informing that zones are enabled
@@ -208,7 +210,8 @@ void ZonesManager::createZone(const std::string& zoneConfig)
 
 void ZonesManager::destroyZone(const std::string& zoneId)
 {
-    // TODO mutex for mZones access
+    Lock lock(mMutex);
+
     auto it = mZones.find(zoneId);
     if (it == mZones.end()) {
         LOGE("Failed to destroy zone " << zoneId << ": no such zone");
@@ -228,6 +231,8 @@ void ZonesManager::destroyZone(const std::string& zoneId)
 
 void ZonesManager::focus(const std::string& zoneId)
 {
+    Lock lock(mMutex);
+
     /* try to access the object first to throw immediately if it doesn't exist */
     ZoneMap::mapped_type& foregroundZone = mZones.at(zoneId);
 
@@ -248,6 +253,8 @@ void ZonesManager::focus(const std::string& zoneId)
 void ZonesManager::startAll()
 {
     LOGI("Starting all zones");
+
+    Lock lock(mMutex);
 
     bool isForegroundFound = false;
 
@@ -279,6 +286,8 @@ void ZonesManager::stopAll()
 {
     LOGI("Stopping all zones");
 
+    Lock lock(mMutex);
+
     for (auto& zone : mZones) {
         zone.second->stop();
     }
@@ -286,6 +295,8 @@ void ZonesManager::stopAll()
 
 bool ZonesManager::isPaused(const std::string& zoneId)
 {
+    Lock lock(mMutex);
+
     auto iter = mZones.find(zoneId);
     if (iter == mZones.end()) {
         LOGE("No such zone id: " << zoneId);
@@ -297,6 +308,8 @@ bool ZonesManager::isPaused(const std::string& zoneId)
 
 bool ZonesManager::isRunning(const std::string& zoneId)
 {
+    Lock lock(mMutex);
+
     auto iter = mZones.find(zoneId);
     if (iter == mZones.end()) {
         LOGE("No such zone id: " << zoneId);
@@ -307,6 +320,8 @@ bool ZonesManager::isRunning(const std::string& zoneId)
 
 std::string ZonesManager::getRunningForegroundZoneId() const
 {
+    Lock lock(mMutex);
+
     for (auto& zone : mZones) {
         if (zone.first == mConfig.foregroundId &&
             zone.second->isRunning()) {
@@ -318,6 +333,8 @@ std::string ZonesManager::getRunningForegroundZoneId() const
 
 std::string ZonesManager::getNextToForegroundZoneId()
 {
+    Lock lock(mMutex);
+
     // handles case where there is no next zone
     if (mZones.size() < 2) {
         return std::string();
@@ -349,6 +366,8 @@ void ZonesManager::switchingSequenceMonitorNotify()
 
 void ZonesManager::setZonesDetachOnExit()
 {
+    Lock lock(mMutex);
+
     mDetachOnExit = true;
 
     for (auto& zone : mZones) {
@@ -362,6 +381,9 @@ void ZonesManager::notifyActiveZoneHandler(const std::string& caller,
 {
     LOGI("notifyActiveZoneHandler(" << caller << ", " << application << ", " << message
          << ") called");
+
+    Lock lock(mMutex);
+
     try {
         const std::string activeZone = getRunningForegroundZoneId();
         if (!activeZone.empty() && caller != activeZone) {
@@ -375,6 +397,8 @@ void ZonesManager::notifyActiveZoneHandler(const std::string& caller,
 void ZonesManager::displayOffHandler(const std::string& /*caller*/)
 {
     // get config of currently set zone and switch if switchToDefaultAfterTimeout is true
+    Lock lock(mMutex);
+
     const std::string activeZoneName = getRunningForegroundZoneId();
     const auto& activeZone = mZones.find(activeZoneName);
 
@@ -413,6 +437,8 @@ void ZonesManager::handleZoneMoveFileRequest(const std::string& srcZoneId,
          << "src: " << srcZoneId << "\n"
          << "dst: " << dstZoneId << "\n"
          << "path: " << path);
+
+    Lock lock(mMutex);
 
     ZoneMap::const_iterator srcIter = mZones.find(srcZoneId);
     if (srcIter == mZones.end()) {
@@ -507,6 +533,8 @@ void ZonesManager::handleProxyCall(const std::string& caller,
         return;
     }
 
+    Lock lock(mMutex);
+
     ZoneMap::const_iterator targetIter = mZones.find(target);
     if (targetIter == mZones.end()) {
         LOGE("Target zone '" << target << "' not found");
@@ -525,6 +553,8 @@ void ZonesManager::handleProxyCall(const std::string& caller,
 
 void ZonesManager::handleGetZoneDbuses(dbus::MethodResultBuilder::Pointer result) const
 {
+    Lock lock(mMutex);
+
     std::vector<GVariant*> entries;
     for (auto& zone : mZones) {
         GVariant* zoneId = g_variant_new_string(zone.first.c_str());
@@ -544,6 +574,8 @@ void ZonesManager::handleDbusStateChanged(const std::string& zoneId,
 
 void ZonesManager::handleGetZoneIdsCall(dbus::MethodResultBuilder::Pointer result) const
 {
+    Lock lock(mMutex);
+
     std::vector<GVariant*> zoneIds;
     for(auto& zone: mZones){
         zoneIds.push_back(g_variant_new_string(zone.first.c_str()));
@@ -558,6 +590,9 @@ void ZonesManager::handleGetZoneIdsCall(dbus::MethodResultBuilder::Pointer resul
 void ZonesManager::handleGetActiveZoneIdCall(dbus::MethodResultBuilder::Pointer result)
 {
     LOGI("GetActiveZoneId call");
+
+    Lock lock(mMutex);
+
     if (!mConfig.foregroundId.empty() && mZones[mConfig.foregroundId]->isRunning()){
         result->set(g_variant_new("(s)", mConfig.foregroundId.c_str()));
     } else {
@@ -569,6 +604,9 @@ void ZonesManager::handleGetZoneInfoCall(const std::string& id,
                                                    dbus::MethodResultBuilder::Pointer result)
 {
     LOGI("GetZoneInfo call");
+
+    Lock lock(mMutex);
+
     if (mZones.count(id) == 0) {
         LOGE("No zone with id=" << id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -607,7 +645,10 @@ void ZonesManager::handleDeclareFileCall(const std::string& zone,
                                               dbus::MethodResultBuilder::Pointer result)
 {
     LOGI("DeclareFile call");
+
     try {
+        Lock lock(mMutex);
+
         mZones.at(zone)->declareFile(type, path, flags, mode);
         result->setVoid();
     } catch (const std::out_of_range&) {
@@ -628,7 +669,10 @@ void ZonesManager::handleDeclareMountCall(const std::string& source,
                                                dbus::MethodResultBuilder::Pointer result)
 {
     LOGI("DeclareMount call");
+
     try {
+        Lock lock(mMutex);
+
         mZones.at(zone)->declareMount(source, target, type, flags, data);
         result->setVoid();
     } catch (const std::out_of_range&) {
@@ -647,6 +691,8 @@ void ZonesManager::handleDeclareLinkCall(const std::string& source,
 {
     LOGI("DeclareLink call");
     try {
+        Lock lock(mMutex);
+
         mZones.at(zone)->declareLink(source, target);
         result->setVoid();
     } catch (const std::out_of_range&) {
@@ -662,6 +708,9 @@ void ZonesManager::handleSetActiveZoneCall(const std::string& id,
                                                      dbus::MethodResultBuilder::Pointer result)
 {
     LOGI("SetActiveZone call; Id=" << id );
+
+    Lock lock(mMutex);
+
     auto zone = mZones.find(id);
     if (zone == mZones.end()){
         LOGE("No zone with id=" << id );
@@ -736,6 +785,8 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
     }
 
     LOGI("Creating zone " << id);
+
+    Lock lock(mMutex);
 
     // TODO: This solution is temporary. It utilizes direct access to config files when creating new
     // zones. Update this handler when config database will appear.
@@ -819,6 +870,8 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
 void ZonesManager::handleDestroyZoneCall(const std::string& id,
                                                    dbus::MethodResultBuilder::Pointer result)
 {
+    Lock lock(mMutex);
+
     if (mZones.find(id) == mZones.end()) {
         LOGE("Failed to destroy zone - no such zone id: " << id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -845,6 +898,9 @@ void ZonesManager::handleLockZoneCall(const std::string& id,
                                                 dbus::MethodResultBuilder::Pointer result)
 {
     LOGI("LockZone call; Id=" << id );
+
+    Lock lock(mMutex);
+
     auto iter = mZones.find(id);
     if (iter == mZones.end()) {
         LOGE("Failed to lock zone - no such zone id: " << id);
@@ -875,6 +931,9 @@ void ZonesManager::handleUnlockZoneCall(const std::string& id,
                                                   dbus::MethodResultBuilder::Pointer result)
 {
     LOGI("UnlockZone call; Id=" << id );
+
+    Lock lock(mMutex);
+
     auto iter = mZones.find(id);
     if (iter == mZones.end()) {
         LOGE("Failed to unlock zone - no such zone id: " << id);
