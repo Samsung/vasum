@@ -118,6 +118,20 @@ void create_zone(int pos, int argc, const char** argv);
 void destroy_zone(int pos, int argc, const char** argv);
 
 /**
+ * Parses command line arguments and call vsm_shutdown_zone
+ *
+ * @see vsm_shutdown_zone
+ */
+void shutdown_zone(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and call vsm_start_zone
+ *
+ * @see vsm_start_zone
+ */
+void start_zone(int pos, int argc, const char** argv);
+
+/**
  * Parses command line arguments and call vsm_lock_zone
  *
  * @see vsm_lock_zone

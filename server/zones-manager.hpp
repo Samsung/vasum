@@ -127,13 +127,13 @@ private:
                            const std::string& resultPath);
 
     void notifyActiveZoneHandler(const std::string& caller,
-                                      const std::string& appliaction,
-                                      const std::string& message);
+                                 const std::string& appliaction,
+                                 const std::string& message);
     void displayOffHandler(const std::string& caller);
     void handleZoneMoveFileRequest(const std::string& srcZoneId,
-                                        const std::string& dstZoneId,
-                                        const std::string& path,
-                                        dbus::MethodResultBuilder::Pointer result);
+                                   const std::string& dstZoneId,
+                                   const std::string& path,
+                                   dbus::MethodResultBuilder::Pointer result);
     void handleProxyCall(const std::string& caller,
                          const std::string& target,
                          const std::string& targetBusName,
@@ -165,15 +165,19 @@ private:
                                const std::string& target,
                                dbus::MethodResultBuilder::Pointer result);
     void handleSetActiveZoneCall(const std::string& id,
-                                      dbus::MethodResultBuilder::Pointer result);
-    void handleCreateZoneCall(const std::string& id,
-                                   dbus::MethodResultBuilder::Pointer result);
-    void handleDestroyZoneCall(const std::string& id,
-                                    dbus::MethodResultBuilder::Pointer result);
-    void handleLockZoneCall(const std::string& id,
                                  dbus::MethodResultBuilder::Pointer result);
+    void handleCreateZoneCall(const std::string& id,
+                              dbus::MethodResultBuilder::Pointer result);
+    void handleDestroyZoneCall(const std::string& id,
+                               dbus::MethodResultBuilder::Pointer result);
+    void handleShutdownZoneCall(const std::string& id,
+                                dbus::MethodResultBuilder::Pointer result);
+    void handleStartZoneCall(const std::string& id,
+                             dbus::MethodResultBuilder::Pointer result);
+    void handleLockZoneCall(const std::string& id,
+                            dbus::MethodResultBuilder::Pointer result);
     void handleUnlockZoneCall(const std::string& id,
-                                   dbus::MethodResultBuilder::Pointer result);
+                              dbus::MethodResultBuilder::Pointer result);
 };
 
 

@@ -460,16 +460,18 @@ VsmStatus Client::vsm_destroy_zone(const char* id) noexcept
     return callMethod(HOST_INTERFACE, api::host::METHOD_DESTROY_ZONE, args_in);
 }
 
-VsmStatus Client::vsm_shutdown_zone(const char*) noexcept
+VsmStatus Client::vsm_shutdown_zone(const char* id) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
+    assert(id);
+    GVariant* args_in = g_variant_new("(s)", id);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_SHUTDOWN_ZONE, args_in);
 }
 
-VsmStatus Client::vsm_start_zone(const char*) noexcept
+VsmStatus Client::vsm_start_zone(const char* id) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
+    assert(id);
+    GVariant* args_in = g_variant_new("(s)", id);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_START_ZONE, args_in);
 }
 
 VsmStatus Client::vsm_lock_zone(const char* id) noexcept

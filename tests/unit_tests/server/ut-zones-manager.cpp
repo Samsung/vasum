@@ -310,7 +310,7 @@ public:
     }
 
     void callAsyncMethodCreateZone(const std::string& id,
-                                        const VoidResultCallback& result)
+                                   const VoidResultCallback& result)
     {
         auto asyncResult = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
             BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
@@ -329,7 +329,7 @@ public:
     }
 
     void callAsyncMethodDestroyZone(const std::string& id,
-                                     const VoidResultCallback& result)
+                                    const VoidResultCallback& result)
     {
         auto asyncResult = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
             BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
@@ -342,6 +342,44 @@ public:
                                  api::host::OBJECT_PATH,
                                  api::host::INTERFACE,
                                  api::host::METHOD_DESTROY_ZONE,
+                                 parameters,
+                                 "()",
+                                 asyncResult);
+    }
+
+    void callAsyncMethodShutdownZone(const std::string& id,
+                                     const VoidResultCallback& result)
+    {
+        auto asyncResult = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
+            BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
+            result();
+        };
+
+        assert(isHost());
+        GVariant* parameters = g_variant_new("(s)", id.c_str());
+        mClient->callMethodAsync(api::host::BUS_NAME,
+                                 api::host::OBJECT_PATH,
+                                 api::host::INTERFACE,
+                                 api::host::METHOD_SHUTDOWN_ZONE,
+                                 parameters,
+                                 "()",
+                                 asyncResult);
+    }
+
+    void callAsyncMethodStartZone(const std::string& id,
+                                  const VoidResultCallback& result)
+    {
+        auto asyncResult = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
+            BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
+            result();
+        };
+
+        assert(isHost());
+        GVariant* parameters = g_variant_new("(s)", id.c_str());
+        mClient->callMethodAsync(api::host::BUS_NAME,
+                                 api::host::OBJECT_PATH,
+                                 api::host::INTERFACE,
+                                 api::host::METHOD_START_ZONE,
                                  parameters,
                                  "()",
                                  asyncResult);
@@ -904,8 +942,8 @@ BOOST_AUTO_TEST_CASE(GetZoneIdsTest)
     DbusAccessory dbus(DbusAccessory::HOST_ID);
 
     std::vector<std::string> zoneIds = {"ut-zones-manager-console1-dbus",
-                                             "ut-zones-manager-console2-dbus",
-                                             "ut-zones-manager-console3-dbus"};
+                                        "ut-zones-manager-console2-dbus",
+                                        "ut-zones-manager-console3-dbus"};
     std::vector<std::string> returnedIds = dbus.callMethodGetZoneIds();
 
     BOOST_CHECK(std::is_permutation(returnedIds.begin(),
@@ -921,8 +959,8 @@ BOOST_AUTO_TEST_CASE(GetActiveZoneIdTest)
     DbusAccessory dbus(DbusAccessory::HOST_ID);
 
     std::vector<std::string> zoneIds = {"ut-zones-manager-console1-dbus",
-                                             "ut-zones-manager-console2-dbus",
-                                             "ut-zones-manager-console3-dbus"};
+                                        "ut-zones-manager-console2-dbus",
+                                        "ut-zones-manager-console3-dbus"};
 
     for (std::string& zoneId: zoneIds){
         cm.focus(zoneId);
@@ -941,8 +979,8 @@ BOOST_AUTO_TEST_CASE(SetActiveZoneTest)
     DbusAccessory dbus(DbusAccessory::HOST_ID);
 
     std::vector<std::string> zoneIds = {"ut-zones-manager-console1-dbus",
-                                             "ut-zones-manager-console2-dbus",
-                                             "ut-zones-manager-console3-dbus"};
+                                        "ut-zones-manager-console2-dbus",
+                                        "ut-zones-manager-console3-dbus"};
 
     for (std::string& zoneId: zoneIds){
         dbus.callMethodSetActiveZone(zoneId);
@@ -1007,6 +1045,44 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZoneTest)
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "");
 }
 
+BOOST_AUTO_TEST_CASE(StartShutdownZoneTest)
+{
+    const std::string zone1 = "ut-zones-manager-console1-dbus";
+    const std::string zone2 = "ut-zones-manager-console2-dbus";
+
+    ZonesManager cm(TEST_DBUS_CONFIG_PATH);
+
+    Latch callDone;
+    auto resultCallback = [&]() {
+        callDone.set();
+    };
+
+    DbusAccessory dbus(DbusAccessory::HOST_ID);
+
+    // start zone1
+    dbus.callAsyncMethodStartZone(zone1, resultCallback);
+    BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+    BOOST_CHECK(cm.isRunning(zone1));
+    BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone1);
+
+    // start zone2
+    dbus.callAsyncMethodStartZone(zone2, resultCallback);
+    BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+    BOOST_CHECK(cm.isRunning(zone2));
+    BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone2);
+
+    // shutdown zone2
+    dbus.callAsyncMethodShutdownZone(zone2, resultCallback);
+    BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+    BOOST_CHECK(!cm.isRunning(zone2));
+
+    // shutdown zone1
+    dbus.callAsyncMethodShutdownZone(zone1, resultCallback);
+    BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+    BOOST_CHECK(!cm.isRunning(zone1));
+    BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "");
+}
+
 BOOST_AUTO_TEST_CASE(LockUnlockZoneTest)
 {
     ZonesManager cm(TEST_DBUS_CONFIG_PATH);
@@ -1015,8 +1091,8 @@ BOOST_AUTO_TEST_CASE(LockUnlockZoneTest)
     DbusAccessory dbus(DbusAccessory::HOST_ID);
 
     std::vector<std::string> zoneIds = {"ut-zones-manager-console1-dbus",
-                                             "ut-zones-manager-console2-dbus",
-                                             "ut-zones-manager-console3-dbus"};
+                                        "ut-zones-manager-console2-dbus",
+                                        "ut-zones-manager-console3-dbus"};
 
     for (std::string& zoneId: zoneIds){
         dbus.callMethodLockZone(zoneId);

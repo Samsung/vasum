@@ -221,6 +221,20 @@ BOOST_AUTO_TEST_CASE(CreateZoneTest)
     vsm_client_free(client);
 }
 
+BOOST_AUTO_TEST_CASE(StartShutdownZoneTest)
+{
+    const std::string newActiveZoneId = "ut-zones-manager-console1-dbus";
+
+    VsmClient client = vsm_client_create();
+    VsmStatus status = vsm_connect(client);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    status = vsm_shutdown_zone(client, newActiveZoneId.c_str());
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    status = vsm_start_zone(client, newActiveZoneId.c_str());
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    vsm_client_free(client);
+}
+
 BOOST_AUTO_TEST_CASE(LockUnlockZoneTest)
 {
     const std::string newActiveZoneId = "ut-zones-manager-console2-dbus";

@@ -165,6 +165,28 @@ void destroy_zone(int pos, int argc, const char** argv)
     one_shot(bind(vsm_destroy_zone, _1, argv[pos + 1], 1));
 }
 
+void shutdown_zone(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 1) {
+        throw runtime_error("Not enough parameters");
+    }
+
+    one_shot(bind(vsm_shutdown_zone, _1, argv[pos + 1]));
+}
+
+void start_zone(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 1) {
+        throw runtime_error("Not enough parameters");
+    }
+
+    one_shot(bind(vsm_start_zone, _1, argv[pos + 1]));
+}
+
 void lock_zone(int pos, int argc, const char** argv)
 {
     using namespace std::placeholders;

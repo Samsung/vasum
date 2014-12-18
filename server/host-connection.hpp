@@ -91,6 +91,12 @@ public:
                               )> DestroyZoneCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
+                              )> ShutdownZoneCallback;
+    typedef std::function<void(const std::string& id,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> StartZoneCallback;
+    typedef std::function<void(const std::string& id,
+                               dbus::MethodResultBuilder::Pointer result
                               )> LockZoneCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
@@ -157,6 +163,16 @@ public:
     void setDestroyZoneCallback(const DestroyZoneCallback& callback);
 
     /**
+     * Register a callback called to shutdown zone
+     */
+    void setShutdownZoneCallback(const ShutdownZoneCallback& callback);
+
+    /**
+     * Register a callback called to start zone
+     */
+    void setStartZoneCallback(const StartZoneCallback& callback);
+
+    /**
      * Register a callback called to lock zone
      */
     void setLockZoneCallback(const LockZoneCallback& callback);
@@ -193,6 +209,8 @@ private:
     SetActiveZoneCallback mSetActiveZoneCallback;
     CreateZoneCallback mCreateZoneCallback;
     DestroyZoneCallback mDestroyZoneCallback;
+    ShutdownZoneCallback mShutdownZoneCallback;
+    StartZoneCallback mStartZoneCallback;
     LockZoneCallback mLockZoneCallback;
     UnlockZoneCallback mUnlockZoneCallback;
 

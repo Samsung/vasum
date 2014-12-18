@@ -32,9 +32,9 @@ namespace vasum {
 namespace api {
 namespace host {
 
-const std::string BUS_NAME                       = "org.tizen.vasum.host";
-const std::string OBJECT_PATH                    = "/org/tizen/vasum/host";
-const std::string INTERFACE                      = "org.tizen.vasum.host.manager";
+const std::string BUS_NAME                  = "org.tizen.vasum.host";
+const std::string OBJECT_PATH               = "/org/tizen/vasum/host";
+const std::string INTERFACE                 = "org.tizen.vasum.host.manager";
 
 const std::string ERROR_ZONE_STOPPED        = "org.tizen.vasum.host.Error.ZonesStopped";
 
@@ -42,12 +42,14 @@ const std::string METHOD_GET_ZONE_DBUSES    = "GetZoneDbuses";
 const std::string METHOD_GET_ZONE_ID_LIST   = "GetZoneIds";
 const std::string METHOD_GET_ACTIVE_ZONE_ID = "GetActiveZoneId";
 const std::string METHOD_GET_ZONE_INFO      = "GetZoneInfo";
-const std::string METHOD_DECLARE_FILE            = "DeclareFile";
-const std::string METHOD_DECLARE_MOUNT           = "DeclareMount";
-const std::string METHOD_DECLARE_LINK            = "DeclareLink";
+const std::string METHOD_DECLARE_FILE       = "DeclareFile";
+const std::string METHOD_DECLARE_MOUNT      = "DeclareMount";
+const std::string METHOD_DECLARE_LINK       = "DeclareLink";
 const std::string METHOD_SET_ACTIVE_ZONE    = "SetActiveZone";
 const std::string METHOD_CREATE_ZONE        = "CreateZone";
 const std::string METHOD_DESTROY_ZONE       = "DestroyZone";
+const std::string METHOD_SHUTDOWN_ZONE      = "ShutdownZone";
+const std::string METHOD_START_ZONE         = "StartZone";
 const std::string METHOD_LOCK_ZONE          = "LockZone";
 const std::string METHOD_UNLOCK_ZONE        = "UnlockZone";
 
@@ -106,6 +108,12 @@ const std::string DEFINITION =
     "      <arg type='s' name='id' direction='in'/>"
     "    </method>"
     "    <method name='" + METHOD_DESTROY_ZONE + "'>"
+    "      <arg type='s' name='id' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_SHUTDOWN_ZONE + "'>"
+    "      <arg type='s' name='id' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_START_ZONE + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "    </method>"
     "    <method name='" + METHOD_LOCK_ZONE + "'>"

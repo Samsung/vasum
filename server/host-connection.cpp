@@ -160,6 +160,16 @@ void HostConnection::setDestroyZoneCallback(const DestroyZoneCallback& callback)
     mDestroyZoneCallback = callback;
 }
 
+void HostConnection::setShutdownZoneCallback(const ShutdownZoneCallback& callback)
+{
+    mShutdownZoneCallback = callback;
+}
+
+void HostConnection::setStartZoneCallback(const StartZoneCallback& callback)
+{
+    mStartZoneCallback = callback;
+}
+
 void HostConnection::setLockZoneCallback(const LockZoneCallback& callback)
 {
     mLockZoneCallback = callback;
@@ -172,10 +182,10 @@ void HostConnection::setUnlockZoneCallback(const UnlockZoneCallback& callback)
 
 
 void HostConnection::onMessageCall(const std::string& objectPath,
-                                        const std::string& interface,
-                                        const std::string& methodName,
-                                        GVariant* parameters,
-                                        dbus::MethodResultBuilder::Pointer result)
+                                   const std::string& interface,
+                                   const std::string& methodName,
+                                   GVariant* parameters,
+                                   dbus::MethodResultBuilder::Pointer result)
 {
     if (objectPath != api::host::OBJECT_PATH || interface != api::host::INTERFACE) {
         return;
@@ -317,6 +327,24 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         }
     }
 
+    if (methodName == api::host::METHOD_SHUTDOWN_ZONE) {
+        const gchar* id = NULL;
+        g_variant_get(parameters, "(&s)", &id);
+
+        if (mShutdownZoneCallback){
+            mShutdownZoneCallback(id, result);
+        }
+    }
+
+    if (methodName == api::host::METHOD_START_ZONE) {
+        const gchar* id = NULL;
+        g_variant_get(parameters, "(&s)", &id);
+
+        if (mStartZoneCallback){
+            mStartZoneCallback(id, result);
+        }
+    }
+
     if (methodName == api::host::METHOD_LOCK_ZONE) {
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
@@ -353,7 +381,7 @@ void HostConnection::proxyCallAsync(const std::string& busName,
 }
 
 void HostConnection::signalZoneDbusState(const std::string& zoneId,
-                                              const std::string& dbusAddress)
+                                         const std::string& dbusAddress)
 {
     GVariant* parameters = g_variant_new("(ss)", zoneId.c_str(), dbusAddress.c_str());
     mDbusConnection->emitSignal(api::host::OBJECT_PATH,

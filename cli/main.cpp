@@ -60,6 +60,22 @@ std::map<std::string, CommandLineInterface> commands = {
         }
     },
     {
+        "shutdown_zone", {
+            shutdown_zone,
+            "shutdown_zone zone_id",
+            "Shutdown zone",
+            {{"zone_id", "id zone name"}}
+        }
+    },
+    {
+        "start_zone", {
+            start_zone,
+            "start_zone zone_id",
+            "Start zone",
+            {{"zone_id", "id zone name"}}
+        }
+    },
+    {
         "lock_zone", {
             lock_zone,
             "lock_zone zone_id",
