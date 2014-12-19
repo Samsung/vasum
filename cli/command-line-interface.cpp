@@ -31,6 +31,7 @@
 #include <functional>
 #include <ostream>
 #include <iostream>
+#include <fcntl.h>
 
 using namespace std;
 
@@ -220,6 +221,29 @@ void lookup_zone_by_id(int pos, int argc, const char** argv)
     one_shot(bind(vsm_lookup_zone_by_id, _1, argv[pos + 1], &zone));
     cout << zone << endl;
     vsm_zone_free(zone);
+}
+
+void grant_device(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 2) {
+        throw runtime_error("Not enough parameters");
+    }
+
+    uint32_t flags = O_RDWR;
+    one_shot(bind(vsm_grant_device, _1, argv[pos + 1], argv[pos + 2], flags));
+}
+
+void revoke_device(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 2) {
+        throw runtime_error("Not enough parameters");
+    }
+
+    one_shot(bind(vsm_revoke_device, _1, argv[pos + 1], argv[pos + 2]));
 }
 
 } // namespace cli

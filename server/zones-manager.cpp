@@ -29,6 +29,7 @@
 #include "zone-dbus-definitions.hpp"
 #include "zones-manager.hpp"
 #include "zone-admin.hpp"
+#include "lxc/cgroup.hpp"
 #include "exception.hpp"
 
 #include "utils/paths.hpp"
@@ -131,6 +132,12 @@ ZonesManager::ZonesManager(const std::string& managerConfigPath)
 
     mHostConnection.setUnlockZoneCallback(bind(&ZonesManager::handleUnlockZoneCall,
                                                this, _1, _2));
+
+    mHostConnection.setGrantDeviceCallback(bind(&ZonesManager::handleGrantDeviceCall,
+                                                this, _1, _2, _3, _4));
+
+    mHostConnection.setRevokeDeviceCallback(bind(&ZonesManager::handleRevokeDeviceCall,
+                                                 this, _1, _2, _3));
 
     for (auto& zoneConfig : mConfig.zoneConfigs) {
         createZone(zoneConfig);
@@ -1012,6 +1019,85 @@ void ZonesManager::handleUnlockZoneCall(const std::string& id,
     } catch (ZoneOperationException& e) {
         LOGE(e.what());
         result->setError(api::ERROR_INTERNAL, e.what());
+        return;
+    }
+
+    result->setVoid();
+}
+
+void ZonesManager::handleGrantDeviceCall(const std::string& id,
+                                         const std::string& device,
+                                         uint32_t flags,
+                                         dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("GrantDevice call; id=" << id << "; dev=" << device);
+
+    Lock lock(mMutex);
+
+    auto iter = mZones.find(id);
+    if (iter == mZones.end()) {
+        LOGE("Failed to grant device - no such zone id: " << id);
+        result->setError(api::ERROR_INVALID_ID, "No such zone id");
+        return;
+    }
+
+    auto& zone = *iter->second;
+    if (!zone.isRunning() && !zone.isPaused()) {
+        LOGE("Zone id=" << id << " is not running");
+        result->setError(api::ERROR_INVALID_STATE, "Zone is not running");
+        return;
+    }
+
+    std::string devicePath = "/dev/" + device;
+
+    if (!lxc::isDevice(devicePath)) {
+        LOGE("Failed to grant device - cannot acces device: " << device);
+        result->setError(api::ERROR_FORBIDDEN, "Cannot access device");
+        return;
+    }
+
+    // assume device node is created inside zone
+    if (!lxc::setDeviceAccess(id, devicePath, true, flags)) {
+        LOGE("Failed to grant device: " << device << " for zone: " << id);
+        result->setError(api::ERROR_INTERNAL, "Cannot grant device");
+        return;
+    }
+
+    result->setVoid();
+}
+
+void ZonesManager::handleRevokeDeviceCall(const std::string& id,
+                                          const std::string& device,
+                                          dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("RevokeDevice call; id=" << id << "; dev=" << device);
+
+    Lock lock(mMutex);
+
+    auto iter = mZones.find(id);
+    if (iter == mZones.end()) {
+        LOGE("Failed to revoke device - no such zone id: " << id);
+        result->setError(api::ERROR_INVALID_ID, "No such zone id");
+        return;
+    }
+
+    auto& zone = *iter->second;
+    if (!zone.isRunning() && !zone.isPaused()) {
+        LOGE("Zone id=" << id << " is not running");
+        result->setError(api::ERROR_INVALID_STATE, "Zone is not running");
+        return;
+    }
+    std::string devicePath = "/dev/" + device;
+
+    if (!lxc::isDevice(devicePath)) {
+        LOGE("Failed to revoke device - cannot acces device: " << device);
+        result->setError(api::ERROR_FORBIDDEN, "Cannot access device");
+        return;
+    }
+
+    if (!lxc::setDeviceAccess(id, devicePath, false, 0)) {
+        LOGE("Failed to revoke device: " << device << " for zone: " << id);
+        result->setError(api::ERROR_INTERNAL, "Cannot revoke device");
         return;
     }
 

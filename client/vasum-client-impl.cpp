@@ -515,16 +515,22 @@ VsmStatus Client::vsm_del_state_callback(VsmSubscriptionId subscriptionId) noexc
     return signalUnsubscribe(subscriptionId);
 }
 
-VsmStatus Client::vsm_zone_grant_device(const char*, const char*, uint32_t) noexcept
+VsmStatus Client::vsm_grant_device(const char* id, const char* device, uint32_t flags) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
+    assert(id);
+    assert(device);
+
+    GVariant* args_in = g_variant_new("(ssu)", id, device, flags);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_GRANT_DEVICE, args_in);
 }
 
-VsmStatus Client::vsm_revoke_device(const char*, const char*) noexcept
+VsmStatus Client::vsm_revoke_device(const char* id, const char* device) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
+    assert(id);
+    assert(device);
+
+    GVariant* args_in = g_variant_new("(ss)", id, device);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_REVOKE_DEVICE, args_in);
 }
 
 VsmStatus Client::vsm_zone_get_netdevs(const char*, VsmArrayString*) noexcept

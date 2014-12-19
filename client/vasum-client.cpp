@@ -196,12 +196,12 @@ API VsmStatus vsm_del_state_callback(VsmClient client, VsmSubscriptionId subscri
     return getClient(client).vsm_del_state_callback(subscriptionId);
 }
 
-API VsmStatus vsm_zone_grant_device(VsmClient client,
-                                      const char* id,
-                                      const char* device,
-                                      uint32_t flags)
+API VsmStatus vsm_grant_device(VsmClient client,
+                               const char* id,
+                               const char* device,
+                               uint32_t flags)
 {
-    return getClient(client).vsm_zone_grant_device(id, device, flags);
+    return getClient(client).vsm_grant_device(id, device, flags);
 }
 
 API VsmStatus vsm_revoke_device(VsmClient client, const char* id, const char* device)

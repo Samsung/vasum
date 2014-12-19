@@ -178,6 +178,13 @@ private:
                             dbus::MethodResultBuilder::Pointer result);
     void handleUnlockZoneCall(const std::string& id,
                               dbus::MethodResultBuilder::Pointer result);
+    void handleGrantDeviceCall(const std::string& id,
+                               const std::string& device,
+                               uint32_t flags,
+                               dbus::MethodResultBuilder::Pointer result);
+    void handleRevokeDeviceCall(const std::string& id,
+                                const std::string& device,
+                                dbus::MethodResultBuilder::Pointer result);
 };
 
 

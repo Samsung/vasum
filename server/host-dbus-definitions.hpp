@@ -52,6 +52,8 @@ const std::string METHOD_SHUTDOWN_ZONE      = "ShutdownZone";
 const std::string METHOD_START_ZONE         = "StartZone";
 const std::string METHOD_LOCK_ZONE          = "LockZone";
 const std::string METHOD_UNLOCK_ZONE        = "UnlockZone";
+const std::string METHOD_GRANT_DEVICE       = "GrantDevice";
+const std::string METHOD_REVOKE_DEVICE      = "RevokeDevice";
 
 const std::string SIGNAL_ZONE_DBUS_STATE    = "ZoneDbusState";
 
@@ -121,6 +123,15 @@ const std::string DEFINITION =
     "    </method>"
     "    <method name='" + METHOD_UNLOCK_ZONE + "'>"
     "      <arg type='s' name='id' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_GRANT_DEVICE + "'>"
+    "      <arg type='s' name='id' direction='in'/>"
+    "      <arg type='s' name='device' direction='in'/>"
+    "      <arg type='u' name='flags' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_REVOKE_DEVICE + "'>"
+    "      <arg type='s' name='id' direction='in'/>"
+    "      <arg type='s' name='device' direction='in'/>"
     "    </method>"
     "    <signal name='" + SIGNAL_ZONE_DBUS_STATE + "'>"
     "      <arg type='s' name='zone'/>"

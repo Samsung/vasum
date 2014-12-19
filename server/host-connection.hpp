@@ -101,6 +101,15 @@ public:
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
                               )> UnlockZoneCallback;
+    typedef std::function<void(const std::string& id,
+                               const std::string& device,
+                               uint32_t flags,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> GrantDeviceCallback;
+    typedef std::function<void(const std::string& id,
+                               const std::string& device,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> RevokeDeviceCallback;
 
     /**
      * Register proxy call callback
@@ -183,6 +192,16 @@ public:
     void setUnlockZoneCallback(const UnlockZoneCallback& callback);
 
     /**
+     * Register a callback called to grant device
+     */
+    void setGrantDeviceCallback(const GrantDeviceCallback& callback);
+
+    /**
+     * Register a callback called to revoke device
+     */
+    void setRevokeDeviceCallback(const RevokeDeviceCallback& callback);
+
+    /**
      * Make a proxy call
      */
     void proxyCallAsync(const std::string& busName,
@@ -213,6 +232,8 @@ private:
     StartZoneCallback mStartZoneCallback;
     LockZoneCallback mLockZoneCallback;
     UnlockZoneCallback mUnlockZoneCallback;
+    GrantDeviceCallback mGrantDeviceCallback;
+    RevokeDeviceCallback mRevokeDeviceCallback;
 
     void onNameAcquired();
     void onNameLost();

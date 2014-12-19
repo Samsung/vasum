@@ -123,7 +123,22 @@ int getArrayStringLength(VsmArrayString astring, int max_len = -1)
 
 } // namespace
 
-BOOST_FIXTURE_TEST_SUITE(Client, Fixture)
+// make nice BOOST_*_EQUAL output
+// (does not work inside anonymous namespace)
+std::ostream& operator<<(std::ostream& out, VsmStatus status)
+{
+    switch(status) {
+    case VSMCLIENT_CUSTOM_ERROR: return out << "CUSTOM_ERROR";
+    case VSMCLIENT_IO_ERROR: return out << "IO_ERROR";
+    case VSMCLIENT_OPERATION_FAILED: return out << "OPERATION_FAILED";
+    case VSMCLIENT_INVALID_ARGUMENT: return out << "INVALID_ARGUMENT";
+    case VSMCLIENT_OTHER_ERROR: return out << "OTHER_ERROR";
+    case VSMCLIENT_SUCCESS: return out << "SUCCESS";
+    default: return out << "UNKNOWN(" << (int)status << ")";
+    };
+}
+
+BOOST_FIXTURE_TEST_SUITE(ClientSuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(NotRunningServerTest)
 {
@@ -354,6 +369,28 @@ BOOST_AUTO_TEST_CASE(GetZoneIdByPidTest2)
     for (const auto& dbus : EXPECTED_DBUSES_STARTED) {
         BOOST_CHECK(ids.count(dbus.first) == 1);
     }
+}
+
+BOOST_AUTO_TEST_CASE(GrantRevokeTest)
+{
+    const std::string zoneId = "ut-zones-manager-console2-dbus";
+    const std::string dev = "tty3";
+
+    VsmClient client = vsm_client_create();
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_connect(client));
+
+    BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, vsm_grant_device(client, zoneId.c_str(), dev.c_str(), 0));
+    BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, vsm_revoke_device(client, zoneId.c_str(), dev.c_str()));
+
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_lock_zone(client, zoneId.c_str()));
+    BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, vsm_grant_device(client, zoneId.c_str(), dev.c_str(), 0));
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_unlock_zone(client, zoneId.c_str()));
+
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_shutdown_zone(client, zoneId.c_str()));
+    BOOST_CHECK_EQUAL(VSMCLIENT_CUSTOM_ERROR, vsm_grant_device(client, zoneId.c_str(), dev.c_str(), 0));
+    BOOST_CHECK_EQUAL(VSMCLIENT_CUSTOM_ERROR, vsm_revoke_device(client, zoneId.c_str(), dev.c_str()));
+
+    vsm_client_free(client);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

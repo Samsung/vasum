@@ -98,6 +98,24 @@ std::map<std::string, CommandLineInterface> commands = {
             "Prints informations about zone",
             {{"zone_id", "id zone name"}}
         }
+    },
+    {
+        "grant_device", {
+            grant_device,
+            "grant_device zone_id device_name",
+            "Grants access to the given device",
+            {{"zone_id", "id zone name"},
+             {"device_name", " device name"}}
+        }
+    },
+    {
+        "revoke_device", {
+            revoke_device,
+            "revoke_device zone_id device_name",
+            "Revokes access to the given device",
+            {{"zone_id", "id zone name"},
+             {"device_name", " device name"}}
+        }
     }
 };
 

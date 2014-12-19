@@ -183,9 +183,9 @@ public:
     /**
      *  @see ::vsm_del_state_callback
      */
-    VsmStatus vsm_zone_grant_device(const char* id,
-                                      const char* device,
-                                      uint32_t flags) noexcept;
+    VsmStatus vsm_grant_device(const char* id,
+                               const char* device,
+                               uint32_t flags) noexcept;
 
     /**
      *  @see ::vsm_revoke_device

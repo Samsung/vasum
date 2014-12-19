@@ -180,6 +180,16 @@ void HostConnection::setUnlockZoneCallback(const UnlockZoneCallback& callback)
     mUnlockZoneCallback = callback;
 }
 
+void HostConnection::setGrantDeviceCallback(const GrantDeviceCallback& callback)
+{
+    mGrantDeviceCallback = callback;
+}
+
+void HostConnection::setRevokeDeviceCallback(const RevokeDeviceCallback& callback)
+{
+    mRevokeDeviceCallback = callback;
+}
+
 
 void HostConnection::onMessageCall(const std::string& objectPath,
                                    const std::string& interface,
@@ -316,6 +326,7 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         if (mCreateZoneCallback){
             mCreateZoneCallback(id, result);
         }
+        return;
     }
 
     if (methodName == api::host::METHOD_DESTROY_ZONE) {
@@ -325,6 +336,7 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         if (mDestroyZoneCallback){
             mDestroyZoneCallback(id, result);
         }
+        return;
     }
 
     if (methodName == api::host::METHOD_SHUTDOWN_ZONE) {
@@ -352,6 +364,7 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         if (mLockZoneCallback){
             mLockZoneCallback(id, result);
         }
+        return;
     }
 
     if (methodName == api::host::METHOD_UNLOCK_ZONE) {
@@ -361,6 +374,30 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         if (mUnlockZoneCallback){
             mUnlockZoneCallback(id, result);
         }
+        return;
+    }
+
+    if (methodName == api::host::METHOD_GRANT_DEVICE) {
+        const gchar* id = NULL;
+        const gchar* device = NULL;
+        uint32_t flags;
+        g_variant_get(parameters, "(&s&su)", &id, &device, &flags);
+
+        if (mGrantDeviceCallback){
+            mGrantDeviceCallback(id, device, flags, result);
+        }
+        return;
+    }
+
+    if (methodName == api::host::METHOD_REVOKE_DEVICE) {
+        const gchar* id = NULL;
+        const gchar* device = NULL;
+        g_variant_get(parameters, "(&s&s)", &id, &device);
+
+        if (mRevokeDeviceCallback){
+            mRevokeDeviceCallback(id, device, result);
+        }
+        return;
     }
 }
 

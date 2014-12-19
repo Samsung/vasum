@@ -25,6 +25,7 @@
 #define CLI_COMMAND_LINE_INTERFACE_HPP
 
 #include <map>
+#include <vector>
 #include <functional>
 #include <ostream>
 #include <string>
@@ -46,7 +47,7 @@ public:
     /**
      * @see CommandLineInterface::CommandLineInterface
      */
-    typedef std::map<std::string, std::string> ArgsSpec;
+    typedef std::vector<std::pair<std::string, std::string>> ArgsSpec;
 
     /**
      * Dummy constructor (for stl usage)
@@ -151,6 +152,20 @@ void unlock_zone(int pos, int argc, const char** argv);
  * @see vsm_lookup_zone_by_id
  */
 void lookup_zone_by_id(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and call vsm_grant_device
+ *
+ * @see vsm_grant_device
+ */
+void grant_device(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and call vsm_revoke_device
+ *
+ * @see vsm_revoke_device
+ */
+void revoke_device(int pos, int argc, const char** argv);
 
 
 } // namespace cli

@@ -463,10 +463,10 @@ VsmStatus vsm_del_state_callback(VsmClient client, VsmSubscriptionId subscriptio
  * @param[in] flags access flags
  * @return status of this function call
  */
-VsmStatus vsm_zone_grant_device(VsmClient client,
-                                  const char* zone,
-                                  const char* device,
-                                  uint32_t flags);
+VsmStatus vsm_grant_device(VsmClient client,
+                           const char* zone,
+                           const char* device,
+                           uint32_t flags);
 
 /**
  * Revoke access to device
