@@ -133,6 +133,10 @@ bool LxcZone::create(const std::string& templatePath, const char* const* argv)
         .add("-t").add(templatePath.c_str())
         .add("-P").add(mLxcContainer->config_path);
 
+    if (*argv) {
+        args.add("--");
+    }
+
     while (*argv) {
         args.add(*argv++);
     }
@@ -177,8 +181,11 @@ bool LxcZone::start(const char* const* argv)
     args.add("lxc-start")
         .add("-d")
         .add("-n").add(mLxcContainer->name)
-        .add("-P").add(mLxcContainer->config_path)
-        .add("--");
+        .add("-P").add(mLxcContainer->config_path);
+
+    if (*argv) {
+        args.add("--");
+    }
 
     while (*argv) {
         args.add(*argv++);
