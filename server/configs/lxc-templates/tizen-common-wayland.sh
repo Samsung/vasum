@@ -86,6 +86,7 @@ ${rootfs}/home \
 ${rootfs}/home/alice \
 ${rootfs}/home/bob \
 ${rootfs}/home/carol \
+${rootfs}/home/developer \
 ${rootfs}/home/guest \
 ${rootfs}/lib \
 ${rootfs}/media \
@@ -104,12 +105,14 @@ ${path}/hooks \
 ${path}/scripts \
 ${path}/systemd \
 ${path}/systemd/system \
+${path}/systemd/system/multi-user.target.wants \
 ${path}/systemd/user
 "
 /bin/mkdir ${ROOTFS_DIRS}
 /bin/chown alice:users ${rootfs}/home/alice
 /bin/chown bob:users ${rootfs}/home/bob
 /bin/chown carol:users ${rootfs}/home/carol
+/bin/chown developer:users ${rootfs}/home/developer
 /bin/chown guest:users ${rootfs}/home/guest
 
 /bin/ln -s /dev/null ${path}/systemd/system/bluetooth.service
@@ -117,8 +120,11 @@ ${path}/systemd/user
 /bin/ln -s /dev/null ${path}/systemd/system/sshd.socket
 /bin/ln -s /dev/null ${path}/systemd/system/sshd@.service
 /bin/ln -s /dev/null ${path}/systemd/system/systemd-udevd.service
-/bin/ln -s /dev/null ${path}/systemd/system/user-session-launch@seat0-5100.service
+/bin/ln -s /dev/null ${path}/systemd/system/systemd-udevd-kernel.socket
+/bin/ln -s /dev/null ${path}/systemd/system/systemd-udevd-control.socket
 /bin/ln -s /dev/null ${path}/systemd/system/vconf-setup.service
+/bin/ln -s /usr/lib/systemd/system/tlm.service ${path}/systemd/system/multi-user.target.wants/tlm.service
+/bin/ln -s /dev/null ${path}/systemd/user/media-server-user.service
 
 cat <<EOF >>${path}/systemd/system/display-manager-run.service
 # Run weston with framebuffer backend on selected virtual terminal.
@@ -133,7 +139,7 @@ WorkingDirectory=/run/%u
 ExecStart=/usr/bin/weston --backend=fbdev-backend.so -i0 --log=/tmp/weston.log --tty=${vt}
 #StandardInput=tty
 #TTYPath=/dev/tty7
-EnvironmentFile=/etc/systemd/system/weston
+EnvironmentFile=/etc/sysconfig/weston
 Restart=on-failure
 RestartSec=10
 
@@ -144,119 +150,18 @@ CapabilityBoundingSet=CAP_SYS_TTY_CONFIG
 [Install]
 WantedBy=graphical.target
 EOF
+chmod 644 ${path}/systemd/system/display-manager-run.service
 
-cat <<EOF >>${path}/systemd/system/display-manager.path
-# Wayland socket path is changed to /tmp directory.
-[Unit]
-Description=Wait for wayland socket
-Requires=display-manager-run.service
-After=display-manager-run.service
-
-[Path]
-PathExists=/tmp/wayland-0
-EOF
-
-cat <<EOF >>${path}/systemd/system/display-manager.service
-# Wayland socket path is changed to /tmp directory.
-[Unit]
-Description=Display manager setup service
-Requires=display-manager-run.service
-After=display-manager-run.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/chmod g+w /tmp/wayland-0
-#ExecStart=/usr/bin/chsmack -a User /tmp/wayland-0
-
-[Install]
-WantedBy=graphical.target
-EOF
-
-cat <<EOF >>${path}/systemd/system/weston
-# path to display manager runtime dir
-XDG_RUNTIME_DIR=/tmp
-XDG_CONFIG_HOME=/etc/systemd/system
-EOF
-
-cat <<EOF >>${path}/systemd/system/weston.ini
-# Weston config for zone.
-[core]
-modules=desktop-shell.so
-
-[shell]
-background-image=/usr/share/backgrounds/tizen/golfe-morbihan.jpg
-background-color=0xff002244
-background-type=scale-crop
-panel-color=0x95333333
-locking=true
-panel=false
-animation=zoom
-#binding-modifier=ctrl
-num-workspaces=4
-#cursor-theme=whiteglass
-#cursor-size=24
-startup-animation=fade
-
-#lockscreen-icon=/usr/share/icons/gnome/256x256/actions/lock.png
-#lockscreen=/usr/share/backgrounds/gnome/Garden.jpg
-#homescreen=/usr/share/backgrounds/gnome/Blinds.jpg
-
-## weston
-
-[launcher]
-icon=/usr/share/icons/tizen/32x32/terminal.png
-path=/usr/bin/weston-terminal
-
-[screensaver]
-# Uncomment path to disable screensaver
-duration=600
-
-[input-method]
-path=/usr/libexec/weston-keyboard
-#path=/bin/weekeyboard
-
-#[keyboard]
-#keymap_layout=fr
-
-#[output]
-#name=LVDS1
-#mode=1680x1050
-#transform=90
-#icc_profile=/usr/share/color/icc/colord/Bluish.icc
-
-#[output]
-#name=VGA1
-#mode=173.00  1920 2048 2248 2576  1080 1083 1088 1120 -hsync +vsync
-#transform=flipped
-
-#[output]
-#name=X1
-#mode=1024x768
-#transform=flipped-270
-
-#[touchpad]
-#constant_accel_factor = 50
-#min_accel_factor = 0.16
-#max_accel_factor = 1.0
-
-[output]
-name=DP1
-default_output=1
-EOF
-
-cat <<EOF >>${path}/systemd/user/weston-user.service
-# Wayland socket path is changed to /tmp directory.
-[Unit]
-Description=Shared weston session
-
-[Service]
-ExecStartPre=/usr/bin/ln -sf /tmp/wayland-0 /run/user/%U/
-ExecStart=/bin/sh -l -c "/usr/bin/tz-launcher -c /usr/share/applications/tizen/launcher.conf %h/.applications/desktop"
-EnvironmentFile=/etc/sysconfig/weston-user
-
-[Install]
-WantedBy=default.target
-EOF
+sed -e 's/run\/display/tmp/g' /usr/lib/systemd/system/display-manager.path >> ${path}/systemd/system/display-manager.path
+chmod 644 ${path}/systemd/system/display-manager.path
+sed -e 's/run\/display/tmp/g' /usr/lib/systemd/system/display-manager.service >> ${path}/systemd/system/display-manager.service
+chmod 644 ${path}/systemd/system/display-manager.service
+sed -e 's/run\/display/tmp/g' /etc/sysconfig/weston >> ${path}/weston
+sed -e 's/backgrounds\/tizen\/current/backgrounds\/tizen\/golfe-morbihan.jpg/g' /etc/xdg/weston/weston.ini >> ${path}/weston.ini
+sed -e 's/run\/display/tmp/g' /usr/lib/systemd/user/weston-user.service >> ${path}/systemd/user/weston-user.service
+sed -e 's/run\/display/tmp/g' /etc/tlm.conf >> ${path}/tlm.conf
+sed -e 's/run\/display/tmp/g' /etc/session.d/user-session >> ${path}/user-session
+chmod 755 ${path}/user-session
 
 # Prepare host configuration
 cat <<EOF >>/etc/udev/rules.d/99-tty.rules
@@ -377,8 +282,12 @@ chmod 770 ${path}/hooks/pre-start.sh
 cat <<EOF >>${path}/fstab
 /bin bin none ro,bind 0 0
 /etc etc none ro,bind 0 0
+${path}/tlm.conf etc/tlm.conf none ro,bind 0 0
+${path}/user-session etc/session.d/user-session none rw,bind 0 0
 ${path}/systemd/system etc/systemd/system none ro,bind 0 0
 ${path}/systemd/user etc/systemd/user none ro,bind 0 0
+${path}/weston etc/sysconfig/weston none ro,bind 0 0
+${path}/weston.ini etc/xdg/weston/weston.ini none ro,bind 0 0
 /lib lib none ro,bind 0 0
 /media media none ro,bind 0 0
 /mnt mnt none ro,bind 0 0
