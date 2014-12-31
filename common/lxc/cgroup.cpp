@@ -24,6 +24,7 @@
 
 
 #include "config.hpp"
+#include "lxc/cgroup.hpp"
 #include "logger/logger.hpp"
 #include "utils/fs.hpp"
 
@@ -105,11 +106,11 @@ bool setDeviceAccess(const std::string& zoneName,
         return false;
     }
 
-    int major = major(devStat.st_rdev);
-    int minor = minor(devStat.st_rdev);
+    unsigned int major = major(devStat.st_rdev);
+    unsigned int minor = minor(devStat.st_rdev);
 
     char value[100];
-    snprintf(value, sizeof(value), "%c %d:%d %s", type, major, minor, perm.c_str());
+    snprintf(value, sizeof(value), "%c %u:%u %s", type, major, minor, perm.c_str());
 
     std::string name = grant ? "devices.allow" : "devices.deny";
     return setCgroup(zoneName, name, value);

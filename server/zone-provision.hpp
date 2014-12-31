@@ -43,7 +43,7 @@ class ZoneProvision {
 public:
     /**
      * ZoneProvision constructor
-     * @param zonesPath directory where zones are defined (lxc configs, rootfs etc)
+     * @param zonePath directory where zones are defined (lxc configs, rootfs etc)
      */
     ZoneProvision(const std::string& zonePath,
                   const std::vector<std::string>& validLinkPrefixes);

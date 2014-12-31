@@ -48,9 +48,7 @@ ScopedGlibLoop::ScopedGlibLoop()
 #if !GLIB_CHECK_VERSION(2,36,0)
     g_type_init();
 #endif
-    mLoopThread = std::thread([this] {
-                                  g_main_loop_run(mLoop.get());
-                              });
+    mLoopThread = std::thread(g_main_loop_run, mLoop.get());
 }
 
 ScopedGlibLoop::~ScopedGlibLoop()

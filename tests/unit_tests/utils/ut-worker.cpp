@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(NoCopyTest)
     struct Task {
         Counter& count;
 
-        Task(Counter& c) : count(c) {};
+        Task(Counter& c) : count(c) {}
         Task(const Task& t) : count(t.count) {++count;}
         Task(Task&& r) : count(r.count) {}
         Task& operator=(const Task&) = delete;

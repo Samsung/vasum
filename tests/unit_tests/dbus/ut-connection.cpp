@@ -110,6 +110,12 @@ BOOST_AUTO_TEST_CASE(NoDbusTest)
     BOOST_CHECK_THROW(DbusConnection::create(DBUS_ADDRESS), DbusIOException);
 }
 
+BOOST_AUTO_TEST_CASE(ConnectionTest)
+{
+    ScopedGlibLoop loop;
+    DbusConnection::Pointer connSystem = DbusConnection::createSystem();
+}
+
 BOOST_AUTO_TEST_CASE(SimpleTest)
 {
     ScopedDbusDaemon daemon;
@@ -273,7 +279,6 @@ BOOST_AUTO_TEST_CASE(RegisterObjectTest)
 
 BOOST_AUTO_TEST_CASE(IntrospectSystemTest)
 {
-    ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
     DbusConnection::Pointer conn = DbusConnection::createSystem();
     std::string xml = conn->introspect("org.freedesktop.DBus", "/org/freedesktop/DBus");
