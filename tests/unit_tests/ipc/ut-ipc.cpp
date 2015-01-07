@@ -532,10 +532,14 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
 
     // Wait for the response
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_CHECK(cv.wait_for(lock, std::chrono::seconds(10), [&retStatus]() {
+    BOOST_CHECK(cv.wait_for(lock, std::chrono::seconds(100), [&retStatus]() {
         return retStatus != ipc::Status::UNDEFINED;
     }));
-    BOOST_CHECK(retStatus == ipc::Status::PEER_DISCONNECTED); //TODO it fails from time to time
+
+    // The disconnection might have happened:
+    // - after sending the message (PEER_DISCONNECTED)
+    // - during external serialization (SERIALIZATION_ERROR)
+    BOOST_CHECK(retStatus == ipc::Status::PEER_DISCONNECTED || retStatus == ipc::Status::SERIALIZATION_ERROR);
 }
 
 
