@@ -36,12 +36,12 @@
 #include "ipc/ipc-gsource.hpp"
 #include "ipc/types.hpp"
 #include "utils/glib-loop.hpp"
+#include "utils/latch.hpp"
 
 #include "config/fields.hpp"
 #include "logger/logger.hpp"
 
 #include <atomic>
-#include <random>
 #include <string>
 #include <thread>
 #include <chrono>
@@ -592,14 +592,14 @@ BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
     Client c(socketPath);
     connect(s, c);
 
-    std::atomic_bool isHandlerACalled(false);
-    auto handlerA = [&isHandlerACalled](const FileDescriptor, std::shared_ptr<SendData>&) {
-        isHandlerACalled = true;
+    utils::Latch latchA;
+    auto handlerA = [&latchA](const FileDescriptor, std::shared_ptr<SendData>&) {
+        latchA.set();
     };
 
-    std::atomic_bool isHandlerBCalled(false);
-    auto handlerB = [&isHandlerBCalled](const FileDescriptor, std::shared_ptr<SendData>&) {
-        isHandlerBCalled = true;
+    utils::Latch latchB;
+    auto handlerB = [&latchB](const FileDescriptor, std::shared_ptr<SendData>&) {
+        latchB.set();
     };
 
     c.addSignalHandler<SendData>(1, handlerA);
@@ -610,8 +610,7 @@ BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
     s.signal<SendData>(1, data);
 
     // Wait for the signals to arrive
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT)); //TODO wait_for
-    BOOST_CHECK(isHandlerACalled && isHandlerBCalled);
+    BOOST_CHECK(latchA.wait(TIMEOUT) && latchB.wait(TIMEOUT));
 }
 
 
@@ -620,14 +619,14 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
     Service s(socketPath);
     Client c(socketPath);
 
-    std::atomic_bool isHandlerACalled(false);
-    auto handlerA = [&isHandlerACalled](const FileDescriptor, std::shared_ptr<SendData>&) {
-        isHandlerACalled = true;
+    utils::Latch latchA;
+    auto handlerA = [&latchA](const FileDescriptor, std::shared_ptr<SendData>&) {
+        latchA.set();
     };
 
-    std::atomic_bool isHandlerBCalled(false);
-    auto handlerB = [&isHandlerBCalled](const FileDescriptor, std::shared_ptr<SendData>&) {
-        isHandlerBCalled = true;
+    utils::Latch latchB;
+    auto handlerB = [&latchB](const FileDescriptor, std::shared_ptr<SendData>&) {
+        latchB.set();
     };
 
     c.addSignalHandler<SendData>(1, handlerA);
@@ -642,8 +641,7 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
     s.signal<SendData>(1, data);
 
     // Wait for the signals to arrive
-    std::this_thread::sleep_for(std::chrono::milliseconds(2 * TIMEOUT));
-    BOOST_CHECK(isHandlerACalled && isHandlerBCalled);
+    BOOST_CHECK(latchA.wait(TIMEOUT) && latchB.wait(TIMEOUT));
 }
 
 
@@ -652,9 +650,9 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
 BOOST_AUTO_TEST_CASE(ServiceGSource)
 {
     ScopedGlibLoop loop;
-    std::atomic_bool isSignalCalled(false);
-    auto signalHandler = [&isSignalCalled](const FileDescriptor, std::shared_ptr<SendData>&) {
-        isSignalCalled = true;
+    utils::Latch l;
+    auto signalHandler = [&l](const FileDescriptor, std::shared_ptr<SendData>&) {
+        l.set();
     };
 
     IPCGSource::Pointer serviceGSource;
@@ -672,17 +670,16 @@ BOOST_AUTO_TEST_CASE(ServiceGSource)
     auto data = std::make_shared<SendData>(1);
     c.signal<SendData>(2, data);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT)); //TODO wait_for
-    BOOST_CHECK(isSignalCalled);
+    BOOST_CHECK(l.wait(TIMEOUT));
 }
 
 BOOST_AUTO_TEST_CASE(ClientGSource)
 {
     ScopedGlibLoop loop;
 
-    std::atomic_bool isSignalCalled(false);
-    auto signalHandler = [&isSignalCalled](const FileDescriptor, std::shared_ptr<SendData>&) {
-        isSignalCalled = true;
+    utils::Latch l;
+    auto signalHandler = [&l](const FileDescriptor, std::shared_ptr<SendData>&) {
+        l.set();
     };
 
     Service s(socketPath);
@@ -702,8 +699,7 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
     auto data = std::make_shared<SendData>(1);
     s.signal<SendData>(2, data);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT)); //TODO wait_for
-    BOOST_CHECK(isSignalCalled);
+    BOOST_CHECK(l.wait(TIMEOUT));
 }
 
 #endif // GLIB_CHECK_VERSION
