@@ -147,6 +147,26 @@ void lock_zone(int pos, int argc, const char** argv);
 void unlock_zone(int pos, int argc, const char** argv);
 
 /**
+ * Parses command line arguments and prints list of zone with
+ * some useful informations (id, state, terminal, root path)
+ */
+void get_zones_status(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and call vsm_get_zone_ids
+ *
+ * @see vsm_get_zone_ids
+ */
+void get_zone_ids(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and call vsm_get_active_zone_id
+ *
+ * @see vsm_get_active_zone_id
+ */
+void get_active_zone_id(int pos, int argc, const char** argv);
+
+/**
  * Parses command line arguments and call vsm_lookup_zone_by_id
  *
  * @see vsm_lookup_zone_by_id

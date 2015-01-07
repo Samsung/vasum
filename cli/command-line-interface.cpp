@@ -31,7 +31,12 @@
 #include <functional>
 #include <ostream>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
+#include <algorithm>
+#include <vector>
 #include <fcntl.h>
+#include <cassert>
 
 using namespace std;
 
@@ -82,6 +87,14 @@ finish:
     }
 }
 
+template<typename T>
+string stringAsInStream(const T& value)
+{
+    std::ostringstream stream;
+    stream << value;
+    return stream.str();
+}
+
 ostream& operator<<(ostream& out, const VsmZoneState& state)
 {
     const char* name;
@@ -110,6 +123,30 @@ ostream& operator<<(ostream& out, const VsmZone& zone)
         << "\nTerminal: " << zone->terminal
         << "\nState: " << zone->state
         << "\nRoot: " << zone->rootfs_path;
+    return out;
+}
+
+typedef vector<vector<string>> Table;
+
+ostream& operator<<(ostream& out, const Table& table)
+{
+    vector<size_t> sizes;
+    for (const auto& row : table) {
+        if (sizes.size() < row.size()) {
+            sizes.resize(row.size());
+        }
+        for (size_t i = 0; i < row.size(); ++i) {
+            sizes[i] = max(sizes[i], row[i].length());
+        }
+    }
+
+    for (const auto& row : table) {
+        for (size_t i = 0; i < row.size(); ++i) {
+            out << left << setw(sizes[i]+2) << row[i];
+        }
+        out << "\n";
+    }
+
     return out;
 }
 
@@ -208,6 +245,58 @@ void unlock_zone(int pos, int argc, const char** argv)
     }
 
     one_shot(bind(vsm_unlock_zone, _1, argv[pos + 1]));
+}
+
+void get_zones_status(int /* pos */, int /* argc */, const char** /* argv */)
+{
+    using namespace std::placeholders;
+
+    VsmArrayString ids;
+    VsmString activeId;
+    Table table;
+
+    one_shot(bind(vsm_get_zone_ids, _1, &ids));
+    one_shot(bind(vsm_get_active_zone_id, _1, &activeId));
+    table.push_back({"Active", "Id", "State", "Terminal", "Root"});
+    for (VsmString* id = ids; *id; ++id) {
+        VsmZone zone;
+        one_shot(bind(vsm_lookup_zone_by_id, _1, *id, &zone));
+        assert(string(zone->id) == string(*id));
+        table.push_back({string(zone->id) == string(activeId) ? "*" : "",
+                         zone->id,
+                         stringAsInStream(zone->state),
+                         to_string(zone->terminal),
+                         zone->rootfs_path});
+        vsm_zone_free(zone);
+    }
+    vsm_string_free(activeId);
+    vsm_array_string_free(ids);
+    cout << table << endl;
+}
+
+void get_zone_ids(int /* pos */, int /* argc */, const char** /* argv */)
+{
+    using namespace std::placeholders;
+
+    VsmArrayString ids;
+    one_shot(bind(vsm_get_zone_ids, _1, &ids));
+    string delim;
+    for (VsmString* id = ids; *id; ++id) {
+        cout << delim << *id;
+        delim = ", ";
+    }
+    cout << endl;
+    vsm_array_string_free(ids);
+}
+
+void get_active_zone_id(int /* pos */, int /* argc */, const char** /* argv */)
+{
+    using namespace std::placeholders;
+
+    VsmString id;
+    one_shot(bind(vsm_get_active_zone_id, _1, &id));
+    cout << id << endl;
+    vsm_string_free(id);
 }
 
 void lookup_zone_by_id(int pos, int argc, const char** argv)

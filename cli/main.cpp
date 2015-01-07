@@ -92,6 +92,30 @@ std::map<std::string, CommandLineInterface> commands = {
         }
     },
     {
+        "get_zones_status", {
+            get_zones_status,
+            "get_zones_status",
+            "Get list of zone with some useful informations (id, state, terminal, root path)",
+            {}
+        }
+    },
+    {
+        "get_zone_ids", {
+            get_zone_ids,
+            "get_zone_ids",
+            "Get all zone ids",
+            {}
+        }
+    },
+    {
+        "get_active_zone_id", {
+            get_active_zone_id,
+            "get_active_zone_id",
+            "Get active (foreground) zone ids",
+            {}
+        }
+    },
+    {
         "lookup_zone_by_id", {
             lookup_zone_by_id,
             "lookup_zone_by_id zone_id",
