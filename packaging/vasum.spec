@@ -158,7 +158,6 @@ Development package including the header files for the client library
 %package zone-support
 Summary:          Vasum Support
 Group:            Security/Other
-Conflicts:        vasum
 
 %description zone-support
 Zones support installed inside every zone.

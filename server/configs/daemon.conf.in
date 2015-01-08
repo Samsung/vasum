@@ -8,10 +8,10 @@
     "foregroundId" : "private",
     "defaultId" : "private",
     "lxcTemplatePrefix" : "/etc/vasum/lxc-templates",
-    "inputConfig" : {"enabled" : false,
+    "inputConfig" : {"enabled" : true,
                      "device" : "gpio_keys.6",
-                     "code" : 139,
-                     "numberOfEvents" : 1,
+                     "code" : 116,
+                     "numberOfEvents" : 2,
                      "timeWindowMs" : 500},
     "proxyCallRules" : []
 }
