@@ -40,30 +40,27 @@ Service::Service(const std::string& socketPath,
       mAcceptor(socketPath, std::bind(&Processor::addPeer, &mProcessor, _1))
 
 {
-    LOGD("Creating server");
+    LOGS("Service Constructor");
 }
 
 Service::~Service()
 {
-    LOGD("Destroying server...");
+    LOGS("Service Destructor");
     try {
         stop();
     } catch (IPCException& e) {
         LOGE("Error in Service's destructor: " << e.what());
     }
-    LOGD("Destroyed");
 }
 
 void Service::start()
 {
-    LOGD("Starting server");
+    LOGS("Service start");
     mProcessor.start();
 
     // There can be an incoming connection from mAcceptor before mProcessor is listening,
     // but it's OK. It will handle the connection when ready. So no need to wait for mProcessor.
     mAcceptor.start();
-
-    LOGD("Started server");
 }
 
 bool Service::isStarted()
@@ -73,10 +70,9 @@ bool Service::isStarted()
 
 void Service::stop()
 {
-    LOGD("Stopping server..");
+    LOGS("Service stop");
     mAcceptor.stop();
     mProcessor.stop();
-    LOGD("Stopped");
 }
 
 std::vector<FileDescriptor> Service::getFDs()
@@ -116,19 +112,20 @@ void Service::handle(const FileDescriptor fd, const short pollEvent)
 
 void Service::setNewPeerCallback(const PeerCallback& newPeerCallback)
 {
+    LOGS("Service setNewPeerCallback");
     mProcessor.setNewPeerCallback(newPeerCallback);
 }
 
 void Service::setRemovedPeerCallback(const PeerCallback& removedPeerCallback)
 {
+    LOGS("Service setRemovedPeerCallback");
     mProcessor.setRemovedPeerCallback(removedPeerCallback);
 }
 
 void Service::removeMethod(const MethodID methodID)
 {
-    LOGD("Removing method " << methodID);
+    LOGS("Service removeMethod methodID: " << methodID);
     mProcessor.removeMethod(methodID);
-    LOGD("Removed " << methodID);
 }
 
 

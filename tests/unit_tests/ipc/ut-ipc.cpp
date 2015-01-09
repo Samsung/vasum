@@ -63,7 +63,7 @@ const int TIMEOUT = 1000 /*ms*/;
 const int SHORT_OPERATION_TIME = TIMEOUT / 100;
 
 // Time that will cause "TIMEOUT" methods to throw
-const int LONG_OPERATION_TIME = 3 * TIMEOUT;
+const int LONG_OPERATION_TIME = 500 + TIMEOUT;
 
 struct Fixture {
     std::string socketPath;
@@ -89,7 +89,7 @@ struct SendData {
 };
 
 struct LongSendData {
-    LongSendData(int i = 0, int waitTime = 1000): mSendData(i), mWaitTime(waitTime), intVal(i) {}
+    LongSendData(int i, int waitTime): mSendData(i), mWaitTime(waitTime), intVal(i) {}
 
     template<typename Visitor>
     void accept(Visitor visitor)
@@ -604,6 +604,9 @@ BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
 
     c.addSignalHandler<SendData>(1, handlerA);
     c.addSignalHandler<SendData>(2, handlerB);
+
+    // Wait for the signals to propagate to the Service
+    std::this_thread::sleep_for(std::chrono::milliseconds(2 * TIMEOUT));
 
     auto data = std::make_shared<SendData>(1);
     s.signal<SendData>(2, data);

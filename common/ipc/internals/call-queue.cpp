@@ -27,6 +27,7 @@
 #include "ipc/internals/call-queue.hpp"
 #include "ipc/exception.hpp"
 #include "logger/logger.hpp"
+#include <algorithm>
 
 namespace vasum {
 namespace ipc {
@@ -51,6 +52,20 @@ MessageID CallQueue::getNextMessageID()
     return ++mMessageIDCounter;
 }
 
+bool CallQueue::erase(const MessageID messageID)
+{
+    LOGT("Erase messgeID: " << messageID);
+    auto it = std::find(mCalls.begin(), mCalls.end(), messageID);
+    if (it == mCalls.end()) {
+        LOGT("No such messgeID");
+        return false;
+    }
+
+    mCalls.erase(it);
+    LOGT("Erased");
+    return true;
+}
+
 CallQueue::Call CallQueue::pop()
 {
     if (isEmpty()) {
@@ -58,7 +73,7 @@ CallQueue::Call CallQueue::pop()
         throw IPCException("CallQueue is empty");
     }
     Call call = std::move(mCalls.front());
-    mCalls.pop();
+    mCalls.pop_front();
     return call;
 }
 

@@ -48,7 +48,8 @@ IPCGSource::IPCGSource(const std::vector<FileDescriptor> fds,
                        const HandlerCallback& handlerCallback)
     : mHandlerCallback(handlerCallback)
 {
-    LOGD("Constructing IPCGSource");
+    LOGS("IPCGSource constructor");
+
     for (const FileDescriptor fd : fds) {
         addFD(fd);
     }
@@ -56,13 +57,13 @@ IPCGSource::IPCGSource(const std::vector<FileDescriptor> fds,
 
 IPCGSource::~IPCGSource()
 {
-    LOGD("Destroying IPCGSource");
+    LOGS("~IPCGSource");
 }
 
 IPCGSource::Pointer IPCGSource::create(const std::vector<FileDescriptor>& fds,
                                        const HandlerCallback& handlerCallback)
 {
-    LOGD("Creating IPCGSource");
+    LOGS("Creating IPCGSource");
 
     static GSourceFuncs funcs = { &IPCGSource::prepare,
                                   &IPCGSource::check,
@@ -94,12 +95,13 @@ IPCGSource::Pointer IPCGSource::create(const std::vector<FileDescriptor>& fds,
 
 void IPCGSource::addFD(const FileDescriptor fd)
 {
+
     if (!&mGSource) {
         // In case it's called as a callback but the IPCGSource is destroyed
         return;
     }
+    LOGS("Adding fd to glib");
 
-    LOGD("Adding fd to glib");
     gpointer tag = g_source_add_unix_fd(&mGSource,
                                         fd,
                                         conditions);
@@ -114,7 +116,7 @@ void IPCGSource::removeFD(const FileDescriptor fd)
         return;
     }
 
-    LOGD("Removing fd from glib");
+    LOGS("Removing fd from glib");
     auto it = std::find(mFDInfos.begin(), mFDInfos.end(), fd);
     if (it == mFDInfos.end()) {
         LOGE("No such fd");
@@ -126,7 +128,7 @@ void IPCGSource::removeFD(const FileDescriptor fd)
 
 guint IPCGSource::attach(GMainContext* context)
 {
-    LOGD("Attaching to GMainContext");
+    LOGS("Attaching to GMainContext");
     guint ret = g_source_attach(&mGSource, context);
     g_source_unref(&mGSource);
     return ret;
@@ -177,6 +179,8 @@ gboolean IPCGSource::dispatch(GSource* gSource,
 
 void  IPCGSource::finalize(GSource* gSource)
 {
+    LOGS("IPCGSource Finalize");
+
     if (gSource) {
         IPCGSource* source = reinterpret_cast<IPCGSource*>(gSource);
         source->~IPCGSource();

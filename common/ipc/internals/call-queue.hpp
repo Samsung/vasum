@@ -27,9 +27,10 @@
 
 #include "ipc/types.hpp"
 #include "config/manager.hpp"
+#include "logger/logger-scope.hpp"
 
 #include <atomic>
-#include <queue>
+#include <list>
 
 namespace vasum {
 namespace ipc {
@@ -45,8 +46,14 @@ public:
     struct Call {
         Call(const Call& other) = delete;
         Call& operator=(const Call&) = delete;
+        Call& operator=(Call&&) = default;
         Call() = default;
         Call(Call&&) = default;
+
+        bool operator==(const MessageID m)
+        {
+            return m == messageID;
+        }
 
         FileDescriptor peerFD;
         MethodID methodID;
@@ -78,10 +85,12 @@ public:
 
     Call pop();
 
+    bool erase(const MessageID messageID);
+
     bool isEmpty() const;
 
 private:
-    std::queue<Call> mCalls;
+    std::list<Call> mCalls;
     std::atomic<MessageID> mMessageIDCounter;
 
     MessageID getNextMessageID();
@@ -103,21 +112,24 @@ MessageID CallQueue::push(const MethodID methodID,
     call.messageID = messageID;
 
     call.serialize = [](const int fd, std::shared_ptr<void>& data)->void {
+        LOGS("Method serialize, peerFD: " << fd);
         config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
     };
 
     call.parse = [](const int fd)->std::shared_ptr<void> {
+        LOGS("Method parse, peerFD: " << fd);
         std::shared_ptr<ReceivedDataType> data(new ReceivedDataType());
         config::loadFromFD<ReceivedDataType>(fd, *data);
         return data;
     };
 
     call.process = [process](Status status, std::shared_ptr<void>& data)->void {
+        LOGS("Method process, status: " << toString(status));
         std::shared_ptr<ReceivedDataType> tmpData = std::static_pointer_cast<ReceivedDataType>(data);
         return process(status, tmpData);
     };
 
-    mCalls.push(std::move(call));
+    mCalls.push_back(std::move(call));
 
     return messageID;
 }
@@ -136,10 +148,11 @@ MessageID CallQueue::push(const MethodID methodID,
     call.messageID = messageID;
 
     call.serialize = [](const int fd, std::shared_ptr<void>& data)->void {
+        LOGS("Signal serialize, peerFD: " << fd);
         config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
     };
 
-    mCalls.push(std::move(call));
+    mCalls.push_back(std::move(call));
 
     return messageID;
 }

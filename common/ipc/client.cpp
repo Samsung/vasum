@@ -34,18 +34,17 @@ namespace ipc {
 Client::Client(const std::string& socketPath)
     : mSocketPath(socketPath)
 {
-    LOGD("Creating client");
+    LOGS("Client Constructor");
 }
 
 Client::~Client()
 {
-    LOGD("Destroying client...");
+    LOGS("Client Destructor");
     try {
         stop();
     } catch (IPCException& e) {
         LOGE("Error in Client's destructor: " << e.what());
     }
-    LOGD("Destroyed client");
 }
 
 void Client::connect()
@@ -58,14 +57,9 @@ void Client::connect()
 
 void Client::start()
 {
-    LOGD("Starting client...");
-
+    LOGS("Client start");
     connect();
-
-    // Start polling thread
     mProcessor.start();
-
-    LOGD("Started client");
 }
 
 bool Client::isStarted()
@@ -75,9 +69,8 @@ bool Client::isStarted()
 
 void Client::stop()
 {
-    LOGD("Stopping client...");
+    LOGS("Client Destructor");
     mProcessor.stop();
-    LOGD("Stopped");
 }
 
 std::vector<FileDescriptor> Client::getFDs()
@@ -107,17 +100,19 @@ void Client::handle(const FileDescriptor fd, const short pollEvent)
 
 void Client::setNewPeerCallback(const PeerCallback& newPeerCallback)
 {
+    LOGS("Client setNewPeerCallback");
     mProcessor.setNewPeerCallback(newPeerCallback);
 }
 
 void Client::setRemovedPeerCallback(const PeerCallback& removedPeerCallback)
 {
+    LOGS("Client setRemovedPeerCallback");
     mProcessor.setRemovedPeerCallback(removedPeerCallback);
 }
 
 void Client::removeMethod(const MethodID methodID)
 {
-    LOGD("Removing method id: " << methodID);
+    LOGS("Client removeMethod methodID: " << methodID);
     mProcessor.removeMethod(methodID);
 }
 

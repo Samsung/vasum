@@ -189,18 +189,16 @@ template<typename SentDataType, typename ReceivedDataType>
 void Client::addMethodHandler(const MethodID methodID,
                               const typename MethodHandler<SentDataType, ReceivedDataType>::type& method)
 {
-    LOGD("Adding method with id " << methodID);
+    LOGS("Client addMethodHandler, methodID: " << methodID);
     mProcessor.addMethodHandler<SentDataType, ReceivedDataType>(methodID, method);
-    LOGD("Added method with id " << methodID);
 }
 
 template<typename ReceivedDataType>
 void Client::addSignalHandler(const MethodID methodID,
                               const typename SignalHandler<ReceivedDataType>::type& handler)
 {
-    LOGD("Adding signal with id " << methodID);
+    LOGS("Client addSignalHandler, methodID: " << methodID);
     mProcessor.addSignalHandler<ReceivedDataType>(methodID, handler);
-    LOGD("Added signal with id " << methodID);
 }
 
 template<typename SentDataType, typename ReceivedDataType>
@@ -208,7 +206,7 @@ std::shared_ptr<ReceivedDataType> Client::callSync(const MethodID methodID,
                                                    const std::shared_ptr<SentDataType>& data,
                                                    unsigned int timeoutMS)
 {
-    LOGD("Sync calling method: " << methodID);
+    LOGS("Client callSync, methodID: " << methodID << ", timeoutMS: " << timeoutMS);
     return mProcessor.callSync<SentDataType, ReceivedDataType>(methodID, mServiceFD, data, timeoutMS);
 }
 
@@ -217,22 +215,20 @@ void Client::callAsync(const MethodID methodID,
                        const std::shared_ptr<SentDataType>& data,
                        const typename ResultHandler<ReceivedDataType>::type& resultCallback)
 {
-    LOGD("Async calling method: " << methodID);
+    LOGS("Client callAsync, methodID: " << methodID);
     mProcessor.callAsync<SentDataType,
                          ReceivedDataType>(methodID,
                                            mServiceFD,
                                            data,
                                            resultCallback);
-    LOGD("Async called method: " << methodID);
 }
 
 template<typename SentDataType>
 void Client::signal(const MethodID methodID,
                     const std::shared_ptr<SentDataType>& data)
 {
-    LOGD("Signaling: " << methodID);
+    LOGS("Client signal, methodID: " << methodID);
     mProcessor.signal<SentDataType>(methodID, data);
-    LOGD("Signaled: " << methodID);
 }
 
 } // namespace ipc
