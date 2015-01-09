@@ -27,19 +27,30 @@
 #include "ut.hpp"
 #include "testconfig-example.hpp"
 #include "config/manager.hpp"
+#include "utils/scoped-dir.hpp"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <boost/filesystem.hpp>
 
-namespace fs = boost::filesystem;
+namespace {
+
 using namespace config;
 
-BOOST_AUTO_TEST_SUITE(ConfigurationSuite)
+const std::string UT_PATH = "/tmp/ut-config/";
+const std::string DB_PATH = UT_PATH + "kvstore.db3";
+const std::string DB_PREFIX = "ut";
 
 // Floating point tolerance as a number of rounding errors
 const int TOLERANCE = 1;
 
+struct Fixture {
+    vasum::utils::ScopedDir mUTDirGuard;
+    Fixture() : mUTDirGuard(UT_PATH) {}
+};
+
+} // namespace
+
+BOOST_FIXTURE_TEST_SUITE(ConfigurationSuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(FromStringTest)
 {
@@ -249,17 +260,12 @@ BOOST_AUTO_TEST_CASE(FromToKVStoreTest)
     TestConfig config;
     loadFromJsonString(jsonTestString, config);
 
-    std::string dbPath = fs::unique_path("/tmp/kvstore-%%%%.db3").string();
-
-    saveToKVStore(dbPath, config, "prefix");
+    saveToKVStore(DB_PATH, config, DB_PREFIX);
     TestConfig outConfig;
-    loadFromKVStore(dbPath, outConfig, "prefix");
+    loadFromKVStore(DB_PATH, outConfig, DB_PREFIX);
 
     std::string out = saveToJsonString(outConfig);
     BOOST_CHECK_EQUAL(out, jsonTestString);
-
-    fs::remove(dbPath);
-    fs::remove(dbPath + "-journal");
 }
 
 BOOST_AUTO_TEST_CASE(FromToFDTest)
@@ -267,7 +273,7 @@ BOOST_AUTO_TEST_CASE(FromToFDTest)
     TestConfig config;
     loadFromJsonString(jsonTestString, config);
     // Setup fd
-    std::string fifoPath = fs::unique_path("/tmp/fdstore-%%%%").string();
+    std::string fifoPath = UT_PATH + "fdstore";
     BOOST_CHECK(::mkfifo(fifoPath.c_str(), S_IWUSR | S_IRUSR) >= 0);
     int fd = ::open(fifoPath.c_str(), O_RDWR);
     BOOST_REQUIRE(fd >= 0);
@@ -281,7 +287,73 @@ BOOST_AUTO_TEST_CASE(FromToFDTest)
 
     // Cleanup
     BOOST_CHECK(::close(fd) >= 0);
-    fs::remove(fifoPath);
+}
+
+BOOST_AUTO_TEST_CASE(FromKVWithDefaultsTest)
+{
+    TestConfig config;
+    loadFromJsonString(jsonTestString, config);
+
+    // nothing in db
+    TestConfig outConfig1;
+    loadFromKVStoreWithJson(DB_PATH, jsonTestString, outConfig1, DB_PREFIX);
+
+    std::string out1 = saveToJsonString(outConfig1);
+    BOOST_CHECK_EQUAL(out1, jsonTestString);
+
+    // all in db
+    saveToKVStore(DB_PATH, config, DB_PREFIX);
+    TestConfig outConfig2;
+    outConfig2.union1.set<int>(0);
+    outConfig2.union2.set<int>(0);
+    std::string emptyConfig = saveToJsonString(outConfig2);
+    loadFromKVStoreWithJson(DB_PATH, emptyConfig, outConfig2, DB_PREFIX);
+
+    std::string out2 = saveToJsonString(outConfig2);
+    BOOST_CHECK_EQUAL(out2, jsonTestString);
+}
+
+BOOST_AUTO_TEST_CASE(PartialConfigTest)
+{
+    // check if partial config is fully supported
+    TestConfig config;
+    loadFromJsonString(jsonTestString, config);
+
+    // from string
+    {
+        PartialTestConfig partialConfig;
+        loadFromJsonString(jsonTestString, partialConfig);
+
+        BOOST_CHECK_EQUAL(config.stringVal, partialConfig.stringVal);
+        BOOST_CHECK(config.intVector == partialConfig.intVector);
+    }
+
+    // from kv
+    {
+        PartialTestConfig partialConfig;
+        saveToKVStore(DB_PATH, config, DB_PREFIX);
+        loadFromKVStore(DB_PATH, partialConfig, DB_PREFIX);
+
+        BOOST_CHECK_EQUAL(config.stringVal, partialConfig.stringVal);
+        BOOST_CHECK(config.intVector == partialConfig.intVector);
+    }
+
+    // from kv with defaults
+    {
+        PartialTestConfig partialConfig;
+        loadFromKVStoreWithJson(DB_PATH, jsonTestString, partialConfig, DB_PREFIX);
+
+        BOOST_CHECK_EQUAL(config.stringVal, partialConfig.stringVal);
+        BOOST_CHECK(config.intVector == partialConfig.intVector);
+    }
+
+    // save to kv
+    {
+        PartialTestConfig partialConfig;
+        partialConfig.stringVal = "partial";
+        partialConfig.intVector = {7};
+        config::saveToKVStore(DB_PATH, partialConfig, DB_PREFIX);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(ConfigUnionTest)

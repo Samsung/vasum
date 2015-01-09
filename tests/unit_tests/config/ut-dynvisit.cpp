@@ -26,30 +26,31 @@
 #include "config.hpp"
 #include "ut.hpp"
 #include "testconfig-example.hpp"
+#include "utils/scoped-dir.hpp"
 #include "config/manager.hpp"
-#include <boost/filesystem.hpp>
 
 #include "config/from-kvjson-visitor.hpp"
 
+namespace {
 
 using namespace config;
-namespace fs = boost::filesystem;
+
+const std::string UT_PATH = "/tmp/ut-config/";
 
 struct Fixture {
+    vasum::utils::ScopedDir mUTDirGuard;
     std::string dbPath;
     std::string dbPrefix;
 
     Fixture()
-        : dbPath(fs::unique_path("/tmp/kvstore-%%%%.db3").string())
+        : mUTDirGuard(UT_PATH)
+        , dbPath(UT_PATH + "kvstore.db3")
         , dbPrefix("conf")
     {
-        fs::remove(dbPath);
-    }
-    ~Fixture()
-    {
-        fs::remove(dbPath);
     }
 };
+
+} // namespace
 
 BOOST_FIXTURE_TEST_SUITE(DynVisitSuite, Fixture)
 

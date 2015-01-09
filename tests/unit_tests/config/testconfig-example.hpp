@@ -122,6 +122,18 @@ struct TestConfig {
     )
 };
 
+struct PartialTestConfig {
+    // a subset of TestConfig fields
+    std::string stringVal;
+    std::vector<int> intVector;
+
+    CONFIG_REGISTER
+    (
+        stringVal,
+        intVector
+    )
+};
+
 /**
  * JSON string used in ConfigSuite test cases
  * For the purpose of these tests the order of this string

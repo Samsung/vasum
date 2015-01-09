@@ -28,6 +28,7 @@
 
 #include "config/kvstore.hpp"
 #include "config/exception.hpp"
+#include "utils/scoped-dir.hpp"
 
 #include <iostream>
 #include <memory>
@@ -38,19 +39,18 @@ namespace fs = boost::filesystem;
 
 namespace {
 
+const std::string UT_PATH = "/tmp/ut-config/";
+
 struct Fixture {
+    vasum::utils::ScopedDir mUTDirGuard;
     std::string dbPath;
     KVStore c;
 
     Fixture()
-        : dbPath(fs::unique_path("/tmp/kvstore-%%%%.db3").string()),
-          c(dbPath)
+        : mUTDirGuard(UT_PATH)
+        , dbPath(UT_PATH + "kvstore.db3")
+        , c(dbPath)
     {
-    }
-    ~Fixture()
-    {
-        fs::remove(dbPath);
-        fs::remove(dbPath + "-journal");
     }
 };
 
@@ -97,7 +97,6 @@ const std::string KEY = "KEY";
 
 BOOST_AUTO_TEST_CASE(SimpleConstructorDestructorTest)
 {
-    const std::string dbPath =  fs::unique_path("/tmp/kvstore-%%%%.db3").string();
     std::unique_ptr<KVStore> conPtr;
     BOOST_REQUIRE_NO_THROW(conPtr.reset(new KVStore(dbPath)));
     BOOST_CHECK(fs::exists(dbPath));
@@ -105,7 +104,6 @@ BOOST_AUTO_TEST_CASE(SimpleConstructorDestructorTest)
     BOOST_CHECK(fs::exists(dbPath));
     BOOST_REQUIRE_NO_THROW(conPtr.reset());
     BOOST_CHECK(fs::exists(dbPath));
-    fs::remove(dbPath);
 }
 
 BOOST_AUTO_TEST_CASE(EscapedCharactersTest)
