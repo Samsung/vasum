@@ -55,6 +55,16 @@ using namespace std::placeholders;
 namespace fs = boost::filesystem;
 
 namespace {
+
+// Timeout for sending one message
+const int TIMEOUT = 1000 /*ms*/;
+
+// Time that won't cause "TIMEOUT" methods to throw
+const int SHORT_OPERATION_TIME = TIMEOUT / 100;
+
+// Time that will cause "TIMEOUT" methods to throw
+const int LONG_OPERATION_TIME = 3 * TIMEOUT;
+
 struct Fixture {
     std::string socketPath;
 
@@ -133,7 +143,7 @@ std::shared_ptr<SendData> echoCallback(const FileDescriptor, std::shared_ptr<Sen
 
 std::shared_ptr<SendData> longEchoCallback(const FileDescriptor, std::shared_ptr<SendData>& data)
 {
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(LONG_OPERATION_TIME));
     return data;
 }
 
@@ -161,7 +171,7 @@ FileDescriptor connect(Service& s, Client& c)
 
 
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(2000), [&peerFD]() {
+    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(3 * TIMEOUT), [&peerFD]() {
         return peerFD != 0;
     }));
 
@@ -201,7 +211,7 @@ std::pair<FileDescriptor, IPCGSource::Pointer> connectServiceGSource(Service& s,
     c.start();
 
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(2000), [&peerFD]() {
+    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(3 * TIMEOUT), [&peerFD]() {
         return peerFD != 0;
     }));
 
@@ -236,7 +246,7 @@ std::pair<FileDescriptor, IPCGSource::Pointer> connectClientGSource(Service& s, 
     ipcGSourcePtr->attach();
 
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(2000), [&peerFD]() {
+    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(3 * TIMEOUT), [&peerFD]() {
         return peerFD != 0;
     }));
 
@@ -249,14 +259,14 @@ std::pair<FileDescriptor, IPCGSource::Pointer> connectClientGSource(Service& s, 
 void testEcho(Client& c, const MethodID methodID)
 {
     std::shared_ptr<SendData> sentData(new SendData(34));
-    std::shared_ptr<SendData> recvData = c.callSync<SendData, SendData>(methodID, sentData, 1000);
+    std::shared_ptr<SendData> recvData = c.callSync<SendData, SendData>(methodID, sentData, TIMEOUT);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
 void testEcho(Service& s, const MethodID methodID, const FileDescriptor peerFD)
 {
     std::shared_ptr<SendData> sentData(new SendData(56));
-    std::shared_ptr<SendData> recvData = s.callSync<SendData, SendData>(methodID, peerFD, sentData, 1000);
+    std::shared_ptr<SendData> recvData = s.callSync<SendData, SendData>(methodID, peerFD, sentData, TIMEOUT);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
@@ -274,7 +284,6 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 BOOST_AUTO_TEST_CASE(ServiceAddRemoveMethod)
 {
     Service s(socketPath);
-
     s.addMethodHandler<EmptyData, EmptyData>(1, returnEmptyCallback);
     s.addMethodHandler<SendData, SendData>(1, returnDataCallback);
 
@@ -284,7 +293,7 @@ BOOST_AUTO_TEST_CASE(ServiceAddRemoveMethod)
     s.addMethodHandler<SendData, SendData>(2, returnDataCallback);
 
     Client c(socketPath);
-    c.start();
+    connect(s, c);
     testEcho(c, 1);
 
     s.removeMethod(1);
@@ -352,9 +361,9 @@ BOOST_AUTO_TEST_CASE(SyncClientToServiceEcho)
     s.addMethodHandler<SendData, SendData>(1, echoCallback);
     s.addMethodHandler<SendData, SendData>(2, echoCallback);
 
-    s.start();
     Client c(socketPath);
-    c.start();
+    connect(s, c);
+
     testEcho(c, 1);
     testEcho(c, 2);
 }
@@ -421,7 +430,7 @@ BOOST_AUTO_TEST_CASE(AsyncClientToServiceEcho)
 
     // Wait for the response
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(100), [&recvData]() {
+    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(TIMEOUT), [&recvData]() {
         return static_cast<bool>(recvData);
     }));
 
@@ -452,7 +461,7 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
 
     // Wait for the response
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(1000), [&recvData]() {
+    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(TIMEOUT), [&recvData]() {
         return recvData.get() != nullptr;
     }));
 
@@ -465,23 +474,20 @@ BOOST_AUTO_TEST_CASE(SyncTimeout)
     Service s(socketPath);
     s.addMethodHandler<SendData, SendData>(1, longEchoCallback);
 
-    s.start();
     Client c(socketPath);
-    c.start();
+    connect(s, c);
 
     std::shared_ptr<SendData> sentData(new SendData(78));
-
-    BOOST_CHECK_THROW((c.callSync<SendData, SendData>(1, sentData, 10)), IPCException); //TODO it fails from time to time
+    BOOST_REQUIRE_THROW((c.callSync<SendData, SendData>(1, sentData, TIMEOUT)), IPCException);
 }
 
 BOOST_AUTO_TEST_CASE(SerializationError)
 {
     Service s(socketPath);
     s.addMethodHandler<SendData, SendData>(1, echoCallback);
-    s.start();
 
     Client c(socketPath);
-    c.start();
+    connect(s, c);
 
     std::shared_ptr<ThrowOnAcceptData> throwingData(new ThrowOnAcceptData());
 
@@ -532,7 +538,7 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
 
     // Wait for the response
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_CHECK(cv.wait_for(lock, std::chrono::seconds(100), [&retStatus]() {
+    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(TIMEOUT), [&retStatus]() {
         return retStatus != ipc::Status::UNDEFINED;
     }));
 
@@ -547,7 +553,7 @@ BOOST_AUTO_TEST_CASE(ReadTimeout)
 {
     Service s(socketPath);
     auto longEchoCallback = [](const FileDescriptor, std::shared_ptr<SendData>& data) {
-        return std::shared_ptr<LongSendData>(new LongSendData(data->intVal, 4000 /*ms*/));
+        return std::shared_ptr<LongSendData>(new LongSendData(data->intVal, LONG_OPERATION_TIME));
     };
     s.addMethodHandler<LongSendData, SendData>(1, longEchoCallback);
 
@@ -556,7 +562,7 @@ BOOST_AUTO_TEST_CASE(ReadTimeout)
 
     // Test timeout on read
     std::shared_ptr<SendData> sentData(new SendData(334));
-    BOOST_CHECK_THROW((c.callSync<SendData, SendData>(1, sentData, 10)), IPCException);
+    BOOST_CHECK_THROW((c.callSync<SendData, SendData>(1, sentData, TIMEOUT)), IPCException);
 }
 
 
@@ -570,13 +576,13 @@ BOOST_AUTO_TEST_CASE(WriteTimeout)
     c.start();
 
     // Test echo with a minimal timeout
-    std::shared_ptr<LongSendData> sentDataA(new LongSendData(34, 10 /*ms*/));
-    std::shared_ptr<SendData> recvData = c.callSync<LongSendData, SendData>(1, sentDataA, 100);
+    std::shared_ptr<LongSendData> sentDataA(new LongSendData(34, SHORT_OPERATION_TIME));
+    std::shared_ptr<SendData> recvData = c.callSync<LongSendData, SendData>(1, sentDataA, TIMEOUT);
     BOOST_CHECK_EQUAL(recvData->intVal, sentDataA->intVal);
 
     // Test timeout on write
-    std::shared_ptr<LongSendData> sentDataB(new LongSendData(34, 1000 /*ms*/));
-    BOOST_CHECK_THROW((c.callSync<LongSendData, SendData>(1, sentDataB, 100)), IPCTimeoutException);
+    std::shared_ptr<LongSendData> sentDataB(new LongSendData(34, LONG_OPERATION_TIME));
+    BOOST_CHECK_THROW((c.callSync<LongSendData, SendData>(1, sentDataB, TIMEOUT)), IPCTimeoutException);
 }
 
 
@@ -604,7 +610,7 @@ BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
     s.signal<SendData>(1, data);
 
     // Wait for the signals to arrive
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //TODO wait_for
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT)); //TODO wait_for
     BOOST_CHECK(isHandlerACalled && isHandlerBCalled);
 }
 
@@ -630,13 +636,13 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
     connect(s, c);
 
     // Wait for the information about the signals to propagate
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT));
     auto data = std::make_shared<SendData>(1);
     s.signal<SendData>(2, data);
     s.signal<SendData>(1, data);
 
     // Wait for the signals to arrive
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //TODO wait_for
+    std::this_thread::sleep_for(std::chrono::milliseconds(2 * TIMEOUT));
     BOOST_CHECK(isHandlerACalled && isHandlerBCalled);
 }
 
@@ -646,7 +652,6 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
 BOOST_AUTO_TEST_CASE(ServiceGSource)
 {
     ScopedGlibLoop loop;
-
     std::atomic_bool isSignalCalled(false);
     auto signalHandler = [&isSignalCalled](const FileDescriptor, std::shared_ptr<SendData>&) {
         isSignalCalled = true;
@@ -667,7 +672,7 @@ BOOST_AUTO_TEST_CASE(ServiceGSource)
     auto data = std::make_shared<SendData>(1);
     c.signal<SendData>(2, data);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //TODO wait_for
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT)); //TODO wait_for
     BOOST_CHECK(isSignalCalled);
 }
 
@@ -697,7 +702,7 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
     auto data = std::make_shared<SendData>(1);
     s.signal<SendData>(2, data);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //TODO wait_for
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT)); //TODO wait_for
     BOOST_CHECK(isSignalCalled);
 }
 

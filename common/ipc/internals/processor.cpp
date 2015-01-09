@@ -588,6 +588,7 @@ bool Processor::onNewPeer()
         Lock lock(mCallbacksMutex);
         if (mNewPeerCallback) {
             // Notify about the new user.
+            LOGT("Calling NewPeerCallback");
             mNewPeerCallback(socketInfo.peerFD);
         }
     }

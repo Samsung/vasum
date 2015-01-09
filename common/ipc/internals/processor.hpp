@@ -602,11 +602,21 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
     };
 
     std::unique_lock<std::mutex> lock(mutex);
+    LOGT("Waiting for the response...");
+    // TODO: There is a race here. mReturnCallbacks were used to indicate if the return call was served or not,
+    //       but if the timeout occurs before the call is even sent, then this method is broken.
     if (!cv.wait_for(lock, std::chrono::milliseconds(timeoutMS), isResultInitialized)) {
+        // Timeout occurred:
+        // - call isn't sent   => delete it
+        // - call is    sent and no reply => throw IPCTimeoutError
+        // - call is being serviced => wait for it with the same timeout
+        LOGT("Probably a timeout in callSync. Checking...");
+
         bool isTimeout = false;
         {
             Lock lock(mReturnCallbacksMutex);
             if (1 == mReturnCallbacks.erase(messageID)) {
+                // Return callback was present, so there was a timeout
                 isTimeout = true;
             }
         }
@@ -615,7 +625,7 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
             LOGE("Function call timeout; methodID: " << methodID);
             throw IPCTimeoutException("Function call timeout; methodID: " + std::to_string(methodID));
         } else {
-            // Timeout started during the return value processing, so wait for it to finish
+            //Timeout started during the return value processing, so wait for it to finish
             cv.wait(lock, isResultInitialized);
         }
     }
