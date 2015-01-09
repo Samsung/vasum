@@ -73,6 +73,7 @@ ADD_DEFINITIONS("-pedantic") # Be pedantic
 ADD_DEFINITIONS("-pedantic-errors") # Make pedantic warnings into errors
 ADD_DEFINITIONS(-DPROGRAM_VERSION="${VERSION}")
 ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+ADD_DEFINITIONS(-DUSE_EXEC)
 
 IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     # Warn about documentation problems
