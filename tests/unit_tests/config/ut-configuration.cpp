@@ -95,6 +95,9 @@ BOOST_AUTO_TEST_CASE(ToStringTest)
 
     std::string out = saveToString(testConfig);
     BOOST_CHECK_EQUAL(out, jsonTestString);
+
+    TestConfig::SubConfigOption unionConfig;
+    BOOST_CHECK_THROW(saveToString(unionConfig), ConfigException);
 }
 
 namespace loadErrorsTest {
@@ -111,6 +114,13 @@ DECLARE_CONFIG(BoolConfig, bool)
 DECLARE_CONFIG(ArrayConfig, std::vector<int>)
 DECLARE_CONFIG(ObjectConfig, IntConfig)
 #undef DECLARE_CONFIG
+struct UnionConfig {
+    CONFIG_DECLARE_UNION
+    (
+            int,
+            bool
+    )
+};
 
 } // namespace loadErrorsTest
 
@@ -177,6 +187,12 @@ BOOST_AUTO_TEST_CASE(LoadErrorsTest)
     BOOST_CHECK_THROW(loadFromString("{\"field\": []}", objectConfig), ConfigException);
     BOOST_CHECK_THROW(loadFromString("{\"field\": {}}", objectConfig), ConfigException);
     BOOST_CHECK_NO_THROW(loadFromString("{\"field\": {\"field\": 1}}", objectConfig));
+
+    UnionConfig unionConfig;
+    BOOST_CHECK_THROW(loadFromString("{\"type\": \"long\", \"value\": 1}", unionConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromString("{\"type\": \"int\"}", unionConfig), ConfigException);
+    BOOST_CHECK_NO_THROW(loadFromString("{\"type\": \"int\", \"value\": 1}", unionConfig));
+    BOOST_CHECK_NO_THROW(loadFromString("{\"type\": \"bool\", \"value\": true}", unionConfig));
 }
 
 namespace hasVisitableTest {
