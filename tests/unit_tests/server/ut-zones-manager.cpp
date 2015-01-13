@@ -313,8 +313,9 @@ public:
                                    const VoidResultCallback& result)
     {
         auto asyncResult = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
-            BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
-            result();
+            if (g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT)) {
+                result();
+            }
         };
 
         assert(isHost());
@@ -332,8 +333,9 @@ public:
                                     const VoidResultCallback& result)
     {
         auto asyncResult = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
-            BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
-            result();
+            if (g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT)) {
+                result();
+            }
         };
 
         assert(isHost());
@@ -351,8 +353,9 @@ public:
                                      const VoidResultCallback& result)
     {
         auto asyncResult = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
-            BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
-            result();
+            if (g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT)) {
+                result();
+            }
         };
 
         assert(isHost());
@@ -370,8 +373,9 @@ public:
                                   const VoidResultCallback& result)
     {
         auto asyncResult = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
-            BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
-            result();
+            if (g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT)) {
+                result();
+            }
         };
 
         assert(isHost());
@@ -923,7 +927,7 @@ BOOST_AUTO_TEST_CASE(ZoneDbusesSignalsTest)
 
         cm.startAll();
 
-        BOOST_CHECK(signalLatch.waitForN(TEST_DBUS_CONNECTION_ZONES_COUNT, EVENT_TIMEOUT));
+        BOOST_REQUIRE(signalLatch.waitForN(TEST_DBUS_CONNECTION_ZONES_COUNT, EVENT_TIMEOUT));
         BOOST_CHECK(signalLatch.empty());
         BOOST_CHECK(EXPECTED_DBUSES_STARTED == collectedDbuses);
         collectedDbuses.clear();
