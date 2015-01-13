@@ -37,6 +37,7 @@
 #include "ipc/types.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
+#include "utils/value-latch.hpp"
 
 #include "config/fields.hpp"
 #include "logger/logger.hpp"
@@ -150,14 +151,9 @@ std::shared_ptr<SendData> longEchoCallback(const FileDescriptor, std::shared_ptr
 FileDescriptor connect(Service& s, Client& c)
 {
     // Connects the Client to the Service and returns Clients FileDescriptor
-    std::mutex mutex;
-    std::condition_variable cv;
-
-    FileDescriptor peerFD = 0;
-    auto newPeerCallback = [&cv, &peerFD, &mutex](const FileDescriptor newFD) {
-        std::unique_lock<std::mutex> lock(mutex);
-        peerFD = newFD;
-        cv.notify_all();
+    ValueLatch<FileDescriptor> peerFDLatch;
+    auto newPeerCallback = [&peerFDLatch](const FileDescriptor newFD) {
+        peerFDLatch.set(newFD);
     };
 
     s.setNewPeerCallback(newPeerCallback);
@@ -168,38 +164,25 @@ FileDescriptor connect(Service& s, Client& c)
 
     c.start();
 
-
-    std::unique_lock<std::mutex> lock(mutex);
-    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(3 * TIMEOUT), [&peerFD]() {
-        return peerFD != 0;
-    }));
-    // Remove the callback
+    FileDescriptor peerFD = peerFDLatch.get(TIMEOUT);
     s.setNewPeerCallback(nullptr);
-    BOOST_REQUIRE(peerFD != 0);
-
+    BOOST_REQUIRE_NE(peerFD, 0);
     return peerFD;
 }
-
-
 
 #if GLIB_CHECK_VERSION(2,36,0)
 
 std::pair<FileDescriptor, IPCGSource::Pointer> connectServiceGSource(Service& s, Client& c)
 {
-    std::mutex mutex;
-    std::condition_variable cv;
-
-    FileDescriptor peerFD = 0;
+    ValueLatch<FileDescriptor> peerFDLatch;
     IPCGSource::Pointer ipcGSourcePtr = IPCGSource::create(s.getFDs(), std::bind(&Service::handle, &s, _1, _2));
 
-    auto newPeerCallback = [&cv, &peerFD, &mutex, ipcGSourcePtr](const FileDescriptor newFD) {
+    auto newPeerCallback = [&peerFDLatch, ipcGSourcePtr](const FileDescriptor newFD) {
         if (ipcGSourcePtr) {
             //TODO: Remove this if
             ipcGSourcePtr->addFD(newFD);
         }
-        std::unique_lock<std::mutex> lock(mutex);
-        peerFD = newFD;
-        cv.notify_all();
+        peerFDLatch.set(newFD);
     };
 
 
@@ -211,28 +194,18 @@ std::pair<FileDescriptor, IPCGSource::Pointer> connectServiceGSource(Service& s,
 
     c.start();
 
-    std::unique_lock<std::mutex> lock(mutex);
-    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(3 * TIMEOUT), [&peerFD]() {
-        return peerFD != 0;
-    }));
-    // remove the callback
+    FileDescriptor peerFD = peerFDLatch.get(TIMEOUT);
     s.setNewPeerCallback(nullptr);
-    BOOST_REQUIRE(peerFD != 0);
-
+    BOOST_REQUIRE_NE(peerFD, 0);
     return std::make_pair(peerFD, ipcGSourcePtr);
 }
 
 std::pair<FileDescriptor, IPCGSource::Pointer> connectClientGSource(Service& s, Client& c)
 {
     // Connects the Client to the Service and returns Clients FileDescriptor
-    std::mutex mutex;
-    std::condition_variable cv;
-
-    FileDescriptor peerFD = 0;
-    auto newPeerCallback = [&cv, &peerFD, &mutex](const FileDescriptor newFD) {
-        std::unique_lock<std::mutex> lock(mutex);
-        peerFD = newFD;
-        cv.notify_all();
+    ValueLatch<FileDescriptor> peerFDLatch;
+    auto newPeerCallback = [&peerFDLatch](const FileDescriptor newFD) {
+        peerFDLatch.set(newFD);
     };
     s.setNewPeerCallback(newPeerCallback);
 
@@ -248,14 +221,9 @@ std::pair<FileDescriptor, IPCGSource::Pointer> connectClientGSource(Service& s, 
 
     ipcGSourcePtr->attach();
 
-    std::unique_lock<std::mutex> lock(mutex);
-    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(3 * TIMEOUT), [&peerFD]() {
-        return peerFD != 0;
-    }));
-    // Remove the callback
+    FileDescriptor peerFD = peerFDLatch.get(TIMEOUT);
     s.setNewPeerCallback(nullptr);
-    BOOST_REQUIRE(peerFD != 0);
-
+    BOOST_REQUIRE_NE(peerFD, 0);
     return std::make_pair(peerFD, ipcGSourcePtr);
 }
 
@@ -413,11 +381,8 @@ BOOST_AUTO_TEST_CASE(SyncServiceToClientEcho)
 
 BOOST_AUTO_TEST_CASE(AsyncClientToServiceEcho)
 {
-    std::mutex mutex;
-    std::condition_variable cv;
-
     std::shared_ptr<SendData> sentData(new SendData(34));
-    std::shared_ptr<SendData> recvData;
+    ValueLatch<SendData> recvDataLatch;
 
     // Setup Service and Client
     Service s(socketPath);
@@ -427,31 +392,22 @@ BOOST_AUTO_TEST_CASE(AsyncClientToServiceEcho)
     c.start();
 
     //Async call
-    auto dataBack = [&cv, &recvData, &mutex](ipc::Status status, std::shared_ptr<SendData>& data) {
+    auto dataBack = [&recvDataLatch](ipc::Status status, std::shared_ptr<SendData>& data) {
         if (status == ipc::Status::OK) {
-            std::unique_lock<std::mutex> lock(mutex);
-            recvData = data;
+            recvDataLatch.set(*data);
         }
-        cv.notify_one();
     };
     c.callAsync<SendData, SendData>(1, sentData, dataBack);
 
     // Wait for the response
-    std::unique_lock<std::mutex> lock(mutex);
-    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(TIMEOUT), [&recvData]() {
-        return static_cast<bool>(recvData);
-    }));
-    BOOST_REQUIRE(recvData);
+    std::shared_ptr<SendData> recvData(new SendData(recvDataLatch.get(TIMEOUT)));
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
 BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
 {
     std::shared_ptr<SendData> sentData(new SendData(56));
-    std::shared_ptr<SendData> recvData;
-
-    std::mutex mutex;
-    std::condition_variable cv;
+    ValueLatch<SendData> recvDataLatch;
 
     Service s(socketPath);
     Client c(socketPath);
@@ -459,23 +415,16 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
     FileDescriptor peerFD = connect(s, c);
 
     // Async call
-    auto dataBack = [&cv, &recvData, &mutex](ipc::Status status, std::shared_ptr<SendData>& data) {
+    auto dataBack = [&recvDataLatch](ipc::Status status, std::shared_ptr<SendData>& data) {
         if (status == ipc::Status::OK) {
-            std::unique_lock<std::mutex> lock(mutex);
-            recvData = data;
+            recvDataLatch.set(*data);
         }
-        cv.notify_one();
     };
 
     s.callAsync<SendData, SendData>(1, peerFD, sentData, dataBack);
 
     // Wait for the response
-    std::unique_lock<std::mutex> lock(mutex);
-    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(TIMEOUT), [&recvData]() {
-        return recvData.get() != nullptr;
-    }));
-
-    BOOST_REQUIRE(recvData);
+    std::shared_ptr<SendData> recvData(new SendData(recvDataLatch.get(TIMEOUT)));
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
@@ -521,6 +470,7 @@ BOOST_AUTO_TEST_CASE(ParseError)
 
 BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
 {
+    ValueLatch<ipc::Status> retStatusLatch;
     Service s(socketPath);
 
     auto method = [](const FileDescriptor, std::shared_ptr<ThrowOnAcceptData>&) {
@@ -531,27 +481,18 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
     s.addMethodHandler<SendData, ThrowOnAcceptData>(1, method);
     s.start();
 
-    std::mutex mutex;
-    std::condition_variable cv;
-    ipc::Status retStatus = ipc::Status::UNDEFINED;
-
     Client c(socketPath);
     c.start();
 
-    auto dataBack = [&cv, &retStatus, &mutex](ipc::Status status, std::shared_ptr<SendData>&) {
-        std::unique_lock<std::mutex> lock(mutex);
-        retStatus = status;
-        cv.notify_one();
+    auto dataBack = [&retStatusLatch](ipc::Status status, std::shared_ptr<SendData>&) {
+        retStatusLatch.set(status);
     };
 
     std::shared_ptr<SendData> sentData(new SendData(78));
     c.callAsync<SendData, SendData>(1, sentData, dataBack);
 
     // Wait for the response
-    std::unique_lock<std::mutex> lock(mutex);
-    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(TIMEOUT), [&retStatus]() {
-        return retStatus != ipc::Status::UNDEFINED;
-    }));
+    ipc::Status retStatus = retStatusLatch.get(TIMEOUT);
 
     // The disconnection might have happened:
     // - after sending the message (PEER_DISCONNECTED)
@@ -663,6 +604,7 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
 
 #if GLIB_CHECK_VERSION(2,36,0)
 
+// FIXME This test causes segfault, however it should work in GDB.
 BOOST_AUTO_TEST_CASE(ServiceGSource)
 {
     utils::Latch l;
