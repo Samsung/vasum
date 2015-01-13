@@ -67,16 +67,8 @@ extern char** environ;
 namespace vasum {
 
 
-Server::Server(const std::string& configPath, bool runAsRoot)
+Server::Server(const std::string& configPath)
     : mConfigPath(configPath)
-{
-    if (!prepareEnvironment(configPath, runAsRoot)) {
-        throw ServerException("Environment setup failed");
-    }
-}
-
-
-Server::~Server()
 {
 }
 
@@ -100,8 +92,12 @@ void signalHandler(const int sig)
 
 } // namespace
 
-void Server::run()
+void Server::run(bool asRoot)
 {
+    if (!prepareEnvironment(mConfigPath, asRoot)) {
+        throw ServerException("Environment setup failed");
+    }
+
     signal(SIGINT,  signalHandler);
     signal(SIGTERM, signalHandler);
     signal(SIGUSR1, signalHandler);

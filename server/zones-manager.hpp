@@ -52,7 +52,7 @@ public:
      *
      * @param zoneConfig config of new zone
      */
-    void createZone(const std::string& zoneConfig);
+    void createZone(const std::string& zoneConfigPath);
 
     /**
      * Destroy zone.
@@ -111,8 +111,8 @@ private:
 
     utils::Worker::Pointer mWorker;
     mutable Mutex mMutex; // used to protect mZones
-    ZonesManagerConfig mConfig;
-    std::string mConfigPath;
+    ZonesManagerConfig mConfig; //TODO make it const
+    ZonesManagerDynamicConfig mDynamicConfig;
     HostConnection mHostConnection;
     // to hold InputMonitor pointer to monitor if zone switching sequence is recognized
     std::unique_ptr<InputMonitor> mSwitchingSequenceMonitor;
@@ -121,6 +121,7 @@ private:
     ZoneMap mZones; // map of zones, id is the key
     bool mDetachOnExit;
 
+    void saveDynamicConfig();
     void switchingSequenceMonitorNotify();
     void generateNewConfig(const std::string& id,
                            const std::string& templatePath,

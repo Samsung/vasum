@@ -75,15 +75,28 @@ const boost::regex ZONE_VT_REGEX("~VT~");
 const unsigned int ZONE_IP_BASE_THIRD_OCTET = 100;
 const unsigned int ZONE_VT_BASE = 1;
 
+std::string getConfigName(const std::string& zoneId)
+{
+    return "zones/" + zoneId + ".conf";
+}
+
+template<typename T>
+void remove(std::vector<T>& v, const T& item)
+{
+    // erase-remove idiom, ask google for explanation
+    v.erase(std::remove(v.begin(), v.end(), item), v.end());
+}
+
 } // namespace
 
-ZonesManager::ZonesManager(const std::string& managerConfigPath)
-    : mWorker(utils::Worker::create()), mDetachOnExit(false)
+ZonesManager::ZonesManager(const std::string& configPath)
+    : mWorker(utils::Worker::create())
+    , mDetachOnExit(false)
 {
     LOGD("Instantiating ZonesManager object...");
 
-    mConfigPath = managerConfigPath;
-    config::loadFromFile(mConfigPath, mConfig);
+    config::loadFromFile(configPath, mConfig);
+    config::loadFromKVStoreWithJsonFile(mConfig.dbPath, configPath, mDynamicConfig);
 
     mProxyCallPolicy.reset(new ProxyCallPolicy(mConfig.proxyCallRules));
 
@@ -139,8 +152,8 @@ ZonesManager::ZonesManager(const std::string& managerConfigPath)
     mHostConnection.setRevokeDeviceCallback(bind(&ZonesManager::handleRevokeDeviceCall,
                                                  this, _1, _2, _3));
 
-    for (auto& zoneConfig : mConfig.zoneConfigs) {
-        createZone(zoneConfig);
+    for (const auto& zoneConfig : mDynamicConfig.zoneConfigs) {
+        createZone(utils::createFilePath(mConfig.zoneNewConfigPrefix, zoneConfig));
     }
 
     // check if default zone exists, throw ZoneOperationException if not found
@@ -178,11 +191,13 @@ ZonesManager::~ZonesManager()
     LOGD("ZonesManager object destroyed");
 }
 
-void ZonesManager::createZone(const std::string& zoneConfig)
+void ZonesManager::saveDynamicConfig()
 {
-    std::string baseConfigPath = utils::dirName(mConfigPath);
-    std::string zoneConfigPath = utils::getAbsolutePath(zoneConfig, baseConfigPath);
+    config::saveToKVStore(mConfig.dbPath, mDynamicConfig);
+}
 
+void ZonesManager::createZone(const std::string& zoneConfigPath)
+{
     LOGT("Creating Zone " << zoneConfigPath);
     std::unique_ptr<Zone> zone(new Zone(mWorker->createSubWorker(),
                                         mConfig.zonesPath,
@@ -217,7 +232,7 @@ void ZonesManager::createZone(const std::string& zoneConfig)
     // after zone is created successfully, put a file informing that zones are enabled
     if (mZones.size() == 1) {
         if (!utils::saveFileContent(
-                utils::createFilePath(mConfig.zonesPath, "/", ENABLED_FILE_NAME), "")) {
+                utils::createFilePath(mConfig.zonesPath, ENABLED_FILE_NAME), "")) {
             throw ZoneOperationException(ENABLED_FILE_NAME + ": cannot create.");
         }
     }
@@ -238,10 +253,14 @@ void ZonesManager::destroyZone(const std::string& zoneId)
     mZones.erase(it);
 
     if (mZones.size() == 0) {
-        if (!utils::removeFile(utils::createFilePath(mConfig.zonesPath, "/", ENABLED_FILE_NAME))) {
+        if (!utils::removeFile(utils::createFilePath(mConfig.zonesPath, ENABLED_FILE_NAME))) {
             LOGE("Failed to remove enabled file.");
         }
     }
+
+    // update dynamic config
+    remove(mDynamicConfig.zoneConfigs, getConfigName(zoneId));
+    saveDynamicConfig();
 }
 
 void ZonesManager::focus(const std::string& zoneId)
@@ -748,18 +767,17 @@ void ZonesManager::generateNewConfig(const std::string& id,
 {
     namespace fs = boost::filesystem;
 
-    std::string resultFileDir = utils::dirName(resultPath);
-    if (!fs::exists(resultFileDir)) {
-        if (!utils::createEmptyDir(resultFileDir)) {
+    if (fs::exists(resultPath)) {
+        LOGT(resultPath << " already exists, removing");
+        fs::remove(resultPath);
+    } else {
+        std::string resultFileDir = utils::dirName(resultPath);
+        if (!utils::createDirs(resultFileDir, fs::perms::owner_all |
+                                              fs::perms::group_read | fs::perms::group_exe |
+                                              fs::perms::others_read | fs::perms::others_exe)) {
             LOGE("Unable to create directory for new config.");
             throw ZoneOperationException("Unable to create directory for new config.");
         }
-    }
-
-    fs::path resultFile(resultPath);
-    if (fs::exists(resultFile)) {
-        LOGT(resultPath << " already exists, removing");
-        fs::remove(resultFile);
     }
 
     std::string config;
@@ -788,7 +806,7 @@ void ZonesManager::generateNewConfig(const std::string& id,
     }
 
     // restrict new config file so that only owner (vasum) can write it
-    fs::permissions(resultPath, fs::perms::owner_all |
+    fs::permissions(resultPath, fs::perms::owner_read | fs::perms::owner_write |
                                 fs::perms::group_read |
                                 fs::perms::others_read);
 }
@@ -817,7 +835,7 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
         return;
     }
 
-    const std::string zonePathStr = utils::createFilePath(mConfig.zonesPath, "/", id, "/");
+    const std::string zonePathStr = utils::createFilePath(mConfig.zonesPath, id, "/");
 
     // copy zone image if config contains path to image
     LOGT("Image path: " << mConfig.zoneImagePath);
@@ -834,12 +852,8 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
     }
 
     // generate paths to new configuration files
-    std::string baseDir = utils::dirName(mConfigPath);
-    std::string configDir = utils::getAbsolutePath(mConfig.zoneNewConfigPrefix, baseDir);
-    std::string templateDir = utils::getAbsolutePath(mConfig.zoneTemplatePath, baseDir);
-
-    std::string configPath = utils::createFilePath(templateDir, "/", ZONE_TEMPLATE_CONFIG_PATH);
-    std::string newConfigPath = utils::createFilePath(configDir, "/zones/", id + ".conf");
+    std::string newConfigName = getConfigName(id);
+    std::string newConfigPath = utils::createFilePath(mConfig.zoneNewConfigPrefix, newConfigName);
 
     auto removeAllWrapper = [](const std::string& path) -> bool {
         try {
@@ -852,8 +866,8 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
     };
 
     try {
-        LOGI("Generating config from " << configPath << " to " << newConfigPath);
-        generateNewConfig(id, configPath, newConfigPath);
+        LOGI("Generating config from " << mConfig.zoneTemplatePath << " to " << newConfigPath);
+        generateNewConfig(id, mConfig.zoneTemplatePath, newConfigPath);
 
     } catch (VasumException& e) {
         LOGE("Generate config failed: " << e.what());
@@ -871,6 +885,9 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
         result->setError(api::ERROR_INTERNAL, "Failed to create zone");
         return;
     }
+
+    mDynamicConfig.zoneConfigs.push_back(newConfigName);
+    saveDynamicConfig();
 
     result->setVoid();
 }

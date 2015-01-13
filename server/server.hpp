@@ -36,18 +36,12 @@ namespace vasum {
 
 class Server {
 public:
-    Server(const std::string& configPath, bool runAsRoot = true);
-    virtual ~Server();
-
-    /**
-     * Set needed caps, groups and drop root privileges.
-     */
-    static bool prepareEnvironment(const std::string& configPath, bool runAsRoot);
+    Server(const std::string& configPath);
 
     /**
      * Starts all the zones and blocks until SIGINT, SIGTERM or SIGUSR1
      */
-    void run();
+    void run(bool asRoot);
 
     /**
      * Reload the server by launching execve on itself if SIGUSR1 was sent to server.
@@ -59,8 +53,15 @@ public:
      * Equivalent of sending SIGINT or SIGTERM signal
      */
     void terminate();
+
 private:
     std::string mConfigPath;
+
+    /**
+     * Set needed caps, groups and drop root privileges.
+     */
+    static bool prepareEnvironment(const std::string& configPath, bool runAsRoot);
+
 };
 
 

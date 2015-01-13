@@ -1,4 +1,5 @@
 {
+    "dbPath" : "/tmp/ut-zones/vasum.db",
     "zoneConfigs" : ["zones/console1-dbus.conf",
                           "zones/console2-dbus.conf",
                           "zones/console3-dbus.conf"],
@@ -6,7 +7,7 @@
     "defaultId" : "ut-zones-manager-console1-dbus",
     "zonesPath" : "/tmp/ut-zones",
     "zoneImagePath" : "",
-    "zoneTemplatePath" : "templates",
+    "zoneTemplatePath" : "@VSM_TEST_CONFIG_INSTALL_DIR@/server/ut-zones-manager/templates/template.conf",
     "zoneNewConfigPrefix" : "@VSM_TEST_CONFIG_INSTALL_DIR@/server/ut-zones-manager/",
     "runMountPointPrefix" : "",
     "lxcTemplatePrefix" : "@VSM_TEST_LXC_TEMPLATES_INSTALL_DIR@",

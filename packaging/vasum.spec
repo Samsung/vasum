@@ -45,7 +45,6 @@ between them. A process from inside a zone can request a switch of context
 %dir /etc/vasum/lxc-templates
 %dir /etc/vasum/templates
 %config /etc/vasum/daemon.conf
-%config /etc/vasum/zones/*.conf
 %attr(755,root,root) /etc/vasum/lxc-templates/*.sh
 %config /etc/vasum/templates/*.conf
 %{_unitdir}/vasum.service

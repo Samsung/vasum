@@ -19,7 +19,6 @@
 
 MESSAGE(STATUS "Installing configs to " ${VSM_CONFIG_INSTALL_DIR})
 
-FILE(GLOB zone_CONF          zones/*.conf)
 FILE(GLOB admin_CONF         lxc-templates/*.sh)
 FILE(GLOB template_CONF      templates/*.conf)
 
@@ -42,8 +41,7 @@ CONFIGURE_FILE(dbus-1/system.d/org.tizen.vasum.host.conf.in
 INSTALL(FILES       ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.vasum.host.conf
         DESTINATION ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)
 
-INSTALL(FILES       ${zone_CONF}
-        DESTINATION ${VSM_CONFIG_INSTALL_DIR}/zones)
+INSTALL(DIRECTORY   DESTINATION ${VSM_CONFIG_INSTALL_DIR}/zones) #TODO temporary solution
 
 INSTALL(PROGRAMS    ${admin_CONF}
         DESTINATION ${VSM_CONFIG_INSTALL_DIR}/lxc-templates)

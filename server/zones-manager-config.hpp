@@ -36,16 +36,12 @@
 
 namespace vasum {
 
-
-const std::string ZONES_MANAGER_CONFIG_PATH = "/etc/vasum/config/daemon.conf";
-
 struct ZonesManagerConfig {
 
     /**
-     * List of zones' configs that we manage.
-     * File paths can be relative to the ZoneManager config file.
+     * Path to config database.
      */
-    std::vector<std::string> zoneConfigs;
+    std::string dbPath;
 
     /**
      * An ID of a currently focused/foreground zone.
@@ -100,7 +96,7 @@ struct ZonesManagerConfig {
 
     CONFIG_REGISTER
     (
-        zoneConfigs,
+        dbPath,
         foregroundId,
         defaultId,
         zonesPath,
@@ -114,6 +110,19 @@ struct ZonesManagerConfig {
     )
 };
 
+struct ZonesManagerDynamicConfig {
+
+    /**
+     * List of zones' configs that we manage.
+     * File paths can be relative to the ZoneManager config file.
+     */
+    std::vector<std::string> zoneConfigs;
+
+    CONFIG_REGISTER
+    (
+        zoneConfigs
+    )
+};
 
 } // namespace vasum
 

@@ -1066,6 +1066,50 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZoneTest)
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "");
 }
 
+BOOST_AUTO_TEST_CASE(CreateDestroyZonePersistenceTest)
+{
+    const std::string zone = "test1";
+
+    Latch callDone;
+    auto resultCallback = [&]() {
+        callDone.set();
+    };
+
+    auto getZoneIds = []() -> std::vector<std::string> {
+        ZonesManager cm(EMPTY_DBUS_CONFIG_PATH);
+        cm.startAll();
+
+        DbusAccessory dbus(DbusAccessory::HOST_ID);
+        return dbus.callMethodGetZoneIds();
+    };
+
+    BOOST_CHECK(getZoneIds().empty());
+
+    // create zone
+    {
+        ZonesManager cm(EMPTY_DBUS_CONFIG_PATH);
+        DbusAccessory dbus(DbusAccessory::HOST_ID);
+        dbus.callAsyncMethodCreateZone(zone, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+    }
+
+    {
+        auto ids = getZoneIds();
+        BOOST_CHECK_EQUAL(1, ids.size());
+        BOOST_CHECK(ids.at(0) == zone);
+    }
+
+    // destroy zone
+    {
+        ZonesManager cm(EMPTY_DBUS_CONFIG_PATH);
+        DbusAccessory dbus(DbusAccessory::HOST_ID);
+        dbus.callAsyncMethodDestroyZone(zone, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+    }
+
+    BOOST_CHECK(getZoneIds().empty());
+}
+
 BOOST_AUTO_TEST_CASE(StartShutdownZoneTest)
 {
     const std::string zone1 = "ut-zones-manager-console1-dbus";

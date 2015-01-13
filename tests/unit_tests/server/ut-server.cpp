@@ -36,6 +36,7 @@
 
 namespace {
 const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
+const bool AS_ROOT = true;
 
 struct Fixture {
     vasum::utils::ScopedDir mZonesPathGuard;
@@ -65,12 +66,12 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)
 {
-    BOOST_REQUIRE_THROW(Server(BUGGY_CONFIG_PATH).run(), ConfigException);
+    BOOST_REQUIRE_THROW(Server(BUGGY_CONFIG_PATH).run(AS_ROOT), ConfigException);
 }
 
 BOOST_AUTO_TEST_CASE(MissingConfigTest)
 {
-    BOOST_REQUIRE_THROW(Server(MISSING_CONFIG_PATH).run(), ConfigException);
+    BOOST_REQUIRE_THROW(Server(MISSING_CONFIG_PATH).run(AS_ROOT), ConfigException);
 }
 
 BOOST_AUTO_TEST_CASE(TerminateTest)
@@ -83,13 +84,13 @@ BOOST_AUTO_TEST_CASE(TerminateRunTest)
 {
     Server s(TEST_CONFIG_PATH);
     s.terminate();
-    s.run();
+    s.run(AS_ROOT);
 }
 
 BOOST_AUTO_TEST_CASE(RunTerminateTest)
 {
     Server s(TEST_CONFIG_PATH);
-    std::future<void> runFuture = std::async(std::launch::async, [&] {s.run();});
+    std::future<void> runFuture = std::async(std::launch::async, [&] {s.run(AS_ROOT);});
 
     // give a chance to run a thread
     std::this_thread::sleep_for(std::chrono::milliseconds(200));

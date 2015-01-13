@@ -52,11 +52,13 @@ namespace {
 const std::string PROGRAM_NAME_AND_VERSION =
     "Vasum Server " PROGRAM_VERSION;
 
+const std::string CONFIG_PATH = "/etc/vasum/daemon.conf";
+
+
 } // namespace
 
 int main(int argc, char* argv[])
 {
-    std::string configPath;
     bool runAsRoot = false;
 
     try {
@@ -67,7 +69,6 @@ int main(int argc, char* argv[])
         ("root,r", "Don't drop root privileges at startup")
         ("version,v", "show application version")
         ("log-level,l", po::value<std::string>()->default_value("DEBUG"), "set log level")
-        ("config,c", po::value<std::string>()->default_value("/etc/vasum/daemon.conf"), "server configuration file")
         ;
 
         po::variables_map vm;
@@ -108,7 +109,6 @@ int main(int argc, char* argv[])
         Logger::setLogBackend(new SystemdJournalBackend());
 #endif
 
-        configPath = vm["config"].as<std::string>();
         runAsRoot = vm.count("root") > 0;
 
     } catch (std::exception& e) {
@@ -117,8 +117,8 @@ int main(int argc, char* argv[])
     }
 
     try {
-        Server server(configPath, runAsRoot);
-        server.run();
+        Server server(CONFIG_PATH);
+        server.run(runAsRoot);
         server.reloadIfRequired(argv);
 
     } catch (std::exception& e) {

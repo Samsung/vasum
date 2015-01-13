@@ -1,11 +1,12 @@
 {
+    "dbPath" : "/tmp/ut-zones/vasum.db",
     "zoneConfigs" : ["zones/console1.conf", "missing/file/path/missing.conf", "zones/console3.conf"],
     "runMountPointPrefix" : "",
     "foregroundId" : "ut-zones-manager-console1",
     "defaultId" : "ut-zones-manager-console1",
     "zonesPath" : "/tmp/ut-zones",
     "zoneImagePath" : "",
-    "zoneTemplatePath" : "templates",
+    "zoneTemplatePath" : "@VSM_TEST_CONFIG_INSTALL_DIR@/server/ut-zones-manager/templates/template.conf",
     "zoneNewConfigPrefix" : "@VSM_TEST_CONFIG_INSTALL_DIR@/server/ut-zones-manager/",
     "lxcTemplatePrefix" : "@VSM_TEST_LXC_TEMPLATES_INSTALL_DIR@",
     "inputConfig" : {"enabled" : false,
