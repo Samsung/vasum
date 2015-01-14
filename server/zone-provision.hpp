@@ -30,6 +30,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 
 namespace vasum {
 
@@ -47,6 +48,7 @@ public:
      */
     ZoneProvision(const std::string& zonePath,
                   const std::vector<std::string>& validLinkPrefixes);
+    ~ZoneProvision();
 
     /**
      * Declare file, directory or pipe that will be created while zone startup
@@ -82,6 +84,7 @@ private:
     std::string mRootPath;
     std::string mProvisionFile;
     std::vector<std::string> mValidLinkPrefixes;
+    std::list<ZoneProvisioning::Unit> mProvisioned;
 
     void mount(const ZoneProvisioning::Mount& config);
     void umount(const ZoneProvisioning::Mount& config);

@@ -20,22 +20,21 @@
 /**
  * @file
  * @author  Mateusz Malicki (m.malicki2@samsung.com)
- * @brief   Unit tests of the ZoneProvsion class
+ * @brief   Unit tests of the ZoneProvision class
  */
 
 #include "config.hpp"
 #include "ut.hpp"
 
-#include "zone.hpp"
-
-#include "utils/glib-loop.hpp"
 #include "utils/scoped-dir.hpp"
+#include "utils/exception.hpp"
 #include "config/manager.hpp"
+#include "zone-provision.hpp"
 #include "zone-provision-config.hpp"
 #include "vasum-client.h"
 
-#include <memory>
 #include <string>
+#include <fstream>
 
 #include <boost/filesystem.hpp>
 #include <sys/mount.h>
@@ -49,8 +48,7 @@ namespace fs = boost::filesystem;
 namespace {
 
 const std::string PROVISON_CONFIG_FILE = "provision.conf";
-const std::string ZONE = "ut-zone-test";
-const fs::path TEST_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone/zones/test.conf";
+const std::string ZONE = "ut-zone-provision-test";
 const fs::path ZONES_PATH = "/tmp/ut-zones";
 const fs::path LXC_TEMPLATES_PATH = VSM_TEST_LXC_TEMPLATES_INSTALL_DIR;
 const fs::path ZONE_PATH = ZONES_PATH / fs::path(ZONE);
@@ -58,25 +56,13 @@ const fs::path PROVISION_FILE_PATH = ZONE_PATH / fs::path(PROVISON_CONFIG_FILE);
 const fs::path ROOTFS_PATH = ZONE_PATH / fs::path("rootfs");
 
 struct Fixture {
-    utils::ScopedGlibLoop mLoop;
     utils::ScopedDir mZonesPathGuard;
-    utils::ScopedDir mRunGuard;
     utils::ScopedDir mRootfsPath;
 
     Fixture()
         : mZonesPathGuard(ZONES_PATH.string())
-        , mRunGuard("/tmp/ut-run")
         , mRootfsPath(ROOTFS_PATH.string())
     {
-    }
-
-    std::unique_ptr<Zone> create(const std::string& configPath)
-    {
-        return std::unique_ptr<Zone>(new Zone(utils::Worker::create(),
-                                              ZONES_PATH.string(),
-                                              configPath,
-                                              LXC_TEMPLATES_PATH.string(),
-                                              ""));
     }
 };
 
@@ -84,6 +70,34 @@ struct Fixture {
 
 
 BOOST_FIXTURE_TEST_SUITE(ZoneProvisionSuite, Fixture)
+
+BOOST_AUTO_TEST_CASE(DestructorTest)
+{
+    const fs::path mountTarget = fs::path("/opt/usr/data/ut-from-host-provision");
+    const fs::path mountSource = fs::path("/tmp/ut-provision");
+    {
+        utils::ScopedDir provisionfs(mountSource.string());
+
+        ZoneProvisioning config;
+        ZoneProvisioning::Unit unit;
+        unit.set(ZoneProvisioning::File({VSMFILE_DIRECTORY,
+                                        mountTarget.string(),
+                                        0,
+                                        0777}));
+        config.units.push_back(unit);
+        unit.set(ZoneProvisioning::Mount({mountSource.string(),
+                                          mountTarget.string(),
+                                          "",
+                                          MS_BIND,
+                                          ""}));
+        config.units.push_back(unit);
+
+        config::saveToFile(PROVISION_FILE_PATH.string(), config);
+        ZoneProvision zoneProvision(ZONE_PATH.string(), {});
+        zoneProvision.start();
+    }
+    BOOST_CHECK(!fs::exists(mountSource));
+}
 
 BOOST_AUTO_TEST_CASE(FileTest)
 {
@@ -116,15 +130,16 @@ BOOST_AUTO_TEST_CASE(FileTest)
                                     0777}));
     config.units.push_back(unit);
     config::saveToFile(PROVISION_FILE_PATH.string(), config);
-    auto c = create(TEST_CONFIG_PATH.string());
-    c->start();
+
+    ZoneProvision zoneProvision(ZONE_PATH.string(), {});
+    zoneProvision.start();
 
     BOOST_CHECK(fs::exists(ROOTFS_PATH / regularFile.parent_path()));
     BOOST_CHECK(fs::exists(ROOTFS_PATH / regularFile));
     BOOST_CHECK(fs::exists(ROOTFS_PATH / copyFile.parent_path()));
     BOOST_CHECK(fs::exists(ROOTFS_PATH / copyFile));
 
-    c->stop();
+    zoneProvision.stop();
 }
 
 BOOST_AUTO_TEST_CASE(MountTest)
@@ -155,16 +170,16 @@ BOOST_AUTO_TEST_CASE(MountTest)
                                     O_CREAT,
                                     0777}));
     config.units.push_back(unit);
-
     config::saveToFile(PROVISION_FILE_PATH.string(), config);
-    auto c = create(TEST_CONFIG_PATH.string());
-    c->start();
+
+    ZoneProvision zoneProvision(ZONE_PATH.string(), {});
+    zoneProvision.start();
 
     BOOST_CHECK(fs::exists(ROOTFS_PATH / mountTarget));
     BOOST_CHECK(fs::exists(ROOTFS_PATH / mountTarget / sharedFile));
     BOOST_CHECK(fs::exists(mountSource / sharedFile));
 
-    c->stop();
+    zoneProvision.stop();
 }
 
 BOOST_AUTO_TEST_CASE(LinkTest)
@@ -178,15 +193,25 @@ BOOST_AUTO_TEST_CASE(LinkTest)
                                      linkFile.string()}));
     config.units.push_back(unit);
     config::saveToFile(PROVISION_FILE_PATH.string(), config);
-    auto c = create(TEST_CONFIG_PATH.string());
-    c->start();
+    {
+        ZoneProvision zoneProvision(ZONE_PATH.string(), {});
+        zoneProvision.start();
 
-    BOOST_CHECK(fs::exists(ROOTFS_PATH / linkFile));
+        BOOST_CHECK(!fs::exists(ROOTFS_PATH / linkFile));
 
-    c->stop();
+        zoneProvision.stop();
+    }
+    {
+        ZoneProvision zoneProvision(ZONE_PATH.string(), {"/tmp/"});
+        zoneProvision.start();
+
+        BOOST_CHECK(fs::exists(ROOTFS_PATH / linkFile));
+
+        zoneProvision.stop();
+    }
 }
 
-BOOST_AUTO_TEST_CASE(DeclareFile)
+BOOST_AUTO_TEST_CASE(DeclareFileTest)
 {
     ZoneProvision zoneProvision(ZONE_PATH.string(), {});
     zoneProvision.declareFile(1, "path", 0747, 0777);
@@ -204,7 +229,7 @@ BOOST_AUTO_TEST_CASE(DeclareFile)
     BOOST_CHECK_EQUAL(unit.mode, 0777);
 }
 
-BOOST_AUTO_TEST_CASE(DeclareMount)
+BOOST_AUTO_TEST_CASE(DeclareMountTest)
 {
     ZoneProvision zoneProvision(ZONE_PATH.string(), {});
     zoneProvision.declareMount("/fake/path1", "/fake/path2", "tmpfs", 077, "fake");
@@ -223,7 +248,7 @@ BOOST_AUTO_TEST_CASE(DeclareMount)
     BOOST_CHECK_EQUAL(unit.data, "fake");
 }
 
-BOOST_AUTO_TEST_CASE(DeclareLink)
+BOOST_AUTO_TEST_CASE(DeclareLinkTest)
 {
     ZoneProvision zoneProvision(ZONE_PATH.string(), {});
     zoneProvision.declareLink("/fake/path1", "/fake/path2");
@@ -237,6 +262,58 @@ BOOST_AUTO_TEST_CASE(DeclareLink)
     const ZoneProvisioning::Link& unit = config.units[0].as<ZoneProvisioning::Link>();
     BOOST_CHECK_EQUAL(unit.source, "/fake/path1");
     BOOST_CHECK_EQUAL(unit.target, "/fake/path2");
+}
+
+BOOST_AUTO_TEST_CASE(ProvisionedAlreadyTest)
+{
+    const fs::path dir = fs::path("/opt/usr/data/ut-from-host-provision");
+    const fs::path linkFile = fs::path("/ut-from-host-provision.conf");
+    const fs::path regularFile = fs::path("/opt/usr/data/ut-regular-file");
+
+    ZoneProvisioning config;
+    ZoneProvisioning::Unit unit;
+    unit.set(ZoneProvisioning::File({VSMFILE_DIRECTORY,
+                                    dir.string(),
+                                    0,
+                                    0777}));
+    config.units.push_back(unit);
+    unit.set(ZoneProvisioning::Link({PROVISION_FILE_PATH.string(),
+                                     linkFile.string()}));
+    config.units.push_back(unit);
+    unit.set(ZoneProvisioning::File({VSMFILE_REGULAR,
+                                    regularFile.string(),
+                                    O_CREAT,
+                                    0777}));
+    config.units.push_back(unit);
+
+    config::saveToFile(PROVISION_FILE_PATH.string(), config);
+
+    ZoneProvision zoneProvision(ZONE_PATH.string(), {"/tmp/"});
+    zoneProvision.start();
+
+    BOOST_CHECK(fs::exists(ROOTFS_PATH / dir));
+    BOOST_CHECK(fs::exists(ROOTFS_PATH / regularFile));
+    BOOST_CHECK(fs::is_empty(ROOTFS_PATH / regularFile));
+    BOOST_CHECK(fs::exists(ROOTFS_PATH / linkFile));
+
+    std::fstream file((ROOTFS_PATH / regularFile).string(), std::fstream::out);
+    BOOST_REQUIRE(file.is_open());
+    file << "touch" << std::endl;
+    file.close();
+    BOOST_REQUIRE(!fs::is_empty(ROOTFS_PATH / regularFile));
+
+    zoneProvision.stop();
+
+    BOOST_CHECK(fs::exists(ROOTFS_PATH / dir));
+    BOOST_CHECK(fs::exists(ROOTFS_PATH / regularFile));
+    BOOST_CHECK(!fs::is_empty(ROOTFS_PATH / regularFile));
+    BOOST_CHECK(fs::exists(ROOTFS_PATH / linkFile));
+
+    zoneProvision.start();
+
+    BOOST_CHECK(!fs::is_empty(ROOTFS_PATH / regularFile));
+
+    zoneProvision.stop();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

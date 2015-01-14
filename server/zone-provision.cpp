@@ -67,6 +67,11 @@ ZoneProvision::ZoneProvision(const std::string& zonePath,
     mValidLinkPrefixes = validLinkPrefixes;
 }
 
+ZoneProvision::~ZoneProvision()
+{
+    stop();
+}
+
 std::string ZoneProvision::getRootPath() const
 {
     return mRootPath;
@@ -118,7 +123,9 @@ void ZoneProvision::start() noexcept
                 } else if (unit.is<ZoneProvisioning::Link>()) {
                     link(unit.as<ZoneProvisioning::Link>());
                 }
-            } catch (std::exception& ex) {
+                // mProvisioned must be FILO
+                mProvisioned.push_front(unit);
+            } catch (const std::exception& ex) {
                 LOGE("Provsion error: " << ex.what());
             }
         }
@@ -127,13 +134,18 @@ void ZoneProvision::start() noexcept
 
 void ZoneProvision::stop() noexcept
 {
-    for (auto it = mProvisioningConfig.units.rbegin();
-         it != mProvisioningConfig.units.rend();
-         ++it) {
-        if (it->is<ZoneProvisioning::Mount>()) {
-            umount(it->as<ZoneProvisioning::Mount>());
+    mProvisioned.remove_if([this](const ZoneProvisioning::Unit& unit) -> bool {
+        try {
+            if (unit.is<ZoneProvisioning::Mount>()) {
+                umount(unit.as<ZoneProvisioning::Mount>());
+            }
+            // leaves files, links, fifo, untouched
+            return true;
+        } catch (const std::exception& ex) {
+            LOGE("Provsion error: " << ex.what());
+            return false;
         }
-    }
+    });
 }
 
 void ZoneProvision::file(const ZoneProvisioning::File& config)
@@ -187,7 +199,10 @@ void ZoneProvision::mount(const ZoneProvisioning::Mount& config)
 void ZoneProvision::umount(const ZoneProvisioning::Mount& config)
 {
     const fs::path hostPath = fs::path(mRootPath) / fs::path(config.target);
-    utils::umount(hostPath.string());
+    bool ret = utils::umount(hostPath.string());
+    if (!ret) {
+        throw UtilsException("Umount operation failure - path : " + config.target);
+    }
 }
 
 void ZoneProvision::link(const ZoneProvisioning::Link& config)
