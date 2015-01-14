@@ -42,6 +42,7 @@
 #include "utils/fs.hpp"
 #include "utils/img.hpp"
 #include "utils/scoped-dir.hpp"
+#include "logger/logger.hpp"
 
 #include <vector>
 #include <map>
@@ -78,6 +79,22 @@ const std::string FILE_CONTENT = "File content\n"
                                  "Line 2\n";
 const std::string NON_EXISTANT_ZONE_ID = "NON_EXISTANT_ZONE_ID";
 const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
+
+/**
+ * Currently there is no way to propagate an error from async call
+ * dropException are used to prevent system crash
+ **/
+DbusConnection::AsyncMethodCallCallback
+dropException(const DbusConnection::AsyncMethodCallCallback& fun)
+{
+    return [fun](dbus::AsyncMethodCallResult& arg) -> void {
+        try {
+            fun(arg);
+        } catch (const std::exception& ex) {
+            LOGE("Got exception: " << ex.what());
+        }
+    };
+}
 
 class DbusAccessory {
 public:
@@ -326,7 +343,7 @@ public:
                                  api::host::METHOD_CREATE_ZONE,
                                  parameters,
                                  "()",
-                                 asyncResult);
+                                 dropException(asyncResult));
     }
 
     void callAsyncMethodDestroyZone(const std::string& id,
@@ -346,7 +363,7 @@ public:
                                  api::host::METHOD_DESTROY_ZONE,
                                  parameters,
                                  "()",
-                                 asyncResult);
+                                 dropException(asyncResult));
     }
 
     void callAsyncMethodShutdownZone(const std::string& id,
@@ -366,7 +383,7 @@ public:
                                  api::host::METHOD_SHUTDOWN_ZONE,
                                  parameters,
                                  "()",
-                                 asyncResult);
+                                 dropException(asyncResult));
     }
 
     void callAsyncMethodStartZone(const std::string& id,
@@ -386,7 +403,7 @@ public:
                                  api::host::METHOD_START_ZONE,
                                  parameters,
                                  "()",
-                                 asyncResult);
+                                 dropException(asyncResult));
     }
 
     void callMethodLockZone(const std::string& id)
@@ -576,8 +593,8 @@ BOOST_AUTO_TEST_CASE(NotifyActiveZoneTest)
         dbus.second->callMethodNotify();
     }
 
-    BOOST_CHECK(signalReceivedLatch.waitForN(dbuses.size() - 1u, EVENT_TIMEOUT));
-    BOOST_CHECK(signalReceivedLatch.empty());
+    BOOST_REQUIRE(signalReceivedLatch.waitForN(dbuses.size() - 1u, EVENT_TIMEOUT));
+    BOOST_REQUIRE(signalReceivedLatch.empty());
 
     //check if there are no signals that was received more than once
     for (const auto& source : signalReceivedSourcesMap[1]) {
@@ -718,8 +735,8 @@ BOOST_AUTO_TEST_CASE(MoveFileTest)
 
     BOOST_CHECK_EQUAL(dbuses.at(1)->callMethodMove(ZONE2, TMP + "/file"),
                       api::zone::FILE_MOVE_SUCCEEDED);
-    BOOST_CHECK(notificationLatch.wait(EVENT_TIMEOUT));
-    BOOST_CHECK(notificationLatch.empty());
+    BOOST_REQUIRE(notificationLatch.wait(EVENT_TIMEOUT));
+    BOOST_REQUIRE(notificationLatch.empty());
     BOOST_CHECK_EQUAL(notificationSource, ZONE1);
     BOOST_CHECK_EQUAL(notificationPath, TMP + "/file");
     BOOST_CHECK_EQUAL(notificationRetcode, api::zone::FILE_MOVE_SUCCEEDED);
