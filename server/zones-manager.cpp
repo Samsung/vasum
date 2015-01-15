@@ -187,6 +187,8 @@ ZonesManager::~ZonesManager()
             LOGE("Failed to stop all of the zones");
         }
     }
+    // wait for all tasks to complete
+    mWorker.reset();
 
     LOGD("ZonesManager object destroyed");
 }

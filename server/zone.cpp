@@ -81,8 +81,12 @@ Zone::~Zone()
     // Make sure all OnNameLostCallbacks get finished and no new will
     // get called before proceeding further. This guarantees no race
     // condition on the reconnect thread.
-    Lock lock(mReconnectMutex);
-    disconnect();
+    {
+        Lock lock(mReconnectMutex);
+        disconnect();
+    }
+    // wait for all tasks to complete
+    mWorker.reset();
 }
 
 const std::vector<boost::regex>& Zone::getPermittedToSend() const
