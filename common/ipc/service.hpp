@@ -61,8 +61,10 @@ public:
 
     /**
      * Starts the worker and acceptor threads
+     *
+     * @param usesExternalPolling internal or external polling is used
      */
-    void start();
+    void start(const bool usesExternalPolling = false);
 
     /**
     * @return is the communication thread running

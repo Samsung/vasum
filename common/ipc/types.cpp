@@ -27,9 +27,19 @@
 #include "ipc/types.hpp"
 #include "logger/logger.hpp"
 
+#include <atomic>
 
 namespace vasum {
 namespace ipc {
+
+namespace {
+std::atomic<MessageID> gLastMessageID(0);
+} // namespace
+
+MessageID getNextMessageID()
+{
+    return ++gLastMessageID;
+}
 
 std::string toString(const Status status)
 {

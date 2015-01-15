@@ -32,7 +32,8 @@ namespace vasum {
 namespace ipc {
 
 Client::Client(const std::string& socketPath)
-    : mSocketPath(socketPath)
+    : mProcessor("[CLIENT]  "),
+      mSocketPath(socketPath)
 {
     LOGS("Client Constructor");
 }
@@ -47,19 +48,14 @@ Client::~Client()
     }
 }
 
-void Client::connect()
+void Client::start(const bool usesExternalPolling)
 {
+    LOGS("Client start");
     // Initialize the connection with the server
     LOGD("Connecting to " + mSocketPath);
     auto socketPtr = std::make_shared<Socket>(Socket::connectSocket(mSocketPath));
     mServiceFD = mProcessor.addPeer(socketPtr);
-}
-
-void Client::start()
-{
-    LOGS("Client start");
-    connect();
-    mProcessor.start();
+    mProcessor.start(usesExternalPolling);
 }
 
 bool Client::isStarted()

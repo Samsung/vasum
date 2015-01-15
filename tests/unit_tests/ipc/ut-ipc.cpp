@@ -63,7 +63,7 @@ const int TIMEOUT = 1000 /*ms*/;
 const int SHORT_OPERATION_TIME = TIMEOUT / 100;
 
 // Time that will cause "TIMEOUT" methods to throw
-const int LONG_OPERATION_TIME = 500 + TIMEOUT;
+const int LONG_OPERATION_TIME = 1000 + TIMEOUT;
 
 struct Fixture {
     std::string socketPath;
@@ -204,7 +204,7 @@ std::pair<FileDescriptor, IPCGSource::Pointer> connectServiceGSource(Service& s,
     // TODO: On timeout remove the callback
     s.setNewPeerCallback(newPeerCallback);
     s.setRemovedPeerCallback(std::bind(&IPCGSource::removeFD, ipcGSourcePtr, _1));
-
+    s.start(true);
     // Service starts to process
     ipcGSourcePtr->attach();
 
@@ -239,7 +239,7 @@ std::pair<FileDescriptor, IPCGSource::Pointer> connectClientGSource(Service& s, 
     }
 
 
-    c.connect();
+    c.start(true);
     IPCGSource::Pointer ipcGSourcePtr = IPCGSource::create(c.getFDs(),
                                                            std::bind(&Client::handle, &c, _1, _2));
 

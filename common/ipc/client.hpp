@@ -55,16 +55,11 @@ public:
     Client& operator=(const Client&) = delete;
 
     /**
-     * Places a connection request in the internal event queue.
-     *
-     * Used with an external polling loop.
-     */
-    void connect();
-
-    /**
      * Starts the worker thread
+     *
+     * @param usesExternalPolling internal or external polling is used
      */
-    void start();
+    void start(const bool usesExternalPolling = false);
 
     /**
     * @return is the communication thread running

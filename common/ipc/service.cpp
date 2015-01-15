@@ -36,7 +36,7 @@ namespace ipc {
 Service::Service(const std::string& socketPath,
                  const PeerCallback& addPeerCallback,
                  const PeerCallback& removePeerCallback)
-    : mProcessor(addPeerCallback, removePeerCallback),
+    : mProcessor("[SERVICE] ", addPeerCallback, removePeerCallback),
       mAcceptor(socketPath, std::bind(&Processor::addPeer, &mProcessor, _1))
 
 {
@@ -53,14 +53,16 @@ Service::~Service()
     }
 }
 
-void Service::start()
+void Service::start(const bool usesExternalPolling)
 {
     LOGS("Service start");
-    mProcessor.start();
+    mProcessor.start(usesExternalPolling);
 
     // There can be an incoming connection from mAcceptor before mProcessor is listening,
     // but it's OK. It will handle the connection when ready. So no need to wait for mProcessor.
-    mAcceptor.start();
+    if (!usesExternalPolling) {
+        mAcceptor.start();
+    }
 }
 
 bool Service::isStarted()

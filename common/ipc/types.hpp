@@ -39,6 +39,8 @@ typedef unsigned int MethodID;
 typedef unsigned int MessageID;
 
 typedef std::function<void(FileDescriptor)> PeerCallback;
+typedef std::function<void(int fd, std::shared_ptr<void>& data)> SerializeCallback;
+typedef std::function<std::shared_ptr<void>(int fd)> ParseCallback;
 
 enum class Status : int {
     OK = 0,
@@ -53,6 +55,8 @@ enum class Status : int {
 
 std::string toString(const Status status);
 void throwOnError(const Status status);
+MessageID getNextMessageID();
+
 
 template<typename SentDataType, typename ReceivedDataType>
 struct MethodHandler {
