@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(DestructorTest)
                                           ""}));
         config.units.push_back(unit);
 
-        config::saveToFile(PROVISION_FILE_PATH.string(), config);
+        config::saveToJsonFile(PROVISION_FILE_PATH.string(), config);
         ZoneProvision zoneProvision(ZONE_PATH.string(), {});
         zoneProvision.start();
     }
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(FileTest)
                                     0,
                                     0777}));
     config.units.push_back(unit);
-    config::saveToFile(PROVISION_FILE_PATH.string(), config);
+    config::saveToJsonFile(PROVISION_FILE_PATH.string(), config);
 
     ZoneProvision zoneProvision(ZONE_PATH.string(), {});
     zoneProvision.start();
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(MountTest)
                                     O_CREAT,
                                     0777}));
     config.units.push_back(unit);
-    config::saveToFile(PROVISION_FILE_PATH.string(), config);
+    config::saveToJsonFile(PROVISION_FILE_PATH.string(), config);
 
     ZoneProvision zoneProvision(ZONE_PATH.string(), {});
     zoneProvision.start();
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE(LinkTest)
     unit.set(ZoneProvisioning::Link({PROVISION_FILE_PATH.string(),
                                      linkFile.string()}));
     config.units.push_back(unit);
-    config::saveToFile(PROVISION_FILE_PATH.string(), config);
+    config::saveToJsonFile(PROVISION_FILE_PATH.string(), config);
     {
         ZoneProvision zoneProvision(ZONE_PATH.string(), {});
         zoneProvision.start();
@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE(DeclareFileTest)
     zoneProvision.declareFile(2, "path", 0747, 0777);
 
     ZoneProvisioning config;
-    BOOST_REQUIRE_NO_THROW(loadFromFile(PROVISION_FILE_PATH.string(), config));
+    BOOST_REQUIRE_NO_THROW(loadFromJsonFile(PROVISION_FILE_PATH.string(), config));
     BOOST_REQUIRE_EQUAL(config.units.size(), 2);
     BOOST_REQUIRE(config.units[0].is<ZoneProvisioning::File>());
     BOOST_REQUIRE(config.units[1].is<ZoneProvisioning::File>());
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(DeclareMountTest)
     zoneProvision.declareMount("/fake/path2", "/fake/path2", "tmpfs", 077, "fake");
 
     ZoneProvisioning config;
-    BOOST_REQUIRE_NO_THROW(loadFromFile(PROVISION_FILE_PATH.string(), config));
+    BOOST_REQUIRE_NO_THROW(loadFromJsonFile(PROVISION_FILE_PATH.string(), config));
     BOOST_REQUIRE_EQUAL(config.units.size(), 2);
     BOOST_REQUIRE(config.units[0].is<ZoneProvisioning::Mount>());
     BOOST_REQUIRE(config.units[1].is<ZoneProvisioning::Mount>());
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(DeclareLinkTest)
     zoneProvision.declareLink("/fake/path2", "/fake/path2");
 
     ZoneProvisioning config;
-    BOOST_REQUIRE_NO_THROW(loadFromFile(PROVISION_FILE_PATH.string(), config));
+    BOOST_REQUIRE_NO_THROW(loadFromJsonFile(PROVISION_FILE_PATH.string(), config));
     BOOST_REQUIRE_EQUAL(config.units.size(), 2);
     BOOST_REQUIRE(config.units[0].is<ZoneProvisioning::Link>());
     BOOST_REQUIRE(config.units[1].is<ZoneProvisioning::Link>());
@@ -286,7 +286,7 @@ BOOST_AUTO_TEST_CASE(ProvisionedAlreadyTest)
                                     0777}));
     config.units.push_back(unit);
 
-    config::saveToFile(PROVISION_FILE_PATH.string(), config);
+    config::saveToJsonFile(PROVISION_FILE_PATH.string(), config);
 
     ZoneProvision zoneProvision(ZONE_PATH.string(), {"/tmp/"});
     zoneProvision.start();

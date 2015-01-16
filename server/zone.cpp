@@ -58,7 +58,7 @@ Zone::Zone(const utils::Worker::Pointer& worker,
            const std::string& baseRunMountPointPath)
     : mWorker(worker)
 {
-    config::loadFromFile(zoneConfigPath, mConfig);
+    config::loadFromJsonFile(zoneConfigPath, mConfig);
 
     for (std::string r: mConfig.permittedToSend) {
         mPermittedToSend.push_back(boost::regex(r));

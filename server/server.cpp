@@ -144,7 +144,7 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
 
     // TODO: currently this config is loaded twice: here and in ZonesManager
     ZonesManagerConfig config;
-    config::loadFromFile(configPath, config);
+    config::loadFromJsonFile(configPath, config);
 
     struct passwd* pwd = ::getpwnam(VASUM_USER);
     if (pwd == NULL) {

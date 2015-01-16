@@ -51,10 +51,10 @@ void declareUnit(const std::string& file, ZoneProvisioning::Unit&& unit)
      // TODO: Add to the dynamic configuration
     ZoneProvisioning config;
     if (fs::exists(file)) {
-        config::loadFromFile(file, config);
+        config::loadFromJsonFile(file, config);
     }
     config.units.push_back(std::move(unit));
-    config::saveToFile(file, config);
+    config::saveToJsonFile(file, config);
 }
 
 } // namespace
@@ -113,7 +113,7 @@ void ZoneProvision::declareLink(const std::string& source,
 void ZoneProvision::start() noexcept
 {
     if (fs::exists(mProvisionFile)) {
-        config::loadFromFile(mProvisionFile, mProvisioningConfig);
+        config::loadFromJsonFile(mProvisionFile, mProvisioningConfig);
         for (const auto& unit : mProvisioningConfig.units) {
             try {
                 if (unit.is<ZoneProvisioning::File>()) {

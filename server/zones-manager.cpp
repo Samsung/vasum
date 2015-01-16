@@ -64,8 +64,8 @@ bool regexMatchVector(const std::string& str, const std::vector<boost::regex>& v
     return false;
 }
 
+const std::string DB_PREFIX = "daemon";
 const std::string HOST_ID = "host";
-const std::string ZONE_TEMPLATE_CONFIG_PATH = "template.conf";
 const std::string ENABLED_FILE_NAME = "enabled";
 
 const boost::regex ZONE_NAME_REGEX("~NAME~");
@@ -95,8 +95,8 @@ ZonesManager::ZonesManager(const std::string& configPath)
 {
     LOGD("Instantiating ZonesManager object...");
 
-    config::loadFromFile(configPath, mConfig);
-    config::loadFromKVStoreWithJsonFile(mConfig.dbPath, configPath, mDynamicConfig);
+    config::loadFromJsonFile(configPath, mConfig);
+    config::loadFromKVStoreWithJsonFile(mConfig.dbPath, configPath, mDynamicConfig, DB_PREFIX);
 
     mProxyCallPolicy.reset(new ProxyCallPolicy(mConfig.proxyCallRules));
 
@@ -195,7 +195,7 @@ ZonesManager::~ZonesManager()
 
 void ZonesManager::saveDynamicConfig()
 {
-    config::saveToKVStore(mConfig.dbPath, mDynamicConfig);
+    config::saveToKVStore(mConfig.dbPath, mDynamicConfig, DB_PREFIX);
 }
 
 void ZonesManager::createZone(const std::string& zoneConfigPath)

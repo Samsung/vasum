@@ -56,7 +56,7 @@ struct Fixture {
 
     std::unique_ptr<ZoneAdmin> create(const std::string& configPath)
     {
-        config::loadFromFile(configPath, mConfig);
+        config::loadFromJsonFile(configPath, mConfig);
         return std::unique_ptr<ZoneAdmin>(new ZoneAdmin(ZONES_PATH,
                                                                   LXC_TEMPLATES_PATH,
                                                                   mConfig));

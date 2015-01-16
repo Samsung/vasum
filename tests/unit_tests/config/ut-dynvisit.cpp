@@ -37,9 +37,11 @@ namespace fs = boost::filesystem;
 
 struct Fixture {
     std::string dbPath;
+    std::string dbPrefix;
 
     Fixture()
         : dbPath(fs::unique_path("/tmp/kvstore-%%%%.db3").string())
+        , dbPrefix("conf")
     {
         fs::remove(dbPath);
     }
@@ -54,7 +56,7 @@ BOOST_FIXTURE_TEST_SUITE(DynVisitSuite, Fixture)
 void checkJsonConfig(const TestConfig& cfg, const std::string& json)
 {
     TestConfig cfg2;
-    loadFromString(json, cfg2);
+    loadFromJsonString(json, cfg2);
     BOOST_CHECK_EQUAL(cfg2.intVal, cfg.intVal);
     BOOST_CHECK_EQUAL(cfg.int64Val, cfg.int64Val);
     BOOST_CHECK_EQUAL(cfg2.boolVal, cfg.boolVal);
@@ -66,34 +68,34 @@ void checkJsonConfig(const TestConfig& cfg, const std::string& json)
 void checkKVConfig(const TestConfig& cfg, const std::string& db)
 {
     KVStore store(db);
-    BOOST_CHECK_EQUAL(store.get<int>(".intVal"), cfg.intVal);
-    BOOST_CHECK_EQUAL(store.get<int64_t>(".int64Val"), cfg.int64Val);
-    BOOST_CHECK_EQUAL(store.get<bool>(".boolVal"), cfg.boolVal);
-    BOOST_CHECK_EQUAL(store.get<std::string>(".stringVal"), cfg.stringVal);
-    BOOST_CHECK_EQUAL(store.get<int>(".intVector"), cfg.intVector.size());
-    BOOST_CHECK_EQUAL(store.get<int>(".subObj.intVal"), cfg.subObj.intVal);
+    BOOST_CHECK_EQUAL(store.get<int>("conf.intVal"), cfg.intVal);
+    BOOST_CHECK_EQUAL(store.get<int64_t>("conf.int64Val"), cfg.int64Val);
+    BOOST_CHECK_EQUAL(store.get<bool>("conf.boolVal"), cfg.boolVal);
+    BOOST_CHECK_EQUAL(store.get<std::string>("conf.stringVal"), cfg.stringVal);
+    BOOST_CHECK_EQUAL(store.get<int>("conf.intVector"), cfg.intVector.size());
+    BOOST_CHECK_EQUAL(store.get<int>("conf.subObj.intVal"), cfg.subObj.intVal);
 }
 
 BOOST_AUTO_TEST_CASE(ReadConfigDefaults)
 {
     TestConfig cfg;
-    loadFromKVStoreWithJson(dbPath, jsonTestString, cfg);
+    loadFromKVStoreWithJson(dbPath, jsonTestString, cfg, dbPrefix);
     checkJsonConfig(cfg, jsonTestString);
 }
 
 BOOST_AUTO_TEST_CASE(ReadConfigNoDefaults)
 {
     TestConfig cfg;
-    loadFromKVStoreWithJson(dbPath, jsonTestString, cfg);
+    loadFromKVStoreWithJson(dbPath, jsonTestString, cfg, dbPrefix);
     // modify and save config
     cfg.intVal += 5;
     cfg.int64Val += 7777;
     cfg.boolVal = !cfg.boolVal;
     cfg.stringVal += "-changed";
-    config::saveToKVStore(dbPath, cfg);
+    config::saveToKVStore(dbPath, cfg, dbPrefix);
 
     TestConfig cfg2;
-    loadFromKVStoreWithJson(dbPath, jsonTestString, cfg2);
+    loadFromKVStoreWithJson(dbPath, jsonTestString, cfg2, dbPrefix);
     checkKVConfig(cfg2, dbPath);
 }
 

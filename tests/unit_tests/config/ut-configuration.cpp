@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(FromStringTest)
 {
     TestConfig testConfig;
 
-    BOOST_REQUIRE_NO_THROW(loadFromString(jsonTestString, testConfig));
+    BOOST_REQUIRE_NO_THROW(loadFromJsonString(jsonTestString, testConfig));
 
     BOOST_CHECK_EQUAL(12345, testConfig.intVal);
     BOOST_CHECK_EQUAL(-1234567890123456789ll, testConfig.int64Val);
@@ -91,13 +91,13 @@ BOOST_AUTO_TEST_CASE(FromStringTest)
 BOOST_AUTO_TEST_CASE(ToStringTest)
 {
     TestConfig testConfig;
-    BOOST_REQUIRE_NO_THROW(loadFromString(jsonTestString, testConfig));
+    BOOST_REQUIRE_NO_THROW(loadFromJsonString(jsonTestString, testConfig));
 
-    std::string out = saveToString(testConfig);
+    std::string out = saveToJsonString(testConfig);
     BOOST_CHECK_EQUAL(out, jsonTestString);
 
     TestConfig::SubConfigOption unionConfig;
-    BOOST_CHECK_THROW(saveToString(unionConfig), ConfigException);
+    BOOST_CHECK_THROW(saveToJsonString(unionConfig), ConfigException);
 }
 
 namespace loadErrorsTest {
@@ -129,70 +129,70 @@ BOOST_AUTO_TEST_CASE(LoadErrorsTest)
     using namespace loadErrorsTest;
 
     IntConfig config;
-    BOOST_REQUIRE_NO_THROW(loadFromString("{\"field\":1}", config));
+    BOOST_REQUIRE_NO_THROW(loadFromJsonString("{\"field\":1}", config));
 
-    BOOST_CHECK_THROW(loadFromString("", config), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{", config), ConfigException); // invalid json
-    BOOST_CHECK_THROW(loadFromString("{}", config), ConfigException); // missing field
+    BOOST_CHECK_THROW(loadFromJsonString("", config), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{", config), ConfigException); // invalid json
+    BOOST_CHECK_THROW(loadFromJsonString("{}", config), ConfigException); // missing field
 
     // invalid type
 
     IntConfig intConfig;
-    BOOST_CHECK_NO_THROW(loadFromString("{\"field\": 1}", intConfig));
-    BOOST_CHECK_THROW(loadFromString("{\"field\": \"1\"}", intConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": 1.0}", intConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": true}", intConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": []}", intConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": {}}", intConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": 1234567890123456789}", intConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": -1234567890123456789}", intConfig), ConfigException);
+    BOOST_CHECK_NO_THROW(loadFromJsonString("{\"field\": 1}", intConfig));
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": \"1\"}", intConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": 1.0}", intConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": true}", intConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": []}", intConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": {}}", intConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": 1234567890123456789}", intConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": -1234567890123456789}", intConfig), ConfigException);
 
     StringConfig stringConfig;
-    BOOST_CHECK_THROW(loadFromString("{\"field\": 1}", stringConfig), ConfigException);
-    BOOST_CHECK_NO_THROW(loadFromString("{\"field\": \"1\"}", stringConfig));
-    BOOST_CHECK_THROW(loadFromString("{\"field\": 1.0}", stringConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": true}", stringConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": []}", stringConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": {}}", stringConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": 1}", stringConfig), ConfigException);
+    BOOST_CHECK_NO_THROW(loadFromJsonString("{\"field\": \"1\"}", stringConfig));
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": 1.0}", stringConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": true}", stringConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": []}", stringConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": {}}", stringConfig), ConfigException);
 
     DoubleConfig doubleConfig;
-    BOOST_CHECK_THROW(loadFromString("{\"field\": 1}", doubleConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": \"1\"}", doubleConfig), ConfigException);
-    BOOST_CHECK_NO_THROW(loadFromString("{\"field\": 1.0}", doubleConfig));
-    BOOST_CHECK_THROW(loadFromString("{\"field\": true}", doubleConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": []}", doubleConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": {}}", doubleConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": 1}", doubleConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": \"1\"}", doubleConfig), ConfigException);
+    BOOST_CHECK_NO_THROW(loadFromJsonString("{\"field\": 1.0}", doubleConfig));
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": true}", doubleConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": []}", doubleConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": {}}", doubleConfig), ConfigException);
 
     BoolConfig boolConfig;
-    BOOST_CHECK_THROW(loadFromString("{\"field\": 1}", boolConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": \"1\"}", boolConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": 1.0}", boolConfig), ConfigException);
-    BOOST_CHECK_NO_THROW(loadFromString("{\"field\": true}", boolConfig));
-    BOOST_CHECK_THROW(loadFromString("{\"field\": []}", boolConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": {}}", boolConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": 1}", boolConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": \"1\"}", boolConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": 1.0}", boolConfig), ConfigException);
+    BOOST_CHECK_NO_THROW(loadFromJsonString("{\"field\": true}", boolConfig));
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": []}", boolConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": {}}", boolConfig), ConfigException);
 
     ArrayConfig arrayConfig;
-    BOOST_CHECK_THROW(loadFromString("{\"field\": 1}", arrayConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": \"1\"}", arrayConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": 1.0}", arrayConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": true}", arrayConfig), ConfigException);
-    BOOST_CHECK_NO_THROW(loadFromString("{\"field\": []}", arrayConfig));
-    BOOST_CHECK_THROW(loadFromString("{\"field\": {}}", arrayConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": 1}", arrayConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": \"1\"}", arrayConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": 1.0}", arrayConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": true}", arrayConfig), ConfigException);
+    BOOST_CHECK_NO_THROW(loadFromJsonString("{\"field\": []}", arrayConfig));
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": {}}", arrayConfig), ConfigException);
 
     ObjectConfig objectConfig;
-    BOOST_CHECK_THROW(loadFromString("{\"field\": 1}", objectConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": \"1\"}", objectConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": 1.0}", objectConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": true}", objectConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": []}", objectConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"field\": {}}", objectConfig), ConfigException);
-    BOOST_CHECK_NO_THROW(loadFromString("{\"field\": {\"field\": 1}}", objectConfig));
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": 1}", objectConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": \"1\"}", objectConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": 1.0}", objectConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": true}", objectConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": []}", objectConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"field\": {}}", objectConfig), ConfigException);
+    BOOST_CHECK_NO_THROW(loadFromJsonString("{\"field\": {\"field\": 1}}", objectConfig));
 
     UnionConfig unionConfig;
-    BOOST_CHECK_THROW(loadFromString("{\"type\": \"long\", \"value\": 1}", unionConfig), ConfigException);
-    BOOST_CHECK_THROW(loadFromString("{\"type\": \"int\"}", unionConfig), ConfigException);
-    BOOST_CHECK_NO_THROW(loadFromString("{\"type\": \"int\", \"value\": 1}", unionConfig));
-    BOOST_CHECK_NO_THROW(loadFromString("{\"type\": \"bool\", \"value\": true}", unionConfig));
+    BOOST_CHECK_THROW(loadFromJsonString("{\"type\": \"long\", \"value\": 1}", unionConfig), ConfigException);
+    BOOST_CHECK_THROW(loadFromJsonString("{\"type\": \"int\"}", unionConfig), ConfigException);
+    BOOST_CHECK_NO_THROW(loadFromJsonString("{\"type\": \"int\", \"value\": 1}", unionConfig));
+    BOOST_CHECK_NO_THROW(loadFromJsonString("{\"type\": \"bool\", \"value\": true}", unionConfig));
 }
 
 namespace hasVisitableTest {
@@ -247,15 +247,15 @@ BOOST_AUTO_TEST_CASE(HasVisibleInternalHelperTest)
 BOOST_AUTO_TEST_CASE(FromToKVStoreTest)
 {
     TestConfig config;
-    loadFromString(jsonTestString, config);
+    loadFromJsonString(jsonTestString, config);
 
     std::string dbPath = fs::unique_path("/tmp/kvstore-%%%%.db3").string();
 
-    saveToKVStore(dbPath, config);
+    saveToKVStore(dbPath, config, "prefix");
     TestConfig outConfig;
-    loadFromKVStore(dbPath, outConfig);
+    loadFromKVStore(dbPath, outConfig, "prefix");
 
-    std::string out = saveToString(outConfig);
+    std::string out = saveToJsonString(outConfig);
     BOOST_CHECK_EQUAL(out, jsonTestString);
 
     fs::remove(dbPath);
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(FromToKVStoreTest)
 BOOST_AUTO_TEST_CASE(FromToFDTest)
 {
     TestConfig config;
-    loadFromString(jsonTestString, config);
+    loadFromJsonString(jsonTestString, config);
     // Setup fd
     std::string fifoPath = fs::unique_path("/tmp/fdstore-%%%%").string();
     BOOST_CHECK(::mkfifo(fifoPath.c_str(), S_IWUSR | S_IRUSR) >= 0);
@@ -276,7 +276,7 @@ BOOST_AUTO_TEST_CASE(FromToFDTest)
     saveToFD(fd, config);
     TestConfig outConfig;
     loadFromFD(fd, outConfig);
-    std::string out = saveToString(outConfig);
+    std::string out = saveToJsonString(outConfig);
     BOOST_CHECK_EQUAL(out, jsonTestString);
 
     // Cleanup
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE(FromToFDTest)
 BOOST_AUTO_TEST_CASE(ConfigUnionTest)
 {
     TestConfig testConfig;
-    BOOST_REQUIRE_NO_THROW(loadFromString(jsonTestString, testConfig));
+    BOOST_REQUIRE_NO_THROW(loadFromJsonString(jsonTestString, testConfig));
 
     BOOST_CHECK(testConfig.union1.is<int>());
     BOOST_CHECK(!testConfig.union1.is<TestConfig::SubConfig>());
@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_CASE(ConfigUnionTest)
     BOOST_CHECK_EQUAL(subConfig.intVal, 54321);
     BOOST_CHECK(testConfig.unions[0].is<int>());
     BOOST_CHECK(testConfig.unions[1].is<TestConfig::SubConfig>());
-    std::string out = saveToString(testConfig);
+    std::string out = saveToJsonString(testConfig);
     BOOST_CHECK_EQUAL(out, jsonTestString);
 
     //Check copy
@@ -326,7 +326,7 @@ BOOST_AUTO_TEST_CASE(ConfigUnionTest)
 
     testConfig.unions.clear();
     testConfig.unions = unions;
-    out = saveToString(testConfig);
+    out = saveToJsonString(testConfig);
     BOOST_CHECK_EQUAL(out, jsonTestString);
 }
 
