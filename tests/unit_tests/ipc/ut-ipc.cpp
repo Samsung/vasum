@@ -160,7 +160,6 @@ FileDescriptor connect(Service& s, Client& c)
         cv.notify_all();
     };
 
-    // TODO: On timeout remove the callback
     s.setNewPeerCallback(newPeerCallback);
 
     if (!s.isStarted()) {
@@ -171,9 +170,12 @@ FileDescriptor connect(Service& s, Client& c)
 
 
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(3 * TIMEOUT), [&peerFD]() {
+    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(3 * TIMEOUT), [&peerFD]() {
         return peerFD != 0;
     }));
+    // Remove the callback
+    s.setNewPeerCallback(nullptr);
+    BOOST_REQUIRE(peerFD != 0);
 
     return peerFD;
 }
@@ -201,7 +203,6 @@ std::pair<FileDescriptor, IPCGSource::Pointer> connectServiceGSource(Service& s,
     };
 
 
-    // TODO: On timeout remove the callback
     s.setNewPeerCallback(newPeerCallback);
     s.setRemovedPeerCallback(std::bind(&IPCGSource::removeFD, ipcGSourcePtr, _1));
     s.start(true);
@@ -211,9 +212,12 @@ std::pair<FileDescriptor, IPCGSource::Pointer> connectServiceGSource(Service& s,
     c.start();
 
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(3 * TIMEOUT), [&peerFD]() {
+    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(3 * TIMEOUT), [&peerFD]() {
         return peerFD != 0;
     }));
+    // remove the callback
+    s.setNewPeerCallback(nullptr);
+    BOOST_REQUIRE(peerFD != 0);
 
     return std::make_pair(peerFD, ipcGSourcePtr);
 }
@@ -230,7 +234,6 @@ std::pair<FileDescriptor, IPCGSource::Pointer> connectClientGSource(Service& s, 
         peerFD = newFD;
         cv.notify_all();
     };
-    // TODO: On timeout remove the callback
     s.setNewPeerCallback(newPeerCallback);
 
     if (!s.isStarted()) {
@@ -246,9 +249,12 @@ std::pair<FileDescriptor, IPCGSource::Pointer> connectClientGSource(Service& s, 
     ipcGSourcePtr->attach();
 
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(3 * TIMEOUT), [&peerFD]() {
+    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(3 * TIMEOUT), [&peerFD]() {
         return peerFD != 0;
     }));
+    // Remove the callback
+    s.setNewPeerCallback(nullptr);
+    BOOST_REQUIRE(peerFD != 0);
 
     return std::make_pair(peerFD, ipcGSourcePtr);
 }
@@ -407,6 +413,12 @@ BOOST_AUTO_TEST_CASE(SyncServiceToClientEcho)
 
 BOOST_AUTO_TEST_CASE(AsyncClientToServiceEcho)
 {
+    std::mutex mutex;
+    std::condition_variable cv;
+
+    std::shared_ptr<SendData> sentData(new SendData(34));
+    std::shared_ptr<SendData> recvData;
+
     // Setup Service and Client
     Service s(socketPath);
     s.addMethodHandler<SendData, SendData>(1, echoCallback);
@@ -414,46 +426,44 @@ BOOST_AUTO_TEST_CASE(AsyncClientToServiceEcho)
     Client c(socketPath);
     c.start();
 
-    std::mutex mutex;
-    std::condition_variable cv;
-
     //Async call
-    std::shared_ptr<SendData> sentData(new SendData(34));
-    std::shared_ptr<SendData> recvData;
     auto dataBack = [&cv, &recvData, &mutex](ipc::Status status, std::shared_ptr<SendData>& data) {
-        BOOST_CHECK(status == ipc::Status::OK);
-        std::unique_lock<std::mutex> lock(mutex);
-        recvData = data;
+        if (status == ipc::Status::OK) {
+            std::unique_lock<std::mutex> lock(mutex);
+            recvData = data;
+        }
         cv.notify_one();
     };
     c.callAsync<SendData, SendData>(1, sentData, dataBack);
 
     // Wait for the response
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(TIMEOUT), [&recvData]() {
+    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(TIMEOUT), [&recvData]() {
         return static_cast<bool>(recvData);
     }));
-
+    BOOST_REQUIRE(recvData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
 BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
 {
+    std::shared_ptr<SendData> sentData(new SendData(56));
+    std::shared_ptr<SendData> recvData;
+
+    std::mutex mutex;
+    std::condition_variable cv;
+
     Service s(socketPath);
     Client c(socketPath);
     c.addMethodHandler<SendData, SendData>(1, echoCallback);
     FileDescriptor peerFD = connect(s, c);
 
     // Async call
-    std::shared_ptr<SendData> sentData(new SendData(56));
-    std::shared_ptr<SendData> recvData;
-
-    std::mutex mutex;
-    std::condition_variable cv;
     auto dataBack = [&cv, &recvData, &mutex](ipc::Status status, std::shared_ptr<SendData>& data) {
-        BOOST_CHECK(status == ipc::Status::OK);
-        std::unique_lock<std::mutex> lock(mutex);
-        recvData = data;
+        if (status == ipc::Status::OK) {
+            std::unique_lock<std::mutex> lock(mutex);
+            recvData = data;
+        }
         cv.notify_one();
     };
 
@@ -461,10 +471,11 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
 
     // Wait for the response
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(TIMEOUT), [&recvData]() {
+    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(TIMEOUT), [&recvData]() {
         return recvData.get() != nullptr;
     }));
 
+    BOOST_REQUIRE(recvData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
@@ -520,12 +531,12 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
     s.addMethodHandler<SendData, ThrowOnAcceptData>(1, method);
     s.start();
 
-    Client c(socketPath);
-    c.start();
-
     std::mutex mutex;
     std::condition_variable cv;
     ipc::Status retStatus = ipc::Status::UNDEFINED;
+
+    Client c(socketPath);
+    c.start();
 
     auto dataBack = [&cv, &retStatus, &mutex](ipc::Status status, std::shared_ptr<SendData>&) {
         std::unique_lock<std::mutex> lock(mutex);
@@ -538,7 +549,7 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
 
     // Wait for the response
     std::unique_lock<std::mutex> lock(mutex);
-    BOOST_CHECK(cv.wait_for(lock, std::chrono::milliseconds(TIMEOUT), [&retStatus]() {
+    BOOST_REQUIRE(cv.wait_for(lock, std::chrono::milliseconds(TIMEOUT), [&retStatus]() {
         return retStatus != ipc::Status::UNDEFINED;
     }));
 
@@ -588,16 +599,17 @@ BOOST_AUTO_TEST_CASE(WriteTimeout)
 
 BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
 {
+    utils::Latch latchA;
+    utils::Latch latchB;
+
     Service s(socketPath);
     Client c(socketPath);
     connect(s, c);
 
-    utils::Latch latchA;
     auto handlerA = [&latchA](const FileDescriptor, std::shared_ptr<SendData>&) {
         latchA.set();
     };
 
-    utils::Latch latchB;
     auto handlerB = [&latchB](const FileDescriptor, std::shared_ptr<SendData>&) {
         latchB.set();
     };
@@ -619,15 +631,16 @@ BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
 
 BOOST_AUTO_TEST_CASE(AddSignalOffline)
 {
+    utils::Latch latchA;
+    utils::Latch latchB;
+
     Service s(socketPath);
     Client c(socketPath);
 
-    utils::Latch latchA;
     auto handlerA = [&latchA](const FileDescriptor, std::shared_ptr<SendData>&) {
         latchA.set();
     };
 
-    utils::Latch latchB;
     auto handlerB = [&latchB](const FileDescriptor, std::shared_ptr<SendData>&) {
         latchB.set();
     };
@@ -652,8 +665,9 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
 
 BOOST_AUTO_TEST_CASE(ServiceGSource)
 {
-    ScopedGlibLoop loop;
     utils::Latch l;
+    ScopedGlibLoop loop;
+
     auto signalHandler = [&l](const FileDescriptor, std::shared_ptr<SendData>&) {
         l.set();
     };
@@ -678,9 +692,9 @@ BOOST_AUTO_TEST_CASE(ServiceGSource)
 
 BOOST_AUTO_TEST_CASE(ClientGSource)
 {
+    utils::Latch l;
     ScopedGlibLoop loop;
 
-    utils::Latch l;
     auto signalHandler = [&l](const FileDescriptor, std::shared_ptr<SendData>&) {
         l.set();
     };
