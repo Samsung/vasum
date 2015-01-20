@@ -1,26 +1,26 @@
-// /*
-// *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
-// *
-// *  Contact: Jan Olszak <j.olszak@samsung.com>
-// *
-// *  Licensed under the Apache License, Version 2.0 (the "License");
-// *  you may not use this file except in compliance with the License.
-// *  You may obtain a copy of the License at
-// *
-// *      http://www.apache.org/licenses/LICENSE-2.0
-// *
-// *  Unless required by applicable law or agreed to in writing, software
-// *  distributed under the License is distributed on an "AS IS" BASIS,
-// *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// *  See the License for the specific language governing permissions and
-// *  limitations under the License
-// */
+/*
+*  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
+*
+*  Contact: Jan Olszak <j.olszak@samsung.com>
+*
+*  Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License
+*/
 
-// /**
-//  * @file
-//  * @author  Jan Olszak (j.olszak@samsung.com)
-//  * @brief   Implementation of the IPC handling class
-//  */
+/**
+ * @file
+ * @author  Jan Olszak (j.olszak@samsung.com)
+ * @brief   Implementation of the IPC handling class
+ */
 
 #include "config.hpp"
 
@@ -36,11 +36,13 @@ namespace ipc {
 Service::Service(const std::string& socketPath,
                  const PeerCallback& addPeerCallback,
                  const PeerCallback& removePeerCallback)
-    : mProcessor("[SERVICE] ", addPeerCallback, removePeerCallback),
+    : mProcessor("[SERVICE] "),
       mAcceptor(socketPath, std::bind(&Processor::addPeer, &mProcessor, _1))
 
 {
     LOGS("Service Constructor");
+    setNewPeerCallback(addPeerCallback);
+    setRemovedPeerCallback(removePeerCallback);
 }
 
 Service::~Service()
@@ -56,6 +58,9 @@ Service::~Service()
 void Service::start(const bool usesExternalPolling)
 {
     LOGS("Service start");
+    if (usesExternalPolling) {
+        startPoll();
+    }
     mProcessor.start(usesExternalPolling);
 
     // There can be an incoming connection from mAcceptor before mProcessor is listening,
@@ -75,20 +80,43 @@ void Service::stop()
     LOGS("Service stop");
     mAcceptor.stop();
     mProcessor.stop();
+
+    if (mIPCGSourcePtr) {
+        stopPoll();
+    }
 }
 
-std::vector<FileDescriptor> Service::getFDs()
+void Service::startPoll()
 {
-    std::vector<FileDescriptor> fds;
-    fds.push_back(mAcceptor.getEventFD());
-    fds.push_back(mAcceptor.getConnectionFD());
-    fds.push_back(mProcessor.getEventFD());
+    LOGS("Service startPoll");
 
-    return fds;
+    mIPCGSourcePtr = IPCGSource::create(std::bind(&Service::handle, this, _1, _2));
+    mIPCGSourcePtr->addFD(mAcceptor.getEventFD());
+    mIPCGSourcePtr->addFD(mAcceptor.getConnectionFD());
+    mIPCGSourcePtr->addFD(mProcessor.getEventFD());
+    mIPCGSourcePtr->attach();
+}
+
+void Service::stopPoll()
+{
+    LOGS("Service stopPoll");
+
+    mIPCGSourcePtr->removeFD(mAcceptor.getEventFD());
+    mIPCGSourcePtr->removeFD(mAcceptor.getConnectionFD());
+    mIPCGSourcePtr->removeFD(mProcessor.getEventFD());
+    mIPCGSourcePtr->detach();
+    mIPCGSourcePtr.reset();
 }
 
 void Service::handle(const FileDescriptor fd, const short pollEvent)
 {
+    LOGS("Service handle");
+
+    if (!isStarted()) {
+        LOGW("Service stopped");
+        return;
+    }
+
     if (fd == mProcessor.getEventFD() && (pollEvent & POLLIN)) {
         mProcessor.handleEvent();
         return;
@@ -111,17 +139,32 @@ void Service::handle(const FileDescriptor fd, const short pollEvent)
     }
 }
 
-
 void Service::setNewPeerCallback(const PeerCallback& newPeerCallback)
 {
     LOGS("Service setNewPeerCallback");
-    mProcessor.setNewPeerCallback(newPeerCallback);
+    auto callback = [newPeerCallback, this](FileDescriptor fd) {
+        if (mIPCGSourcePtr) {
+            mIPCGSourcePtr->addFD(fd);
+        }
+        if (newPeerCallback) {
+            newPeerCallback(fd);
+        }
+    };
+    mProcessor.setNewPeerCallback(callback);
 }
 
 void Service::setRemovedPeerCallback(const PeerCallback& removedPeerCallback)
 {
     LOGS("Service setRemovedPeerCallback");
-    mProcessor.setRemovedPeerCallback(removedPeerCallback);
+    auto callback = [removedPeerCallback, this](FileDescriptor fd) {
+        if (mIPCGSourcePtr) {
+            mIPCGSourcePtr->removeFD(fd);
+        }
+        if (removedPeerCallback) {
+            removedPeerCallback(fd);
+        }
+    };
+    mProcessor.setRemovedPeerCallback(callback);
 }
 
 void Service::removeMethod(const MethodID methodID)

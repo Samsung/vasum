@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+*  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
 *
 *  Contact: Jan Olszak <j.olszak@samsung.com>
 *
@@ -36,6 +36,8 @@ Client::Client(const std::string& socketPath)
       mSocketPath(socketPath)
 {
     LOGS("Client Constructor");
+    setNewPeerCallback(nullptr);
+    setRemovedPeerCallback(nullptr);
 }
 
 Client::~Client()
@@ -52,10 +54,14 @@ void Client::start(const bool usesExternalPolling)
 {
     LOGS("Client start");
     // Initialize the connection with the server
+    if (usesExternalPolling) {
+        startPoll();
+    }
+    mProcessor.start(usesExternalPolling);
+
     LOGD("Connecting to " + mSocketPath);
     auto socketPtr = std::make_shared<Socket>(Socket::connectSocket(mSocketPath));
     mServiceFD = mProcessor.addPeer(socketPtr);
-    mProcessor.start(usesExternalPolling);
 }
 
 bool Client::isStarted()
@@ -65,21 +71,41 @@ bool Client::isStarted()
 
 void Client::stop()
 {
-    LOGS("Client Destructor");
+    LOGS("Client stop");
     mProcessor.stop();
+
+    if (mIPCGSourcePtr) {
+        stopPoll();
+    }
 }
 
-std::vector<FileDescriptor> Client::getFDs()
+void Client::startPoll()
 {
-    std::vector<FileDescriptor> fds;
-    fds.push_back(mProcessor.getEventFD());
-    fds.push_back(mServiceFD);
+    LOGS("Client startPoll");
+    using namespace std::placeholders;
+    mIPCGSourcePtr = IPCGSource::create(std::bind(&Client::handle, this, _1, _2));
+    mIPCGSourcePtr->addFD(mProcessor.getEventFD());
+    mIPCGSourcePtr->attach();
+}
 
-    return fds;
+void Client::stopPoll()
+{
+    LOGS("Client stopPoll");
+
+    mIPCGSourcePtr->removeFD(mProcessor.getEventFD());
+    mIPCGSourcePtr->detach();
+    mIPCGSourcePtr.reset();
 }
 
 void Client::handle(const FileDescriptor fd, const short pollEvent)
 {
+    LOGS("Client handle");
+
+    if (!isStarted()) {
+        LOGW("Client stopped");
+        return;
+    }
+
     if (fd == mProcessor.getEventFD() && (pollEvent & POLLIN)) {
         mProcessor.handleEvent();
         return;
@@ -97,13 +123,29 @@ void Client::handle(const FileDescriptor fd, const short pollEvent)
 void Client::setNewPeerCallback(const PeerCallback& newPeerCallback)
 {
     LOGS("Client setNewPeerCallback");
-    mProcessor.setNewPeerCallback(newPeerCallback);
+    auto callback = [newPeerCallback, this](FileDescriptor fd) {
+        if (mIPCGSourcePtr) {
+            mIPCGSourcePtr->addFD(fd);
+        }
+        if (newPeerCallback) {
+            newPeerCallback(fd);
+        }
+    };
+    mProcessor.setNewPeerCallback(callback);
 }
 
 void Client::setRemovedPeerCallback(const PeerCallback& removedPeerCallback)
 {
     LOGS("Client setRemovedPeerCallback");
-    mProcessor.setRemovedPeerCallback(removedPeerCallback);
+    auto callback = [removedPeerCallback, this](FileDescriptor fd) {
+        if (mIPCGSourcePtr) {
+            mIPCGSourcePtr->removeFD(fd);
+        }
+        if (removedPeerCallback) {
+            removedPeerCallback(fd);
+        }
+    };
+    mProcessor.setRemovedPeerCallback(callback);
 }
 
 void Client::removeMethod(const MethodID methodID)

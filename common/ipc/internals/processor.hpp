@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+*  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
 *
 *  Contact: Jan Olszak <j.olszak@samsung.com>
 *
@@ -190,7 +190,7 @@ public:
      * @tparam ReceivedDataType data type to receive
      */
     template<typename SentDataType, typename ReceivedDataType>
-    void addMethodHandler(const MethodID methodID,
+    void setMethodHandler(const MethodID methodID,
                           const typename MethodHandler<SentDataType, ReceivedDataType>::type& process);
 
     /**
@@ -208,7 +208,7 @@ public:
      * @tparam ReceivedDataType data type to receive
      */
     template<typename ReceivedDataType>
-    void addSignalHandler(const MethodID methodID,
+    void setSignalHandler(const MethodID methodID,
                           const typename SignalHandler<ReceivedDataType>::type& process);
 
     /**
@@ -360,6 +360,7 @@ private:
     RequestQueue<Event> mRequestQueue;
 
     bool mIsRunning;
+    bool mUsesExternalPolling;
 
     std::unordered_map<MethodID, std::shared_ptr<MethodHandlers>> mMethodsCallbacks;
     std::unordered_map<MethodID, std::shared_ptr<SignalHandlers>> mSignalsCallbacks;
@@ -381,7 +382,7 @@ private:
     std::thread mThread;
 
     template<typename SentDataType, typename ReceivedDataType>
-    void addMethodHandlerInternal(const MethodID methodID,
+    void setMethodHandlerInternal(const MethodID methodID,
                                   const typename MethodHandler<SentDataType, ReceivedDataType>::type& process);
 
     template<typename ReceivedDataType>
@@ -420,7 +421,7 @@ private:
 };
 
 template<typename SentDataType, typename ReceivedDataType>
-void Processor::addMethodHandlerInternal(const MethodID methodID,
+void Processor::setMethodHandlerInternal(const MethodID methodID,
                                          const typename MethodHandler<SentDataType, ReceivedDataType>::type& method)
 {
     MethodHandlers methodCall;
@@ -447,7 +448,7 @@ void Processor::addMethodHandlerInternal(const MethodID methodID,
 }
 
 template<typename SentDataType, typename ReceivedDataType>
-void Processor::addMethodHandler(const MethodID methodID,
+void Processor::setMethodHandler(const MethodID methodID,
                                  const typename MethodHandler<SentDataType, ReceivedDataType>::type& method)
 {
     if (methodID == RETURN_METHOD_ID || methodID == REGISTER_SIGNAL_METHOD_ID) {
@@ -463,13 +464,13 @@ void Processor::addMethodHandler(const MethodID methodID,
             throw IPCException("MethodID used by a signal: " + std::to_string(methodID));
         }
 
-        addMethodHandlerInternal<SentDataType, ReceivedDataType >(methodID, method);
+        setMethodHandlerInternal<SentDataType, ReceivedDataType >(methodID, method);
     }
 
 }
 
 template<typename ReceivedDataType>
-void Processor::addSignalHandler(const MethodID methodID,
+void Processor::setSignalHandler(const MethodID methodID,
                                  const typename SignalHandler<ReceivedDataType>::type& handler)
 {
     if (methodID == RETURN_METHOD_ID || methodID == REGISTER_SIGNAL_METHOD_ID) {

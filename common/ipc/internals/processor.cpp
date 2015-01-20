@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+*  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
 *
 *  Contact: Jan Olszak <j.olszak@samsung.com>
 *
@@ -66,7 +66,7 @@ Processor::Processor(const std::string& logName,
 
     utils::signalBlock(SIGPIPE);
     using namespace std::placeholders;
-    addMethodHandlerInternal<EmptyData, RegisterSignalsMessage>(REGISTER_SIGNAL_METHOD_ID,
+    setMethodHandlerInternal<EmptyData, RegisterSignalsMessage>(REGISTER_SIGNAL_METHOD_ID,
                                                                 std::bind(&Processor::onNewSignals, this, _1, _2));
 }
 
@@ -94,6 +94,7 @@ void Processor::start(bool usesExternalPolling)
     if (!isStarted()) {
         LOGI(mLogPrefix + "Processor start");
         mIsRunning = true;
+        mUsesExternalPolling = usesExternalPolling;
         if (!usesExternalPolling) {
             mThread = std::thread(&Processor::run, this);
         }
@@ -228,7 +229,6 @@ void Processor::removePeerInternal(const FileDescriptor peerFD, Status status)
         mRemovedPeerCallback(peerFD);
     }
 
-
     resetPolling();
 }
 
@@ -236,8 +236,7 @@ void Processor::resetPolling()
 {
     LOGS(mLogPrefix + "Processor resetPolling");
 
-    if (!isStarted()) {
-        LOGW(mLogPrefix + "Processor not started! Polling not reset!");
+    if (mUsesExternalPolling) {
         return;
     }
 
@@ -681,7 +680,7 @@ bool Processor::onFinishRequest(FinishRequest& request)
             break;
         }
         case Event::REMOVE_PEER: {
-            request.get<RemovePeerRequest>()->conditionPtr->notify_all();
+            onRemovePeerRequest(*request.get<RemovePeerRequest>());
             break;
         }
         case Event::SIGNAL:
@@ -692,6 +691,7 @@ bool Processor::onFinishRequest(FinishRequest& request)
     }
 
     mIsRunning = false;
+
     request.conditionPtr->notify_all();
     return true;
 }

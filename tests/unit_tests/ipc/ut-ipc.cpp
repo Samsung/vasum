@@ -33,7 +33,6 @@
 
 #include "ipc/service.hpp"
 #include "ipc/client.hpp"
-#include "ipc/ipc-gsource.hpp"
 #include "ipc/types.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
@@ -148,7 +147,7 @@ std::shared_ptr<SendData> longEchoCallback(const FileDescriptor, std::shared_ptr
     return data;
 }
 
-FileDescriptor connect(Service& s, Client& c)
+FileDescriptor connect(Service& s, Client& c, bool isServiceGlib = false, bool isClientGlib = false)
 {
     // Connects the Client to the Service and returns Clients FileDescriptor
     ValueLatch<FileDescriptor> peerFDLatch;
@@ -159,10 +158,10 @@ FileDescriptor connect(Service& s, Client& c)
     s.setNewPeerCallback(newPeerCallback);
 
     if (!s.isStarted()) {
-        s.start();
+        s.start(isServiceGlib);
     }
 
-    c.start();
+    c.start(isClientGlib);
 
     FileDescriptor peerFD = peerFDLatch.get(TIMEOUT);
     s.setNewPeerCallback(nullptr);
@@ -170,65 +169,15 @@ FileDescriptor connect(Service& s, Client& c)
     return peerFD;
 }
 
-#if GLIB_CHECK_VERSION(2,36,0)
-
-std::pair<FileDescriptor, IPCGSource::Pointer> connectServiceGSource(Service& s, Client& c)
+FileDescriptor connectServiceGSource(Service& s, Client& c)
 {
-    ValueLatch<FileDescriptor> peerFDLatch;
-    IPCGSource::Pointer ipcGSourcePtr = IPCGSource::create(s.getFDs(), std::bind(&Service::handle, &s, _1, _2));
-
-    auto newPeerCallback = [&peerFDLatch, ipcGSourcePtr](const FileDescriptor newFD) {
-        if (ipcGSourcePtr) {
-            //TODO: Remove this if
-            ipcGSourcePtr->addFD(newFD);
-        }
-        peerFDLatch.set(newFD);
-    };
-
-
-    s.setNewPeerCallback(newPeerCallback);
-    s.setRemovedPeerCallback(std::bind(&IPCGSource::removeFD, ipcGSourcePtr, _1));
-    s.start(true);
-    // Service starts to process
-    ipcGSourcePtr->attach();
-
-    c.start();
-
-    FileDescriptor peerFD = peerFDLatch.get(TIMEOUT);
-    s.setNewPeerCallback(nullptr);
-    BOOST_REQUIRE_NE(peerFD, 0);
-    return std::make_pair(peerFD, ipcGSourcePtr);
+    return connect(s, c, true, false);
 }
 
-std::pair<FileDescriptor, IPCGSource::Pointer> connectClientGSource(Service& s, Client& c)
+FileDescriptor connectClientGSource(Service& s, Client& c)
 {
-    // Connects the Client to the Service and returns Clients FileDescriptor
-    ValueLatch<FileDescriptor> peerFDLatch;
-    auto newPeerCallback = [&peerFDLatch](const FileDescriptor newFD) {
-        peerFDLatch.set(newFD);
-    };
-    s.setNewPeerCallback(newPeerCallback);
-
-    if (!s.isStarted()) {
-        // Service starts to process
-        s.start();
-    }
-
-
-    c.start(true);
-    IPCGSource::Pointer ipcGSourcePtr = IPCGSource::create(c.getFDs(),
-                                                           std::bind(&Client::handle, &c, _1, _2));
-
-    ipcGSourcePtr->attach();
-
-    FileDescriptor peerFD = peerFDLatch.get(TIMEOUT);
-    s.setNewPeerCallback(nullptr);
-    BOOST_REQUIRE_NE(peerFD, 0);
-    return std::make_pair(peerFD, ipcGSourcePtr);
+    return connect(s, c, false, true);
 }
-
-#endif // GLIB_CHECK_VERSION
-
 
 void testEcho(Client& c, const MethodID methodID)
 {
@@ -260,13 +209,13 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 BOOST_AUTO_TEST_CASE(ServiceAddRemoveMethod)
 {
     Service s(socketPath);
-    s.addMethodHandler<EmptyData, EmptyData>(1, returnEmptyCallback);
-    s.addMethodHandler<SendData, SendData>(1, returnDataCallback);
+    s.setMethodHandler<EmptyData, EmptyData>(1, returnEmptyCallback);
+    s.setMethodHandler<SendData, SendData>(1, returnDataCallback);
 
     s.start();
 
-    s.addMethodHandler<SendData, SendData>(1, echoCallback);
-    s.addMethodHandler<SendData, SendData>(2, returnDataCallback);
+    s.setMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, SendData>(2, returnDataCallback);
 
     Client c(socketPath);
     connect(s, c);
@@ -282,13 +231,13 @@ BOOST_AUTO_TEST_CASE(ClientAddRemoveMethod)
 {
     Service s(socketPath);
     Client c(socketPath);
-    c.addMethodHandler<EmptyData, EmptyData>(1, returnEmptyCallback);
-    c.addMethodHandler<SendData, SendData>(1, returnDataCallback);
+    c.setMethodHandler<EmptyData, EmptyData>(1, returnEmptyCallback);
+    c.setMethodHandler<SendData, SendData>(1, returnDataCallback);
 
     FileDescriptor peerFD = connect(s, c);
 
-    c.addMethodHandler<SendData, SendData>(1, echoCallback);
-    c.addMethodHandler<SendData, SendData>(2, returnDataCallback);
+    c.setMethodHandler<SendData, SendData>(1, echoCallback);
+    c.setMethodHandler<SendData, SendData>(2, returnDataCallback);
 
     testEcho(s, 1, peerFD);
 
@@ -302,7 +251,7 @@ BOOST_AUTO_TEST_CASE(ServiceStartStop)
 {
     Service s(socketPath);
 
-    s.addMethodHandler<SendData, SendData>(1, returnDataCallback);
+    s.setMethodHandler<SendData, SendData>(1, returnDataCallback);
 
     s.start();
     s.stop();
@@ -317,7 +266,7 @@ BOOST_AUTO_TEST_CASE(ClientStartStop)
 {
     Service s(socketPath);
     Client c(socketPath);
-    c.addMethodHandler<SendData, SendData>(1, returnDataCallback);
+    c.setMethodHandler<SendData, SendData>(1, returnDataCallback);
 
     c.start();
     c.stop();
@@ -334,8 +283,8 @@ BOOST_AUTO_TEST_CASE(ClientStartStop)
 BOOST_AUTO_TEST_CASE(SyncClientToServiceEcho)
 {
     Service s(socketPath);
-    s.addMethodHandler<SendData, SendData>(1, echoCallback);
-    s.addMethodHandler<SendData, SendData>(2, echoCallback);
+    s.setMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, SendData>(2, echoCallback);
 
     Client c(socketPath);
     connect(s, c);
@@ -347,9 +296,9 @@ BOOST_AUTO_TEST_CASE(SyncClientToServiceEcho)
 BOOST_AUTO_TEST_CASE(Restart)
 {
     Service s(socketPath);
-    s.addMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, SendData>(1, echoCallback);
     s.start();
-    s.addMethodHandler<SendData, SendData>(2, echoCallback);
+    s.setMethodHandler<SendData, SendData>(2, echoCallback);
 
     Client c(socketPath);
     c.start();
@@ -373,7 +322,7 @@ BOOST_AUTO_TEST_CASE(SyncServiceToClientEcho)
 {
     Service s(socketPath);
     Client c(socketPath);
-    c.addMethodHandler<SendData, SendData>(1, echoCallback);
+    c.setMethodHandler<SendData, SendData>(1, echoCallback);
     FileDescriptor peerFD = connect(s, c);
 
     std::shared_ptr<SendData> sentData(new SendData(56));
@@ -389,7 +338,7 @@ BOOST_AUTO_TEST_CASE(AsyncClientToServiceEcho)
 
     // Setup Service and Client
     Service s(socketPath);
-    s.addMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, SendData>(1, echoCallback);
     s.start();
     Client c(socketPath);
     c.start();
@@ -414,7 +363,7 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
 
     Service s(socketPath);
     Client c(socketPath);
-    c.addMethodHandler<SendData, SendData>(1, echoCallback);
+    c.setMethodHandler<SendData, SendData>(1, echoCallback);
     FileDescriptor peerFD = connect(s, c);
 
     // Async call
@@ -435,7 +384,7 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
 BOOST_AUTO_TEST_CASE(SyncTimeout)
 {
     Service s(socketPath);
-    s.addMethodHandler<SendData, SendData>(1, longEchoCallback);
+    s.setMethodHandler<SendData, SendData>(1, longEchoCallback);
 
     Client c(socketPath);
     connect(s, c);
@@ -447,7 +396,7 @@ BOOST_AUTO_TEST_CASE(SyncTimeout)
 BOOST_AUTO_TEST_CASE(SerializationError)
 {
     Service s(socketPath);
-    s.addMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, SendData>(1, echoCallback);
 
     Client c(socketPath);
     connect(s, c);
@@ -461,7 +410,7 @@ BOOST_AUTO_TEST_CASE(SerializationError)
 BOOST_AUTO_TEST_CASE(ParseError)
 {
     Service s(socketPath);
-    s.addMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, SendData>(1, echoCallback);
     s.start();
 
     Client c(socketPath);
@@ -481,7 +430,7 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
     };
 
     // Method will throw during serialization and disconnect automatically
-    s.addMethodHandler<SendData, ThrowOnAcceptData>(1, method);
+    s.setMethodHandler<SendData, ThrowOnAcceptData>(1, method);
     s.start();
 
     Client c(socketPath);
@@ -510,7 +459,7 @@ BOOST_AUTO_TEST_CASE(ReadTimeout)
     auto longEchoCallback = [](const FileDescriptor, std::shared_ptr<SendData>& data) {
         return std::shared_ptr<LongSendData>(new LongSendData(data->intVal, LONG_OPERATION_TIME));
     };
-    s.addMethodHandler<LongSendData, SendData>(1, longEchoCallback);
+    s.setMethodHandler<LongSendData, SendData>(1, longEchoCallback);
 
     Client c(socketPath);
     connect(s, c);
@@ -524,7 +473,7 @@ BOOST_AUTO_TEST_CASE(ReadTimeout)
 BOOST_AUTO_TEST_CASE(WriteTimeout)
 {
     Service s(socketPath);
-    s.addMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, SendData>(1, echoCallback);
     s.start();
 
     Client c(socketPath);
@@ -559,8 +508,8 @@ BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
         latchB.set();
     };
 
-    c.addSignalHandler<SendData>(1, handlerA);
-    c.addSignalHandler<SendData>(2, handlerB);
+    c.setSignalHandler<SendData>(1, handlerA);
+    c.setSignalHandler<SendData>(2, handlerB);
 
     // Wait for the signals to propagate to the Service
     std::this_thread::sleep_for(std::chrono::milliseconds(2 * TIMEOUT));
@@ -590,8 +539,8 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
         latchB.set();
     };
 
-    c.addSignalHandler<SendData>(1, handlerA);
-    c.addSignalHandler<SendData>(2, handlerB);
+    c.setSignalHandler<SendData>(1, handlerA);
+    c.setSignalHandler<SendData>(2, handlerB);
 
     connect(s, c);
 
@@ -606,9 +555,6 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
 }
 
 
-#if GLIB_CHECK_VERSION(2,36,0)
-
-// FIXME This test causes segfault, however it should work in GDB.
 BOOST_AUTO_TEST_CASE(ServiceGSource)
 {
     utils::Latch l;
@@ -620,13 +566,12 @@ BOOST_AUTO_TEST_CASE(ServiceGSource)
 
     IPCGSource::Pointer serviceGSource;
     Service s(socketPath);
-    s.addMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, SendData>(1, echoCallback);
 
     Client c(socketPath);
-    s.addSignalHandler<SendData>(2, signalHandler);
+    s.setSignalHandler<SendData>(2, signalHandler);
 
-    auto ret = connectServiceGSource(s, c);
-    serviceGSource = ret.second;
+    connectServiceGSource(s, c);
 
     testEcho(c, 1);
 
@@ -635,6 +580,7 @@ BOOST_AUTO_TEST_CASE(ServiceGSource)
 
     BOOST_CHECK(l.wait(TIMEOUT));
 }
+
 
 BOOST_AUTO_TEST_CASE(ClientGSource)
 {
@@ -650,12 +596,10 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
 
     IPCGSource::Pointer clientGSource;
     Client c(socketPath);
-    c.addMethodHandler<SendData, SendData>(1, echoCallback);
-    c.addSignalHandler<SendData>(2, signalHandler);
+    c.setMethodHandler<SendData, SendData>(1, echoCallback);
+    c.setSignalHandler<SendData>(2, signalHandler);
 
-    auto ret = connectClientGSource(s, c);
-    FileDescriptor peerFD = ret.first;
-    clientGSource = ret.second;
+    FileDescriptor peerFD = connectClientGSource(s, c);
 
     testEcho(s, 1, peerFD);
 
@@ -665,8 +609,6 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
     BOOST_CHECK(l.wait(TIMEOUT));
 }
 
-#endif // GLIB_CHECK_VERSION
-
 // BOOST_AUTO_TEST_CASE(ConnectionLimitTest)
 // {
 //     unsigned oldLimit = ipc::getMaxFDNumber();
@@ -674,7 +616,7 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
 
 //     // Setup Service and many Clients
 //     Service s(socketPath);
-//     s.addMethodHandler<SendData, SendData>(1, echoCallback);
+//     s.setMethodHandler<SendData, SendData>(1, echoCallback);
 //     s.start();
 
 //     std::list<Client> clients;

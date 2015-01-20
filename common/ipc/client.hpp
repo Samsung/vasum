@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+*  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
 *
 *  Contact: Jan Olszak <j.olszak@samsung.com>
 *
@@ -26,6 +26,7 @@
 #define COMMON_IPC_CLIENT_HPP
 
 #include "ipc/internals/processor.hpp"
+#include "ipc/ipc-gsource.hpp"
 #include "ipc/types.hpp"
 #include "logger/logger.hpp"
 
@@ -72,13 +73,6 @@ public:
     void stop();
 
     /**
-    * Used with an external polling loop
-    *
-    * @return vector of internal file descriptors
-    */
-    std::vector<FileDescriptor> getFDs();
-
-    /**
      * Used with an external polling loop.
      * Handles one event from the file descriptor.
      *
@@ -111,7 +105,7 @@ public:
      * @param method method handling implementation
      */
     template<typename SentDataType, typename ReceivedDataType>
-    void addMethodHandler(const MethodID methodID,
+    void setMethodHandler(const MethodID methodID,
                           const typename MethodHandler<SentDataType, ReceivedDataType>::type& method);
 
     /**
@@ -124,7 +118,7 @@ public:
      * @tparam ReceivedDataType data type to serialize
      */
     template<typename ReceivedDataType>
-    void addSignalHandler(const MethodID methodID,
+    void setSignalHandler(const MethodID methodID,
                           const typename SignalHandler<ReceivedDataType>::type& signal);
 
     /**
@@ -175,25 +169,30 @@ public:
                 const std::shared_ptr<SentDataType>& data);
 
 private:
+
+    void startPoll();
+    void stopPoll();
+
     FileDescriptor mServiceFD;
     Processor mProcessor;
     std::string mSocketPath;
+    IPCGSource::Pointer mIPCGSourcePtr;
 };
 
 template<typename SentDataType, typename ReceivedDataType>
-void Client::addMethodHandler(const MethodID methodID,
+void Client::setMethodHandler(const MethodID methodID,
                               const typename MethodHandler<SentDataType, ReceivedDataType>::type& method)
 {
-    LOGS("Client addMethodHandler, methodID: " << methodID);
-    mProcessor.addMethodHandler<SentDataType, ReceivedDataType>(methodID, method);
+    LOGS("Client setMethodHandler, methodID: " << methodID);
+    mProcessor.setMethodHandler<SentDataType, ReceivedDataType>(methodID, method);
 }
 
 template<typename ReceivedDataType>
-void Client::addSignalHandler(const MethodID methodID,
+void Client::setSignalHandler(const MethodID methodID,
                               const typename SignalHandler<ReceivedDataType>::type& handler)
 {
-    LOGS("Client addSignalHandler, methodID: " << methodID);
-    mProcessor.addSignalHandler<ReceivedDataType>(methodID, handler);
+    LOGS("Client setSignalHandler, methodID: " << methodID);
+    mProcessor.setSignalHandler<ReceivedDataType>(methodID, handler);
 }
 
 template<typename SentDataType, typename ReceivedDataType>

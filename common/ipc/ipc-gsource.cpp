@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+*  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
 *
 *  Contact: Jan Olszak <j.olszak@samsung.com>
 *
@@ -26,10 +26,9 @@
 #include "config.hpp"
 
 #include "ipc/ipc-gsource.hpp"
-
-#if GLIB_CHECK_VERSION(2,36,0)
-
+#include "utils/callback-wrapper.hpp"
 #include "logger/logger.hpp"
+
 #include <algorithm>
 
 namespace vasum {
@@ -37,33 +36,26 @@ namespace ipc {
 
 namespace {
 
+gushort conditions = static_cast<gushort>(G_IO_IN |
+                                          G_IO_ERR |
+                                          G_IO_HUP);
 
-GIOCondition conditions = static_cast<GIOCondition>(G_IO_IN |
-                                                    G_IO_ERR |
-                                                    G_IO_HUP);
 }
 
-
-IPCGSource::IPCGSource(const std::vector<FileDescriptor> fds,
-                       const HandlerCallback& handlerCallback)
+IPCGSource::IPCGSource(const HandlerCallback& handlerCallback)
     : mHandlerCallback(handlerCallback)
 {
-    LOGS("IPCGSource constructor");
-
-    for (const FileDescriptor fd : fds) {
-        addFD(fd);
-    }
+    LOGT("IPCGSource Constructor");
 }
 
 IPCGSource::~IPCGSource()
 {
-    LOGS("~IPCGSource");
+    LOGT("IPCGSource Destructor");
 }
 
-IPCGSource::Pointer IPCGSource::create(const std::vector<FileDescriptor>& fds,
-                                       const HandlerCallback& handlerCallback)
+IPCGSource::Pointer IPCGSource::create(const HandlerCallback& handlerCallback)
 {
-    LOGS("Creating IPCGSource");
+    LOGT("Creating IPCGSource");
 
     static GSourceFuncs funcs = { &IPCGSource::prepare,
                                   &IPCGSource::check,
@@ -79,64 +71,96 @@ IPCGSource::Pointer IPCGSource::create(const std::vector<FileDescriptor>& fds,
 
     // Fill additional data
     IPCGSource* source = reinterpret_cast<IPCGSource*>(gSource);
-    new(source)IPCGSource(fds, handlerCallback);
+    new(source) IPCGSource(handlerCallback);
 
     auto deleter = [](IPCGSource * ptr) {
         LOGD("Deleter");
-
-        if (!g_source_is_destroyed(&(ptr->mGSource))) {
-            // This way finalize method will be run in glib loop's thread
-            g_source_destroy(&(ptr->mGSource));
-        }
+        g_source_unref(&ptr->mGSource);
     };
 
-    return std::shared_ptr<IPCGSource>(source, deleter);
+    Pointer ipcGSourcePtr(source, deleter);
+
+    g_source_set_callback(gSource,
+                          &IPCGSource::onHandlerCall,
+                          utils::createCallbackWrapper(Pointer(ipcGSourcePtr), ipcGSourcePtr->mGuard.spawn()),
+                          &utils::deleteCallbackWrapper<Pointer>);
+
+    return ipcGSourcePtr;
 }
 
 void IPCGSource::addFD(const FileDescriptor fd)
 {
+    LOGI("Adding to glib FD: " << fd);
+    Lock lock(mStateMutex);
 
-    if (!&mGSource) {
-        // In case it's called as a callback but the IPCGSource is destroyed
-        return;
-    }
-    LOGS("Adding fd to glib");
-
-    gpointer tag = g_source_add_unix_fd(&mGSource,
-                                        fd,
-                                        conditions);
-    FDInfo fdInfo(tag, fd);
-    mFDInfos.push_back(std::move(fdInfo));
+    mGPollFDs.push_back({fd, conditions, 0});
+    g_source_add_poll(&mGSource, &mGPollFDs.back());
 }
 
 void IPCGSource::removeFD(const FileDescriptor fd)
 {
-    if (!&mGSource) {
-        // In case it's called as a callback but the IPCGSource is destroyed
-        return;
-    }
+    Lock lock(mStateMutex);
 
-    LOGS("Removing fd from glib");
-    auto it = std::find(mFDInfos.begin(), mFDInfos.end(), fd);
-    if (it == mFDInfos.end()) {
+    auto it = std::find_if(mGPollFDs.begin(), mGPollFDs.end(), [fd](GPollFD gPollFD) {
+        return gPollFD.fd = fd;
+    });
+
+    if (it == mGPollFDs.end()) {
         LOGE("No such fd");
         return;
     }
-    g_source_remove_unix_fd(&mGSource, it->tag);
-    mFDInfos.erase(it);
+    g_source_remove_poll(&mGSource, &(*it));
+    mGPollFDs.erase(it);
+    LOGI("Removed from glib FD: " << fd);
 }
 
 guint IPCGSource::attach(GMainContext* context)
 {
-    LOGS("Attaching to GMainContext");
+    LOGT("Attaching to GMainContext");
     guint ret = g_source_attach(&mGSource, context);
-    g_source_unref(&mGSource);
     return ret;
+}
+
+void IPCGSource::detach()
+{
+    LOGT("Detaching");
+    Lock lock(mStateMutex);
+
+    for (GPollFD gPollFD : mGPollFDs) {
+        g_source_remove_poll(&mGSource, &gPollFD);
+    }
+
+    mGPollFDs.clear();
+    if (!g_source_is_destroyed(&mGSource)) {
+        LOGD("Destroying");
+        // This way finalize method will be run in glib loop's thread
+        g_source_destroy(&mGSource);
+    }
+}
+
+void IPCGSource::callHandler()
+{
+    Lock lock(mStateMutex);
+
+    for (const GPollFD& gPollFD : mGPollFDs) {
+        if (gPollFD.revents & conditions) {
+            mHandlerCallback(gPollFD.fd, gPollFD.revents);
+        }
+    }
+}
+
+gboolean IPCGSource::onHandlerCall(gpointer userData)
+{
+    const auto& source = utils::getCallbackFromPointer<Pointer>(userData);
+    if (source) {
+        source->callHandler();
+    }
+    return TRUE;
 }
 
 gboolean IPCGSource::prepare(GSource* gSource, gint* timeout)
 {
-    if (!gSource) {
+    if (!gSource || g_source_is_destroyed(gSource)) {
         return FALSE;
     }
 
@@ -149,7 +173,7 @@ gboolean IPCGSource::prepare(GSource* gSource, gint* timeout)
 
 gboolean IPCGSource::check(GSource* gSource)
 {
-    if (!gSource) {
+    if (!gSource || g_source_is_destroyed(gSource)) {
         return FALSE;
     }
 
@@ -157,21 +181,16 @@ gboolean IPCGSource::check(GSource* gSource)
 }
 
 gboolean IPCGSource::dispatch(GSource* gSource,
-                              GSourceFunc /*callback*/,
-                              gpointer /*userData*/)
+                              GSourceFunc callback,
+                              gpointer userData)
 {
     if (!gSource || g_source_is_destroyed(gSource)) {
         // Remove the GSource from the GMainContext
         return FALSE;
     }
 
-    IPCGSource* source = reinterpret_cast<IPCGSource*>(gSource);
-
-    for (const FDInfo fdInfo : source->mFDInfos) {
-        GIOCondition cond = g_source_query_unix_fd(gSource, fdInfo.tag);
-        if (conditions & cond) {
-            source->mHandlerCallback(fdInfo.fd, cond);
-        }
+    if (callback) {
+        callback(userData);
     }
 
     return TRUE;
@@ -179,8 +198,6 @@ gboolean IPCGSource::dispatch(GSource* gSource,
 
 void  IPCGSource::finalize(GSource* gSource)
 {
-    LOGS("IPCGSource Finalize");
-
     if (gSource) {
         IPCGSource* source = reinterpret_cast<IPCGSource*>(gSource);
         source->~IPCGSource();
@@ -189,5 +206,3 @@ void  IPCGSource::finalize(GSource* gSource)
 
 } // namespace ipc
 } // namespace vasum
-
-#endif // GLIB_CHECK_VERSION

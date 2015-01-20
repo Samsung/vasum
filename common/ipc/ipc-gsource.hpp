@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+*  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
 *
 *  Contact: Jan Olszak <j.olszak@samsung.com>
 *
@@ -26,12 +26,12 @@
 #define COMMON_IPC_IPC_GSOURCE_HPP
 
 #include <glib.h>
-#if GLIB_CHECK_VERSION(2,36,0)
-
-#include "ipc/service.hpp"
 #include "ipc/types.hpp"
+#include "utils/callback-guard.hpp"
 
 #include <memory>
+#include <mutex>
+#include <list>
 
 
 namespace vasum {
@@ -82,18 +82,32 @@ public:
     guint attach(GMainContext* context = nullptr);
 
     /**
+     * After this method quits handlerCallback will not be called
+     */
+    void detach();
+
+    /**
      * Creates the IPCGSource class in the memory allocated by glib.
      * Calls IPCGSource's constructor
      *
-     * @param fds initial set of file descriptors
      * @param handlerCallback event handling callback
      *
      * @return pointer to the IPCGSource
      */
-    static Pointer create(const std::vector<FileDescriptor>& fds,
-                          const HandlerCallback& handlerCallback);
+    static Pointer create(const HandlerCallback& handlerCallback);
+
+    /**
+     * Callback for the dispatch function
+     */
+    static gboolean onHandlerCall(gpointer userData);
+
+    /**
+     * Locks the internal state mutex and calls the handler callback for each fd
+     */
+    void callHandler();
 
 private:
+    typedef std::unique_lock<std::recursive_mutex> Lock;
 
     /**
      * GSourceFuncs' callback
@@ -117,38 +131,18 @@ private:
      */
     static void  finalize(GSource* source);
 
-
-
     // Called only from IPCGSource::create
-    IPCGSource(const std::vector<FileDescriptor> fds,
-               const HandlerCallback& handlerCallback);
-
-    struct FDInfo {
-        FDInfo(gpointer tag, FileDescriptor fd)
-            : tag(tag), fd(fd) {}
-
-        bool operator==(const gpointer t)
-        {
-            return t == tag;
-        }
-
-        bool operator==(const FileDescriptor f)
-        {
-            return f == fd;
-        }
-
-        gpointer tag;
-        FileDescriptor fd;
-    };
+    IPCGSource(const HandlerCallback& handlerCallback);
 
     GSource mGSource;
     HandlerCallback mHandlerCallback;
-    std::vector<FDInfo> mFDInfos;
+    std::list<GPollFD> mGPollFDs;
+    utils::CallbackGuard mGuard;
+    std::recursive_mutex mStateMutex;
+
 };
 
 } // namespace ipc
 } // namespace vasum
-
-#endif // GLIB_CHECK_VERSION
 
 #endif // COMMON_IPC_IPC_GSOURCE_HPP
