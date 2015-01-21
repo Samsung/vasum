@@ -234,6 +234,7 @@ void testEcho(Client& c, const MethodID methodID)
 {
     std::shared_ptr<SendData> sentData(new SendData(34));
     std::shared_ptr<SendData> recvData = c.callSync<SendData, SendData>(methodID, sentData, TIMEOUT);
+    BOOST_REQUIRE(recvData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
@@ -241,6 +242,7 @@ void testEcho(Service& s, const MethodID methodID, const FileDescriptor peerFD)
 {
     std::shared_ptr<SendData> sentData(new SendData(56));
     std::shared_ptr<SendData> recvData = s.callSync<SendData, SendData>(methodID, peerFD, sentData, TIMEOUT);
+    BOOST_REQUIRE(recvData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
@@ -376,6 +378,7 @@ BOOST_AUTO_TEST_CASE(SyncServiceToClientEcho)
 
     std::shared_ptr<SendData> sentData(new SendData(56));
     std::shared_ptr<SendData> recvData = s.callSync<SendData, SendData>(1, peerFD, sentData);
+    BOOST_REQUIRE(recvData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
@@ -530,6 +533,7 @@ BOOST_AUTO_TEST_CASE(WriteTimeout)
     // Test echo with a minimal timeout
     std::shared_ptr<LongSendData> sentDataA(new LongSendData(34, SHORT_OPERATION_TIME));
     std::shared_ptr<SendData> recvData = c.callSync<LongSendData, SendData>(1, sentDataA, TIMEOUT);
+    BOOST_REQUIRE(recvData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentDataA->intVal);
 
     // Test timeout on write

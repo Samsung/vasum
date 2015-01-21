@@ -42,6 +42,7 @@
 #include <mutex>
 #include <condition_variable>
 
+//TODO: BOOST_* macros aren't thread-safe. Remove it from callbacks
 
 BOOST_AUTO_TEST_SUITE(DbusSuite)
 
@@ -461,6 +462,8 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallAsyncHandlerTest)
     Latch nameAcquired;
     Latch handlerDone;
     Latch callDone;
+    std::string strResult;
+    MethodResultBuilder::Pointer deferredResult;
 
     DbusConnection::Pointer conn1 = DbusConnection::create(DBUS_ADDRESS);
     DbusConnection::Pointer conn2 = DbusConnection::create(DBUS_ADDRESS);
@@ -469,9 +472,6 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallAsyncHandlerTest)
                    [&] {nameAcquired.set();},
                    [] {});
     BOOST_REQUIRE(nameAcquired.wait(EVENT_TIMEOUT));
-
-    std::string strResult;
-    MethodResultBuilder::Pointer deferredResult;
 
     auto handler = [&](const std::string& objectPath,
                       const std::string& interface,

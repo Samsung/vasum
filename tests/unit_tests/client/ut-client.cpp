@@ -158,6 +158,7 @@ BOOST_AUTO_TEST_CASE(GetZoneDbusesTest)
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     VsmArrayString keys, values;
     status = vsm_get_zone_dbuses(client, &keys, &values);
+    //TODO: Clean up if BOOST_REQUIRE_EQUAL fail (remove client). Same in other client tests.
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
 
     BOOST_CHECK_EQUAL(getArrayStringLength(keys, EXPECTED_DBUSES_STARTED.size() + 1u),

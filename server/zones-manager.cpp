@@ -965,17 +965,22 @@ void ZonesManager::handleStartZoneCall(const std::string& id,
 
     LOGT("Start zone " << id);
 
-    auto resultCallback = [this, id, result](bool succeeded) {
-        if (succeeded) {
+    auto startAsync = [this, id, result]() {
+        try {
+            ZoneMap::mapped_type zone;
+            {
+                Lock lock(mMutex);
+                zone = mZones.at(id);
+            }
+            zone->start();
             focus(id);
             result->setVoid();
-        } else {
-            LOGE("Failed to start zone.");
+        } catch (const std::exception& e) {
+            LOGE(id << ": failed to start: " << e.what());
             result->setError(api::ERROR_INTERNAL, "Failed to start zone");
         }
     };
-
-    mZones[id]->startAsync(resultCallback);
+    mWorker->addTask(startAsync);
 }
 
 void ZonesManager::handleLockZoneCall(const std::string& id,

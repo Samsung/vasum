@@ -127,26 +127,6 @@ void Zone::start()
     goBackground();
 }
 
-void Zone::startAsync(const StartAsyncResultCallback& callback)
-{
-    auto startWrapper = [this, callback]() {
-        bool succeeded = false;
-
-        try {
-            start();
-            succeeded = true;
-        } catch(std::exception& e) {
-            LOGE(getId() << ": failed to start: " << e.what());
-        }
-
-        if (callback) {
-            callback(succeeded);
-        }
-    };
-
-    mWorker->addTask(startWrapper);
-}
-
 void Zone::stop()
 {
     Lock lock(mReconnectMutex);

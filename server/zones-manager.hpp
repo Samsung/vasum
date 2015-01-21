@@ -117,7 +117,7 @@ private:
     // to hold InputMonitor pointer to monitor if zone switching sequence is recognized
     std::unique_ptr<InputMonitor> mSwitchingSequenceMonitor;
     std::unique_ptr<ProxyCallPolicy> mProxyCallPolicy;
-    typedef std::unordered_map<std::string, std::unique_ptr<Zone>> ZoneMap;
+    typedef std::unordered_map<std::string, std::shared_ptr<Zone>> ZoneMap;
     ZoneMap mZones; // map of zones, id is the key
     bool mDetachOnExit;
 

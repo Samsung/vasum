@@ -98,14 +98,6 @@ public:
     void start();
 
     /**
-     * Boot the zone to the background in separate thread. This function immediately exits
-     * after zone booting is started in another thread.
-     *
-     * @param callback Called after starting the zone. Passes bool with result of starting.
-     */
-    void startAsync(const StartAsyncResultCallback& callback);
-
-    /**
      * Try to shutdown the zone, if failed, destroy it.
      */
     void stop();
