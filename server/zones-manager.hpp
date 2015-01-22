@@ -50,7 +50,7 @@ public:
     /**
      * Create new zone.
      *
-     * @param zoneConfig config of new zone
+     * @param zoneConfigPath config of new zone
      */
     void createZone(const std::string& zoneConfigPath);
 

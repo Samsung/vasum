@@ -51,6 +51,7 @@ const std::string BUGGY_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zo
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/config.conf";
 const std::string ZONES_PATH = "/tmp/ut-zones";
 const std::string LXC_TEMPLATES_PATH = VSM_TEST_LXC_TEMPLATES_INSTALL_DIR;
+const std::string DB_PATH = ZONES_PATH + "/vasum.db";
 
 struct Fixture {
     utils::ScopedGlibLoop mLoop;
@@ -66,6 +67,7 @@ struct Fixture {
         return std::unique_ptr<Zone>(new Zone(utils::Worker::create(),
                                               ZONES_PATH,
                                               configPath,
+                                              DB_PATH,
                                               LXC_TEMPLATES_PATH,
                                               ""));
     }

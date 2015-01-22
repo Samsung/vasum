@@ -48,12 +48,14 @@ typedef std::lock_guard<std::recursive_mutex> Lock;
 // TODO: move constants to the config file when default values are implemented there
 const int RECONNECT_RETRIES = 15;
 const int RECONNECT_DELAY = 1 * 1000;
+const std::string DB_PREFIX = "zone.";
 
 } // namespace
 
 Zone::Zone(const utils::Worker::Pointer& worker,
            const std::string& zonesPath,
            const std::string& zoneConfigPath,
+           const std::string& dbPath,
            const std::string& lxcTemplatePrefix,
            const std::string& baseRunMountPointPath)
     : mWorker(worker)
@@ -72,8 +74,12 @@ Zone::Zone(const utils::Worker::Pointer& worker,
     }
 
     mAdmin.reset(new ZoneAdmin(zonesPath, lxcTemplatePrefix, mConfig));
+
     const fs::path zonePath = fs::path(zonesPath) / mAdmin->getId();
-    mProvision.reset(new ZoneProvision(zonePath.string(), mConfig.validLinkPrefixes));
+    mRootPath = (zonePath / fs::path("rootfs")).string();
+    const std::string dbPrefix = DB_PREFIX + mAdmin->getId();
+
+    mProvision.reset(new ZoneProvision(mRootPath, zoneConfigPath, dbPath, dbPrefix, mConfig.validLinkPrefixes));
 }
 
 Zone::~Zone()
@@ -185,9 +191,8 @@ int Zone::getVT() const
 
 std::string Zone::getRootPath() const
 {
-    return mProvision->getRootPath();
+    return mRootPath;
 }
-
 
 bool Zone::activateVT()
 {

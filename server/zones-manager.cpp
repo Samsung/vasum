@@ -204,6 +204,7 @@ void ZonesManager::createZone(const std::string& zoneConfigPath)
     std::unique_ptr<Zone> zone(new Zone(mWorker->createSubWorker(),
                                         mConfig.zonesPath,
                                         zoneConfigPath,
+                                        mConfig.dbPath,
                                         mConfig.lxcTemplatePrefix,
                                         mConfig.runMountPointPrefix));
     const std::string id = zone->getId();
@@ -254,7 +255,7 @@ void ZonesManager::destroyZone(const std::string& zoneId)
     it->second->setDestroyOnExit();
     mZones.erase(it);
 
-    if (mZones.size() == 0) {
+    if (mZones.empty()) {
         if (!utils::removeFile(utils::createFilePath(mConfig.zonesPath, ENABLED_FILE_NAME))) {
             LOGE("Failed to remove enabled file.");
         }

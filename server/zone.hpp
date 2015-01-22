@@ -55,6 +55,7 @@ public:
     Zone(const utils::Worker::Pointer& worker,
          const std::string& zonesPath,
          const std::string& zoneConfigPath,
+         const std::string& dbPath,
          const std::string& lxcTemplatePrefix,
          const std::string& baseRunMountPointPath);
     Zone(Zone&&) = default;
@@ -269,6 +270,7 @@ private:
     DbusStateChangedCallback mDbusStateChangedCallback;
     std::string mDbusAddress;
     std::string mRunMountPoint;
+    std::string mRootPath;
 
     void onNameLostCallback();
     void reconnectHandler();

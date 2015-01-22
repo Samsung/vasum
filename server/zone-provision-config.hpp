@@ -34,7 +34,7 @@
 
 namespace vasum {
 
-struct ZoneProvisioning
+struct ZoneProvisioningConfig
 {
 
     struct File
@@ -83,7 +83,7 @@ struct ZoneProvisioning
         )
     };
 
-    struct Unit
+    struct Provision
     {
         CONFIG_DECLARE_UNION
         (
@@ -93,11 +93,11 @@ struct ZoneProvisioning
         )
     };
 
-    std::vector<Unit> units;
+    std::vector<Provision> provisions;
 
     CONFIG_REGISTER
     (
-        units
+        provisions
     )
 };
 

@@ -11,6 +11,7 @@
     "cpuQuotaForeground" : -1,
     "cpuQuotaBackground" : 1000,
     "runMountPoint" : "/tmp/ut-run/ut-zones-manager-console1-dbus",
+    "provisions" : [],
     "permittedToSend" : [ "/tmp/.*", "/etc/secret2" ],
     "permittedToRecv" : [ "/tmp/.*" ],
     "validLinkPrefixes" : []

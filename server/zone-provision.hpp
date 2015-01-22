@@ -44,11 +44,22 @@ class ZoneProvision {
 public:
     /**
      * ZoneProvision constructor
-     * @param zonePath directory where zones are defined (lxc configs, rootfs etc)
+     * @param rootPath zone root path
+     * @param configPath path to config with defaults
+     * @param dbPath path to database
+     * @param dbPrefix database prefix
+     * @param validLinkPrefixes valid link prefixes
      */
-    ZoneProvision(const std::string& zonePath,
+    ZoneProvision(const std::string& rootPath,
+                  const std::string& configPath,
+                  const std::string& dbPath,
+                  const std::string& dbPrefix,
                   const std::vector<std::string>& validLinkPrefixes);
     ~ZoneProvision();
+
+    ZoneProvision(const ZoneProvision&) = delete;
+    ZoneProvision& operator=(const ZoneProvision&) = delete;
+    ZoneProvision(ZoneProvision&&) = default;
 
     /**
      * Declare file, directory or pipe that will be created while zone startup
@@ -71,25 +82,24 @@ public:
     void declareLink(const std::string& source,
                      const std::string& target);
 
-   /**
-     * Get zone root path
-     */
-    std::string getRootPath() const;
-
     void start() noexcept;
     void stop() noexcept;
 
 private:
-    ZoneProvisioning mProvisioningConfig;
+    ZoneProvisioningConfig mProvisioningConfig;
     std::string mRootPath;
-    std::string mProvisionFile;
+    std::string mDbPath;
+    std::string mDbPrefix;
     std::vector<std::string> mValidLinkPrefixes;
-    std::list<ZoneProvisioning::Unit> mProvisioned;
+    std::list<ZoneProvisioningConfig::Provision> mProvisioned;
 
-    void mount(const ZoneProvisioning::Mount& config);
-    void umount(const ZoneProvisioning::Mount& config);
-    void file(const ZoneProvisioning::File& config);
-    void link(const ZoneProvisioning::Link& config);
+    void saveProvisioningConfig();
+    void declareProvision(ZoneProvisioningConfig::Provision&& provision);
+
+    void mount(const ZoneProvisioningConfig::Mount& config);
+    void umount(const ZoneProvisioningConfig::Mount& config);
+    void file(const ZoneProvisioningConfig::File& config);
+    void link(const ZoneProvisioningConfig::Link& config);
 };
 
 

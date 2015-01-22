@@ -11,6 +11,7 @@
     "cpuQuotaForeground" : -1,
     "cpuQuotaBackground" : 1000,
     "runMountPoint" : "/tmp/ut-run/ut-zone-test-dbus",
+    "provisions" : [],
     "permittedToSend" : [],
     "permittedToRecv" : [],
     "validLinkPrefixes" : []

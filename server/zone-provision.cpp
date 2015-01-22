@@ -42,29 +42,17 @@ namespace fs = boost::filesystem;
 
 namespace vasum {
 
-namespace {
-
-const std::string ZONE_PROVISION_FILE = "provision.conf";
-
-void declareUnit(const std::string& file, ZoneProvisioning::Unit&& unit)
-{
-     // TODO: Add to the dynamic configuration
-    ZoneProvisioning config;
-    if (fs::exists(file)) {
-        config::loadFromJsonFile(file, config);
-    }
-    config.units.push_back(std::move(unit));
-    config::saveToJsonFile(file, config);
-}
-
-} // namespace
-
-ZoneProvision::ZoneProvision(const std::string& zonePath,
+ZoneProvision::ZoneProvision(const std::string& rootPath,
+                             const std::string& configPath,
+                             const std::string& dbPath,
+                             const std::string& dbPrefix,
                              const std::vector<std::string>& validLinkPrefixes)
+    : mRootPath(rootPath)
+    , mDbPath(dbPath)
+    , mDbPrefix(dbPrefix)
+    , mValidLinkPrefixes(validLinkPrefixes)
 {
-    mProvisionFile = (fs::path(zonePath) / fs::path(ZONE_PROVISION_FILE)).string();
-    mRootPath = (zonePath / fs::path("rootfs")).string();
-    mValidLinkPrefixes = validLinkPrefixes;
+    config::loadFromKVStoreWithJsonFile(dbPath, configPath, mProvisioningConfig, dbPrefix);
 }
 
 ZoneProvision::~ZoneProvision()
@@ -72,21 +60,26 @@ ZoneProvision::~ZoneProvision()
     stop();
 }
 
-std::string ZoneProvision::getRootPath() const
+void ZoneProvision::saveProvisioningConfig()
 {
-    return mRootPath;
+    config::saveToKVStore(mDbPath, mProvisioningConfig, mDbPrefix);
 }
 
+void ZoneProvision::declareProvision(ZoneProvisioningConfig::Provision&& provision)
+{
+    mProvisioningConfig.provisions.push_back(std::move(provision));
+    saveProvisioningConfig();
+}
 
 void ZoneProvision::declareFile(const int32_t& type,
                                 const std::string& path,
                                 const int32_t& flags,
                                 const int32_t& mode)
 {
-    ZoneProvisioning::Unit unit;
-    unit.set(ZoneProvisioning::File({type, path, flags, mode}));
+    ZoneProvisioningConfig::Provision provision;
+    provision.set(ZoneProvisioningConfig::File({type, path, flags, mode}));
 
-    declareUnit(mProvisionFile, std::move(unit));
+    declareProvision(std::move(provision));
 }
 
 void ZoneProvision::declareMount(const std::string& source,
@@ -95,49 +88,46 @@ void ZoneProvision::declareMount(const std::string& source,
                                  const int64_t& flags,
                                  const std::string& data)
 {
-    ZoneProvisioning::Unit unit;
-    unit.set(ZoneProvisioning::Mount({source, target, type, flags, data}));
+    ZoneProvisioningConfig::Provision provision;
+    provision.set(ZoneProvisioningConfig::Mount({source, target, type, flags, data}));
 
-    declareUnit(mProvisionFile, std::move(unit));
+    declareProvision(std::move(provision));
 }
 
 void ZoneProvision::declareLink(const std::string& source,
                                 const std::string& target)
 {
-    ZoneProvisioning::Unit unit;
-    unit.set(ZoneProvisioning::Link({source, target}));
+    ZoneProvisioningConfig::Provision provision;
+    provision.set(ZoneProvisioningConfig::Link({source, target}));
 
-    declareUnit(mProvisionFile, std::move(unit));
+    declareProvision(std::move(provision));
 }
 
 void ZoneProvision::start() noexcept
 {
-    if (fs::exists(mProvisionFile)) {
-        config::loadFromJsonFile(mProvisionFile, mProvisioningConfig);
-        for (const auto& unit : mProvisioningConfig.units) {
-            try {
-                if (unit.is<ZoneProvisioning::File>()) {
-                    file(unit.as<ZoneProvisioning::File>());
-                } else if (unit.is<ZoneProvisioning::Mount>()) {
-                    mount(unit.as<ZoneProvisioning::Mount>());
-                } else if (unit.is<ZoneProvisioning::Link>()) {
-                    link(unit.as<ZoneProvisioning::Link>());
-                }
-                // mProvisioned must be FILO
-                mProvisioned.push_front(unit);
-            } catch (const std::exception& ex) {
-                LOGE("Provsion error: " << ex.what());
+    for (const auto& provision : mProvisioningConfig.provisions) {
+        try {
+            if (provision.is<ZoneProvisioningConfig::File>()) {
+                file(provision.as<ZoneProvisioningConfig::File>());
+            } else if (provision.is<ZoneProvisioningConfig::Mount>()) {
+                mount(provision.as<ZoneProvisioningConfig::Mount>());
+            } else if (provision.is<ZoneProvisioningConfig::Link>()) {
+                link(provision.as<ZoneProvisioningConfig::Link>());
             }
+            // mProvisioned must be FILO
+            mProvisioned.push_front(provision);
+        } catch (const std::exception& ex) {
+            LOGE("Provsion error: " << ex.what());
         }
     }
 }
 
 void ZoneProvision::stop() noexcept
 {
-    mProvisioned.remove_if([this](const ZoneProvisioning::Unit& unit) -> bool {
+    mProvisioned.remove_if([this](const ZoneProvisioningConfig::Provision& provision) -> bool {
         try {
-            if (unit.is<ZoneProvisioning::Mount>()) {
-                umount(unit.as<ZoneProvisioning::Mount>());
+            if (provision.is<ZoneProvisioningConfig::Mount>()) {
+                umount(provision.as<ZoneProvisioningConfig::Mount>());
             }
             // leaves files, links, fifo, untouched
             return true;
@@ -148,7 +138,7 @@ void ZoneProvision::stop() noexcept
     });
 }
 
-void ZoneProvision::file(const ZoneProvisioning::File& config)
+void ZoneProvision::file(const ZoneProvisioningConfig::File& config)
 {
     bool ret = false;
     const fs::path hostPath = fs::path(mRootPath) / fs::path(config.path);
@@ -183,7 +173,7 @@ void ZoneProvision::file(const ZoneProvisioning::File& config)
     }
 }
 
-void ZoneProvision::mount(const ZoneProvisioning::Mount& config)
+void ZoneProvision::mount(const ZoneProvisioningConfig::Mount& config)
 {
     const fs::path hostPath = fs::path(mRootPath) / fs::path(config.target);
     bool ret = utils::mount(config.source,
@@ -196,7 +186,7 @@ void ZoneProvision::mount(const ZoneProvisioning::Mount& config)
     }
 }
 
-void ZoneProvision::umount(const ZoneProvisioning::Mount& config)
+void ZoneProvision::umount(const ZoneProvisioningConfig::Mount& config)
 {
     const fs::path hostPath = fs::path(mRootPath) / fs::path(config.target);
     bool ret = utils::umount(hostPath.string());
@@ -205,7 +195,7 @@ void ZoneProvision::umount(const ZoneProvisioning::Mount& config)
     }
 }
 
-void ZoneProvision::link(const ZoneProvisioning::Link& config)
+void ZoneProvision::link(const ZoneProvisioningConfig::Link& config)
 {
     const std::string srcHostPath = fs::path(config.source).normalize().string();
     for (const std::string& prefix : mValidLinkPrefixes) {

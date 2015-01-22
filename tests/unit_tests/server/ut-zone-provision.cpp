@@ -28,6 +28,7 @@
 
 #include "utils/scoped-dir.hpp"
 #include "utils/exception.hpp"
+#include "utils/fs.hpp"
 #include "config/manager.hpp"
 #include "zone-provision.hpp"
 #include "zone-provision-config.hpp"
@@ -47,13 +48,15 @@ namespace fs = boost::filesystem;
 
 namespace {
 
-const std::string PROVISON_CONFIG_FILE = "provision.conf";
+const std::string TEST_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone-provision/test.conf";
 const std::string ZONE = "ut-zone-provision-test";
 const fs::path ZONES_PATH = "/tmp/ut-zones";
 const fs::path LXC_TEMPLATES_PATH = VSM_TEST_LXC_TEMPLATES_INSTALL_DIR;
 const fs::path ZONE_PATH = ZONES_PATH / fs::path(ZONE);
-const fs::path PROVISION_FILE_PATH = ZONE_PATH / fs::path(PROVISON_CONFIG_FILE);
-const fs::path ROOTFS_PATH = ZONE_PATH / fs::path("rootfs");
+const fs::path SOME_FILE_PATH = ZONE_PATH / "file.txt";
+const fs::path ROOTFS_PATH = ZONE_PATH / "rootfs";
+const fs::path DB_PATH = ZONES_PATH / "vasum.db";
+const std::string DB_PREFIX = "zone";
 
 struct Fixture {
     utils::ScopedDir mZonesPathGuard;
@@ -63,6 +66,26 @@ struct Fixture {
         : mZonesPathGuard(ZONES_PATH.string())
         , mRootfsPath(ROOTFS_PATH.string())
     {
+        BOOST_REQUIRE(utils::saveFileContent(SOME_FILE_PATH.string(), "text"));
+    }
+
+    ZoneProvision create(const std::vector<std::string>& validLinkPrefixes)
+    {
+        return ZoneProvision(ROOTFS_PATH.string(),
+                             TEST_CONFIG_PATH,
+                             DB_PATH.string(),
+                             DB_PREFIX,
+                             validLinkPrefixes);
+    }
+
+    void load(ZoneProvisioningConfig& config)
+    {
+        config::loadFromKVStoreWithJsonFile(DB_PATH.string(), TEST_CONFIG_PATH, config, DB_PREFIX);
+    }
+
+    void save(const ZoneProvisioningConfig& config)
+    {
+        config::saveToKVStore(DB_PATH.string(), config, DB_PREFIX);
     }
 };
 
@@ -78,22 +101,22 @@ BOOST_AUTO_TEST_CASE(DestructorTest)
     {
         utils::ScopedDir provisionfs(mountSource.string());
 
-        ZoneProvisioning config;
-        ZoneProvisioning::Unit unit;
-        unit.set(ZoneProvisioning::File({VSMFILE_DIRECTORY,
+        ZoneProvisioningConfig config;
+        ZoneProvisioningConfig::Provision provision;
+        provision.set(ZoneProvisioningConfig::File({VSMFILE_DIRECTORY,
                                         mountTarget.string(),
                                         0,
                                         0777}));
-        config.units.push_back(unit);
-        unit.set(ZoneProvisioning::Mount({mountSource.string(),
+        config.provisions.push_back(provision);
+        provision.set(ZoneProvisioningConfig::Mount({mountSource.string(),
                                           mountTarget.string(),
                                           "",
                                           MS_BIND,
                                           ""}));
-        config.units.push_back(unit);
+        config.provisions.push_back(provision);
+        save(config);
 
-        config::saveToJsonFile(PROVISION_FILE_PATH.string(), config);
-        ZoneProvision zoneProvision(ZONE_PATH.string(), {});
+        ZoneProvision zoneProvision = create({});
         zoneProvision.start();
     }
     BOOST_CHECK(!fs::exists(mountSource));
@@ -103,35 +126,35 @@ BOOST_AUTO_TEST_CASE(FileTest)
 {
     //TODO: Test Fifo
     const fs::path regularFile = fs::path("/opt/usr/data/ut-regular-file");
-    const fs::path copyFile = PROVISION_FILE_PATH;
+    const fs::path copyFile = SOME_FILE_PATH;
 
-    ZoneProvisioning config;
-    ZoneProvisioning::Unit unit;
-    unit.set(ZoneProvisioning::File({VSMFILE_DIRECTORY,
+    ZoneProvisioningConfig config;
+    ZoneProvisioningConfig::Provision provision;
+    provision.set(ZoneProvisioningConfig::File({VSMFILE_DIRECTORY,
                                     regularFile.parent_path().string(),
                                     0,
                                     0777}));
-    config.units.push_back(unit);
+    config.provisions.push_back(provision);
 
-    unit.set(ZoneProvisioning::File({VSMFILE_REGULAR,
+    provision.set(ZoneProvisioningConfig::File({VSMFILE_REGULAR,
                                     regularFile.string(),
                                     O_CREAT,
                                     0777}));
-    config.units.push_back(unit);
+    config.provisions.push_back(provision);
 
-    unit.set(ZoneProvisioning::File({VSMFILE_DIRECTORY,
+    provision.set(ZoneProvisioningConfig::File({VSMFILE_DIRECTORY,
                                     copyFile.parent_path().string(),
                                     0,
                                     0777}));
-    config.units.push_back(unit);
-    unit.set(ZoneProvisioning::File({VSMFILE_REGULAR,
+    config.provisions.push_back(provision);
+    provision.set(ZoneProvisioningConfig::File({VSMFILE_REGULAR,
                                     copyFile.string(),
                                     0,
                                     0777}));
-    config.units.push_back(unit);
-    config::saveToJsonFile(PROVISION_FILE_PATH.string(), config);
+    config.provisions.push_back(provision);
+    save(config);
 
-    ZoneProvision zoneProvision(ZONE_PATH.string(), {});
+    ZoneProvision zoneProvision = create({});
     zoneProvision.start();
 
     BOOST_CHECK(fs::exists(ROOTFS_PATH / regularFile.parent_path()));
@@ -152,27 +175,27 @@ BOOST_AUTO_TEST_CASE(MountTest)
     utils::ScopedDir provisionfs(mountSource.string());
 
 
-    ZoneProvisioning config;
-    ZoneProvisioning::Unit unit;
-    unit.set(ZoneProvisioning::File({VSMFILE_DIRECTORY,
+    ZoneProvisioningConfig config;
+    ZoneProvisioningConfig::Provision provision;
+    provision.set(ZoneProvisioningConfig::File({VSMFILE_DIRECTORY,
                                     mountTarget.string(),
                                     0,
                                     0777}));
-    config.units.push_back(unit);
-    unit.set(ZoneProvisioning::Mount({mountSource.string(),
+    config.provisions.push_back(provision);
+    provision.set(ZoneProvisioningConfig::Mount({mountSource.string(),
                                       mountTarget.string(),
                                       "",
                                       MS_BIND,
                                       ""}));
-    config.units.push_back(unit);
-    unit.set(ZoneProvisioning::File({VSMFILE_REGULAR,
+    config.provisions.push_back(provision);
+    provision.set(ZoneProvisioningConfig::File({VSMFILE_REGULAR,
                                     (mountTarget / sharedFile).string(),
                                     O_CREAT,
                                     0777}));
-    config.units.push_back(unit);
-    config::saveToJsonFile(PROVISION_FILE_PATH.string(), config);
+    config.provisions.push_back(provision);
+    save(config);
 
-    ZoneProvision zoneProvision(ZONE_PATH.string(), {});
+    ZoneProvision zoneProvision = create({});
     zoneProvision.start();
 
     BOOST_CHECK(fs::exists(ROOTFS_PATH / mountTarget));
@@ -184,17 +207,17 @@ BOOST_AUTO_TEST_CASE(MountTest)
 
 BOOST_AUTO_TEST_CASE(LinkTest)
 {
-    const fs::path linkFile = fs::path("/ut-from-host-provision.conf");
+    const fs::path linkFile = fs::path("/ut-from-host-file.txt");
 
-    ZoneProvisioning config;
-    ZoneProvisioning::Unit unit;
+    ZoneProvisioningConfig config;
+    ZoneProvisioningConfig::Provision provision;
 
-    unit.set(ZoneProvisioning::Link({PROVISION_FILE_PATH.string(),
+    provision.set(ZoneProvisioningConfig::Link({SOME_FILE_PATH.string(),
                                      linkFile.string()}));
-    config.units.push_back(unit);
-    config::saveToJsonFile(PROVISION_FILE_PATH.string(), config);
+    config.provisions.push_back(provision);
+    save(config);
     {
-        ZoneProvision zoneProvision(ZONE_PATH.string(), {});
+        ZoneProvision zoneProvision = create({});
         zoneProvision.start();
 
         BOOST_CHECK(!fs::exists(ROOTFS_PATH / linkFile));
@@ -202,7 +225,7 @@ BOOST_AUTO_TEST_CASE(LinkTest)
         zoneProvision.stop();
     }
     {
-        ZoneProvision zoneProvision(ZONE_PATH.string(), {"/tmp/"});
+        ZoneProvision zoneProvision = create({"/tmp/"});
         zoneProvision.start();
 
         BOOST_CHECK(fs::exists(ROOTFS_PATH / linkFile));
@@ -213,82 +236,81 @@ BOOST_AUTO_TEST_CASE(LinkTest)
 
 BOOST_AUTO_TEST_CASE(DeclareFileTest)
 {
-    ZoneProvision zoneProvision(ZONE_PATH.string(), {});
+    ZoneProvision zoneProvision = create({});
     zoneProvision.declareFile(1, "path", 0747, 0777);
     zoneProvision.declareFile(2, "path", 0747, 0777);
 
-    ZoneProvisioning config;
-    BOOST_REQUIRE_NO_THROW(loadFromJsonFile(PROVISION_FILE_PATH.string(), config));
-    BOOST_REQUIRE_EQUAL(config.units.size(), 2);
-    BOOST_REQUIRE(config.units[0].is<ZoneProvisioning::File>());
-    BOOST_REQUIRE(config.units[1].is<ZoneProvisioning::File>());
-    const ZoneProvisioning::File& unit = config.units[0].as<ZoneProvisioning::File>();
-    BOOST_CHECK_EQUAL(unit.type, 1);
-    BOOST_CHECK_EQUAL(unit.path, "path");
-    BOOST_CHECK_EQUAL(unit.flags, 0747);
-    BOOST_CHECK_EQUAL(unit.mode, 0777);
+    ZoneProvisioningConfig config;
+    load(config);
+    BOOST_REQUIRE_EQUAL(config.provisions.size(), 2);
+    BOOST_REQUIRE(config.provisions[0].is<ZoneProvisioningConfig::File>());
+    BOOST_REQUIRE(config.provisions[1].is<ZoneProvisioningConfig::File>());
+    const ZoneProvisioningConfig::File& provision = config.provisions[0].as<ZoneProvisioningConfig::File>();
+    BOOST_CHECK_EQUAL(provision.type, 1);
+    BOOST_CHECK_EQUAL(provision.path, "path");
+    BOOST_CHECK_EQUAL(provision.flags, 0747);
+    BOOST_CHECK_EQUAL(provision.mode, 0777);
 }
 
 BOOST_AUTO_TEST_CASE(DeclareMountTest)
 {
-    ZoneProvision zoneProvision(ZONE_PATH.string(), {});
+    ZoneProvision zoneProvision = create({});
     zoneProvision.declareMount("/fake/path1", "/fake/path2", "tmpfs", 077, "fake");
     zoneProvision.declareMount("/fake/path2", "/fake/path2", "tmpfs", 077, "fake");
 
-    ZoneProvisioning config;
-    BOOST_REQUIRE_NO_THROW(loadFromJsonFile(PROVISION_FILE_PATH.string(), config));
-    BOOST_REQUIRE_EQUAL(config.units.size(), 2);
-    BOOST_REQUIRE(config.units[0].is<ZoneProvisioning::Mount>());
-    BOOST_REQUIRE(config.units[1].is<ZoneProvisioning::Mount>());
-    const ZoneProvisioning::Mount& unit = config.units[0].as<ZoneProvisioning::Mount>();
-    BOOST_CHECK_EQUAL(unit.source, "/fake/path1");
-    BOOST_CHECK_EQUAL(unit.target, "/fake/path2");
-    BOOST_CHECK_EQUAL(unit.type, "tmpfs");
-    BOOST_CHECK_EQUAL(unit.flags, 077);
-    BOOST_CHECK_EQUAL(unit.data, "fake");
+    ZoneProvisioningConfig config;
+    load(config);
+    BOOST_REQUIRE_EQUAL(config.provisions.size(), 2);
+    BOOST_REQUIRE(config.provisions[0].is<ZoneProvisioningConfig::Mount>());
+    BOOST_REQUIRE(config.provisions[1].is<ZoneProvisioningConfig::Mount>());
+    const ZoneProvisioningConfig::Mount& provision = config.provisions[0].as<ZoneProvisioningConfig::Mount>();
+    BOOST_CHECK_EQUAL(provision.source, "/fake/path1");
+    BOOST_CHECK_EQUAL(provision.target, "/fake/path2");
+    BOOST_CHECK_EQUAL(provision.type, "tmpfs");
+    BOOST_CHECK_EQUAL(provision.flags, 077);
+    BOOST_CHECK_EQUAL(provision.data, "fake");
 }
 
 BOOST_AUTO_TEST_CASE(DeclareLinkTest)
 {
-    ZoneProvision zoneProvision(ZONE_PATH.string(), {});
+    ZoneProvision zoneProvision = create({});
     zoneProvision.declareLink("/fake/path1", "/fake/path2");
     zoneProvision.declareLink("/fake/path2", "/fake/path2");
 
-    ZoneProvisioning config;
-    BOOST_REQUIRE_NO_THROW(loadFromJsonFile(PROVISION_FILE_PATH.string(), config));
-    BOOST_REQUIRE_EQUAL(config.units.size(), 2);
-    BOOST_REQUIRE(config.units[0].is<ZoneProvisioning::Link>());
-    BOOST_REQUIRE(config.units[1].is<ZoneProvisioning::Link>());
-    const ZoneProvisioning::Link& unit = config.units[0].as<ZoneProvisioning::Link>();
-    BOOST_CHECK_EQUAL(unit.source, "/fake/path1");
-    BOOST_CHECK_EQUAL(unit.target, "/fake/path2");
+    ZoneProvisioningConfig config;
+    load(config);
+    BOOST_REQUIRE_EQUAL(config.provisions.size(), 2);
+    BOOST_REQUIRE(config.provisions[0].is<ZoneProvisioningConfig::Link>());
+    BOOST_REQUIRE(config.provisions[1].is<ZoneProvisioningConfig::Link>());
+    const ZoneProvisioningConfig::Link& provision = config.provisions[0].as<ZoneProvisioningConfig::Link>();
+    BOOST_CHECK_EQUAL(provision.source, "/fake/path1");
+    BOOST_CHECK_EQUAL(provision.target, "/fake/path2");
 }
 
 BOOST_AUTO_TEST_CASE(ProvisionedAlreadyTest)
 {
-    const fs::path dir = fs::path("/opt/usr/data/ut-from-host-provision");
-    const fs::path linkFile = fs::path("/ut-from-host-provision.conf");
+    const fs::path dir = fs::path("/opt/usr/data/ut-from-host");
+    const fs::path linkFile = fs::path("/ut-from-host-file.txt");
     const fs::path regularFile = fs::path("/opt/usr/data/ut-regular-file");
 
-    ZoneProvisioning config;
-    ZoneProvisioning::Unit unit;
-    unit.set(ZoneProvisioning::File({VSMFILE_DIRECTORY,
+    ZoneProvisioningConfig config;
+    ZoneProvisioningConfig::Provision provision;
+    provision.set(ZoneProvisioningConfig::File({VSMFILE_DIRECTORY,
                                     dir.string(),
                                     0,
                                     0777}));
-    config.units.push_back(unit);
-    unit.set(ZoneProvisioning::Link({PROVISION_FILE_PATH.string(),
+    config.provisions.push_back(provision);
+    provision.set(ZoneProvisioningConfig::Link({SOME_FILE_PATH.string(),
                                      linkFile.string()}));
-    config.units.push_back(unit);
-    unit.set(ZoneProvisioning::File({VSMFILE_REGULAR,
+    config.provisions.push_back(provision);
+    provision.set(ZoneProvisioningConfig::File({VSMFILE_REGULAR,
                                     regularFile.string(),
                                     O_CREAT,
                                     0777}));
-    config.units.push_back(unit);
+    config.provisions.push_back(provision);
+    save(config);
 
-    config::saveToJsonFile(PROVISION_FILE_PATH.string(), config);
-
-    ZoneProvision zoneProvision(ZONE_PATH.string(), {"/tmp/"});
+    ZoneProvision zoneProvision = create({"/tmp/"});
     zoneProvision.start();
 
     BOOST_CHECK(fs::exists(ROOTFS_PATH / dir));

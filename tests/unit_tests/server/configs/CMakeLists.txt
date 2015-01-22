@@ -28,6 +28,8 @@ FILE(GLOB manager_zone_CONF    ut-zones-manager/zones/*.conf)
 FILE(GLOB zone_CONF            ut-zone/*.conf)
 FILE(GLOB zone_zone_CONF  ut-zone/zones/*.conf)
 
+FILE(GLOB zone_provision_CONF  ut-zone-provision/*.conf)
+
 FILE(GLOB admin_zone_CONF      ut-zone-admin/zones/*.conf)
 
 FILE(GLOB connection_CONF           ut-zone-connection/*.conf)
@@ -96,6 +98,9 @@ INSTALL(FILES        ${zone_zone_CONF}
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zone/zones)
 INSTALL(FILES        ${zone_zone_CONF_GEN}
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zone/zones)
+
+INSTALL(FILES        ${zone_provision_CONF}
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zone-provision)
 
 INSTALL(FILES        ${admin_zone_CONF}
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zone-admin/zones)
