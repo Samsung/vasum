@@ -25,7 +25,6 @@
 
 // TODO: Test connection limit
 // TODO: Refactor tests - function for setting up env
-// TODO: Callback wrapper that waits till the callback is called
 
 
 #include "config.hpp"
@@ -80,7 +79,17 @@ struct Fixture {
 
 struct SendData {
     int intVal;
-    SendData(int i = 0): intVal(i) {}
+    SendData(int i): intVal(i) {}
+
+    CONFIG_REGISTER
+    (
+        intVal
+    )
+};
+
+struct RecvData {
+    int intVal;
+    RecvData(): intVal(-1) {}
 
     CONFIG_REGISTER
     (
@@ -128,23 +137,23 @@ struct ThrowOnAcceptData {
 
 std::shared_ptr<EmptyData> returnEmptyCallback(const FileDescriptor, std::shared_ptr<EmptyData>&)
 {
-    return std::shared_ptr<EmptyData>(new EmptyData());
+    return std::make_shared<EmptyData>();
 }
 
-std::shared_ptr<SendData> returnDataCallback(const FileDescriptor, std::shared_ptr<SendData>&)
+std::shared_ptr<SendData> returnDataCallback(const FileDescriptor, std::shared_ptr<RecvData>&)
 {
-    return std::shared_ptr<SendData>(new SendData(1));
+    return std::make_shared<SendData>(1);
 }
 
-std::shared_ptr<SendData> echoCallback(const FileDescriptor, std::shared_ptr<SendData>& data)
+std::shared_ptr<SendData> echoCallback(const FileDescriptor, std::shared_ptr<RecvData>& data)
 {
-    return data;
+    return std::make_shared<SendData>(data->intVal);
 }
 
-std::shared_ptr<SendData> longEchoCallback(const FileDescriptor, std::shared_ptr<SendData>& data)
+std::shared_ptr<SendData> longEchoCallback(const FileDescriptor, std::shared_ptr<RecvData>& data)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(LONG_OPERATION_TIME));
-    return data;
+    return std::make_shared<SendData>(data->intVal);
 }
 
 FileDescriptor connect(Service& s, Client& c, bool isServiceGlib = false, bool isClientGlib = false)
@@ -182,7 +191,7 @@ FileDescriptor connectClientGSource(Service& s, Client& c)
 void testEcho(Client& c, const MethodID methodID)
 {
     std::shared_ptr<SendData> sentData(new SendData(34));
-    std::shared_ptr<SendData> recvData = c.callSync<SendData, SendData>(methodID, sentData, TIMEOUT);
+    std::shared_ptr<RecvData> recvData = c.callSync<SendData, RecvData>(methodID, sentData, TIMEOUT);
     BOOST_REQUIRE(recvData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
@@ -190,7 +199,7 @@ void testEcho(Client& c, const MethodID methodID)
 void testEcho(Service& s, const MethodID methodID, const FileDescriptor peerFD)
 {
     std::shared_ptr<SendData> sentData(new SendData(56));
-    std::shared_ptr<SendData> recvData = s.callSync<SendData, SendData>(methodID, peerFD, sentData, TIMEOUT);
+    std::shared_ptr<RecvData> recvData = s.callSync<SendData, RecvData>(methodID, peerFD, sentData, TIMEOUT);
     BOOST_REQUIRE(recvData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
@@ -210,12 +219,12 @@ BOOST_AUTO_TEST_CASE(ServiceAddRemoveMethod)
 {
     Service s(socketPath);
     s.setMethodHandler<EmptyData, EmptyData>(1, returnEmptyCallback);
-    s.setMethodHandler<SendData, SendData>(1, returnDataCallback);
+    s.setMethodHandler<SendData, RecvData>(1, returnDataCallback);
 
     s.start();
 
-    s.setMethodHandler<SendData, SendData>(1, echoCallback);
-    s.setMethodHandler<SendData, SendData>(2, returnDataCallback);
+    s.setMethodHandler<SendData, RecvData>(1, echoCallback);
+    s.setMethodHandler<SendData, RecvData>(2, returnDataCallback);
 
     Client c(socketPath);
     connect(s, c);
@@ -232,12 +241,12 @@ BOOST_AUTO_TEST_CASE(ClientAddRemoveMethod)
     Service s(socketPath);
     Client c(socketPath);
     c.setMethodHandler<EmptyData, EmptyData>(1, returnEmptyCallback);
-    c.setMethodHandler<SendData, SendData>(1, returnDataCallback);
+    c.setMethodHandler<SendData, RecvData>(1, returnDataCallback);
 
     FileDescriptor peerFD = connect(s, c);
 
-    c.setMethodHandler<SendData, SendData>(1, echoCallback);
-    c.setMethodHandler<SendData, SendData>(2, returnDataCallback);
+    c.setMethodHandler<SendData, RecvData>(1, echoCallback);
+    c.setMethodHandler<SendData, RecvData>(2, returnDataCallback);
 
     testEcho(s, 1, peerFD);
 
@@ -251,7 +260,7 @@ BOOST_AUTO_TEST_CASE(ServiceStartStop)
 {
     Service s(socketPath);
 
-    s.setMethodHandler<SendData, SendData>(1, returnDataCallback);
+    s.setMethodHandler<SendData, RecvData>(1, returnDataCallback);
 
     s.start();
     s.stop();
@@ -266,7 +275,7 @@ BOOST_AUTO_TEST_CASE(ClientStartStop)
 {
     Service s(socketPath);
     Client c(socketPath);
-    c.setMethodHandler<SendData, SendData>(1, returnDataCallback);
+    c.setMethodHandler<SendData, RecvData>(1, returnDataCallback);
 
     c.start();
     c.stop();
@@ -283,8 +292,8 @@ BOOST_AUTO_TEST_CASE(ClientStartStop)
 BOOST_AUTO_TEST_CASE(SyncClientToServiceEcho)
 {
     Service s(socketPath);
-    s.setMethodHandler<SendData, SendData>(1, echoCallback);
-    s.setMethodHandler<SendData, SendData>(2, echoCallback);
+    s.setMethodHandler<SendData, RecvData>(1, echoCallback);
+    s.setMethodHandler<SendData, RecvData>(2, echoCallback);
 
     Client c(socketPath);
     connect(s, c);
@@ -296,9 +305,9 @@ BOOST_AUTO_TEST_CASE(SyncClientToServiceEcho)
 BOOST_AUTO_TEST_CASE(Restart)
 {
     Service s(socketPath);
-    s.setMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.start();
-    s.setMethodHandler<SendData, SendData>(2, echoCallback);
+    s.setMethodHandler<SendData, RecvData>(2, echoCallback);
 
     Client c(socketPath);
     c.start();
@@ -322,11 +331,11 @@ BOOST_AUTO_TEST_CASE(SyncServiceToClientEcho)
 {
     Service s(socketPath);
     Client c(socketPath);
-    c.setMethodHandler<SendData, SendData>(1, echoCallback);
+    c.setMethodHandler<SendData, RecvData>(1, echoCallback);
     FileDescriptor peerFD = connect(s, c);
 
     std::shared_ptr<SendData> sentData(new SendData(56));
-    std::shared_ptr<SendData> recvData = s.callSync<SendData, SendData>(1, peerFD, sentData);
+    std::shared_ptr<RecvData> recvData = s.callSync<SendData, RecvData>(1, peerFD, sentData);
     BOOST_REQUIRE(recvData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
@@ -334,49 +343,49 @@ BOOST_AUTO_TEST_CASE(SyncServiceToClientEcho)
 BOOST_AUTO_TEST_CASE(AsyncClientToServiceEcho)
 {
     std::shared_ptr<SendData> sentData(new SendData(34));
-    ValueLatch<SendData> recvDataLatch;
+    ValueLatch<std::shared_ptr<RecvData>> recvDataLatch;
 
     // Setup Service and Client
     Service s(socketPath);
-    s.setMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.start();
     Client c(socketPath);
     c.start();
 
     //Async call
-    auto dataBack = [&recvDataLatch](ipc::Status status, std::shared_ptr<SendData>& data) {
+    auto dataBack = [&recvDataLatch](ipc::Status status, std::shared_ptr<RecvData>& data) {
         if (status == ipc::Status::OK) {
-            recvDataLatch.set(*data);
+            recvDataLatch.set(data);
         }
     };
-    c.callAsync<SendData, SendData>(1, sentData, dataBack);
+    c.callAsync<SendData, RecvData>(1, sentData, dataBack);
 
     // Wait for the response
-    std::shared_ptr<SendData> recvData(new SendData(recvDataLatch.get(TIMEOUT)));
+    std::shared_ptr<RecvData> recvData(recvDataLatch.get(TIMEOUT));
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
 BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
 {
     std::shared_ptr<SendData> sentData(new SendData(56));
-    ValueLatch<SendData> recvDataLatch;
+    ValueLatch<std::shared_ptr<RecvData>> recvDataLatch;
 
     Service s(socketPath);
     Client c(socketPath);
-    c.setMethodHandler<SendData, SendData>(1, echoCallback);
+    c.setMethodHandler<SendData, RecvData>(1, echoCallback);
     FileDescriptor peerFD = connect(s, c);
 
     // Async call
-    auto dataBack = [&recvDataLatch](ipc::Status status, std::shared_ptr<SendData>& data) {
+    auto dataBack = [&recvDataLatch](ipc::Status status, std::shared_ptr<RecvData>& data) {
         if (status == ipc::Status::OK) {
-            recvDataLatch.set(*data);
+            recvDataLatch.set(data);
         }
     };
 
-    s.callAsync<SendData, SendData>(1, peerFD, sentData, dataBack);
+    s.callAsync<SendData, RecvData>(1, peerFD, sentData, dataBack);
 
     // Wait for the response
-    std::shared_ptr<SendData> recvData(new SendData(recvDataLatch.get(TIMEOUT)));
+    std::shared_ptr<RecvData> recvData(recvDataLatch.get(TIMEOUT));
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
@@ -384,33 +393,33 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
 BOOST_AUTO_TEST_CASE(SyncTimeout)
 {
     Service s(socketPath);
-    s.setMethodHandler<SendData, SendData>(1, longEchoCallback);
+    s.setMethodHandler<SendData, RecvData>(1, longEchoCallback);
 
     Client c(socketPath);
     connect(s, c);
 
     std::shared_ptr<SendData> sentData(new SendData(78));
-    BOOST_REQUIRE_THROW((c.callSync<SendData, SendData>(1, sentData, TIMEOUT)), IPCException);
+    BOOST_REQUIRE_THROW((c.callSync<SendData, RecvData>(1, sentData, TIMEOUT)), IPCException);
 }
 
 BOOST_AUTO_TEST_CASE(SerializationError)
 {
     Service s(socketPath);
-    s.setMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, RecvData>(1, echoCallback);
 
     Client c(socketPath);
     connect(s, c);
 
     std::shared_ptr<ThrowOnAcceptData> throwingData(new ThrowOnAcceptData());
 
-    BOOST_CHECK_THROW((c.callSync<ThrowOnAcceptData, SendData>(1, throwingData)), IPCSerializationException);
+    BOOST_CHECK_THROW((c.callSync<ThrowOnAcceptData, RecvData>(1, throwingData)), IPCSerializationException);
 
 }
 
 BOOST_AUTO_TEST_CASE(ParseError)
 {
     Service s(socketPath);
-    s.setMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.start();
 
     Client c(socketPath);
@@ -436,12 +445,12 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
     Client c(socketPath);
     c.start();
 
-    auto dataBack = [&retStatusLatch](ipc::Status status, std::shared_ptr<SendData>&) {
+    auto dataBack = [&retStatusLatch](ipc::Status status, std::shared_ptr<RecvData>&) {
         retStatusLatch.set(status);
     };
 
     std::shared_ptr<SendData> sentData(new SendData(78));
-    c.callAsync<SendData, SendData>(1, sentData, dataBack);
+    c.callAsync<SendData, RecvData>(1, sentData, dataBack);
 
     // Wait for the response
     ipc::Status retStatus = retStatusLatch.get(TIMEOUT);
@@ -456,24 +465,24 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
 BOOST_AUTO_TEST_CASE(ReadTimeout)
 {
     Service s(socketPath);
-    auto longEchoCallback = [](const FileDescriptor, std::shared_ptr<SendData>& data) {
+    auto longEchoCallback = [](const FileDescriptor, std::shared_ptr<RecvData>& data) {
         return std::shared_ptr<LongSendData>(new LongSendData(data->intVal, LONG_OPERATION_TIME));
     };
-    s.setMethodHandler<LongSendData, SendData>(1, longEchoCallback);
+    s.setMethodHandler<LongSendData, RecvData>(1, longEchoCallback);
 
     Client c(socketPath);
     connect(s, c);
 
     // Test timeout on read
     std::shared_ptr<SendData> sentData(new SendData(334));
-    BOOST_CHECK_THROW((c.callSync<SendData, SendData>(1, sentData, TIMEOUT)), IPCException);
+    BOOST_CHECK_THROW((c.callSync<SendData, RecvData>(1, sentData, TIMEOUT)), IPCException);
 }
 
 
 BOOST_AUTO_TEST_CASE(WriteTimeout)
 {
     Service s(socketPath);
-    s.setMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.start();
 
     Client c(socketPath);
@@ -481,77 +490,86 @@ BOOST_AUTO_TEST_CASE(WriteTimeout)
 
     // Test echo with a minimal timeout
     std::shared_ptr<LongSendData> sentDataA(new LongSendData(34, SHORT_OPERATION_TIME));
-    std::shared_ptr<SendData> recvData = c.callSync<LongSendData, SendData>(1, sentDataA, TIMEOUT);
+    std::shared_ptr<RecvData> recvData = c.callSync<LongSendData, RecvData>(1, sentDataA, TIMEOUT);
     BOOST_REQUIRE(recvData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentDataA->intVal);
 
     // Test timeout on write
     std::shared_ptr<LongSendData> sentDataB(new LongSendData(34, LONG_OPERATION_TIME));
-    BOOST_CHECK_THROW((c.callSync<LongSendData, SendData>(1, sentDataB, TIMEOUT)), IPCTimeoutException);
+    BOOST_CHECK_THROW((c.callSync<LongSendData, RecvData>(1, sentDataB, TIMEOUT)), IPCTimeoutException);
 }
 
 
 BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
 {
-    utils::Latch latchA;
-    utils::Latch latchB;
+    ValueLatch<std::shared_ptr<RecvData>> recvDataLatchA;
+    ValueLatch<std::shared_ptr<RecvData>> recvDataLatchB;
 
     Service s(socketPath);
     Client c(socketPath);
     connect(s, c);
 
-    auto handlerA = [&latchA](const FileDescriptor, std::shared_ptr<SendData>&) {
-        latchA.set();
+    auto handlerA = [&recvDataLatchA](const FileDescriptor, std::shared_ptr<RecvData>& data) {
+        recvDataLatchA.set(data);
     };
 
-    auto handlerB = [&latchB](const FileDescriptor, std::shared_ptr<SendData>&) {
-        latchB.set();
+    auto handlerB = [&recvDataLatchB](const FileDescriptor, std::shared_ptr<RecvData>& data) {
+        recvDataLatchB.set(data);
     };
 
-    c.setSignalHandler<SendData>(1, handlerA);
-    c.setSignalHandler<SendData>(2, handlerB);
+    c.setSignalHandler<RecvData>(1, handlerA);
+    c.setSignalHandler<RecvData>(2, handlerB);
 
     // Wait for the signals to propagate to the Service
     std::this_thread::sleep_for(std::chrono::milliseconds(2 * TIMEOUT));
 
-    auto data = std::make_shared<SendData>(1);
-    s.signal<SendData>(2, data);
-    s.signal<SendData>(1, data);
+    auto sendDataA = std::make_shared<SendData>(1);
+    auto sendDataB = std::make_shared<SendData>(2);
+    s.signal<SendData>(2, sendDataB);
+    s.signal<SendData>(1, sendDataA);
 
     // Wait for the signals to arrive
-    BOOST_CHECK(latchA.wait(TIMEOUT) && latchB.wait(TIMEOUT));
+    std::shared_ptr<RecvData> recvDataA(recvDataLatchA.get(TIMEOUT));
+    std::shared_ptr<RecvData> recvDataB(recvDataLatchB.get(TIMEOUT));
+    BOOST_CHECK_EQUAL(recvDataA->intVal, sendDataA->intVal);
+    BOOST_CHECK_EQUAL(recvDataB->intVal, sendDataB->intVal);
 }
 
 
 BOOST_AUTO_TEST_CASE(AddSignalOffline)
 {
-    utils::Latch latchA;
-    utils::Latch latchB;
+    ValueLatch<std::shared_ptr<RecvData>> recvDataLatchA;
+    ValueLatch<std::shared_ptr<RecvData>> recvDataLatchB;
 
     Service s(socketPath);
     Client c(socketPath);
 
-    auto handlerA = [&latchA](const FileDescriptor, std::shared_ptr<SendData>&) {
-        latchA.set();
+    auto handlerA = [&recvDataLatchA](const FileDescriptor, std::shared_ptr<RecvData>& data) {
+        recvDataLatchA.set(data);
     };
 
-    auto handlerB = [&latchB](const FileDescriptor, std::shared_ptr<SendData>&) {
-        latchB.set();
+    auto handlerB = [&recvDataLatchB](const FileDescriptor, std::shared_ptr<RecvData>& data) {
+        recvDataLatchB.set(data);
     };
 
-    c.setSignalHandler<SendData>(1, handlerA);
-    c.setSignalHandler<SendData>(2, handlerB);
+    c.setSignalHandler<RecvData>(1, handlerA);
+    c.setSignalHandler<RecvData>(2, handlerB);
 
     connect(s, c);
 
     // Wait for the information about the signals to propagate
     std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT));
-    auto data = std::make_shared<SendData>(1);
-    s.signal<SendData>(2, data);
-    s.signal<SendData>(1, data);
+
+    auto sendDataA = std::make_shared<SendData>(1);
+    auto sendDataB = std::make_shared<SendData>(2);
+    s.signal<SendData>(2, sendDataB);
+    s.signal<SendData>(1, sendDataA);
 
     // Wait for the signals to arrive
-    BOOST_CHECK(latchA.wait(TIMEOUT) && latchB.wait(TIMEOUT));
+    std::shared_ptr<RecvData> recvDataA(recvDataLatchA.get(TIMEOUT));
+    std::shared_ptr<RecvData> recvDataB(recvDataLatchB.get(TIMEOUT));
+    BOOST_CHECK_EQUAL(recvDataA->intVal, sendDataA->intVal);
+    BOOST_CHECK_EQUAL(recvDataB->intVal, sendDataB->intVal);
 }
 
 
@@ -560,16 +578,16 @@ BOOST_AUTO_TEST_CASE(ServiceGSource)
     utils::Latch l;
     ScopedGlibLoop loop;
 
-    auto signalHandler = [&l](const FileDescriptor, std::shared_ptr<SendData>&) {
+    auto signalHandler = [&l](const FileDescriptor, std::shared_ptr<RecvData>&) {
         l.set();
     };
 
     IPCGSource::Pointer serviceGSource;
     Service s(socketPath);
-    s.setMethodHandler<SendData, SendData>(1, echoCallback);
+    s.setMethodHandler<SendData, RecvData>(1, echoCallback);
 
     Client c(socketPath);
-    s.setSignalHandler<SendData>(2, signalHandler);
+    s.setSignalHandler<RecvData>(2, signalHandler);
 
     connectServiceGSource(s, c);
 
@@ -587,7 +605,7 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
     utils::Latch l;
     ScopedGlibLoop loop;
 
-    auto signalHandler = [&l](const FileDescriptor, std::shared_ptr<SendData>&) {
+    auto signalHandler = [&l](const FileDescriptor, std::shared_ptr<RecvData>&) {
         l.set();
     };
 
@@ -596,8 +614,8 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
 
     IPCGSource::Pointer clientGSource;
     Client c(socketPath);
-    c.setMethodHandler<SendData, SendData>(1, echoCallback);
-    c.setSignalHandler<SendData>(2, signalHandler);
+    c.setMethodHandler<SendData, RecvData>(1, echoCallback);
+    c.setSignalHandler<RecvData>(2, signalHandler);
 
     FileDescriptor peerFD = connectClientGSource(s, c);
 
@@ -616,7 +634,7 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
 
 //     // Setup Service and many Clients
 //     Service s(socketPath);
-//     s.setMethodHandler<SendData, SendData>(1, echoCallback);
+//     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
 //     s.start();
 
 //     std::list<Client> clients;
@@ -632,7 +650,7 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
 //     for (auto it = clients.begin(); it != clients.end(); ++it) {
 //         try {
 //             std::shared_ptr<SendData> sentData(new SendData(generator()));
-//             std::shared_ptr<SendData> recvData = it->callSync<SendData, SendData>(1, sentData);
+//             std::shared_ptr<RecvData> recvData = it->callSync<SendData, RecvData>(1, sentData);
 //             BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 //         } catch (...) {}
 //     }

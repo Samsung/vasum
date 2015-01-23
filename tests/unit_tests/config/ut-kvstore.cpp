@@ -29,12 +29,15 @@
 #include "config/kvstore.hpp"
 #include "config/exception.hpp"
 #include "utils/scoped-dir.hpp"
+#include "utils/latch.hpp"
 
 #include <iostream>
 #include <memory>
+#include <thread>
 #include <boost/filesystem.hpp>
 
 using namespace config;
+using namespace vasum::utils;
 namespace fs = boost::filesystem;
 
 namespace {
@@ -171,19 +174,19 @@ BOOST_AUTO_TEST_CASE(SingleValueTest)
 
 namespace {
 template<typename T>
-void setVector(Fixture& f, std::vector<T> vec)
+void setVector(Fixture& f, const std::vector<T>& vec)
 {
     std::vector<T> storedVec;
     BOOST_CHECK_NO_THROW(f.c.set(KEY, vec));
-    BOOST_CHECK_NO_THROW(storedVec = f.c.get<std::vector<T> >(KEY))
+    BOOST_CHECK_NO_THROW(storedVec = f.c.get<std::vector<T>>(KEY))
     BOOST_CHECK_EQUAL_COLLECTIONS(storedVec.begin(), storedVec.end(), vec.begin(), vec.end());
 }
 
 template<typename T>
 void testVectorOfValues(Fixture& f,
-                        std::vector<T> a,
-                        std::vector<T> b,
-                        std::vector<T> c)
+                        const std::vector<T>& a,
+                        const std::vector<T>& b,
+                        const std::vector<T>& c)
 {
     // Set
     setVector(f, a);
@@ -219,6 +222,31 @@ BOOST_AUTO_TEST_CASE(ClearTest)
     BOOST_CHECK_NO_THROW(c.remove(KEY));
     BOOST_CHECK_THROW(c.get<std::vector<std::string>>(KEY), ConfigException);
     BOOST_CHECK_THROW(c.get(KEY), ConfigException);
+}
+
+BOOST_AUTO_TEST_CASE(TransactionTest)
+{
+    auto t1 = c.getTransaction();
+    BOOST_CHECK_EQUAL(t1.use_count(), 1);
+
+    auto t2 = c.getTransaction();
+    BOOST_CHECK_EQUAL(t1.use_count(), 2);
+    BOOST_CHECK_EQUAL(t2.use_count(), 2);
+}
+
+BOOST_AUTO_TEST_CASE(TransactionTwoThreadsTest)
+{
+    Latch latch;
+    auto trans1 = c.getTransaction();
+    std::thread thread([&]{
+        auto trans2 = c.getTransaction();
+        latch.set();
+    });
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    BOOST_CHECK(latch.empty());
+    trans1.reset();
+    latch.wait();
+    thread.join();
 }
 
 BOOST_AUTO_TEST_CASE(KeyTest)

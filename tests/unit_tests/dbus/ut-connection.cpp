@@ -414,8 +414,9 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallTest)
     conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler);
 
     auto asyncResult1 = [&](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
-        BOOST_CHECK(g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT));
-        callDone.set();
+        if (g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT)) {
+            callDone.set();
+        }
     };
     conn2->callMethodAsync(TESTAPI_BUS_NAME,
                            TESTAPI_OBJECT_PATH,
@@ -429,8 +430,9 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallTest)
     auto asyncResult2 = [&](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
         const gchar* ret = NULL;
         g_variant_get(asyncMethodCallResult.get(), "(&s)", &ret);
-        BOOST_CHECK_EQUAL("resp: arg", ret);
-        callDone.set();
+        if (ret == std::string("resp: arg")) {
+            callDone.set();
+        }
     };
     conn2->callMethodAsync(TESTAPI_BUS_NAME,
                            TESTAPI_OBJECT_PATH,
@@ -442,8 +444,12 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallTest)
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 
     auto asyncResult3 = [&](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
-        BOOST_CHECK_THROW(asyncMethodCallResult.get(), DbusCustomException);
-        callDone.set();
+        try {
+            asyncMethodCallResult.get();
+        } catch (DbusCustomException&) {
+            //expected
+            callDone.set();
+        }
     };
     conn2->callMethodAsync(TESTAPI_BUS_NAME,
                            TESTAPI_OBJECT_PATH,
@@ -494,8 +500,9 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallAsyncHandlerTest)
     auto asyncResult = [&](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
         const gchar* ret = NULL;
         g_variant_get(asyncMethodCallResult.get(), "(&s)", &ret);
-        BOOST_CHECK_EQUAL("resp: arg", ret);
-        callDone.set();
+        if (ret == std::string("resp: arg")) {
+            callDone.set();
+        }
     };
     conn2->callMethodAsync(TESTAPI_BUS_NAME,
                            TESTAPI_OBJECT_PATH,
@@ -583,8 +590,9 @@ BOOST_AUTO_TEST_CASE(DbusApiNotifyTest)
     DbusTestClient client;
 
     auto onNotify = [&](const std::string& message) {
-        BOOST_CHECK_EQUAL("notification", message);
-        notified.set();
+        if (message == "notification") {
+            notified.set();
+        }
     };
     client.setNotifyCallback(onNotify);
     server.notifyClients("notification");

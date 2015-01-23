@@ -548,6 +548,7 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
     Status returnStatus = ipc::Status::UNDEFINED;
 
     auto process = [&result, &mutex, &cv, &returnStatus](Status status, std::shared_ptr<ReceivedDataType> returnedData) {
+        std::unique_lock<std::mutex> lock(mutex);
         returnStatus = status;
         result = returnedData;
         cv.notify_all();
