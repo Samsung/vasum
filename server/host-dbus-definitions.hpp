@@ -121,6 +121,7 @@ const std::string DEFINITION =
     "    </method>"
     "    <method name='" + METHOD_CREATE_ZONE + "'>"
     "      <arg type='s' name='id' direction='in'/>"
+    "      <arg type='s' name='templateName' direction='in'/>"
     "    </method>"
     "    <method name='" + METHOD_DESTROY_ZONE + "'>"
     "      <arg type='s' name='id' direction='in'/>"

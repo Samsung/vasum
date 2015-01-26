@@ -267,6 +267,7 @@ public:
 private:
     utils::Worker::Pointer mWorker;
     ZoneConfig mConfig;
+    ZoneDynamicConfig mDynamicConfig;
     std::vector<boost::regex> mPermittedToSend;
     std::vector<boost::regex> mPermittedToRecv;
     std::unique_ptr<ZoneConnectionTransport> mConnectionTransport;

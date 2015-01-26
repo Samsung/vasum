@@ -79,6 +79,7 @@ Zone::Zone(const utils::Worker::Pointer& worker,
     mRootPath = (zonePath / fs::path("rootfs")).string();
     const std::string dbPrefix = DB_PREFIX + mAdmin->getId();
 
+    config::loadFromKVStoreWithJsonFile(dbPath, zoneConfigPath, mDynamicConfig, dbPrefix);
     mProvision.reset(new ZoneProvision(mRootPath, zoneConfigPath, dbPath, dbPrefix, mConfig.validLinkPrefixes));
 }
 

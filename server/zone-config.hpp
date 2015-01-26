@@ -137,6 +137,10 @@ struct ZoneConfig {
     )
 };
 
+struct ZoneDynamicConfig {
+    //TODO a place for zone dynamic config (other than provisioning which has its own struct)
+    CONFIG_REGISTER_EMPTY
+};
 
 } // namespace vasum
 

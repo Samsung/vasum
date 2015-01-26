@@ -378,7 +378,7 @@ VsmStatus vsm_set_active_zone(VsmClient client, const char* id);
  *
  * @param[in] client vasum-server's client
  * @param[in] id zone id
- * @param[in] tname template name, NULL for default
+ * @param[in] tname template name, NULL is equivalent to "default"
  * @return status of this function call
  */
 VsmStatus vsm_create_zone(VsmClient client, const char* id, const char* tname);

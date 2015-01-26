@@ -163,7 +163,7 @@ ZonesManager::ZonesManager(const std::string& configPath)
                                                   this, _1, _2));
 
     mHostConnection.setCreateZoneCallback(bind(&ZonesManager::handleCreateZoneCall,
-                                               this, _1, _2));
+                                               this, _1, _2, _3));
 
     mHostConnection.setDestroyZoneCallback(bind(&ZonesManager::handleDestroyZoneCall,
                                                 this, _1, _2));
@@ -998,6 +998,7 @@ int ZonesManager::getVTForNewZone()
 }
 
 void ZonesManager::handleCreateZoneCall(const std::string& id,
+                                        const std::string& templateName,
                                         dbus::MethodResultBuilder::Pointer result)
 {
     if (id.empty()) {
@@ -1051,9 +1052,12 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
         return true;
     };
 
+    std::string zoneTemplatePath = utils::createFilePath(mConfig.zoneTemplateDir,
+                                                         templateName + ".conf");
+
     try {
-        LOGI("Generating config from " << mConfig.zoneTemplatePath << " to " << newConfigPath);
-        generateNewConfig(id, mConfig.zoneTemplatePath, newConfigPath);
+        LOGI("Generating config from " << zoneTemplatePath << " to " << newConfigPath);
+        generateNewConfig(id, zoneTemplatePath, newConfigPath);
 
     } catch (VasumException& e) {
         LOGE("Generate config failed: " << e.what());

@@ -444,12 +444,9 @@ VsmStatus Client::vsm_set_active_zone(const char* id) noexcept
 VsmStatus Client::vsm_create_zone(const char* id, const char* tname) noexcept
 {
     assert(id);
-    if (tname) {
-        mStatus = Status(VSMCLIENT_OTHER_ERROR, "Named template isn't implemented");
-        return vsm_get_status();
-    }
+    const char* template_name = tname ? tname : "default";
 
-    GVariant* args_in = g_variant_new("(s)", id);
+    GVariant* args_in = g_variant_new("(ss)", id, template_name);
     return callMethod(HOST_INTERFACE, api::host::METHOD_CREATE_ZONE, args_in);
 }
 

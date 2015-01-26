@@ -91,6 +91,7 @@ public:
                                dbus::MethodResultBuilder::Pointer result
                               )> SetActiveZoneCallback;
     typedef std::function<void(const std::string& id,
+                               const std::string& templateName,
                                dbus::MethodResultBuilder::Pointer result
                               )> CreateZoneCallback;
     typedef std::function<void(const std::string& id,

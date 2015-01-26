@@ -64,8 +64,8 @@ CONFIGURE_FILE(ut-zones-manager/zones/console3-dbus.conf.in
                ${CMAKE_BINARY_DIR}/ut-zones-manager/zones/console3-dbus.conf @ONLY)
 FILE(GLOB manager_zone_CONF_GEN ${CMAKE_BINARY_DIR}/ut-zones-manager/zones/*.conf)
 
-CONFIGURE_FILE(ut-zones-manager/templates/template.conf.in
-               ${CMAKE_BINARY_DIR}/ut-zones-manager/templates/template.conf @ONLY)
+CONFIGURE_FILE(ut-zones-manager/templates/default.conf.in
+               ${CMAKE_BINARY_DIR}/ut-zones-manager/templates/default.conf @ONLY)
 FILE(GLOB manager_zone_TEMPLATE_GEN ${CMAKE_BINARY_DIR}/ut-zones-manager/templates/*.conf)
 
 

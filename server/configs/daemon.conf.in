@@ -3,7 +3,7 @@
     "zoneConfigs" : [],
     "zonesPath" : "${DATA_DIR}/.zones",
     "zoneImagePath" : "",
-    "zoneTemplatePath" : "/etc/vasum/templates/template.conf",
+    "zoneTemplateDir" : "/etc/vasum/templates/",
     "zoneNewConfigPrefix" : "/var/lib/vasum",
     "runMountPointPrefix" : "/var/run/zones",
     "defaultId" : "",

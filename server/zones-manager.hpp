@@ -184,6 +184,7 @@ private:
     void handleSetActiveZoneCall(const std::string& id,
                                  dbus::MethodResultBuilder::Pointer result);
     void handleCreateZoneCall(const std::string& id,
+                              const std::string& templateName,
                               dbus::MethodResultBuilder::Pointer result);
     void handleDestroyZoneCall(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result);

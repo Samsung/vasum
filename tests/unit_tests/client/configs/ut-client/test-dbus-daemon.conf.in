@@ -6,7 +6,7 @@
     "defaultId" : "ut-zones-manager-console1-dbus",
     "zonesPath" : "/tmp/ut-zones",
     "zoneImagePath" : "",
-    "zoneTemplatePath" : "no_need_for_templates_in_this_test",
+    "zoneTemplateDir" : "no_need_for_templates_in_this_test",
     "zoneNewConfigPrefix" : "@VSM_TEST_CONFIG_INSTALL_DIR@/client/ut-client/",
     "runMountPointPrefix" : "",
     "lxcTemplatePrefix" : "@VSM_TEST_LXC_TEMPLATES_INSTALL_DIR@",

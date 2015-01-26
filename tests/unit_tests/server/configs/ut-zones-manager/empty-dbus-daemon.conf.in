@@ -4,7 +4,7 @@
     "defaultId" : "",
     "zonesPath" : "/tmp/ut-zones",
     "zoneImagePath" : "",
-    "zoneTemplatePath" : "@VSM_TEST_CONFIG_INSTALL_DIR@/server/ut-zones-manager/templates/template.conf",
+    "zoneTemplateDir" : "@VSM_TEST_CONFIG_INSTALL_DIR@/server/ut-zones-manager/templates/",
     "zoneNewConfigPrefix" : "/tmp/ut-zones/generated-configs/",
     "runMountPointPrefix" : "",
     "lxcTemplatePrefix" : "@VSM_TEST_LXC_TEMPLATES_INSTALL_DIR@",

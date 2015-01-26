@@ -55,9 +55,9 @@ struct ZonesManagerConfig {
     std::string zoneImagePath;
 
     /**
-     * A path where template configuration files for new zones reside
+     * A dir where template configuration files for new zones reside
      */
-    std::string zoneTemplatePath;
+    std::string zoneTemplateDir;
 
     /**
      * Prefix added to a path for new zone configuration files
@@ -94,7 +94,7 @@ struct ZonesManagerConfig {
         dbPath,
         zonesPath,
         zoneImagePath,
-        zoneTemplatePath,
+        zoneTemplateDir,
         zoneNewConfigPrefix,
         lxcTemplatePrefix,
         availableVTs,

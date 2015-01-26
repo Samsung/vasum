@@ -3,7 +3,7 @@
     "zoneConfigs" : ["zones/zone1.conf", "zones/zone2.conf", "zones/zone3.conf"],
     "zonesPath" : "/tmp/ut-zones",
     "zoneImagePath" : "",
-    "zoneTemplatePath" : "no_need_for_templates_in_this_test",
+    "zoneTemplateDir" : "no_need_for_templates_in_this_test",
     "zoneNewConfigPrefix" : "@VSM_TEST_CONFIG_INSTALL_DIR@/server/ut-server/",
     "runMountPointPrefix" : "",
     "defaultId" : "ut-server-zone1",

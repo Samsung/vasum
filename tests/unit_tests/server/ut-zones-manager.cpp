@@ -78,6 +78,7 @@ const std::string FILE_CONTENT = "File content\n"
                                  "Line 2\n";
 const std::string NON_EXISTANT_ZONE_ID = "NON_EXISTANT_ZONE_ID";
 const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
+const std::string TEMPLATE_NAME = "default";
 
 /**
  * Currently there is no way to propagate an error from async call
@@ -326,6 +327,7 @@ public:
     }
 
     void callAsyncMethodCreateZone(const std::string& id,
+                                   const std::string& templateName,
                                    const VoidResultCallback& result)
     {
         auto asyncResult = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
@@ -335,7 +337,7 @@ public:
         };
 
         assert(isHost());
-        GVariant* parameters = g_variant_new("(s)", id.c_str());
+        GVariant* parameters = g_variant_new("(ss)", id.c_str(), templateName.c_str());
         mClient->callMethodAsync(api::host::BUS_NAME,
                                  api::host::OBJECT_PATH,
                                  api::host::INTERFACE,
@@ -1028,15 +1030,15 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZoneTest)
     DbusAccessory dbus(DbusAccessory::HOST_ID);
 
     // create zone1
-    dbus.callAsyncMethodCreateZone(zone1, resultCallback);
+    dbus.callAsyncMethodCreateZone(zone1, TEMPLATE_NAME, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 
     // create zone2
-    dbus.callAsyncMethodCreateZone(zone2, resultCallback);
+    dbus.callAsyncMethodCreateZone(zone2, TEMPLATE_NAME, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 
     // create zone3
-    dbus.callAsyncMethodCreateZone(zone3, resultCallback);
+    dbus.callAsyncMethodCreateZone(zone3, TEMPLATE_NAME, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 
     cm.startAll();
@@ -1084,7 +1086,7 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZonePersistenceTest)
     {
         ZonesManager cm(EMPTY_DBUS_CONFIG_PATH);
         DbusAccessory dbus(DbusAccessory::HOST_ID);
-        dbus.callAsyncMethodCreateZone(zone, resultCallback);
+        dbus.callAsyncMethodCreateZone(zone, TEMPLATE_NAME, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
     }
 

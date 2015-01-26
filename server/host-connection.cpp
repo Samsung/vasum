@@ -352,10 +352,11 @@ void HostConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::host::METHOD_CREATE_ZONE) {
         const gchar* id = NULL;
-        g_variant_get(parameters, "(&s)", &id);
+        const gchar* templateName = NULL;
+        g_variant_get(parameters, "(&s&s)", &id, &templateName);
 
         if (mCreateZoneCallback){
-            mCreateZoneCallback(id, result);
+            mCreateZoneCallback(id, templateName, result);
         }
         return;
     }
