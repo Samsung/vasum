@@ -89,6 +89,12 @@ struct Fixture {
     }
 };
 
+std::function<bool(const std::exception&)> expectedMessage(const std::string& message) {
+    return [=](const std::exception& e) {
+        return e.what() == message;
+    };
+}
+
 } // namespace
 
 
@@ -257,6 +263,9 @@ BOOST_AUTO_TEST_CASE(DeclareMountTest)
     ZoneProvision zoneProvision = create({});
     zoneProvision.declareMount("/fake/path1", "/fake/path2", "tmpfs", 077, "fake");
     zoneProvision.declareMount("/fake/path2", "/fake/path2", "tmpfs", 077, "fake");
+    BOOST_CHECK_EXCEPTION(zoneProvision.declareMount("/fake/path2", "/fake/path2", "tmpfs", 077, "fake"),
+                          UtilsException,
+                          expectedMessage("Provision already exists"));
 
     ZoneProvisioningConfig config;
     load(config);
@@ -336,6 +345,66 @@ BOOST_AUTO_TEST_CASE(ProvisionedAlreadyTest)
     BOOST_CHECK(!fs::is_empty(ROOTFS_PATH / regularFile));
 
     zoneProvision.stop();
+}
+
+BOOST_AUTO_TEST_CASE(ListTest)
+{
+    std::vector<std::string> expected;
+    ZoneProvision zoneProvision = create({});
+
+    zoneProvision.declareFile(1, "path", 0747, 0777);
+    zoneProvision.declareFile(2, "path", 0747, 0777);
+    expected.push_back("file path 1 " + std::to_string(0747) + " " + std::to_string(0777));
+    expected.push_back("file path 2 " + std::to_string(0747) + " " + std::to_string(0777));
+
+    zoneProvision.declareMount("/fake/path1", "/fake/path2", "tmpfs", 077, "fake1");
+    zoneProvision.declareMount("/fake/path1", "/fake/path2", "tmpfs", 077, "fake2");
+    expected.push_back("mount /fake/path1 /fake/path2 tmpfs " + std::to_string(077) + " fake1");
+    expected.push_back("mount /fake/path1 /fake/path2 tmpfs " + std::to_string(077) + " fake2");
+
+    zoneProvision.declareLink("/fake/path1", "/fake/path3");
+    zoneProvision.declareLink("/fake/path2", "/fake/path4");
+    expected.push_back("link /fake/path1 /fake/path3");
+    expected.push_back("link /fake/path2 /fake/path4");
+
+    const std::vector<std::string> provisions = zoneProvision.list();
+    BOOST_REQUIRE_EQUAL(provisions.size(), expected.size());
+    auto provision = provisions.cbegin();
+    for (const auto& item : expected) {
+        BOOST_CHECK_EQUAL(item, *(provision++));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(RemoveTest)
+{
+    std::vector<std::string> expected;
+    ZoneProvision zoneProvision = create({});
+
+    zoneProvision.declareFile(1, "path", 0747, 0777);
+    zoneProvision.declareFile(2, "path", 0747, 0777);
+    expected.push_back("file path 2 " + std::to_string(0747) + " " + std::to_string(0777));
+
+    zoneProvision.declareMount("/fake/path1", "/fake/path2", "tmpfs", 077, "fake1");
+    zoneProvision.declareMount("/fake/path1", "/fake/path2", "tmpfs", 077, "fake2");
+    expected.push_back("mount /fake/path1 /fake/path2 tmpfs " + std::to_string(077) + " fake1");
+
+    zoneProvision.declareLink("/fake/path1", "/fake/path3");
+    zoneProvision.declareLink("/fake/path2", "/fake/path4");
+    expected.push_back("link /fake/path1 /fake/path3");
+
+    zoneProvision.remove("file path 1 " + std::to_string(0747) + " " + std::to_string(0777));
+    zoneProvision.remove("mount /fake/path1 /fake/path2 tmpfs " + std::to_string(077) + " fake2");
+    zoneProvision.remove("link /fake/path2 /fake/path4");
+    BOOST_CHECK_EXCEPTION(zoneProvision.remove("link /fake/path_fake /fake/path2"),
+                          UtilsException,
+                          expectedMessage("Can't find provision"));
+
+    const std::vector<std::string> provisions = zoneProvision.list();
+    BOOST_REQUIRE_EQUAL(provisions.size(), expected.size());
+    auto provision = provisions.cbegin();
+    for (const auto& item : expected) {
+        BOOST_CHECK_EQUAL(item, *(provision++));
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

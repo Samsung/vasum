@@ -36,6 +36,7 @@
 #include <boost/filesystem.hpp>
 
 #include <string>
+#include <algorithm>
 #include <fcntl.h>
 
 namespace fs = boost::filesystem;
@@ -65,42 +66,53 @@ void ZoneProvision::saveProvisioningConfig()
     config::saveToKVStore(mDbPath, mProvisioningConfig, mDbPrefix);
 }
 
-void ZoneProvision::declareProvision(ZoneProvisioningConfig::Provision&& provision)
+std::string ZoneProvision::declareProvision(ZoneProvisioningConfig::Provision&& provision)
 {
+    std::string id = getId(provision);
+    auto it = std::find_if(mProvisioningConfig.provisions.begin(),
+                           mProvisioningConfig.provisions.end(),
+                           [&](const ZoneProvisioningConfig::Provision& provision) {
+                               return getId(provision) == id;
+                           });
+    if (it != mProvisioningConfig.provisions.end()) {
+        LOGE("Can't add provision. It already exists: " << id);
+        throw UtilsException("Provision already exists");
+    }
     mProvisioningConfig.provisions.push_back(std::move(provision));
     saveProvisioningConfig();
+    return id;
 }
 
-void ZoneProvision::declareFile(const int32_t& type,
-                                const std::string& path,
-                                const int32_t& flags,
-                                const int32_t& mode)
+std::string ZoneProvision::declareFile(const int32_t& type,
+                                       const std::string& path,
+                                       const int32_t& flags,
+                                       const int32_t& mode)
 {
     ZoneProvisioningConfig::Provision provision;
     provision.set(ZoneProvisioningConfig::File({type, path, flags, mode}));
 
-    declareProvision(std::move(provision));
+    return declareProvision(std::move(provision));
 }
 
-void ZoneProvision::declareMount(const std::string& source,
-                                 const std::string& target,
-                                 const std::string& type,
-                                 const int64_t& flags,
-                                 const std::string& data)
+std::string ZoneProvision::declareMount(const std::string& source,
+                                        const std::string& target,
+                                        const std::string& type,
+                                        const int64_t& flags,
+                                        const std::string& data)
 {
     ZoneProvisioningConfig::Provision provision;
     provision.set(ZoneProvisioningConfig::Mount({source, target, type, flags, data}));
 
-    declareProvision(std::move(provision));
+    return declareProvision(std::move(provision));
 }
 
-void ZoneProvision::declareLink(const std::string& source,
-                                const std::string& target)
+std::string ZoneProvision::declareLink(const std::string& source,
+                                       const std::string& target)
 {
     ZoneProvisioningConfig::Provision provision;
     provision.set(ZoneProvisioningConfig::Link({source, target}));
 
-    declareProvision(std::move(provision));
+    return declareProvision(std::move(provision));
 }
 
 void ZoneProvision::start() noexcept
@@ -136,6 +148,31 @@ void ZoneProvision::stop() noexcept
             return false;
         }
     });
+}
+
+std::vector<std::string> ZoneProvision::list() const
+{
+    std::vector<std::string> items;
+    for (const auto& provision : mProvisioningConfig.provisions) {
+        items.push_back(getId(provision));
+    }
+    return items;
+}
+
+void ZoneProvision::remove(const std::string& item)
+{
+
+    const auto it = std::find_if(mProvisioningConfig.provisions.begin(),
+                                 mProvisioningConfig.provisions.end(),
+                                 [&](const ZoneProvisioningConfig::Provision& provision) {
+                                    return getId(provision) == item;
+                                 });
+    if (it == mProvisioningConfig.provisions.end()) {
+        throw UtilsException("Can't find provision");
+    }
+
+    mProvisioningConfig.provisions.erase(it);
+    LOGI("Provision removed: " << item);
 }
 
 void ZoneProvision::file(const ZoneProvisioningConfig::File& config)
@@ -214,6 +251,45 @@ void ZoneProvision::link(const ZoneProvisioningConfig::Link& config)
          << srcHostPath
          << ", msg: Path prefix is not valid path");
     throw UtilsException("Failed to hard link: path prefix is not valid");
+}
+
+std::string ZoneProvision::getId(const ZoneProvisioningConfig::File& file) const
+{
+    //TODO output of type,flags and mode should be more user friendly
+    return "file " +
+           file.path + " " +
+           std::to_string(file.type) + " " +
+           std::to_string(file.flags) + " " +
+           std::to_string(file.mode);
+}
+
+std::string ZoneProvision::getId(const ZoneProvisioningConfig::Mount& mount) const
+{
+    //TODO output of flags should be more user friendly
+    return "mount " +
+           mount.source + " " +
+           mount.target + " " +
+           mount.type + " " +
+           std::to_string(mount.flags) + " " +
+           mount.data;
+}
+
+std::string ZoneProvision::getId(const ZoneProvisioningConfig::Link& link) const
+{
+    return "link " + link.source + " " + link.target;
+}
+
+std::string ZoneProvision::getId(const ZoneProvisioningConfig::Provision& provision) const
+{
+    using namespace vasum;
+    if (provision.is<ZoneProvisioningConfig::File>()) {
+        return getId(provision.as<ZoneProvisioningConfig::File>());
+    } else if (provision.is<ZoneProvisioningConfig::Mount>()) {
+        return getId(provision.as<ZoneProvisioningConfig::Mount>());
+    } else if (provision.is<ZoneProvisioningConfig::Link>()) {
+        return getId(provision.as<ZoneProvisioningConfig::Link>());
+    }
+    throw UtilsException("Unknown provision type");
 }
 
 } // namespace vasum

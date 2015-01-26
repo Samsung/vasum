@@ -230,23 +230,23 @@ public:
     /**
      * Declare file, directory or pipe that will be created while zone startup
      */
-    void declareFile(const int32_t& type,
-                     const std::string& path,
-                     const int32_t& flags,
-                     const int32_t& mode);
+    std::string declareFile(const int32_t& type,
+                            const std::string& path,
+                            const int32_t& flags,
+                            const int32_t& mode);
     /**
      * Declare mount that will be created while zone startup
      */
-    void declareMount(const std::string& source,
-                      const std::string& target,
-                      const std::string& type,
-                      const int64_t& flags,
-                      const std::string& data);
+    std::string declareMount(const std::string& source,
+                             const std::string& target,
+                             const std::string& type,
+                             const int64_t& flags,
+                             const std::string& data);
     /**
      * Declare link that will be created while zone startup
      */
-    void declareLink(const std::string& source,
-                     const std::string& target);
+    std::string declareLink(const std::string& source,
+                            const std::string& target);
 
    /**
      * Get zone root path

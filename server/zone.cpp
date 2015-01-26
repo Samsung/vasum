@@ -381,27 +381,27 @@ void Zone::proxyCallAsync(const std::string& busName,
     }
 }
 
-void Zone::declareFile(const int32_t& type,
-                       const std::string& path,
-                       const int32_t& flags,
-                       const int32_t& mode)
+std::string Zone::declareFile(const int32_t& type,
+                              const std::string& path,
+                              const int32_t& flags,
+                              const int32_t& mode)
 {
-    mProvision->declareFile(type, path, flags, mode);
+    return mProvision->declareFile(type, path, flags, mode);
 }
 
-void Zone::declareMount(const std::string& source,
-                        const std::string& target,
-                        const std::string& type,
-                        const int64_t& flags,
-                        const std::string& data)
+std::string Zone::declareMount(const std::string& source,
+                               const std::string& target,
+                               const std::string& type,
+                               const int64_t& flags,
+                               const std::string& data)
 {
-    mProvision->declareMount(source, target, type, flags, data);
+    return mProvision->declareMount(source, target, type, flags, data);
 }
 
-void Zone::declareLink(const std::string& source,
-                       const std::string& target)
+std::string Zone::declareLink(const std::string& source,
+                              const std::string& target)
 {
-    mProvision->declareLink(source, target);
+    return mProvision->declareLink(source, target);
 }
 
 } // namespace vasum

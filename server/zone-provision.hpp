@@ -64,26 +64,38 @@ public:
     /**
      * Declare file, directory or pipe that will be created while zone startup
      */
-    void declareFile(const int32_t& type,
-                     const std::string& path,
-                     const int32_t& flags,
-                     const int32_t& mode);
+    std::string declareFile(const int32_t& type,
+                            const std::string& path,
+                            const int32_t& flags,
+                            const int32_t& mode);
     /**
      * Declare mount that will be created while zone startup
      */
-    void declareMount(const std::string& source,
-                      const std::string& target,
-                      const std::string& type,
-                      const int64_t& flags,
-                      const std::string& data);
+    std::string declareMount(const std::string& source,
+                             const std::string& target,
+                             const std::string& type,
+                             const int64_t& flags,
+                             const std::string& data);
     /**
      * Declare link that will be created while zone startup
      */
-    void declareLink(const std::string& source,
-                     const std::string& target);
+    std::string declareLink(const std::string& source,
+                            const std::string& target);
 
     void start() noexcept;
     void stop() noexcept;
+
+    /**
+     * List all provisioned resources
+     */
+    std::vector<std::string> list() const;
+
+    /**
+     * Remove resource
+     *
+     * @param item resource to be removed (as in list())
+     */
+    void remove(const std::string& item);
 
 private:
     ZoneProvisioningConfig mProvisioningConfig;
@@ -94,14 +106,18 @@ private:
     std::list<ZoneProvisioningConfig::Provision> mProvisioned;
 
     void saveProvisioningConfig();
-    void declareProvision(ZoneProvisioningConfig::Provision&& provision);
+    std::string declareProvision(ZoneProvisioningConfig::Provision&& provision);
 
     void mount(const ZoneProvisioningConfig::Mount& config);
     void umount(const ZoneProvisioningConfig::Mount& config);
     void file(const ZoneProvisioningConfig::File& config);
     void link(const ZoneProvisioningConfig::Link& config);
-};
 
+    std::string getId(const ZoneProvisioningConfig::File& file) const;
+    std::string getId(const ZoneProvisioningConfig::Mount& mount) const;
+    std::string getId(const ZoneProvisioningConfig::Link& link) const;
+    std::string getId(const ZoneProvisioningConfig::Provision& provision) const;
+};
 
 } // namespace vasum
 
