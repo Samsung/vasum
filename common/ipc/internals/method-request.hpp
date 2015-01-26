@@ -25,9 +25,12 @@
 #ifndef COMMON_IPC_INTERNALS_METHOD_REQUEST_HPP
 #define COMMON_IPC_INTERNALS_METHOD_REQUEST_HPP
 
+#include "ipc/internals/result-builder.hpp"
 #include "ipc/types.hpp"
+#include "ipc/result.hpp"
 #include "logger/logger-scope.hpp"
 #include "config/manager.hpp"
+#include <utility>
 
 namespace vasum {
 namespace ipc {
@@ -49,7 +52,7 @@ public:
     std::shared_ptr<void> data;
     SerializeCallback serialize;
     ParseCallback parse;
-    ResultHandler<void>::type process;
+    ResultBuilderHandler process;
 
 private:
     MethodRequest(const MethodID methodID, const FileDescriptor peerFD)
@@ -82,10 +85,9 @@ std::shared_ptr<MethodRequest> MethodRequest::create(const MethodID methodID,
         return data;
     };
 
-    request->process = [process](Status status, std::shared_ptr<void>& data)->void {
-        LOGS("Method process, status: " << toString(status));
-        std::shared_ptr<ReceivedDataType> tmpData = std::static_pointer_cast<ReceivedDataType>(data);
-        return process(status, tmpData);
+    request->process = [process](ResultBuilder & resultBuilder) {
+        LOGS("Method process");
+        process(resultBuilder.build<ReceivedDataType>());
     };
 
     return request;

@@ -29,35 +29,67 @@
 #include "base-exception.hpp"
 
 namespace vasum {
-
+namespace ipc {
 
 /**
  * Base class for exceptions in IPC
  */
 struct IPCException: public VasumException {
-    IPCException(const std::string& error) : VasumException(error) {}
+    IPCException(const std::string& message)
+        : VasumException(message) {}
 };
 
 struct IPCParsingException: public IPCException {
-    IPCParsingException(const std::string& error) : IPCException(error) {}
+    IPCParsingException(const std::string& message = "Exception during reading/parsing data from the socket")
+        : IPCException(message) {}
 };
 
 struct IPCSerializationException: public IPCException {
-    IPCSerializationException(const std::string& error) : IPCException(error) {}
+    IPCSerializationException(const std::string& message = "Exception during writing/serializing data to the socket")
+        : IPCException(message) {}
 };
 
 struct IPCPeerDisconnectedException: public IPCException {
-    IPCPeerDisconnectedException(const std::string& error) : IPCException(error) {}
+    IPCPeerDisconnectedException(const std::string& message = "No such peer. Might got disconnected.")
+        : IPCException(message) {}
 };
 
 struct IPCNaughtyPeerException: public IPCException {
-    IPCNaughtyPeerException(const std::string& error) : IPCException(error) {}
+    IPCNaughtyPeerException(const std::string& message = "Peer performed a forbidden action.")
+        : IPCException(message) {}
+};
+
+struct IPCRemovedPeerException: public IPCException {
+    IPCRemovedPeerException(const std::string& message = "Removing peer")
+        : IPCException(message) {}
+};
+
+struct IPCClosingException: public IPCException {
+    IPCClosingException(const std::string& message = "Closing IPC")
+        : IPCException(message) {}
 };
 
 struct IPCTimeoutException: public IPCException {
-    IPCTimeoutException(const std::string& error) : IPCException(error) {}
+    IPCTimeoutException(const std::string& message)
+        : IPCException(message) {}
 };
-}
 
+struct IPCUserException: public IPCException {
+    IPCUserException(const int code, const std::string& message)
+        : IPCException(message),
+          mCode(code)
+    {}
+
+    int getCode() const
+    {
+        return mCode;
+    }
+
+private:
+    int mCode;
+};
+
+} // namespace ipc
+} // namespace vasum
 
 #endif // COMMON_IPC_EXCEPTION_HPP

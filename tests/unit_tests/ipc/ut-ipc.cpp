@@ -33,6 +33,7 @@
 #include "ipc/service.hpp"
 #include "ipc/client.hpp"
 #include "ipc/types.hpp"
+#include "ipc/result.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
 #include "utils/value-latch.hpp"
@@ -353,10 +354,8 @@ BOOST_AUTO_TEST_CASE(AsyncClientToServiceEcho)
     c.start();
 
     //Async call
-    auto dataBack = [&recvDataLatch](ipc::Status status, std::shared_ptr<RecvData>& data) {
-        if (status == ipc::Status::OK) {
-            recvDataLatch.set(data);
-        }
+    auto dataBack = [&recvDataLatch](Result<RecvData> && r) {
+        recvDataLatch.set(r.get());
     };
     c.callAsync<SendData, RecvData>(1, sentData, dataBack);
 
@@ -376,10 +375,8 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
     FileDescriptor peerFD = connect(s, c);
 
     // Async call
-    auto dataBack = [&recvDataLatch](ipc::Status status, std::shared_ptr<RecvData>& data) {
-        if (status == ipc::Status::OK) {
-            recvDataLatch.set(data);
-        }
+    auto dataBack = [&recvDataLatch](Result<RecvData> && r) {
+        recvDataLatch.set(r.get());
     };
 
     s.callAsync<SendData, RecvData>(1, peerFD, sentData, dataBack);
@@ -431,7 +428,7 @@ BOOST_AUTO_TEST_CASE(ParseError)
 
 BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
 {
-    ValueLatch<ipc::Status> retStatusLatch;
+    ValueLatch<Result<RecvData>> retStatusLatch;
     Service s(socketPath);
 
     auto method = [](const FileDescriptor, std::shared_ptr<ThrowOnAcceptData>&) {
@@ -445,20 +442,20 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
     Client c(socketPath);
     c.start();
 
-    auto dataBack = [&retStatusLatch](ipc::Status status, std::shared_ptr<RecvData>&) {
-        retStatusLatch.set(status);
+    auto dataBack = [&retStatusLatch](Result<RecvData> && r) {
+        retStatusLatch.set(std::move(r));
     };
 
     std::shared_ptr<SendData> sentData(new SendData(78));
     c.callAsync<SendData, RecvData>(1, sentData, dataBack);
 
     // Wait for the response
-    ipc::Status retStatus = retStatusLatch.get(TIMEOUT);
+    Result<RecvData> result = retStatusLatch.get(TIMEOUT);
 
     // The disconnection might have happened:
     // - after sending the message (PEER_DISCONNECTED)
     // - during external serialization (SERIALIZATION_ERROR)
-    BOOST_CHECK(retStatus == ipc::Status::PEER_DISCONNECTED || retStatus == ipc::Status::SERIALIZATION_ERROR);
+    BOOST_CHECK_THROW(result.get(), IPCException);
 }
 
 
@@ -627,6 +624,32 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
     BOOST_CHECK(l.wait(TIMEOUT));
 }
 
+BOOST_AUTO_TEST_CASE(UsersError)
+{
+    const int TEST_ERROR_CODE = -234;
+    const std::string TEST_ERROR_MESSAGE = "Ay, caramba!";
+
+    Service s(socketPath);
+    Client c(socketPath);
+    auto clientID = connect(s, c);
+
+    auto throwingMethodHandler = [&](const FileDescriptor, std::shared_ptr<RecvData>&) -> std::shared_ptr<SendData> {
+        throw IPCUserException(TEST_ERROR_CODE, TEST_ERROR_MESSAGE);
+    };
+
+    s.setMethodHandler<SendData, RecvData>(1, throwingMethodHandler);
+    c.setMethodHandler<SendData, RecvData>(1, throwingMethodHandler);
+
+    std::shared_ptr<SendData> sentData(new SendData(78));
+
+    auto hasProperData = [&](const IPCUserException & e) {
+        return e.getCode() == TEST_ERROR_CODE && e.what() == TEST_ERROR_MESSAGE;
+    };
+
+    BOOST_CHECK_EXCEPTION((c.callSync<SendData, RecvData>(1, sentData, TIMEOUT)), IPCUserException, hasProperData);
+    BOOST_CHECK_EXCEPTION((s.callSync<SendData, RecvData>(1, clientID, sentData, TIMEOUT)), IPCUserException, hasProperData);
+
+}
 // BOOST_AUTO_TEST_CASE(ConnectionLimitTest)
 // {
 //     unsigned oldLimit = ipc::getMaxFDNumber();

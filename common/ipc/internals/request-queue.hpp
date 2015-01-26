@@ -78,13 +78,22 @@ public:
     bool isEmpty() const;
 
     /**
-     * Push data to the queue
+     * Push data to back of the queue
      *
      * @param requestID request type
      * @param data data corresponding to the request
      */
-    void push(const RequestIdType requestID,
-              const std::shared_ptr<void>& data = nullptr);
+    void pushBack(const RequestIdType requestID,
+                  const std::shared_ptr<void>& data = nullptr);
+
+    /**
+     * Push data to back of the queue
+     *
+     * @param requestID request type
+     * @param data data corresponding to the request
+     */
+    void pushFront(const RequestIdType requestID,
+                   const std::shared_ptr<void>& data = nullptr);
 
     /**
      * @return get the data from the next request
@@ -118,11 +127,20 @@ bool RequestQueue<RequestIdType>::isEmpty() const
 }
 
 template<typename RequestIdType>
-void RequestQueue<RequestIdType>::push(const RequestIdType requestID,
-                                       const std::shared_ptr<void>& data)
+void RequestQueue<RequestIdType>::pushBack(const RequestIdType requestID,
+                                           const std::shared_ptr<void>& data)
 {
     Request request(requestID, data);
     mRequests.push_back(std::move(request));
+    mEventFD.send();
+}
+
+template<typename RequestIdType>
+void RequestQueue<RequestIdType>::pushFront(const RequestIdType requestID,
+                                            const std::shared_ptr<void>& data)
+{
+    Request request(requestID, data);
+    mRequests.push_front(std::move(request));
     mEventFD.send();
 }
 

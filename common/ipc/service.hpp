@@ -29,6 +29,7 @@
 #include "ipc/internals/acceptor.hpp"
 #include "ipc/ipc-gsource.hpp"
 #include "ipc/types.hpp"
+#include "ipc/result.hpp"
 #include "logger/logger.hpp"
 
 #include <string>

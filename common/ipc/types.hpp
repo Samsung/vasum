@@ -42,21 +42,7 @@ typedef std::function<void(FileDescriptor)> PeerCallback;
 typedef std::function<void(int fd, std::shared_ptr<void>& data)> SerializeCallback;
 typedef std::function<std::shared_ptr<void>(int fd)> ParseCallback;
 
-enum class Status : int {
-    OK = 0,
-    PARSING_ERROR,
-    SERIALIZATION_ERROR,
-    PEER_DISCONNECTED,
-    NAUGHTY_PEER,
-    REMOVED_PEER,
-    CLOSING,
-    UNDEFINED
-};
-
-std::string toString(const Status status);
-void throwOnError(const Status status);
 MessageID getNextMessageID();
-
 
 template<typename SentDataType, typename ReceivedDataType>
 struct MethodHandler {
@@ -68,12 +54,6 @@ template<typename ReceivedDataType>
 struct SignalHandler {
     typedef std::function<void(FileDescriptor peerFD,
                                std::shared_ptr<ReceivedDataType>& data)> type;
-};
-
-template <typename ReceivedDataType>
-struct ResultHandler {
-    typedef std::function<void(Status status,
-                               std::shared_ptr<ReceivedDataType>& resultData)> type;
 };
 
 } // namespace ipc

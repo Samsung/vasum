@@ -28,6 +28,7 @@
 #include "ipc/internals/processor.hpp"
 #include "ipc/ipc-gsource.hpp"
 #include "ipc/types.hpp"
+#include "ipc/result.hpp"
 #include "logger/logger.hpp"
 
 #include <string>

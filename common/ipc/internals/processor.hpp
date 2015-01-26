@@ -25,6 +25,7 @@
 #ifndef COMMON_IPC_INTERNALS_PROCESSOR_HPP
 #define COMMON_IPC_INTERNALS_PROCESSOR_HPP
 
+#include "ipc/internals/result-builder.hpp"
 #include "ipc/internals/socket.hpp"
 #include "ipc/internals/request-queue.hpp"
 #include "ipc/internals/method-request.hpp"
@@ -55,7 +56,6 @@ namespace vasum {
 namespace ipc {
 
 const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
-const unsigned int DEFAULT_METHOD_TIMEOUT = 1000;
 
 /**
 * This class wraps communication via UX sockets
@@ -84,6 +84,7 @@ const unsigned int DEFAULT_METHOD_TIMEOUT = 1000;
 *  - no new events added after stop() called
 *  - when using IPCGSource: addFD and removeFD can be called from addPeer removePeer callbacks, but
 *    there is no mechanism to ensure the IPCSource exists.. therefore SIGSEGV :)
+*  - remove recursive mutex
 *
 */
 class Processor {
@@ -97,7 +98,6 @@ private:
     };
 
 public:
-
     friend std::ostream& operator<<(std::ostream& os, const Processor::Event& event);
 
     /**
@@ -109,6 +109,11 @@ public:
      * Indicates an Processor's internal request/broadcast to register a Signal
      */
     static const MethodID REGISTER_SIGNAL_METHOD_ID;
+
+    /**
+    * Error return message
+    */
+    static const MethodID ERROR_METHOD_ID;
 
     /**
      * Constructs the Processor, but doesn't start it.
@@ -304,9 +309,9 @@ private:
         CONFIG_REGISTER_EMPTY
     };
 
-    struct RegisterSignalsMessage {
-        RegisterSignalsMessage() = default;
-        RegisterSignalsMessage(const std::vector<MethodID> ids)
+    struct RegisterSignalsProtocolMessage {
+        RegisterSignalsProtocolMessage() = default;
+        RegisterSignalsProtocolMessage(const std::vector<MethodID> ids)
             : ids(ids) {}
 
         std::vector<MethodID> ids;
@@ -314,6 +319,23 @@ private:
         CONFIG_REGISTER
         (
             ids
+        )
+    };
+
+    struct ErrorProtocolMessage {
+        ErrorProtocolMessage() = default;
+        ErrorProtocolMessage(const MessageID messageID, const int code, const std::string& message)
+            : messageID(messageID), code(code), message(message) {}
+
+        MessageID messageID;
+        int code;
+        std::string message;
+
+        CONFIG_REGISTER
+        (
+            messageID,
+            code,
+            message
         )
     };
 
@@ -347,12 +369,12 @@ private:
         ReturnCallbacks(ReturnCallbacks&&) = default;
         ReturnCallbacks& operator=(ReturnCallbacks &&) = default;
 
-        ReturnCallbacks(FileDescriptor peerFD, const ParseCallback& parse, const ResultHandler<void>::type& process)
+        ReturnCallbacks(FileDescriptor peerFD, const ParseCallback& parse, const ResultBuilderHandler& process)
             : peerFD(peerFD), parse(parse), process(process) {}
 
         FileDescriptor peerFD;
         ParseCallback parse;
-        ResultHandler<void>::type process;
+        ResultBuilderHandler process;
     };
 
     std::string mLogPrefix;
@@ -386,7 +408,13 @@ private:
                                   const typename MethodHandler<SentDataType, ReceivedDataType>::type& process);
 
     template<typename ReceivedDataType>
-    static void discardResultHandler(Status, std::shared_ptr<ReceivedDataType>&) {}
+    void setSignalHandlerInternal(const MethodID methodID,
+                                  const typename SignalHandler<ReceivedDataType>::type& handler);
+
+    template<typename SentDataType>
+    void signalInternal(const MethodID methodID,
+                        const FileDescriptor peerFD,
+                        const std::shared_ptr<SentDataType>& data);
 
     void run();
 
@@ -412,10 +440,13 @@ private:
                         std::shared_ptr<SignalHandlers> signalCallbacks);
     void resetPolling();
     FileDescriptor getNextFileDescriptor();
-    void removePeerInternal(const FileDescriptor peerFD, Status status);
+    void removePeerInternal(const FileDescriptor peerFD, const std::exception_ptr& exceptionPtr);
 
-    std::shared_ptr<EmptyData> onNewSignals(const FileDescriptor peerFD,
-                                            std::shared_ptr<RegisterSignalsMessage>& data);
+    void onNewSignals(const FileDescriptor peerFD,
+                      std::shared_ptr<RegisterSignalsProtocolMessage>& data);
+
+    void onErrorSignal(const FileDescriptor peerFD,
+                       std::shared_ptr<ErrorProtocolMessage>& data);
 
 
 };
@@ -441,10 +472,7 @@ void Processor::setMethodHandlerInternal(const MethodID methodID,
         return method(peerFD, tmpData);
     };
 
-    {
-        Lock lock(mStateMutex);
-        mMethodsCallbacks[methodID] = std::make_shared<MethodHandlers>(std::move(methodCall));
-    }
+    mMethodsCallbacks[methodID] = std::make_shared<MethodHandlers>(std::move(methodCall));
 }
 
 template<typename SentDataType, typename ReceivedDataType>
@@ -464,10 +492,31 @@ void Processor::setMethodHandler(const MethodID methodID,
             throw IPCException("MethodID used by a signal: " + std::to_string(methodID));
         }
 
-        setMethodHandlerInternal<SentDataType, ReceivedDataType >(methodID, method);
+        setMethodHandlerInternal<SentDataType, ReceivedDataType>(methodID, method);
     }
 
 }
+
+template<typename ReceivedDataType>
+void Processor::setSignalHandlerInternal(const MethodID methodID,
+                                         const typename SignalHandler<ReceivedDataType>::type& handler)
+{
+    SignalHandlers signalCall;
+
+    signalCall.parse = [](const int fd)->std::shared_ptr<void> {
+        std::shared_ptr<ReceivedDataType> dataToFill(new ReceivedDataType());
+        config::loadFromFD<ReceivedDataType>(fd, *dataToFill);
+        return dataToFill;
+    };
+
+    signalCall.signal = [handler](const FileDescriptor peerFD, std::shared_ptr<void>& dataReceived) {
+        std::shared_ptr<ReceivedDataType> tmpData = std::static_pointer_cast<ReceivedDataType>(dataReceived);
+        handler(peerFD, tmpData);
+    };
+
+    mSignalsCallbacks[methodID] = std::make_shared<SignalHandlers>(std::move(signalCall));
+}
+
 
 template<typename ReceivedDataType>
 void Processor::setSignalHandler(const MethodID methodID,
@@ -478,8 +527,9 @@ void Processor::setSignalHandler(const MethodID methodID,
         throw IPCException("Forbidden methodID: " + std::to_string(methodID));
     }
 
-    std::shared_ptr<RegisterSignalsMessage> data;
+    std::shared_ptr<RegisterSignalsProtocolMessage> data;
     std::vector<FileDescriptor> peerFDs;
+
     {
         Lock lock(mStateMutex);
 
@@ -489,24 +539,11 @@ void Processor::setSignalHandler(const MethodID methodID,
             throw IPCException("MethodID used by a method: " + std::to_string(methodID));
         }
 
-        SignalHandlers signalCall;
-
-        signalCall.parse = [](const int fd)->std::shared_ptr<void> {
-            std::shared_ptr<ReceivedDataType> data(new ReceivedDataType());
-            config::loadFromFD<ReceivedDataType>(fd, *data);
-            return data;
-        };
-
-        signalCall.signal = [handler](const FileDescriptor peerFD, std::shared_ptr<void>& data) {
-            std::shared_ptr<ReceivedDataType> tmpData = std::static_pointer_cast<ReceivedDataType>(data);
-            handler(peerFD, tmpData);
-        };
-
-        mSignalsCallbacks[methodID] = std::make_shared<SignalHandlers>(std::move(signalCall));
+        setSignalHandlerInternal<ReceivedDataType>(methodID, handler);
 
         // Broadcast the new signal:
         std::vector<MethodID> ids {methodID};
-        data = std::make_shared<RegisterSignalsMessage>(ids);
+        data = std::make_shared<RegisterSignalsProtocolMessage>(ids);
 
         for (const auto kv : mSockets) {
             peerFDs.push_back(kv.first);
@@ -514,10 +551,9 @@ void Processor::setSignalHandler(const MethodID methodID,
     }
 
     for (const auto peerFD : peerFDs) {
-        callSync<RegisterSignalsMessage, EmptyData>(REGISTER_SIGNAL_METHOD_ID,
-                                                    peerFD,
-                                                    data,
-                                                    DEFAULT_METHOD_TIMEOUT);
+        signalInternal<RegisterSignalsProtocolMessage>(REGISTER_SIGNAL_METHOD_ID,
+                                                       peerFD,
+                                                       data);
     }
 }
 
@@ -530,7 +566,7 @@ MessageID Processor::callAsync(const MethodID methodID,
 {
     Lock lock(mStateMutex);
     auto request = MethodRequest::create<SentDataType, ReceivedDataType>(methodID, peerFD, data, process);
-    mRequestQueue.push(Event::METHOD, request);
+    mRequestQueue.pushBack(Event::METHOD, request);
     return request->messageID;
 }
 
@@ -541,16 +577,14 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
                                                       const std::shared_ptr<SentDataType>& data,
                                                       unsigned int timeoutMS)
 {
-    std::shared_ptr<ReceivedDataType> result;
+    Result<ReceivedDataType> result;
 
     std::mutex mutex;
     std::condition_variable cv;
-    Status returnStatus = ipc::Status::UNDEFINED;
 
-    auto process = [&result, &mutex, &cv, &returnStatus](Status status, std::shared_ptr<ReceivedDataType> returnedData) {
+    auto process = [&result, &mutex, &cv](const Result<ReceivedDataType> && r) {
         std::unique_lock<std::mutex> lock(mutex);
-        returnStatus = status;
-        result = returnedData;
+        result = std::move(r);
         cv.notify_all();
     };
 
@@ -559,8 +593,8 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
                                                                     data,
                                                                     process);
 
-    auto isResultInitialized = [&returnStatus]() {
-        return returnStatus != ipc::Status::UNDEFINED;
+    auto isResultInitialized = [&result]() {
+        return result.isValid();
     };
 
     std::unique_lock<std::mutex> lock(mutex);
@@ -594,9 +628,17 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
         }
     }
 
-    throwOnError(returnStatus);
+    return result.get();
+}
 
-    return result;
+template<typename SentDataType>
+void Processor::signalInternal(const MethodID methodID,
+                               const FileDescriptor peerFD,
+                               const std::shared_ptr<SentDataType>& data)
+{
+    Lock lock(mStateMutex);
+    auto request = SignalRequest::create<SentDataType>(methodID, peerFD, data);
+    mRequestQueue.pushFront(Event::SIGNAL, request);
 }
 
 template<typename SentDataType>
@@ -611,7 +653,7 @@ void Processor::signal(const MethodID methodID,
     }
     for (const FileDescriptor peerFD : it->second) {
         auto request =  SignalRequest::create<SentDataType>(methodID, peerFD, data);
-        mRequestQueue.push(Event::SIGNAL, request);
+        mRequestQueue.pushBack(Event::SIGNAL, request);
     }
 }
 
