@@ -45,6 +45,8 @@ const std::string METHOD_GET_ZONE_INFO      = "GetZoneInfo";
 const std::string METHOD_DECLARE_FILE       = "DeclareFile";
 const std::string METHOD_DECLARE_MOUNT      = "DeclareMount";
 const std::string METHOD_DECLARE_LINK       = "DeclareLink";
+const std::string METHOD_GET_DECLARATIONS   = "GetDeclarations";
+const std::string METHOD_REMOVE_DECLARATION = "RemoveDeclaration";
 const std::string METHOD_SET_ACTIVE_ZONE    = "SetActiveZone";
 const std::string METHOD_CREATE_ZONE        = "CreateZone";
 const std::string METHOD_DESTROY_ZONE       = "DestroyZone";
@@ -89,6 +91,7 @@ const std::string DEFINITION =
     "      <arg type='s' name='path' direction='in'/>"
     "      <arg type='i' name='flags' direction='in'/>"
     "      <arg type='i' name='mode' direction='in'/>"
+    "      <arg type='s' name='id' direction='out'/>"
     "    </method>"
     "    <method name='" + METHOD_DECLARE_MOUNT + "'>"
     "      <arg type='s' name='source' direction='in'/>"
@@ -97,11 +100,21 @@ const std::string DEFINITION =
     "      <arg type='s' name='type' direction='in'/>"
     "      <arg type='t' name='flags' direction='in'/>"
     "      <arg type='s' name='data' direction='in'/>"
+    "      <arg type='s' name='id' direction='out'/>"
     "    </method>"
     "    <method name='" + METHOD_DECLARE_LINK + "'>"
     "      <arg type='s' name='source' direction='in'/>"
     "      <arg type='s' name='zone' direction='in'/>"
     "      <arg type='s' name='target' direction='in'/>"
+    "      <arg type='s' name='id' direction='out'/>"
+    "    </method>"
+    "    <method name='" + METHOD_GET_DECLARATIONS + "'>"
+    "      <arg type='s' name='zone' direction='in'/>"
+    "      <arg type='as' name='list' direction='out'/>"
+    "    </method>"
+    "    <method name='" + METHOD_REMOVE_DECLARATION + "'>"
+    "      <arg type='s' name='zone' direction='in'/>"
+    "      <arg type='s' name='declaration' direction='in'/>"
     "    </method>"
     "    <method name='" + METHOD_SET_ACTIVE_ZONE + "'>"
     "      <arg type='s' name='id' direction='in'/>"

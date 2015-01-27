@@ -653,6 +653,35 @@ VsmStatus vsm_declare_link(VsmClient client,
                            const char* zone,
                            const char *target);
 
+/**
+ * Get all declarations
+ *
+ * Gets all declarations of resourcies
+ * (@see ::vsm_declare_link, @see ::vsm_declare_mount, @see ::vsm_declare_linki)
+ *
+ * @param[in] client vasum-server's client
+ * @param[in] zone zone id
+ * @param[out] declarations array of declarations id
+ * @return status of this function call
+ */
+VsmStatus vsm_list_declarations(VsmClient client,
+                                const char* zone,
+                                VsmArrayString* declarations);
+
+/**
+ * Remove declaration
+ *
+ * Removes given declaration by its id (@see ::vsm_list_declarations)
+ *
+ * @param[in] client vasum-server's client
+ * @param[in] zone zone id
+ * @param[in] declaration declaration id
+ * @return status of this function call
+ */
+VsmStatus vsm_remove_declaration(VsmClient client,
+                                 const char* zone,
+                                 VsmString declaration);
+
 
 /** @} Host API */
 

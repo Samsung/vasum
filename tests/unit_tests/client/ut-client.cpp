@@ -394,4 +394,24 @@ BOOST_AUTO_TEST_CASE(GrantRevokeTest)
     vsm_client_free(client);
 }
 
+BOOST_AUTO_TEST_CASE(ProvisionTest)
+{
+    VsmClient client = vsm_client_create();
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_connect(client));
+    const std::string zone = cm.getRunningForegroundZoneId();
+    VsmArrayString declarations;
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_list_declarations(client, zone.c_str(), &declarations));
+    BOOST_REQUIRE(declarations != NULL && declarations[0] == NULL);
+    vsm_array_string_free(declarations);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_declare_link(client, "/tmp/fake", zone.c_str(), "/tmp/fake/"));
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_list_declarations(client, zone.c_str(), &declarations));
+    BOOST_REQUIRE(declarations != NULL && declarations[0] != NULL && declarations[1] == NULL);
+    BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, vsm_remove_declaration(client, zone.c_str(), declarations[0]));
+    vsm_array_string_free(declarations);
+    BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, vsm_list_declarations(client, zone.c_str(), &declarations));
+    BOOST_CHECK(declarations != NULL && declarations[0] == NULL);
+    vsm_array_string_free(declarations);
+    vsm_client_free(client);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -145,6 +145,16 @@ void HostConnection::setDeclareLinkCallback(const DeclareLinkCallback& callback)
     mDeclareLinkCallback = callback;
 }
 
+void HostConnection::setGetDeclarationsCallback(const GetDeclarationsCallback& callback)
+{
+    mGetDeclarationsCallback = callback;
+}
+
+void HostConnection::setRemoveDeclarationCallback(const RemoveDeclarationCallback& callback)
+{
+    mRemoveDeclarationCallback =  callback;
+}
+
 void HostConnection::setSetActiveZoneCallback(const SetActiveZoneCallback& callback)
 {
     mSetActiveZoneCallback = callback;
@@ -315,6 +325,27 @@ void HostConnection::onMessageCall(const std::string& objectPath,
 
         if (mDeclareLinkCallback) {
             mDeclareLinkCallback(source, zone, target, result);
+        }
+        return;
+    }
+
+    if (methodName == api::host::METHOD_GET_DECLARATIONS) {
+        const gchar* zone;
+        g_variant_get(parameters, "(&s)", &zone);
+
+        if (mGetDeclarationsCallback) {
+            mGetDeclarationsCallback(zone, result);
+        }
+        return;
+    }
+
+    if (methodName == api::host::METHOD_REMOVE_DECLARATION) {
+        const gchar* zone;
+        const gchar* declarationId;
+        g_variant_get(parameters, "(&s&s)", &zone, &declarationId);
+
+        if (mRemoveDeclarationCallback) {
+            mRemoveDeclarationCallback(zone, declarationId, result);
         }
         return;
     }

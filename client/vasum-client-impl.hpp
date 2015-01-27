@@ -254,7 +254,8 @@ public:
                                VsmFileType type,
                                const char* path,
                                int32_t flags,
-                               mode_t mode) noexcept;
+                               mode_t mode,
+                               VsmString* id) noexcept;
 
     /**
      * @see ::vsm_declare_mount
@@ -264,13 +265,25 @@ public:
                                 const char* target,
                                 const char* type,
                                 uint64_t flags,
-                                const char* data) noexcept;
+                                const char* data,
+                                VsmString* id) noexcept;
     /**
      * @see ::vsm_declare_link
      */
     VsmStatus vsm_declare_link(const char* source,
                                const char* zone,
-                               const char* target) noexcept;
+                               const char* target,
+                               VsmString* id) noexcept;
+
+    /**
+     * @see ::vsm_list_declarations
+     */
+    VsmStatus vsm_list_declarations(const char* zone, VsmArrayString* declarations);
+
+    /**
+     * @see ::vsm_remove_declaration
+     */
+    VsmStatus vsm_remove_declaration(const char* zone, VsmString declaration);
 
     /**
      *  @see ::vsm_notify_active_zone

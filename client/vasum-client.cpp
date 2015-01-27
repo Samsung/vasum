@@ -279,7 +279,7 @@ API VsmStatus vsm_declare_file(VsmClient client,
                                int32_t flags,
                                mode_t mode)
 {
-    return getClient(client).vsm_declare_file(zone, type, path, flags, mode);
+    return getClient(client).vsm_declare_file(zone, type, path, flags, mode, NULL);
 }
 
 
@@ -291,7 +291,7 @@ API VsmStatus vsm_declare_mount(VsmClient client,
                                 uint64_t flags,
                                 const char* data)
 {
-    return getClient(client).vsm_declare_mount(source, zone, target, type, flags, data);
+    return getClient(client).vsm_declare_mount(source, zone, target, type, flags, data, NULL);
 }
 
 API VsmStatus vsm_declare_link(VsmClient client,
@@ -299,9 +299,22 @@ API VsmStatus vsm_declare_link(VsmClient client,
                                const char* zone,
                                const char* target)
 {
-    return getClient(client).vsm_declare_link(source, zone, target);
+    return getClient(client).vsm_declare_link(source, zone, target, NULL);
 }
 
+API VsmStatus vsm_list_declarations(VsmClient client,
+                                    const char* zone,
+                                    VsmArrayString* declarations)
+{
+    return getClient(client).vsm_list_declarations(zone, declarations);
+}
+
+API VsmStatus vsm_remove_declaration(VsmClient client,
+                                     const char* zone,
+                                     VsmString declaration)
+{
+    return getClient(client).vsm_remove_declaration(zone, declaration);
+}
 
 API VsmStatus vsm_notify_active_zone(VsmClient client,
                                           const char* application,

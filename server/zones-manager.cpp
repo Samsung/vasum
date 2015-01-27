@@ -171,6 +171,12 @@ ZonesManager::ZonesManager(const std::string& configPath)
     mHostConnection.setDeclareLinkCallback(bind(&ZonesManager::handleDeclareLinkCall,
                                                 this, _1, _2, _3, _4));
 
+    mHostConnection.setGetDeclarationsCallback(bind(&ZonesManager::handleGetDeclarationsCall,
+                                                    this, _1, _2));
+
+    mHostConnection.setRemoveDeclarationCallback(bind(&ZonesManager::handleRemoveDeclarationCall,
+                                                    this, _1, _2, _3));
+
     mHostConnection.setSetActiveZoneCallback(bind(&ZonesManager::handleSetActiveZoneCall,
                                                   this, _1, _2));
 
@@ -725,7 +731,7 @@ void ZonesManager::handleGetZoneDbuses(dbus::MethodResultBuilder::Pointer result
         entries.push_back(entry);
     }
     GVariant* dict = g_variant_new_array(G_VARIANT_TYPE("{ss}"), entries.data(), entries.size());
-    result->set(g_variant_new("(*)", dict));
+    result->set(g_variant_new("(@a{ss})", dict));
 }
 
 void ZonesManager::handleDbusStateChanged(const std::string& zoneId,
@@ -746,7 +752,7 @@ void ZonesManager::handleGetZoneIdsCall(dbus::MethodResultBuilder::Pointer resul
     GVariant* array = g_variant_new_array(G_VARIANT_TYPE("s"),
                                           zoneIds.data(),
                                           zoneIds.size());
-    result->set(g_variant_new("(*)", array));
+    result->set(g_variant_new("(@as)", array));
 }
 
 void ZonesManager::handleGetActiveZoneIdCall(dbus::MethodResultBuilder::Pointer result)
@@ -804,8 +810,8 @@ void ZonesManager::handleDeclareFileCall(const std::string& zone,
     try {
         Lock lock(mMutex);
 
-        at(mZones, zone).declareFile(type, path, flags, mode);
-        result->setVoid();
+        const std::string id = at(mZones, zone).declareFile(type, path, flags, mode);
+        result->set(g_variant_new("(s)", id.c_str()));
     } catch (const std::out_of_range&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -828,8 +834,8 @@ void ZonesManager::handleDeclareMountCall(const std::string& source,
     try {
         Lock lock(mMutex);
 
-        at(mZones, zone).declareMount(source, target, type, flags, data);
-        result->setVoid();
+        const std::string id = at(mZones, zone).declareMount(source, target, type, flags, data);
+        result->set(g_variant_new("(s)", id.c_str()));
     } catch (const std::out_of_range&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -848,14 +854,62 @@ void ZonesManager::handleDeclareLinkCall(const std::string& source,
     try {
         Lock lock(mMutex);
 
-        at(mZones, zone).declareLink(source, target);
-        result->setVoid();
+        const std::string id = at(mZones, zone).declareLink(source, target);
+        result->set(g_variant_new("(s)", id.c_str()));
     } catch (const std::out_of_range&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const config::ConfigException& ex) {
         LOGE("Can't declare link: " << ex.what());
         result->setError(api::ERROR_INTERNAL, "Internal error");
+    }
+}
+
+void ZonesManager::handleGetDeclarationsCall(const std::string& zone,
+                                             dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("GetDeclarations call Id=" << zone);
+    try {
+        Lock lock(mMutex);
+
+        std::vector<std::string> declarations = at(mZones, zone).getDeclarations();
+
+        std::vector<GVariant*> out;
+        for (auto declaration : declarations) {
+            out.push_back(g_variant_new_string(declaration.c_str()));
+        }
+
+        GVariant* array = g_variant_new_array(G_VARIANT_TYPE("s"),
+                                              out.data(),
+                                              out.size());
+        result->set(g_variant_new("(@as)", array));
+    } catch (const std::out_of_range&) {
+        LOGE("No zone with id=" << zone);
+        result->setError(api::ERROR_INVALID_ID, "No such zone id");
+    } catch (const VasumException& ex) {
+        LOGE(ex.what());
+        result->setError(api::ERROR_INTERNAL, ex.what());
+    }
+
+}
+
+void ZonesManager::handleRemoveDeclarationCall(const std::string& zone,
+                                               const std::string& declarationId,
+                                               dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("RemoveDeclaration call Id=" << zone);
+    try {
+        Lock lock(mMutex);
+
+        at(mZones, zone).removeDeclaration(declarationId);
+
+        result->setVoid();
+    } catch (const std::out_of_range&) {
+        LOGE("No zone with id=" << zone);
+        result->setError(api::ERROR_INVALID_ID, "No such zone id");
+    } catch (const VasumException& ex) {
+        LOGE(ex.what());
+        result->setError(api::ERROR_INTERNAL, ex.what());
     }
 }
 

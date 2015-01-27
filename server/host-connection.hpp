@@ -82,6 +82,13 @@ public:
                               )> DeclareLinkCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
+                              )> GetDeclarationsCallback;
+    typedef std::function<void(const std::string& id,
+                               const std::string& declarationId,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> RemoveDeclarationCallback;
+    typedef std::function<void(const std::string& id,
+                               dbus::MethodResultBuilder::Pointer result
                               )> SetActiveZoneCallback;
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
@@ -157,6 +164,16 @@ public:
     void setDeclareLinkCallback(const DeclareLinkCallback& callback);
 
     /**
+     * Register a callback called to list declarations
+     */
+    void setGetDeclarationsCallback(const GetDeclarationsCallback& callback);
+
+    /**
+     * Register a callback called to remove declarartion
+     */
+    void setRemoveDeclarationCallback(const RemoveDeclarationCallback& callback);
+
+    /**
      * Register a callback called to set the active zone
      */
     void setSetActiveZoneCallback(const SetActiveZoneCallback& callback);
@@ -225,6 +242,8 @@ private:
     DeclareFileCallback mDeclareFileCallback;
     DeclareMountCallback mDeclareMountCallback;
     DeclareLinkCallback mDeclareLinkCallback;
+    GetDeclarationsCallback mGetDeclarationsCallback;
+    RemoveDeclarationCallback mRemoveDeclarationCallback;
     SetActiveZoneCallback mSetActiveZoneCallback;
     CreateZoneCallback mCreateZoneCallback;
     DestroyZoneCallback mDestroyZoneCallback;

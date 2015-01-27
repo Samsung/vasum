@@ -585,14 +585,29 @@ VsmStatus Client::vsm_declare_file(const char* zone,
                                    VsmFileType type,
                                    const char *path,
                                    int32_t flags,
-                                   mode_t mode) noexcept
+                                   mode_t mode,
+                                   VsmString* id) noexcept
 {
     assert(path);
 
+    GVariant* out = NULL;
     GVariant* args_in = g_variant_new("(sisii)", zone, type, path, flags, mode);
-    return callMethod(ZONE_INTERFACE,
-                      api::host::METHOD_DECLARE_FILE,
-                      args_in);
+    VsmStatus ret = callMethod(HOST_INTERFACE,
+                               api::host::METHOD_DECLARE_FILE,
+                               args_in,
+                               "(s)",
+                               &out);
+    if (ret != VSMCLIENT_SUCCESS) {
+        return ret;
+    }
+    GVariant* unpacked;
+    if (id != NULL) {
+        g_variant_get(out, "(*)", &unpacked);
+        toBasic(unpacked, id);
+        g_variant_unref(unpacked);
+    }
+    g_variant_unref(out);
+    return ret;
 }
 
 VsmStatus Client::vsm_declare_mount(const char *source,
@@ -600,7 +615,8 @@ VsmStatus Client::vsm_declare_mount(const char *source,
                                     const char *target,
                                     const char *type,
                                     uint64_t flags,
-                                    const char *data) noexcept
+                                    const char *data,
+                                    VsmString* id) noexcept
 {
     assert(source);
     assert(target);
@@ -609,22 +625,83 @@ VsmStatus Client::vsm_declare_mount(const char *source,
         data = "";
     }
 
+    GVariant* out = NULL;
     GVariant* args_in = g_variant_new("(ssssts)", source, zone, target, type, flags, data);
-    return callMethod(ZONE_INTERFACE,
-                      api::host::METHOD_DECLARE_MOUNT,
-                      args_in);
+    VsmStatus ret = callMethod(HOST_INTERFACE,
+                               api::host::METHOD_DECLARE_MOUNT,
+                               args_in,
+                               "(s)",
+                               &out);
+    if (ret != VSMCLIENT_SUCCESS) {
+        return ret;
+    }
+    GVariant* unpacked;
+    if (id != NULL) {
+        g_variant_get(out, "(*)", &unpacked);
+        toBasic(unpacked, id);
+        g_variant_unref(unpacked);
+    }
+    g_variant_unref(out);
+    return ret;
 }
 
 VsmStatus Client::vsm_declare_link(const char *source,
                                    const char* zone,
-                                   const char *target) noexcept
+                                   const char *target,
+                                   VsmString* id) noexcept
 {
     assert(source);
     assert(target);
 
+    GVariant* out = NULL;
     GVariant* args_in = g_variant_new("(sss)", source, zone, target);
-    return callMethod(ZONE_INTERFACE,
-                      api::host::METHOD_DECLARE_LINK,
+    VsmStatus ret = callMethod(HOST_INTERFACE,
+                               api::host::METHOD_DECLARE_LINK,
+                               args_in,
+                               "(s)",
+                               &out);
+    if (ret != VSMCLIENT_SUCCESS) {
+        return ret;
+    }
+    GVariant* unpacked;
+    if (id != NULL) {
+        g_variant_get(out, "(*)", &unpacked);
+        toBasic(unpacked, id);
+        g_variant_unref(unpacked);
+    }
+    g_variant_unref(out);
+    return ret;
+}
+
+VsmStatus Client::vsm_list_declarations(const char* zone, VsmArrayString* declarations)
+{
+    assert(declarations);
+
+    GVariant* out = NULL;
+    GVariant* args_in = g_variant_new("(s)", zone);
+    VsmStatus ret = callMethod(HOST_INTERFACE,
+                               api::host::METHOD_GET_DECLARATIONS,
+                               args_in,
+                               "(as)",
+                               &out);
+    if (ret != VSMCLIENT_SUCCESS) {
+        return ret;
+    }
+    GVariant* unpacked;
+    g_variant_get(out, "(*)", &unpacked);
+    toArray(unpacked, declarations);
+    g_variant_unref(unpacked);
+    g_variant_unref(out);
+    return ret;
+}
+
+VsmStatus Client::vsm_remove_declaration(const char* zone, VsmString declaration)
+{
+    assert(declaration);
+
+    GVariant* args_in = g_variant_new("(ss)", zone, declaration);
+    return callMethod(HOST_INTERFACE,
+                      api::host::METHOD_REMOVE_DECLARATION,
                       args_in);
 }
 

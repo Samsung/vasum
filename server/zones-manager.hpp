@@ -174,6 +174,11 @@ private:
                                const std::string& zone,
                                const std::string& target,
                                dbus::MethodResultBuilder::Pointer result);
+    void handleGetDeclarationsCall(const std::string& zone,
+                                   dbus::MethodResultBuilder::Pointer result);
+    void handleRemoveDeclarationCall(const std::string& zone,
+                                     const std::string& declarationId,
+                                     dbus::MethodResultBuilder::Pointer result);
     void handleSetActiveZoneCall(const std::string& id,
                                  dbus::MethodResultBuilder::Pointer result);
     void handleCreateZoneCall(const std::string& id,

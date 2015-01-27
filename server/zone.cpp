@@ -404,4 +404,14 @@ std::string Zone::declareLink(const std::string& source,
     return mProvision->declareLink(source, target);
 }
 
+std::vector<std::string> Zone::getDeclarations() const
+{
+    return mProvision->list();
+}
+
+void Zone::removeDeclaration(const std::string& declarationId)
+{
+    mProvision->remove(declarationId);
+}
+
 } // namespace vasum

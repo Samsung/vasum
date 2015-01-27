@@ -249,7 +249,17 @@ public:
     std::string declareLink(const std::string& source,
                             const std::string& target);
 
-   /**
+    /**
+     * Gets all declarations
+     */
+    std::vector<std::string> getDeclarations() const;
+
+    /**
+     * Remove declaration
+     */
+    void removeDeclaration(const std::string& declarationId);
+
+    /**
      * Get zone root path
      */
     std::string getRootPath() const;
