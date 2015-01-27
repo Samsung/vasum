@@ -2,7 +2,6 @@
     "dbPath" : "/tmp/ut-zones/vasum.db",
     "zoneConfigs" : ["zones/console1.conf", "missing/file/path/missing.conf", "zones/console3.conf"],
     "runMountPointPrefix" : "",
-    "foregroundId" : "ut-zones-manager-console1",
     "defaultId" : "ut-zones-manager-console1",
     "zonesPath" : "/tmp/ut-zones",
     "zoneImagePath" : "",

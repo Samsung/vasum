@@ -44,16 +44,6 @@ struct ZonesManagerConfig {
     std::string dbPath;
 
     /**
-     * An ID of a currently focused/foreground zone.
-     */
-    std::string foregroundId;
-
-    /**
-     * An ID of default zone.
-     */
-    std::string defaultId;
-
-    /**
      * A path where the zones mount points reside.
      */
     std::string zonesPath;
@@ -97,8 +87,6 @@ struct ZonesManagerConfig {
     CONFIG_REGISTER
     (
         dbPath,
-        foregroundId,
-        defaultId,
         zonesPath,
         zoneImagePath,
         zoneTemplatePath,
@@ -118,9 +106,15 @@ struct ZonesManagerDynamicConfig {
      */
     std::vector<std::string> zoneConfigs;
 
+    /**
+     * An ID of default zone.
+     */
+    std::string defaultId;
+
     CONFIG_REGISTER
     (
-        zoneConfigs
+        zoneConfigs,
+        defaultId
     )
 };
 

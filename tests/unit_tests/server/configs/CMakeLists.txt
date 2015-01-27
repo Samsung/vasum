@@ -50,10 +50,6 @@ CONFIGURE_FILE(ut-zones-manager/test-daemon.conf.in
                ${CMAKE_BINARY_DIR}/ut-zones-manager/test-daemon.conf @ONLY)
 CONFIGURE_FILE(ut-zones-manager/buggy-daemon.conf.in
                ${CMAKE_BINARY_DIR}/ut-zones-manager/buggy-daemon.conf @ONLY)
-CONFIGURE_FILE(ut-zones-manager/buggy-default-daemon.conf.in
-               ${CMAKE_BINARY_DIR}/ut-zones-manager/buggy-default-daemon.conf @ONLY)
-CONFIGURE_FILE(ut-zones-manager/buggy-foreground-daemon.conf.in
-               ${CMAKE_BINARY_DIR}/ut-zones-manager/buggy-foreground-daemon.conf @ONLY)
 CONFIGURE_FILE(ut-zones-manager/test-dbus-daemon.conf.in
                ${CMAKE_BINARY_DIR}/ut-zones-manager/test-dbus-daemon.conf @ONLY)
 CONFIGURE_FILE(ut-zones-manager/empty-dbus-daemon.conf.in

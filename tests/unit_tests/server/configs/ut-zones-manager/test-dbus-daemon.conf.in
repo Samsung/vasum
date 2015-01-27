@@ -3,7 +3,6 @@
     "zoneConfigs" : ["zones/console1-dbus.conf",
                           "zones/console2-dbus.conf",
                           "zones/console3-dbus.conf"],
-    "foregroundId" : "ut-zones-manager-console1-dbus",
     "defaultId" : "ut-zones-manager-console1-dbus",
     "zonesPath" : "/tmp/ut-zones",
     "zoneImagePath" : "",

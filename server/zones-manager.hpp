@@ -117,11 +117,14 @@ private:
     // to hold InputMonitor pointer to monitor if zone switching sequence is recognized
     std::unique_ptr<InputMonitor> mSwitchingSequenceMonitor;
     std::unique_ptr<ProxyCallPolicy> mProxyCallPolicy;
-    typedef std::unordered_map<std::string, std::shared_ptr<Zone>> ZoneMap;
+    typedef std::unordered_map<std::string, std::shared_ptr<Zone>> ZoneMap;//TODO should keep order of insertions
     ZoneMap mZones; // map of zones, id is the key
+    std::string mActiveZoneId;
     bool mDetachOnExit;
 
     void saveDynamicConfig();
+    void updateDefaultId();
+    void refocus();
     void switchingSequenceMonitorNotify();
     void generateNewConfig(const std::string& id,
                            const std::string& templatePath,

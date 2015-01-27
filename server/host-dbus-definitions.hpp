@@ -36,7 +36,7 @@ const std::string BUS_NAME                  = "org.tizen.vasum.host";
 const std::string OBJECT_PATH               = "/org/tizen/vasum/host";
 const std::string INTERFACE                 = "org.tizen.vasum.host.manager";
 
-const std::string ERROR_ZONE_STOPPED        = "org.tizen.vasum.host.Error.ZonesStopped";
+const std::string ERROR_ZONE_NOT_RUNNING    = "org.tizen.vasum.host.Error.ZonesNotRunning";
 
 const std::string METHOD_GET_ZONE_DBUSES    = "GetZoneDbuses";
 const std::string METHOD_GET_ZONE_ID_LIST   = "GetZoneIds";

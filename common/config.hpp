@@ -55,6 +55,7 @@
 #define final
 #define override
 #define thread_local __thread  // use GCC extension instead of C++11
+#define steady_clock monotonic_clock
 #endif // GCC_VERSION < 40700
 
 #endif // GCC_VERSION

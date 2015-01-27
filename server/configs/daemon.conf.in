@@ -6,7 +6,6 @@
     "zoneTemplatePath" : "/etc/vasum/templates/template.conf",
     "zoneNewConfigPrefix" : "/var/lib/vasum",
     "runMountPointPrefix" : "/var/run/zones",
-    "foregroundId" : "",
     "defaultId" : "",
     "lxcTemplatePrefix" : "/etc/vasum/lxc-templates",
     "inputConfig" : {"enabled" : true,

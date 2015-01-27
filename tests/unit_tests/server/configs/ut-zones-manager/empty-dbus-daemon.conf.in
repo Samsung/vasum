@@ -1,7 +1,6 @@
 {
     "dbPath" : "/tmp/ut-zones/vasum.db",
     "zoneConfigs" : [],
-    "foregroundId" : "",
     "defaultId" : "",
     "zonesPath" : "/tmp/ut-zones",
     "zoneImagePath" : "",

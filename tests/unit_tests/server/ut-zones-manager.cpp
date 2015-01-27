@@ -65,11 +65,10 @@ const std::string TEST_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zon
 const std::string TEST_DBUS_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zones-manager/test-dbus-daemon.conf";
 const std::string EMPTY_DBUS_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zones-manager/empty-dbus-daemon.conf";
 const std::string BUGGY_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zones-manager/buggy-daemon.conf";
-const std::string BUGGY_FOREGROUND_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zones-manager/buggy-foreground-daemon.conf";
-const std::string BUGGY_DEFAULTID_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zones-manager/buggy-default-daemon.conf";
 const std::string TEST_ZONE_CONF_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zones-manager/zones/";
 const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/missing-daemon.conf";
 const int EVENT_TIMEOUT = 5000;
+const int UNEXPECTED_EVENT_TIMEOUT = EVENT_TIMEOUT / 5;
 const int TEST_DBUS_CONNECTION_ZONES_COUNT = 3;
 const std::string PREFIX_CONSOLE_NAME = "ut-zones-manager-console";
 const std::string TEST_APP_NAME = "testapp";
@@ -438,7 +437,8 @@ private:
     std::mutex mMutex;
     std::condition_variable mNameCondition;
 
-    bool isHost() const {
+    bool isHost() const
+    {
         return mId == HOST_ID;
     }
 
@@ -452,10 +452,24 @@ private:
     }
 };
 
-std::function<bool(const std::exception&)> expectedMessage(const std::string& message) {
+std::function<bool(const std::exception&)> expectedMessage(const std::string& message)
+{
     return [=](const std::exception& e) {
         return e.what() == message;
     };
+}
+
+template<class Predicate>
+bool spinWaitFor(int timeoutMs, Predicate pred)
+{
+    auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
+    while (!pred()) {
+        if (std::chrono::steady_clock::now() >= until) {
+            return false;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    return true;
 }
 
 struct Fixture {
@@ -497,19 +511,6 @@ BOOST_AUTO_TEST_CASE(StartAllTest)
     ZonesManager cm(TEST_CONFIG_PATH);
     cm.startAll();
     BOOST_CHECK(cm.getRunningForegroundZoneId() == "ut-zones-manager-console1");
-}
-
-BOOST_AUTO_TEST_CASE(BuggyForegroundTest)
-{
-    ZonesManager cm(BUGGY_FOREGROUND_CONFIG_PATH);
-    cm.startAll();
-    BOOST_CHECK(cm.getRunningForegroundZoneId() == "ut-zones-manager-console2");
-}
-
-BOOST_AUTO_TEST_CASE(BuggyDefaultTest)
-{
-    BOOST_REQUIRE_THROW(ZonesManager cm(BUGGY_DEFAULTID_CONFIG_PATH),
-                        ZoneOperationException);
 }
 
 BOOST_AUTO_TEST_CASE(StopAllTest)
@@ -626,9 +627,6 @@ BOOST_AUTO_TEST_CASE(DisplayOffTest)
         client->setName(fake_power_manager_api::BUS_NAME);
     }
 
-    std::mutex Mutex;
-    std::unique_lock<std::mutex> Lock(Mutex);
-    std::condition_variable Condition;
     auto cond = [&cm]() -> bool {
         return cm.getRunningForegroundZoneId() == "ut-zones-manager-console1-dbus";
     };
@@ -645,7 +643,7 @@ BOOST_AUTO_TEST_CASE(DisplayOffTest)
                            nullptr);
 
         // check if default zone has focus
-        BOOST_CHECK(Condition.wait_for(Lock, std::chrono::milliseconds(EVENT_TIMEOUT), cond));
+        BOOST_CHECK(spinWaitFor(EVENT_TIMEOUT, cond));
     }
 }
 
@@ -761,9 +759,6 @@ BOOST_AUTO_TEST_CASE(AllowSwitchToDefaultTest)
         client->setName(fake_power_manager_api::BUS_NAME);
     }
 
-    std::mutex condMutex;
-    std::unique_lock<std::mutex> condLock(condMutex);
-    std::condition_variable condition;
     auto cond = [&cm]() -> bool {
         return cm.getRunningForegroundZoneId() == "ut-zones-manager-console1-dbus";
     };
@@ -779,7 +774,7 @@ BOOST_AUTO_TEST_CASE(AllowSwitchToDefaultTest)
                            nullptr);
 
         // check if default zone has focus
-        BOOST_CHECK(condition.wait_for(condLock, std::chrono::milliseconds(EVENT_TIMEOUT), cond));
+        BOOST_CHECK(spinWaitFor(EVENT_TIMEOUT, cond));
 
         // focus non-default zone with disabled switching
         cm.focus("ut-zones-manager-console2-dbus");
@@ -791,7 +786,7 @@ BOOST_AUTO_TEST_CASE(AllowSwitchToDefaultTest)
                            nullptr);
 
         // now default zone should not be focused
-        BOOST_CHECK(!condition.wait_for(condLock, std::chrono::milliseconds(EVENT_TIMEOUT), cond));
+        BOOST_CHECK(!spinWaitFor(UNEXPECTED_EVENT_TIMEOUT, cond));
     }
 }
 
@@ -1048,6 +1043,8 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZoneTest)
 
     cm.startAll();
 
+    BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone1);
+    cm.focus(zone3);
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone3);
 
     // destroy zone2
@@ -1058,7 +1055,7 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZoneTest)
     // destroy zone3
     dbus.callAsyncMethodDestroyZone(zone3, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
-    //BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone1);//TODO fix it
+    BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone1);
 
     // destroy zone1
     dbus.callAsyncMethodDestroyZone(zone1, resultCallback);
@@ -1159,7 +1156,7 @@ BOOST_AUTO_TEST_CASE(LockUnlockZoneTest)
                                         "ut-zones-manager-console2-dbus",
                                         "ut-zones-manager-console3-dbus"};
 
-    for (std::string& zoneId: zoneIds){
+    for (const std::string& zoneId: zoneIds){
         dbus.callMethodLockZone(zoneId);
         BOOST_CHECK(cm.isPaused(zoneId));
         dbus.callMethodUnlockZone(zoneId);
