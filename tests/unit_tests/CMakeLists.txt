@@ -32,6 +32,9 @@ LIST(REMOVE_ITEM server_SRCS ${main_SRC})
 SET(UT_SERVER_CODENAME "${PROJECT_NAME}-server-unit-tests")
 ADD_EXECUTABLE(${UT_SERVER_CODENAME} ${project_SRCS} ${common_SRCS} ${server_SRCS} ${client_SRCS})
 
+## A fake target to test vasum-client C API
+ADD_EXECUTABLE("vasum-client-c-api-compile-test" client/client-c-api-compile-test.c)
+
 
 ## Link libraries ##############################################################
 FIND_PACKAGE (Boost COMPONENTS unit_test_framework system filesystem regex)

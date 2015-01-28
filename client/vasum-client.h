@@ -80,6 +80,7 @@ finish:
 
 #include <stdint.h>
 #include <sys/stat.h>
+#include <netinet/ip.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -109,12 +110,12 @@ typedef VsmString* VsmArrayString;
  * Completion status of communication function.
  */
 typedef enum {
-    VSMCLIENT_CUSTOM_ERROR,     ///< User specified error
-    VSMCLIENT_IO_ERROR,         ///< Input/Output error
-    VSMCLIENT_OPERATION_FAILED, ///< Operation failed
-    VSMCLIENT_INVALID_ARGUMENT, ///< Invalid argument
-    VSMCLIENT_OTHER_ERROR,      ///< Other error
-    VSMCLIENT_SUCCESS           ///< Success
+    VSMCLIENT_CUSTOM_ERROR,     /**< User specified error */
+    VSMCLIENT_IO_ERROR,         /**< Input/Output error */
+    VSMCLIENT_OPERATION_FAILED, /**< Operation failed */
+    VSMCLIENT_INVALID_ARGUMENT, /**< Invalid argument */
+    VSMCLIENT_OTHER_ERROR,      /**< Other error */
+    VSMCLIENT_SUCCESS           /**< Success */
 } VsmStatus;
 
 /**
@@ -653,7 +654,7 @@ VsmStatus vsm_declare_link(VsmClient client,
                            const char *target);
 
 
-/** @} */ // Host API
+/** @} Host API */
 
 
 /**
@@ -722,7 +723,7 @@ VsmStatus vsm_add_notification_callback(VsmClient client,
  */
 VsmStatus vsm_del_notification_callback(VsmClient client, VsmSubscriptionId subscriptionId);
 
-/** @} */ // Zone API
+/** @} Zone API */
 
 #ifdef __cplusplus
 }
