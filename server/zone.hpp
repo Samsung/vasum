@@ -58,8 +58,9 @@ public:
          const std::string& dbPath,
          const std::string& lxcTemplatePrefix,
          const std::string& baseRunMountPointPath);
-    Zone(Zone&&) = default;
-    virtual ~Zone();
+    Zone(const Zone&) = delete;
+    Zone& operator=(const Zone&) = delete;
+    ~Zone();
 
     typedef ZoneConnection::NotifyActiveZoneCallback NotifyActiveZoneCallback;
     typedef ZoneConnection::DisplayOffCallback DisplayOffCallback;

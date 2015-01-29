@@ -962,9 +962,7 @@ BOOST_AUTO_TEST_CASE(GetZoneIdsTest)
                                         "ut-zones-manager-console3-dbus"};
     std::vector<std::string> returnedIds = dbus.callMethodGetZoneIds();
 
-    BOOST_CHECK(std::is_permutation(returnedIds.begin(),
-                                    returnedIds.end(),
-                                    zoneIds.begin()));
+    BOOST_CHECK(returnedIds == zoneIds);// order should be preserved
 }
 
 BOOST_AUTO_TEST_CASE(GetActiveZoneIdTest)

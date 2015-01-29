@@ -34,7 +34,6 @@
 #include "utils/worker.hpp"
 
 #include <string>
-#include <unordered_map>
 #include <memory>
 
 
@@ -92,7 +91,7 @@ public:
     /**
      * @return id of the currently focused/foreground zone
      */
-    std::string getRunningForegroundZoneId() const;
+    std::string getRunningForegroundZoneId();
 
     /**
      * @return id of next to currently focused/foreground zone. If currently focused zone
@@ -110,17 +109,23 @@ private:
     typedef std::unique_lock<Mutex> Lock;
 
     utils::Worker::Pointer mWorker;
-    mutable Mutex mMutex; // used to protect mZones
+    Mutex mMutex; // used to protect mZones
     ZonesManagerConfig mConfig; //TODO make it const
     ZonesManagerDynamicConfig mDynamicConfig;
     HostConnection mHostConnection;
     // to hold InputMonitor pointer to monitor if zone switching sequence is recognized
     std::unique_ptr<InputMonitor> mSwitchingSequenceMonitor;
     std::unique_ptr<ProxyCallPolicy> mProxyCallPolicy;
-    typedef std::unordered_map<std::string, std::shared_ptr<Zone>> ZoneMap;//TODO should keep order of insertions
-    ZoneMap mZones; // map of zones, id is the key
+    // like set but keep insertion order
+    // smart pointer is needed because Zone is not moveable (because of mutex)
+    typedef std::vector<std::unique_ptr<Zone>> Zones;
+    Zones mZones;
     std::string mActiveZoneId;
     bool mDetachOnExit;
+
+    Zones::iterator getRunningForegroundZoneIterator();
+    Zones::iterator getNextToForegroundZoneIterator();
+    void focusInternal(Zones::iterator iter);
 
     void saveDynamicConfig();
     void updateDefaultId();
@@ -146,9 +151,9 @@ private:
                          const std::string& targetMethod,
                          GVariant* parameters,
                          dbus::MethodResultBuilder::Pointer result);
-    void handleGetZoneDbuses(dbus::MethodResultBuilder::Pointer result) const;
+    void handleGetZoneDbuses(dbus::MethodResultBuilder::Pointer result);
     void handleDbusStateChanged(const std::string& zoneId, const std::string& dbusAddress);
-    void handleGetZoneIdsCall(dbus::MethodResultBuilder::Pointer result) const;
+    void handleGetZoneIdsCall(dbus::MethodResultBuilder::Pointer result);
     void handleGetActiveZoneIdCall(dbus::MethodResultBuilder::Pointer result);
     void handleGetZoneInfoCall(const std::string& id, dbus::MethodResultBuilder::Pointer result);
     void handleDeclareFileCall(const std::string& zone,
