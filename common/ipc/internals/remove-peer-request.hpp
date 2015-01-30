@@ -39,14 +39,14 @@ public:
     RemovePeerRequest& operator=(const RemovePeerRequest&) = delete;
 
     RemovePeerRequest(const FileDescriptor peerFD,
-                      const std::shared_ptr<std::condition_variable_any>& conditionPtr)
+                      const std::shared_ptr<std::condition_variable>& conditionPtr)
         : peerFD(peerFD),
           conditionPtr(conditionPtr)
     {
     }
 
     FileDescriptor peerFD;
-    std::shared_ptr<std::condition_variable_any> conditionPtr;
+    std::shared_ptr<std::condition_variable> conditionPtr;
 };
 
 } // namespace ipc

@@ -35,11 +35,11 @@ public:
     FinishRequest(const FinishRequest&) = delete;
     FinishRequest& operator=(const FinishRequest&) = delete;
 
-    FinishRequest(const std::shared_ptr<std::condition_variable_any>& conditionPtr)
+    FinishRequest(const std::shared_ptr<std::condition_variable>& conditionPtr)
         : conditionPtr(conditionPtr)
     {}
 
-    std::shared_ptr<std::condition_variable_any> conditionPtr;
+    std::shared_ptr<std::condition_variable> conditionPtr;
 };
 
 } // namespace ipc

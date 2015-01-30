@@ -66,6 +66,7 @@ Processor::Processor(const std::string& logName,
     LOGS(mLogPrefix + "Processor Constructor");
 
     utils::signalBlock(SIGPIPE);
+
     using namespace std::placeholders;
     setSignalHandlerInternal<RegisterSignalsProtocolMessage>(REGISTER_SIGNAL_METHOD_ID,
                                                              std::bind(&Processor::onNewSignals, this, _1, _2));
@@ -94,7 +95,7 @@ void Processor::start(bool usesExternalPolling)
     LOGS(mLogPrefix + "Processor start");
 
     Lock lock(mStateMutex);
-    if (!isStarted()) {
+    if (!mIsRunning) {
         LOGI(mLogPrefix + "Processor start");
         mIsRunning = true;
         mUsesExternalPolling = usesExternalPolling;
@@ -109,7 +110,7 @@ void Processor::stop()
     LOGS(mLogPrefix + "Processor stop");
 
     if (isStarted()) {
-        auto conditionPtr = std::make_shared<std::condition_variable_any>();
+        auto conditionPtr = std::make_shared<std::condition_variable>();
         {
             Lock lock(mStateMutex);
             auto request = std::make_shared<FinishRequest>(conditionPtr);
@@ -124,7 +125,7 @@ void Processor::stop()
             // Wait till the FINISH request is served
             Lock lock(mStateMutex);
             conditionPtr->wait(lock, [this]() {
-                return !isStarted();
+                return !mIsRunning;
             });
         }
     }
@@ -168,31 +169,25 @@ FileDescriptor Processor::addPeer(const std::shared_ptr<Socket>& socketPtr)
     return peerFD;
 }
 
-void Processor::removePeer(const FileDescriptor peerFD)
+void Processor::removePeerSyncInternal(const FileDescriptor peerFD, Lock& lock)
 {
     LOGS(mLogPrefix + "Processor removePeer peerFD: " << peerFD);
-
-    {
-        Lock lock(mStateMutex);
-        mRequestQueue.removeIf([peerFD](Request & request) {
-            return request.requestID == Event::ADD_PEER &&
-                   request.get<AddPeerRequest>()->peerFD == peerFD;
-        });
-    }
-
-    // Remove peer and wait till he's gone
-    std::shared_ptr<std::condition_variable_any> conditionPtr(new std::condition_variable_any());
-    {
-        Lock lock(mStateMutex);
-        auto request = std::make_shared<RemovePeerRequest>(peerFD, conditionPtr);
-        mRequestQueue.pushBack(Event::REMOVE_PEER, request);
-    }
 
     auto isPeerDeleted = [&peerFD, this]()->bool {
         return mSockets.count(peerFD) == 0;
     };
 
-    Lock lock(mStateMutex);
+    mRequestQueue.removeIf([peerFD](Request & request) {
+        return request.requestID == Event::ADD_PEER &&
+               request.get<AddPeerRequest>()->peerFD == peerFD;
+    });
+
+    // Remove peer and wait till he's gone
+    std::shared_ptr<std::condition_variable> conditionPtr(new std::condition_variable());
+
+    auto request = std::make_shared<RemovePeerRequest>(peerFD, conditionPtr);
+    mRequestQueue.pushBack(Event::REMOVE_PEER, request);
+
     conditionPtr->wait(lock, isPeerDeleted);
 }
 
@@ -231,8 +226,6 @@ void Processor::removePeerInternal(const FileDescriptor peerFD, const std::excep
         // Notify about the deletion
         mRemovedPeerCallback(peerFD);
     }
-
-    resetPolling();
 }
 
 void Processor::resetPolling()
@@ -243,23 +236,20 @@ void Processor::resetPolling()
         return;
     }
 
-    {
-        Lock lock(mStateMutex);
-        LOGI(mLogPrefix + "Reseting mFDS.size: " << mSockets.size());
-        // Setup polling on eventfd and sockets
-        mFDs.resize(mSockets.size() + 1);
+    LOGI(mLogPrefix + "Reseting mFDS.size: " << mSockets.size());
+    // Setup polling on eventfd and sockets
+    mFDs.resize(mSockets.size() + 1);
 
-        mFDs[0].fd = mRequestQueue.getFD();
-        mFDs[0].events = POLLIN;
+    mFDs[0].fd = mRequestQueue.getFD();
+    mFDs[0].events = POLLIN;
 
-        auto socketIt = mSockets.begin();
-        for (unsigned int i = 1; i < mFDs.size(); ++i) {
-            LOGI(mLogPrefix + "Reseting fd: " << socketIt->second->getFD());
-            mFDs[i].fd = socketIt->second->getFD();
-            mFDs[i].events = POLLIN | POLLHUP; // Listen for input events
-            ++socketIt;
-            // TODO: It's possible to block on writing to fd. Maybe listen for POLLOUT too?
-        }
+    auto socketIt = mSockets.begin();
+    for (unsigned int i = 1; i < mFDs.size(); ++i) {
+        LOGI(mLogPrefix + "Reseting fd: " << socketIt->second->getFD());
+        mFDs[i].fd = socketIt->second->getFD();
+        mFDs[i].events = POLLIN | POLLHUP; // Listen for input events
+        ++socketIt;
+        // TODO: It's possible to block on writing to fd. Maybe listen for POLLOUT too?
     }
 }
 
@@ -267,7 +257,10 @@ void Processor::run()
 {
     LOGS(mLogPrefix + "Processor run");
 
-    resetPolling();
+    {
+        Lock lock(mStateMutex);
+        resetPolling();
+    }
 
     while (isStarted()) {
         LOGT(mLogPrefix + "Waiting for communication...");
@@ -284,12 +277,14 @@ void Processor::run()
         // Check for lost connections:
         if (handleLostConnections()) {
             // mFDs changed
+            resetPolling();
             continue;
         }
 
         // Check for incoming data.
         if (handleInputs()) {
             // mFDs changed
+            resetPolling();
             continue;
         }
 
@@ -298,6 +293,7 @@ void Processor::run()
             mFDs[0].revents &= ~(POLLIN);
             if (handleEvent()) {
                 // mFDs changed
+                resetPolling();
                 continue;
             }
         }
@@ -335,7 +331,7 @@ bool Processor::handleLostConnection(const FileDescriptor peerFD)
 
 bool Processor::handleInputs()
 {
-    Lock lock(mStateMutex);
+    // Lock not needed, mFDs won't be changed by handleInput
 
     bool pollChanged = false;
     for (unsigned int i = 1; i < mFDs.size(); ++i) {
@@ -351,6 +347,7 @@ bool Processor::handleInputs()
 bool Processor::handleInput(const FileDescriptor peerFD)
 {
     LOGS(mLogPrefix + "Processor handleInput peerFD: " << peerFD);
+
     Lock lock(mStateMutex);
 
     std::shared_ptr<Socket> socketPtr;
@@ -384,7 +381,7 @@ bool Processor::handleInput(const FileDescriptor peerFD)
             if (mMethodsCallbacks.count(methodID)) {
                 // Method
                 std::shared_ptr<MethodHandlers> methodCallbacks = mMethodsCallbacks.at(methodID);
-                return onRemoteCall(*socketPtr, methodID, messageID, methodCallbacks);
+                return onRemoteMethod(*socketPtr, methodID, messageID, methodCallbacks);
 
             } else if (mSignalsCallbacks.count(methodID)) {
                 // Signal
@@ -428,7 +425,6 @@ bool Processor::onReturnValue(const Socket& socket,
 {
     LOGS(mLogPrefix + "Processor onReturnValue messageID: " << messageID);
 
-    // LOGI(mLogPrefix + "Return value for messageID: " << messageID);
     ReturnCallbacks returnCallbacks;
     try {
         LOGT(mLogPrefix + "Getting the return callback");
@@ -454,11 +450,9 @@ bool Processor::onReturnValue(const Socket& socket,
         return true;
     }
 
-    // LOGT(mLogPrefix + "Process return value callback for messageID: " << messageID);
     ResultBuilder resultBuilder(data);
     IGNORE_EXCEPTIONS(returnCallbacks.process(resultBuilder));
 
-    // LOGT(mLogPrefix + "Return value for messageID: " << messageID << " processed");
     return false;
 }
 
@@ -468,8 +462,6 @@ bool Processor::onRemoteSignal(const Socket& socket,
                                std::shared_ptr<SignalHandlers> signalCallbacks)
 {
     LOGS(mLogPrefix + "Processor onRemoteSignal; methodID: " << methodID << " messageID: " << messageID);
-
-    // LOGI(mLogPrefix + "Processor onRemoteSignal; methodID: " << methodID << " messageID: " << messageID);
 
     std::shared_ptr<void> data;
     try {
@@ -482,7 +474,6 @@ bool Processor::onRemoteSignal(const Socket& socket,
         return true;
     }
 
-    // LOGT(mLogPrefix + "Signal callback for methodID: " << methodID << "; messageID: " << messageID);
     try {
         signalCallbacks->signal(socket.getFD(), data);
     } catch (const IPCUserException& e) {
@@ -499,13 +490,12 @@ bool Processor::onRemoteSignal(const Socket& socket,
     return false;
 }
 
-bool Processor::onRemoteCall(const Socket& socket,
-                             const MethodID methodID,
-                             const MessageID messageID,
-                             std::shared_ptr<MethodHandlers> methodCallbacks)
+bool Processor::onRemoteMethod(const Socket& socket,
+                               const MethodID methodID,
+                               const MessageID messageID,
+                               std::shared_ptr<MethodHandlers> methodCallbacks)
 {
-    LOGS(mLogPrefix + "Processor onRemoteCall; methodID: " << methodID << " messageID: " << messageID);
-    // LOGI(mLogPrefix + "Remote call; methodID: " << methodID << " messageID: " << messageID);
+    LOGS(mLogPrefix + "Processor onRemoteMethod; methodID: " << methodID << " messageID: " << messageID);
 
     std::shared_ptr<void> data;
     try {
@@ -680,9 +670,6 @@ bool Processor::onAddPeerRequest(AddPeerRequest& request)
     signalInternal<RegisterSignalsProtocolMessage>(REGISTER_SIGNAL_METHOD_ID,
                                                    request.peerFD,
                                                    data);
-
-
-    resetPolling();
 
     if (mNewPeerCallback) {
         // Notify about the new user.

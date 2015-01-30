@@ -84,7 +84,6 @@ const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
 *  - no new events added after stop() called
 *  - when using IPCGSource: addFD and removeFD can be called from addPeer removePeer callbacks, but
 *    there is no mechanism to ensure the IPCSource exists.. therefore SIGSEGV :)
-*  - remove recursive mutex
 *
 */
 class Processor {
@@ -174,13 +173,6 @@ public:
      * @return peerFD of the new socket
      */
     FileDescriptor addPeer(const std::shared_ptr<Socket>& socketPtr);
-
-    /**
-     * Request removing peer and wait
-     *
-     * @param peerFD id of the peer
-     */
-    void removePeer(const FileDescriptor peerFD);
 
     /**
      * Saves the callbacks connected to the method id.
@@ -302,7 +294,7 @@ public:
 private:
     typedef std::function<void(int fd, std::shared_ptr<void>& data)> SerializeCallback;
     typedef std::function<std::shared_ptr<void>(int fd)> ParseCallback;
-    typedef std::unique_lock<std::recursive_mutex> Lock;
+    typedef std::unique_lock<std::mutex> Lock;
     typedef RequestQueue<Event>::Request Request;
 
     struct EmptyData {
@@ -394,7 +386,7 @@ private:
     std::unordered_map<MessageID, ReturnCallbacks> mReturnCallbacks;
 
     // Mutex for modifying any internal data
-    std::recursive_mutex mStateMutex;
+    std::mutex mStateMutex;
 
     PeerCallback mNewPeerCallback;
     PeerCallback mRemovedPeerCallback;
@@ -430,10 +422,10 @@ private:
 
     bool onReturnValue(const Socket& socket,
                        const MessageID messageID);
-    bool onRemoteCall(const Socket& socket,
-                      const MethodID methodID,
-                      const MessageID messageID,
-                      std::shared_ptr<MethodHandlers> methodCallbacks);
+    bool onRemoteMethod(const Socket& socket,
+                        const MethodID methodID,
+                        const MessageID messageID,
+                        std::shared_ptr<MethodHandlers> methodCallbacks);
     bool onRemoteSignal(const Socket& socket,
                         const MethodID methodID,
                         const MessageID messageID,
@@ -441,6 +433,7 @@ private:
     void resetPolling();
     FileDescriptor getNextFileDescriptor();
     void removePeerInternal(const FileDescriptor peerFD, const std::exception_ptr& exceptionPtr);
+    void removePeerSyncInternal(const FileDescriptor peerFD, Lock& lock);
 
     void onNewSignals(const FileDescriptor peerFD,
                       std::shared_ptr<RegisterSignalsProtocolMessage>& data);
@@ -528,7 +521,6 @@ void Processor::setSignalHandler(const MethodID methodID,
     }
 
     std::shared_ptr<RegisterSignalsProtocolMessage> data;
-    std::vector<FileDescriptor> peerFDs;
 
     {
         Lock lock(mStateMutex);
@@ -546,14 +538,10 @@ void Processor::setSignalHandler(const MethodID methodID,
         data = std::make_shared<RegisterSignalsProtocolMessage>(ids);
 
         for (const auto kv : mSockets) {
-            peerFDs.push_back(kv.first);
+            signalInternal<RegisterSignalsProtocolMessage>(REGISTER_SIGNAL_METHOD_ID,
+                                                           kv.first,
+                                                           data);
         }
-    }
-
-    for (const auto peerFD : peerFDs) {
-        signalInternal<RegisterSignalsProtocolMessage>(REGISTER_SIGNAL_METHOD_ID,
-                                                       peerFD,
-                                                       data);
     }
 }
 
@@ -578,12 +566,10 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
                                                       unsigned int timeoutMS)
 {
     Result<ReceivedDataType> result;
-
-    std::mutex mutex;
     std::condition_variable cv;
 
-    auto process = [&result, &mutex, &cv](const Result<ReceivedDataType> && r) {
-        std::unique_lock<std::mutex> lock(mutex);
+    auto process = [&result, &cv](const Result<ReceivedDataType> && r) {
+        // This is called under lock(mStateMutex)
         result = std::move(r);
         cv.notify_all();
     };
@@ -597,27 +583,21 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
         return result.isValid();
     };
 
-    std::unique_lock<std::mutex> lock(mutex);
+    Lock lock(mStateMutex);
     LOGT(mLogPrefix + "Waiting for the response...");
     if (!cv.wait_for(lock, std::chrono::milliseconds(timeoutMS), isResultInitialized)) {
         LOGW(mLogPrefix + "Probably a timeout in callSync. Checking...");
-        bool isTimeout;
-        {
-            Lock lock(mStateMutex);
-            // Call isn't sent or call is sent but there is no reply
-            isTimeout = mRequestQueue.removeIf([messageID](Request & request) {
-                return request.requestID == Event::METHOD &&
-                       request.get<MethodRequest>()->messageID == messageID;
-            })
-            || mRequestQueue.removeIf([messageID](Request & request) {
-                return request.requestID == Event::SIGNAL &&
-                       request.get<SignalRequest>()->messageID == messageID;
-            })
-            || 1 == mReturnCallbacks.erase(messageID);
-        }
+
+        // Call isn't sent or call is sent but there is no reply
+        bool isTimeout = mRequestQueue.removeIf([messageID](Request & request) {
+            return request.requestID == Event::METHOD &&
+                   request.get<MethodRequest>()->messageID == messageID;
+        })
+        || 1 == mReturnCallbacks.erase(messageID);
+
         if (isTimeout) {
             LOGE(mLogPrefix + "Function call timeout; methodID: " << methodID);
-            removePeer(peerFD);
+            removePeerSyncInternal(peerFD, lock);
             throw IPCTimeoutException("Function call timeout; methodID: " + std::to_string(methodID));
         } else {
             LOGW(mLogPrefix + "Timeout started during the return value processing, so wait for it to finish");
@@ -636,7 +616,6 @@ void Processor::signalInternal(const MethodID methodID,
                                const FileDescriptor peerFD,
                                const std::shared_ptr<SentDataType>& data)
 {
-    Lock lock(mStateMutex);
     auto request = SignalRequest::create<SentDataType>(methodID, peerFD, data);
     mRequestQueue.pushFront(Event::SIGNAL, request);
 }
