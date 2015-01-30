@@ -160,4 +160,18 @@ const std::string jsonTestString =
         "{ \"type\": \"SubConfig\", \"value\": { \"intVal\": 54321, \"intVector\": [ 1 ], "
             "\"subSubObj\": { \"intVal\": 234 } } } ] }";
 
+const std::string jsonEmptyTestString =
+    "{ \"intVal\": 0, "
+    "\"int64Val\": 0, "
+    "\"stringVal\": \"\", "
+    "\"boolVal\": false, "
+    "\"emptyIntVector\": [ ], "
+    "\"intVector\": [ ], "
+    "\"stringVector\": [ ], "
+    "\"subObj\": { \"intVal\": 0, \"intVector\": [ ], \"subSubObj\": { \"intVal\": 0 } }, "
+    "\"subVector\": [ ], "
+    "\"union1\": { \"type\": \"int\", \"value\": 0 }, "
+    "\"union2\": { \"type\": \"int\", \"value\": 0 }, "
+    "\"unions\": [ ] }";
+
 #endif

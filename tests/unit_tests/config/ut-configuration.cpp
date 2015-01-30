@@ -304,10 +304,7 @@ BOOST_AUTO_TEST_CASE(FromKVWithDefaultsTest)
     // all in db
     saveToKVStore(DB_PATH, config, DB_PREFIX);
     TestConfig outConfig2;
-    outConfig2.union1.set<int>(0);
-    outConfig2.union2.set<int>(0);
-    std::string emptyConfig = saveToJsonString(outConfig2);
-    loadFromKVStoreWithJson(DB_PATH, emptyConfig, outConfig2, DB_PREFIX);
+    loadFromKVStoreWithJson(DB_PATH, jsonEmptyTestString, outConfig2, DB_PREFIX);
 
     std::string out2 = saveToJsonString(outConfig2);
     BOOST_CHECK_EQUAL(out2, jsonTestString);
