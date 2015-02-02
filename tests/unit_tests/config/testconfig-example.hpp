@@ -168,6 +168,7 @@ const std::string jsonEmptyTestString =
     "\"emptyIntVector\": [ ], "
     "\"intVector\": [ ], "
     "\"stringVector\": [ ], "
+    "\"doubleVector\": [ ], "
     "\"subObj\": { \"intVal\": 0, \"intVector\": [ ], \"subSubObj\": { \"intVal\": 0 } }, "
     "\"subVector\": [ ], "
     "\"union1\": { \"type\": \"int\", \"value\": 0 }, "
