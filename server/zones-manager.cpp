@@ -73,7 +73,6 @@ const boost::regex ZONE_IP_THIRD_OCTET_REGEX("~IP~");
 const boost::regex ZONE_VT_REGEX("~VT~");
 
 const unsigned int ZONE_IP_BASE_THIRD_OCTET = 100;
-const unsigned int ZONE_VT_BASE = 1;
 
 std::string getConfigName(const std::string& zoneId)
 {
@@ -890,6 +889,7 @@ void ZonesManager::generateNewConfig(const std::string& id,
                                      const std::string& templatePath,
                                      const std::string& resultPath)
 {
+    // TODO Do not store new config at all, use template and dynamic config instead
     namespace fs = boost::filesystem;
 
     if (fs::exists(resultPath)) {
@@ -913,17 +913,15 @@ void ZonesManager::generateNewConfig(const std::string& id,
 
     std::string resultConfig = boost::regex_replace(config, ZONE_NAME_REGEX, id);
 
+    // generate first free VT number
+    const int freeVT = getVTForNewZone();
+    LOGD("VT number: " << freeVT);
+    resultConfig = boost::regex_replace(resultConfig, ZONE_VT_REGEX, std::to_string(freeVT));
+
     // generate third IP octet for network config
-    // TODO change algorithm after implementing removeZone
-    std::string thirdOctetStr = std::to_string(ZONE_IP_BASE_THIRD_OCTET + mZones.size() + 1);
+    std::string thirdOctetStr = std::to_string(ZONE_IP_BASE_THIRD_OCTET + freeVT);
     LOGD("IP third octet: " << thirdOctetStr);
     resultConfig = boost::regex_replace(resultConfig, ZONE_IP_THIRD_OCTET_REGEX, thirdOctetStr);
-
-    // generate first free VT number
-    // TODO change algorithm after implementing removeZone
-    std::string freeVT = std::to_string(ZONE_VT_BASE + mZones.size() + 1);
-    LOGD("VT number: " << freeVT);
-    resultConfig = boost::regex_replace(resultConfig, ZONE_VT_REGEX, freeVT);
 
     if (!utils::saveFileContent(resultPath, resultConfig)) {
         LOGE("Faield to save new config file.");
@@ -934,6 +932,24 @@ void ZonesManager::generateNewConfig(const std::string& id,
     fs::permissions(resultPath, fs::perms::owner_read | fs::perms::owner_write |
                                 fs::perms::group_read |
                                 fs::perms::others_read);
+}
+
+int ZonesManager::getVTForNewZone()
+{
+    if (mConfig.availableVTs.empty()) {
+        return -1;
+    }
+    std::set<int> candidates(mConfig.availableVTs.begin(), mConfig.availableVTs.end());
+    // exclude all used
+    for (auto& zone : mZones) {
+        candidates.erase(zone->getVT());
+    }
+    if (candidates.empty()) {
+        LOGE("No free VT for zone");
+        throw ZoneOperationException("No free VT for zone");
+    }
+    // return the smallest
+    return *candidates.begin();
 }
 
 void ZonesManager::handleCreateZoneCall(const std::string& id,

@@ -69,6 +69,11 @@ struct ZonesManagerConfig {
      */
     std::string lxcTemplatePrefix;
 
+    /**
+     * VTs available for zones
+     */
+    std::vector<int> availableVTs;
+
     /*
      * Parameters describing input device used to switch between zones
      */
@@ -92,6 +97,7 @@ struct ZonesManagerConfig {
         zoneTemplatePath,
         zoneNewConfigPrefix,
         lxcTemplatePrefix,
+        availableVTs,
         inputConfig,
         runMountPointPrefix,
         proxyCallRules

@@ -8,6 +8,7 @@
     "zoneNewConfigPrefix" : "/tmp/ut-zones/generated-configs/",
     "runMountPointPrefix" : "",
     "lxcTemplatePrefix" : "@VSM_TEST_LXC_TEMPLATES_INSTALL_DIR@",
+    "availableVTs" : [],
     "inputConfig" : {"enabled" : false,
                      "device" : "/dev/doesnotexist",
                      "code" : 139,

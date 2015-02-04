@@ -8,6 +8,7 @@
     "runMountPointPrefix" : "",
     "defaultId" : "ut-server-zone1",
     "lxcTemplatePrefix" : "@VSM_TEST_LXC_TEMPLATES_INSTALL_DIR@",
+    "availableVTs" : [],
     "inputConfig" : {"enabled" : false,
                      "device" : "gpio-keys.4",
                      "code" : 139,

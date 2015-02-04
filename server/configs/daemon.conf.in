@@ -8,6 +8,7 @@
     "runMountPointPrefix" : "/var/run/zones",
     "defaultId" : "",
     "lxcTemplatePrefix" : "/etc/vasum/lxc-templates",
+    "availableVTs" : [3, 4, 5, 6],
     "inputConfig" : {"enabled" : true,
                      "device" : "gpio_keys.6",
                      "code" : 116,

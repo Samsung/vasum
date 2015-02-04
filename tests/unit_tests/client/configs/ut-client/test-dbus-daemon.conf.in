@@ -10,6 +10,7 @@
     "zoneNewConfigPrefix" : "@VSM_TEST_CONFIG_INSTALL_DIR@/client/ut-client/",
     "runMountPointPrefix" : "",
     "lxcTemplatePrefix" : "@VSM_TEST_LXC_TEMPLATES_INSTALL_DIR@",
+    "availableVTs" : [],
     "inputConfig" : {"enabled" : false,
                      "device" : "/dev/doesnotexist",
                      "code" : 139,

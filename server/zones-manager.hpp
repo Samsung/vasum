@@ -134,6 +134,7 @@ private:
     void generateNewConfig(const std::string& id,
                            const std::string& templatePath,
                            const std::string& resultPath);
+    int getVTForNewZone();
 
     void notifyActiveZoneHandler(const std::string& caller,
                                  const std::string& appliaction,
