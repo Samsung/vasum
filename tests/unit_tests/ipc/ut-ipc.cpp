@@ -136,33 +136,33 @@ struct ThrowOnAcceptData {
     }
 };
 
-std::shared_ptr<EmptyData> returnEmptyCallback(const FileDescriptor, std::shared_ptr<EmptyData>&)
+std::shared_ptr<EmptyData> returnEmptyCallback(const PeerID, std::shared_ptr<EmptyData>&)
 {
     return std::make_shared<EmptyData>();
 }
 
-std::shared_ptr<SendData> returnDataCallback(const FileDescriptor, std::shared_ptr<RecvData>&)
+std::shared_ptr<SendData> returnDataCallback(const PeerID, std::shared_ptr<RecvData>&)
 {
     return std::make_shared<SendData>(1);
 }
 
-std::shared_ptr<SendData> echoCallback(const FileDescriptor, std::shared_ptr<RecvData>& data)
+std::shared_ptr<SendData> echoCallback(const PeerID, std::shared_ptr<RecvData>& data)
 {
     return std::make_shared<SendData>(data->intVal);
 }
 
-std::shared_ptr<SendData> longEchoCallback(const FileDescriptor, std::shared_ptr<RecvData>& data)
+std::shared_ptr<SendData> longEchoCallback(const PeerID, std::shared_ptr<RecvData>& data)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(LONG_OPERATION_TIME));
     return std::make_shared<SendData>(data->intVal);
 }
 
-FileDescriptor connect(Service& s, Client& c, bool isServiceGlib = false, bool isClientGlib = false)
+PeerID connect(Service& s, Client& c, bool isServiceGlib = false, bool isClientGlib = false)
 {
-    // Connects the Client to the Service and returns Clients FileDescriptor
-    ValueLatch<FileDescriptor> peerFDLatch;
-    auto newPeerCallback = [&peerFDLatch](const FileDescriptor newFD) {
-        peerFDLatch.set(newFD);
+    // Connects the Client to the Service and returns Clients PeerID
+    ValueLatch<PeerID> peerIDLatch;
+    auto newPeerCallback = [&peerIDLatch](const PeerID newID, const FileDescriptor) {
+        peerIDLatch.set(newID);
     };
 
     s.setNewPeerCallback(newPeerCallback);
@@ -173,18 +173,18 @@ FileDescriptor connect(Service& s, Client& c, bool isServiceGlib = false, bool i
 
     c.start(isClientGlib);
 
-    FileDescriptor peerFD = peerFDLatch.get(TIMEOUT);
+    PeerID peerID = peerIDLatch.get(TIMEOUT);
     s.setNewPeerCallback(nullptr);
-    BOOST_REQUIRE_NE(peerFD, 0);
-    return peerFD;
+    BOOST_REQUIRE_NE(peerID, 0);
+    return peerID;
 }
 
-FileDescriptor connectServiceGSource(Service& s, Client& c)
+PeerID connectServiceGSource(Service& s, Client& c)
 {
     return connect(s, c, true, false);
 }
 
-FileDescriptor connectClientGSource(Service& s, Client& c)
+PeerID connectClientGSource(Service& s, Client& c)
 {
     return connect(s, c, false, true);
 }
@@ -197,10 +197,10 @@ void testEcho(Client& c, const MethodID methodID)
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
-void testEcho(Service& s, const MethodID methodID, const FileDescriptor peerFD)
+void testEcho(Service& s, const MethodID methodID, const PeerID peerID)
 {
     std::shared_ptr<SendData> sentData(new SendData(56));
-    std::shared_ptr<RecvData> recvData = s.callSync<SendData, RecvData>(methodID, peerFD, sentData, TIMEOUT);
+    std::shared_ptr<RecvData> recvData = s.callSync<SendData, RecvData>(methodID, peerID, sentData, TIMEOUT);
     BOOST_REQUIRE(recvData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
@@ -244,17 +244,17 @@ BOOST_AUTO_TEST_CASE(ClientAddRemoveMethod)
     c.setMethodHandler<EmptyData, EmptyData>(1, returnEmptyCallback);
     c.setMethodHandler<SendData, RecvData>(1, returnDataCallback);
 
-    FileDescriptor peerFD = connect(s, c);
+    PeerID peerID = connect(s, c);
 
     c.setMethodHandler<SendData, RecvData>(1, echoCallback);
     c.setMethodHandler<SendData, RecvData>(2, returnDataCallback);
 
-    testEcho(s, 1, peerFD);
+    testEcho(s, 1, peerID);
 
     c.removeMethod(1);
     c.removeMethod(2);
 
-    BOOST_CHECK_THROW(testEcho(s, 1, peerFD), IPCException);
+    BOOST_CHECK_THROW(testEcho(s, 1, peerID), IPCException);
 }
 
 BOOST_AUTO_TEST_CASE(ServiceStartStop)
@@ -333,10 +333,10 @@ BOOST_AUTO_TEST_CASE(SyncServiceToClientEcho)
     Service s(socketPath);
     Client c(socketPath);
     c.setMethodHandler<SendData, RecvData>(1, echoCallback);
-    FileDescriptor peerFD = connect(s, c);
+    PeerID peerID = connect(s, c);
 
     std::shared_ptr<SendData> sentData(new SendData(56));
-    std::shared_ptr<RecvData> recvData = s.callSync<SendData, RecvData>(1, peerFD, sentData);
+    std::shared_ptr<RecvData> recvData = s.callSync<SendData, RecvData>(1, peerID, sentData);
     BOOST_REQUIRE(recvData);
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
@@ -372,14 +372,14 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
     Service s(socketPath);
     Client c(socketPath);
     c.setMethodHandler<SendData, RecvData>(1, echoCallback);
-    FileDescriptor peerFD = connect(s, c);
+    PeerID peerID = connect(s, c);
 
     // Async call
     auto dataBack = [&recvDataLatch](Result<RecvData> && r) {
         recvDataLatch.set(r.get());
     };
 
-    s.callAsync<SendData, RecvData>(1, peerFD, sentData, dataBack);
+    s.callAsync<SendData, RecvData>(1, peerID, sentData, dataBack);
 
     // Wait for the response
     std::shared_ptr<RecvData> recvData(recvDataLatch.get(TIMEOUT));
@@ -431,7 +431,7 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
     ValueLatch<Result<RecvData>> retStatusLatch;
     Service s(socketPath);
 
-    auto method = [](const FileDescriptor, std::shared_ptr<ThrowOnAcceptData>&) {
+    auto method = [](const PeerID, std::shared_ptr<ThrowOnAcceptData>&) {
         return std::shared_ptr<SendData>(new SendData(1));
     };
 
@@ -462,7 +462,7 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
 BOOST_AUTO_TEST_CASE(ReadTimeout)
 {
     Service s(socketPath);
-    auto longEchoCallback = [](const FileDescriptor, std::shared_ptr<RecvData>& data) {
+    auto longEchoCallback = [](const PeerID, std::shared_ptr<RecvData>& data) {
         return std::shared_ptr<LongSendData>(new LongSendData(data->intVal, LONG_OPERATION_TIME));
     };
     s.setMethodHandler<LongSendData, RecvData>(1, longEchoCallback);
@@ -506,14 +506,15 @@ BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
     Client c(socketPath);
     connect(s, c);
 
-    auto handlerA = [&recvDataLatchA](const FileDescriptor, std::shared_ptr<RecvData>& data) {
+    auto handlerA = [&recvDataLatchA](const PeerID, std::shared_ptr<RecvData>& data) {
         recvDataLatchA.set(data);
     };
 
-    auto handlerB = [&recvDataLatchB](const FileDescriptor, std::shared_ptr<RecvData>& data) {
+    auto handlerB = [&recvDataLatchB](const PeerID, std::shared_ptr<RecvData>& data) {
         recvDataLatchB.set(data);
     };
 
+    LOGH("SETTING SIGNAAALS");
     c.setSignalHandler<RecvData>(1, handlerA);
     c.setSignalHandler<RecvData>(2, handlerB);
 
@@ -541,11 +542,11 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
     Service s(socketPath);
     Client c(socketPath);
 
-    auto handlerA = [&recvDataLatchA](const FileDescriptor, std::shared_ptr<RecvData>& data) {
+    auto handlerA = [&recvDataLatchA](const PeerID, std::shared_ptr<RecvData>& data) {
         recvDataLatchA.set(data);
     };
 
-    auto handlerB = [&recvDataLatchB](const FileDescriptor, std::shared_ptr<RecvData>& data) {
+    auto handlerB = [&recvDataLatchB](const PeerID, std::shared_ptr<RecvData>& data) {
         recvDataLatchB.set(data);
     };
 
@@ -575,7 +576,7 @@ BOOST_AUTO_TEST_CASE(ServiceGSource)
     utils::Latch l;
     ScopedGlibLoop loop;
 
-    auto signalHandler = [&l](const FileDescriptor, std::shared_ptr<RecvData>&) {
+    auto signalHandler = [&l](const PeerID, std::shared_ptr<RecvData>&) {
         l.set();
     };
 
@@ -602,7 +603,7 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
     utils::Latch l;
     ScopedGlibLoop loop;
 
-    auto signalHandler = [&l](const FileDescriptor, std::shared_ptr<RecvData>&) {
+    auto signalHandler = [&l](const PeerID, std::shared_ptr<RecvData>&) {
         l.set();
     };
 
@@ -614,9 +615,9 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
     c.setMethodHandler<SendData, RecvData>(1, echoCallback);
     c.setSignalHandler<RecvData>(2, signalHandler);
 
-    FileDescriptor peerFD = connectClientGSource(s, c);
+    PeerID peerID = connectClientGSource(s, c);
 
-    testEcho(s, 1, peerFD);
+    testEcho(s, 1, peerID);
 
     auto data = std::make_shared<SendData>(1);
     s.signal<SendData>(2, data);
@@ -633,7 +634,7 @@ BOOST_AUTO_TEST_CASE(UsersError)
     Client c(socketPath);
     auto clientID = connect(s, c);
 
-    auto throwingMethodHandler = [&](const FileDescriptor, std::shared_ptr<RecvData>&) -> std::shared_ptr<SendData> {
+    auto throwingMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>&) -> std::shared_ptr<SendData> {
         throw IPCUserException(TEST_ERROR_CODE, TEST_ERROR_MESSAGE);
     };
 

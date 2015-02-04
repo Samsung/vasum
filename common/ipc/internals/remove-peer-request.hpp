@@ -38,14 +38,14 @@ public:
     RemovePeerRequest(const RemovePeerRequest&) = delete;
     RemovePeerRequest& operator=(const RemovePeerRequest&) = delete;
 
-    RemovePeerRequest(const FileDescriptor peerFD,
+    RemovePeerRequest(const PeerID peerID,
                       const std::shared_ptr<std::condition_variable>& conditionPtr)
-        : peerFD(peerFD),
+        : peerID(peerID),
           conditionPtr(conditionPtr)
     {
     }
 
-    FileDescriptor peerFD;
+    PeerID peerID;
     std::shared_ptr<std::condition_variable> conditionPtr;
 };
 

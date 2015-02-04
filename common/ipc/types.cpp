@@ -34,6 +34,7 @@ namespace ipc {
 
 namespace {
 std::atomic<MessageID> gLastMessageID(0);
+std::atomic<PeerID> gLastPeerID(0);
 } // namespace
 
 MessageID getNextMessageID()
@@ -41,6 +42,10 @@ MessageID getNextMessageID()
     return ++gLastMessageID;
 }
 
+PeerID getNextPeerID()
+{
+    return ++gLastPeerID;
+}
 
 
 } // namespace ipc

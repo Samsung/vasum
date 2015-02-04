@@ -174,7 +174,7 @@ private:
     void startPoll();
     void stopPoll();
 
-    FileDescriptor mServiceFD;
+    PeerID mServiceID;
     Processor mProcessor;
     std::string mSocketPath;
     IPCGSource::Pointer mIPCGSourcePtr;
@@ -202,7 +202,7 @@ std::shared_ptr<ReceivedDataType> Client::callSync(const MethodID methodID,
                                                    unsigned int timeoutMS)
 {
     LOGS("Client callSync, methodID: " << methodID << ", timeoutMS: " << timeoutMS);
-    return mProcessor.callSync<SentDataType, ReceivedDataType>(methodID, mServiceFD, data, timeoutMS);
+    return mProcessor.callSync<SentDataType, ReceivedDataType>(methodID, mServiceID, data, timeoutMS);
 }
 
 template<typename SentDataType, typename ReceivedDataType>
@@ -213,7 +213,7 @@ void Client::callAsync(const MethodID methodID,
     LOGS("Client callAsync, methodID: " << methodID);
     mProcessor.callAsync<SentDataType,
                          ReceivedDataType>(methodID,
-                                           mServiceFD,
+                                           mServiceID,
                                            data,
                                            resultCallback);
 }

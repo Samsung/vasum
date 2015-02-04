@@ -42,12 +42,12 @@ public:
 
     template<typename SentDataType, typename ReceivedDataType>
     static std::shared_ptr<MethodRequest> create(const MethodID methodID,
-                                                 const FileDescriptor peerFD,
+                                                 const PeerID peerID,
                                                  const std::shared_ptr<SentDataType>& data,
                                                  const typename ResultHandler<ReceivedDataType>::type& process);
 
     MethodID methodID;
-    FileDescriptor peerFD;
+    PeerID peerID;
     MessageID messageID;
     std::shared_ptr<void> data;
     SerializeCallback serialize;
@@ -55,9 +55,9 @@ public:
     ResultBuilderHandler process;
 
 private:
-    MethodRequest(const MethodID methodID, const FileDescriptor peerFD)
+    MethodRequest(const MethodID methodID, const PeerID peerID)
         : methodID(methodID),
-          peerFD(peerFD),
+          peerID(peerID),
           messageID(getNextMessageID())
     {}
 };
@@ -65,21 +65,21 @@ private:
 
 template<typename SentDataType, typename ReceivedDataType>
 std::shared_ptr<MethodRequest> MethodRequest::create(const MethodID methodID,
-                                                     const FileDescriptor peerFD,
+                                                     const PeerID peerID,
                                                      const std::shared_ptr<SentDataType>& data,
                                                      const typename ResultHandler<ReceivedDataType>::type& process)
 {
-    std::shared_ptr<MethodRequest> request(new MethodRequest(methodID, peerFD));
+    std::shared_ptr<MethodRequest> request(new MethodRequest(methodID, peerID));
 
     request->data = data;
 
     request->serialize = [](const int fd, std::shared_ptr<void>& data)->void {
-        LOGS("Method serialize, peerFD: " << fd);
+        LOGS("Method serialize, peerID: " << fd);
         config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
     };
 
     request->parse = [](const int fd)->std::shared_ptr<void> {
-        LOGS("Method parse, peerFD: " << fd);
+        LOGS("Method parse, peerID: " << fd);
         std::shared_ptr<ReceivedDataType> data(new ReceivedDataType());
         config::loadFromFD<ReceivedDataType>(fd, *data);
         return data;

@@ -61,7 +61,7 @@ void Client::start(const bool usesExternalPolling)
 
     LOGD("Connecting to " + mSocketPath);
     auto socketPtr = std::make_shared<Socket>(Socket::connectSocket(mSocketPath));
-    mServiceFD = mProcessor.addPeer(socketPtr);
+    mServiceID = mProcessor.addPeer(socketPtr);
 }
 
 bool Client::isStarted()
@@ -123,12 +123,12 @@ void Client::handle(const FileDescriptor fd, const short pollEvent)
 void Client::setNewPeerCallback(const PeerCallback& newPeerCallback)
 {
     LOGS("Client setNewPeerCallback");
-    auto callback = [newPeerCallback, this](FileDescriptor fd) {
+    auto callback = [newPeerCallback, this](PeerID peerID, FileDescriptor fd) {
         if (mIPCGSourcePtr) {
             mIPCGSourcePtr->addFD(fd);
         }
         if (newPeerCallback) {
-            newPeerCallback(fd);
+            newPeerCallback(peerID, fd);
         }
     };
     mProcessor.setNewPeerCallback(callback);
@@ -137,12 +137,12 @@ void Client::setNewPeerCallback(const PeerCallback& newPeerCallback)
 void Client::setRemovedPeerCallback(const PeerCallback& removedPeerCallback)
 {
     LOGS("Client setRemovedPeerCallback");
-    auto callback = [removedPeerCallback, this](FileDescriptor fd) {
+    auto callback = [removedPeerCallback, this](PeerID peerID, FileDescriptor fd) {
         if (mIPCGSourcePtr) {
             mIPCGSourcePtr->removeFD(fd);
         }
         if (removedPeerCallback) {
-            removedPeerCallback(fd);
+            removedPeerCallback(peerID, fd);
         }
     };
     mProcessor.setRemovedPeerCallback(callback);

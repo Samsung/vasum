@@ -22,11 +22,10 @@
  * @brief   Types definitions
  */
 
-#ifndef COMMON_IPC_HANDLERS_HPP
-#define COMMON_IPC_HANDLERS_HPP
+#ifndef COMMON_IPC_TYPES_HPP
+#define COMMON_IPC_TYPES_HPP
 
 #include "ipc/exception.hpp"
-
 #include <functional>
 #include <memory>
 #include <string>
@@ -37,26 +36,28 @@ namespace ipc {
 typedef int FileDescriptor;
 typedef unsigned int MethodID;
 typedef unsigned int MessageID;
+typedef unsigned int PeerID;
 
-typedef std::function<void(FileDescriptor)> PeerCallback;
+typedef std::function<void(const PeerID, const FileDescriptor)> PeerCallback;
 typedef std::function<void(int fd, std::shared_ptr<void>& data)> SerializeCallback;
 typedef std::function<std::shared_ptr<void>(int fd)> ParseCallback;
 
 MessageID getNextMessageID();
+PeerID getNextPeerID();
 
 template<typename SentDataType, typename ReceivedDataType>
 struct MethodHandler {
-    typedef std::function<std::shared_ptr<SentDataType>(FileDescriptor peerFD,
+    typedef std::function<std::shared_ptr<SentDataType>(PeerID peerID,
                                                         std::shared_ptr<ReceivedDataType>& data)> type;
 };
 
 template<typename ReceivedDataType>
 struct SignalHandler {
-    typedef std::function<void(FileDescriptor peerFD,
+    typedef std::function<void(PeerID peerID,
                                std::shared_ptr<ReceivedDataType>& data)> type;
 };
 
 } // namespace ipc
 } // namespace vasum
 
-#endif // COMMON_IPC_HANDLERS_HPP
+#endif // COMMON_IPC_TYPES_HPP

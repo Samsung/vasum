@@ -142,12 +142,12 @@ void Service::handle(const FileDescriptor fd, const short pollEvent)
 void Service::setNewPeerCallback(const PeerCallback& newPeerCallback)
 {
     LOGS("Service setNewPeerCallback");
-    auto callback = [newPeerCallback, this](FileDescriptor fd) {
+    auto callback = [newPeerCallback, this](PeerID peerID, FileDescriptor fd) {
         if (mIPCGSourcePtr) {
             mIPCGSourcePtr->addFD(fd);
         }
         if (newPeerCallback) {
-            newPeerCallback(fd);
+            newPeerCallback(peerID, fd);
         }
     };
     mProcessor.setNewPeerCallback(callback);
@@ -156,12 +156,12 @@ void Service::setNewPeerCallback(const PeerCallback& newPeerCallback)
 void Service::setRemovedPeerCallback(const PeerCallback& removedPeerCallback)
 {
     LOGS("Service setRemovedPeerCallback");
-    auto callback = [removedPeerCallback, this](FileDescriptor fd) {
+    auto callback = [removedPeerCallback, this](PeerID peerID, FileDescriptor fd) {
         if (mIPCGSourcePtr) {
             mIPCGSourcePtr->removeFD(fd);
         }
         if (removedPeerCallback) {
-            removedPeerCallback(fd);
+            removedPeerCallback(peerID, fd);
         }
     };
     mProcessor.setRemovedPeerCallback(callback);

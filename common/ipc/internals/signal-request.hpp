@@ -41,19 +41,19 @@ public:
 
     template<typename SentDataType>
     static std::shared_ptr<SignalRequest> create(const MethodID methodID,
-                                                 const FileDescriptor peerFD,
+                                                 const PeerID peerID,
                                                  const std::shared_ptr<SentDataType>& data);
 
     MethodID methodID;
-    FileDescriptor peerFD;
+    PeerID peerID;
     MessageID messageID;
     std::shared_ptr<void> data;
     SerializeCallback serialize;
 
 private:
-    SignalRequest(const MethodID methodID, const FileDescriptor peerFD)
+    SignalRequest(const MethodID methodID, const PeerID peerID)
         : methodID(methodID),
-          peerFD(peerFD),
+          peerID(peerID),
           messageID(getNextMessageID())
     {}
 
@@ -61,15 +61,15 @@ private:
 
 template<typename SentDataType>
 std::shared_ptr<SignalRequest> SignalRequest::create(const MethodID methodID,
-                                                     const FileDescriptor peerFD,
+                                                     const PeerID peerID,
                                                      const std::shared_ptr<SentDataType>& data)
 {
-    std::shared_ptr<SignalRequest> request(new SignalRequest(methodID, peerFD));
+    std::shared_ptr<SignalRequest> request(new SignalRequest(methodID, peerID));
 
     request->data = data;
 
     request->serialize = [](const int fd, std::shared_ptr<void>& data)->void {
-        LOGS("Signal serialize, peerFD: " << fd);
+        LOGS("Signal serialize, peerID: " << fd);
         config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
     };
 

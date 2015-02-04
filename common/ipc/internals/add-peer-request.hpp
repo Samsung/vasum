@@ -36,14 +36,14 @@ public:
     AddPeerRequest(const AddPeerRequest&) = delete;
     AddPeerRequest& operator=(const AddPeerRequest&) = delete;
 
-    AddPeerRequest(const FileDescriptor peerFD, const std::shared_ptr<Socket>& socketPtr)
-        : peerFD(peerFD),
-          socketPtr(socketPtr)
+    AddPeerRequest(const std::shared_ptr<Socket>& socketPtr)
+        : socketPtr(socketPtr),
+          peerID(getNextPeerID())
     {
     }
 
-    FileDescriptor peerFD;
     std::shared_ptr<Socket> socketPtr;
+    PeerID peerID;
 };
 
 } // namespace ipc

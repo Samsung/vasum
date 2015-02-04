@@ -143,7 +143,7 @@ public:
      */
     template<typename SentDataType, typename ReceivedDataType>
     std::shared_ptr<ReceivedDataType> callSync(const MethodID methodID,
-                                               const FileDescriptor peerFD,
+                                               const PeerID peerID,
                                                const std::shared_ptr<SentDataType>& data,
                                                unsigned int timeoutMS = 500);
 
@@ -158,7 +158,7 @@ public:
      */
     template<typename SentDataType, typename ReceivedDataType>
     void callAsync(const MethodID methodID,
-                   const FileDescriptor peerFD,
+                   const PeerID peerID,
                    const std::shared_ptr<SentDataType>& data,
                    const typename ResultHandler<ReceivedDataType>::type& resultCallback);
 
@@ -204,26 +204,26 @@ void Service::setSignalHandler(const MethodID methodID,
 
 template<typename SentDataType, typename ReceivedDataType>
 std::shared_ptr<ReceivedDataType> Service::callSync(const MethodID methodID,
-                                                    const FileDescriptor peerFD,
+                                                    const PeerID peerID,
                                                     const std::shared_ptr<SentDataType>& data,
                                                     unsigned int timeoutMS)
 {
     LOGS("Service callSync, methodID: " << methodID
-         << ", peerFD: " << peerFD
+         << ", peerID: " << peerID
          << ", timeoutMS: " << timeoutMS);
-    return mProcessor.callSync<SentDataType, ReceivedDataType>(methodID, peerFD, data, timeoutMS);
+    return mProcessor.callSync<SentDataType, ReceivedDataType>(methodID, peerID, data, timeoutMS);
 }
 
 template<typename SentDataType, typename ReceivedDataType>
 void Service::callAsync(const MethodID methodID,
-                        const FileDescriptor peerFD,
+                        const PeerID peerID,
                         const std::shared_ptr<SentDataType>& data,
                         const typename ResultHandler<ReceivedDataType>::type& resultCallback)
 {
-    LOGS("Service callAsync, methodID: " << methodID << ", peerFD: " << peerFD);
+    LOGS("Service callAsync, methodID: " << methodID << ", peerID: " << peerID);
     mProcessor.callAsync<SentDataType,
                          ReceivedDataType>(methodID,
-                                           peerFD,
+                                           peerID,
                                            data,
                                            resultCallback);
 }
