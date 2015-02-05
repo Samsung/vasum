@@ -226,27 +226,84 @@ BOOST_AUTO_TEST_CASE(ClearTest)
 
 BOOST_AUTO_TEST_CASE(TransactionTest)
 {
-    auto t1 = c.getTransaction();
-    BOOST_CHECK_EQUAL(t1.use_count(), 1);
+    {
+        KVStore::Transaction trans(c);
+        c.set<int>(KEY, 1);
+        trans.commit();
+    }
+    BOOST_CHECK_EQUAL(c.get<int>(KEY), 1);
 
-    auto t2 = c.getTransaction();
-    BOOST_CHECK_EQUAL(t1.use_count(), 2);
-    BOOST_CHECK_EQUAL(t2.use_count(), 2);
+    {
+        KVStore::Transaction trans(c);
+        c.set<int>(KEY, 2);
+        // no commit
+    }
+    BOOST_CHECK_EQUAL(c.get<int>(KEY), 1);
+
+    {
+        KVStore::Transaction trans(c);
+        trans.commit();
+        BOOST_CHECK_THROW(trans.commit(), ConfigException);
+        BOOST_CHECK_THROW(KVStore::Transaction{c}, ConfigException);
+    }
 }
 
-BOOST_AUTO_TEST_CASE(TransactionTwoThreadsTest)
+BOOST_AUTO_TEST_CASE(TransactionStackedTest)
 {
-    Latch latch;
-    auto trans1 = c.getTransaction();
-    std::thread thread([&]{
-        auto trans2 = c.getTransaction();
-        latch.set();
+    {
+        KVStore::Transaction transOuter(c);
+        KVStore::Transaction transInner(c);
+    }
+
+    {
+        KVStore::Transaction transOuter(c);
+        {
+            KVStore::Transaction transInner(c);
+            c.set<int>(KEY, 1);
+            // no inner commit
+        }
+        transOuter.commit();
+    }
+    BOOST_CHECK_EQUAL(c.get<int>(KEY), 1);
+
+    {
+        KVStore::Transaction transOuter(c);
+        {
+            KVStore::Transaction transInner(c);
+            c.set<int>(KEY, 2);
+            transInner.commit();
+        }
+        // no outer commit
+    }
+    BOOST_CHECK_EQUAL(c.get<int>(KEY), 1);
+
+    {
+        KVStore::Transaction transOuter(c);
+        KVStore::Transaction transInner(c);
+        transOuter.commit();
+        BOOST_CHECK_THROW(transInner.commit(), ConfigException);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(TransactionThreadsTest)
+{
+    Latch trans1Started, trans1Release, trans2Released;
+    std::thread thread1([&] {
+        KVStore::Transaction trans1(c);
+        trans1Started.set();
+        trans1Release.wait();
+    });
+    std::thread thread2([&] {
+        trans1Started.wait();
+        KVStore::Transaction trans2(c);
+        trans2Released.set();
     });
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    BOOST_CHECK(latch.empty());
-    trans1.reset();
-    latch.wait();
-    thread.join();
+    BOOST_CHECK(trans2Released.empty());
+    trans1Release.set();
+    thread1.join();
+    trans2Released.wait();
+    thread2.join();
 }
 
 BOOST_AUTO_TEST_CASE(KeyTest)
