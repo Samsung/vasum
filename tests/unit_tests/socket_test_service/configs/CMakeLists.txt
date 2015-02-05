@@ -1,4 +1,4 @@
-#Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+# Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 # @author Lukasz Kostyra (l.kostyra@samsung.com)
 #
 
-SET(UNIT_TESTS_FOLDER ${TESTS_FOLDER}/unit_tests)
-SET(SOCKET_TEST_FOLDER ${UNIT_TESTS_FOLDER}/socket_test_service)
+MESSAGE(STATUS "Installing configs for Vasum sycket test service to " ${VSM_TEST_CONFIG_INSTALL_DIR})
 
-ADD_SUBDIRECTORY(scripts)
-ADD_SUBDIRECTORY(integration_tests)
-ADD_SUBDIRECTORY(unit_tests)
+## Install #####################################################################
+INSTALL(FILES        systemd/vasum-socket-test.socket
+        DESTINATION  ${SYSTEMD_UNIT_DIR})
+INSTALL(FILES        systemd/vasum-socket-test.service
+        DESTINATION  ${SYSTEMD_UNIT_DIR})

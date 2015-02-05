@@ -75,13 +75,15 @@ void waitForEvent(int fd,
             throw IPCException("Timeout in read");
         }
 
-        if (fds[0].revents & POLLHUP) {
-            LOGE("Peer disconnected");
-            throw IPCException("Peer disconnected");
+        if (fds[0].revents & event) {
+            // Here Comes the Sun
+            break;
         }
 
-        // Here Comes the Sun
-        break;
+        if (fds[0].revents & POLLHUP) {
+            LOGW("Peer disconnected");
+            throw IPCException("Peer disconnected");
+        }
     }
 }
 

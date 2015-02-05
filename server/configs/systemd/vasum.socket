@@ -1,0 +1,9 @@
+[Socket]
+ListenStream=/run/vasum.socket
+SocketMode=0755
+SmackLabelIPIn=*
+SmackLabelIPOut=@
+Service=vasum.service
+
+[Install]
+WantedBy=sockets.target

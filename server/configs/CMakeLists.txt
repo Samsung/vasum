@@ -49,5 +49,7 @@ INSTALL(PROGRAMS    ${admin_CONF}
 INSTALL(PROGRAMS    ${template_CONF}
         DESTINATION ${VSM_CONFIG_INSTALL_DIR}/templates)
 
-INSTALL(FILES       ${CMAKE_BINARY_DIR}/systemd/vasum.service
+INSTALL(FILES
+        ${CMAKE_BINARY_DIR}/systemd/vasum.service
+        systemd/vasum.socket
         DESTINATION ${SYSTEMD_UNIT_DIR})

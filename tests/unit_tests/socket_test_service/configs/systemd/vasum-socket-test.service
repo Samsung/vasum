@@ -1,0 +1,10 @@
+[Unit]
+Description=Vasum Socket tests mini-service
+ConditionVirtualization=no
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/vasum-socket-test
+Sockets=vasum-socket-test.socket
+StartLimitInterval=0
+StartLimitBurst=0

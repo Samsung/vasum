@@ -48,6 +48,7 @@ between them. A process from inside a zone can request a switch of context
 %attr(755,root,root) /etc/vasum/lxc-templates/*.sh
 %config /etc/vasum/templates/*.conf
 %{_unitdir}/vasum.service
+%{_unitdir}/vasum.socket
 %{_unitdir}/multi-user.target.wants/vasum.service
 /etc/dbus-1/system.d/org.tizen.vasum.host.conf
 %dir %{_datadir}/.zones
@@ -211,10 +212,23 @@ Requires:         boost-test
 %description tests
 Unit tests for both: server and client and integration tests.
 
+%post tests
+systemctl daemon-reload
+systemctl enable vasum-socket-test.socket
+systemctl start vasum-socket-test.socket
+
+%preun tests
+systemctl stop vasum-socket-test.socket
+systemctl disable vasum-socket-test.socket
+
+%postun tests
+systemctl daemon-reload
+
 %files tests
 %manifest packaging/vasum-server-tests.manifest
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/vasum-server-unit-tests
+%attr(755,root,root) %{_bindir}/vasum-socket-test
 %attr(755,root,root) %{script_dir}/vsm_all_tests.py
 %attr(755,root,root) %{script_dir}/vsm_int_tests.py
 %attr(755,root,root) %{script_dir}/vsm_launch_test.py
@@ -223,3 +237,5 @@ Unit tests for both: server and client and integration tests.
 %attr(755,root,root) %{_datadir}/vasum/lxc-templates
 %{python_sitelib}/vsm_integration_tests
 /etc/dbus-1/system.d/org.tizen.vasum.tests.conf
+%{_unitdir}/vasum-socket-test.socket
+%{_unitdir}/vasum-socket-test.service
