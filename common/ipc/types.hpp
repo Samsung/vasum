@@ -25,7 +25,6 @@
 #ifndef COMMON_IPC_TYPES_HPP
 #define COMMON_IPC_TYPES_HPP
 
-#include "ipc/exception.hpp"
 #include <functional>
 #include <memory>
 #include <string>
@@ -45,11 +44,6 @@ typedef std::function<std::shared_ptr<void>(int fd)> ParseCallback;
 MessageID getNextMessageID();
 PeerID getNextPeerID();
 
-template<typename SentDataType, typename ReceivedDataType>
-struct MethodHandler {
-    typedef std::function<std::shared_ptr<SentDataType>(PeerID peerID,
-                                                        std::shared_ptr<ReceivedDataType>& data)> type;
-};
 
 template<typename ReceivedDataType>
 struct SignalHandler {

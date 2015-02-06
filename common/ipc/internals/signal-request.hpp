@@ -37,8 +37,6 @@ public:
     SignalRequest(const SignalRequest&) = delete;
     SignalRequest& operator=(const SignalRequest&) = delete;
 
-
-
     template<typename SentDataType>
     static std::shared_ptr<SignalRequest> create(const MethodID methodID,
                                                  const PeerID peerID,

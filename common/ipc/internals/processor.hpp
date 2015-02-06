@@ -32,8 +32,10 @@
 #include "ipc/internals/signal-request.hpp"
 #include "ipc/internals/add-peer-request.hpp"
 #include "ipc/internals/remove-peer-request.hpp"
+#include "ipc/internals/send-result-request.hpp"
 #include "ipc/internals/finish-request.hpp"
 #include "ipc/exception.hpp"
+#include "ipc/method-result.hpp"
 #include "ipc/types.hpp"
 #include "config/manager.hpp"
 #include "config/fields.hpp"
@@ -51,12 +53,12 @@
 #include <list>
 #include <functional>
 #include <unordered_map>
+#include <utility>
 
 namespace vasum {
 namespace ipc {
 
 const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
-
 /**
 * This class wraps communication via UX sockets
 *
@@ -89,11 +91,12 @@ const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
 class Processor {
 private:
     enum class Event {
-        FINISH,     // Shutdown request
-        METHOD,     // New method call in the queue
-        SIGNAL,     // New signal call in the queue
-        ADD_PEER,   // New peer in the queue
-        REMOVE_PEER // Remove peer
+        FINISH,      // Shutdown request
+        METHOD,      // New method call in the queue
+        SIGNAL,      // New signal call in the queue
+        ADD_PEER,    // New peer in the queue
+        REMOVE_PEER, // Remove peer
+        SEND_RESULT  // Send the result of a method's call
     };
 
 public:
@@ -209,6 +212,44 @@ public:
                           const typename SignalHandler<ReceivedDataType>::type& process);
 
     /**
+     * Send result of the method.
+     * Used for asynchronous communication, only internally.
+     *
+     * @param methodID API dependent id of the method
+     * @param peerID id of the peer
+     * @param messageID id of the message to which it replies
+     * @param data data to send
+     */
+    void sendResult(const MethodID methodID,
+                    const PeerID peerID,
+                    const MessageID messageID,
+                    const std::shared_ptr<void>& data);
+
+    /**
+     * Send error result of the method
+     *
+     * @param peerID id of the peer
+     * @param messageID id of the message to which it replies
+     * @param errorCode code of the error
+     * @param message description of the error
+     */
+    void sendError(const PeerID peerID,
+                   const MessageID messageID,
+                   const int errorCode,
+                   const std::string& message);
+
+    /**
+     * Indicate that the method handler finished
+     *
+     * @param methodID API dependent id of the method
+     * @param peerID id of the peer
+     * @param messageID id of the message to which it replies
+     */
+    void sendVoid(const MethodID methodID,
+                  const PeerID peerID,
+                  const MessageID messageID);
+
+    /**
      * Removes the callback
      *
      * @param methodID API dependent id of the method
@@ -220,7 +261,7 @@ public:
      *
      * @param methodID API dependent id of the method
      * @param peerID id of the peer
-     * @param data data to sent
+     * @param data data to send
      * @param timeoutMS how long to wait for the return value before throw
      * @tparam SentDataType data type to send
      * @tparam ReceivedDataType data type to receive
@@ -432,6 +473,7 @@ private:
     bool onSignalRequest(SignalRequest& request);
     bool onAddPeerRequest(AddPeerRequest& request);
     bool onRemovePeerRequest(RemovePeerRequest& request);
+    bool onSendResultRequest(SendResultRequest& request);
     bool onFinishRequest(FinishRequest& request);
 
     bool handleLostConnections();
@@ -480,9 +522,9 @@ void Processor::setMethodHandlerInternal(const MethodID methodID,
         config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
     };
 
-    methodCall.method = [method](const PeerID peerID, std::shared_ptr<void>& data)->std::shared_ptr<void> {
+    methodCall.method = [method](const PeerID peerID, std::shared_ptr<void>& data, MethodResult::Pointer && methodResult) {
         std::shared_ptr<ReceivedDataType> tmpData = std::static_pointer_cast<ReceivedDataType>(data);
-        return method(peerID, tmpData);
+        method(peerID, tmpData, std::forward<MethodResult::Pointer>(methodResult));
     };
 
     mMethodsCallbacks[methodID] = std::make_shared<MethodHandlers>(std::move(methodCall));
@@ -636,8 +678,8 @@ void Processor::signalInternal(const MethodID methodID,
                                const PeerID peerID,
                                const std::shared_ptr<SentDataType>& data)
 {
-    auto request = SignalRequest::create<SentDataType>(methodID, peerID, data);
-    mRequestQueue.pushFront(Event::SIGNAL, request);
+    auto requestPtr = SignalRequest::create<SentDataType>(methodID, peerID, data);
+    mRequestQueue.pushFront(Event::SIGNAL, requestPtr);
 }
 
 template<typename SentDataType>
@@ -651,8 +693,8 @@ void Processor::signal(const MethodID methodID,
         return;
     }
     for (const PeerID peerID : it->second) {
-        auto request =  SignalRequest::create<SentDataType>(methodID, peerID, data);
-        mRequestQueue.pushBack(Event::SIGNAL, request);
+        auto requestPtr =  SignalRequest::create<SentDataType>(methodID, peerID, data);
+        mRequestQueue.pushBack(Event::SIGNAL, requestPtr);
     }
 }
 

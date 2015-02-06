@@ -46,6 +46,7 @@
 #include <thread>
 #include <chrono>
 #include <utility>
+#include <future>
 #include <boost/filesystem.hpp>
 
 using namespace vasum;
@@ -136,25 +137,36 @@ struct ThrowOnAcceptData {
     }
 };
 
-std::shared_ptr<EmptyData> returnEmptyCallback(const PeerID, std::shared_ptr<EmptyData>&)
+void returnEmptyCallback(const PeerID,
+                         std::shared_ptr<EmptyData>&,
+                         MethodResult::Pointer methodResult)
 {
-    return std::make_shared<EmptyData>();
+    methodResult->setVoid();
 }
 
-std::shared_ptr<SendData> returnDataCallback(const PeerID, std::shared_ptr<RecvData>&)
+void returnDataCallback(const PeerID,
+                        std::shared_ptr<RecvData>&,
+                        MethodResult::Pointer methodResult)
 {
-    return std::make_shared<SendData>(1);
+    auto returnData = std::make_shared<SendData>(1);
+    methodResult->set(returnData);
 }
 
-std::shared_ptr<SendData> echoCallback(const PeerID, std::shared_ptr<RecvData>& data)
+void echoCallback(const PeerID,
+                  std::shared_ptr<RecvData>& data,
+                  MethodResult::Pointer methodResult)
 {
-    return std::make_shared<SendData>(data->intVal);
+    auto returnData = std::make_shared<SendData>(data->intVal);
+    methodResult->set(returnData);
 }
 
-std::shared_ptr<SendData> longEchoCallback(const PeerID, std::shared_ptr<RecvData>& data)
+void longEchoCallback(const PeerID,
+                      std::shared_ptr<RecvData>& data,
+                      MethodResult::Pointer methodResult)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(LONG_OPERATION_TIME));
-    return std::make_shared<SendData>(data->intVal);
+    auto returnData = std::make_shared<SendData>(data->intVal);
+    methodResult->set(returnData);
 }
 
 PeerID connect(Service& s, Client& c, bool isServiceGlib = false, bool isClientGlib = false)
@@ -431,8 +443,9 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
     ValueLatch<Result<RecvData>> retStatusLatch;
     Service s(socketPath);
 
-    auto method = [](const PeerID, std::shared_ptr<ThrowOnAcceptData>&) {
-        return std::shared_ptr<SendData>(new SendData(1));
+    auto method = [](const PeerID, std::shared_ptr<ThrowOnAcceptData>&, MethodResult::Pointer methodResult) {
+        auto resultData = std::make_shared<SendData>(1);
+        methodResult->set<SendData>(resultData);
     };
 
     // Method will throw during serialization and disconnect automatically
@@ -462,8 +475,9 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
 BOOST_AUTO_TEST_CASE(ReadTimeout)
 {
     Service s(socketPath);
-    auto longEchoCallback = [](const PeerID, std::shared_ptr<RecvData>& data) {
-        return std::shared_ptr<LongSendData>(new LongSendData(data->intVal, LONG_OPERATION_TIME));
+    auto longEchoCallback = [](const PeerID, std::shared_ptr<RecvData>& data, MethodResult::Pointer methodResult) {
+        auto resultData = std::make_shared<LongSendData>(data->intVal, LONG_OPERATION_TIME);
+        methodResult->set<LongSendData>(resultData);
     };
     s.setMethodHandler<LongSendData, RecvData>(1, longEchoCallback);
 
@@ -514,7 +528,6 @@ BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
         recvDataLatchB.set(data);
     };
 
-    LOGH("SETTING SIGNAAALS");
     c.setSignalHandler<RecvData>(1, handlerA);
     c.setSignalHandler<RecvData>(2, handlerB);
 
@@ -634,12 +647,18 @@ BOOST_AUTO_TEST_CASE(UsersError)
     Client c(socketPath);
     auto clientID = connect(s, c);
 
-    auto throwingMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>&) -> std::shared_ptr<SendData> {
+    auto throwingMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>&, MethodResult::Pointer) {
         throw IPCUserException(TEST_ERROR_CODE, TEST_ERROR_MESSAGE);
     };
 
+    auto sendErrorMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>&, MethodResult::Pointer methodResult) {
+        methodResult->setError(TEST_ERROR_CODE, TEST_ERROR_MESSAGE);
+    };
+
     s.setMethodHandler<SendData, RecvData>(1, throwingMethodHandler);
+    s.setMethodHandler<SendData, RecvData>(2, sendErrorMethodHandler);
     c.setMethodHandler<SendData, RecvData>(1, throwingMethodHandler);
+    c.setMethodHandler<SendData, RecvData>(2, sendErrorMethodHandler);
 
     std::shared_ptr<SendData> sentData(new SendData(78));
 
@@ -649,8 +668,66 @@ BOOST_AUTO_TEST_CASE(UsersError)
 
     BOOST_CHECK_EXCEPTION((c.callSync<SendData, RecvData>(1, sentData, TIMEOUT)), IPCUserException, hasProperData);
     BOOST_CHECK_EXCEPTION((s.callSync<SendData, RecvData>(1, clientID, sentData, TIMEOUT)), IPCUserException, hasProperData);
-
+    BOOST_CHECK_EXCEPTION((c.callSync<SendData, RecvData>(2, sentData, TIMEOUT)), IPCUserException, hasProperData);
+    BOOST_CHECK_EXCEPTION((s.callSync<SendData, RecvData>(2, clientID, sentData, TIMEOUT)), IPCUserException, hasProperData);
 }
+
+BOOST_AUTO_TEST_CASE(AsyncResult)
+{
+    const int TEST_ERROR_CODE = -567;
+    const std::string TEST_ERROR_MESSAGE = "Ooo jooo!";
+
+    Service s(socketPath);
+    Client c(socketPath);
+    auto clientID = connect(s, c);
+
+    auto errorMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>&, MethodResult::Pointer methodResult) {
+        std::async(std::launch::async, [&, methodResult] {
+            std::this_thread::sleep_for(std::chrono::milliseconds(SHORT_OPERATION_TIME));
+            methodResult->setError(TEST_ERROR_CODE, TEST_ERROR_MESSAGE);
+        });
+    };
+
+    auto voidMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>&, MethodResult::Pointer methodResult) {
+        std::async(std::launch::async, [methodResult] {
+            std::this_thread::sleep_for(std::chrono::milliseconds(SHORT_OPERATION_TIME));
+            methodResult->setVoid();
+        });
+    };
+
+    auto dataMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>& data, MethodResult::Pointer methodResult) {
+        std::async(std::launch::async, [data, methodResult] {
+            std::this_thread::sleep_for(std::chrono::milliseconds(SHORT_OPERATION_TIME));
+            methodResult->set(data);
+        });
+    };
+
+    s.setMethodHandler<SendData, RecvData>(1, errorMethodHandler);
+    s.setMethodHandler<EmptyData, RecvData>(2, voidMethodHandler);
+    s.setMethodHandler<SendData, RecvData>(3, dataMethodHandler);
+    c.setMethodHandler<SendData, RecvData>(1, errorMethodHandler);
+    c.setMethodHandler<EmptyData, RecvData>(2, voidMethodHandler);
+    c.setMethodHandler<SendData, RecvData>(3, dataMethodHandler);
+
+    std::shared_ptr<SendData> sentData(new SendData(90));
+
+    auto hasProperData = [&](const IPCUserException & e) {
+        return e.getCode() == TEST_ERROR_CODE && e.what() == TEST_ERROR_MESSAGE;
+    };
+
+    BOOST_CHECK_EXCEPTION((s.callSync<SendData, RecvData>(1, clientID, sentData, TIMEOUT)), IPCUserException, hasProperData);
+    BOOST_CHECK_EXCEPTION((c.callSync<SendData, RecvData>(1, sentData, TIMEOUT)), IPCUserException, hasProperData);
+
+    BOOST_CHECK_NO_THROW((s.callSync<SendData, EmptyData>(2, clientID, sentData, TIMEOUT)));
+    BOOST_CHECK_NO_THROW((c.callSync<SendData, EmptyData>(2, sentData, TIMEOUT)));
+
+    std::shared_ptr<RecvData> recvData;
+    recvData = s.callSync<SendData, RecvData>(3, clientID, sentData, TIMEOUT);
+    BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
+    recvData = c.callSync<SendData, RecvData>(3, sentData, TIMEOUT);
+    BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
+}
+
 // BOOST_AUTO_TEST_CASE(ConnectionLimitTest)
 // {
 //     unsigned oldLimit = ipc::getMaxFDNumber();

@@ -163,6 +163,33 @@ FileDescriptor Processor::getEventFD()
     return mRequestQueue.getFD();
 }
 
+void Processor::sendResult(const MethodID methodID,
+                           const PeerID peerID,
+                           const MessageID messageID,
+                           const std::shared_ptr<void>& data)
+{
+    auto requestPtr = std::make_shared<SendResultRequest>(methodID, peerID, messageID, data);
+    mRequestQueue.pushFront(Event::SEND_RESULT, requestPtr);
+}
+
+void Processor::sendError(const PeerID peerID,
+                          const MessageID messageID,
+                          const int errorCode,
+                          const std::string& message)
+{
+    auto data = std::make_shared<ErrorProtocolMessage>(messageID, errorCode, message);
+    signalInternal<ErrorProtocolMessage>(ERROR_METHOD_ID, peerID , data);
+}
+
+void Processor::sendVoid(const MethodID methodID,
+                         const PeerID peerID,
+                         const MessageID messageID)
+{
+    auto data = std::make_shared<EmptyData>();
+    auto requestPtr = std::make_shared<SendResultRequest>(methodID, peerID, messageID, data);
+    mRequestQueue.pushFront(Event::SEND_RESULT, requestPtr);
+}
+
 void Processor::removeMethod(const MethodID methodID)
 {
     Lock lock(mStateMutex);
@@ -374,16 +401,16 @@ bool Processor::handleInput(const FileDescriptor fd)
         return false;
     }
 
-    Socket& socket = *peerIt->socketPtr;
 
     MethodID methodID;
     MessageID messageID;
     {
-        Socket::Guard guard = socket.getGuard();
         try {
+            // Read information about the incoming data
+            Socket& socket = *peerIt->socketPtr;
+            Socket::Guard guard = socket.getGuard();
             socket.read(&methodID, sizeof(methodID));
             socket.read(&messageID, sizeof(messageID));
-
         } catch (const IPCException& e) {
             LOGE(mLogPrefix + "Error during reading the socket");
             removePeerInternal(peerIt,
@@ -525,34 +552,18 @@ bool Processor::onRemoteMethod(Peers::iterator& peerIt,
     }
 
     LOGT(mLogPrefix + "Process callback for methodID: " << methodID << "; messageID: " << messageID);
-    std::shared_ptr<void> returnData;
     try {
-        returnData = methodCallbacks->method(peerIt->peerID, data);
+        methodCallbacks->method(peerIt->peerID,
+                                data,
+                                std::make_shared<MethodResult>(*this, methodID, messageID, peerIt->peerID));
     } catch (const IPCUserException& e) {
         LOGW("User's exception");
-        auto data = std::make_shared<ErrorProtocolMessage>(messageID, e.getCode(), e.what());
-        signalInternal<ErrorProtocolMessage>(ERROR_METHOD_ID, peerIt->peerID, data);
+        sendError(peerIt->peerID, messageID, e.getCode(), e.what());
         return false;
     } catch (const std::exception& e) {
         LOGE(mLogPrefix + "Exception in method handler: " << e.what());
         removePeerInternal(peerIt,
                            std::make_exception_ptr(IPCNaughtyPeerException()));
-        return true;
-    }
-
-    LOGT(mLogPrefix + "Sending return data; methodID: " << methodID << "; messageID: " << messageID);
-    try {
-        // Send the call with the socket
-        Socket& socket = *peerIt->socketPtr;
-        Socket::Guard guard = socket.getGuard();
-        socket.write(&RETURN_METHOD_ID, sizeof(RETURN_METHOD_ID));
-        socket.write(&messageID, sizeof(messageID));
-        methodCallbacks->serialize(socket.getFD(), returnData);
-    } catch (const std::exception& e) {
-        LOGE(mLogPrefix + "Exception during serialization: " << e.what());
-        removePeerInternal(peerIt,
-                           std::make_exception_ptr(IPCSerializationException()));
-
         return true;
     }
 
@@ -573,6 +584,7 @@ bool Processor::handleEvent()
     case Event::SIGNAL:      return onSignalRequest(*request.get<SignalRequest>());
     case Event::ADD_PEER:    return onAddPeerRequest(*request.get<AddPeerRequest>());
     case Event::REMOVE_PEER: return onRemovePeerRequest(*request.get<RemovePeerRequest>());
+    case Event::SEND_RESULT: return onSendResultRequest(*request.get<SendResultRequest>());
     case Event::FINISH:      return onFinishRequest(*request.get<FinishRequest>());
     }
 
@@ -602,9 +614,9 @@ bool Processor::onMethodRequest(MethodRequest& request)
                                                                     std::move(request.parse),
                                                                     std::move(request.process)));
 
-    Socket& socket = *peerIt->socketPtr;
     try {
         // Send the call with the socket
+        Socket& socket = *peerIt->socketPtr;
         Socket::Guard guard = socket.getGuard();
         socket.write(&request.methodID, sizeof(request.methodID));
         socket.write(&request.messageID, sizeof(request.messageID));
@@ -639,9 +651,9 @@ bool Processor::onSignalRequest(SignalRequest& request)
         return false;
     }
 
-    Socket& socket = *peerIt->socketPtr;
     try {
         // Send the call with the socket
+        Socket& socket = *peerIt->socketPtr;
         Socket::Guard guard = socket.getGuard();
         socket.write(&request.methodID, sizeof(request.methodID));
         socket.write(&request.messageID, sizeof(request.messageID));
@@ -707,6 +719,51 @@ bool Processor::onRemovePeerRequest(RemovePeerRequest& request)
     return true;
 }
 
+bool Processor::onSendResultRequest(SendResultRequest& request)
+{
+    LOGS(mLogPrefix + "Processor onMethodRequest");
+
+    auto peerIt = getPeerInfoIterator(request.peerID);
+
+    if (peerIt == mPeerInfo.end()) {
+        LOGE(mLogPrefix + "Peer disconnected, no result is sent. No user with a peerID: " << request.peerID);
+        return false;
+    }
+
+    std::shared_ptr<MethodHandlers> methodCallbacks;
+    try {
+        methodCallbacks = mMethodsCallbacks.at(request.methodID);
+    } catch (const std::out_of_range&) {
+        LOGW(mLogPrefix + "No method, might have been deleted. methodID: " << request.methodID);
+        return true;
+    }
+
+    try {
+        // Send the call with the socket
+        Socket& socket = *peerIt->socketPtr;
+        Socket::Guard guard = socket.getGuard();
+        socket.write(&RETURN_METHOD_ID, sizeof(RETURN_METHOD_ID));
+        socket.write(&request.messageID, sizeof(request.messageID));
+        LOGT(mLogPrefix + "Serializing the message");
+        methodCallbacks->serialize(socket.getFD(), request.data);
+    } catch (const std::exception& e) {
+        LOGE(mLogPrefix + "Error during sending a method: " << e.what());
+
+        // Inform about the error
+        ResultBuilder resultBuilder(std::make_exception_ptr(IPCSerializationException()));
+        IGNORE_EXCEPTIONS(mReturnCallbacks[request.messageID].process(resultBuilder));
+
+
+        mReturnCallbacks.erase(request.messageID);
+        removePeerInternal(peerIt,
+                           std::make_exception_ptr(IPCSerializationException()));
+        return true;
+
+    }
+
+    return false;
+}
+
 bool Processor::onFinishRequest(FinishRequest& request)
 {
     LOGS(mLogPrefix + "Processor onFinishRequest");
@@ -725,6 +782,10 @@ bool Processor::onFinishRequest(FinishRequest& request)
         }
         case Event::REMOVE_PEER: {
             onRemovePeerRequest(*request.get<RemovePeerRequest>());
+            break;
+        }
+        case Event::SEND_RESULT: {
+            onSendResultRequest(*request.get<SendResultRequest>());
             break;
         }
         case Event::SIGNAL:
@@ -766,6 +827,11 @@ std::ostream& operator<<(std::ostream& os, const Processor::Event& event)
 
     case Processor::Event::REMOVE_PEER: {
         os << "Event::REMOVE_PEER";
+        break;
+    }
+
+    case Processor::Event::SEND_RESULT: {
+        os << "Event::SEND_RESULT";
         break;
     }
     }

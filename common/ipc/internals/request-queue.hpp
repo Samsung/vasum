@@ -31,6 +31,7 @@
 
 #include <list>
 #include <memory>
+#include <mutex>
 #include <algorithm>
 
 namespace vasum {
@@ -70,12 +71,12 @@ public:
     /**
      * @return event's file descriptor
      */
-    int getFD() const;
+    int getFD();
 
     /**
      * @return is the queue empty
      */
-    bool isEmpty() const;
+    bool isEmpty();
 
     /**
      * Push data to back of the queue
@@ -110,19 +111,24 @@ public:
     bool removeIf(Predicate predicate);
 
 private:
+    typedef std::unique_lock<std::mutex> Lock;
+
     std::list<Request> mRequests;
+    std::mutex mStateMutex;
     EventFD mEventFD;
 };
 
 template<typename RequestIdType>
-int RequestQueue<RequestIdType>::getFD() const
+int RequestQueue<RequestIdType>::getFD()
 {
+    Lock lock(mStateMutex);
     return mEventFD.getFD();
 }
 
 template<typename RequestIdType>
-bool RequestQueue<RequestIdType>::isEmpty() const
+bool RequestQueue<RequestIdType>::isEmpty()
 {
+    Lock lock(mStateMutex);
     return mRequests.empty();
 }
 
@@ -130,6 +136,7 @@ template<typename RequestIdType>
 void RequestQueue<RequestIdType>::pushBack(const RequestIdType requestID,
                                            const std::shared_ptr<void>& data)
 {
+    Lock lock(mStateMutex);
     Request request(requestID, data);
     mRequests.push_back(std::move(request));
     mEventFD.send();
@@ -139,6 +146,7 @@ template<typename RequestIdType>
 void RequestQueue<RequestIdType>::pushFront(const RequestIdType requestID,
                                             const std::shared_ptr<void>& data)
 {
+    Lock lock(mStateMutex);
     Request request(requestID, data);
     mRequests.push_front(std::move(request));
     mEventFD.send();
@@ -147,6 +155,7 @@ void RequestQueue<RequestIdType>::pushFront(const RequestIdType requestID,
 template<typename RequestIdType>
 typename RequestQueue<RequestIdType>::Request RequestQueue<RequestIdType>::pop()
 {
+    Lock lock(mStateMutex);
     mEventFD.receive();
     if (mRequests.empty()) {
         LOGE("Request queue is empty");
@@ -161,6 +170,7 @@ template<typename RequestIdType>
 template<typename Predicate>
 bool RequestQueue<RequestIdType>::removeIf(Predicate predicate)
 {
+    Lock lock(mStateMutex);
     auto it = std::find_if(mRequests.begin(), mRequests.end(), predicate);
     if (it == mRequests.end()) {
         return false;
