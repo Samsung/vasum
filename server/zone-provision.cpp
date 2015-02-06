@@ -71,8 +71,8 @@ std::string ZoneProvision::declareProvision(ZoneProvisioningConfig::Provision&& 
     std::string id = getId(provision);
     auto it = std::find_if(mProvisioningConfig.provisions.begin(),
                            mProvisioningConfig.provisions.end(),
-                           [&](const ZoneProvisioningConfig::Provision& provision) {
-                               return getId(provision) == id;
+                           [&](const ZoneProvisioningConfig::Provision& existingProvision) {
+                               return getId(existingProvision) == id;
                            });
     if (it != mProvisioningConfig.provisions.end()) {
         LOGE("Can't add provision. It already exists: " << id);

@@ -316,8 +316,8 @@ bool LxcZone::waitForState(State state, int timeout)
 bool LxcZone::setRunLevel(int runLevel)
 {
     auto callback = [](void* param) -> int {
-        utils::RunLevel runLevel = *reinterpret_cast<utils::RunLevel*>(param);
-        return utils::setRunLevel(runLevel) ? 0 : 1;
+        utils::RunLevel level = *reinterpret_cast<utils::RunLevel*>(param);
+        return utils::setRunLevel(level) ? 0 : 1;
     };
 
     lxc_attach_options_t options = LXC_ATTACH_OPTIONS_DEFAULT;

@@ -363,23 +363,25 @@ bool createDir(const std::string& path, uid_t uid, uid_t gid, boost::filesystem:
 
 bool createDirs(const std::string& path, mode_t mode)
 {
-    boost::filesystem::perms perms = getPerms(mode);
-    std::vector<fs::path> dirs;
+    const boost::filesystem::perms perms = getPerms(mode);
+    std::vector<fs::path> dirsCreated;
     fs::path prefix;
-    fs::path dirPath = fs::path(path);
-    for (const auto dir : dirPath) {
-        prefix /= dir;
+    const fs::path dirPath = fs::path(path);
+    for (const auto& dirSegment : dirPath) {
+        prefix /= dirSegment;
         if (!fs::exists(prefix)) {
             bool created = createDir(prefix.string(), -1, -1, perms);
             if (created) {
-                dirs.push_back(prefix);
+                dirsCreated.push_back(prefix);
             } else {
                 LOGE("Failed to create dir");
-                for (auto dir = dirs.rbegin(); dir != dirs.rend(); ++dir) {
+                // undo
+                for (auto iter = dirsCreated.rbegin(); iter != dirsCreated.rend(); ++iter) {
                     boost::system::error_code errorCode;
-                    fs::remove(*dir, errorCode);
+                    fs::remove(*iter, errorCode);
                     if (errorCode) {
-                        LOGE("Error during cleaning: dir: " << *dir << ", msg: " << errorCode.message());
+                        LOGE("Error during cleaning: dir: " << *iter
+                            << ", msg: " << errorCode.message());
                     }
                 }
                 return false;

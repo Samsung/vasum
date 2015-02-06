@@ -51,13 +51,13 @@ Socket::Socket(int socketFD)
 {
 }
 
-Socket::Socket(Socket&& socket)
+Socket::Socket(Socket&& socket) noexcept
     : mFD(socket.mFD)
 {
     socket.mFD = -1;
 }
 
-Socket::~Socket()
+Socket::~Socket() noexcept
 {
     try {
         ipc::close(mFD);

@@ -48,10 +48,13 @@ public:
      *
      * @param socketFD socket obtained outside the class.
      */
-    Socket(int socketFD = -1);
-    Socket(Socket&& socket);
-    ~Socket();
+    explicit Socket(int socketFD = -1);
+    Socket(Socket&& socket) noexcept;
+    ~Socket() noexcept;
+
+    Socket(const Socket&) = delete;
     Socket& operator=(const Socket&) = delete;
+    Socket& operator=(Socket&&) = delete;
 
     /**
      * @return reference to the socket's file descriptor

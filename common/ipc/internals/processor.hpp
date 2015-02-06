@@ -219,7 +219,7 @@ public:
      * Synchronous method call.
      *
      * @param methodID API dependent id of the method
-     * @param peerD id of the peer
+     * @param peerID id of the peer
      * @param data data to sent
      * @param timeoutMS how long to wait for the return value before throw
      * @tparam SentDataType data type to send

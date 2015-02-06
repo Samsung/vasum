@@ -123,6 +123,8 @@ private:
     std::string mActiveZoneId;
     bool mDetachOnExit;
 
+    Zones::iterator findZone(const std::string& id);
+    Zone& getZone(const std::string& id);
     Zones::iterator getRunningForegroundZoneIterator();
     Zones::iterator getNextToForegroundZoneIterator();
     void focusInternal(Zones::iterator iter);

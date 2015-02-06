@@ -106,27 +106,9 @@ Iter circularFindNext(Iter begin, Iter end, Iter current, Predicate pred)
     }
 }
 
-std::vector<std::unique_ptr<Zone>>::iterator find(std::vector<std::unique_ptr<Zone>>& zones,
-                                                  const std::string& id)
-{
-    auto equalId = [&id](const std::unique_ptr<Zone>& zone) {
-        return zone->getId() == id;
-    };
-    return std::find_if(zones.begin(), zones.end(), equalId);
-}
-
 Zone& get(std::vector<std::unique_ptr<Zone>>::iterator iter)
 {
     return **iter;
-}
-
-Zone& at(std::vector<std::unique_ptr<Zone>>& zones, const std::string& id)
-{
-    auto iter = find(zones, id);
-    if (iter == zones.end()) {
-        throw std::out_of_range("id not found");
-    }
-    return get(iter);
 }
 
 bool zoneIsRunning(const std::unique_ptr<Zone>& zone) {
@@ -240,6 +222,22 @@ ZonesManager::~ZonesManager()
     LOGD("ZonesManager object destroyed");
 }
 
+ZonesManager::Zones::iterator ZonesManager::findZone(const std::string& id)
+{
+    return std::find_if(mZones.begin(), mZones.end(), [&id](const std::unique_ptr<Zone>& zone) {
+        return zone->getId() == id;
+    });
+}
+
+Zone& ZonesManager::getZone(const std::string& id)
+{
+    auto iter = findZone(id);
+    if (iter == mZones.end()) {
+        throw std::out_of_range("id not found");
+    }
+    return get(iter);
+}
+
 void ZonesManager::saveDynamicConfig()
 {
     config::saveToKVStore(mConfig.dbPath, mDynamicConfig, DB_PREFIX);
@@ -252,7 +250,7 @@ void ZonesManager::updateDefaultId()
         LOGT("Keep empty defaultId");
         return;
     }
-    if (find(mZones, mDynamicConfig.defaultId) != mZones.end()) {
+    if (findZone(mDynamicConfig.defaultId) != mZones.end()) {
         LOGT("Keep " << mDynamicConfig.defaultId << " as defaultId");
         return;
     }
@@ -300,7 +298,7 @@ void ZonesManager::createZone(const std::string& zoneConfigPath)
 
     Lock lock(mMutex);
 
-    if (find(mZones, id) != mZones.end()) {
+    if (findZone(id) != mZones.end()) {
         throw ZoneOperationException("Zone already exists");
     }
     mZones.push_back(std::move(zone));
@@ -318,7 +316,7 @@ void ZonesManager::destroyZone(const std::string& zoneId)
 {
     Lock lock(mMutex);
 
-    auto iter = find(mZones, zoneId);
+    auto iter = findZone(zoneId);
     if (iter == mZones.end()) {
         LOGE("Failed to destroy zone " << zoneId << ": no such zone");
         throw ZoneOperationException("No such zone");
@@ -344,7 +342,7 @@ void ZonesManager::destroyZone(const std::string& zoneId)
 void ZonesManager::focus(const std::string& zoneId)
 {
     Lock lock(mMutex);
-    auto iter = find(mZones, zoneId);
+    auto iter = findZone(zoneId);
     focusInternal(iter);
 }
 
@@ -361,29 +359,29 @@ void ZonesManager::focusInternal(Zones::iterator iter)
         return;
     }
 
-    Zone& zone = get(iter);
-    std::string zoneId = zone.getId();
+    Zone& zoneToFocus = get(iter);
+    const std::string idToFocus = zoneToFocus.getId();
 
-    if (zoneId == mActiveZoneId) {
+    if (idToFocus == mActiveZoneId) {
         return;
     }
 
-    if (!zone.isRunning()) {
-        LOGE("Can't focus not running zone " << zoneId);
+    if (!zoneToFocus.isRunning()) {
+        LOGE("Can't focus not running zone " << idToFocus);
         assert(false);
         return;
     }
 
-    LOGI("Focus to: " << zone.getId());
+    LOGI("Focus to: " << idToFocus);
 
-    if (!zone.activateVT()) {
+    if (!zoneToFocus.activateVT()) {
         LOGE("Failed to activate zones VT");
         return;
     }
 
     for (auto& zone : mZones) {
         std::string id = zone->getId();
-        if (id == zoneId) {
+        if (id == idToFocus) {
             LOGD(id << ": being sent to foreground");
             zone->goForeground();
         } else {
@@ -391,7 +389,7 @@ void ZonesManager::focusInternal(Zones::iterator iter)
             zone->goBackground();
         }
     }
-    mActiveZoneId = zoneId;
+    mActiveZoneId = idToFocus;
 }
 
 void ZonesManager::refocus()
@@ -399,25 +397,18 @@ void ZonesManager::refocus()
     // assume mutex is locked
 
     // check if refocus is required
-    auto oldIter = find(mZones, mActiveZoneId);
+    auto oldIter = findZone(mActiveZoneId);
     if (oldIter != mZones.end() && get(oldIter).isRunning()) {
         return;
     }
 
     // try to refocus to defaultId
-    auto iter = find(mZones, mDynamicConfig.defaultId);
-    if (iter != mZones.end() && get(iter).isRunning()) {
-        // focus to default
-        focusInternal(iter);
-    } else {
+    auto iter = findZone(mDynamicConfig.defaultId);
+    if (iter == mZones.end() || !get(iter).isRunning()) {
         // focus to any running or to host if not found
-        auto iter = std::find_if(mZones.begin(), mZones.end(), zoneIsRunning);
-        if (iter == mZones.end()) {
-            focusInternal(mZones.end());
-        } else {
-            focusInternal(iter);
-        }
+        iter = std::find_if(mZones.begin(), mZones.end(), zoneIsRunning);
     }
+    focusInternal(iter);
 }
 
 void ZonesManager::startAll()
@@ -450,7 +441,7 @@ bool ZonesManager::isPaused(const std::string& zoneId)
 {
     Lock lock(mMutex);
 
-    auto iter = find(mZones, zoneId);
+    auto iter = findZone(zoneId);
     if (iter == mZones.end()) {
         LOGE("No such zone id: " << zoneId);
         throw ZoneOperationException("No such zone");
@@ -463,7 +454,7 @@ bool ZonesManager::isRunning(const std::string& zoneId)
 {
     Lock lock(mMutex);
 
-    auto iter = find(mZones, zoneId);
+    auto iter = findZone(zoneId);
     if (iter == mZones.end()) {
         LOGE("No such zone id: " << zoneId);
         throw ZoneOperationException("No such zone");
@@ -491,7 +482,7 @@ ZonesManager::Zones::iterator ZonesManager::getRunningForegroundZoneIterator()
     if (mActiveZoneId.empty()) {
         return mZones.end();
     }
-    auto iter = find(mZones, mActiveZoneId);
+    auto iter = findZone(mActiveZoneId);
     if (!get(iter).isRunning()) {
         // Can zone change its state by itself?
         // Maybe when it is shut down by itself? TODO check it
@@ -505,7 +496,7 @@ ZonesManager::Zones::iterator ZonesManager::getRunningForegroundZoneIterator()
 ZonesManager::Zones::iterator ZonesManager::getNextToForegroundZoneIterator()
 {
     // assume mutex is locked
-    auto current = find(mZones, mActiveZoneId);
+    auto current = findZone(mActiveZoneId);
     if (current == mZones.end()) {
         // find any running
         return std::find_if(mZones.begin(), mZones.end(), zoneIsRunning);
@@ -564,8 +555,8 @@ void ZonesManager::displayOffHandler(const std::string& /*caller*/)
     // get config of currently set zone and switch if switchToDefaultAfterTimeout is true
     Lock lock(mMutex);
 
-    auto activeIter = find(mZones, mActiveZoneId);
-    auto defaultIter = find(mZones, mDynamicConfig.defaultId);
+    auto activeIter = findZone(mActiveZoneId);
+    auto defaultIter = findZone(mDynamicConfig.defaultId);
 
     if (activeIter != mZones.end() &&
         defaultIter != mZones.end() &&
@@ -608,14 +599,14 @@ void ZonesManager::handleZoneMoveFileRequest(const std::string& srcZoneId,
 
     Lock lock(mMutex);
 
-    auto srcIter = find(mZones, srcZoneId);
+    auto srcIter = findZone(srcZoneId);
     if (srcIter == mZones.end()) {
         LOGE("Source zone '" << srcZoneId << "' not found");
         return;
     }
     Zone& srcZone = get(srcIter);
 
-    auto dstIter = find(mZones, dstZoneId);
+    auto dstIter = findZone(dstZoneId);
     if (dstIter == mZones.end()) {
         LOGE("Destination zone '" << dstZoneId << "' not found");
         result->set(g_variant_new("(s)", api::zone::FILE_MOVE_DESTINATION_NOT_FOUND.c_str()));
@@ -703,7 +694,7 @@ void ZonesManager::handleProxyCall(const std::string& caller,
 
     Lock lock(mMutex);
 
-    auto targetIter = find(mZones, target);
+    auto targetIter = findZone(target);
     if (targetIter == mZones.end()) {
         LOGE("Target zone '" << target << "' not found");
         result->setError(api::ERROR_INVALID_ID, "Unknown proxy call target");
@@ -770,7 +761,7 @@ void ZonesManager::handleGetZoneInfoCall(const std::string& id,
 
     Lock lock(mMutex);
 
-    auto iter = find(mZones, id);
+    auto iter = findZone(id);
     if (iter == mZones.end()) {
         LOGE("No zone with id=" << id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -810,7 +801,7 @@ void ZonesManager::handleDeclareFileCall(const std::string& zone,
     try {
         Lock lock(mMutex);
 
-        const std::string id = at(mZones, zone).declareFile(type, path, flags, mode);
+        const std::string id = getZone(zone).declareFile(type, path, flags, mode);
         result->set(g_variant_new("(s)", id.c_str()));
     } catch (const std::out_of_range&) {
         LOGE("No zone with id=" << zone);
@@ -834,7 +825,7 @@ void ZonesManager::handleDeclareMountCall(const std::string& source,
     try {
         Lock lock(mMutex);
 
-        const std::string id = at(mZones, zone).declareMount(source, target, type, flags, data);
+        const std::string id = getZone(zone).declareMount(source, target, type, flags, data);
         result->set(g_variant_new("(s)", id.c_str()));
     } catch (const std::out_of_range&) {
         LOGE("No zone with id=" << zone);
@@ -854,7 +845,7 @@ void ZonesManager::handleDeclareLinkCall(const std::string& source,
     try {
         Lock lock(mMutex);
 
-        const std::string id = at(mZones, zone).declareLink(source, target);
+        const std::string id = getZone(zone).declareLink(source, target);
         result->set(g_variant_new("(s)", id.c_str()));
     } catch (const std::out_of_range&) {
         LOGE("No zone with id=" << zone);
@@ -872,7 +863,7 @@ void ZonesManager::handleGetDeclarationsCall(const std::string& zone,
     try {
         Lock lock(mMutex);
 
-        std::vector<std::string> declarations = at(mZones, zone).getDeclarations();
+        std::vector<std::string> declarations = getZone(zone).getDeclarations();
 
         std::vector<GVariant*> out;
         for (auto declaration : declarations) {
@@ -901,7 +892,7 @@ void ZonesManager::handleRemoveDeclarationCall(const std::string& zone,
     try {
         Lock lock(mMutex);
 
-        at(mZones, zone).removeDeclaration(declarationId);
+        getZone(zone).removeDeclaration(declarationId);
 
         result->setVoid();
     } catch (const std::out_of_range&) {
@@ -920,7 +911,7 @@ void ZonesManager::handleSetActiveZoneCall(const std::string& id,
 
     Lock lock(mMutex);
 
-    auto iter = find(mZones, id);
+    auto iter = findZone(id);
     if (iter == mZones.end()){
         LOGE("No zone with id=" << id );
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -1024,7 +1015,7 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
     namespace fs = boost::filesystem;
 
     // check if zone does not exist
-    if (find(mZones, id) != mZones.end()) {
+    if (findZone(id) != mZones.end()) {
         LOGE("Cannot create " << id << " zone - already exists!");
         result->setError(api::ERROR_INVALID_ID, "Already exists");
         return;
@@ -1120,7 +1111,7 @@ void ZonesManager::handleShutdownZoneCall(const std::string& id,
             LOGT("Shutdown zone " << id);
 
             Lock lock(mMutex);
-            auto iter = find(mZones, id);
+            auto iter = findZone(id);
             if (iter == mZones.end()) {
                 LOGE("Failed to shutdown zone - no such zone id: " << id);
                 result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -1149,7 +1140,7 @@ void ZonesManager::handleStartZoneCall(const std::string& id,
             LOGT("Start zone " << id );
 
             Lock lock(mMutex);
-            auto iter = find(mZones, id);
+            auto iter = findZone(id);
             if (iter == mZones.end()) {
                 LOGE("Failed to start zone - no such zone id: " << id);
                 result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -1173,7 +1164,7 @@ void ZonesManager::handleLockZoneCall(const std::string& id,
 
     Lock lock(mMutex);
 
-    auto iter = find(mZones, id);
+    auto iter = findZone(id);
     if (iter == mZones.end()) {
         LOGE("Failed to lock zone - no such zone id: " << id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -1207,7 +1198,7 @@ void ZonesManager::handleUnlockZoneCall(const std::string& id,
 
     Lock lock(mMutex);
 
-    auto iter = find(mZones, id);
+    auto iter = findZone(id);
     if (iter == mZones.end()) {
         LOGE("Failed to unlock zone - no such zone id: " << id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -1242,7 +1233,7 @@ void ZonesManager::handleGrantDeviceCall(const std::string& id,
 
     Lock lock(mMutex);
 
-    auto iter = find(mZones, id);
+    auto iter = findZone(id);
     if (iter == mZones.end()) {
         LOGE("Failed to grant device - no such zone id: " << id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -1282,7 +1273,7 @@ void ZonesManager::handleRevokeDeviceCall(const std::string& id,
 
     Lock lock(mMutex);
 
-    auto iter = find(mZones, id);
+    auto iter = findZone(id);
     if (iter == mZones.end()) {
         LOGE("Failed to revoke device - no such zone id: " << id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
