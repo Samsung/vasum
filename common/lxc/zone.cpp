@@ -313,6 +313,11 @@ bool LxcZone::waitForState(State state, int timeout)
     return true;
 }
 
+pid_t LxcZone::getInitPid() const
+{
+    return mLxcContainer->init_pid(mLxcContainer);
+}
+
 bool LxcZone::setRunLevel(int runLevel)
 {
     auto callback = [](void* param) -> int {

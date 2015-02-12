@@ -26,6 +26,7 @@
 
 #include "zone-admin.hpp"
 #include "exception.hpp"
+#include "netdev.hpp"
 
 #include "logger/logger.hpp"
 #include "utils/paths.hpp"
@@ -270,22 +271,22 @@ std::int64_t ZoneAdmin::getSchedulerQuota()
     return std::stoll(ret);
 }
 
-void ZoneAdmin::createNetdevVeth(const std::string& /* zoneDev */,
-                                 const std::string& /* hostDev */)
+void ZoneAdmin::createNetdevVeth(const std::string& zoneDev,
+                                 const std::string& hostDev)
 {
-    throw ZoneOperationException("Not implemented");
+    netdev::createVeth(mZone.getInitPid(), zoneDev, hostDev);
 }
 
-void ZoneAdmin::createNetdevMacvlan(const std::string& /* zoneDev */,
-                                    const std::string& /* hostDev */,
-                                    const uint32_t& /* mode */)
+void ZoneAdmin::createNetdevMacvlan(const std::string& zoneDev,
+                                    const std::string& hostDev,
+                                    const uint32_t& mode)
 {
-    throw ZoneOperationException("Not implemented");
+    netdev::createMacvlan(mZone.getInitPid(), zoneDev, hostDev, static_cast<macvlan_mode>(mode));
 }
 
-void ZoneAdmin::moveNetdev(const std::string& /* devId */)
+void ZoneAdmin::moveNetdev(const std::string& devId)
 {
-    throw ZoneOperationException("Not implemented");
+    netdev::movePhys(mZone.getInitPid(), devId);
 }
 
 } // namespace vasum

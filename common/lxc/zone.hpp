@@ -26,6 +26,7 @@
 #define COMMON_LXC_ZONE_HPP
 
 #include <string>
+#include <sys/types.h>
 
 // fwd declaration of lxc internals
 struct lxc_container;
@@ -136,6 +137,12 @@ public:
      * Unfreeze zone
      */
     bool unfreeze();
+
+    /**
+     * Get pid of init process
+     */
+    pid_t getInitPid() const;
+
 private:
     lxc_container* mLxcContainer;
 
