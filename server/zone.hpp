@@ -267,6 +267,24 @@ public:
      */
     std::string getRootPath() const;
 
+    /**
+     * Create veth network device
+     */
+    void createNetdevVeth(const std::string& zoneDev,
+                          const std::string& hostDev);
+
+    /**
+     * Create macvlan network device
+     */
+    void createNetdevMacvlan(const std::string& zoneDev,
+                             const std::string& hostDev,
+                             const uint32_t& mode);
+
+    /**
+     * Move network device to zone
+     */
+    void moveNetdev(const std::string& devId);
+
 private:
     utils::Worker::Pointer mWorker;
     ZoneConfig mConfig;

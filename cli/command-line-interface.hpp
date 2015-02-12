@@ -187,6 +187,26 @@ void grant_device(int pos, int argc, const char** argv);
  */
 void revoke_device(int pos, int argc, const char** argv);
 
+/**
+ * Parses command line arguments and call vsm_create_netdev_veth
+ *
+ * @see vsm_create_netdev_veth
+ */
+void create_netdev_veth(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and call vsm_create_netdev_macvlan
+ *
+ * @see vsm_create_netdev_macvlan
+ */
+void create_netdev_macvlan(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and call vsm_create_netdev_phys
+ *
+ * @see vsm_create_netdev_phys
+ */
+void create_netdev_phys(int pos, int argc, const char** argv);
 
 } // namespace cli
 } // namespace vasum

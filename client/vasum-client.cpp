@@ -250,18 +250,26 @@ API VsmStatus vsm_netdev_set_ipv6_addr(VsmClient client,
     return getClient(client).vsm_netdev_set_ipv6_addr(zone, netdevId, addr, prefix);
 }
 
-API VsmStatus vsm_create_netdev(VsmClient client,
-                                const char* zone,
-                                VsmNetdevType netdevType,
-                                const char* target,
-                                const char* netdevId)
+API VsmStatus vsm_create_netdev_veth(VsmClient client,
+                                     const char* zone,
+                                     const char* zoneDev,
+                                     const char* hostDev)
 {
-    return getClient(client).vsm_create_netdev(zone, netdevType, target, netdevId);
+    return getClient(client).vsm_create_netdev_veth(zone, zoneDev, hostDev);
 }
 
-API VsmStatus vsm_destroy_netdev(VsmClient client, const char* zone, const char* netdevId)
+API VsmStatus vsm_create_netdev_macvlan(VsmClient client,
+                                        const char* zone,
+                                        const char* zoneDev,
+                                        const char* hostDev,
+                                        enum macvlan_mode mode)
 {
-    return getClient(client).vsm_destroy_netdev(zone, netdevId);
+    return getClient(client).vsm_create_netdev_macvlan(zone, zoneDev, hostDev, mode);
+}
+
+API VsmStatus vsm_create_netdev_phys(VsmClient client, const char* zone, const char* devId)
+{
+    return getClient(client).vsm_create_netdev_phys(zone, devId);
 }
 
 API VsmStatus vsm_lookup_netdev_by_name(VsmClient client,
@@ -270,6 +278,11 @@ API VsmStatus vsm_lookup_netdev_by_name(VsmClient client,
                                         VsmNetdev* netdev)
 {
     return getClient(client).vsm_lookup_netdev_by_name(zone, netdevId, netdev);
+}
+
+API VsmStatus vsm_destroy_netdev(VsmClient client, const char* zone, const char* devId)
+{
+    return getClient(client).vsm_destroy_netdev(zone, devId);
 }
 
 API VsmStatus vsm_declare_file(VsmClient client,

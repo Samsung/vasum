@@ -140,6 +140,36 @@ std::map<std::string, CommandLineInterface> commands = {
             {{"zone_id", "id zone name"},
              {"device_name", " device name"}}
         }
+    },
+    {
+        "create_netdev_veth", {
+            create_netdev_veth,
+            "create_netdev_veth zone_id zoneDev hostDev",
+            "Create netdev in zone",
+            {{"zone_id", "id zone name"},
+             {"zoneDev", "network device id"},
+             {"hostDev", "host bridge id"}}
+        }
+    },
+    {
+        "create_netdev_macvlan", {
+            create_netdev_macvlan,
+            "create_netdev_macvlan zone_id zoneDev hostDev mode",
+            "Create netdev in zone",
+            {{"zone_id", "id zone name"},
+             {"zoneDev", "network device id"},
+             {"hostDev", "host bridge id"},
+             {"mode", "macvlan mode (private, vepa, bridge, passthru)"}}
+        }
+    },
+    {
+        "create_netdev_phys", {
+            create_netdev_phys,
+            "create_netdev_phys zone_id devId",
+            "Create/move netdev to zone",
+            {{"zone_id", "id zone name"},
+             {"devId", "network device id"}}
+        }
     }
 };
 

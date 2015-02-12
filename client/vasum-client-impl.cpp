@@ -152,7 +152,7 @@ void toArray(GVariant* in, T** scArray)
     *scArray = ids;
 }
 
-VsmStatus toStatus(const std::exception& ex)
+VsmStatus toStatus(const exception& ex)
 {
     if (typeid(DbusCustomException) == typeid(ex)) {
         return VSMCLIENT_CUSTOM_ERROR;
@@ -168,14 +168,14 @@ VsmStatus toStatus(const std::exception& ex)
     return VSMCLIENT_OTHER_ERROR;
 }
 
-bool readFirstLineOfFile(const std::string& path, std::string& ret)
+bool readFirstLineOfFile(const string& path, string& ret)
 {
-    std::ifstream file(path);
+    ifstream file(path);
     if (!file) {
         return false;
     }
 
-    std::getline(file, ret);
+    getline(file, ret);
     return true;
 }
 
@@ -209,7 +209,7 @@ Client::Status::Status()
 {
 }
 
-Client::Status::Status(VsmStatus status, const std::string& msg)
+Client::Status::Status(VsmStatus status, const string& msg)
     : mVsmStatus(status), mMsg(msg)
 {
 }
@@ -272,10 +272,10 @@ VsmStatus Client::signalSubscribe(const DbusInterfaceInfo& info,
                                   SignalCallback signalCallback,
                                   VsmSubscriptionId* subscriptionId)
 {
-    auto onSignal = [=](const std::string& /*senderBusName*/,
-                        const std::string & objectPath,
-                        const std::string & interface,
-                        const std::string & signalName,
+    auto onSignal = [=](const string& /*senderBusName*/,
+                        const string & objectPath,
+                        const string & interface,
+                        const string & signalName,
                         GVariant * parameters) {
         if (objectPath == info.objectPath &&
             interface == info.interface &&
@@ -290,7 +290,7 @@ VsmStatus Client::signalSubscribe(const DbusInterfaceInfo& info,
             *subscriptionId = id;
         }
         mStatus = Status();
-    } catch (const std::exception& ex) {
+    } catch (const exception& ex) {
         mStatus = Status(toStatus(ex), ex.what());
     }
     return vsm_get_status();
@@ -301,7 +301,7 @@ VsmStatus Client::signalUnsubscribe(VsmSubscriptionId id)
     try {
         mConnection->signalUnsubscribe(id);
         mStatus = Status();
-    } catch (const std::exception& ex) {
+    } catch (const exception& ex) {
         mStatus = Status(toStatus(ex), ex.what());
     }
     return vsm_get_status();
@@ -385,15 +385,15 @@ VsmStatus Client::vsm_lookup_zone_by_pid(int pid, VsmString* id) noexcept
 {
     assert(id);
 
-    const std::string path = "/proc/" + std::to_string(pid) + "/cpuset";
+    const string path = "/proc/" + to_string(pid) + "/cpuset";
 
-    std::string cpuset;
+    string cpuset;
     if (!readFirstLineOfFile(path, cpuset)) {
         mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, "Process not found");
         return vsm_get_status();
     }
 
-    std::string zoneId;
+    string zoneId;
     if (!parseZoneIdFromCpuSet(cpuset, zoneId)) {
         mStatus = Status(VSMCLIENT_OTHER_ERROR, "unknown format of cpuset");
         return vsm_get_status();
@@ -560,19 +560,36 @@ VsmStatus Client::vsm_netdev_set_ipv6_addr(const char*, const char*, struct in6_
     return vsm_get_status();
 }
 
-VsmStatus Client::vsm_create_netdev(const char*, VsmNetdevType, const char*, const char*) noexcept
+VsmStatus Client::vsm_create_netdev_veth(const char* zone,
+                                         const char* zoneDev,
+                                         const char* hostDev) noexcept
+{
+    GVariant* args_in = g_variant_new("(sss)", zone, zoneDev, hostDev);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_CREATE_NETDEV_VETH, args_in);
+}
+
+VsmStatus Client::vsm_create_netdev_macvlan(const char* zone,
+                                            const char* zoneDev,
+                                            const char* hostDev,
+                                            enum macvlan_mode mode) noexcept
+{
+    GVariant* args_in = g_variant_new("(sssu)", zone, zoneDev, hostDev, mode);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_CREATE_NETDEV_MACVLAN, args_in);
+}
+
+VsmStatus Client::vsm_create_netdev_phys(const char* zone, const char* devId) noexcept
+{
+    GVariant* args_in = g_variant_new("(ss)", zone, devId);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_CREATE_NETDEV_PHYS, args_in);
+}
+
+VsmStatus Client::vsm_lookup_netdev_by_name(const char*, const char*, VsmNetdev*) noexcept
 {
     mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
     return vsm_get_status();
 }
 
 VsmStatus Client::vsm_destroy_netdev(const char*, const char*) noexcept
-{
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
-}
-
-VsmStatus Client::vsm_lookup_netdev_by_name(const char*, const char*, VsmNetdev*) noexcept
 {
     mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
     return vsm_get_status();

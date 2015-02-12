@@ -60,6 +60,21 @@ public:
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
                               )> GetZoneInfoCallback;
+    typedef std::function<void(const std::string& id,
+                               const std::string& zoneDev,
+                               const std::string& hostDev,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> CreateNetdevVethCallback;
+    typedef std::function<void(const std::string& id,
+                               const std::string& zoneDev,
+                               const std::string& hostDev,
+                               const uint32_t& mode,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> CreateNetdevMacvlanCallback;
+    typedef std::function<void(const std::string& id,
+                               const std::string& devId,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> CreateNetdevPhysCallback;
     typedef std::function<void(const std::string& zone,
                                const int32_t& type,
                                const std::string& path,
@@ -148,6 +163,21 @@ public:
      * Register a callback called to get the zone informations
      */
     void setGetZoneInfoCallback(const GetZoneInfoCallback& callback);
+
+    /**
+     * Register a callback called to create veth
+     */
+    void setCreateNetdevVethCallback(const CreateNetdevVethCallback& callback);
+
+    /**
+     * Register a callback called to create macvlan
+     */
+    void setCreateNetdevMacvlanCallback(const CreateNetdevMacvlanCallback& callback);
+
+    /**
+     * Register a callback called to create/move phys
+     */
+    void setCreateNetdevPhysCallback(const CreateNetdevPhysCallback& callback);
 
     /**
      * Register a callback called to declare file
@@ -240,6 +270,9 @@ private:
     GetZoneIdsCallback mGetZoneIdsCallback;
     GetActiveZoneIdCallback mGetActiveZoneIdCallback;
     GetZoneInfoCallback mGetZoneInfoCallback;
+    CreateNetdevVethCallback mCreateNetdevVethCallback;
+    CreateNetdevMacvlanCallback mCreateNetdevMacvlanCallback;
+    CreateNetdevPhysCallback mCreateNetdevPhysCallback;
     DeclareFileCallback mDeclareFileCallback;
     DeclareMountCallback mDeclareMountCallback;
     DeclareLinkCallback mDeclareLinkCallback;

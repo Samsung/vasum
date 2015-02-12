@@ -29,6 +29,7 @@
 #include "vasum-client.h"
 #include <dbus/connection.hpp>
 #include <exception>
+#include <linux/if_link.h>
 
 /**
  * Structure which defines the dbus interface.
@@ -228,17 +229,24 @@ public:
                                        int prefix) noexcept;
 
     /**
-     *  @see ::vsm_create_netdev
+     *  @see ::vsm_create_netdev_veth
      */
-    VsmStatus vsm_create_netdev(const char* zone,
-                                VsmNetdevType netdevType,
-                                const char* target,
-                                const char* netdevId) noexcept;
+    VsmStatus vsm_create_netdev_veth(const char* zone,
+                                     const char* zoneDev,
+                                     const char* hostDev) noexcept;
 
     /**
-     *  @see ::vsm_destroy_netdev
+     *  @see ::vsm_create_netdev_macvlan
      */
-    VsmStatus vsm_destroy_netdev(const char* zone, const char* netdevId) noexcept;
+    VsmStatus vsm_create_netdev_macvlan(const char* zone,
+                                        const char* zoneDev,
+                                        const char* hostDev,
+                                        enum macvlan_mode mode) noexcept;
+
+    /**
+     *  @see ::vsm_create_netdev_phys
+     */
+    VsmStatus vsm_create_netdev_phys(const char* zone, const char* devId) noexcept;
 
     /**
      *  @see ::vsm_lookup_netdev_by_name
@@ -246,6 +254,11 @@ public:
     VsmStatus vsm_lookup_netdev_by_name(const char* zone,
                                         const char* netdevId,
                                         VsmNetdev* netdev) noexcept;
+
+    /**
+     *  @see ::vsm_destroy_netdev
+     */
+    VsmStatus vsm_destroy_netdev(const char* zone, const char* devId) noexcept;
 
     /**
      *  @see ::vsm_declare_file

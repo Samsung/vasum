@@ -37,6 +37,7 @@
 #include <vector>
 #include <fcntl.h>
 #include <cassert>
+#include <linux/if_link.h>
 
 using namespace std;
 
@@ -148,6 +149,22 @@ ostream& operator<<(ostream& out, const Table& table)
     }
 
     return out;
+}
+
+enum macvlan_mode macvlanFromString(const std::string& mode) {
+    if (mode == "private") {
+        return MACVLAN_MODE_PRIVATE;
+    }
+    if (mode == "vepa") {
+        return MACVLAN_MODE_VEPA;
+    }
+    if (mode == "bridge") {
+        return MACVLAN_MODE_BRIDGE;
+    }
+    if (mode == "passthru") {
+        return MACVLAN_MODE_PASSTHRU;
+    }
+    throw runtime_error("Unsupported macvlan mode");
 }
 
 } // namespace
@@ -333,6 +350,48 @@ void revoke_device(int pos, int argc, const char** argv)
     }
 
     one_shot(bind(vsm_revoke_device, _1, argv[pos + 1], argv[pos + 2]));
+}
+
+void create_netdev_veth(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 3) {
+        throw runtime_error("Not enough parameters");
+    }
+    one_shot(bind(vsm_create_netdev_veth,
+                  _1,
+                  argv[pos + 1],
+                  argv[pos + 2],
+                  argv[pos + 3]));
+}
+
+void create_netdev_macvlan(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 4) {
+        throw runtime_error("Not enough parameters");
+    }
+    one_shot(bind(vsm_create_netdev_macvlan,
+                  _1,
+                  argv[pos + 1],
+                  argv[pos + 2],
+                  argv[pos + 3],
+                  macvlanFromString(argv[pos + 4])));
+}
+
+void create_netdev_phys(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 2) {
+        throw runtime_error("Not enough parameters");
+    }
+    one_shot(bind(vsm_create_netdev_phys,
+                  _1,
+                  argv[pos + 1],
+                  argv[pos + 2]));
 }
 
 } // namespace cli

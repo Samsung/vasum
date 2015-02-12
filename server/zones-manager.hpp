@@ -161,6 +161,18 @@ private:
     void handleGetZoneIdsCall(dbus::MethodResultBuilder::Pointer result);
     void handleGetActiveZoneIdCall(dbus::MethodResultBuilder::Pointer result);
     void handleGetZoneInfoCall(const std::string& id, dbus::MethodResultBuilder::Pointer result);
+    void handleCreateNetdevVethCall(const std::string& zone,
+                                    const std::string& zoneDev,
+                                    const std::string& hostDev,
+                                    dbus::MethodResultBuilder::Pointer result);
+    void handleCreateNetdevMacvlanCall(const std::string& zone,
+                                       const std::string& zoneDev,
+                                       const std::string& hostDev,
+                                       const uint32_t& mode,
+                                       dbus::MethodResultBuilder::Pointer result);
+    void handleCreateNetdevPhysCall(const std::string& zone,
+                                    const std::string& devId,
+                                    dbus::MethodResultBuilder::Pointer result);
     void handleDeclareFileCall(const std::string& zone,
                                const int32_t& type,
                                const std::string& path,

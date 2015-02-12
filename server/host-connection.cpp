@@ -130,6 +130,21 @@ void HostConnection::setGetZoneInfoCallback(const GetZoneInfoCallback& callback)
     mGetZoneInfoCallback = callback;
 }
 
+void HostConnection::setCreateNetdevVethCallback(const CreateNetdevVethCallback& callback)
+{
+    mCreateNetdevVethCallback = callback;
+}
+
+void HostConnection::setCreateNetdevMacvlanCallback(const CreateNetdevMacvlanCallback& callback)
+{
+    mCreateNetdevMacvlanCallback = callback;
+}
+
+void HostConnection::setCreateNetdevPhysCallback(const CreateNetdevPhysCallback& callback)
+{
+    mCreateNetdevPhysCallback = callback;
+}
+
 void HostConnection::setDeclareFileCallback(const DeclareFileCallback& callback)
 {
     mDeclareFileCallback = callback;
@@ -279,6 +294,37 @@ void HostConnection::onMessageCall(const std::string& objectPath,
             mGetZoneInfoCallback(id, result);
         }
         return;
+    }
+
+    if (methodName == api::host::METHOD_CREATE_NETDEV_VETH) {
+        const gchar* id = NULL;
+        const gchar* zoneDev = NULL;
+        const gchar* hostDev = NULL;
+        g_variant_get(parameters, "(&s&s&s)", &id, &zoneDev, &hostDev);
+        if (mCreateNetdevVethCallback) {
+            mCreateNetdevVethCallback(id, zoneDev, hostDev, result);
+        }
+        return;
+    }
+
+    if (methodName == api::host::METHOD_CREATE_NETDEV_MACVLAN) {
+        const gchar* id = NULL;
+        const gchar* zoneDev = NULL;
+        const gchar* hostDev = NULL;
+        guint32 mode;
+        g_variant_get(parameters, "(&s&s&su)", &id, &zoneDev, &hostDev, &mode);
+        if (mCreateNetdevMacvlanCallback) {
+            mCreateNetdevMacvlanCallback(id, zoneDev, hostDev, mode, result);
+        }
+    }
+
+    if (methodName == api::host::METHOD_CREATE_NETDEV_PHYS) {
+        const gchar* id = NULL;
+        const gchar* devId = NULL;
+        g_variant_get(parameters, "(&s&s)", &id, &devId);
+        if (mCreateNetdevPhysCallback) {
+            mCreateNetdevPhysCallback(id, devId, result);
+        }
     }
 
     if (methodName == api::host::METHOD_DECLARE_FILE) {

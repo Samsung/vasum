@@ -46,6 +46,7 @@ struct VasumException: public std::runtime_error {
  * it is wrapper for strerror_r
  */
 std::string getSystemErrorMessage();
+std::string getSystemErrorMessage(int err);
 
 } // namespace vasum
 

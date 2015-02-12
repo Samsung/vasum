@@ -141,6 +141,15 @@ ZonesManager::ZonesManager(const std::string& configPath)
     mHostConnection.setGetZoneInfoCallback(bind(&ZonesManager::handleGetZoneInfoCall,
                                                 this, _1, _2));
 
+    mHostConnection.setCreateNetdevVethCallback(bind(&ZonesManager::handleCreateNetdevVethCall,
+                                                this, _1, _2, _3, _4));
+
+    mHostConnection.setCreateNetdevMacvlanCallback(bind(&ZonesManager::handleCreateNetdevMacvlanCall,
+                                                this, _1, _2, _3, _4, _5));
+
+    mHostConnection.setCreateNetdevPhysCallback(bind(&ZonesManager::handleCreateNetdevPhysCall,
+                                                this, _1, _2, _3));
+
     mHostConnection.setDeclareFileCallback(bind(&ZonesManager::handleDeclareFileCall,
                                                 this, _1, _2, _3, _4, _5, _6));
 
@@ -790,6 +799,66 @@ void ZonesManager::handleGetZoneInfoCall(const std::string& id,
                               zone.getVT(),
                               state,
                               zone.getRootPath().c_str()));
+}
+
+void ZonesManager::handleCreateNetdevVethCall(const std::string& zone,
+                                              const std::string& zoneDev,
+                                              const std::string& hostDev,
+                                              dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("CreateNetdevVeth call");
+    try {
+        Lock lock(mMutex);
+
+        getZone(zone).createNetdevVeth(zoneDev, hostDev);
+        result->setVoid();
+    } catch (const std::out_of_range&) {
+        LOGE("No zone with id=" << zone);
+        result->setError(api::ERROR_INVALID_ID, "No such zone id");
+    } catch (const VasumException& ex) {
+        LOGE("Can't create veth: " << ex.what());
+        result->setError(api::ERROR_INTERNAL, ex.what());
+    }
+}
+
+void ZonesManager::handleCreateNetdevMacvlanCall(const std::string& zone,
+                                                 const std::string& zoneDev,
+                                                 const std::string& hostDev,
+                                                 const uint32_t& mode,
+                                                 dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("CreateNetdevMacvlan call");
+    try {
+        Lock lock(mMutex);
+
+        getZone(zone).createNetdevMacvlan(zoneDev, hostDev, mode);
+        result->setVoid();
+    } catch (const std::out_of_range&) {
+        LOGE("No zone with id=" << zone);
+        result->setError(api::ERROR_INVALID_ID, "No such zone id");
+    } catch (const VasumException& ex) {
+        LOGE("Can't create macvlan: " << ex.what());
+        result->setError(api::ERROR_INTERNAL, ex.what());
+    }
+}
+
+void ZonesManager::handleCreateNetdevPhysCall(const std::string& zone,
+                                              const std::string& devId,
+                                              dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("CreateNetdevPhys call");
+    try {
+        Lock lock(mMutex);
+
+        getZone(zone).moveNetdev(devId);
+        result->setVoid();
+    } catch (const std::out_of_range&) {
+        LOGE("No zone with id=" << zone);
+        result->setError(api::ERROR_INVALID_ID, "No such zone id");
+    } catch (const VasumException& ex) {
+        LOGE("Can't create netdev: " << ex.what());
+        result->setError(api::ERROR_INTERNAL, ex.what());
+    }
 }
 
 void ZonesManager::handleDeclareFileCall(const std::string& zone,

@@ -207,6 +207,27 @@ bool Zone::activateVT()
     return true;
 }
 
+void Zone::createNetdevVeth(const std::string& zoneDev,
+                            const std::string& hostDev)
+{
+    Lock lock(mReconnectMutex);
+    mAdmin->createNetdevVeth(zoneDev, hostDev);
+}
+
+void Zone::createNetdevMacvlan(const std::string& zoneDev,
+                               const std::string& hostDev,
+                               const uint32_t& mode)
+{
+    Lock lock(mReconnectMutex);
+    mAdmin->createNetdevMacvlan(zoneDev, hostDev, mode);
+}
+
+void Zone::moveNetdev(const std::string& devId)
+{
+    Lock lock(mReconnectMutex);
+    mAdmin->moveNetdev(devId);
+}
+
 void Zone::goForeground()
 {
     Lock lock(mReconnectMutex);

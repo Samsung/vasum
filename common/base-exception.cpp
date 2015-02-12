@@ -34,8 +34,13 @@ const int ERROR_MESSAGE_BUFFER_CAPACITY = 256;
 
 std::string getSystemErrorMessage()
 {
+    return getSystemErrorMessage(errno);
+}
+
+std::string getSystemErrorMessage(int err)
+{
     char buf[ERROR_MESSAGE_BUFFER_CAPACITY];
-    return strerror_r(errno, buf, sizeof(buf));
+    return strerror_r(err, buf, sizeof(buf));
 }
 
 } // namespace vasum

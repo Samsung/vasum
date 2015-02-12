@@ -81,6 +81,7 @@ finish:
 #include <stdint.h>
 #include <sys/stat.h>
 #include <netinet/ip.h>
+#include <linux/if_link.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -551,30 +552,41 @@ VsmStatus vsm_netdev_set_ipv6_addr(VsmClient client,
                                    int prefix);
 
 /**
- * Create netdev in zone
+ * Create veth netdev in zone
  *
  * @param[in] client vasum-server's client
  * @param[in] zone zone name
- * @param[in] netdevType netdev type
- * @param[in] target TODO: this is taken form zone-control
- * @param[in] netdevId network device id
+ * @param[in] zoneDev in host network device id
+ * @param[in] hostDev in zone network device id
  * @return status of this function call
  */
-VsmStatus vsm_create_netdev(VsmClient client,
-                            const char* zone,
-                            VsmNetdevType netdevType,
-                            const char* target,
-                            const char* netdevId);
-
+VsmStatus vsm_create_netdev_veth(VsmClient client,
+                                 const char* zone,
+                                 const char* zoneDev,
+                                 const char* hostDev);
 /**
- * Remove netdev from zone
+ * Create macvlab in zone
  *
  * @param[in] client vasum-server's client
  * @param[in] zone zone name
- * @param[in] netdevId network device id
+ * @param[in] zoneDev in host network device id
+ * @param[in] hostDev in zone network device id
  * @return status of this function call
  */
-VsmStatus vsm_destroy_netdev(VsmClient client, const char* zone, const char* netdevId);
+VsmStatus vsm_create_netdev_macvlan(VsmClient client,
+                                    const char* zone,
+                                    const char* zoneDev,
+                                    const char* hostDev,
+                                    enum macvlan_mode mode);
+/**
+ * Create/move phys netdev in/to zone
+ *
+ * @param[in] client vasum-server's client
+ * @param[in] zone zone name
+ * @param[in] devId network device id
+ * @return status of this function call
+ */
+VsmStatus vsm_create_netdev_phys(VsmClient client, const char* zone, const char* devId);
 
 /**
  * Get netdev informations
@@ -590,6 +602,16 @@ VsmStatus vsm_lookup_netdev_by_name(VsmClient client,
                                     const char* zone,
                                     const char* netdevId,
                                     VsmNetdev* netdev);
+
+/**
+ * Remove netdev from zone
+ *
+ * @param[in] client vasum-server's client
+ * @param[in] zone zone name
+ * @param[in] devId network device id
+ * @return status of this function call
+ */
+VsmStatus vsm_destroy_netdev(VsmClient client, const char* zone, const char* devId);
 
 /**
  * Create file, directory or pipe in zone
