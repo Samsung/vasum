@@ -45,10 +45,11 @@ using namespace config;
 
 namespace {
 
-const std::string TEST_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone/zones/test.conf";
-const std::string TEST_DBUS_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone/zones/test-dbus.conf";
-const std::string BUGGY_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone/zones/buggy.conf";
-const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/config.conf";
+const std::string ZONES_CONFIG_DIR = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone/zones";
+const std::string TEST_CONFIG_PATH = ZONES_CONFIG_DIR + "/test.conf";
+const std::string TEST_DBUS_CONFIG_PATH = ZONES_CONFIG_DIR + "/test-dbus.conf";
+const std::string BUGGY_CONFIG_PATH = ZONES_CONFIG_DIR + "/buggy.conf";
+const std::string MISSING_CONFIG_PATH = ZONES_CONFIG_DIR + "/missing.conf";
 const std::string ZONES_PATH = "/tmp/ut-zones";
 const std::string LXC_TEMPLATES_PATH = VSM_TEST_LXC_TEMPLATES_INSTALL_DIR;
 const std::string DB_PATH = ZONES_PATH + "/vasum.db";

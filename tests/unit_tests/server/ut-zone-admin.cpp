@@ -37,10 +37,11 @@ using namespace vasum;
 
 namespace {
 
-const std::string TEST_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone-admin/zones/test.conf";
-const std::string TEST_NO_SHUTDOWN_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone-admin/zones/test-no-shutdown.conf";
-const std::string BUGGY_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone-admin/zones/buggy.conf";
-const std::string MISSING_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone-admin/zones/missing.conf";
+const std::string ZONES_CONFIG_DIR = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone-admin/zones";
+const std::string TEST_CONFIG_PATH = ZONES_CONFIG_DIR + "/test.conf";
+const std::string TEST_NO_SHUTDOWN_CONFIG_PATH = ZONES_CONFIG_DIR + "/test-no-shutdown.conf";
+const std::string BUGGY_CONFIG_PATH = ZONES_CONFIG_DIR + "/buggy.conf";
+const std::string MISSING_CONFIG_PATH = ZONES_CONFIG_DIR + "/missing.conf";
 const std::string ZONES_PATH = "/tmp/ut-zones";
 const std::string LXC_TEMPLATES_PATH = VSM_TEST_LXC_TEMPLATES_INSTALL_DIR;
 

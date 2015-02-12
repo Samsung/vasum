@@ -61,12 +61,12 @@ using namespace dbus;
 
 namespace {
 
-const std::string TEST_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zones-manager/test-daemon.conf";
-const std::string TEST_DBUS_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zones-manager/test-dbus-daemon.conf";
-const std::string EMPTY_DBUS_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zones-manager/empty-dbus-daemon.conf";
-const std::string BUGGY_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zones-manager/buggy-daemon.conf";
-const std::string TEST_ZONE_CONF_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zones-manager/zones/";
-const std::string MISSING_CONFIG_PATH = "/this/is/a/missing/file/path/missing-daemon.conf";
+const std::string CONFIG_DIR = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zones-manager";
+const std::string TEST_CONFIG_PATH = CONFIG_DIR + "/test-daemon.conf";
+const std::string TEST_DBUS_CONFIG_PATH = CONFIG_DIR + "/test-dbus-daemon.conf";
+const std::string EMPTY_DBUS_CONFIG_PATH = CONFIG_DIR + "/empty-dbus-daemon.conf";
+const std::string BUGGY_CONFIG_PATH = CONFIG_DIR + "/buggy-daemon.conf";
+const std::string MISSING_CONFIG_PATH = CONFIG_DIR + "/missing-daemon.conf";
 const int EVENT_TIMEOUT = 5000;
 const int UNEXPECTED_EVENT_TIMEOUT = EVENT_TIMEOUT / 5;
 const int TEST_DBUS_CONNECTION_ZONES_COUNT = 3;

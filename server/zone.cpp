@@ -25,6 +25,7 @@
 #include "config.hpp"
 
 #include "zone.hpp"
+#include "dynamic-config-scheme.hpp"
 #include "base-exception.hpp"
 
 #include "logger/logger.hpp"
@@ -48,7 +49,6 @@ typedef std::lock_guard<std::recursive_mutex> Lock;
 // TODO: move constants to the config file when default values are implemented there
 const int RECONNECT_RETRIES = 15;
 const int RECONNECT_DELAY = 1 * 1000;
-const std::string DB_PREFIX = "zone.";
 
 } // namespace
 
@@ -77,7 +77,7 @@ Zone::Zone(const utils::Worker::Pointer& worker,
 
     const fs::path zonePath = fs::path(zonesPath) / mAdmin->getId();
     mRootPath = (zonePath / fs::path("rootfs")).string();
-    const std::string dbPrefix = DB_PREFIX + mAdmin->getId();
+    const std::string dbPrefix = getZoneDbPrefix(mAdmin->getId());
 
     config::loadFromKVStoreWithJsonFile(dbPath, zoneConfigPath, mDynamicConfig, dbPrefix);
     mProvision.reset(new ZoneProvision(mRootPath, zoneConfigPath, dbPath, dbPrefix, mConfig.validLinkPrefixes));

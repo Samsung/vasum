@@ -49,9 +49,10 @@ public:
     /**
      * Create new zone.
      *
-     * @param zoneConfigPath config of new zone
+     * @param zoneId id of new zone
+     * @param templateName a template name
      */
-    void createZone(const std::string& zoneConfigPath);
+    void createZone(const std::string& zoneId, const std::string& templateName);
 
     /**
      * Destroy zone.
@@ -137,6 +138,7 @@ private:
                            const std::string& templatePath,
                            const std::string& resultPath);
     int getVTForNewZone();
+    void insertZone(const std::string& zoneConfigPath);
 
     void notifyActiveZoneHandler(const std::string& caller,
                                  const std::string& appliaction,

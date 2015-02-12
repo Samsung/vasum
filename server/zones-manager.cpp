@@ -27,6 +27,7 @@
 #include "host-dbus-definitions.hpp"
 #include "common-dbus-definitions.hpp"
 #include "zone-dbus-definitions.hpp"
+#include "dynamic-config-scheme.hpp"
 #include "zones-manager.hpp"
 #include "zone-admin.hpp"
 #include "lxc/cgroup.hpp"
@@ -64,7 +65,6 @@ bool regexMatchVector(const std::string& str, const std::vector<boost::regex>& v
     return false;
 }
 
-const std::string DB_PREFIX = "daemon";
 const std::string HOST_ID = "host";
 const std::string ENABLED_FILE_NAME = "enabled";
 
@@ -124,7 +124,10 @@ ZonesManager::ZonesManager(const std::string& configPath)
     LOGD("Instantiating ZonesManager object...");
 
     config::loadFromJsonFile(configPath, mConfig);
-    config::loadFromKVStoreWithJsonFile(mConfig.dbPath, configPath, mDynamicConfig, DB_PREFIX);
+    config::loadFromKVStoreWithJsonFile(mConfig.dbPath,
+                                        configPath,
+                                        mDynamicConfig,
+                                        getVasumDbPrefix());
 
     mProxyCallPolicy.reset(new ProxyCallPolicy(mConfig.proxyCallRules));
 
@@ -187,7 +190,7 @@ ZonesManager::ZonesManager(const std::string& configPath)
                                                  this, _1, _2, _3));
 
     for (const auto& zoneConfig : mDynamicConfig.zoneConfigs) {
-        createZone(utils::createFilePath(mConfig.zoneNewConfigPrefix, zoneConfig));
+        insertZone(utils::createFilePath(mConfig.zoneNewConfigPrefix, zoneConfig));
     }
 
     updateDefaultId();
@@ -233,14 +236,14 @@ Zone& ZonesManager::getZone(const std::string& id)
 {
     auto iter = findZone(id);
     if (iter == mZones.end()) {
-        throw std::out_of_range("id not found");
+        throw InvalidZoneIdException("Zone id not found");
     }
     return get(iter);
 }
 
 void ZonesManager::saveDynamicConfig()
 {
-    config::saveToKVStore(mConfig.dbPath, mDynamicConfig, DB_PREFIX);
+    config::saveToKVStore(mConfig.dbPath, mDynamicConfig, getVasumDbPrefix());
 }
 
 void ZonesManager::updateDefaultId()
@@ -266,7 +269,7 @@ void ZonesManager::updateDefaultId()
     saveDynamicConfig();
 }
 
-void ZonesManager::createZone(const std::string& zoneConfigPath)
+void ZonesManager::insertZone(const std::string& zoneConfigPath)
 {
     LOGT("Creating Zone " << zoneConfigPath);
     std::unique_ptr<Zone> zone(new Zone(mWorker->createSubWorker(),
@@ -277,7 +280,10 @@ void ZonesManager::createZone(const std::string& zoneConfigPath)
                                         mConfig.runMountPointPrefix));
     const std::string id = zone->getId();
     if (id == HOST_ID) {
-        throw ZoneOperationException("Cannot use reserved zone ID");
+        throw InvalidZoneIdException("Cannot use reserved zone ID");
+    }
+    if (findZone(id) != mZones.end()) {
+        throw InvalidZoneIdException("Zone already exists");
     }
 
     using namespace std::placeholders;
@@ -296,11 +302,6 @@ void ZonesManager::createZone(const std::string& zoneConfigPath)
     zone->setDbusStateChangedCallback(bind(&ZonesManager::handleDbusStateChanged,
                                            this, id, _1));
 
-    Lock lock(mMutex);
-
-    if (findZone(id) != mZones.end()) {
-        throw ZoneOperationException("Zone already exists");
-    }
     mZones.push_back(std::move(zone));
 
     // after zone is created successfully, put a file informing that zones are enabled
@@ -319,7 +320,7 @@ void ZonesManager::destroyZone(const std::string& zoneId)
     auto iter = findZone(zoneId);
     if (iter == mZones.end()) {
         LOGE("Failed to destroy zone " << zoneId << ": no such zone");
-        throw ZoneOperationException("No such zone");
+        throw InvalidZoneIdException("No such zone");
     }
 
     get(iter).setDestroyOnExit();
@@ -444,7 +445,7 @@ bool ZonesManager::isPaused(const std::string& zoneId)
     auto iter = findZone(zoneId);
     if (iter == mZones.end()) {
         LOGE("No such zone id: " << zoneId);
-        throw ZoneOperationException("No such zone");
+        throw InvalidZoneIdException("No such zone");
     }
 
     return get(iter).isPaused();
@@ -457,7 +458,7 @@ bool ZonesManager::isRunning(const std::string& zoneId)
     auto iter = findZone(zoneId);
     if (iter == mZones.end()) {
         LOGE("No such zone id: " << zoneId);
-        throw ZoneOperationException("No such zone");
+        throw InvalidZoneIdException("No such zone");
     }
     return get(iter).isRunning();
 }
@@ -803,7 +804,7 @@ void ZonesManager::handleDeclareFileCall(const std::string& zone,
 
         const std::string id = getZone(zone).declareFile(type, path, flags, mode);
         result->set(g_variant_new("(s)", id.c_str()));
-    } catch (const std::out_of_range&) {
+    } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const config::ConfigException& ex) {
@@ -827,7 +828,7 @@ void ZonesManager::handleDeclareMountCall(const std::string& source,
 
         const std::string id = getZone(zone).declareMount(source, target, type, flags, data);
         result->set(g_variant_new("(s)", id.c_str()));
-    } catch (const std::out_of_range&) {
+    } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const config::ConfigException& ex) {
@@ -847,7 +848,7 @@ void ZonesManager::handleDeclareLinkCall(const std::string& source,
 
         const std::string id = getZone(zone).declareLink(source, target);
         result->set(g_variant_new("(s)", id.c_str()));
-    } catch (const std::out_of_range&) {
+    } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const config::ConfigException& ex) {
@@ -874,7 +875,7 @@ void ZonesManager::handleGetDeclarationsCall(const std::string& zone,
                                               out.data(),
                                               out.size());
         result->set(g_variant_new("(@as)", array));
-    } catch (const std::out_of_range&) {
+    } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
@@ -895,7 +896,7 @@ void ZonesManager::handleRemoveDeclarationCall(const std::string& zone,
         getZone(zone).removeDeclaration(declarationId);
 
         result->setVoid();
-    } catch (const std::out_of_range&) {
+    } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
@@ -997,14 +998,12 @@ int ZonesManager::getVTForNewZone()
     return *candidates.begin();
 }
 
-void ZonesManager::handleCreateZoneCall(const std::string& id,
-                                        const std::string& templateName,
-                                        dbus::MethodResultBuilder::Pointer result)
+void ZonesManager::createZone(const std::string& id,
+                              const std::string& templateName)
 {
-    if (id.empty()) {
+    if (id.empty()) { // TODO validate id (no spaces, slashes etc)
         LOGE("Failed to add zone - invalid name.");
-        result->setError(api::ERROR_INVALID_ID, "Invalid name");
-        return;
+        throw InvalidZoneIdException("Invalid name");
     }
 
     LOGI("Creating zone " << id);
@@ -1018,8 +1017,7 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
     // check if zone does not exist
     if (findZone(id) != mZones.end()) {
         LOGE("Cannot create " << id << " zone - already exists!");
-        result->setError(api::ERROR_INVALID_ID, "Already exists");
-        return;
+        throw InvalidZoneIdException("Already exists");
     }
 
     const std::string zonePathStr = utils::createFilePath(mConfig.zonesPath, id, "/");
@@ -1033,8 +1031,7 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
 
         if (!utils::launchAsRoot(copyImageContentsWrapper)) {
             LOGE("Failed to copy zone image.");
-            result->setError(api::ERROR_INTERNAL, "Failed to copy zone image.");
-            return;
+            throw ZoneOperationException("Failed to copy zone image.");
         }
     }
 
@@ -1062,25 +1059,35 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
     } catch (VasumException& e) {
         LOGE("Generate config failed: " << e.what());
         utils::launchAsRoot(std::bind(removeAllWrapper, zonePathStr));
-        result->setError(api::ERROR_INTERNAL, "Failed to generate config");
-        return;
+        throw e;
     }
 
     LOGT("Creating new zone");
     try {
-        createZone(newConfigPath);
+        insertZone(newConfigPath);
     } catch (VasumException& e) {
         LOGE("Creating new zone failed: " << e.what());
         utils::launchAsRoot(std::bind(removeAllWrapper, zonePathStr));
-        result->setError(api::ERROR_INTERNAL, "Failed to create zone");
-        return;
+        throw e;
     }
 
     mDynamicConfig.zoneConfigs.push_back(newConfigName);
     saveDynamicConfig();
     updateDefaultId();
+}
 
-    result->setVoid();
+void ZonesManager::handleCreateZoneCall(const std::string& id,
+                                        const std::string& templateName,
+                                        dbus::MethodResultBuilder::Pointer result)
+{
+    try {
+        createZone(id, templateName);
+        result->setVoid();
+    } catch (const InvalidZoneIdException& e) {
+        result->setError(api::ERROR_INVALID_ID, "Existing or invalid zone id");
+    } catch (const VasumException& e) {
+        result->setError(api::ERROR_INTERNAL, "Failed to create zone");
+    }
 }
 
 void ZonesManager::handleDestroyZoneCall(const std::string& id,
@@ -1091,7 +1098,7 @@ void ZonesManager::handleDestroyZoneCall(const std::string& id,
             LOGI("Destroying zone " << id);
 
             destroyZone(id);
-        } catch (const ZoneOperationException& e) {
+        } catch (const InvalidZoneIdException&) {
             LOGE("Failed to destroy zone - no such zone id: " << id);
             result->setError(api::ERROR_INVALID_ID, "No such zone id");
         } catch (const VasumException& e) {

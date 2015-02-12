@@ -56,6 +56,9 @@ lxc.haltsignal = SIGTERM
 lxc.pts = 256
 lxc.tty = 0
 
+#lxc.loglevel = TRACE
+#lxc.logfile = /tmp/${name}.log
+
 lxc.cgroup.devices.deny = a
 
 lxc.mount.auto = proc sys cgroup

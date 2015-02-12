@@ -74,6 +74,7 @@ ZoneConnectionTransport::ZoneConnectionTransport(const std::string& runMountPoin
             LOGE("Initialization failed: could not mount " << runMountPoint);
             throw ZoneConnectionException("Could not mount: " + runMountPoint);
         }
+        LOGI("Mounted: " << runMountPoint);
     }
 
     // if there is no systemd in the zone this dir won't be created automatically
@@ -95,6 +96,7 @@ ZoneConnectionTransport::~ZoneConnectionTransport()
             if (!utils::umount(mRunMountPoint)) {
                 LOGE("Deinitialization failed: could not umount " << mRunMountPoint);
             }
+            LOGI("Unmounted: " << mRunMountPoint);
         }
     }
 }

@@ -50,6 +50,14 @@ struct ZoneOperationException: public ServerException {
 };
 
 /**
+ * Invalid zone id
+ */
+struct InvalidZoneIdException : public ServerException {
+
+    InvalidZoneIdException(const std::string& error = "") : ServerException(error) {}
+};
+
+/**
  * Exception during performing an operation on a zone connection
  */
 struct ZoneConnectionException: public ServerException {
