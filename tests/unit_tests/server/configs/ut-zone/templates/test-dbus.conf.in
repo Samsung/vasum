@@ -1,5 +1,4 @@
 {
-    "name" : "ut-zone-test-dbus",
     "lxcTemplate" : "minimal-dbus.sh",
     "initWithArgs" : ["/bin/sh", "-c", "trap exit SIGTERM; /usr/bin/dbus-daemon --config-file=@VSM_TEST_CONFIG_INSTALL_DIR@/server/ut-zone/ut-dbus.conf --fork; read"],
     "ipv4Gateway" : "",
@@ -10,7 +9,7 @@
     "enableDbusIntegration" : true,
     "cpuQuotaForeground" : -1,
     "cpuQuotaBackground" : 1000,
-    "runMountPoint" : "/tmp/ut-run/ut-zone-test-dbus",
+    "runMountPoint" : "/tmp/ut-run/zoneId",
     "provisions" : [],
     "permittedToSend" : [],
     "permittedToRecv" : [],

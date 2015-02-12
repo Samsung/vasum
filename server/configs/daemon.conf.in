@@ -1,10 +1,9 @@
 {
     "dbPath" : "/usr/dbspace/vasum.db",
-    "zoneConfigs" : [],
+    "zoneIds" : [],
     "zonesPath" : "${DATA_DIR}/.zones",
     "zoneImagePath" : "",
     "zoneTemplateDir" : "/etc/vasum/templates/",
-    "zoneNewConfigPrefix" : "/var/lib/vasum",
     "runMountPointPrefix" : "/var/run/zones",
     "defaultId" : "",
     "lxcTemplatePrefix" : "/etc/vasum/lxc-templates",

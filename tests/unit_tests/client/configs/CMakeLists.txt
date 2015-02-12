@@ -20,20 +20,16 @@
 MESSAGE(STATUS "Installing configs for the Client Unit Tests to " ${VSM_TEST_CONFIG_INSTALL_DIR})
 
 ## Generate ####################################################################
-CONFIGURE_FILE(ut-client/test-dbus-daemon.conf.in
-              ${CMAKE_BINARY_DIR}/ut-client/test-dbus-daemon.conf @ONLY)
+CONFIGURE_FILE(ut-client/test-daemon.conf.in
+              ${CMAKE_BINARY_DIR}/ut-client/test-daemon.conf @ONLY)
 FILE(GLOB client_manager_CONF_GEN ${CMAKE_BINARY_DIR}/ut-client/*.conf)
 
-CONFIGURE_FILE(ut-client/zones/console1-dbus.conf.in
-               ${CMAKE_BINARY_DIR}/ut-client/zones/console1-dbus.conf @ONLY)
-CONFIGURE_FILE(ut-client/zones/console2-dbus.conf.in
-               ${CMAKE_BINARY_DIR}/ut-client/zones/console2-dbus.conf @ONLY)
-CONFIGURE_FILE(ut-client/zones/console3-dbus.conf.in
-               ${CMAKE_BINARY_DIR}/ut-client/zones/console3-dbus.conf @ONLY)
-FILE(GLOB client_zone_CONF_GEN ${CMAKE_BINARY_DIR}/ut-client/zones/*.conf)
+CONFIGURE_FILE(ut-client/templates/console-dbus.conf.in
+               ${CMAKE_BINARY_DIR}/ut-client/templates/console-dbus.conf @ONLY)
+FILE(GLOB client_templates_CONF_GEN ${CMAKE_BINARY_DIR}/ut-client/templates/*.conf)
 
 ## Install #####################################################################
 INSTALL(FILES        ${client_manager_CONF_GEN}
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/client/ut-client)
-INSTALL(FILES        ${client_zone_CONF_GEN}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/client/ut-client/zones)
+INSTALL(FILES        ${client_templates_CONF_GEN}
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/client/ut-client/templates)

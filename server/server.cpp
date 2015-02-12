@@ -165,16 +165,6 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
         }
     }
 
-    // create directory for additional zone data (if needed)
-    if (!config.zoneNewConfigPrefix.empty()) {
-        if (!utils::createDir(config.zoneNewConfigPrefix, uid, gid,
-                              fs::perms::owner_all |
-                              fs::perms::group_read | fs::perms::group_exe |
-                              fs::perms::others_read | fs::perms::others_exe)) {
-            return false;
-        }
-    }
-
     // Omit supplementaty group setup and root drop if the user is already switched.
     // This situation will happen during daemon update triggered by SIGUSR1.
     if (!runAsRoot && geteuid() == uid) {

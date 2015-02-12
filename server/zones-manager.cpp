@@ -70,14 +70,8 @@ const std::string ENABLED_FILE_NAME = "enabled";
 
 const boost::regex ZONE_NAME_REGEX("~NAME~");
 const boost::regex ZONE_IP_THIRD_OCTET_REGEX("~IP~");
-const boost::regex ZONE_VT_REGEX("~VT~");
 
 const unsigned int ZONE_IP_BASE_THIRD_OCTET = 100;
-
-std::string getConfigName(const std::string& zoneId)
-{
-    return "zones/" + zoneId + ".conf";
-}
 
 template<typename T>
 void remove(std::vector<T>& v, const T& item)
@@ -189,8 +183,8 @@ ZonesManager::ZonesManager(const std::string& configPath)
     mHostConnection.setRevokeDeviceCallback(bind(&ZonesManager::handleRevokeDeviceCall,
                                                  this, _1, _2, _3));
 
-    for (const auto& zoneConfig : mDynamicConfig.zoneConfigs) {
-        insertZone(utils::createFilePath(mConfig.zoneNewConfigPrefix, zoneConfig));
+    for (const auto& zoneId : mDynamicConfig.zoneIds) {
+        insertZone(zoneId, getTemplatePathForExistingZone(zoneId));
     }
 
     updateDefaultId();
@@ -269,38 +263,46 @@ void ZonesManager::updateDefaultId()
     saveDynamicConfig();
 }
 
-void ZonesManager::insertZone(const std::string& zoneConfigPath)
+std::string ZonesManager::getTemplatePathForExistingZone(const std::string& id)
 {
-    LOGT("Creating Zone " << zoneConfigPath);
-    std::unique_ptr<Zone> zone(new Zone(mWorker->createSubWorker(),
-                                        mConfig.zonesPath,
-                                        zoneConfigPath,
-                                        mConfig.dbPath,
-                                        mConfig.lxcTemplatePrefix,
-                                        mConfig.runMountPointPrefix));
-    const std::string id = zone->getId();
-    if (id == HOST_ID) {
+    ZoneTemplatePathConfig config;
+    config::loadFromKVStore(mConfig.dbPath, config, getZoneDbPrefix(id));
+    return config.zoneTemplatePath;
+}
+
+void ZonesManager::insertZone(const std::string& zoneId, const std::string& zoneTemplatePath)
+{
+    if (zoneId == HOST_ID) {
         throw InvalidZoneIdException("Cannot use reserved zone ID");
     }
-    if (findZone(id) != mZones.end()) {
+    if (findZone(zoneId) != mZones.end()) {
         throw InvalidZoneIdException("Zone already exists");
     }
 
+    LOGT("Creating Zone " << zoneId);
+    std::unique_ptr<Zone> zone(new Zone(mWorker->createSubWorker(),
+                                        zoneId,
+                                        mConfig.zonesPath,
+                                        zoneTemplatePath,
+                                        mConfig.dbPath,
+                                        mConfig.lxcTemplatePrefix,
+                                        mConfig.runMountPointPrefix));
+
     using namespace std::placeholders;
     zone->setNotifyActiveZoneCallback(bind(&ZonesManager::notifyActiveZoneHandler,
-                                           this, id, _1, _2));
+                                           this, zoneId, _1, _2));
 
     zone->setDisplayOffCallback(bind(&ZonesManager::displayOffHandler,
-                                     this, id));
+                                     this, zoneId));
 
     zone->setFileMoveRequestCallback(bind(&ZonesManager::handleZoneMoveFileRequest,
-                                          this, id, _1, _2, _3));
+                                          this, zoneId, _1, _2, _3));
 
     zone->setProxyCallCallback(bind(&ZonesManager::handleProxyCall,
-                                    this, id, _1, _2, _3, _4, _5, _6, _7));
+                                    this, zoneId, _1, _2, _3, _4, _5, _6, _7));
 
     zone->setDbusStateChangedCallback(bind(&ZonesManager::handleDbusStateChanged,
-                                           this, id, _1));
+                                           this, zoneId, _1));
 
     mZones.push_back(std::move(zone));
 
@@ -333,7 +335,7 @@ void ZonesManager::destroyZone(const std::string& zoneId)
     }
 
     // update dynamic config
-    remove(mDynamicConfig.zoneConfigs, getConfigName(zoneId));
+    remove(mDynamicConfig.zoneIds, zoneId);
     saveDynamicConfig();
     updateDefaultId();
 
@@ -932,52 +934,40 @@ void ZonesManager::handleSetActiveZoneCall(const std::string& id,
 
 
 void ZonesManager::generateNewConfig(const std::string& id,
-                                     const std::string& templatePath,
-                                     const std::string& resultPath)
+                                     const std::string& templatePath)
 {
-    // TODO Do not store new config at all, use template and dynamic config instead
-    namespace fs = boost::filesystem;
+    const std::string dbPrefix = getZoneDbPrefix(id);
+    ZoneDynamicConfig dynamicConfig;
+    config::loadFromKVStoreWithJsonFile(mConfig.dbPath, templatePath, dynamicConfig, dbPrefix);
 
-    if (fs::exists(resultPath)) {
-        LOGT(resultPath << " already exists, removing");
-        fs::remove(resultPath);
-    } else {
-        std::string resultFileDir = utils::dirName(resultPath);
-        if (!utils::createDirs(resultFileDir, fs::perms::owner_all |
-                                              fs::perms::group_read | fs::perms::group_exe |
-                                              fs::perms::others_read | fs::perms::others_exe)) {
-            LOGE("Unable to create directory for new config.");
-            throw ZoneOperationException("Unable to create directory for new config.");
-        }
-    }
-
-    std::string config;
-    if (!utils::readFileContent(templatePath, config)) {
-        LOGE("Failed to read template config file.");
-        throw ZoneOperationException("Failed to read template config file.");
-    }
-
-    std::string resultConfig = boost::regex_replace(config, ZONE_NAME_REGEX, id);
+    // update mount point path
+    dynamicConfig.runMountPoint = boost::regex_replace(dynamicConfig.runMountPoint,
+                                                       ZONE_NAME_REGEX,
+                                                       id);
 
     // generate first free VT number
     const int freeVT = getVTForNewZone();
     LOGD("VT number: " << freeVT);
-    resultConfig = boost::regex_replace(resultConfig, ZONE_VT_REGEX, std::to_string(freeVT));
+    dynamicConfig.vt = freeVT;
 
     // generate third IP octet for network config
     std::string thirdOctetStr = std::to_string(ZONE_IP_BASE_THIRD_OCTET + freeVT);
     LOGD("IP third octet: " << thirdOctetStr);
-    resultConfig = boost::regex_replace(resultConfig, ZONE_IP_THIRD_OCTET_REGEX, thirdOctetStr);
+    dynamicConfig.ipv4Gateway = boost::regex_replace(dynamicConfig.ipv4Gateway,
+                                                     ZONE_IP_THIRD_OCTET_REGEX,
+                                                     thirdOctetStr);
+    dynamicConfig.ipv4 = boost::regex_replace(dynamicConfig.ipv4,
+                                              ZONE_IP_THIRD_OCTET_REGEX,
+                                              thirdOctetStr);
 
-    if (!utils::saveFileContent(resultPath, resultConfig)) {
-        LOGE("Faield to save new config file.");
-        throw ZoneOperationException("Failed to save new config file.");
-    }
+    // save dynamic config
+    config::saveToKVStore(mConfig.dbPath, dynamicConfig, dbPrefix);
 
-    // restrict new config file so that only owner (vasum) can write it
-    fs::permissions(resultPath, fs::perms::owner_read | fs::perms::owner_write |
-                                fs::perms::group_read |
-                                fs::perms::others_read);
+    // save zone template path
+    ZoneTemplatePathConfig templatePathConfig;
+    templatePathConfig.zoneTemplatePath = templatePath;
+    config::saveToKVStore(mConfig.dbPath, templatePathConfig, dbPrefix);
+
 }
 
 int ZonesManager::getVTForNewZone()
@@ -1035,10 +1025,6 @@ void ZonesManager::createZone(const std::string& id,
         }
     }
 
-    // generate paths to new configuration files
-    std::string newConfigName = getConfigName(id);
-    std::string newConfigPath = utils::createFilePath(mConfig.zoneNewConfigPrefix, newConfigName);
-
     auto removeAllWrapper = [](const std::string& path) -> bool {
         try {
             LOGD("Removing copied data");
@@ -1053,9 +1039,8 @@ void ZonesManager::createZone(const std::string& id,
                                                          templateName + ".conf");
 
     try {
-        LOGI("Generating config from " << zoneTemplatePath << " to " << newConfigPath);
-        generateNewConfig(id, zoneTemplatePath, newConfigPath);
-
+        LOGI("Generating config from " << zoneTemplatePath);
+        generateNewConfig(id, zoneTemplatePath);
     } catch (VasumException& e) {
         LOGE("Generate config failed: " << e.what());
         utils::launchAsRoot(std::bind(removeAllWrapper, zonePathStr));
@@ -1064,14 +1049,14 @@ void ZonesManager::createZone(const std::string& id,
 
     LOGT("Creating new zone");
     try {
-        insertZone(newConfigPath);
+        insertZone(id, zoneTemplatePath);
     } catch (VasumException& e) {
         LOGE("Creating new zone failed: " << e.what());
         utils::launchAsRoot(std::bind(removeAllWrapper, zonePathStr));
         throw e;
     }
 
-    mDynamicConfig.zoneConfigs.push_back(newConfigName);
+    mDynamicConfig.zoneIds.push_back(id);
     saveDynamicConfig();
     updateDefaultId();
 }

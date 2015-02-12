@@ -27,9 +27,12 @@
 #include "ut.hpp"
 
 #include "server.hpp"
+#include "zones-manager.hpp"
 #include "exception.hpp"
 #include "config/exception.hpp"
+#include "utils/glib-loop.hpp"
 #include "utils/scoped-dir.hpp"
+#include "logger/logger.hpp"
 
 #include <string>
 #include <future>
@@ -38,8 +41,8 @@ namespace {
 
 const std::string CONFIG_DIR = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-server";
 const std::string TEST_CONFIG_PATH = CONFIG_DIR + "/test-daemon.conf";
-const std::string BUGGY_CONFIG_PATH = CONFIG_DIR + "/buggy-daemon.conf";
 const std::string MISSING_CONFIG_PATH = CONFIG_DIR + "/missing-daemon.conf";
+const std::string TEMPLATE_NAME = "default";
 
 const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
 const bool AS_ROOT = true;
@@ -49,7 +52,19 @@ struct Fixture {
 
     Fixture()
         : mZonesPathGuard(ZONES_PATH)
-    {}
+    {
+        prepare();
+        LOGI("------------ setup complete -----------");
+    }
+
+    void prepare()
+    {
+        vasum::utils::ScopedGlibLoop loop;
+        vasum::ZonesManager manager(TEST_CONFIG_PATH);
+        manager.createZone("zone1", TEMPLATE_NAME);
+        manager.createZone("zone2", TEMPLATE_NAME);
+        manager.startAll();
+    }
 };
 } // namespace
 
@@ -65,14 +80,9 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
     s.reset();
 }
 
-BOOST_AUTO_TEST_CASE(BuggyConfigTest)
-{
-    BOOST_REQUIRE_THROW(Server(BUGGY_CONFIG_PATH).run(AS_ROOT), ConfigException);
-}
-
 BOOST_AUTO_TEST_CASE(MissingConfigTest)
 {
-    BOOST_REQUIRE_THROW(Server(MISSING_CONFIG_PATH).run(AS_ROOT), ConfigException);
+    BOOST_REQUIRE_THROW(Server(MISSING_CONFIG_PATH).run(AS_ROOT), ConfigException);//TODO check message
 }
 
 BOOST_AUTO_TEST_CASE(TerminateTest)

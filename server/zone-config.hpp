@@ -38,11 +38,6 @@ namespace vasum {
 struct ZoneConfig {
 
     /**
-     * Zone name
-     */
-    std::string name;
-
-    /**
      * Lxc template name (relative to lxcTemplatePrefix)
      */
     std::string lxcTemplate;
@@ -53,25 +48,10 @@ struct ZoneConfig {
     std::vector<std::string> initWithArgs;
 
     /**
-     * IP v4 gateway address
-     */
-    std::string ipv4Gateway;
-
-    /**
-     * IP v4 address
-     */
-    std::string ipv4;
-
-    /**
      * Privilege of the zone.
      * The smaller the value the more important the zone
      */
     int privilege;
-
-    /**
-     * Number of virtual terminal used by xserver inside zone
-     */
-    int vt;
 
     /**
      * Allow switching to default zone after timeout.
@@ -96,11 +76,6 @@ struct ZoneConfig {
     std::int64_t cpuQuotaBackground;
 
     /**
-     * Path to zones dbus unix socket
-     */
-    std::string runMountPoint;
-
-    /**
      * When you move a file out of the zone (by move request)
      * its path must match at least one of the regexps in this vector.
      */
@@ -119,27 +94,57 @@ struct ZoneConfig {
 
     CONFIG_REGISTER
     (
-        name,
         lxcTemplate,
         initWithArgs,
-        ipv4Gateway,
-        ipv4,
-        privilege,
-        vt,
-        switchToDefaultAfterTimeout,
+        privilege, // TODO not needed?
+        switchToDefaultAfterTimeout, // TODO move to dynamic and add an API to change
         enableDbusIntegration,
         cpuQuotaForeground,
         cpuQuotaBackground,
-        runMountPoint,
-        permittedToSend,
-        permittedToRecv,
+        permittedToSend, // TODO move to dynamic and add an API to change
+        permittedToRecv, // TODO move to dynamic and add an API to change
         validLinkPrefixes
     )
 };
 
 struct ZoneDynamicConfig {
-    //TODO a place for zone dynamic config (other than provisioning which has its own struct)
-    CONFIG_REGISTER_EMPTY
+
+    /**
+     * IP v4 gateway address
+     */
+    std::string ipv4Gateway;
+
+    /**
+     * IP v4 address
+     */
+    std::string ipv4;
+
+    /**
+     * Number of virtual terminal used by xserver inside zone
+     */
+    int vt;
+
+    /**
+     * Path to zones dbus unix socket
+     */
+    std::string runMountPoint;
+
+    CONFIG_REGISTER
+    (
+        ipv4Gateway,
+        ipv4,
+        vt,
+        runMountPoint
+    )
+};
+
+struct ZoneTemplatePathConfig {
+    /**
+     * A path to zone template config (containing default values)
+     */
+    std::string zoneTemplatePath;
+
+    CONFIG_REGISTER(zoneTemplatePath)
 };
 
 } // namespace vasum

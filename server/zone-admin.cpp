@@ -46,12 +46,14 @@ const int SHUTDOWN_WAIT = 10;
 const std::uint64_t DEFAULT_CPU_SHARES = 1024;
 const std::uint64_t DEFAULT_VCPU_PERIOD_MS = 100000;
 
-ZoneAdmin::ZoneAdmin(const std::string& zonesPath,
-                               const std::string& lxcTemplatePrefix,
-                               const ZoneConfig& config)
+ZoneAdmin::ZoneAdmin(const std::string& zoneId,
+                     const std::string& zonesPath,
+                     const std::string& lxcTemplatePrefix,
+                     const ZoneConfig& config,
+                     const ZoneDynamicConfig& dynamicConfig)
     : mConfig(config),
-      mZone(zonesPath, config.name),
-      mId(mZone.getName()),
+      mZone(zonesPath, zoneId),
+      mId(zoneId),
       mDetachOnExit(false),
       mDestroyOnExit(false)
 {
@@ -63,16 +65,16 @@ ZoneAdmin::ZoneAdmin(const std::string& zonesPath,
                                                                lxcTemplatePrefix);
         LOGI(mId << ": Creating zone from template: " << lxcTemplate);
         utils::CStringArrayBuilder args;
-        if (!config.ipv4Gateway.empty()) {
+        if (!dynamicConfig.ipv4Gateway.empty()) {
             args.add("--ipv4-gateway");
-            args.add(config.ipv4Gateway.c_str());
+            args.add(dynamicConfig.ipv4Gateway.c_str());
         }
-        if (!config.ipv4.empty()) {
+        if (!dynamicConfig.ipv4.empty()) {
             args.add("--ipv4");
-            args.add(config.ipv4.c_str());
+            args.add(dynamicConfig.ipv4.c_str());
         }
-        const std::string vt = std::to_string(config.vt);
-        if (config.vt > 0) {
+        const std::string vt = std::to_string(dynamicConfig.vt);
+        if (dynamicConfig.vt > 0) {
             args.add("--vt");
             args.add(vt.c_str());
         }

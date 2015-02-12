@@ -47,14 +47,17 @@ class Zone {
 public:
     /**
      * Zone constructor
+     * @param zoneId zone id
      * @param zonesPath directory where zones are defined (lxc configs, rootfs etc)
-     * @param zoneConfigPath path for zones config
+     * @param zoneTemplatePath path for zones config template
+     * @param dbPath path to dynamic config db file
      * @param lxcTemplatePrefix directory where templates are stored
      * @param baseRunMountPointPath base directory for run mount point
      */
     Zone(const utils::Worker::Pointer& worker,
+         const std::string& zoneId,
          const std::string& zonesPath,
-         const std::string& zoneConfigPath,
+         const std::string& zoneTemplatePath,
          const std::string& dbPath,
          const std::string& lxcTemplatePrefix,
          const std::string& baseRunMountPointPath);

@@ -60,11 +60,6 @@ struct ZonesManagerConfig {
     std::string zoneTemplateDir;
 
     /**
-     * Prefix added to a path for new zone configuration files
-     */
-    std::string zoneNewConfigPrefix;
-
-    /**
      * Path prefix for lxc templates
      */
     std::string lxcTemplatePrefix;
@@ -95,7 +90,6 @@ struct ZonesManagerConfig {
         zonesPath,
         zoneImagePath,
         zoneTemplateDir,
-        zoneNewConfigPrefix,
         lxcTemplatePrefix,
         availableVTs,
         inputConfig,
@@ -107,10 +101,9 @@ struct ZonesManagerConfig {
 struct ZonesManagerDynamicConfig {
 
     /**
-     * List of zones' configs that we manage.
-     * File paths can be relative to the ZoneManager config file.
+     * A list of created zones.
      */
-    std::vector<std::string> zoneConfigs;
+    std::vector<std::string> zoneIds;
 
     /**
      * An ID of default zone.
@@ -119,7 +112,7 @@ struct ZonesManagerDynamicConfig {
 
     CONFIG_REGISTER
     (
-        zoneConfigs,
+        zoneIds,
         defaultId
     )
 };

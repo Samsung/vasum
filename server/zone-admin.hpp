@@ -44,13 +44,17 @@ public:
 
     /**
      * ZoneAdmin constructor
+     * @param zoneId zone id
      * @param zonesPath directory where zones are defined (lxc configs, rootfs etc)
      * @param lxcTemplatePrefix directory where templates are stored
      * @param config zones config
+     * @param dynamicConfig zones dynamic config
      */
-    ZoneAdmin(const std::string& zonesPath,
-                   const std::string& lxcTemplatePrefix,
-                   const ZoneConfig& config);
+    ZoneAdmin(const std::string& zoneId,
+              const std::string& zonesPath,
+              const std::string& lxcTemplatePrefix,
+              const ZoneConfig& config,
+              const ZoneDynamicConfig& dynamicConfig);
     virtual ~ZoneAdmin();
 
     /**

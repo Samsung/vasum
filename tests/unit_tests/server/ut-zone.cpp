@@ -45,11 +45,11 @@ using namespace config;
 
 namespace {
 
-const std::string ZONES_CONFIG_DIR = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone/zones";
-const std::string TEST_CONFIG_PATH = ZONES_CONFIG_DIR + "/test.conf";
-const std::string TEST_DBUS_CONFIG_PATH = ZONES_CONFIG_DIR + "/test-dbus.conf";
-const std::string BUGGY_CONFIG_PATH = ZONES_CONFIG_DIR + "/buggy.conf";
-const std::string MISSING_CONFIG_PATH = ZONES_CONFIG_DIR + "/missing.conf";
+const std::string TEMPLATES_DIR = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone/templates";
+const std::string TEST_CONFIG_PATH = TEMPLATES_DIR + "/test.conf";
+const std::string TEST_DBUS_CONFIG_PATH = TEMPLATES_DIR + "/test-dbus.conf";
+const std::string BUGGY_CONFIG_PATH = TEMPLATES_DIR + "/buggy.conf";
+const std::string MISSING_CONFIG_PATH = TEMPLATES_DIR + "/missing.conf";
 const std::string ZONES_PATH = "/tmp/ut-zones";
 const std::string LXC_TEMPLATES_PATH = VSM_TEST_LXC_TEMPLATES_INSTALL_DIR;
 const std::string DB_PATH = ZONES_PATH + "/vasum.db";
@@ -66,6 +66,7 @@ struct Fixture {
     std::unique_ptr<Zone> create(const std::string& configPath)
     {
         return std::unique_ptr<Zone>(new Zone(utils::Worker::create(),
+                                              "zoneId",
                                               ZONES_PATH,
                                               configPath,
                                               DB_PATH,
@@ -93,12 +94,12 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)
 {
-    BOOST_REQUIRE_THROW(create(BUGGY_CONFIG_PATH), ZoneOperationException);
+    BOOST_REQUIRE_THROW(create(BUGGY_CONFIG_PATH), ZoneOperationException);//TODO check message
 }
 
 BOOST_AUTO_TEST_CASE(MissingConfigTest)
 {
-    BOOST_REQUIRE_THROW(create(MISSING_CONFIG_PATH), ConfigException);
+    BOOST_REQUIRE_THROW(create(MISSING_CONFIG_PATH), ConfigException);//TODO check message
 }
 
 BOOST_AUTO_TEST_CASE(StartStopTest)

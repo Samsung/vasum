@@ -135,10 +135,10 @@ private:
     void refocus();
     void switchingSequenceMonitorNotify();
     void generateNewConfig(const std::string& id,
-                           const std::string& templatePath,
-                           const std::string& resultPath);
+                           const std::string& templatePath);
+    std::string getTemplatePathForExistingZone(const std::string& id);
     int getVTForNewZone();
-    void insertZone(const std::string& zoneConfigPath);
+    void insertZone(const std::string& zoneId, const std::string& templatePath);
 
     void notifyActiveZoneHandler(const std::string& caller,
                                  const std::string& appliaction,

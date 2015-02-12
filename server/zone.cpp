@@ -53,14 +53,17 @@ const int RECONNECT_DELAY = 1 * 1000;
 } // namespace
 
 Zone::Zone(const utils::Worker::Pointer& worker,
+           const std::string& zoneId,
            const std::string& zonesPath,
-           const std::string& zoneConfigPath,
+           const std::string& zoneTemplatePath,
            const std::string& dbPath,
            const std::string& lxcTemplatePrefix,
            const std::string& baseRunMountPointPath)
     : mWorker(worker)
 {
-    config::loadFromJsonFile(zoneConfigPath, mConfig);
+    const std::string dbPrefix = getZoneDbPrefix(zoneId);
+    config::loadFromKVStoreWithJsonFile(dbPath, zoneTemplatePath, mConfig, dbPrefix);
+    config::loadFromKVStoreWithJsonFile(dbPath, zoneTemplatePath, mDynamicConfig, dbPrefix);
 
     for (std::string r: mConfig.permittedToSend) {
         mPermittedToSend.push_back(boost::regex(r));
@@ -69,18 +72,16 @@ Zone::Zone(const utils::Worker::Pointer& worker,
         mPermittedToRecv.push_back(boost::regex(r));
     }
 
-    if (!mConfig.runMountPoint.empty()) {
-        mRunMountPoint = fs::absolute(mConfig.runMountPoint, baseRunMountPointPath).string();
+    if (!mDynamicConfig.runMountPoint.empty()) {
+        mRunMountPoint = fs::absolute(mDynamicConfig.runMountPoint, baseRunMountPointPath).string();
     }
 
-    mAdmin.reset(new ZoneAdmin(zonesPath, lxcTemplatePrefix, mConfig));
+    mAdmin.reset(new ZoneAdmin(zoneId, zonesPath, lxcTemplatePrefix, mConfig, mDynamicConfig));
 
-    const fs::path zonePath = fs::path(zonesPath) / mAdmin->getId();
+    const fs::path zonePath = fs::path(zonesPath) / zoneId;
     mRootPath = (zonePath / fs::path("rootfs")).string();
-    const std::string dbPrefix = getZoneDbPrefix(mAdmin->getId());
 
-    config::loadFromKVStoreWithJsonFile(dbPath, zoneConfigPath, mDynamicConfig, dbPrefix);
-    mProvision.reset(new ZoneProvision(mRootPath, zoneConfigPath, dbPath, dbPrefix, mConfig.validLinkPrefixes));
+    mProvision.reset(new ZoneProvision(mRootPath, zoneTemplatePath, dbPath, dbPrefix, mConfig.validLinkPrefixes));
 }
 
 Zone::~Zone()
@@ -187,7 +188,7 @@ std::string Zone::getDbusAddress() const
 
 int Zone::getVT() const
 {
-    return mConfig.vt;
+    return mDynamicConfig.vt;
 }
 
 std::string Zone::getRootPath() const
@@ -199,8 +200,8 @@ bool Zone::activateVT()
 {
     Lock lock(mReconnectMutex);
 
-    if (mConfig.vt >= 0) {
-        return utils::activateVT(mConfig.vt);
+    if (mDynamicConfig.vt >= 0) {
+        return utils::activateVT(mDynamicConfig.vt);
     }
 
     return true;

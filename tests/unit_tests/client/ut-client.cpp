@@ -31,6 +31,7 @@
 #include "utils/scoped-dir.hpp"
 #include "zones-manager.hpp"
 #include "zone-dbus-definitions.hpp"
+#include "logger/logger.hpp"
 
 #include <map>
 #include <string>
@@ -45,9 +46,10 @@ using namespace vasum::utils;
 
 namespace {
 
-const std::string TEST_DBUS_CONFIG_PATH =
-    VSM_TEST_CONFIG_INSTALL_DIR "/client/ut-client/test-dbus-daemon.conf";
+const std::string TEST_CONFIG_PATH =
+    VSM_TEST_CONFIG_INSTALL_DIR "/client/ut-client/test-daemon.conf";
 const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
+const std::string TEMPLATE_NAME = "console-dbus";
 
 struct Loop {
     Loop()
@@ -70,25 +72,34 @@ struct Fixture {
     Fixture()
         : mZonesPathGuard(ZONES_PATH)
         , mRunGuard("/tmp/ut-run")
-        , cm(TEST_DBUS_CONFIG_PATH)
+        , cm(TEST_CONFIG_PATH)
     {
+        cm.createZone("zone1", TEMPLATE_NAME);
+        cm.createZone("zone2", TEMPLATE_NAME);
+        cm.createZone("zone3", TEMPLATE_NAME);
         cm.startAll();
+        LOGI("------- setup complete --------");
+    }
+
+    ~Fixture()
+    {
+        LOGI("------- cleanup --------");
     }
 };
 
 const int EVENT_TIMEOUT = 5000; ///< ms
 const std::map<std::string, std::string> EXPECTED_DBUSES_STARTED = {
     {
-        "ut-zones-manager-console1-dbus",
-        "unix:path=/tmp/ut-run/ut-zones-manager-console1-dbus/dbus/system_bus_socket"
+        "zone1",
+        "unix:path=/tmp/ut-run/zone1/dbus/system_bus_socket"
     },
     {
-        "ut-zones-manager-console2-dbus",
-        "unix:path=/tmp/ut-run/ut-zones-manager-console2-dbus/dbus/system_bus_socket"
+        "zone2",
+        "unix:path=/tmp/ut-run/zone2/dbus/system_bus_socket"
     },
     {
-        "ut-zones-manager-console3-dbus",
-        "unix:path=/tmp/ut-run/ut-zones-manager-console3-dbus/dbus/system_bus_socket"
+        "zone3",
+        "unix:path=/tmp/ut-run/zone3/dbus/system_bus_socket"
     }
 };
 
@@ -212,7 +223,7 @@ BOOST_AUTO_TEST_CASE(GetActiveZoneIdTest)
 
 BOOST_AUTO_TEST_CASE(SetActiveZoneTest)
 {
-    const std::string newActiveZoneId = "ut-zones-manager-console2-dbus";
+    const std::string newActiveZoneId = "zone2";
 
     BOOST_REQUIRE_NE(newActiveZoneId, cm.getRunningForegroundZoneId());
 
@@ -239,7 +250,7 @@ BOOST_AUTO_TEST_CASE(CreateZoneTest)
 
 BOOST_AUTO_TEST_CASE(StartShutdownZoneTest)
 {
-    const std::string newActiveZoneId = "ut-zones-manager-console1-dbus";
+    const std::string newActiveZoneId = "zone1";
 
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
@@ -253,7 +264,7 @@ BOOST_AUTO_TEST_CASE(StartShutdownZoneTest)
 
 BOOST_AUTO_TEST_CASE(LockUnlockZoneTest)
 {
-    const std::string newActiveZoneId = "ut-zones-manager-console2-dbus";
+    const std::string newActiveZoneId = "zone2";
 
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
@@ -374,7 +385,7 @@ BOOST_AUTO_TEST_CASE(GetZoneIdByPidTest2)
 
 BOOST_AUTO_TEST_CASE(GrantRevokeTest)
 {
-    const std::string zoneId = "ut-zones-manager-console2-dbus";
+    const std::string zoneId = "zone2";
     const std::string dev = "tty3";
 
     VsmClient client = vsm_client_create();
