@@ -21,6 +21,7 @@ import subprocess
 import string
 import sys
 import os
+import traceback
 
 # Debug command on/off
 DEBUG_COMMAND=False
@@ -28,18 +29,18 @@ DEBUG_COMMAND=False
 # Test urls
 TEST_URL_INTERNET=["www.samsung.com", "www.google.com", "www.oracle.com"]
 
+#TODO read path from config (daemon.conf)
 # Path to test zone
-TEST_ZONE_PATH="/opt/usr/zones/private"
+TEST_ZONE_PATH="/usr/share/.zones"
 
 # Device Ethernet device
 ETHERNET_DEVICE="usb0"
 ETHERNET_DEVICE_DETECT=False
 
 # Test zones
-ZONE_T1="business"
-ZONE_T2="private"
-
-zones=[ZONE_T1, ZONE_T2]
+TEST_ZONE="test"
+TEST_ZONE_ROOTFS=TEST_ZONE_PATH+"/"+TEST_ZONE
+ZONES=[ TEST_ZONE ]
 
 # Null device
 OUTPUT_TO_NULL_DEVICE=" >/dev/null 2>&1 "
@@ -47,17 +48,24 @@ OUTPUT_TO_NULL_DEVICE=" >/dev/null 2>&1 "
 # Ping timeout
 PING_TIME_OUT=3
 
-# The calss store test cases results
-class TestNetworkInfo:
+# The class store test cases results
+class TestInfo:
     testName = ""
-    testItemType = []
-    testItemName = []
-    testItemStatus = []
-    testItemResult = []
-    testItemDescription = []
+    testItems = []
 
     def __init__(self, tn):
         self.testName = tn
+
+class TestItem:
+    itype = ""
+    name = ""
+    description = ""
+    status = 0
+    result = ""
+
+    def __init__(self, tn, n):
+        self.itype = tn
+        self.name = n
 
 # ----------------------------------------------------------
 # Functions print info/error/warning message
@@ -95,7 +103,9 @@ def runCommand(cmd, blockDebug=False):
     rc=0
     try:
         out=vsm_test_utils.launchProc(run_cmd)
+        rc=out[0]
     except Exception:
+        traceback.print_exc()
         rc=1
 
     if(DEBUG_COMMAND and not blockDebug):
@@ -125,10 +135,10 @@ def runCommandAndReadOutput(cmd):
             break
 
 # ----------------------------------------------------------
-# The function checks whether test zone image is present in system
+# The function checks whether zone path is present in system
 #
-def test_guest_image():
-    rc = runCommand("/usr/bin/chroot " + TEST_ZONE_PATH + " /bin/true")
+def test_zone_path():
+    rc = runCommand("ls " + TEST_ZONE_PATH)
     if( rc != 0 ):
         return 1
     return 0
@@ -147,151 +157,3 @@ def getActiveEthernetDevice():
 
     return 0
 
-# ----------------------------------------------------------
-# The function checks whether mandatory tools are present in
-# the system
-#
-def test_mandatory_toos():
-
-    tools     =["/usr/bin/ping"]
-    root_tools=[TEST_ZONE_PATH]
-
-    for i in range(len(tools)):
-        rc = runCommand("/usr/bin/ls " + root_tools[i] + tools[i])
-        if( rc != 0 ):
-            if( root_tools[i] != "" ):
-                LOG_ERROR("No " + tools[i] + " command in guest")
-            else:
-                LOG_ERROR("No " + tools[i] + " command in host")
-            return 1
-    return 0
-
-def virshCmd(args):
-    return runCommand("/usr/bin/virsh -c lxc:/// " + args)
-
-# ----------------------------------------------------------
-# The function tests single test case result
-#
-def test_result(expected_result, result):
-    if((expected_result >= 0 and result == expected_result) or (expected_result < 0 and result != 0)):
-        return 0
-    return 1
-
-# ----------------------------------------------------------
-# The function performs single internet access test
-#
-def internetAccessTest(zone):
-    count=0
-    for item in TEST_URL_INTERNET:
-        LOG_INFO("           Test for URL : " + item);
-        rc = virshCmd("lxc-enter-namespace " + zone + \
-                    " --noseclabel -- /usr/bin/ping -c 3 -W " + \
-                    str(PING_TIME_OUT) + " " + item)
-        if(rc != 0):
-            count = count + 1
-
-    if(count != 0):
-        return 1
-
-    return 0;
-
-# ----------------------------------------------------------
-# The function performs single internet access test
-#
-def networkVisibiltyTest(zone, dest_ip):
-    return virshCmd("lxc-enter-namespace " + zone + \
-                    " --noseclabel -- /usr/bin/ping -c 3 -W " + \
-                    str(PING_TIME_OUT) + " " + dest_ip)
-
-def printInternetAccessTestStatus(zone, testInfo1):
-
-    text = "          Internet access for zone: " + zone + \
-           "; TCS = " + testInfo1.testItemResult[len(testInfo1.testItemResult)-1]
-
-    if(testInfo1.testItemResult[len(testInfo1.testItemResult)-1] == "Success"):
-        LOG_INFO(text)
-    else:
-        LOG_ERROR(text)
-
-def networkVisibiltyTestStatus(src, dest, ip, testInfo2):
-
-    text = "          Zone access: " + src + \
-          " -> " + dest + \
-          " [" + ip + "]" + \
-          "; TCS = " + testInfo2.testItemResult[len(testInfo2.testItemResult)-1]
-
-    if(testInfo2.testItemResult[len(testInfo2.testItemResult)-1] == "Success"):
-        LOG_INFO(text)
-    else:
-        LOG_ERROR(text)
-
-# ----------------------------------------------------------
-# The function performs test case for two zones - Business and Private.
-# Both zones are mutually isolated and have access to the Internet.
-#
-def twoNetworks():
-    ltestInfo = TestNetworkInfo("Two networks tests")
-
-    # 0. Test data
-    zones_list      = [ZONE_T1, ZONE_T2]
-    dest_zones_list = [ZONE_T2, ZONE_T1]
-    test_ip_list         = [["10.0.101.2"], ["10.0.102.2"]]
-    test_1_expected_res  = [ 0,  0]
-    test_2_expected_res  = [-1, -1]
-
-    # 1. Enable internet access for both networks
-    LOG_INFO("   - Setup device")
-
-    # 2. Internet access
-    LOG_INFO("   - Two zones environment network test case execution")
-    LOG_INFO("     - Internet access test")
-    for i in range(len(zones_list)):
-
-        # - Test case info
-        ltestInfo.testItemType.append("[Two nets] Internet access")
-        ltestInfo.testItemName.append(zones_list[i])
-        ltestInfo.testItemDescription.append("Internet access test for : " + zones_list[i])
-
-        # - Perform test
-        rc = internetAccessTest(zones_list[i])
-
-        # - Test status store
-        if(test_result(test_1_expected_res[i], rc) == 0):
-            ltestInfo.testItemStatus.append(0)
-            ltestInfo.testItemResult.append("Success")
-        else:
-            ltestInfo.testItemStatus.append(1)
-            ltestInfo.testItemResult.append("Error")
-
-        # - Print status
-        printInternetAccessTestStatus(zones_list[i], ltestInfo)
-
-    # 3. Mutual zones visibility
-    LOG_INFO("     - Zones isolation")
-    for i in range(len(zones_list)):
-        # Interate over destynation ips
-        dest_ips = test_ip_list[i]
-
-        for j in range(len(dest_ips)):
-            # - Test case info
-            ltestInfo.testItemType.append("[Two nets] Visibility")
-            ltestInfo.testItemName.append(zones_list[i] + "->" + dest_zones_list[i])
-            ltestInfo.testItemDescription.append("Zone access for : " + zones_list[i])
-
-            # Perform test
-            rc = networkVisibiltyTest(zones_list[i], dest_ips[j])
-
-            # - Test status store
-            if(test_result(test_2_expected_res[i], rc) == 0):
-                ltestInfo.testItemStatus.append(0)
-                ltestInfo.testItemResult.append("Success")
-            else:
-                ltestInfo.testItemStatus.append(1)
-                ltestInfo.testItemResult.append("Error")
-
-            # - Print status
-            networkVisibiltyTestStatus(zones_list[i], dest_zones_list[i], dest_ips[j], ltestInfo)
-
-    LOG_INFO("   - Clean environment")
-
-    return ltestInfo

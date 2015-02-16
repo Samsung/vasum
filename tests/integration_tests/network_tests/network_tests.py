@@ -35,17 +35,12 @@ class NetworkTestCase(unittest.TestCase):
             self.assertTrue(False, "ROOT user is required to run the test")
             return
 
-        # 2. Test zone images
-        if(test_guest_image() == 1):
-            self.assertTrue(False, "No test zone in path :" + TEST_ZONE_PATH)
+        # 2. Test zone path
+        if(test_zone_path() == 1):
+            self.assertTrue(False, "No test zone path :" + TEST_ZONE_PATH)
             return
 
-        # 3. Test mandatory tools
-        if(test_mandatory_toos() == 1):
-            self.assertTrue(False, "No mandatory tools on host or in guest")
-            return
-
-        # 4. Ethernet device obtaning
+        # 3. Ethernet device obtaning
         if(ETHERNET_DEVICE_DETECT and getActiveEthernetDevice() == 1):
             self.assertTrue(False, "Cannot obtain ethernet device")
             return
@@ -53,10 +48,6 @@ class NetworkTestCase(unittest.TestCase):
     def test_01twoNetworks(self):
         '''! Checks networks configuration
         '''
-        print("\n")
-        ret=twoNetworks()
-        for item in ret.testItemStatus:
-           self.assertTrue(item == 0)
 
 def main():
     unittest.main(verbosity=2)

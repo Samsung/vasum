@@ -5,7 +5,6 @@
 import subprocess
 import os
 
-
 def launchProc(cmd):
     '''! Launch specified command as a subprocess.
 
@@ -13,12 +12,12 @@ def launchProc(cmd):
     stderr.
 
     @param cmd Command to be launched
-    @return Tuple containing output provided by specified command and return code.
+    @return Tuple containing subprocess exit code and text output received
     '''
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    ret = p.wait()
+    rc = p.wait()
     output = p.stdout.read()
-    return (output, ret)
+    return (rc,output)
 
 
 def mount(dir, opts=[]):
