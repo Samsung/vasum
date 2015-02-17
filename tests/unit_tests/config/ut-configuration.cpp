@@ -52,7 +52,7 @@ struct Fixture {
 
 BOOST_FIXTURE_TEST_SUITE(ConfigurationSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(FromStringTest)
+BOOST_AUTO_TEST_CASE(FromJsonStringTest)
 {
     TestConfig testConfig;
 
@@ -96,10 +96,28 @@ BOOST_AUTO_TEST_CASE(FromStringTest)
     BOOST_CHECK_EQUAL(4,   testConfig.subVector[0].intVector[1]);
     BOOST_CHECK_EQUAL(6,   testConfig.subVector[1].intVector[1]);
 
+    BOOST_CHECK(testConfig.union1.is<int>());
+    BOOST_CHECK_EQUAL(2, testConfig.union1.as<int>());
+
+    BOOST_CHECK(testConfig.union2.is<TestConfig::SubConfig>());
+    BOOST_CHECK_EQUAL(54321, testConfig.union2.as<TestConfig::SubConfig>().intVal);
+    BOOST_REQUIRE_EQUAL(1,   testConfig.union2.as<TestConfig::SubConfig>().intVector.size());
+    BOOST_CHECK_EQUAL(1,     testConfig.union2.as<TestConfig::SubConfig>().intVector[0]);
+    BOOST_CHECK_EQUAL(234,   testConfig.union2.as<TestConfig::SubConfig>().subSubObj.intVal);
+
+    BOOST_REQUIRE_EQUAL(2, testConfig.unions.size());
+    BOOST_CHECK(testConfig.unions[0].is<int>());
+    BOOST_CHECK_EQUAL(2, testConfig.unions[0].as<int>());
+
+    BOOST_CHECK(testConfig.unions[1].is<TestConfig::SubConfig>());
+    BOOST_CHECK_EQUAL(54321, testConfig.unions[1].as<TestConfig::SubConfig>().intVal);
+    BOOST_REQUIRE_EQUAL(1,   testConfig.unions[1].as<TestConfig::SubConfig>().intVector.size());
+    BOOST_CHECK_EQUAL(1,     testConfig.unions[1].as<TestConfig::SubConfig>().intVector[0]);
+    BOOST_CHECK_EQUAL(234,   testConfig.unions[1].as<TestConfig::SubConfig>().subSubObj.intVal);
 }
 
 
-BOOST_AUTO_TEST_CASE(ToStringTest)
+BOOST_AUTO_TEST_CASE(ToJsonStringTest)
 {
     TestConfig testConfig;
     BOOST_REQUIRE_NO_THROW(loadFromJsonString(jsonTestString, testConfig));
@@ -135,7 +153,7 @@ struct UnionConfig {
 
 } // namespace loadErrorsTest
 
-BOOST_AUTO_TEST_CASE(LoadErrorsTest)
+BOOST_AUTO_TEST_CASE(JsonLoadErrorsTest)
 {
     using namespace loadErrorsTest;
 
@@ -351,6 +369,14 @@ BOOST_AUTO_TEST_CASE(PartialConfigTest)
         partialConfig.intVector = {7};
         config::saveToKVStore(DB_PATH, partialConfig, DB_PREFIX);
     }
+
+    // from gvariant (partial is not supported!)
+    {
+        PartialTestConfig partialConfig;
+        std::unique_ptr<GVariant, decltype(&g_variant_unref)> v(saveToGVariant(config),
+                                                                g_variant_unref);
+        BOOST_CHECK_THROW(loadFromGVariant(v.get(), partialConfig), ConfigException);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(ConfigUnionTest)
@@ -397,6 +423,25 @@ BOOST_AUTO_TEST_CASE(ConfigUnionTest)
     testConfig.unions = unions;
     out = saveToJsonString(testConfig);
     BOOST_CHECK_EQUAL(out, jsonTestString);
+}
+
+
+BOOST_AUTO_TEST_CASE(GVariantVisitorTest)
+{
+    TestConfig testConfig;
+    BOOST_REQUIRE_NO_THROW(loadFromJsonString(jsonTestString, testConfig));
+    std::unique_ptr<GVariant, decltype(&g_variant_unref)> v(saveToGVariant(testConfig),
+                                                            g_variant_unref);
+    TestConfig testConfig2;
+    loadFromGVariant(v.get(), testConfig2);
+    std::string out = saveToJsonString(testConfig2);
+    BOOST_CHECK_EQUAL(out, jsonTestString);
+
+    PartialTestConfig partialConfig;
+    partialConfig.stringVal = testConfig.stringVal;
+    partialConfig.intVector = testConfig.intVector;
+    v.reset(saveToGVariant(partialConfig));
+    BOOST_CHECK_THROW(loadFromGVariant(v.get(), testConfig), ConfigException);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
