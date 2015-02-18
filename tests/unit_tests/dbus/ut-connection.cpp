@@ -574,10 +574,9 @@ BOOST_AUTO_TEST_CASE(DbusApiTest)
     BOOST_CHECK_EQUAL("Processed: arg", client.process("arg"));
     BOOST_CHECK_NO_THROW(client.throwException(0));
 
-    auto checkException = [](const DbusCustomException& e) {
-        return e.what() == std::string("Argument: 666");
-    };
-    BOOST_CHECK_EXCEPTION(client.throwException(666), DbusCustomException, checkException);
+    BOOST_CHECK_EXCEPTION(client.throwException(666),
+                          DbusCustomException,
+                          WhatEquals("Argument: 666"));
 }
 
 BOOST_AUTO_TEST_CASE(DbusApiNotifyTest)

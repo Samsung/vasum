@@ -38,7 +38,7 @@ namespace vasum {
  */
 struct VasumException: public std::runtime_error {
 
-    VasumException(const std::string& error = "") : std::runtime_error(error) {}
+    VasumException(const std::string& error) : std::runtime_error(error) {}
 };
 
 /**

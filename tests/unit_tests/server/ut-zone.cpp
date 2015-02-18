@@ -94,12 +94,16 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 
 BOOST_AUTO_TEST_CASE(BuggyConfigTest)
 {
-    BOOST_REQUIRE_THROW(create(BUGGY_CONFIG_PATH), ZoneOperationException);//TODO check message
+    BOOST_REQUIRE_EXCEPTION(create(BUGGY_CONFIG_PATH),
+                            ZoneOperationException,
+                            WhatEquals("Could not create zone"));
 }
 
 BOOST_AUTO_TEST_CASE(MissingConfigTest)
 {
-    BOOST_REQUIRE_THROW(create(MISSING_CONFIG_PATH), ConfigException);//TODO check message
+    BOOST_REQUIRE_EXCEPTION(create(MISSING_CONFIG_PATH),
+                            ConfigException,
+                            WhatEquals("Could not load " + MISSING_CONFIG_PATH));
 }
 
 BOOST_AUTO_TEST_CASE(StartStopTest)

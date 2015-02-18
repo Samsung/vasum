@@ -33,7 +33,7 @@
 
 #include <stdexcept>
 
-BOOST_AUTO_TEST_SUITE(LogSuite)
+BOOST_AUTO_TEST_SUITE(LoggerSuite)
 
 using namespace logger;
 
@@ -135,7 +135,9 @@ BOOST_AUTO_TEST_CASE(StringLogLevelSetandGet)
     Logger::setLogLevel("ERROR");
     BOOST_CHECK(LogLevel::ERROR == Logger::getLogLevel());
 
-    BOOST_REQUIRE_THROW(Logger::setLogLevel("UNKNOWN"), std::runtime_error);
+    BOOST_REQUIRE_EXCEPTION(Logger::setLogLevel("UNKNOWN"),
+                            std::runtime_error,
+                            WhatEquals("Invalid LogLevel to parse")); //TODO change message
 }
 
 BOOST_AUTO_TEST_CASE(TestLogsError)

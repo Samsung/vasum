@@ -94,23 +94,25 @@ BOOST_FIXTURE_TEST_SUITE(InputMonitorSuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(Config_OK)
 {
-    BOOST_REQUIRE_NO_THROW(InputMonitor inputMonitor(inputConfig, InputMonitor::NotifyCallback()));
+    InputMonitor inputMonitor(inputConfig, InputMonitor::NotifyCallback());
 }
 
 BOOST_AUTO_TEST_CASE(Config_timeWindowMsTooHigh)
 {
     inputConfig.timeWindowMs = 50000;
 
-    BOOST_REQUIRE_THROW(InputMonitor inputMonitor(inputConfig, InputMonitor::NotifyCallback()),
-                        InputMonitorException);
+    BOOST_REQUIRE_EXCEPTION(InputMonitor inputMonitor(inputConfig, InputMonitor::NotifyCallback()),
+                            InputMonitorException,
+                            WhatEquals("Time window exceeds maximum"));
 }
 
 BOOST_AUTO_TEST_CASE(Config_deviceFilePathNotExisting)
 {
     inputConfig.device = TEST_INPUT_DEVICE + "notExisting";
 
-    BOOST_REQUIRE_THROW(InputMonitor inputMonitor(inputConfig, InputMonitor::NotifyCallback()),
-                        InputMonitorException);
+    BOOST_REQUIRE_EXCEPTION(InputMonitor inputMonitor(inputConfig, InputMonitor::NotifyCallback()),
+                            InputMonitorException,
+                            WhatEquals("Cannot find a device"));
 }
 
 namespace {
@@ -119,8 +121,7 @@ void sendNEvents(Fixture& f, unsigned int noOfEventsToSend)
 {
     Latch eventLatch;
 
-    std::unique_ptr<InputMonitor> inputMonitor;
-    BOOST_REQUIRE_NO_THROW(inputMonitor.reset(new InputMonitor(f.inputConfig, [&] {eventLatch.set();})));
+    InputMonitor inputMonitor(f.inputConfig, [&] {eventLatch.set();});
 
     int fd = ::open(TEST_INPUT_DEVICE.c_str(), O_WRONLY);
     BOOST_REQUIRE(fd >= 0);
@@ -166,8 +167,7 @@ void sendNEventsWithPauses(Fixture& f, unsigned int noOfEventsToSend)
 {
     Latch eventLatch;
 
-    std::unique_ptr<InputMonitor> inputMonitor;
-    BOOST_REQUIRE_NO_THROW(inputMonitor.reset(new InputMonitor(f.inputConfig, [&] {eventLatch.set();})));
+    InputMonitor inputMonitor(f.inputConfig, [&] {eventLatch.set();});
 
     int fd = ::open(TEST_INPUT_DEVICE.c_str(), O_WRONLY);
     BOOST_REQUIRE(fd >= 0);

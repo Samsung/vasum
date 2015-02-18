@@ -53,7 +53,7 @@ std::string readFileContent(const std::string& path)
 {
     std::string result;
     if (!readFileContent(path, result)) {
-        throw UtilsException();
+        throw UtilsException("Read failed");
     }
     return result;
 }

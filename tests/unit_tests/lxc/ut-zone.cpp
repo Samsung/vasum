@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(CreateDestroyTest)
 
     BOOST_CHECK(lxc.isDefined());
     BOOST_CHECK_EQUAL(lxc.getConfigItem("lxc.rootfs"), LXC_PATH + ZONE_NAME + "/rootfs");
-    BOOST_CHECK_THROW(lxc.getConfigItem("xxx"), LxcException);
+    BOOST_CHECK_EXCEPTION(lxc.getConfigItem("xxx"), LxcException, WhatEquals("Key not found"));
 
     BOOST_CHECK(lxc.destroy());
 

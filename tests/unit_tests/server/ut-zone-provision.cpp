@@ -89,12 +89,6 @@ struct Fixture {
     }
 };
 
-std::function<bool(const std::exception&)> expectedMessage(const std::string& message) {
-    return [=](const std::exception& e) {
-        return e.what() == message;
-    };
-}
-
 } // namespace
 
 
@@ -265,7 +259,7 @@ BOOST_AUTO_TEST_CASE(DeclareMountTest)
     zoneProvision.declareMount("/fake/path2", "/fake/path2", "tmpfs", 077, "fake");
     BOOST_CHECK_EXCEPTION(zoneProvision.declareMount("/fake/path2", "/fake/path2", "tmpfs", 077, "fake"),
                           UtilsException,
-                          expectedMessage("Provision already exists"));
+                          WhatEquals("Provision already exists"));
 
     ZoneProvisioningConfig config;
     load(config);
@@ -397,7 +391,7 @@ BOOST_AUTO_TEST_CASE(RemoveTest)
     zoneProvision.remove("link /fake/path2 /fake/path4");
     BOOST_CHECK_EXCEPTION(zoneProvision.remove("link /fake/path_fake /fake/path2"),
                           UtilsException,
-                          expectedMessage("Can't find provision"));
+                          WhatEquals("Can't find provision"));
 
     const std::vector<std::string> provisions = zoneProvision.list();
     BOOST_REQUIRE_EQUAL(provisions.size(), expected.size());

@@ -71,12 +71,12 @@ InputMonitor::InputMonitor(const InputConfig& inputConfig,
 {
     if (mConfig.timeWindowMs > MAX_TIME_WINDOW_SEC * 1000L) {
         LOGE("Time window exceeds maximum: " << MAX_TIME_WINDOW_SEC);
-        throw InputMonitorException();
+        throw InputMonitorException("Time window exceeds maximum");
     }
 
     if (mConfig.numberOfEvents > MAX_NUMBER_OF_EVENTS) {
         LOGE("Number of events exceeds maximum: " << MAX_NUMBER_OF_EVENTS);
-        throw InputMonitorException();
+        throw InputMonitorException("Number of events exceeds maximum");
     }
 
     std::string devicePath = getDevicePath();
@@ -168,7 +168,7 @@ std::string InputMonitor::getDevicePath() const
     if (it == end) {
         LOGE("None of the files under '" << DEVICE_DIR <<
              "' represents device named: " << device);
-        throw InputMonitorException();
+        throw InputMonitorException("Cannot find a device");
     }
 
     return it->path().string();
@@ -183,7 +183,7 @@ void InputMonitor::createGIOChannel(const std::string& devicePath)
     if (fd < 0) {
         LOGE("Cannot create input monitor channel. Device file: " <<
              devicePath << " doesn't exist");
-        throw InputMonitorException();
+        throw InputMonitorException("Device does not exist");
     }
 
     mChannelPtr = g_io_channel_unix_new(fd);
@@ -193,7 +193,7 @@ void InputMonitor::createGIOChannel(const std::string& devicePath)
                                   NULL,
                                   NULL) != G_IO_STATUS_NORMAL) {
         LOGE("Cannot set encoding for input monitor channel ");
-        throw InputMonitorException();
+        throw InputMonitorException("Cannot set encoding");
     }
 
     using namespace std::placeholders;
@@ -207,7 +207,7 @@ void InputMonitor::createGIOChannel(const std::string& devicePath)
                                     &utils::deleteCallbackWrapper<ReadDeviceCallback>);
     if (!mSourceId) {
         LOGE("Cannot add watch on device input file");
-        throw InputMonitorException();
+        throw InputMonitorException("Cannot add watch");
     }
 }
 

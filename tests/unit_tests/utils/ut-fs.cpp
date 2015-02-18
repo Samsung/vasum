@@ -76,7 +76,9 @@ const std::string FILE_NAME_RANDOM_2 =
 BOOST_AUTO_TEST_CASE(ReadFileContentTest)
 {
     BOOST_CHECK_EQUAL(FILE_CONTENT, readFileContent(FILE_PATH));
-    BOOST_CHECK_THROW(readFileContent(BUGGY_FILE_PATH), UtilsException);
+    BOOST_CHECK_EXCEPTION(readFileContent(BUGGY_FILE_PATH),
+                          UtilsException,
+                          WhatEquals("Read failed"));
 }
 
 BOOST_AUTO_TEST_CASE(SaveFileContentTest)
@@ -217,8 +219,7 @@ BOOST_AUTO_TEST_CASE(CopyDirContentsTest)
     BOOST_CHECK_EQUAL(readFileContent(dst_inner2 + "/" + FILE_NAME_RANDOM_1), FILE_CONTENT_3);
     BOOST_CHECK_EQUAL(readFileContent(dst_inner2 + "/" + FILE_NAME_RANDOM_2), FILE_CONTENT_2);
 
-    fs::file_status st;
-    BOOST_REQUIRE_NO_THROW(st = fs::status(fs::path(dst_inner2)));
+    fs::file_status st = fs::status(fs::path(dst_inner2));
     BOOST_CHECK(fs::owner_read == st.permissions());
 }
 

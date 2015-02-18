@@ -451,13 +451,6 @@ private:
     }
 };
 
-std::function<bool(const std::exception&)> expectedMessage(const std::string& message)
-{
-    return [=](const std::exception& e) {
-        return e.what() == message;
-    };
-}
-
 template<class Predicate>
 bool spinWaitFor(int timeoutMs, Predicate pred)
 {
@@ -497,7 +490,9 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 
 BOOST_AUTO_TEST_CASE(MissingConfigTest)
 {
-    BOOST_REQUIRE_THROW(ZonesManager cm(MISSING_CONFIG_PATH), ConfigException);
+    BOOST_REQUIRE_EXCEPTION(ZonesManager{MISSING_CONFIG_PATH},
+                            ConfigException,
+                            WhatEquals("Could not load " + MISSING_CONFIG_PATH));
 }
 
 BOOST_AUTO_TEST_CASE(CreateTest)
@@ -867,12 +862,12 @@ BOOST_AUTO_TEST_CASE(ProxyCallTest)
     // host -> unknown
     BOOST_CHECK_EXCEPTION(dbuses.at(0)->testApiProxyCall("unknown", "param"),
                           DbusCustomException,
-                          expectedMessage("Unknown proxy call target"));
+                          WhatEquals("Unknown proxy call target"));
 
     // forwarding error
     BOOST_CHECK_EXCEPTION(dbuses.at(0)->testApiProxyCall("host", ""),
                           DbusCustomException,
-                          expectedMessage("Test error"));
+                          WhatEquals("Test error"));
 
     // forbidden call
     BOOST_CHECK_EXCEPTION(dbuses.at(0)->proxyCall("host",
@@ -882,7 +877,7 @@ BOOST_AUTO_TEST_CASE(ProxyCallTest)
                                               "foo",
                                               g_variant_new("(s)", "arg")),
                           DbusCustomException,
-                          expectedMessage("Proxy call forbidden"));
+                          WhatEquals("Proxy call forbidden"));
 }
 
 namespace {
@@ -1039,12 +1034,14 @@ BOOST_AUTO_TEST_CASE(SetActiveZoneTest)
         BOOST_CHECK(dbus.callMethodGetActiveZoneId() == zoneId);
     }
 
-    BOOST_REQUIRE_THROW(dbus.callMethodSetActiveZone(NON_EXISTANT_ZONE_ID),
-                        DbusException);
+    BOOST_REQUIRE_EXCEPTION(dbus.callMethodSetActiveZone(NON_EXISTANT_ZONE_ID),
+                            DbusException,
+                            WhatEquals("No such zone id"));
 
     cm.stopAll();
-    BOOST_REQUIRE_THROW(dbus.callMethodSetActiveZone("zone1"),
-                        DbusException);
+    BOOST_REQUIRE_EXCEPTION(dbus.callMethodSetActiveZone("zone1"),
+                            DbusException,
+                            WhatEquals("Could not activate stopped or paused zone"));
 }
 
 BOOST_AUTO_TEST_CASE(CreateDestroyZoneTest)
@@ -1204,16 +1201,20 @@ BOOST_AUTO_TEST_CASE(LockUnlockZoneTest)
         BOOST_CHECK(cm.isRunning(zoneId));
     }
 
-    BOOST_REQUIRE_THROW(dbus.callMethodLockZone(NON_EXISTANT_ZONE_ID),
-                        DbusException);
-    BOOST_REQUIRE_THROW(dbus.callMethodUnlockZone(NON_EXISTANT_ZONE_ID),
-                        DbusException);
+    BOOST_REQUIRE_EXCEPTION(dbus.callMethodLockZone(NON_EXISTANT_ZONE_ID),
+                            DbusException,
+                            WhatEquals("No such zone id"));
+    BOOST_REQUIRE_EXCEPTION(dbus.callMethodUnlockZone(NON_EXISTANT_ZONE_ID),
+                            DbusException,
+                            WhatEquals("No such zone id"));
 
     cm.stopAll();
-    BOOST_REQUIRE_THROW(dbus.callMethodLockZone("zone1"),
-                        DbusException);
-    BOOST_REQUIRE_THROW(dbus.callMethodUnlockZone("zone1"),
-                        DbusException);
+    BOOST_REQUIRE_EXCEPTION(dbus.callMethodLockZone("zone1"),
+                            DbusException,
+                            WhatEquals("Zone is not running"));
+    BOOST_REQUIRE_EXCEPTION(dbus.callMethodUnlockZone("zone1"),
+                            DbusException,
+                            WhatEquals("Zone is not paused"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

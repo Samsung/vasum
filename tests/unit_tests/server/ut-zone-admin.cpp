@@ -87,7 +87,9 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 
 BOOST_AUTO_TEST_CASE(MissingConfigTest)
 {
-    BOOST_REQUIRE_THROW(create(MISSING_CONFIG_PATH), ZoneOperationException);//TODO check message
+    BOOST_REQUIRE_EXCEPTION(create(MISSING_CONFIG_PATH),
+                            ZoneOperationException,
+                            WhatEquals("Could not create zone"));
 }
 
 BOOST_AUTO_TEST_CASE(StartTest)
@@ -103,7 +105,9 @@ BOOST_AUTO_TEST_CASE(StartTest)
 BOOST_AUTO_TEST_CASE(StartBuggyTest)
 {
     auto admin = create(BUGGY_CONFIG_PATH);
-    BOOST_REQUIRE_THROW(admin->start(), ZoneOperationException);//TODO check message
+    BOOST_REQUIRE_EXCEPTION(admin->start(),
+                            ZoneOperationException,
+                            WhatEquals("Could not start zone"));
 }
 
 BOOST_AUTO_TEST_CASE(StopShutdownTest)
@@ -158,9 +162,9 @@ BOOST_AUTO_TEST_CASE(SuspendResumeTest)
 //
 //    admin->start();
 //    ensureStarted();
-//    BOOST_REQUIRE_NO_THROW(admin->setSchedulerLevel(SchedulerLevel::FOREGROUND));
+//    admin->setSchedulerLevel(SchedulerLevel::FOREGROUND);
 //    BOOST_REQUIRE(admin->getSchedulerQuota() == config.cpuQuotaForeground);
-//    BOOST_REQUIRE_NO_THROW(admin->setSchedulerLevel(SchedulerLevel::BACKGROUND));
+//    admin->setSchedulerLevel(SchedulerLevel::BACKGROUND);
 //    BOOST_REQUIRE(admin->getSchedulerQuota() == config.cpuQuotaBackground);
 //}
 

@@ -82,7 +82,9 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
 
 BOOST_AUTO_TEST_CASE(MissingConfigTest)
 {
-    BOOST_REQUIRE_THROW(Server(MISSING_CONFIG_PATH).run(AS_ROOT), ConfigException);//TODO check message
+    BOOST_REQUIRE_EXCEPTION(Server(MISSING_CONFIG_PATH).run(AS_ROOT),
+                            ConfigException,
+                            WhatEquals("Could not load " + MISSING_CONFIG_PATH));
 }
 
 BOOST_AUTO_TEST_CASE(TerminateTest)

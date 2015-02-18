@@ -37,7 +37,7 @@ namespace zone_daemon {
  */
 struct ZoneDaemonException: public VasumException {
 
-    ZoneDaemonException(const std::string& error = "") : VasumException(error) {}
+    ZoneDaemonException(const std::string& error) : VasumException(error) {}
 };
 
 

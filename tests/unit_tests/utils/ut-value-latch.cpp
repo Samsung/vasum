@@ -105,7 +105,9 @@ BOOST_AUTO_TEST_CASE(TimeoutTest)
 {
     ValueLatch<int> testLatch;
 
-    BOOST_REQUIRE_THROW(testLatch.get(EXPECTED_TIMEOUT), vasum::UtilsException);
+    BOOST_REQUIRE_EXCEPTION(testLatch.get(EXPECTED_TIMEOUT),
+                            vasum::UtilsException,
+                            WhatEquals("Timeout occured"));
 }
 
 BOOST_AUTO_TEST_CASE(MultipleSetTest)
@@ -113,7 +115,9 @@ BOOST_AUTO_TEST_CASE(MultipleSetTest)
     ValueLatch<int> testLatch;
 
     testLatch.set(3);
-    BOOST_REQUIRE_THROW(testLatch.set(2), vasum::UtilsException);
+    BOOST_REQUIRE_EXCEPTION(testLatch.set(2),
+                            vasum::UtilsException,
+                            WhatEquals("Cannot set value multiple times"));
 }
 
 BOOST_AUTO_TEST_CASE(MultipleGetTest)
@@ -122,7 +126,9 @@ BOOST_AUTO_TEST_CASE(MultipleGetTest)
 
     testLatch.set(3);
     testLatch.get(TIMEOUT);
-    BOOST_REQUIRE_THROW(testLatch.get(EXPECTED_TIMEOUT), vasum::UtilsException);
+    BOOST_REQUIRE_EXCEPTION(testLatch.get(EXPECTED_TIMEOUT),
+                            vasum::UtilsException,
+                            WhatEquals("Timeout occured"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

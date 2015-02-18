@@ -28,4 +28,27 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <string>
+
+/**
+ * An exception message checker
+ *
+ * Usage example:
+ * BOOST_CHECK_EXCEPTION(foo(), SomeException, WhatEquals("oops"))
+ */
+class WhatEquals {
+public:
+    explicit WhatEquals(const std::string& message)
+        : mMessage(message) {}
+
+    template <typename T>
+    bool operator()(const T& e)
+    {
+        BOOST_WARN_EQUAL(e.what(), mMessage); // additional failure info
+        return e.what() == mMessage;
+    }
+private:
+    std::string mMessage;
+};
+
 #endif // UNIT_TESTS_UT_HPP

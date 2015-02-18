@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructorConnectTest)
     ScopedGlibLoop loop;
     ScopedDbusDaemon dbus;
 
-    BOOST_REQUIRE_NO_THROW(ZoneConnection(dbus.acquireAddress(), nullptr));
+    ZoneConnection(dbus.acquireAddress(), nullptr);
 }
 
 BOOST_AUTO_TEST_CASE(NotifyActiveZoneApiTest)
@@ -141,16 +141,14 @@ BOOST_AUTO_TEST_CASE(NotifyActiveZoneApiTest)
     ScopedDbusDaemon dbus;
 
     Latch notifyCalled;
-    std::unique_ptr<ZoneConnection> connection;
-
-    BOOST_REQUIRE_NO_THROW(connection.reset(new ZoneConnection(dbus.acquireAddress(), nullptr)));
+    ZoneConnection connection(dbus.acquireAddress(), nullptr);
 
     auto callback = [&](const std::string& application, const std::string& message) {
         if (application == "testapp" && message == "testmessage") {
             notifyCalled.set();
         }
     };
-    connection->setNotifyActiveZoneCallback(callback);
+    connection.setNotifyActiveZoneCallback(callback);
 
     DbusConnection::Pointer client = DbusConnection::create(dbus.acquireAddress());
     client->callMethod(api::zone::BUS_NAME,
@@ -168,9 +166,7 @@ BOOST_AUTO_TEST_CASE(SignalNotificationApiTest)
     ScopedDbusDaemon dbus;
 
     Latch signalEmitted;
-    std::unique_ptr<ZoneConnection> connection;
-
-    BOOST_REQUIRE_NO_THROW(connection.reset(new ZoneConnection(dbus.acquireAddress(), nullptr)));
+    ZoneConnection connection(dbus.acquireAddress(), nullptr);
 
     DbusConnection::Pointer client = DbusConnection::create(dbus.acquireAddress());
 
@@ -197,7 +193,7 @@ BOOST_AUTO_TEST_CASE(SignalNotificationApiTest)
     };
     client->signalSubscribe(handler, api::zone::BUS_NAME);
 
-    connection->sendNotification("testzone", "testapp", "testmessage");
+    connection.sendNotification("testzone", "testapp", "testmessage");
 
     BOOST_CHECK(signalEmitted.wait(EVENT_TIMEOUT));
 }
@@ -208,10 +204,7 @@ BOOST_AUTO_TEST_CASE(SignalDisplayOffApiTest)
     ScopedDbusDaemon dbus;
 
     Latch displayOffCalled;
-    std::unique_ptr<ZoneConnection> connection;
-
-    BOOST_REQUIRE_NO_THROW(connection.reset(new ZoneConnection(dbus.acquireAddress(),
-                                            nullptr)));
+    ZoneConnection connection(dbus.acquireAddress(), nullptr);
 
     DbusConnection::Pointer client = DbusConnection::create(dbus.acquireAddress());
 
@@ -219,7 +212,7 @@ BOOST_AUTO_TEST_CASE(SignalDisplayOffApiTest)
         displayOffCalled.set();
     };
 
-    connection->setDisplayOffCallback(callback);
+    connection.setDisplayOffCallback(callback);
 
     client->emitSignal(fake_power_manager_api::OBJECT_PATH,
                        fake_power_manager_api::INTERFACE,

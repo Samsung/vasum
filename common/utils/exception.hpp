@@ -37,7 +37,7 @@ namespace vasum {
  */
 struct UtilsException: public VasumException {
 
-    UtilsException(const std::string& error = "") : VasumException(error) {}
+    UtilsException(const std::string& error) : VasumException(error) {}
 };
 
 
