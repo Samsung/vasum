@@ -28,6 +28,7 @@
 #include "dbus/test-client.hpp"
 #include "dbus/test-common.hpp"
 #include "utils/scoped-daemon.hpp"
+#include "utils/scoped-dir.hpp"
 
 #include "dbus/connection.hpp"
 #include "dbus/exception.hpp"
@@ -37,7 +38,6 @@
 #include "utils/fs.hpp"
 #include "logger/logger.hpp"
 
-#include <boost/filesystem.hpp>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -65,16 +65,17 @@ const int EVENT_TIMEOUT = 1000;
 class ScopedDbusDaemon {
 public:
     ScopedDbusDaemon()
+        : mTestPathGuard(DBUS_SOCKET_DIR)
     {
-        boost::filesystem::remove("/tmp/zone_socket");
         mDaemon.start(DBUS_DAEMON_PROC, DBUS_DAEMON_ARGS);
-        waitForFile(DBUS_SOCKET_FILE, DBUS_DAEMON_TIMEOUT);
+        waitForFile(DBUS_SOCKET_PATH, DBUS_DAEMON_TIMEOUT);
     }
     void stop()
     {
         mDaemon.stop();
     }
 private:
+    ScopedDir mTestPathGuard;
     ScopedDaemon mDaemon;
 };
 

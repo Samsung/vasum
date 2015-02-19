@@ -39,9 +39,8 @@
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
 #include "utils/fs.hpp"
+#include "utils/scoped-dir.hpp"
 
-
-BOOST_AUTO_TEST_SUITE(ZoneConnectionSuite)
 
 using namespace vasum;
 using namespace vasum::utils;
@@ -57,13 +56,15 @@ const char* const DBUS_DAEMON_ARGS[] = {
     NULL
 };
 
-const std::string TRANSPORT_MOUNT_POINT = "/tmp/ut-zone-connection";
+const std::string ZONES_PATH = "/tmp/ut-zones";
+const std::string TRANSPORT_MOUNT_POINT = ZONES_PATH + "/mount-point";
 const int EVENT_TIMEOUT = 1000;
 
-class ScopedDbusDaemon {
+class Fixture {
 public:
-    ScopedDbusDaemon()
-        : mTransport(TRANSPORT_MOUNT_POINT)
+    Fixture()
+        : mZonesPathGuard(ZONES_PATH)
+        , mTransport(TRANSPORT_MOUNT_POINT)
     {
         mDaemon.start(DBUS_DAEMON_PROC, DBUS_DAEMON_ARGS);
     }
@@ -73,6 +74,8 @@ public:
         return mTransport.acquireAddress();
     }
 private:
+    ScopedGlibLoop mLoop;
+    ScopedDir mZonesPathGuard;
     ZoneConnectionTransport mTransport;
     ScopedDaemon mDaemon;
 };
@@ -126,22 +129,17 @@ private:
 
 } // namespace
 
+BOOST_FIXTURE_TEST_SUITE(ZoneConnectionSuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(ConstructorDestructorConnectTest)
 {
-    ScopedGlibLoop loop;
-    ScopedDbusDaemon dbus;
-
-    ZoneConnection(dbus.acquireAddress(), nullptr);
+    ZoneConnection(acquireAddress(), nullptr);
 }
 
 BOOST_AUTO_TEST_CASE(NotifyActiveZoneApiTest)
 {
-    ScopedGlibLoop loop;
-    ScopedDbusDaemon dbus;
-
     Latch notifyCalled;
-    ZoneConnection connection(dbus.acquireAddress(), nullptr);
+    ZoneConnection connection(acquireAddress(), nullptr);
 
     auto callback = [&](const std::string& application, const std::string& message) {
         if (application == "testapp" && message == "testmessage") {
@@ -150,7 +148,7 @@ BOOST_AUTO_TEST_CASE(NotifyActiveZoneApiTest)
     };
     connection.setNotifyActiveZoneCallback(callback);
 
-    DbusConnection::Pointer client = DbusConnection::create(dbus.acquireAddress());
+    DbusConnection::Pointer client = DbusConnection::create(acquireAddress());
     client->callMethod(api::zone::BUS_NAME,
                        api::zone::OBJECT_PATH,
                        api::zone::INTERFACE,
@@ -162,13 +160,10 @@ BOOST_AUTO_TEST_CASE(NotifyActiveZoneApiTest)
 
 BOOST_AUTO_TEST_CASE(SignalNotificationApiTest)
 {
-    ScopedGlibLoop loop;
-    ScopedDbusDaemon dbus;
-
     Latch signalEmitted;
-    ZoneConnection connection(dbus.acquireAddress(), nullptr);
+    ZoneConnection connection(acquireAddress(), nullptr);
 
-    DbusConnection::Pointer client = DbusConnection::create(dbus.acquireAddress());
+    DbusConnection::Pointer client = DbusConnection::create(acquireAddress());
 
     auto handler = [&](const std::string& /*senderBusName*/,
                        const std::string& objectPath,
@@ -200,13 +195,10 @@ BOOST_AUTO_TEST_CASE(SignalNotificationApiTest)
 
 BOOST_AUTO_TEST_CASE(SignalDisplayOffApiTest)
 {
-    ScopedGlibLoop loop;
-    ScopedDbusDaemon dbus;
-
     Latch displayOffCalled;
-    ZoneConnection connection(dbus.acquireAddress(), nullptr);
+    ZoneConnection connection(acquireAddress(), nullptr);
 
-    DbusConnection::Pointer client = DbusConnection::create(dbus.acquireAddress());
+    DbusConnection::Pointer client = DbusConnection::create(acquireAddress());
 
     auto callback = [&]() {
         displayOffCalled.set();

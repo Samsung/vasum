@@ -32,6 +32,7 @@
 
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
+#include "utils/scoped-dir.hpp"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -39,7 +40,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <boost/filesystem.hpp>
 #include <chrono>
 #include <memory>
 #include <string>
@@ -50,8 +50,8 @@ using namespace vasum::utils;
 
 namespace {
 
-std::string TEST_INPUT_DEVICE =
-    boost::filesystem::unique_path("/tmp/testInputDevice-%%%%").string();
+const std::string TEST_DIR = "/tmp/ut-input-monitor";
+const std::string TEST_INPUT_DEVICE = TEST_DIR + "/input-device";
 
 const int EVENT_TYPE = 1;
 const int EVENT_CODE = 139;
@@ -61,11 +61,13 @@ const int EVENT_BUTTON_PRESSED = 1;
 const int SINGLE_EVENT_TIMEOUT = 1000;
 
 struct Fixture {
-    InputConfig inputConfig;
     utils::ScopedGlibLoop mLoop;
+    ScopedDir mTestPathGuard;
+    InputConfig inputConfig;
     struct input_event ie;
 
     Fixture()
+        : mTestPathGuard(TEST_DIR)
     {
         inputConfig.numberOfEvents = 2;
         inputConfig.device = TEST_INPUT_DEVICE;
@@ -80,12 +82,7 @@ struct Fixture {
         ie.code = EVENT_CODE;
         ie.value = EVENT_BUTTON_RELEASED;
 
-        ::remove(TEST_INPUT_DEVICE.c_str());
         BOOST_CHECK(::mkfifo(TEST_INPUT_DEVICE.c_str(), S_IWUSR | S_IRUSR) >= 0);
-    }
-    ~Fixture()
-    {
-        ::remove(TEST_INPUT_DEVICE.c_str());
     }
 };
 } // namespace

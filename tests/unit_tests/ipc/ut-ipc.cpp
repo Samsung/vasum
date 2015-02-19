@@ -37,6 +37,7 @@
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
 #include "utils/value-latch.hpp"
+#include "utils/scoped-dir.hpp"
 
 #include "config/fields.hpp"
 #include "logger/logger.hpp"
@@ -47,13 +48,11 @@
 #include <chrono>
 #include <utility>
 #include <future>
-#include <boost/filesystem.hpp>
 
 using namespace vasum;
 using namespace vasum::ipc;
 using namespace vasum::utils;
 using namespace std::placeholders;
-namespace fs = boost::filesystem;
 
 namespace {
 
@@ -66,16 +65,16 @@ const int SHORT_OPERATION_TIME = TIMEOUT / 100;
 // Time that will cause "TIMEOUT" methods to throw
 const int LONG_OPERATION_TIME = 1000 + TIMEOUT;
 
+const std::string TEST_DIR = "/tmp/ut-ipc";
+const std::string SOCKET_PATH = TEST_DIR + "/test.socket";
+
 struct Fixture {
-    std::string socketPath;
+    ScopedDir mTestPathGuard;
+    std::string SOCKET_PATH;
 
     Fixture()
-        : socketPath(fs::unique_path("/tmp/ipc-%%%%.socket").string())
+        : mTestPathGuard(TEST_DIR)
     {
-    }
-    ~Fixture()
-    {
-        fs::remove(socketPath);
     }
 };
 
@@ -224,13 +223,13 @@ BOOST_FIXTURE_TEST_SUITE(IPCSuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 {
-    Service s(socketPath);
-    Client c(socketPath);
+    Service s(SOCKET_PATH);
+    Client c(SOCKET_PATH);
 }
 
 BOOST_AUTO_TEST_CASE(ServiceAddRemoveMethod)
 {
-    Service s(socketPath);
+    Service s(SOCKET_PATH);
     s.setMethodHandler<EmptyData, EmptyData>(1, returnEmptyCallback);
     s.setMethodHandler<SendData, RecvData>(1, returnDataCallback);
 
@@ -239,7 +238,7 @@ BOOST_AUTO_TEST_CASE(ServiceAddRemoveMethod)
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.setMethodHandler<SendData, RecvData>(2, returnDataCallback);
 
-    Client c(socketPath);
+    Client c(SOCKET_PATH);
     connect(s, c);
     testEcho(c, 1);
 
@@ -251,8 +250,8 @@ BOOST_AUTO_TEST_CASE(ServiceAddRemoveMethod)
 
 BOOST_AUTO_TEST_CASE(ClientAddRemoveMethod)
 {
-    Service s(socketPath);
-    Client c(socketPath);
+    Service s(SOCKET_PATH);
+    Client c(SOCKET_PATH);
     c.setMethodHandler<EmptyData, EmptyData>(1, returnEmptyCallback);
     c.setMethodHandler<SendData, RecvData>(1, returnDataCallback);
 
@@ -271,7 +270,7 @@ BOOST_AUTO_TEST_CASE(ClientAddRemoveMethod)
 
 BOOST_AUTO_TEST_CASE(ServiceStartStop)
 {
-    Service s(socketPath);
+    Service s(SOCKET_PATH);
 
     s.setMethodHandler<SendData, RecvData>(1, returnDataCallback);
 
@@ -286,8 +285,8 @@ BOOST_AUTO_TEST_CASE(ServiceStartStop)
 
 BOOST_AUTO_TEST_CASE(ClientStartStop)
 {
-    Service s(socketPath);
-    Client c(socketPath);
+    Service s(SOCKET_PATH);
+    Client c(SOCKET_PATH);
     c.setMethodHandler<SendData, RecvData>(1, returnDataCallback);
 
     c.start();
@@ -304,11 +303,11 @@ BOOST_AUTO_TEST_CASE(ClientStartStop)
 
 BOOST_AUTO_TEST_CASE(SyncClientToServiceEcho)
 {
-    Service s(socketPath);
+    Service s(SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.setMethodHandler<SendData, RecvData>(2, echoCallback);
 
-    Client c(socketPath);
+    Client c(SOCKET_PATH);
     connect(s, c);
 
     testEcho(c, 1);
@@ -317,12 +316,12 @@ BOOST_AUTO_TEST_CASE(SyncClientToServiceEcho)
 
 BOOST_AUTO_TEST_CASE(Restart)
 {
-    Service s(socketPath);
+    Service s(SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.start();
     s.setMethodHandler<SendData, RecvData>(2, echoCallback);
 
-    Client c(socketPath);
+    Client c(SOCKET_PATH);
     c.start();
     testEcho(c, 1);
     testEcho(c, 2);
@@ -342,8 +341,8 @@ BOOST_AUTO_TEST_CASE(Restart)
 
 BOOST_AUTO_TEST_CASE(SyncServiceToClientEcho)
 {
-    Service s(socketPath);
-    Client c(socketPath);
+    Service s(SOCKET_PATH);
+    Client c(SOCKET_PATH);
     c.setMethodHandler<SendData, RecvData>(1, echoCallback);
     PeerID peerID = connect(s, c);
 
@@ -359,10 +358,10 @@ BOOST_AUTO_TEST_CASE(AsyncClientToServiceEcho)
     ValueLatch<std::shared_ptr<RecvData>> recvDataLatch;
 
     // Setup Service and Client
-    Service s(socketPath);
+    Service s(SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.start();
-    Client c(socketPath);
+    Client c(SOCKET_PATH);
     c.start();
 
     //Async call
@@ -381,8 +380,8 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
     std::shared_ptr<SendData> sentData(new SendData(56));
     ValueLatch<std::shared_ptr<RecvData>> recvDataLatch;
 
-    Service s(socketPath);
-    Client c(socketPath);
+    Service s(SOCKET_PATH);
+    Client c(SOCKET_PATH);
     c.setMethodHandler<SendData, RecvData>(1, echoCallback);
     PeerID peerID = connect(s, c);
 
@@ -401,10 +400,10 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
 
 BOOST_AUTO_TEST_CASE(SyncTimeout)
 {
-    Service s(socketPath);
+    Service s(SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, longEchoCallback);
 
-    Client c(socketPath);
+    Client c(SOCKET_PATH);
     connect(s, c);
 
     std::shared_ptr<SendData> sentData(new SendData(78));
@@ -413,10 +412,10 @@ BOOST_AUTO_TEST_CASE(SyncTimeout)
 
 BOOST_AUTO_TEST_CASE(SerializationError)
 {
-    Service s(socketPath);
+    Service s(SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
 
-    Client c(socketPath);
+    Client c(SOCKET_PATH);
     connect(s, c);
 
     std::shared_ptr<ThrowOnAcceptData> throwingData(new ThrowOnAcceptData());
@@ -427,11 +426,11 @@ BOOST_AUTO_TEST_CASE(SerializationError)
 
 BOOST_AUTO_TEST_CASE(ParseError)
 {
-    Service s(socketPath);
+    Service s(SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.start();
 
-    Client c(socketPath);
+    Client c(SOCKET_PATH);
     c.start();
 
     std::shared_ptr<SendData> sentData(new SendData(78));
@@ -441,7 +440,7 @@ BOOST_AUTO_TEST_CASE(ParseError)
 BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
 {
     ValueLatch<Result<RecvData>> retStatusLatch;
-    Service s(socketPath);
+    Service s(SOCKET_PATH);
 
     auto method = [](const PeerID, std::shared_ptr<ThrowOnAcceptData>&, MethodResult::Pointer methodResult) {
         auto resultData = std::make_shared<SendData>(1);
@@ -452,7 +451,7 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
     s.setMethodHandler<SendData, ThrowOnAcceptData>(1, method);
     s.start();
 
-    Client c(socketPath);
+    Client c(SOCKET_PATH);
     c.start();
 
     auto dataBack = [&retStatusLatch](Result<RecvData> && r) {
@@ -474,14 +473,14 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
 
 BOOST_AUTO_TEST_CASE(ReadTimeout)
 {
-    Service s(socketPath);
+    Service s(SOCKET_PATH);
     auto longEchoCallback = [](const PeerID, std::shared_ptr<RecvData>& data, MethodResult::Pointer methodResult) {
         auto resultData = std::make_shared<LongSendData>(data->intVal, LONG_OPERATION_TIME);
         methodResult->set<LongSendData>(resultData);
     };
     s.setMethodHandler<LongSendData, RecvData>(1, longEchoCallback);
 
-    Client c(socketPath);
+    Client c(SOCKET_PATH);
     connect(s, c);
 
     // Test timeout on read
@@ -492,11 +491,11 @@ BOOST_AUTO_TEST_CASE(ReadTimeout)
 
 BOOST_AUTO_TEST_CASE(WriteTimeout)
 {
-    Service s(socketPath);
+    Service s(SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.start();
 
-    Client c(socketPath);
+    Client c(SOCKET_PATH);
     c.start();
 
     // Test echo with a minimal timeout
@@ -516,8 +515,8 @@ BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
     ValueLatch<std::shared_ptr<RecvData>> recvDataLatchA;
     ValueLatch<std::shared_ptr<RecvData>> recvDataLatchB;
 
-    Service s(socketPath);
-    Client c(socketPath);
+    Service s(SOCKET_PATH);
+    Client c(SOCKET_PATH);
     connect(s, c);
 
     auto handlerA = [&recvDataLatchA](const PeerID, std::shared_ptr<RecvData>& data) {
@@ -552,8 +551,8 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
     ValueLatch<std::shared_ptr<RecvData>> recvDataLatchA;
     ValueLatch<std::shared_ptr<RecvData>> recvDataLatchB;
 
-    Service s(socketPath);
-    Client c(socketPath);
+    Service s(SOCKET_PATH);
+    Client c(SOCKET_PATH);
 
     auto handlerA = [&recvDataLatchA](const PeerID, std::shared_ptr<RecvData>& data) {
         recvDataLatchA.set(data);
@@ -594,10 +593,10 @@ BOOST_AUTO_TEST_CASE(ServiceGSource)
     };
 
     IPCGSource::Pointer serviceGSource;
-    Service s(socketPath);
+    Service s(SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
 
-    Client c(socketPath);
+    Client c(SOCKET_PATH);
     s.setSignalHandler<RecvData>(2, signalHandler);
 
     connectServiceGSource(s, c);
@@ -620,11 +619,11 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
         l.set();
     };
 
-    Service s(socketPath);
+    Service s(SOCKET_PATH);
     s.start();
 
     IPCGSource::Pointer clientGSource;
-    Client c(socketPath);
+    Client c(SOCKET_PATH);
     c.setMethodHandler<SendData, RecvData>(1, echoCallback);
     c.setSignalHandler<RecvData>(2, signalHandler);
 
@@ -643,8 +642,8 @@ BOOST_AUTO_TEST_CASE(UsersError)
     const int TEST_ERROR_CODE = -234;
     const std::string TEST_ERROR_MESSAGE = "Ay, caramba!";
 
-    Service s(socketPath);
-    Client c(socketPath);
+    Service s(SOCKET_PATH);
+    Client c(SOCKET_PATH);
     auto clientID = connect(s, c);
 
     auto throwingMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>&, MethodResult::Pointer) {
@@ -677,8 +676,8 @@ BOOST_AUTO_TEST_CASE(AsyncResult)
     const int TEST_ERROR_CODE = -567;
     const std::string TEST_ERROR_MESSAGE = "Ooo jooo!";
 
-    Service s(socketPath);
-    Client c(socketPath);
+    Service s(SOCKET_PATH);
+    Client c(SOCKET_PATH);
     auto clientID = connect(s, c);
 
     auto errorMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>&, MethodResult::Pointer methodResult) {
@@ -734,14 +733,14 @@ BOOST_AUTO_TEST_CASE(AsyncResult)
 //     ipc::setMaxFDNumber(50);
 
 //     // Setup Service and many Clients
-//     Service s(socketPath);
+//     Service s(SOCKET_PATH);
 //     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
 //     s.start();
 
 //     std::list<Client> clients;
 //     for (int i = 0; i < 100; ++i) {
 //         try {
-//             clients.push_back(Client(socketPath));
+//             clients.push_back(Client(SOCKET_PATH));
 //             clients.back().start();
 //         } catch (...) {}
 //     }
