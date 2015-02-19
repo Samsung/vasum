@@ -42,6 +42,9 @@ const std::string METHOD_GET_ZONE_DBUSES       = "GetZoneDbuses";
 const std::string METHOD_GET_ZONE_ID_LIST      = "GetZoneIds";
 const std::string METHOD_GET_ACTIVE_ZONE_ID    = "GetActiveZoneId";
 const std::string METHOD_GET_ZONE_INFO         = "GetZoneInfo";
+const std::string METHOD_SET_NETDEV_ATTRS      = "SetNetdevAttrs";
+const std::string METHOD_GET_NETDEV_ATTRS      = "GetNetdevAttrs";
+const std::string METHOD_GET_NETDEV_LIST       = "GetNetdevList";
 const std::string METHOD_CREATE_NETDEV_VETH    = "CreateNetdevVeth";
 const std::string METHOD_CREATE_NETDEV_MACVLAN = "CreateNetdevMacvlan";
 const std::string METHOD_CREATE_NETDEV_PHYS    = "CreateNetdevPhys";
@@ -87,6 +90,20 @@ const std::string DEFINITION =
     "    <method name='" + METHOD_GET_ZONE_INFO + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "      <arg type='(siss)' name='result' direction='out'/>"
+    "    </method>"
+    "    <method name='" + METHOD_SET_NETDEV_ATTRS + "'>"
+    "      <arg type='s' name='zone' direction='in'/>"
+    "      <arg type='s' name='netdev' direction='in'/>"
+    "      <arg type='a(ss)' name='attributes' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_GET_NETDEV_ATTRS + "'>"
+    "      <arg type='s' name='zone' direction='in'/>"
+    "      <arg type='s' name='netdev' direction='in'/>"
+    "      <arg type='a(ss)' name='attributes' direction='out'/>"
+    "    </method>"
+    "    <method name='" + METHOD_GET_NETDEV_LIST + "'>"
+    "      <arg type='s' name='zone' direction='in'/>"
+    "      <arg type='as' name='list' direction='out'/>"
     "    </method>"
     "    <method name='" + METHOD_CREATE_NETDEV_VETH + "'>"
     "      <arg type='s' name='id' direction='in'/>"

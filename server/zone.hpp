@@ -285,6 +285,21 @@ public:
      */
     void moveNetdev(const std::string& devId);
 
+    /**
+     * Set network device attributes
+     */
+    void setNetdevAttrs(const std::string& netdev, const ZoneAdmin::NetdevAttrs& attrs);
+
+    /**
+     * Get network device attributes
+     */
+    ZoneAdmin::NetdevAttrs getNetdevAttrs(const std::string& netdev);
+
+    /**
+     * Get network device list
+     */
+    std::vector<std::string> getNetdevList();
+
 private:
     utils::Worker::Pointer mWorker;
     ZoneConfig mConfig;

@@ -42,11 +42,15 @@
 #define PAGE_SIZE 4096
 #endif
 
+namespace {
+
 const int NLMSG_GOOD_SIZE = 2*PAGE_SIZE;
-constexpr rtattr* NLMSG_TAIL(nlmsghdr* nmsg)
+inline rtattr* NLMSG_TAIL(nlmsghdr* nmsg)
 {
     return reinterpret_cast<rtattr*>(reinterpret_cast<char*>(nmsg) + NLMSG_ALIGN(nmsg->nlmsg_len));
 }
+
+} // namespace
 
 namespace vasum {
 namespace netlink {

@@ -41,6 +41,7 @@ enum class SchedulerLevel {
 class ZoneAdmin {
 
 public:
+    typedef std::vector<std::tuple<std::string, std::string>> NetdevAttrs;
 
     /**
      * ZoneAdmin constructor
@@ -147,6 +148,21 @@ public:
      * Move network device to zone
      */
     void moveNetdev(const std::string& devId);
+
+    /**
+     * Set network device attributes
+     */
+    void setNetdevAttrs(const std::string& netdev, const NetdevAttrs& attrs);
+
+    /**
+     * Get network device attributes
+     */
+    NetdevAttrs getNetdevAttrs(const std::string& netdev);
+
+    /**
+     * Get network device list
+     */
+    std::vector<std::string> getNetdevList();
 
 private:
     const ZoneConfig& mConfig;

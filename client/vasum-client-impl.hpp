@@ -229,6 +229,16 @@ public:
                                        int prefix) noexcept;
 
     /**
+     *  @see ::vsm_netdev_up
+     */
+    VsmStatus vsm_netdev_up(const char* zone, const char* netdevId) noexcept;
+
+    /**
+     *  @see ::vsm_netdev_down
+     */
+    VsmStatus vsm_netdev_down(const char* zone, const char* netdevId) noexcept;
+
+    /**
      *  @see ::vsm_create_netdev_veth
      */
     VsmStatus vsm_create_netdev_veth(const char* zone,

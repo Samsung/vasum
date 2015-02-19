@@ -161,6 +161,15 @@ private:
     void handleGetZoneIdsCall(dbus::MethodResultBuilder::Pointer result);
     void handleGetActiveZoneIdCall(dbus::MethodResultBuilder::Pointer result);
     void handleGetZoneInfoCall(const std::string& id, dbus::MethodResultBuilder::Pointer result);
+    void handleSetNetdevAttrsCall(const std::string& zone,
+                                  const std::string& netdev,
+                                  const std::vector<std::tuple<std::string, std::string>>& attrs,
+                                  dbus::MethodResultBuilder::Pointer result);
+    void handleGetNetdevAttrsCall(const std::string& zone,
+                                  const std::string& netdev,
+                                  dbus::MethodResultBuilder::Pointer result);
+    void handleGetNetdevListCall(const std::string& zone,
+                                 dbus::MethodResultBuilder::Pointer result);
     void handleCreateNetdevVethCall(const std::string& zone,
                                     const std::string& zoneDev,
                                     const std::string& hostDev,

@@ -170,6 +170,72 @@ std::map<std::string, CommandLineInterface> commands = {
             {{"zone_id", "id zone name"},
              {"devId", "network device id"}}
         }
+    },
+    {
+        "zone_get_netdevs", {
+            zone_get_netdevs,
+            "zone_get_netdevs zone_id",
+            "List network devices in the zone",
+            {{"zone_id", "id zone name"}}
+        }
+    },
+    {
+        "netdev_get_ipv4_addr", {
+            netdev_get_ipv4_addr,
+            "netdev_get_ipv4_addr zone_id netdev_id",
+            "Get ipv4 address",
+            {{"zone_id", "id zone name"},
+             {"netdev_id", "network device name"}}
+        }
+    },
+    {
+        "netdev_get_ipv6_addr", {
+            netdev_get_ipv6_addr,
+            "netdev_get_ipv6_addr zone_id netdev_id",
+            "Get ipv6 address",
+            {{"zone_id", "id zone name"},
+             {"netdev_id", "network device name"}}
+        }
+    },
+    {
+        "netdev_set_ipv4_addr", {
+            netdev_set_ipv4_addr,
+            "netdev_set_ipv4_addr zone_id netdev_id address prefix_len",
+            "Set ipv4 address",
+            {{"zone_id", "id zone name"},
+             {"netdev_id", "network device name"},
+             {"address", "ipv4 address"},
+             {"prefix_len", "bit length of prefix"}}
+        }
+    },
+    {
+        "netdev_set_ipv6_addr", {
+            netdev_set_ipv6_addr,
+            "netdev_set_ipv6_addr zone_id netdev_id address prefix_len",
+            "Set ipv6 address",
+            {{"zone_id", "id zone name"},
+             {"netdev_id", "network device name"},
+             {"address", "ipv6 address"},
+             {"prefix_len", "bit length of prefix"}}
+        }
+    },
+    {
+        "netdev_up", {
+            netdev_up,
+            "netdev_up zone_id netdev_id",
+            "Turn up a network device in the zone",
+            {{"zone_id", "id zone name"},
+             {"netdev_id", "network device id"}}
+        }
+    },
+    {
+        "zone_get_netdevs", {
+            zone_get_netdevs,
+            "zone_get_netdevs zone_id",
+            "Turn down a network device in the zone",
+            {{"zone_id", "id zone name"},
+             {"netdev_id", "network device id"}}
+        }
     }
 };
 

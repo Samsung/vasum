@@ -441,4 +441,22 @@ void Zone::removeDeclaration(const std::string& declarationId)
     mProvision->remove(declarationId);
 }
 
+void Zone::setNetdevAttrs(const std::string& netdev, const ZoneAdmin::NetdevAttrs& attrs)
+{
+    Lock lock(mReconnectMutex);
+    mAdmin->setNetdevAttrs(netdev, attrs);
+}
+
+ZoneAdmin::NetdevAttrs Zone::getNetdevAttrs(const std::string& netdev)
+{
+    Lock lock(mReconnectMutex);
+    return mAdmin->getNetdevAttrs(netdev);
+}
+
+std::vector<std::string> Zone::getNetdevList()
+{
+    Lock lock(mReconnectMutex);
+    return mAdmin->getNetdevList();
+}
+
 } // namespace vasum

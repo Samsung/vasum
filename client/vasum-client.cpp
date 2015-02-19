@@ -250,6 +250,20 @@ API VsmStatus vsm_netdev_set_ipv6_addr(VsmClient client,
     return getClient(client).vsm_netdev_set_ipv6_addr(zone, netdevId, addr, prefix);
 }
 
+API VsmStatus vsm_netdev_up(VsmClient client,
+                            const char* zone,
+                            const char* netdevId)
+{
+    return getClient(client).vsm_netdev_up(zone, netdevId);
+}
+
+API VsmStatus vsm_netdev_down(VsmClient client,
+                              const char* zone,
+                              const char* netdevId)
+{
+    return getClient(client).vsm_netdev_down(zone, netdevId);
+}
+
 API VsmStatus vsm_create_netdev_veth(VsmClient client,
                                      const char* zone,
                                      const char* zoneDev,

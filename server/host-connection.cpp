@@ -130,6 +130,21 @@ void HostConnection::setGetZoneInfoCallback(const GetZoneInfoCallback& callback)
     mGetZoneInfoCallback = callback;
 }
 
+void HostConnection::setSetNetdevAttrsCallback(const SetNetdevAttrsCallback& callback)
+{
+    mSetNetdevAttrsCallback = callback;
+}
+
+void HostConnection::setGetNetdevAttrsCallback(const GetNetdevAttrsCallback& callback)
+{
+    mGetNetdevAttrsCallback = callback;
+}
+
+void HostConnection::setGetNetdevListCallback(const GetNetdevListCallback& callback)
+{
+    mGetNetdevListCallback = callback;
+}
+
 void HostConnection::setCreateNetdevVethCallback(const CreateNetdevVethCallback& callback)
 {
     mCreateNetdevVethCallback = callback;
@@ -295,6 +310,44 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         }
         return;
     }
+
+    if (methodName == api::host::METHOD_SET_NETDEV_ATTRS){
+        const gchar* zone = NULL;
+        const gchar* netdev = NULL;
+        GVariantIter* iter;
+        g_variant_get(parameters, "(&s&sa(ss))", &zone, &netdev, &iter);
+        gchar* key = NULL;
+        gchar* value = NULL;
+        std::vector<std::tuple<std::string, std::string>> attrs;
+        while (g_variant_iter_loop(iter, "(&s&s)", &key, &value)) {
+            attrs.push_back(std::make_tuple<std::string, std::string>(key, value));
+        }
+        g_variant_iter_free(iter);
+        if (mSetNetdevAttrsCallback) {
+            mSetNetdevAttrsCallback(zone, netdev, attrs, result);
+        }
+        return;
+    }
+
+    if (methodName == api::host::METHOD_GET_NETDEV_ATTRS){
+        const gchar* zone = NULL;
+        const gchar* netdev = NULL;
+        g_variant_get(parameters, "(&s&s)", &zone, &netdev);
+        if (mGetNetdevAttrsCallback) {
+            mGetNetdevAttrsCallback(zone, netdev, result);
+        }
+        return;
+    }
+
+    if (methodName == api::host::METHOD_GET_NETDEV_LIST){
+        const gchar* zone = NULL;
+        g_variant_get(parameters, "(&s)", &zone);
+        if (mGetNetdevListCallback) {
+            mGetNetdevListCallback(zone, result);
+        }
+        return;
+    }
+
 
     if (methodName == api::host::METHOD_CREATE_NETDEV_VETH) {
         const gchar* id = NULL;

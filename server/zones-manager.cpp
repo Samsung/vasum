@@ -141,6 +141,15 @@ ZonesManager::ZonesManager(const std::string& configPath)
     mHostConnection.setGetZoneInfoCallback(bind(&ZonesManager::handleGetZoneInfoCall,
                                                 this, _1, _2));
 
+    mHostConnection.setSetNetdevAttrsCallback(bind(&ZonesManager::handleSetNetdevAttrsCall,
+                                                this, _1, _2, _3, _4));
+
+    mHostConnection.setGetNetdevAttrsCallback(bind(&ZonesManager::handleGetNetdevAttrsCall,
+                                                this, _1, _2, _3));
+
+    mHostConnection.setGetNetdevListCallback(bind(&ZonesManager::handleGetNetdevListCall,
+                                                this, _1, _2));
+
     mHostConnection.setCreateNetdevVethCallback(bind(&ZonesManager::handleCreateNetdevVethCall,
                                                 this, _1, _2, _3, _4));
 
@@ -803,6 +812,78 @@ void ZonesManager::handleGetZoneInfoCall(const std::string& id,
                               zone.getRootPath().c_str()));
 }
 
+void ZonesManager::handleSetNetdevAttrsCall(const std::string& zone,
+                                            const std::string& netdev,
+                                            const std::vector<
+                                                std::tuple<std::string, std::string>>& attrs,
+                                            dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("SetNetdevAttrs call");
+    try {
+        Lock lock(mMutex);
+
+        getZone(zone).setNetdevAttrs(netdev, attrs);
+        result->setVoid();
+    } catch (const InvalidZoneIdException&) {
+        LOGE("No zone with id=" << zone);
+        result->setError(api::ERROR_INVALID_ID, "No such zone id");
+    } catch (const VasumException& ex) {
+        LOGE("Can't set attributes: " << ex.what());
+        result->setError(api::ERROR_INTERNAL, ex.what());
+    }
+}
+
+void ZonesManager::handleGetNetdevAttrsCall(const std::string& zone,
+                                            const std::string& netdev,
+                                            dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("GetNetdevAttrs call");
+    try {
+        Lock lock(mMutex);
+
+        const auto attrs = getZone(zone).getNetdevAttrs(netdev);
+
+        GVariantBuilder builder;
+        g_variant_builder_init(&builder, G_VARIANT_TYPE_ARRAY);
+        for (const auto entry : attrs) {
+            g_variant_builder_add(&builder,
+                                  "(ss)",
+                                  std::get<0>(entry).c_str(),
+                                  std::get<1>(entry).c_str());
+        }
+        result->set(g_variant_builder_end(&builder));
+    } catch (const InvalidZoneIdException&) {
+        LOGE("No zone with id=" << zone);
+        result->setError(api::ERROR_INVALID_ID, "No such zone id");
+    } catch (const VasumException& ex) {
+        LOGE("Can't set attributes: " << ex.what());
+        result->setError(api::ERROR_INTERNAL, ex.what());
+    }
+}
+
+void ZonesManager::handleGetNetdevListCall(const std::string& zone,
+                                           dbus::MethodResultBuilder::Pointer result)
+{
+    LOGI("GetNetdevList call");
+    try {
+        Lock lock(mMutex);
+        std::vector<GVariant*> netdevs;
+        for(auto& netdev: getZone(zone).getNetdevList()){
+            netdevs.push_back(g_variant_new_string(netdev.c_str()));
+        }
+        GVariant* array = g_variant_new_array(G_VARIANT_TYPE("s"),
+                                              netdevs.data(),
+                                              netdevs.size());
+        result->set(g_variant_new("(@as)", array));
+    } catch (const InvalidZoneIdException&) {
+        LOGE("No zone with id=" << zone);
+        result->setError(api::ERROR_INVALID_ID, "No such zone id");
+    } catch (const VasumException& ex) {
+        LOGE("Can't set attributes: " << ex.what());
+        result->setError(api::ERROR_INTERNAL, ex.what());
+    }
+}
+
 void ZonesManager::handleCreateNetdevVethCall(const std::string& zone,
                                               const std::string& zoneDev,
                                               const std::string& hostDev,
@@ -814,7 +895,7 @@ void ZonesManager::handleCreateNetdevVethCall(const std::string& zone,
 
         getZone(zone).createNetdevVeth(zoneDev, hostDev);
         result->setVoid();
-    } catch (const std::out_of_range&) {
+    } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
@@ -835,7 +916,7 @@ void ZonesManager::handleCreateNetdevMacvlanCall(const std::string& zone,
 
         getZone(zone).createNetdevMacvlan(zoneDev, hostDev, mode);
         result->setVoid();
-    } catch (const std::out_of_range&) {
+    } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
@@ -854,7 +935,7 @@ void ZonesManager::handleCreateNetdevPhysCall(const std::string& zone,
 
         getZone(zone).moveNetdev(devId);
         result->setVoid();
-    } catch (const std::out_of_range&) {
+    } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {

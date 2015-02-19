@@ -208,6 +208,55 @@ void create_netdev_macvlan(int pos, int argc, const char** argv);
  */
 void create_netdev_phys(int pos, int argc, const char** argv);
 
+/**
+ * Parses command line arguments and prints result of vsm_zone_get_netdevs
+ *
+ * @see vsm_zone_get_netdevs
+ */
+void zone_get_netdevs(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and prints result of vsm_netdev_get_ipv4_addr
+ *
+ * @see vsm_netdev_get_ipv4_addr
+ */
+void netdev_get_ipv4_addr(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and and prints result of vsm_netdev_get_ipv6_addr
+ *
+ * @see vsm_netdev_get_ipv6_addr
+ */
+void netdev_get_ipv6_addr(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and call vsm_netdev_set_ipv4_addr
+ *
+ * @see vsm_netdev_set_ipv4_addr
+ */
+void netdev_set_ipv4_addr(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and call vsm_netdev_set_ipv6_addr
+ *
+ * @see vsm_netdev_set_ipv6_addr
+ */
+void netdev_set_ipv6_addr(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and call vsm_netdev_up
+ *
+ * @see vsm_netdev_up
+ */
+void netdev_up(int pos, int argc, const char** argv);
+
+/**
+ * Parses command line arguments and call vsm_netdev_down
+ *
+ * @see vsm_netdev_down
+ */
+void netdev_down(int pos, int argc, const char** argv);
+
 } // namespace cli
 } // namespace vasum
 

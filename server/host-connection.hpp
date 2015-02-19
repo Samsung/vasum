@@ -30,6 +30,8 @@
 
 #include <mutex>
 #include <condition_variable>
+#include <tuple>
+#include <vector>
 
 
 namespace vasum {
@@ -60,8 +62,20 @@ public:
     typedef std::function<void(const std::string& id,
                                dbus::MethodResultBuilder::Pointer result
                               )> GetZoneInfoCallback;
-    typedef std::function<void(const std::string& id,
-                               const std::string& zoneDev,
+    typedef std::function<void(const std::string& zone,
+                               const std::string& netdev,
+                               const std::vector<std::tuple<std::string, std::string>>& attrs,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> SetNetdevAttrsCallback;
+    typedef std::function<void(const std::string& zone,
+                               const std::string& netdev,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> GetNetdevAttrsCallback;
+    typedef std::function<void(const std::string& zone,
+                               dbus::MethodResultBuilder::Pointer result
+                              )> GetNetdevListCallback;
+    typedef std::function<void(const std::string& zone,
+                               const std::string& netdev,
                                const std::string& hostDev,
                                dbus::MethodResultBuilder::Pointer result
                               )> CreateNetdevVethCallback;
@@ -163,6 +177,21 @@ public:
      * Register a callback called to get the zone informations
      */
     void setGetZoneInfoCallback(const GetZoneInfoCallback& callback);
+
+    /**
+     * Register a callback called to set network device attributes
+     */
+    void setSetNetdevAttrsCallback(const SetNetdevAttrsCallback& callback);
+
+    /**
+     * Register a callback called to get network device attributes
+     */
+    void setGetNetdevAttrsCallback(const GetNetdevAttrsCallback& callback);
+
+    /**
+     * Register a callback called to get network device list
+     */
+    void setGetNetdevListCallback(const GetNetdevListCallback& callback);
 
     /**
      * Register a callback called to create veth
@@ -270,6 +299,9 @@ private:
     GetZoneIdsCallback mGetZoneIdsCallback;
     GetActiveZoneIdCallback mGetActiveZoneIdCallback;
     GetZoneInfoCallback mGetZoneInfoCallback;
+    SetNetdevAttrsCallback mSetNetdevAttrsCallback;
+    GetNetdevAttrsCallback mGetNetdevAttrsCallback;
+    GetNetdevListCallback mGetNetdevListCallback;
     CreateNetdevVethCallback mCreateNetdevVethCallback;
     CreateNetdevMacvlanCallback mCreateNetdevMacvlanCallback;
     CreateNetdevPhysCallback mCreateNetdevPhysCallback;

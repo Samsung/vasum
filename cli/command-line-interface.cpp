@@ -38,6 +38,7 @@
 #include <fcntl.h>
 #include <cassert>
 #include <linux/if_link.h>
+#include <arpa/inet.h>
 
 using namespace std;
 
@@ -389,6 +390,134 @@ void create_netdev_phys(int pos, int argc, const char** argv)
         throw runtime_error("Not enough parameters");
     }
     one_shot(bind(vsm_create_netdev_phys,
+                  _1,
+                  argv[pos + 1],
+                  argv[pos + 2]));
+}
+
+void zone_get_netdevs(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 1) {
+        throw runtime_error("Not enough parameters");
+    }
+    VsmArrayString ids;
+    one_shot(bind(vsm_zone_get_netdevs,
+                  _1,
+                  argv[pos + 1],
+                  &ids));
+    string delim;
+    for (VsmString* id = ids; *id; ++id) {
+        cout << delim << *id;
+        delim = ", ";
+    }
+    if (delim.empty()) {
+        cout << "There is no network device in zone";
+    }
+    cout << endl;
+    vsm_array_string_free(ids);
+}
+
+void netdev_get_ipv4_addr(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 2) {
+        throw runtime_error("Not enough parameters");
+    }
+    in_addr addr;
+    one_shot(bind(vsm_netdev_get_ipv4_addr,
+                  _1,
+                  argv[pos + 1],
+                  argv[pos + 2],
+                  &addr));
+    char buf[INET_ADDRSTRLEN];
+    if (inet_ntop(AF_INET, &addr, buf, INET_ADDRSTRLEN) == NULL) {
+        throw runtime_error("Server gave the wrong address format");
+    }
+    cout << buf << endl;
+}
+
+void netdev_get_ipv6_addr(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 2) {
+        throw runtime_error("Not enough parameters");
+    }
+    in6_addr addr;
+    one_shot(bind(vsm_netdev_get_ipv6_addr,
+                  _1,
+                  argv[pos + 1],
+                  argv[pos + 2],
+                  &addr));
+    char buf[INET6_ADDRSTRLEN];
+    if (inet_ntop(AF_INET6, &addr, buf, INET6_ADDRSTRLEN) == NULL) {
+        throw runtime_error("Server gave the wrong address format");
+    }
+    cout << buf << endl;
+}
+
+void netdev_set_ipv4_addr(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 4) {
+        throw runtime_error("Not enough parameters");
+    }
+    in_addr addr;
+    if (inet_pton(AF_INET, argv[pos + 3], &addr) != 1) {
+        throw runtime_error("Wrong address format");
+    };
+    one_shot(bind(vsm_netdev_set_ipv4_addr,
+                  _1,
+                  argv[pos + 1],
+                  argv[pos + 2],
+                  &addr,
+                  stoi(argv[pos + 4])));
+}
+
+void netdev_set_ipv6_addr(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 4) {
+        throw runtime_error("Not enough parameters");
+    }
+    in6_addr addr;
+    if (inet_pton(AF_INET6, argv[pos + 3], &addr) != 1) {
+        throw runtime_error("Wrong address format");
+    };
+    one_shot(bind(vsm_netdev_set_ipv6_addr,
+                  _1,
+                  argv[pos + 1],
+                  argv[pos + 2],
+                  &addr,
+                  stoi(argv[pos + 4])));
+}
+
+void netdev_up(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 2) {
+        throw runtime_error("Not enough parameters");
+    }
+    one_shot(bind(vsm_netdev_up,
+                  _1,
+                  argv[pos + 1],
+                  argv[pos + 2]));
+}
+
+void netdev_down(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 2) {
+        throw runtime_error("Not enough parameters");
+    }
+    one_shot(bind(vsm_netdev_down,
                   _1,
                   argv[pos + 1],
                   argv[pos + 2]));

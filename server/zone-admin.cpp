@@ -289,4 +289,19 @@ void ZoneAdmin::moveNetdev(const std::string& devId)
     netdev::movePhys(mZone.getInitPid(), devId);
 }
 
+void ZoneAdmin::setNetdevAttrs(const std::string& /* netdev */, const NetdevAttrs& /* attrs */)
+{
+    throw ZoneOperationException("Not implemented");
+}
+
+ZoneAdmin::NetdevAttrs ZoneAdmin::getNetdevAttrs(const std::string& /* netdev */)
+{
+    throw ZoneOperationException("Not implemented");
+}
+
+std::vector<std::string> ZoneAdmin::getNetdevList()
+{
+    throw ZoneOperationException("Not implemented");
+}
+
 } // namespace vasum

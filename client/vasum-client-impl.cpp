@@ -31,10 +31,15 @@
 #include <utils/glib-loop.hpp>
 #include <host-dbus-definitions.hpp>
 #include <zone-dbus-definitions.hpp>
+#include <base-exception.hpp>
 
+#include <algorithm>
+#include <tuple>
+#include <vector>
 #include <cstring>
 #include <cassert>
 #include <fstream>
+#include <arpa/inet.h>
 
 using namespace std;
 using namespace dbus;
@@ -75,6 +80,21 @@ void toDict(GVariant* in, VsmArrayString* keys, VsmArrayString* values)
     }
     *keys = outk;
     *values = outv;
+}
+
+vector<tuple<string, string>> toDict(GVariant* in)
+{
+    assert(in);
+
+    const gchar* key;
+    const gchar* value;
+    vector<tuple<string, string>> dict;
+    GVariantIter iter;
+    g_variant_iter_init(&iter, in);
+    while (g_variant_iter_loop(&iter, "(&s&s)", &key, &value)) {
+        dict.push_back(make_tuple<string, string>(key, value));
+    }
+    return dict;
 }
 
 void toBasic(GVariant* in, char** str)
@@ -151,6 +171,37 @@ void toArray(GVariant* in, T** scArray)
     }
     *scArray = ids;
 }
+
+string toString(const in_addr* addr)
+{
+    char buf[INET_ADDRSTRLEN];
+    const char* ret = inet_ntop(AF_INET, addr, buf, INET_ADDRSTRLEN);
+    if (ret == NULL) {
+        throw runtime_error(getSystemErrorMessage());
+    }
+    return ret;
+}
+
+string toString(const in6_addr* addr)
+{
+    char buf[INET6_ADDRSTRLEN];
+    const char* ret = inet_ntop(AF_INET6, addr, buf, INET6_ADDRSTRLEN);
+    if (ret == NULL) {
+        throw runtime_error(getSystemErrorMessage());
+    }
+    return ret;
+}
+
+GVariant* createTupleArray(const vector<tuple<string, string>>& dict)
+{
+    GVariantBuilder builder;
+    g_variant_builder_init(&builder, G_VARIANT_TYPE_ARRAY);
+    for (const auto entry : dict) {
+        g_variant_builder_add(&builder, "(ss)", get<0>(entry).c_str(), get<1>(entry).c_str());
+    }
+    return g_variant_builder_end(&builder);
+}
+
 
 VsmStatus toStatus(const exception& ex)
 {
@@ -530,34 +581,162 @@ VsmStatus Client::vsm_revoke_device(const char* id, const char* device) noexcept
     return callMethod(HOST_INTERFACE, api::host::METHOD_REVOKE_DEVICE, args_in);
 }
 
-VsmStatus Client::vsm_zone_get_netdevs(const char*, VsmArrayString*) noexcept
+VsmStatus Client::vsm_zone_get_netdevs(const char* zone, VsmArrayString* netdevIds) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    assert(zone);
+    assert(netdevIds);
+
+    GVariant* out = NULL;
+    GVariant* args_in = g_variant_new("(s)", zone);
+    VsmStatus ret = callMethod(HOST_INTERFACE,
+                               api::host::METHOD_GET_NETDEV_LIST,
+                               args_in,
+                               "(as)",
+                               &out);
+    if (ret != VSMCLIENT_SUCCESS) {
+        return ret;
+    }
+    GVariant* unpacked;
+    g_variant_get(out, "(*)", &unpacked);
+    toArray(unpacked, netdevIds);
+    g_variant_unref(unpacked);
+    g_variant_unref(out);
+    return ret;
+}
+
+VsmStatus Client::vsm_netdev_get_ipv4_addr(const char* zone,
+                                           const char* netdevId,
+                                           struct in_addr* addr) noexcept
+{
+    assert(zone);
+    assert(netdevId);
+    assert(addr);
+
+    GVariant* out = NULL;
+    GVariant* args_in = g_variant_new("(ss)", zone, netdevId);
+    VsmStatus ret = callMethod(HOST_INTERFACE,
+                               api::host::METHOD_GET_NETDEV_ATTRS,
+                               args_in,
+                               "(a(ss))",
+                               &out);
+    if (ret != VSMCLIENT_SUCCESS) {
+        return ret;
+    }
+    GVariant* unpacked;
+    g_variant_get(out, "(*)", &unpacked);
+    vector<tuple<string, string>> attrs = toDict(unpacked);
+    g_variant_unref(unpacked);
+    g_variant_unref(out);
+
+    auto it = find_if(attrs.begin(), attrs.end(), [](const tuple<string, string>& entry) {
+            return get<0>(entry) == "ipv4";
+    });
+    if (it != attrs.end()) {
+       if (inet_pton(AF_INET, get<1>(*it).c_str(), addr) != 1) {
+           mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Invalid response data");
+           return vsm_get_status();
+       }
+       mStatus = Status();
+       return vsm_get_status();
+    }
+    mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Address not found");
     return vsm_get_status();
 }
 
-VsmStatus Client::vsm_netdev_get_ipv4_addr(const char*, const char*, struct in_addr*) noexcept
+VsmStatus Client::vsm_netdev_get_ipv6_addr(const char* zone,
+                                           const char* netdevId,
+                                           struct in6_addr* addr) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    assert(zone);
+    assert(netdevId);
+    assert(addr);
+
+    GVariant* out = NULL;
+    GVariant* args_in = g_variant_new("(ss)", zone, netdevId);
+    VsmStatus ret = callMethod(HOST_INTERFACE,
+                               api::host::METHOD_GET_NETDEV_ATTRS,
+                               args_in,
+                               "(a(ss))",
+                               &out);
+    if (ret != VSMCLIENT_SUCCESS) {
+        return ret;
+    }
+    GVariant* unpacked;
+    g_variant_get(out, "(*)", &unpacked);
+    vector<tuple<string, string>> attrs = toDict(unpacked);
+    g_variant_unref(unpacked);
+    g_variant_unref(out);
+
+    //XXX: return only one address
+    auto it = find_if(attrs.begin(), attrs.end(), [](const tuple<string, string>& entry) {
+            return get<0>(entry) == "ipv6";
+    });
+    if (it != attrs.end()) {
+       if (inet_pton(AF_INET6, get<1>(*it).c_str(), addr) != 1) {
+           mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Invalid response data");
+           return vsm_get_status();
+       }
+       mStatus = Status();
+       return vsm_get_status();
+    }
+    mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Address not found");
     return vsm_get_status();
 }
 
-VsmStatus Client::vsm_netdev_get_ipv6_addr(const char*, const char*, struct in6_addr*) noexcept
+VsmStatus Client::vsm_netdev_set_ipv4_addr(const char* zone,
+                                           const char* netdevId,
+                                           struct in_addr* addr,
+                                           int mask) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
+    try {
+        GVariant* dict = createTupleArray({make_tuple("ipv4", toString(addr)),
+                                          make_tuple("mask", to_string(mask))});
+        GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
+        return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
+    } catch (exception& ex) {
+        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
+        return vsm_get_status();
+    }
 }
 
-VsmStatus Client::vsm_netdev_set_ipv4_addr(const char*, const char*, struct in_addr*, int) noexcept
+VsmStatus Client::vsm_netdev_set_ipv6_addr(const char* zone,
+                                           const char* netdevId,
+                                           struct in6_addr* addr,
+                                           int mask) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
+    try {
+        GVariant* dict = createTupleArray({make_tuple("ipv6", toString(addr)),
+                                          make_tuple("mask", to_string(mask))});
+        GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
+        return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
+    } catch (exception& ex) {
+        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
+        return vsm_get_status();
+    }
 }
 
-VsmStatus Client::vsm_netdev_set_ipv6_addr(const char*, const char*, struct in6_addr*, int) noexcept
+VsmStatus Client::vsm_netdev_up(const char* zone, const char* netdevId) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
+    try {
+        GVariant* dict = createTupleArray({make_tuple("up", "true")});
+        GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
+        return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
+    } catch (exception& ex) {
+        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
+        return vsm_get_status();
+    }
+}
+
+VsmStatus Client::vsm_netdev_down(const char* zone, const char* netdevId) noexcept
+{
+    try {
+        GVariant* dict = createTupleArray({make_tuple("up", "false")});
+        GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
+        return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
+    } catch (exception& ex) {
+        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
+        return vsm_get_status();
+    }
 }
 
 VsmStatus Client::vsm_create_netdev_veth(const char* zone,

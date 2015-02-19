@@ -23,7 +23,9 @@ FILE(GLOB project_SRCS *.cpp *.hpp *.h)
 FILE(GLOB common_SRCS ${COMMON_FOLDER}/utils/callback-guard.hpp
                       ${COMMON_FOLDER}/utils/callback-guard.cpp
                       ${COMMON_FOLDER}/utils/glib-loop.cpp
-                      ${COMMON_FOLDER}/utils/glib-loop.hpp)
+                      ${COMMON_FOLDER}/utils/glib-loop.hpp
+                      ${COMMON_FOLDER}/base-exception.hpp
+                      ${COMMON_FOLDER}/base-exception.cpp)
 
 SET(_LIB_VERSION_ "0.0.1")
 SET(_LIB_SOVERSION_ "0")

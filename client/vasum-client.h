@@ -552,6 +552,31 @@ VsmStatus vsm_netdev_set_ipv6_addr(VsmClient client,
                                    int prefix);
 
 /**
+ * Turn up a network device in the zone
+ *
+ * @param[in] client vasum-server's client
+ * @param[in] zone zone name
+ * @param[in] netdevId netdev id
+ * @return status of this function call
+ */
+VsmStatus vsm_netdev_up(VsmClient client,
+                        const char* zone,
+                        const char* netdevId);
+
+/**
+ * Turn down a network device in the zone
+ *
+ * @param[in] client vasum-server's client
+ * @param[in] zone zone name
+ * @param[in] netdevId netdev id
+ * @return status of this function call
+ */
+VsmStatus vsm_netdev_down(VsmClient client,
+                          const char* zone,
+                          const char* netdevId);
+
+
+/**
  * Create veth netdev in zone
  *
  * @param[in] client vasum-server's client
