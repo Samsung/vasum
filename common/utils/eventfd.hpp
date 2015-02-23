@@ -22,17 +22,18 @@
  * @brief   Eventfd wrapper
  */
 
-#ifndef COMMON_IPC_INTERNALS_EVENTFD_HPP
-#define COMMON_IPC_INTERNALS_EVENTFD_HPP
+#ifndef COMMON_UTILS_EVENTFD_HPP
+#define COMMON_UTILS_EVENTFD_HPP
 
 namespace vasum {
-namespace ipc {
+namespace utils {
 
 class EventFD {
 public:
 
     EventFD();
     ~EventFD();
+
     EventFD(const EventFD& eventfd) = delete;
     EventFD& operator=(const EventFD&) = delete;
 
@@ -56,7 +57,7 @@ private:
     int mFD;
 };
 
-} // namespace ipc
+} // namespace utils
 } // namespace vasum
 
-#endif // COMMON_IPC_INTERNALS_EVENTFD_HPP
+#endif // COMMON_UTILS_EVENTFD_HPP

@@ -19,20 +19,19 @@
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Utility functions
+ * @brief   File descriptor utility functions
  */
 
-#ifndef COMMON_IPC_INTERNALS_UTILS_HPP
-#define COMMON_IPC_INTERNALS_UTILS_HPP
+#ifndef COMMON_UTILS_FD_HPP
+#define COMMON_UTILS_FD_HPP
 
 #include <cstddef>
 
 namespace vasum {
-namespace ipc {
+namespace utils {
 
 /**
  * Close the file descriptor.
- * Repeat until
  */
 void close(int fd);
 
@@ -73,7 +72,7 @@ void setMaxFDNumber(unsigned int limit);
  */
 unsigned int getFDNumber();
 
-} // namespace ipc
+} // namespace utils
 } // namespace vasum
 
-#endif // COMMON_IPC_INTERNALS_UTILS_HPP
+#endif // COMMON_UTILS_FD_HPP

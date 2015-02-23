@@ -45,7 +45,7 @@ Client::~Client()
     LOGS("Client Destructor");
     try {
         stop();
-    } catch (IPCException& e) {
+    } catch (std::exception& e) {
         LOGE("Error in Client's destructor: " << e.what());
     }
 }

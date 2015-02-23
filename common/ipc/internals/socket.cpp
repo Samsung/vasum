@@ -26,7 +26,7 @@
 
 #include "ipc/exception.hpp"
 #include "ipc/internals/socket.hpp"
-#include "ipc/internals/utils.hpp"
+#include "utils/fd-utils.hpp"
 #include "logger/logger.hpp"
 
 #include <systemd/sd-daemon.h>
@@ -60,8 +60,8 @@ Socket::Socket(Socket&& socket) noexcept
 Socket::~Socket() noexcept
 {
     try {
-        ipc::close(mFD);
-    } catch (IPCException& e) {
+        utils::close(mFD);
+    } catch (std::exception& e) {
         LOGE("Error in Socket's destructor: " << e.what());
     }
 }
@@ -89,13 +89,13 @@ std::shared_ptr<Socket> Socket::accept()
 void Socket::write(const void* bufferPtr, const size_t size) const
 {
     Guard guard(mCommunicationMutex);
-    ipc::write(mFD, bufferPtr, size);
+    utils::write(mFD, bufferPtr, size);
 }
 
 void Socket::read(void* bufferPtr, const size_t size) const
 {
     Guard guard(mCommunicationMutex);
-    ipc::read(mFD, bufferPtr, size);
+    utils::read(mFD, bufferPtr, size);
 }
 
 int Socket::getSystemdSocket(const std::string& path)
@@ -142,7 +142,7 @@ int Socket::createZoneSocket(const std::string& path)
                      reinterpret_cast<struct sockaddr*>(&serverAddress),
                      sizeof(struct sockaddr_un))) {
         std::string message = strerror(errno);
-        ::close(sockfd);
+        utils::close(sockfd);
         LOGE("Error in bind: " << message);
         IPCException("Error in bind: " + message);
     }
@@ -150,7 +150,7 @@ int Socket::createZoneSocket(const std::string& path)
     if (-1 == ::listen(sockfd,
                        MAX_QUEUE_LENGTH)) {
         std::string message = strerror(errno);
-        ::close(sockfd);
+        utils::close(sockfd);
         LOGE("Error in listen: " << message);
         IPCException("Error in listen: " + message);
     }
@@ -188,7 +188,7 @@ Socket Socket::connectSocket(const std::string& path)
     if (-1 == connect(fd,
                       reinterpret_cast<struct sockaddr*>(&serverAddress),
                       sizeof(struct sockaddr_un))) {
-        ::close(fd);
+        utils::close(fd);
         LOGE("Error in connect: " + std::string(strerror(errno)));
         throw IPCException("Error in connect: " + std::string(strerror(errno)));
     }
@@ -196,7 +196,7 @@ Socket Socket::connectSocket(const std::string& path)
     // Nonblock socket
     int flags = fcntl(fd, F_GETFL, 0);
     if (-1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
-        ::close(fd);
+        utils::close(fd);
         LOGE("Error in fcntl: " + std::string(strerror(errno)));
         throw IPCException("Error in fcntl: " + std::string(strerror(errno)));
     }

@@ -49,7 +49,7 @@ Acceptor::~Acceptor()
     LOGT("Destroying Acceptor");
     try {
         stop();
-    } catch (IPCException& e) {
+    } catch (std::exception& e) {
         LOGE("Error in destructor: " << e.what());
     }
     LOGT("Destroyed Acceptor");

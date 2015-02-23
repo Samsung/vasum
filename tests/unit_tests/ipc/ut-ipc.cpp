@@ -592,7 +592,6 @@ BOOST_AUTO_TEST_CASE(ServiceGSource)
         l.set();
     };
 
-    IPCGSource::Pointer serviceGSource;
     Service s(SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
 
@@ -622,7 +621,6 @@ BOOST_AUTO_TEST_CASE(ClientGSource)
     Service s(SOCKET_PATH);
     s.start();
 
-    IPCGSource::Pointer clientGSource;
     Client c(SOCKET_PATH);
     c.setMethodHandler<SendData, RecvData>(1, echoCallback);
     c.setSignalHandler<RecvData>(2, signalHandler);

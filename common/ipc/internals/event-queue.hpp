@@ -26,7 +26,7 @@
 #define COMMON_IPC_INTERNALS_EVENT_QUEUE_HPP
 
 #include "ipc/exception.hpp"
-#include "ipc/internals/eventfd.hpp"
+#include "utils/eventfd.hpp"
 #include "logger/logger.hpp"
 
 #include <string>
@@ -82,7 +82,7 @@ private:
     std::mutex mCommunicationMutex;
     std::queue<MessageType> mMessages;
 
-    EventFD mEventFD;
+    utils::EventFD mEventFD;
 };
 
 template<typename MessageType>

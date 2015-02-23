@@ -26,7 +26,7 @@
 #define COMMON_IPC_INTERNALS_MESSAGE_QUEUE_HPP
 
 #include "ipc/exception.hpp"
-#include "ipc/internals/eventfd.hpp"
+#include "utils/eventfd.hpp"
 #include "logger/logger.hpp"
 
 #include <list>
@@ -115,7 +115,7 @@ private:
 
     std::list<Request> mRequests;
     std::mutex mStateMutex;
-    EventFD mEventFD;
+    utils::EventFD mEventFD;
 };
 
 template<typename RequestIdType>

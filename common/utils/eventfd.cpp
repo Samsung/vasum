@@ -24,9 +24,9 @@
 
 #include "config.hpp"
 
-#include "ipc/internals/eventfd.hpp"
-#include "ipc/internals/utils.hpp"
-#include "ipc/exception.hpp"
+#include "utils/eventfd.hpp"
+#include "utils/exception.hpp"
+#include "utils/fd-utils.hpp"
 #include "logger/logger.hpp"
 
 #include <sys/eventfd.h>
@@ -35,24 +35,20 @@
 #include <cstdint>
 
 namespace vasum {
-namespace ipc {
+namespace utils {
 
 EventFD::EventFD()
 {
-    mFD = ::eventfd(0, EFD_SEMAPHORE | EFD_NONBLOCK);
+    mFD = ::eventfd(0, EFD_SEMAPHORE | EFD_CLOEXEC);
     if (mFD == -1) {
-        LOGE("Error in eventfd: " << std::string(strerror(errno)));
-        throw IPCException("Error in eventfd: " + std::string(strerror(errno)));
+        LOGE("Error in eventfd: " << getSystemErrorMessage());
+        throw UtilsException("Error in eventfd: " + getSystemErrorMessage());
     }
 }
 
 EventFD::~EventFD()
 {
-    try {
-        ipc::close(mFD);
-    } catch (IPCException& e) {
-        LOGE("Error in Event's destructor: " << e.what());
-    }
+    utils::close(mFD);
 }
 
 int EventFD::getFD() const
@@ -63,15 +59,15 @@ int EventFD::getFD() const
 void EventFD::send()
 {
     const std::uint64_t toSend = 1;
-    ipc::write(mFD, &toSend, sizeof(toSend));
+    utils::write(mFD, &toSend, sizeof(toSend));
 }
 
 void EventFD::receive()
 {
     std::uint64_t readBuffer;
-    ipc::read(mFD, &readBuffer, sizeof(readBuffer));
+    utils::read(mFD, &readBuffer, sizeof(readBuffer));
 }
 
 
-} // namespace ipc
+} // namespace utils
 } // namespace vasum

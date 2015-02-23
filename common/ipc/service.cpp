@@ -50,7 +50,7 @@ Service::~Service()
     LOGS("Service Destructor");
     try {
         stop();
-    } catch (IPCException& e) {
+    } catch (std::exception& e) {
         LOGE("Error in Service's destructor: " << e.what());
     }
 }

@@ -26,8 +26,8 @@
 
 #include "ipc/exception.hpp"
 #include "ipc/internals/processor.hpp"
-#include "ipc/internals/utils.hpp"
 #include "utils/signal.hpp"
+#include "utils/exception.hpp"
 
 #include <cerrno>
 #include <cstring>
@@ -79,21 +79,21 @@ Processor::~Processor()
     LOGS(mLogPrefix + "Processor Destructor");
     try {
         stop();
-    } catch (IPCException& e) {
+    } catch (std::exception& e) {
         LOGE(mLogPrefix + "Error in Processor's destructor: " << e.what());
     }
 }
 
 Processor::Peers::iterator Processor::getPeerInfoIterator(const FileDescriptor fd)
 {
-    return std::find_if(mPeerInfo.begin(), mPeerInfo.end(), [&fd](const PeerInfo & peerInfo) {
+    return std::find_if(mPeerInfo.begin(), mPeerInfo.end(), [fd](const PeerInfo & peerInfo) {
         return fd == peerInfo.socketPtr->getFD();
     });
 }
 
 Processor::Peers::iterator Processor::getPeerInfoIterator(const PeerID peerID)
 {
-    return std::find_if(mPeerInfo.begin(), mPeerInfo.end(), [&peerID](const PeerInfo & peerInfo) {
+    return std::find_if(mPeerInfo.begin(), mPeerInfo.end(), [peerID](const PeerInfo & peerInfo) {
         return peerID == peerInfo.peerID;
     });
 }
@@ -411,7 +411,7 @@ bool Processor::handleInput(const FileDescriptor fd)
             Socket::Guard guard = socket.getGuard();
             socket.read(&methodID, sizeof(methodID));
             socket.read(&messageID, sizeof(messageID));
-        } catch (const IPCException& e) {
+        } catch (const UtilsException& e) {
             LOGE(mLogPrefix + "Error during reading the socket");
             removePeerInternal(peerIt,
                                std::make_exception_ptr(IPCNaughtyPeerException()));
