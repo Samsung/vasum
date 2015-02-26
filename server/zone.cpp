@@ -125,19 +125,23 @@ void Zone::start()
     if (mConfig.enableDbusIntegration) {
         mConnectionTransport.reset(new ZoneConnectionTransport(mRunMountPoint));
     }
+
     mAdmin->start();
     if (mConfig.enableDbusIntegration) {
+        // Increase cpu quota before connect, otherwise it'd take ages.
+        goForeground();
         connect();
     }
-
-    // Send to the background only after we're connected, otherwise it'd take ages.
-    LOGD(getId() << ": sending to the background");
-    goBackground();
+    // refocus in ZonesManager will adjust cpu quota after all
 }
 
 void Zone::stop()
 {
     Lock lock(mReconnectMutex);
+    if (mAdmin->isRunning()) {
+        // boost stopping
+        goForeground();
+    }
     disconnect();
     mAdmin->stop();
     mConnectionTransport.reset();

@@ -31,8 +31,14 @@ namespace vasum {
 namespace lxc {
 
 bool setCgroup(const std::string& zoneName,
+               const std::string& cgroupController,
                const std::string& cgroupName,
                const std::string& value);
+
+bool getCgroup(const std::string& zoneName,
+               const std::string& cgroupController,
+               const std::string& cgroupName,
+               std::string& value);
 
 bool isDevice(const std::string& device);
 

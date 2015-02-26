@@ -156,16 +156,20 @@ BOOST_AUTO_TEST_CASE(SuspendResumeTest)
     BOOST_CHECK(admin->isRunning());
 }
 
-//BOOST_AUTO_TEST_CASE(SchedulerLevelTest)
-//{
-//    auto admin = create(TEST_CONFIG_PATH);
-//
-//    admin->start();
-//    ensureStarted();
-//    admin->setSchedulerLevel(SchedulerLevel::FOREGROUND);
-//    BOOST_REQUIRE(admin->getSchedulerQuota() == config.cpuQuotaForeground);
-//    admin->setSchedulerLevel(SchedulerLevel::BACKGROUND);
-//    BOOST_REQUIRE(admin->getSchedulerQuota() == config.cpuQuotaBackground);
-//}
+BOOST_AUTO_TEST_CASE(SchedulerLevelTest)
+{
+    BOOST_REQUIRE(mConfig.cpuQuotaForeground != mConfig.cpuQuotaBackground);
+
+    auto admin = create(TEST_CONFIG_PATH);
+
+    admin->start();
+    ensureStarted();
+
+    admin->setSchedulerLevel(SchedulerLevel::FOREGROUND);
+    BOOST_CHECK_EQUAL(admin->getSchedulerQuota(), mConfig.cpuQuotaForeground);
+
+    admin->setSchedulerLevel(SchedulerLevel::BACKGROUND);
+    BOOST_CHECK_EQUAL(admin->getSchedulerQuota(), mConfig.cpuQuotaBackground);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

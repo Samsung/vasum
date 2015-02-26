@@ -50,6 +50,12 @@ bool readFileContent(const std::string& path, std::string& content);
 bool saveFileContent(const std::string& path, const std::string& content);
 
 /**
+ * Read a line from file
+ * Its goal is to read a kernel config files (eg. from /proc, /sys/)
+ */
+bool readFirstLineOfFile(const std::string& path, std::string& ret);
+
+/**
  * Remove file
  */
 bool removeFile(const std::string& path);

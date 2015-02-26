@@ -392,13 +392,15 @@ void ZonesManager::focusInternal(Zones::iterator iter)
     }
 
     for (auto& zone : mZones) {
-        std::string id = zone->getId();
-        if (id == idToFocus) {
-            LOGD(id << ": being sent to foreground");
-            zone->goForeground();
-        } else {
-            LOGD(id << ": being sent to background");
-            zone->goBackground();
+        if (zone->isRunning()) {
+            std::string id = zone->getId();
+            if (id == idToFocus) {
+                LOGD(id << ": being sent to foreground");
+                zone->goForeground();
+            } else {
+                LOGD(id << ": being sent to background");
+                zone->goBackground();
+            }
         }
     }
     mActiveZoneId = idToFocus;
@@ -1245,6 +1247,7 @@ void ZonesManager::handleLockZoneCall(const std::string& id,
 
     LOGT("Lock zone");
     try {
+        zone.goBackground();// make sure it will be in background after unlock
         zone.suspend();
         refocus();
     } catch (ZoneOperationException& e) {

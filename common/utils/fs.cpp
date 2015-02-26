@@ -101,6 +101,22 @@ bool saveFileContent(const std::string& path, const std::string& content)
     return true;
 }
 
+bool readFirstLineOfFile(const std::string& path, std::string& ret)
+{
+    std::ifstream file(path);
+    if (!file) {
+        LOGD(path << ": could not open for reading");
+        return false;
+    }
+
+    std::getline(file, ret);
+    if (!file) {
+        LOGD(path << ": read error");
+        return false;
+    }
+    return true;
+}
+
 bool removeFile(const std::string& path)
 {
     LOGD(path << ": exists, removing.");

@@ -30,8 +30,10 @@
 #include "logger/logger.hpp"
 #include "utils/paths.hpp"
 #include "utils/c-array.hpp"
+#include "lxc/cgroup.hpp"
 
 #include <cassert>
+#include <climits>
 
 
 namespace vasum {
@@ -210,6 +212,8 @@ bool ZoneAdmin::isPaused()
 
 void ZoneAdmin::setSchedulerLevel(SchedulerLevel sched)
 {
+    assert(isRunning());
+
     switch (sched) {
     case SchedulerLevel::FOREGROUND:
         LOGD(mId << ": Setting SchedulerLevel::FOREGROUND");
@@ -229,27 +233,21 @@ void ZoneAdmin::setSchedulerLevel(SchedulerLevel sched)
 }
 
 
-void ZoneAdmin::setSchedulerParams(std::uint64_t, std::uint64_t, std::int64_t)
-//void ZoneAdmin::setSchedulerParams(std::uint64_t cpuShares, std::uint64_t vcpuPeriod, std::int64_t vcpuQuota)
+void ZoneAdmin::setSchedulerParams(std::uint64_t cpuShares,
+                                   std::uint64_t vcpuPeriod,
+                                   std::int64_t vcpuQuota)
 {
-//    assert(mZone);
-//
-//    int maxParams = 3;
-//    int numParamsBuff = 0;
-//
-//    std::unique_ptr<virTypedParameter[]> params(new virTypedParameter[maxParams]);
-//
-//    virTypedParameterPtr paramsTmp = params.get();
-//
-//    virTypedParamsAddULLong(&paramsTmp, &numParamsBuff, &maxParams, VIR_DOMAIN_SCHEDULER_CPU_SHARES, cpuShares);
-//    virTypedParamsAddULLong(&paramsTmp, &numParamsBuff, &maxParams, VIR_DOMAIN_SCHEDULER_VCPU_PERIOD, vcpuPeriod);
-//    virTypedParamsAddLLong(&paramsTmp, &numParamsBuff, &maxParams, VIR_DOMAIN_SCHEDULER_VCPU_QUOTA, vcpuQuota);
-//
-//    if (virDomainSetSchedulerParameters(mZone.get(), params.get(), numParamsBuff) < 0) {
-//        LOGE(mId << ": Error while setting the zone's scheduler params:\n"
-//             << libvirt::libvirtFormatError());
-//        throw ZoneOperationException();
-//    }
+    assert(vcpuPeriod >= 1000 && vcpuPeriod <= 1000000);
+    assert(vcpuQuota == -1 ||
+           (vcpuQuota >= 1000 && vcpuQuota <= static_cast<std::int64_t>(ULLONG_MAX / 1000)));
+
+    if (!lxc::setCgroup(mId, "cpu", "cpu.shares", std::to_string(cpuShares)) ||
+        !lxc::setCgroup(mId, "cpu", "cpu.cfs_period_us", std::to_string(vcpuPeriod)) ||
+        !lxc::setCgroup(mId, "cpu", "cpu.cfs_quota_us", std::to_string(vcpuQuota))) {
+
+        LOGE(mId << ": Error while setting the zone's scheduler params");
+        throw ZoneOperationException("Could not set scheduler params");
+    }
 }
 
 void ZoneAdmin::setDetachOnExit()
@@ -264,37 +262,12 @@ void ZoneAdmin::setDestroyOnExit()
 
 std::int64_t ZoneAdmin::getSchedulerQuota()
 {
-//    assert(mZone);
-//
-//    int numParamsBuff;
-//    std::unique_ptr<char, void(*)(void*)> type(virDomainGetSchedulerType(mZone.get(), &numParamsBuff), free);
-//
-//    if (type == NULL || numParamsBuff <= 0 || strcmp(type.get(), "posix") != 0) {
-//        LOGE(mId << ": Error while getting the zone's scheduler type:\n"
-//             << libvirt::libvirtFormatError());
-//        throw ZoneOperationException();
-//    }
-//
-//    std::unique_ptr<virTypedParameter[]> params(new virTypedParameter[numParamsBuff]);
-//
-//    if (virDomainGetSchedulerParameters(mZone.get(), params.get(), &numParamsBuff) < 0) {
-//        LOGE(mId << ": Error while getting the zone's scheduler params:\n"
-//             << libvirt::libvirtFormatError());
-//        throw ZoneOperationException();
-//    }
-//
-//    long long quota;
-//    if (virTypedParamsGetLLong(params.get(),
-//                               numParamsBuff,
-//                               VIR_DOMAIN_SCHEDULER_VCPU_QUOTA,
-//                               &quota) <= 0) {
-//        LOGE(mId << ": Error while getting the zone's scheduler quota param:\n"
-//             << libvirt::libvirtFormatError());
-//        throw ZoneOperationException();
-//    }
-//
-//    return quota;
-    return 0;
+    std::string ret;
+    if (!lxc::getCgroup(mId, "cpu", "cpu.cfs_quota_us", ret)) {
+        LOGE(mId << ": Error while getting the zone's scheduler quota param");
+        throw ZoneOperationException("Could not get scheduler quota param");
+    }
+    return std::stoll(ret);
 }
 
 void ZoneAdmin::createNetdevVeth(const std::string& /* zoneDev */,

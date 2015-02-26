@@ -27,6 +27,7 @@
 #include "lxc/cgroup.hpp"
 #include "logger/logger.hpp"
 #include "utils/fs.hpp"
+#include "utils/paths.hpp"
 
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -54,15 +55,36 @@ std::string flagsToPermissions(bool grant, uint32_t flags)
     }
 }
 
+std::string getCgroupPath(const std::string& zoneName,
+                          const std::string& cgroupController,
+                          const std::string& cgroupName)
+{
+    return utils::createFilePath("/sys/fs/cgroup",
+                                 cgroupController,
+                                 "lxc",
+                                 zoneName,
+                                 cgroupName);
+}
+
 } // namespace
 
 bool setCgroup(const std::string& zoneName,
+               const std::string& cgroupController,
                const std::string& cgroupName,
                const std::string& value)
 {
-    const std::string path = "/sys/fs/cgroup/devices/lxc/" + zoneName + "/" + cgroupName;
+    const std::string path = getCgroupPath(zoneName, cgroupController, cgroupName);
     LOGD("Set '" << value << "' to " << path);
     return utils::saveFileContent(path, value);
+}
+
+bool getCgroup(const std::string& zoneName,
+               const std::string& cgroupController,
+               const std::string& cgroupName,
+               std::string& value)
+{
+    const std::string path = getCgroupPath(zoneName, cgroupController, cgroupName);
+    return utils::readFirstLineOfFile(path, value);
 }
 
 bool isDevice(const std::string& device)
@@ -113,7 +135,7 @@ bool setDeviceAccess(const std::string& zoneName,
     snprintf(value, sizeof(value), "%c %u:%u %s", type, major, minor, perm.c_str());
 
     std::string name = grant ? "devices.allow" : "devices.deny";
-    return setCgroup(zoneName, name, value);
+    return setCgroup(zoneName, "devices", name, value);
 }
 
 
