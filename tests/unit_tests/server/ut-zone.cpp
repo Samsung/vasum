@@ -33,12 +33,12 @@
 #include "utils/glib-loop.hpp"
 #include "utils/scoped-dir.hpp"
 #include "config/exception.hpp"
+#include "netdev.hpp"
 
 #include <memory>
 #include <string>
 #include <thread>
 #include <chrono>
-
 
 using namespace vasum;
 using namespace config;
@@ -126,5 +126,22 @@ BOOST_AUTO_TEST_CASE(DbusConnectionTest)
 
 // TODO: DbusReconnectionTest
 
+BOOST_AUTO_TEST_CASE(ListNetdevTest)
+{
+    typedef std::vector<std::string> NetdevList;
+
+    auto c = create(TEST_CONFIG_PATH);
+    c->start();
+    ensureStarted();
+    // Depending on the kernel configuration there can be lots of interfaces (f.e. sit0, ip6tnl0)
+    NetdevList netdevs = c->getNetdevList();
+    // Check if there is mandatory loopback interface
+    BOOST_CHECK(find(netdevs.begin(), netdevs.end(), "lo") != netdevs.end());
+    NetdevList hostNetdevs = netdev::listNetdev(0);
+    // Check if we get interfaces from zone net namespace
+    BOOST_CHECK(hostNetdevs != netdevs);
+
+    c->stop(false);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

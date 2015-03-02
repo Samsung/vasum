@@ -25,9 +25,11 @@
 #ifndef COMMON_NETLINK_NETLINK_HPP
 #define COMMON_NETLINK_NETLINK_HPP
 
-#include <linux/netlink.h>
+#include <memory>
+#include <vector>
 
 namespace vasum {
+namespace netlink {
 
 /**
  * Netlink class is responsible for communicating
@@ -43,8 +45,10 @@ public:
 
     /**
      * Open connnection
+     *
+     * @param netNsPid pid which defines net namespace
      */
-    void open();
+    void open(int netNsPid = 0);
 
     /**
      * Close connection
@@ -58,8 +62,9 @@ public:
      * different instances at the same time
      *
      * @param nlmsg pointer to message
+     * @return sequence number
      */
-    void send(const nlmsghdr *nlmsg);
+    unsigned int send(const void* nlmsg);
 
     /**
      * Receive message
@@ -67,13 +72,15 @@ public:
      * It is not thread safe and even you shouldn't call this function on
      * different instances at the same time
      *
-     * @param answer pointer to answer buffer
+     * @param nlmsgSeq sequence number
+     * @return received data
      */
-    int rcv(nlmsghdr *answer);
+    std::unique_ptr<std::vector<char>> rcv(unsigned int nlmsgSeq);
 private:
     int mFd;
 };
 
+} // namesapce netlink
 } // namespace vasum
 
 #endif /* COMMON_NETLINK_NETLINK_HPP */

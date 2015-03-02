@@ -25,6 +25,7 @@
 #include "config.hpp"
 #include "netdev.hpp"
 #include "netlink/netlink-message.hpp"
+#include "utils/make-clean.hpp"
 #include "utils.hpp"
 #include "exception.hpp"
 
@@ -54,15 +55,6 @@ namespace vasum {
 namespace netdev {
 
 namespace {
-
-template<class T>
-T make_clean()
-{
-    static_assert(std::is_pod<T>::value, "make_clean require trivial and standard-layout");
-    T value;
-    std::fill_n(reinterpret_cast<char*>(&value), sizeof(value), 0);
-    return value;
-}
 
 string getUniqueVethName()
 {
@@ -109,7 +101,7 @@ void createPipedNetdev(const string& netdev1, const string& netdev2)
     validateNetdevName(netdev2);
 
     NetlinkMessage nlm(RTM_NEWLINK, NLM_F_REQUEST | NLM_F_CREATE | NLM_F_EXCL | NLM_F_ACK);
-    ifinfomsg infoPeer = make_clean<ifinfomsg>();
+    ifinfomsg infoPeer = utils::make_clean<ifinfomsg>();
     infoPeer.ifi_family = AF_UNSPEC;
     infoPeer.ifi_change = 0xFFFFFFFF;
     nlm.put(infoPeer)
@@ -138,7 +130,7 @@ void attachToBridge(const string& bridge, const string& netdev)
         throw ZoneOperationException("Can't attach to bridge");
     }
 
-    struct ifreq ifr = make_clean<ifreq>();
+    struct ifreq ifr = utils::make_clean<ifreq>();
     strncpy(ifr.ifr_name, bridge.c_str(), IFNAMSIZ);
     ifr.ifr_ifindex = index;
     int err = ioctl(fd, SIOCBRADDIF, &ifr);
@@ -156,7 +148,7 @@ int setFlags(const string& name, uint32_t mask, uint32_t flags)
 {
     uint32_t index = getInterfaceIndex(name);
     NetlinkMessage nlm(RTM_NEWLINK, NLM_F_REQUEST | NLM_F_ACK);
-    ifinfomsg infoPeer = make_clean<ifinfomsg>();
+    ifinfomsg infoPeer = utils::make_clean<ifinfomsg>();
     infoPeer.ifi_family = AF_UNSPEC;
     infoPeer.ifi_index = index;
     infoPeer.ifi_flags = flags;
@@ -176,7 +168,7 @@ void moveToNS(const string& netdev, pid_t pid)
 {
     uint32_t index = getInterfaceIndex(netdev);
     NetlinkMessage nlm(RTM_NEWLINK, NLM_F_REQUEST | NLM_F_ACK);
-    ifinfomsg infopeer = make_clean<ifinfomsg>();
+    ifinfomsg infopeer = utils::make_clean<ifinfomsg>();
     infopeer.ifi_family = AF_UNSPEC;
     infopeer.ifi_index = index;
     nlm.put(infopeer)
@@ -191,7 +183,7 @@ void createMacvlan(const string& master, const string& slave, const macvlan_mode
 
     uint32_t index = getInterfaceIndex(master);
     NetlinkMessage nlm(RTM_NEWLINK, NLM_F_REQUEST|NLM_F_CREATE|NLM_F_EXCL|NLM_F_ACK);
-    ifinfomsg infopeer = make_clean<ifinfomsg>();
+    ifinfomsg infopeer = utils::make_clean<ifinfomsg>();
     infopeer.ifi_family = AF_UNSPEC;
     infopeer.ifi_change = 0xFFFFFFFF;
     nlm.put(infopeer)
@@ -235,6 +227,24 @@ void movePhys(const pid_t& nsPid, const string& devId)
 {
     LOGT("Creating phys: dev: " << devId);
     moveToNS(devId, nsPid);
+}
+
+std::vector<std::string> listNetdev(const pid_t& nsPid)
+{
+    NetlinkMessage nlm(RTM_GETLINK, NLM_F_REQUEST|NLM_F_DUMP|NLM_F_ROOT);
+    ifinfomsg info = utils::make_clean<ifinfomsg>();
+    info.ifi_family = AF_PACKET;
+    nlm.put(info);
+    NetlinkResponse response = send(nlm, nsPid);
+    std::vector<std::string> interfaces;
+    while (response.hasMessage()) {
+        std::string ifName;
+        response.skip<ifinfomsg>();
+        response.fetch(IFLA_IFNAME, ifName);
+        interfaces.push_back(ifName);
+        response.fetchNextMessage();
+    }
+    return interfaces;
 }
 
 } //namespace netdev

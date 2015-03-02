@@ -314,7 +314,7 @@ ZoneAdmin::NetdevAttrs ZoneAdmin::getNetdevAttrs(const std::string& /* netdev */
 
 std::vector<std::string> ZoneAdmin::getNetdevList()
 {
-    throw ZoneOperationException("Not implemented");
+    return netdev::listNetdev(mZone.getInitPid());
 }
 
 } // namespace vasum

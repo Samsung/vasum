@@ -26,6 +26,7 @@
 #define SERVER_NETDEV_HPP
 
 #include <string>
+#include <vector>
 #include <linux/if_link.h>
 #include <sys/types.h>
 
@@ -38,6 +39,7 @@ void createMacvlan(const pid_t& nsPid,
                    const std::string& hostDev,
                    const macvlan_mode& mode);
 void movePhys(const pid_t& nsPid, const std::string& devId);
+std::vector<std::string> listNetdev(const pid_t& nsPid);
 
 } //namespace netdev
 } //namespace vasum

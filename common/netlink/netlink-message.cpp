@@ -29,8 +29,10 @@
 
 #include <logger/logger.hpp>
 
+#include <algorithm>
 #include <memory>
 #include <cstring>
+#include <atomic>
 #include <cassert>
 
 #include <linux/netlink.h>
@@ -38,16 +40,15 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#ifndef PAGE_SIZE
-#define PAGE_SIZE 4096
-#endif
-
 namespace {
 
-const int NLMSG_GOOD_SIZE = 2*PAGE_SIZE;
-inline rtattr* NLMSG_TAIL(nlmsghdr* nmsg)
+inline const rtattr* asAttr(const void* data) { return reinterpret_cast<const rtattr*>(data); }
+inline const nlmsghdr* asHdr(const void* data) { return reinterpret_cast<const nlmsghdr*>(data); }
+inline rtattr* asAttr(void* data) { return reinterpret_cast<rtattr*>(data); }
+inline nlmsghdr* asHdr(void* data) { return reinterpret_cast<nlmsghdr*>(data); }
+inline char* NLMSG_TAIL(nlmsghdr* nmsg)
 {
-    return reinterpret_cast<rtattr*>(reinterpret_cast<char*>(nmsg) + NLMSG_ALIGN(nmsg->nlmsg_len));
+    return reinterpret_cast<char*>(nmsg) + NLMSG_ALIGN(nmsg->nlmsg_len);
 }
 
 } // namespace
@@ -55,10 +56,15 @@ inline rtattr* NLMSG_TAIL(nlmsghdr* nmsg)
 namespace vasum {
 namespace netlink {
 
+NetlinkResponse send(const NetlinkMessage& msg)
+{
+    return send(msg, 0);
+}
+
 NetlinkMessage::NetlinkMessage(uint16_t type, uint16_t flags)
 {
-    static uint32_t seq = 0;
-    mNlmsg.resize(NLMSG_GOOD_SIZE, 0);
+    static std::atomic<uint32_t> seq(0);
+    mNlmsg.resize(NLMSG_HDRLEN, 0);
     hdr().nlmsg_len = NLMSG_HDRLEN;
     hdr().nlmsg_flags = flags | NLM_F_ACK;
     hdr().nlmsg_type = type;
@@ -68,18 +74,17 @@ NetlinkMessage::NetlinkMessage(uint16_t type, uint16_t flags)
 
 NetlinkMessage& NetlinkMessage::beginNested(int ifla)
 {
-    struct rtattr *nest = NLMSG_TAIL(&hdr());
+    auto offset = std::distance(reinterpret_cast<char*>(&hdr()), NLMSG_TAIL(&hdr()));
     put(ifla, NULL, 0);
-    mNested.push(nest);
+    mNested.push(offset);
     return *this;
 }
 
 NetlinkMessage& NetlinkMessage::endNested()
 {
     assert(!mNested.empty());
-    rtattr *nest = reinterpret_cast<rtattr*>(mNested.top());
-    nest->rta_len = std::distance(reinterpret_cast<char*>(nest),
-                                  reinterpret_cast<char*>(NLMSG_TAIL(&hdr())));
+    rtattr* nest = asAttr(reinterpret_cast<char*>(&hdr()) +  mNested.top());
+    nest->rta_len = std::distance(reinterpret_cast<char*>(nest), NLMSG_TAIL(&hdr()));
     mNested.pop();
     return *this;
 }
@@ -96,7 +101,7 @@ NetlinkMessage& NetlinkMessage::put(int ifla, const void* data, int len)
     int newLen = NLMSG_ALIGN(hdr().nlmsg_len) + RTA_ALIGN(rtalen);
 
     setMinCapacity(newLen);
-    rta = NLMSG_TAIL(&hdr());
+    rta = asAttr(NLMSG_TAIL(&hdr()));
     rta->rta_type = ifla;
     rta->rta_len = rtalen;
     memcpy(RTA_DATA(rta), data, len);
@@ -113,11 +118,11 @@ NetlinkMessage& NetlinkMessage::put(const void* data, int len)
 }
 
 nlmsghdr& NetlinkMessage::hdr() {
-    return *reinterpret_cast<nlmsghdr*>(mNlmsg.data());
+    return *asHdr(mNlmsg.data());
 }
 
 const nlmsghdr& NetlinkMessage::hdr() const {
-    return *reinterpret_cast<const nlmsghdr*>(mNlmsg.data());
+    return *asHdr(mNlmsg.data());
 }
 
 void NetlinkMessage::setMinCapacity(unsigned int size)
@@ -127,41 +132,179 @@ void NetlinkMessage::setMinCapacity(unsigned int size)
     }
 }
 
-void send(const NetlinkMessage& msg)
+NetlinkResponse::NetlinkResponse(std::unique_ptr<std::vector<char>>&& message)
+    : mNlmsg(std::move(message))
+    , mNlmsgHdr(asHdr(mNlmsg.get()->data()))
+    , mPosition(NLMSG_HDRLEN)
 {
-    //TODO: Handle messages with responses
+}
+
+bool NetlinkResponse::hasMessage() const
+{
+    unsigned int tail = size() - getHdrPosition();
+    bool hasHeader = NLMSG_OK(mNlmsgHdr, tail);
+    if (!hasHeader) {
+        return false;
+    }
+    //Check if isn't ACK message
+    return NLMSG_PAYLOAD(mNlmsgHdr,0) > sizeof(uint32_t);
+}
+
+int NetlinkResponse::getMessageType() const
+{
+    return mNlmsgHdr->nlmsg_type;
+}
+
+void NetlinkResponse::fetchNextMessage()
+{
+    if (mNlmsgHdr->nlmsg_type == NLMSG_DONE) {
+        throw VasumException("There is no next message");
+    }
+    int tail = size() - mPosition;
+    mNlmsgHdr = NLMSG_NEXT(mNlmsgHdr, tail);
+    mPosition = getHdrPosition() + NLMSG_HDRLEN;
+}
+
+bool NetlinkResponse::hasAttribute() const
+{
+    assert(mPosition >= getHdrPosition());
+    int tail = mNlmsgHdr->nlmsg_len - (mPosition - getHdrPosition());
+    return RTA_OK(asAttr(get(0)), tail);
+}
+
+bool NetlinkResponse::isNestedAttribute() const
+{
+    return asAttr(get(RTA_LENGTH(0)))->rta_len == RTA_LENGTH(0);
+}
+
+void NetlinkResponse::skipAttribute()
+{
+    const rtattr *rta = asAttr(get(RTA_LENGTH(0)));
+    if (size() < mPosition + RTA_ALIGN(rta->rta_len)) {
+        LOGE("Skipping out of buffer:"
+                << " to: " << mPosition + RTA_ALIGN(rta->rta_len)
+                << ", buf size: " << size());
+        throw VasumException("Skipping out of buffer");
+    }
+    seek(RTA_ALIGN(rta->rta_len));
+}
+
+NetlinkResponse& NetlinkResponse::openNested(int ifla)
+{
+    const rtattr *rta = asAttr(get(RTA_LENGTH(0)));
+    if (rta->rta_type == ifla) {
+        LOGE("Wrong attribute type, expected: " << ifla << ", got: " << rta->rta_type);
+        throw VasumException("Wrong attribute type");
+    }
+    int pos = mPosition;
+    seek(RTA_LENGTH(0));
+    mNested.push(pos);
+    return *this;
+}
+
+NetlinkResponse& NetlinkResponse::closeNested()
+{
+    assert(!mNested.empty());
+    int pos = mNested.top();
+    const rtattr *rta = asAttr(mNlmsg->data() + pos);
+    if (rta->rta_len != mPosition - pos) {
+        LOGE("There is no nested attribute end. Did you read all attributes (read: "
+                << mPosition -  pos << ", length: " << rta->rta_len);
+        throw VasumException("There is no nested attribute end");
+    }
+    mNested.pop();
+    mPosition = pos;
+    return *this;
+}
+
+NetlinkResponse& NetlinkResponse::fetch(int ifla, std::string& value, int maxSize)
+{
+    value = std::string(get(ifla, maxSize));
+    skipAttribute();
+    return *this;
+}
+
+const char* NetlinkResponse::get(int ifla, int len) const
+{
+    const rtattr *rta = asAttr(get(RTA_LENGTH(len < 0 ? 0 : len)));
+    if (rta->rta_type != ifla) {
+        LOGE("Wrong attribute type, expected:" << ifla << ", got: " << rta->rta_type);
+        throw VasumException("Wrong attribute type");
+    }
+    if (len >= 0 && rta->rta_len != RTA_LENGTH(len)) {
+        LOGE("Wrong attribute length, expected: " << rta->rta_len + ", got " << len);
+        throw VasumException("Wrong attribute length");
+    }
+    return reinterpret_cast<const char*>(RTA_DATA(get(rta->rta_len)));
+}
+
+const char* NetlinkResponse::get(int len) const
+{
+    if (size() < mPosition + len) {
+        LOGE("Read out of buffer:"
+                << " from: " << mPosition + len
+                << ", buf size: " << size());
+        throw VasumException("Read out of buffer");
+    }
+    return mNlmsg->data() + mPosition;
+}
+
+NetlinkResponse& NetlinkResponse::fetch(int ifla, char* data, int len)
+{
+    std::copy_n(get(ifla, len), len, data);
+    skipAttribute();
+    return *this;
+}
+
+NetlinkResponse& NetlinkResponse::fetch(char* data, int len)
+{
+    std::copy_n(get(len), len, data);
+    seek(len);
+    return *this;
+}
+
+int NetlinkResponse::getAttributeType() const
+{
+    return asAttr(get(RTA_LENGTH(0)))->rta_type;
+}
+
+NetlinkResponse& NetlinkResponse::seek(int len)
+{
+    if (size() < mPosition + len) {
+        throw VasumException("Skipping out of buffer");
+    }
+    mPosition += len;
+    return *this;
+}
+
+int NetlinkResponse::size() const
+{
+    return mNlmsg->size();
+}
+
+inline int NetlinkResponse::getHdrPosition() const
+{
+    return std::distance(reinterpret_cast<const char*>(mNlmsg->data()),
+                         reinterpret_cast<const char*>(mNlmsgHdr));
+}
+
+NetlinkResponse send(const NetlinkMessage& msg, int pid)
+{
     assert(msg.hdr().nlmsg_flags & NLM_F_ACK);
 
-    const int answerLen = NLMSG_ALIGN(msg.hdr().nlmsg_len + sizeof(nlmsgerr));
-    std::unique_ptr<char[]> answerBuff(new char[answerLen]);
-    nlmsghdr* answer = reinterpret_cast<nlmsghdr*>(answerBuff.get());
-    answer->nlmsg_len =  answerLen;
-
+    std::unique_ptr<std::vector<char>> data;
     Netlink nl;
-    nl.open();
+    nl.open(pid);
     try {
         nl.send(&msg.hdr());
-        //Receive ACK Netlink Message
-        do {
-            nl.rcv(answer);
-        } while (answer->nlmsg_type == NLMSG_NOOP);
+        data = nl.rcv(msg.hdr().nlmsg_seq);
     } catch (const std::exception& ex) {
         LOGE("Sending failed (" << ex.what() << ")");
         nl.close();
         throw;
     }
     nl.close();
-    if (answer->nlmsg_type != NLMSG_ERROR) {
-        // It is not NACK/ACK message
-        throw VasumException("Sending failed ( unrecognized message type )");
-    }
-    nlmsgerr *err = reinterpret_cast<nlmsgerr*>(NLMSG_DATA(answer));
-    if (answer->nlmsg_seq != msg.hdr().nlmsg_seq) {
-        throw VasumException("Sending failed ( answer message was mismatched )");
-    }
-    if (err->error) {
-        throw VasumException("Sending failed (" + getSystemErrorMessage(-err->error) + ")");
-    }
+    return NetlinkResponse(std::move(data));
 }
 
 } // namespace netlink

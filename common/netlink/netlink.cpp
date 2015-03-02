@@ -26,6 +26,8 @@
 #include "netlink.hpp"
 #include "utils.hpp"
 #include "base-exception.hpp"
+#include "utils/make-clean.hpp"
+#include "utils/environment.hpp"
 
 #include <logger/logger.hpp>
 #include <cassert>
@@ -34,20 +36,53 @@
 #include <unistd.h>
 #include <linux/netlink.h>
 
-namespace vasum {
+#ifndef PAGE_SIZE
+#define PAGE_SIZE 4096
+#endif
+
+using namespace vasum;
 
 namespace {
 
-template<class T>
-T make_clean()
+const int NLMSG_RCV_GOOD_SIZE = 2*PAGE_SIZE;
+
+int vsm_recvmsg(int fd, struct msghdr *msg, int flags)
 {
-    static_assert(std::is_pod<T>::value, "make_clean require trivial and standard-layout");
-    T value;
-    std::fill_n(reinterpret_cast<char*>(&value), sizeof(value), 0);
-    return value;
+    int ret = recvmsg(fd, msg, flags);
+    if (ret < 0) {
+        LOGE("Can't receive message: " + getSystemErrorMessage());
+    } else if (ret == 0 && msg->msg_iov && msg->msg_iov->iov_len > 0) {
+        LOGE("Peer has performed an orderly shutdown");
+    } else if (msg->msg_flags & MSG_TRUNC) {
+        LOGE("Can't receive message: " + getSystemErrorMessage(EMSGSIZE));
+    } else if (msg->msg_flags & MSG_ERRQUEUE) {
+        LOGE("No data was received but an extended error");
+    } else if (msg->msg_flags & MSG_OOB) {
+        LOGE("Internal error (expedited or out-of-band data were received)");
+    } else if (msg->msg_flags & MSG_CTRUNC) {
+        LOGE("Some control data were discarded");
+    } else if (msg->msg_flags & MSG_EOR) {
+        LOGE("End-of-record");
+    } else {
+        // All ok
+        return ret;
+    }
+    throw VasumException("Can't receive netlink message");
+}
+
+void vsm_sendmsg(int fd, const struct msghdr *msg, int flags)
+{
+    int ret = sendmsg(fd, msg, flags);
+    if (ret < 0) {
+        LOGE("Can't send message: " << getSystemErrorMessage());
+        throw VasumException("Can't send netlink message");
+    }
 }
 
 } // namespace
+
+namespace vasum {
+namespace netlink {
 
 Netlink::Netlink() : mFd(-1)
 {
@@ -58,22 +93,30 @@ Netlink::~Netlink()
     close();
 }
 
-void Netlink::open()
+void Netlink::open(int netNsPid)
 {
+    auto fdFactory = []{ return socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE); };
+
     assert(mFd == -1);
-    mFd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    if (netNsPid == 0 || netNsPid == getpid()) {
+        mFd = fdFactory();
+        if (mFd == -1) {
+            LOGE("Can't open socket: " << getSystemErrorMessage());
+        }
+    } else {
+        mFd = utils::passNemaspacedFd(netNsPid, CLONE_NEWNET, fdFactory);
+    }
     if (mFd == -1) {
-        LOGE("Can't open socket (" << getSystemErrorMessage() << ")");
         throw VasumException("Can't open netlink connection");
     }
 
-    sockaddr_nl local = make_clean<sockaddr_nl>();
+    sockaddr_nl local = utils::make_clean<sockaddr_nl>();
     local.nl_family = AF_NETLINK;
 
     if (bind(mFd, (struct sockaddr *)&local, sizeof(local)) < 0) {
         int err = errno;
         close();
-        LOGE("Can't bind to socket (" << getSystemErrorMessage(err) << ")");
+        LOGE("Can't bind to socket: " << getSystemErrorMessage(err));
         throw VasumException("Can't set up netlink connection");
     }
 }
@@ -86,70 +129,72 @@ void Netlink::close()
     }
 }
 
-void Netlink::send(const nlmsghdr *nlmsg)
+unsigned int Netlink::send(const void *nlmsg)
 {
-    msghdr msg = make_clean<msghdr>();
-    sockaddr_nl nladdr = make_clean<sockaddr_nl>();
-    iovec iov = make_clean<iovec>();
+    msghdr msg = utils::make_clean<msghdr>();
+    sockaddr_nl nladdr = utils::make_clean<sockaddr_nl>();
+    iovec iov = utils::make_clean<iovec>();
 
-    iov.iov_base = (void *)nlmsg;
-    iov.iov_len = nlmsg->nlmsg_len;
+    iov.iov_base = const_cast<void*>(nlmsg);
+    iov.iov_len = reinterpret_cast<const nlmsghdr*>(nlmsg)->nlmsg_len;
     msg.msg_name = &nladdr;
     msg.msg_namelen = sizeof(nladdr);
     msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
     nladdr.nl_family = AF_NETLINK;
 
-    int ret = sendmsg(mFd, &msg, 0);
-    if (ret < 0) {
-        LOGE("Can't send message (" << getSystemErrorMessage() << ")");
-        throw VasumException("Can't send netlink message");
-    }
+    vsm_sendmsg(mFd, &msg, 0);
+    return reinterpret_cast<const nlmsghdr*>(nlmsg)->nlmsg_seq;
 }
 
-int Netlink::rcv(nlmsghdr *answer)
+std::unique_ptr<std::vector<char>> Netlink::rcv(unsigned int nlmsgSeq)
 {
-    //TODO: Handle too small buffer situation (buffer resizing)
-    msghdr msg = make_clean<msghdr>();
-    sockaddr_nl nladdr = make_clean<sockaddr_nl>();
-    iovec iov = make_clean<iovec>();
+    std::unique_ptr<std::vector<char>> buf(new std::vector<char>());
 
-    iov.iov_base = answer;
-    iov.iov_len = answer->nlmsg_len;
+    msghdr msg = utils::make_clean<msghdr>();
+    sockaddr_nl nladdr = utils::make_clean<sockaddr_nl>();
+    iovec iov = utils::make_clean<iovec>();
+
     msg.msg_name = &nladdr;
     msg.msg_namelen = sizeof(nladdr);
     msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
     nladdr.nl_family = AF_NETLINK;
 
-    int ret = recvmsg(mFd, &msg, 0);
-    if (ret < 0) {
-        LOGE("Can't receive message (" + getSystemErrorMessage() + ")");
-        throw VasumException("Can't receive netlink message");
-    }
-    if (ret == 0) {
-        LOGE("Peer has performed an orderly shutdown");
-        throw VasumException("Can't receive netlink message");
-    }
-    if (msg.msg_flags & MSG_TRUNC) {
-        LOGE("Can't receive message (" + getSystemErrorMessage(EMSGSIZE) + ")");
-        throw VasumException("Can't receive netlink message");
-    }
-    if (msg.msg_flags & MSG_ERRQUEUE) {
-        LOGE("No data was received but an extended error");
-        throw VasumException("Can't receive netlink message");
-    }
-    if (msg.msg_flags & MSG_OOB) {
-        LOGE("Internal error (expedited or out-of-band data were received)");
-        throw VasumException("Can't receive netlink message");
-    }
-    if (msg.msg_flags & (MSG_EOR | MSG_CTRUNC)) {
-        assert(!"This should not happen!");
-        LOGE("Internal error (" << std::to_string(msg.msg_flags) << ")");
-        throw VasumException("Internal error while recaiving netlink message");
-    }
+    nlmsghdr* answer;
+    nlmsghdr* lastOk = NULL;
+    size_t offset = 0;
+    do {
+        buf->resize(offset + NLMSG_RCV_GOOD_SIZE);
+        answer = reinterpret_cast<nlmsghdr*>(buf->data() + offset);
+        iov.iov_base = answer;
+        iov.iov_len = buf->size() - offset;
+        unsigned int ret = vsm_recvmsg(mFd, &msg, 0);
+        for (unsigned int len = ret; NLMSG_OK(answer, len); answer = NLMSG_NEXT(answer, len)) {
+            lastOk = answer;
+            if (answer->nlmsg_type == NLMSG_ERROR) {
+                // It is NACK/ACK message
+                nlmsgerr *err = reinterpret_cast<nlmsgerr*>(NLMSG_DATA(answer));
+                if (answer->nlmsg_seq != nlmsgSeq) {
+                    throw VasumException("Sending failed: answer message was mismatched");
+                }
+                if (err->error) {
+                    throw VasumException("Sending failed: " + getSystemErrorMessage(-err->error));
+                }
+            } else if (answer->nlmsg_type == NLMSG_OVERRUN) {
+                throw VasumException("Sending failed: data lost");
+            }
+        }
+        if (lastOk == NULL) {
+            LOGE("Something went terribly wrong. Check vsm_recvmsg function");
+            throw VasumException("Can't receive data from system");
+        }
+        offset +=  NLMSG_ALIGN(ret);
+    } while (lastOk->nlmsg_type != NLMSG_DONE && lastOk->nlmsg_flags & NLM_F_MULTI);
 
-    return ret;
+    buf->resize(offset);
+    return buf;
 }
 
+} //namespace netlink
 } //namespace vasum

@@ -25,6 +25,7 @@
 #ifndef COMMON_NETLINK_NETLINK_MESSAGE_HPP
 #define COMMON_NETLINK_NETLINK_MESSAGE_HPP
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <stack>
@@ -34,6 +35,9 @@
 
 namespace vasum {
 namespace netlink {
+
+class NetlinkResponse;
+class NetlinkMessage;
 
 /**
  *  NetlinkMessage is used to creatie a netlink messages
@@ -81,20 +85,123 @@ public:
      * Send netlink message
      *
      * It is not thread safe
+     * @param msg Netlink message
+     * @param pid Process id which describes network namespace
      */
-    friend void send(const NetlinkMessage& msg);
+    friend NetlinkResponse send(const NetlinkMessage& msg, int pid);
 private:
     std::vector<char> mNlmsg;
-    std::stack<void*> mNested;
+    std::stack<int> mNested;
 
     NetlinkMessage& put(int ifla, const void* data, int len);
     NetlinkMessage& put(const void* data, int len);
     nlmsghdr& hdr();
     const nlmsghdr& hdr() const;
     void setMinCapacity(unsigned int size);
-
-
 };
+
+/**
+ *  NetlinkResponse is used to read netlink messages
+ */
+class NetlinkResponse {
+public:
+    /**
+     * Check if theres is next message in netlink response
+     */
+    bool hasMessage() const;
+
+    /**
+     * Fetch next message
+     */
+    void fetchNextMessage();
+
+    /**
+     * Get message type
+     */
+    int getMessageType() const;
+
+    /**
+     * Check if there is any attribute in message
+     */
+    bool hasAttribute() const;
+
+    /**
+     * Check if current attribute is nested
+     */
+    bool isNestedAttribute() const;
+
+    /**
+     * Skip attribute
+     */
+    void skipAttribute();
+
+    /**
+     * Start reading nested attribute
+     */
+    NetlinkResponse& openNested(int ifla);
+
+    /**
+     * End reading nested attribute
+     */
+    NetlinkResponse& closeNested();
+
+    ///@{
+    /**
+     * Fetch attribute
+     */
+    NetlinkResponse& fetch(int ifla, std::string& value, int maxSize = std::string::npos);
+    template<class T>
+    NetlinkResponse& fetch(int ifla, T& value);
+    ///@}
+
+    /**
+     * Get attributie type
+     **/
+    int getAttributeType() const;
+
+    /**
+     * Fetch data of type T
+     */
+    template<class T>
+    NetlinkResponse& fetch(T& value);
+
+    /**
+     * Skip data of type T
+     */
+    template<class T>
+    NetlinkResponse& skip();
+
+    /**
+     * Send netlink message
+     *
+     * It is not thread safe
+     * @param msg Netlink message
+     * @param pid Process id which describes network namespace
+     */
+    friend NetlinkResponse send(const NetlinkMessage& msg, int pid);
+private:
+    NetlinkResponse(std::unique_ptr<std::vector<char>>&& message);
+
+    std::unique_ptr<std::vector<char>> mNlmsg;
+    std::stack<int> mNested;
+    nlmsghdr* mNlmsgHdr;
+    int mPosition;
+
+    const char* get(int ifla, int iflasize) const;
+    const char* get(int size = 0) const;
+    NetlinkResponse& fetch(int ifla, char* data, int len);
+    NetlinkResponse& fetch(char* data, int len);
+    NetlinkResponse& seek(int len);
+    int size() const;
+    int getHdrPosition() const;
+};
+
+/**
+ * Send netlink message
+ *
+ * It is not thread safe
+ */
+NetlinkResponse send(const NetlinkMessage& msg);
 
 template<class T>
 NetlinkMessage& NetlinkMessage::put(int ifla, const T& value)
@@ -108,6 +215,27 @@ NetlinkMessage& NetlinkMessage::put(const T& value)
 {
     static_assert(std::is_pod<T>::value, "Require trivial and standard-layout structure");
     return put(&value, sizeof(value));
+}
+
+template<class T>
+NetlinkResponse& NetlinkResponse::fetch(int ifla, T& value)
+{
+    static_assert(std::is_pod<T>::value, "Require trivial and standard-layout");
+    return fetch(ifla, reinterpret_cast<char*>(&value), sizeof(value));
+}
+
+template<class T>
+NetlinkResponse& NetlinkResponse::fetch(T& value)
+{
+    static_assert(std::is_pod<T>::value, "Require trivial and standard-layout structure");
+    return fetch(reinterpret_cast<char*>(&value), sizeof(value));
+}
+
+template<class T>
+NetlinkResponse& NetlinkResponse::skip()
+{
+    static_assert(std::is_pod<T>::value, "Require trivial and standard-layout structure");
+    return seek(sizeof(T));
 }
 
 } // namespace netlink
