@@ -77,7 +77,7 @@ struct Fixture {
         cm.createZone("zone1", TEMPLATE_NAME);
         cm.createZone("zone2", TEMPLATE_NAME);
         cm.createZone("zone3", TEMPLATE_NAME);
-        cm.startAll();
+        cm.restoreAll();
         LOGI("------- setup complete --------");
     }
 
@@ -153,7 +153,7 @@ BOOST_FIXTURE_TEST_SUITE(ClientSuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(NotRunningServerTest)
 {
-    cm.stopAll();
+    cm.shutdownAll();
 
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect_custom(client,

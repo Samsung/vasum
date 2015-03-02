@@ -508,9 +508,9 @@ BOOST_AUTO_TEST_CASE(StartStopTest)
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
 
-    cm.startAll();
+    cm.restoreAll();
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "zone1");
-    cm.stopAll();
+    cm.shutdownAll();
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "");
 }
 
@@ -520,13 +520,13 @@ BOOST_AUTO_TEST_CASE(DetachOnExitTest)
         ZonesManager cm(TEST_CONFIG_PATH);
         cm.createZone("zone1", SIMPLE_TEMPLATE);
         cm.createZone("zone2", SIMPLE_TEMPLATE);
-        cm.startAll();
+        cm.restoreAll();
         BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "zone1");
         cm.setZonesDetachOnExit();
     }
     {
         ZonesManager cm(TEST_CONFIG_PATH);
-        cm.startAll();
+        cm.restoreAll();
         BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "zone1");
     }
 }
@@ -537,7 +537,7 @@ BOOST_AUTO_TEST_CASE(FocusTest)
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
-    cm.startAll();
+    cm.restoreAll();
 
     BOOST_CHECK(cm.getRunningForegroundZoneId() == "zone1");
     cm.focus("zone2");
@@ -554,7 +554,7 @@ BOOST_AUTO_TEST_CASE(NotifyActiveZoneTest)
     cm.createZone("zone1", DBUS_TEMPLATE);
     cm.createZone("zone2", DBUS_TEMPLATE);
     cm.createZone("zone3", DBUS_TEMPLATE);
-    cm.startAll();
+    cm.restoreAll();
 
     Latch signalReceivedLatch;
     std::map<int, std::vector<std::string>> signalReceivedSourcesMap;
@@ -624,7 +624,7 @@ BOOST_AUTO_TEST_CASE(DisplayOffTest)
     cm.createZone("zone1", DBUS_TEMPLATE);
     cm.createZone("zone2", DBUS_TEMPLATE);
     cm.createZone("zone3", DBUS_TEMPLATE);
-    cm.startAll();
+    cm.restoreAll();
 
     std::vector<std::unique_ptr<DbusAccessory>> clients;
     for (int i = 1; i <= TEST_DBUS_CONNECTION_ZONES_COUNT; ++i) {
@@ -661,7 +661,7 @@ BOOST_AUTO_TEST_CASE(MoveFileTest)
     cm.createZone("zone1", DBUS_TEMPLATE);
     cm.createZone("zone2", DBUS_TEMPLATE);
     cm.createZone("zone3", DBUS_TEMPLATE);
-    cm.startAll();
+    cm.restoreAll();
 
     Latch notificationLatch;
     std::string notificationSource;
@@ -763,7 +763,7 @@ BOOST_AUTO_TEST_CASE(AllowSwitchToDefaultTest)
     cm.createZone("zone1", DBUS_TEMPLATE);
     cm.createZone("zone2", DBUS_TEMPLATE);
     cm.createZone("zone3", DBUS_TEMPLATE);
-    cm.startAll();
+    cm.restoreAll();
 
     std::vector<std::unique_ptr<DbusAccessory>> clients;
     for (int i = 1; i <= TEST_DBUS_CONNECTION_ZONES_COUNT; ++i) {
@@ -812,7 +812,7 @@ BOOST_AUTO_TEST_CASE(ProxyCallTest)
     cm.createZone("zone1", DBUS_TEMPLATE);
     cm.createZone("zone2", DBUS_TEMPLATE);
     cm.createZone("zone3", DBUS_TEMPLATE);
-    cm.startAll();
+    cm.restoreAll();
 
     std::map<int, std::unique_ptr<DbusAccessory>> dbuses;
     for (int i = 0; i <= TEST_DBUS_CONNECTION_ZONES_COUNT; ++i) {
@@ -904,9 +904,9 @@ BOOST_AUTO_TEST_CASE(GetZoneDbusesTest)
     cm.createZone("zone3", DBUS_TEMPLATE);
 
     BOOST_CHECK(EXPECTED_DBUSES_NONE == host.callMethodGetZoneDbuses());
-    cm.startAll();
+    cm.restoreAll();
     BOOST_CHECK(EXPECTED_DBUSES_ALL == host.callMethodGetZoneDbuses());
-    cm.stopAll();
+    cm.shutdownAll();
     BOOST_CHECK(EXPECTED_DBUSES_NONE == host.callMethodGetZoneDbuses());
 }
 
@@ -919,9 +919,9 @@ BOOST_AUTO_TEST_CASE(GetZoneDbusesNoDbusTest)
     cm.createZone("zone3", SIMPLE_TEMPLATE);
 
     BOOST_CHECK(EXPECTED_DBUSES_NONE == host.callMethodGetZoneDbuses());
-    cm.startAll();
+    cm.restoreAll();
     BOOST_CHECK(EXPECTED_DBUSES_NONE == host.callMethodGetZoneDbuses());
-    cm.stopAll();
+    cm.shutdownAll();
     BOOST_CHECK(EXPECTED_DBUSES_NONE == host.callMethodGetZoneDbuses());
 }
 
@@ -961,7 +961,7 @@ BOOST_AUTO_TEST_CASE(ZoneDbusesSignalsTest)
         BOOST_CHECK(signalLatch.empty());
         BOOST_CHECK(collectedDbuses.empty());
 
-        cm.startAll();
+        cm.restoreAll();
 
         BOOST_REQUIRE(signalLatch.waitForN(TEST_DBUS_CONNECTION_ZONES_COUNT, EVENT_TIMEOUT));
         BOOST_CHECK(signalLatch.empty());
@@ -998,7 +998,7 @@ BOOST_AUTO_TEST_CASE(GetActiveZoneIdTest)
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
-    cm.startAll();
+    cm.restoreAll();
 
     DbusAccessory dbus(DbusAccessory::HOST_ID);
 
@@ -1011,7 +1011,7 @@ BOOST_AUTO_TEST_CASE(GetActiveZoneIdTest)
         BOOST_CHECK(dbus.callMethodGetActiveZoneId() == zoneId);
     }
 
-    cm.stopAll();
+    cm.shutdownAll();
     BOOST_CHECK(dbus.callMethodGetActiveZoneId() == "");
 }
 
@@ -1021,7 +1021,7 @@ BOOST_AUTO_TEST_CASE(SetActiveZoneTest)
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
-    cm.startAll();
+    cm.restoreAll();
 
     DbusAccessory dbus(DbusAccessory::HOST_ID);
 
@@ -1038,7 +1038,7 @@ BOOST_AUTO_TEST_CASE(SetActiveZoneTest)
                             DbusException,
                             WhatEquals("No such zone id"));
 
-    cm.stopAll();
+    cm.shutdownAll();
     BOOST_REQUIRE_EXCEPTION(dbus.callMethodSetActiveZone("zone1"),
                             DbusException,
                             WhatEquals("Could not activate stopped or paused zone"));
@@ -1051,7 +1051,7 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZoneTest)
     const std::string zone3 = "test3";
 
     ZonesManager cm(TEST_CONFIG_PATH);
-    cm.startAll();
+    cm.restoreAll();
 
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "");
 
@@ -1074,7 +1074,7 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZoneTest)
     dbus.callAsyncMethodCreateZone(zone3, SIMPLE_TEMPLATE, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 
-    cm.startAll();
+    cm.restoreAll();
 
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone1);
     cm.focus(zone3);
@@ -1107,7 +1107,7 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZonePersistenceTest)
 
     auto getZoneIds = []() -> std::vector<std::string> {
         ZonesManager cm(TEST_CONFIG_PATH);
-        cm.startAll();
+        cm.restoreAll();
 
         DbusAccessory dbus(DbusAccessory::HOST_ID);
         return dbus.callMethodGetZoneIds();
@@ -1138,6 +1138,77 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZonePersistenceTest)
     }
 
     BOOST_CHECK(getZoneIds().empty());
+}
+
+BOOST_AUTO_TEST_CASE(ZoneStatePersistenceTest)
+{
+    const std::string zone1 = "zone1";
+    const std::string zone2 = "zone2";
+    const std::string zone3 = "zone3";
+    const std::string zone4 = "zone4";
+    const std::string zone5 = "zone5";
+
+    Latch callDone;
+    auto resultCallback = [&]() {
+        callDone.set();
+    };
+
+    // firts run
+    {
+        ZonesManager cm(TEST_CONFIG_PATH);
+        DbusAccessory dbus(DbusAccessory::HOST_ID);
+
+        // zone1 - created
+        dbus.callAsyncMethodCreateZone(zone1, SIMPLE_TEMPLATE, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+
+        // zone2 - started
+        dbus.callAsyncMethodCreateZone(zone2, SIMPLE_TEMPLATE, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+        dbus.callAsyncMethodStartZone(zone2, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+        BOOST_CHECK(cm.isRunning(zone2));
+
+        // zone3 - started then paused
+        dbus.callAsyncMethodCreateZone(zone3, SIMPLE_TEMPLATE, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+        dbus.callAsyncMethodStartZone(zone3, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+        dbus.callMethodLockZone(zone3);
+        BOOST_CHECK(cm.isPaused(zone3));
+
+        // zone4 - started then stopped
+        dbus.callAsyncMethodCreateZone(zone4, SIMPLE_TEMPLATE, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+        dbus.callAsyncMethodStartZone(zone4, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+        dbus.callAsyncMethodShutdownZone(zone4, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+        BOOST_CHECK(cm.isStopped(zone4));
+
+        // zone5 - started then stopped then started
+        dbus.callAsyncMethodCreateZone(zone5, SIMPLE_TEMPLATE, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+        dbus.callAsyncMethodStartZone(zone5, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+        dbus.callAsyncMethodShutdownZone(zone5, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+        dbus.callAsyncMethodStartZone(zone5, resultCallback);
+        BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
+        BOOST_CHECK(cm.isRunning(zone5));
+    }
+
+    // second run
+    {
+        ZonesManager cm(TEST_CONFIG_PATH);
+        cm.restoreAll();
+
+        BOOST_CHECK(cm.isRunning(zone1)); // because the default json value
+        BOOST_CHECK(cm.isRunning(zone2));
+        BOOST_CHECK(cm.isPaused(zone3));
+        BOOST_CHECK(cm.isStopped(zone4));
+        BOOST_CHECK(cm.isRunning(zone5));
+    }
 }
 
 BOOST_AUTO_TEST_CASE(StartShutdownZoneTest)
@@ -1186,7 +1257,7 @@ BOOST_AUTO_TEST_CASE(LockUnlockZoneTest)
     cm.createZone("zone1", DBUS_TEMPLATE);
     cm.createZone("zone2", DBUS_TEMPLATE);
     cm.createZone("zone3", DBUS_TEMPLATE);
-    cm.startAll();
+    cm.restoreAll();
 
     DbusAccessory dbus(DbusAccessory::HOST_ID);
 
@@ -1208,7 +1279,7 @@ BOOST_AUTO_TEST_CASE(LockUnlockZoneTest)
                             DbusException,
                             WhatEquals("No such zone id"));
 
-    cm.stopAll();
+    cm.shutdownAll();
     BOOST_REQUIRE_EXCEPTION(dbus.callMethodLockZone("zone1"),
                             DbusException,
                             WhatEquals("Zone is not running"));

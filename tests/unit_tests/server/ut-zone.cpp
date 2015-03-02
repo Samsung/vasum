@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(StartStopTest)
     auto c = create(TEST_CONFIG_PATH);
     c->start();
     ensureStarted();
-    c->stop();
+    c->stop(true);
 }
 
 BOOST_AUTO_TEST_CASE(DbusConnectionTest)
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(DbusConnectionTest)
     auto c = create(TEST_DBUS_CONFIG_PATH);
     c->start();
     ensureStarted();
-    c->stop();
+    c->stop(true);
 }
 
 // TODO: DbusReconnectionTest

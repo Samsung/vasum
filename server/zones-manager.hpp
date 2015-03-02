@@ -70,14 +70,14 @@ public:
     void focus(const std::string& zoneId);
 
     /**
-     * Start up all the configured zones
+     * Restore all the configured zones to the saved state
      */
-    void startAll();
+    void restoreAll();
 
     /**
-     * Stop all managed zones
+     * Shutdown all managed zones without changing the saved state
      */
-    void stopAll();
+    void shutdownAll();
 
     /**
      * @return Is the zone in a paused state?
@@ -88,6 +88,11 @@ public:
      * @return Is the zone running?
      */
     bool isRunning(const std::string& zoneId);
+
+    /**
+     * @return Is the zone stopped?
+     */
+    bool isStopped(const std::string& zoneId);
 
     /**
      * @return id of the currently focused/foreground zone

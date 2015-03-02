@@ -107,7 +107,7 @@ void Server::run(bool asRoot)
         utils::ScopedGlibLoop loop;
         ZonesManager manager(mConfigPath);
 
-        manager.startAll();
+        manager.restoreAll();
         LOGI("Daemon started");
 
         gSignalLatch.wait();
@@ -118,7 +118,7 @@ void Server::run(bool asRoot)
         }
 
         LOGI("Stopping daemon...");
-        // manager.stopAll() will be called in destructor
+        // manager.shutdownAll() will be called in destructor
     }
     LOGI("Daemon stopped");
 }

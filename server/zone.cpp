@@ -50,6 +50,10 @@ typedef std::lock_guard<std::recursive_mutex> Lock;
 const int RECONNECT_RETRIES = 15;
 const int RECONNECT_DELAY = 1 * 1000;
 
+const std::string STATE_STOPPED = "stopped";
+const std::string STATE_RUNNING = "running";
+const std::string STATE_PAUSED = "paused";
+
 } // namespace
 
 Zone::Zone(const utils::Worker::Pointer& worker,
@@ -60,6 +64,7 @@ Zone::Zone(const utils::Worker::Pointer& worker,
            const std::string& lxcTemplatePrefix,
            const std::string& baseRunMountPointPath)
     : mWorker(worker)
+    , mDbPath(dbPath)
 {
     const std::string dbPrefix = getZoneDbPrefix(zoneId);
     config::loadFromKVStoreWithJsonFile(dbPath, zoneTemplatePath, mConfig, dbPrefix);
@@ -118,9 +123,46 @@ int Zone::getPrivilege() const
     return mConfig.privilege;
 }
 
+void Zone::saveDynamicConfig()
+{
+    config::saveToKVStore(mDbPath, mDynamicConfig, getZoneDbPrefix(getId()));
+}
+
+void Zone::updateRequestedState(const std::string& state)
+{
+    // assume mutex is locked
+    if (state != mDynamicConfig.requestedState) {
+        LOGT("Set requested state of " << getId() << " to " << state);
+        mDynamicConfig.requestedState = state;
+        saveDynamicConfig();
+    }
+}
+
+void Zone::restore()
+{
+    std::string requestedState;
+    {
+        Lock lock(mReconnectMutex);
+        requestedState = mDynamicConfig.requestedState;
+        LOGT("Requested state of " << getId() << ": " << requestedState);
+    }
+
+    if (requestedState == STATE_RUNNING) {
+        start();
+    } else if (requestedState == STATE_STOPPED) {
+    } else if (requestedState == STATE_PAUSED) {
+        start();
+        suspend();
+    } else {
+        LOGE("Invalid requested state: " << requestedState);
+        assert(0 && "invalid requested state");
+    }
+}
+
 void Zone::start()
 {
     Lock lock(mReconnectMutex);
+    updateRequestedState(STATE_RUNNING);
     mProvision->start();
     if (mConfig.enableDbusIntegration) {
         mConnectionTransport.reset(new ZoneConnectionTransport(mRunMountPoint));
@@ -135,9 +177,12 @@ void Zone::start()
     // refocus in ZonesManager will adjust cpu quota after all
 }
 
-void Zone::stop()
+void Zone::stop(bool saveState)
 {
     Lock lock(mReconnectMutex);
+    if (saveState) {
+        updateRequestedState(STATE_STOPPED);
+    }
     if (mAdmin->isRunning()) {
         // boost stopping
         goForeground();
@@ -192,6 +237,7 @@ std::string Zone::getDbusAddress() const
 
 int Zone::getVT() const
 {
+    Lock lock(mReconnectMutex);
     return mDynamicConfig.vt;
 }
 
@@ -275,12 +321,14 @@ void Zone::suspend()
 {
     Lock lock(mReconnectMutex);
     mAdmin->suspend();
+    updateRequestedState(STATE_PAUSED);
 }
 
 void Zone::resume()
 {
     Lock lock(mReconnectMutex);
     mAdmin->resume();
+    updateRequestedState(STATE_RUNNING);
 }
 
 bool Zone::isPaused()
@@ -329,7 +377,7 @@ void Zone::reconnectHandler()
     }
 
     LOGE(getId() << ": Reconnecting to the DBUS has failed, stopping the zone");
-    stop();
+    stop(false);
 }
 
 void Zone::setNotifyActiveZoneCallback(const NotifyActiveZoneCallback& callback)

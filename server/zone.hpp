@@ -98,14 +98,20 @@ public:
     int getPrivilege() const;
 
     /**
+     * Restore zone to the previous state
+     */
+    void restore();
+
+    /**
      * Boot the zone to the background.
      */
     void start();
 
     /**
      * Try to shutdown the zone, if failed, destroy it.
+     * @param saveState save zone's state
      */
-    void stop();
+    void stop(bool saveState);
 
     /**
      * Activate this zone's VT
@@ -319,11 +325,14 @@ private:
     std::string mDbusAddress;
     std::string mRunMountPoint;
     std::string mRootPath;
+    std::string mDbPath;
 
     void onNameLostCallback();
     void reconnectHandler();
     void connect();
     void disconnect();
+    void saveDynamicConfig();
+    void updateRequestedState(const std::string& state);
 };
 
 

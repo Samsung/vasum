@@ -63,7 +63,7 @@ struct Fixture {
         vasum::ZonesManager manager(TEST_CONFIG_PATH);
         manager.createZone("zone1", TEMPLATE_NAME);
         manager.createZone("zone2", TEMPLATE_NAME);
-        manager.startAll();
+        manager.restoreAll();
     }
 };
 } // namespace

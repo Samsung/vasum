@@ -226,9 +226,9 @@ ZonesManager::~ZonesManager()
 
     if (!mDetachOnExit) {
         try {
-            stopAll();
+            shutdownAll();
         } catch (ServerException&) {
-            LOGE("Failed to stop all of the zones");
+            LOGE("Failed to shutdown all of the zones");
         }
     }
     // wait for all tasks to complete
@@ -434,27 +434,27 @@ void ZonesManager::refocus()
     focusInternal(iter);
 }
 
-void ZonesManager::startAll()
+void ZonesManager::restoreAll()
 {
-    LOGI("Starting all zones");
+    LOGI("Restoring all zones");
 
     Lock lock(mMutex);
 
     for (auto& zone : mZones) {
-        zone->start();
+        zone->restore();
     }
 
     refocus();
 }
 
-void ZonesManager::stopAll()
+void ZonesManager::shutdownAll()
 {
     LOGI("Stopping all zones");
 
     Lock lock(mMutex);
 
     for (auto& zone : mZones) {
-        zone->stop();
+        zone->stop(false);
     }
 
     refocus();
@@ -463,26 +463,19 @@ void ZonesManager::stopAll()
 bool ZonesManager::isPaused(const std::string& zoneId)
 {
     Lock lock(mMutex);
-
-    auto iter = findZone(zoneId);
-    if (iter == mZones.end()) {
-        LOGE("No such zone id: " << zoneId);
-        throw InvalidZoneIdException("No such zone");
-    }
-
-    return get(iter).isPaused();
+    return getZone(zoneId).isPaused();
 }
 
 bool ZonesManager::isRunning(const std::string& zoneId)
 {
     Lock lock(mMutex);
+    return getZone(zoneId).isRunning();
+}
 
-    auto iter = findZone(zoneId);
-    if (iter == mZones.end()) {
-        LOGE("No such zone id: " << zoneId);
-        throw InvalidZoneIdException("No such zone");
-    }
-    return get(iter).isRunning();
+bool ZonesManager::isStopped(const std::string& zoneId)
+{
+    Lock lock(mMutex);
+    return getZone(zoneId).isStopped();
 }
 
 std::string ZonesManager::getRunningForegroundZoneId()
@@ -1265,7 +1258,7 @@ void ZonesManager::handleShutdownZoneCall(const std::string& id,
                 result->setError(api::ERROR_INVALID_ID, "No such zone id");
                 return;
             }
-            get(iter).stop();
+            get(iter).stop(true);
             refocus();
             result->setVoid();
         } catch (ZoneOperationException& e) {

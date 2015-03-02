@@ -110,6 +110,11 @@ struct ZoneConfig {
 struct ZoneDynamicConfig {
 
     /**
+     * Requested zone state after restore
+     */
+    std::string requestedState;
+
+    /**
      * IP v4 gateway address
      */
     std::string ipv4Gateway;
@@ -131,6 +136,7 @@ struct ZoneDynamicConfig {
 
     CONFIG_REGISTER
     (
+        requestedState,
         ipv4Gateway,
         ipv4,
         vt,

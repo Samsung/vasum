@@ -158,9 +158,9 @@ BOOST_AUTO_TEST_CASE(SuspendResumeTest)
 
 BOOST_AUTO_TEST_CASE(SchedulerLevelTest)
 {
-    BOOST_REQUIRE(mConfig.cpuQuotaForeground != mConfig.cpuQuotaBackground);
-
     auto admin = create(TEST_CONFIG_PATH);
+
+    BOOST_REQUIRE(mConfig.cpuQuotaForeground != mConfig.cpuQuotaBackground);
 
     admin->start();
     ensureStarted();
