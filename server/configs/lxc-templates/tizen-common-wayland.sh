@@ -297,6 +297,6 @@ ${path}/weston.ini etc/xdg/weston/weston.ini none ro,bind 0 0
 devtmpfs dev devtmpfs rw,relatime,mode=755 0 0
 devpts dev/pts devpts rw,relatime,gid=5,mode=620,ptmxmode=000 0 0
 /sys/fs/smackfs sys/fs/smackfs none rw,bind 0 0
-/var/run/zones/${name}/run var/run none rw,bind 0 0
+#/var/run/zones/${name}/run var/run none rw,bind 0 0
 #tmpfs run tmpfs rw,nosuid,nodev,mode=755 0 0
 EOF
