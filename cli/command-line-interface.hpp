@@ -209,6 +209,13 @@ void create_netdev_macvlan(int pos, int argc, const char** argv);
 void create_netdev_phys(int pos, int argc, const char** argv);
 
 /**
+ * Parses command line arguments and call vsm_destroy_netdev
+ *
+ * @see vsm_destroy_netdev
+ */
+void destroy_netdev(int pos, int argc, const char** argv);
+
+/**
  * Parses command line arguments and prints result of vsm_zone_get_netdevs
  *
  * @see vsm_zone_get_netdevs

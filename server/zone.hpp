@@ -292,6 +292,11 @@ public:
     void moveNetdev(const std::string& devId);
 
     /**
+     * Destroy network device in zone
+     */
+    void destroyNetdev(const std::string& devId);
+
+    /**
      * Set network device attributes
      */
     void setNetdevAttrs(const std::string& netdev, const ZoneAdmin::NetdevAttrs& attrs);

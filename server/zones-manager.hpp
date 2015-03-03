@@ -189,6 +189,9 @@ private:
     void handleCreateNetdevPhysCall(const std::string& zone,
                                     const std::string& devId,
                                     api::MethodResultBuilder::Pointer result);
+    void handleDestroyNetdevCall(const std::string& zone,
+                                 const std::string& devId,
+                                 api::MethodResultBuilder::Pointer result);
     void handleDeclareFileCall(const std::string& zone,
                                const int32_t& type,
                                const std::string& path,

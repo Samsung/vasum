@@ -173,6 +173,15 @@ std::map<std::string, CommandLineInterface> commands = {
         }
     },
     {
+        "destroy_netdev", {
+            destroy_netdev,
+            "destroy_netdev zone_id devId",
+            "Destroy netdev in zone",
+            {{"zone_id", "id zone name"},
+             {"devId", "network device id"}}
+        }
+    },
+    {
         "zone_get_netdevs", {
             zone_get_netdevs,
             "zone_get_netdevs zone_id",

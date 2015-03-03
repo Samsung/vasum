@@ -27,6 +27,7 @@
 #include "ut.hpp"
 
 #include "zone.hpp"
+#include "netdev.hpp"
 #include "exception.hpp"
 
 #include "utils/exception.hpp"
@@ -39,8 +40,11 @@
 #include <string>
 #include <thread>
 #include <chrono>
+#include <linux/in6.h>
+#include <linux/if_bridge.h>
 
 using namespace vasum;
+using namespace vasum::netdev;
 using namespace config;
 
 namespace {
@@ -53,15 +57,28 @@ const std::string MISSING_CONFIG_PATH = TEMPLATES_DIR + "/missing.conf";
 const std::string ZONES_PATH = "/tmp/ut-zones";
 const std::string LXC_TEMPLATES_PATH = VSM_TEST_LXC_TEMPLATES_INSTALL_DIR;
 const std::string DB_PATH = ZONES_PATH + "/vasum.db";
+const std::string BRIDGE_NAME = "brtest01";
+const std::string ZONE_NETDEV = "netdevtest01";
 
 struct Fixture {
     utils::ScopedGlibLoop mLoop;
     utils::ScopedDir mZonesPathGuard;
     utils::ScopedDir mRunGuard;
+    std::string mBridgeName;
 
     Fixture()
         : mZonesPathGuard(ZONES_PATH)
     {}
+    ~Fixture()
+    {
+        if (!mBridgeName.empty()) {
+            try {
+                destroyNetdev(mBridgeName);
+            } catch (std::exception& ex) {
+                BOOST_MESSAGE("Can't destroy bridge: " + std::string(ex.what()));
+            }
+        }
+    }
 
     std::unique_ptr<Zone> create(const std::string& configPath)
     {
@@ -74,9 +91,21 @@ struct Fixture {
                                               ""));
     }
 
+    void setupBridge(const std::string& name)
+    {
+        createBridge(name);
+        mBridgeName = name;
+    }
+
+
     void ensureStarted()
     {
         // wait for zones init to fully start
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
+    void ensureStop()
+    {
+        // wait for fully stop
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 };
@@ -141,6 +170,42 @@ BOOST_AUTO_TEST_CASE(ListNetdevTest)
     // Check if we get interfaces from zone net namespace
     BOOST_CHECK(hostNetdevs != netdevs);
 
+    c->stop(false);
+}
+
+BOOST_AUTO_TEST_CASE(CreateNetdevVethTest)
+{
+    typedef std::vector<std::string> NetdevList;
+
+    setupBridge(BRIDGE_NAME);
+    auto c = create(TEST_CONFIG_PATH);
+    c->start();
+    ensureStarted();
+    c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME);
+    NetdevList netdevs = c->getNetdevList();
+    BOOST_CHECK(find(netdevs.begin(), netdevs.end(), ZONE_NETDEV) != netdevs.end());
+    c->stop(false);
+    ensureStop();
+
+    //Check clean up
+    NetdevList hostNetdevsInit = listNetdev();
+    BOOST_REQUIRE_THROW(c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME), VasumException);
+    NetdevList hostNetdevsThrow = listNetdev();
+    BOOST_CHECK_EQUAL_COLLECTIONS(hostNetdevsInit.begin(), hostNetdevsInit.end(),
+                                  hostNetdevsThrow.begin(), hostNetdevsThrow.end());
+}
+
+BOOST_AUTO_TEST_CASE(CreateNetdevMacvlanTest)
+{
+    typedef std::vector<std::string> NetdevList;
+
+    setupBridge(BRIDGE_NAME);
+    auto c = create(TEST_CONFIG_PATH);
+    c->start();
+    ensureStarted();
+    c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME);
+    NetdevList netdevs = c->getNetdevList();
+    BOOST_CHECK(find(netdevs.begin(), netdevs.end(), ZONE_NETDEV) != netdevs.end());
     c->stop(false);
 }
 

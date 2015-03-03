@@ -48,6 +48,7 @@ const std::string METHOD_GET_NETDEV_LIST       = "GetNetdevList";
 const std::string METHOD_CREATE_NETDEV_VETH    = "CreateNetdevVeth";
 const std::string METHOD_CREATE_NETDEV_MACVLAN = "CreateNetdevMacvlan";
 const std::string METHOD_CREATE_NETDEV_PHYS    = "CreateNetdevPhys";
+const std::string METHOD_DESTROY_NETDEV        = "DestroyNetdev";
 const std::string METHOD_DECLARE_FILE          = "DeclareFile";
 const std::string METHOD_DECLARE_MOUNT         = "DeclareMount";
 const std::string METHOD_DECLARE_LINK          = "DeclareLink";
@@ -117,6 +118,10 @@ const std::string DEFINITION =
     "      <arg type='u' name='mode' direction='in'/>"
     "    </method>"
     "    <method name='" + METHOD_CREATE_NETDEV_PHYS + "'>"
+    "      <arg type='s' name='id' direction='in'/>"
+    "      <arg type='s' name='devId' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_DESTROY_NETDEV + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "      <arg type='s' name='devId' direction='in'/>"
     "    </method>"

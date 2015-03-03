@@ -160,6 +160,9 @@ ZonesManager::ZonesManager(const std::string& configPath)
     mHostConnection.setCreateNetdevPhysCallback(bind(&ZonesManager::handleCreateNetdevPhysCall,
                                                      this, _1, _2, _3));
 
+    mHostConnection.setDestroyNetdevCallback(bind(&ZonesManager::handleDestroyNetdevCall,
+                                                  this, _1, _2, _3));
+
     mHostConnection.setDeclareFileCallback(bind(&ZonesManager::handleDeclareFileCall,
                                                 this, _1, _2, _3, _4, _5, _6));
 
@@ -917,6 +920,25 @@ void ZonesManager::handleCreateNetdevPhysCall(const std::string& zone,
         Lock lock(mMutex);
 
         getZone(zone).moveNetdev(devId);
+        result->setVoid();
+    } catch (const InvalidZoneIdException&) {
+        LOGE("No zone with id=" << zone);
+        result->setError(api::ERROR_INVALID_ID, "No such zone id");
+    } catch (const VasumException& ex) {
+        LOGE("Can't create netdev: " << ex.what());
+        result->setError(api::ERROR_INTERNAL, ex.what());
+    }
+}
+
+void ZonesManager::handleDestroyNetdevCall(const std::string& zone,
+                                           const std::string& devId,
+                                           api::MethodResultBuilder::Pointer result)
+{
+    LOGI("DestroyNetdev call");
+    try {
+        Lock lock(mMutex);
+
+        getZone(zone).destroyNetdev(devId);
         result->setVoid();
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);

@@ -90,6 +90,10 @@ public:
                                const std::string& devId,
                                api::MethodResultBuilder::Pointer result
                               )> CreateNetdevPhysCallback;
+    typedef std::function<void(const std::string& id,
+                               const std::string& devId,
+                               api::MethodResultBuilder::Pointer result
+                              )> DestroyNetdevCallback;
     typedef std::function<void(const std::string& zone,
                                const int32_t& type,
                                const std::string& path,
@@ -210,6 +214,11 @@ public:
     void setCreateNetdevPhysCallback(const CreateNetdevPhysCallback& callback);
 
     /**
+     * Register a callback called to destroy netdev
+     */
+    void setDestroyNetdevCallback(const DestroyNetdevCallback& callback);
+
+    /**
      * Register a callback called to declare file
      */
     void setDeclareFileCallback(const DeclareFileCallback& callback);
@@ -306,6 +315,7 @@ private:
     CreateNetdevVethCallback mCreateNetdevVethCallback;
     CreateNetdevMacvlanCallback mCreateNetdevMacvlanCallback;
     CreateNetdevPhysCallback mCreateNetdevPhysCallback;
+    DestroyNetdevCallback mDestroyNetdevCallback;
     DeclareFileCallback mDeclareFileCallback;
     DeclareMountCallback mDeclareMountCallback;
     DeclareLinkCallback mDeclareLinkCallback;

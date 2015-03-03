@@ -278,6 +278,12 @@ void Zone::moveNetdev(const std::string& devId)
     mAdmin->moveNetdev(devId);
 }
 
+void Zone::destroyNetdev(const std::string& devId)
+{
+    Lock lock(mReconnectMutex);
+    mAdmin->destroyNetdev(devId);
+}
+
 void Zone::goForeground()
 {
     Lock lock(mReconnectMutex);

@@ -46,6 +46,17 @@
 #include <linux/sockios.h>
 #include <linux/if_link.h>
 #include <linux/rtnetlink.h>
+#include <linux/in6.h>
+#include <linux/if_bridge.h>
+
+//IFLA_BRIDGE_FLAGS and BRIDGE_FLAGS_MASTER
+//should be defined in linux/if_bridge.h since kernel v3.7
+#ifndef IFLA_BRIDGE_FLAGS
+#define IFLA_BRIDGE_FLAGS 0
+#endif
+#ifndef BRIDGE_FLAGS_MASTER
+#define BRIDGE_FLAGS_MASTER 1
+#endif
 
 using namespace std;
 using namespace vasum;
@@ -205,10 +216,18 @@ void createVeth(const pid_t& nsPid, const string& nsDev, const string& hostDev)
     string hostVeth = getUniqueVethName();
     LOGT("Creating veth: bridge: " << hostDev << ", port: " << hostVeth << ", zone: " << nsDev);
     createPipedNetdev(nsDev, hostVeth);
-    //TODO: clean up if following instructions fail
-    attachToBridge(hostDev, hostVeth);
-    up(hostVeth);
-    moveToNS(nsDev, nsPid);
+    try {
+        attachToBridge(hostDev, hostVeth);
+        up(hostVeth);
+        moveToNS(nsDev, nsPid);
+    } catch(const exception& ex) {
+        try {
+            destroyNetdev(hostVeth);
+        } catch (const exception& ex) {
+            LOGE("Can't destroy netdev pipe: " << hostVeth << ", " << nsDev);
+        }
+        throw;
+    }
 }
 
 void createMacvlan(const pid_t& nsPid,
@@ -218,9 +237,17 @@ void createMacvlan(const pid_t& nsPid,
 {
     LOGT("Creating macvlan: host: " << hostDev << ", zone: " << nsDev << ", mode: " << mode);
     createMacvlan(hostDev, nsDev, mode);
-    //TODO: clean up if following instructions fail
-    up(nsDev);
-    moveToNS(nsDev, nsPid);
+    try {
+        up(nsDev);
+        moveToNS(nsDev, nsPid);
+    } catch(const exception& ex) {
+        try {
+            destroyNetdev(nsDev);
+        } catch (const exception& ex) {
+            LOGE("Can't destroy netdev: " << nsDev);
+        }
+        throw;
+    }
 }
 
 void movePhys(const pid_t& nsPid, const string& devId)
@@ -246,6 +273,43 @@ std::vector<std::string> listNetdev(const pid_t& nsPid)
     }
     return interfaces;
 }
+
+void destroyNetdev(const string& netdev, const pid_t pid)
+{
+    LOGT("Destroying netdev: " << netdev);
+    validateNetdevName(netdev);
+
+    NetlinkMessage nlm(RTM_DELLINK, NLM_F_REQUEST|NLM_F_ACK);
+    ifinfomsg infopeer = utils::make_clean<ifinfomsg>();
+    infopeer.ifi_family = AF_UNSPEC;
+    infopeer.ifi_change = 0xFFFFFFFF;
+    nlm.put(infopeer)
+        .put(IFLA_IFNAME, netdev);
+    send(nlm, pid);
+}
+
+void createBridge(const string& netdev)
+{
+    LOGT("Creating bridge: " << netdev);
+    validateNetdevName(netdev);
+
+    NetlinkMessage nlm(RTM_NEWLINK, NLM_F_REQUEST | NLM_F_CREATE | NLM_F_EXCL | NLM_F_ACK);
+    ifinfomsg infoPeer = utils::make_clean<ifinfomsg>();
+    infoPeer.ifi_family = AF_UNSPEC;
+    infoPeer.ifi_change = 0xFFFFFFFF;
+    nlm.put(infoPeer)
+        .beginNested(IFLA_LINKINFO)
+            .put(IFLA_INFO_KIND, "bridge")
+            .beginNested(IFLA_INFO_DATA)
+                .beginNested(IFLA_AF_SPEC)
+                    .put<uint32_t>(IFLA_BRIDGE_FLAGS, BRIDGE_FLAGS_MASTER)
+                .endNested()
+            .endNested()
+        .endNested()
+        .put(IFLA_IFNAME, netdev);
+    send(nlm);
+}
+
 
 } //namespace netdev
 } //namespace vasum

@@ -302,6 +302,11 @@ void ZoneAdmin::moveNetdev(const std::string& devId)
     netdev::movePhys(mZone.getInitPid(), devId);
 }
 
+void ZoneAdmin::destroyNetdev(const std::string& devId)
+{
+    netdev::destroyNetdev(devId, mZone.getInitPid());
+}
+
 void ZoneAdmin::setNetdevAttrs(const std::string& /* netdev */, const NetdevAttrs& /* attrs */)
 {
     throw ZoneOperationException("Not implemented");

@@ -397,6 +397,19 @@ void create_netdev_phys(int pos, int argc, const char** argv)
                   argv[pos + 2]));
 }
 
+void destroy_netdev(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 2) {
+        throw runtime_error("Not enough parameters");
+    }
+    one_shot(bind(vsm_destroy_netdev,
+                  _1,
+                  argv[pos + 1],
+                  argv[pos + 2]));
+}
+
 void zone_get_netdevs(int pos, int argc, const char** argv)
 {
     using namespace std::placeholders;

@@ -39,7 +39,17 @@ void createMacvlan(const pid_t& nsPid,
                    const std::string& hostDev,
                    const macvlan_mode& mode);
 void movePhys(const pid_t& nsPid, const std::string& devId);
-std::vector<std::string> listNetdev(const pid_t& nsPid);
+std::vector<std::string> listNetdev(const pid_t& nsPid = 0);
+void destroyNetdev(const std::string& netdev, const pid_t pid = 0);
+
+/**
+ * Create bridge
+ *
+ * Bridge are in BRIDGE_MODE_VEB (loopback) mode and it is software bridge (BRIDGE_FLAGS_MASTER)
+ *
+ * @param netdev bridge name
+ */
+void createBridge(const std::string& netdev);
 
 } //namespace netdev
 } //namespace vasum

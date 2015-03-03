@@ -768,10 +768,10 @@ VsmStatus Client::vsm_lookup_netdev_by_name(const char*, const char*, VsmNetdev*
     return vsm_get_status();
 }
 
-VsmStatus Client::vsm_destroy_netdev(const char*, const char*) noexcept
+VsmStatus Client::vsm_destroy_netdev(const char* zone, const char* devId) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
+    GVariant* args_in = g_variant_new("(ss)", zone, devId);
+    return callMethod(HOST_INTERFACE, api::host::METHOD_DESTROY_NETDEV, args_in);
 }
 
 VsmStatus Client::vsm_declare_file(const char* zone,

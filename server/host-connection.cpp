@@ -162,6 +162,11 @@ void HostConnection::setCreateNetdevPhysCallback(const CreateNetdevPhysCallback&
     mCreateNetdevPhysCallback = callback;
 }
 
+void HostConnection::setDestroyNetdevCallback(const DestroyNetdevCallback& callback)
+{
+    mDestroyNetdevCallback = callback;
+}
+
 void HostConnection::setDeclareFileCallback(const DeclareFileCallback& callback)
 {
     mDeclareFileCallback = callback;
@@ -390,6 +395,16 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         if (mCreateNetdevPhysCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
             mCreateNetdevPhysCallback(id, devId, rb);
+        }
+    }
+
+    if (methodName == api::host::METHOD_DESTROY_NETDEV) {
+        const gchar* id = NULL;
+        const gchar* devId = NULL;
+        g_variant_get(parameters, "(&s&s)", &id, &devId);
+        if (mDestroyNetdevCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mDestroyNetdevCallback(id, devId, rb);
         }
     }
 
