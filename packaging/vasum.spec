@@ -50,7 +50,7 @@ between them. A process from inside a zone can request a switch of context
 %{_unitdir}/vasum.service
 %{_unitdir}/vasum.socket
 %{_unitdir}/multi-user.target.wants/vasum.service
-/etc/dbus-1/system.d/org.tizen.vasum.host.conf
+%config /etc/dbus-1/system.d/org.tizen.vasum.host.conf
 %dir %{_datadir}/.zones
 
 %prep
@@ -165,7 +165,7 @@ Zones support installed inside every zone.
 %files zone-support
 %manifest packaging/vasum-zone-support.manifest
 %defattr(644,root,root,755)
-/etc/dbus-1/system.d/org.tizen.vasum.zone.conf
+%config /etc/dbus-1/system.d/org.tizen.vasum.zone.conf
 
 
 ## Zone Daemon Package ####################################################
@@ -182,7 +182,7 @@ Daemon running inside every zone.
 %manifest packaging/vasum-zone-daemon.manifest
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/vasum-zone-daemon
-/etc/dbus-1/system.d/org.tizen.vasum.zone.daemon.conf
+%config /etc/dbus-1/system.d/org.tizen.vasum.zone.daemon.conf
 
 
 ## Command Line Interface ######################################################
@@ -233,9 +233,9 @@ systemctl daemon-reload
 %attr(755,root,root) %{script_dir}/vsm_int_tests.py
 %attr(755,root,root) %{script_dir}/vsm_launch_test.py
 %{script_dir}/vsm_test_parser.py
-%{_datadir}/vasum/tests
-%attr(755,root,root) %{_datadir}/vasum/lxc-templates
+%config /etc/vasum/tests
+%attr(755,root,root) /etc/vasum/tests/lxc-templates
 %{python_sitelib}/vsm_integration_tests
-/etc/dbus-1/system.d/org.tizen.vasum.tests.conf
+%config /etc/dbus-1/system.d/org.tizen.vasum.tests.conf
 %{_unitdir}/vasum-socket-test.socket
 %{_unitdir}/vasum-socket-test.service
