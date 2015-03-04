@@ -35,6 +35,8 @@
 
 #include <cassert>
 #include <climits>
+#include <thread>
+#include <chrono>
 
 
 namespace vasum {
@@ -55,6 +57,7 @@ ZoneAdmin::ZoneAdmin(const std::string& zoneId,
                      const ZoneConfig& config,
                      const ZoneDynamicConfig& dynamicConfig)
     : mConfig(config),
+      mDynamicConfig(dynamicConfig),
       mZone(zonesPath, zoneId),
       mId(zoneId),
       mDetachOnExit(false),
@@ -136,6 +139,16 @@ void ZoneAdmin::start()
 
     if (!mZone.start(args.c_array())) {
         throw ZoneOperationException("Could not start zone");
+    }
+
+    // Wait until the full platform launch with graphical stack.
+    // VT should be activated by a graphical stack.
+    // If we do it with 'zoneToFocus.activateVT' before starting the graphical stack,
+    // graphical stack initialization failed and we finally switch to the black screen.
+    // Skip waiting when graphical stack is not running (unit tests).
+    if (mDynamicConfig.vt > 0) {
+        // TODO, timeout is a temporary solution
+        std::this_thread::sleep_for(std::chrono::milliseconds(4000));
     }
 
     LOGD(mId << ": Started");

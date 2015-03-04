@@ -166,6 +166,7 @@ public:
 
 private:
     const ZoneConfig& mConfig;
+    const ZoneDynamicConfig& mDynamicConfig;
     lxc::LxcZone mZone;
     const std::string mId;
     bool mDetachOnExit;
