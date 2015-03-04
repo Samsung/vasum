@@ -28,12 +28,24 @@ INCLUDE(FindPkgConfig)
 ## default CMAKE_INSTALL_* variables ###########################################
 INCLUDE(GNUInstallDirs)
 
+## Color output if it's possible:
+IF (( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8.3))
+      OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" ))
+
+    ADD_DEFINITIONS("-fdiagnostics-color=always")
+ENDIF()
 
 ## Compiler flags, depending on the build type #################################
 IF(NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE "DEBUG")
 ENDIF(NOT CMAKE_BUILD_TYPE)
-MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+## Print build information #####################################################
+MESSAGE(STATUS "-------------------------------------------------")
+MESSAGE(STATUS "Compiler:          " ${CMAKE_CXX_COMPILER_ID})
+MESSAGE(STATUS "Compiler version:  " ${CMAKE_CXX_COMPILER_VERSION})
+MESSAGE(STATUS "Build type:        " ${CMAKE_BUILD_TYPE})
+MESSAGE(STATUS "-------------------------------------------------")
 
 # special case for a GCC < 4.7, assume rest is fine
 IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
@@ -111,13 +123,11 @@ ADD_DEFINITIONS(-DDISK_GROUP="${DISK_GROUP}")
 ADD_DEFINITIONS(-DTTY_GROUP="${TTY_GROUP}")
 
 ## Python packages directory ###################################################
-
 IF(NOT DEFINED PYTHON_SITELIB)
     EXECUTE_PROCESS(COMMAND python -c
     "from distutils.sysconfig import get_python_lib; import sys; sys.stdout.write(get_python_lib())"
     OUTPUT_VARIABLE PYTHON_SITELIB)
 ENDIF(NOT DEFINED PYTHON_SITELIB)
-
 
 ## Subdirectories ##############################################################
 SET(COMMON_FOLDER ${PROJECT_SOURCE_DIR}/common)
