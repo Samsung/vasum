@@ -28,7 +28,7 @@
 
 #include "zone-config.hpp"
 #include "lxc/zone.hpp"
-
+#include "netdev.hpp"
 
 namespace vasum {
 
@@ -41,7 +41,7 @@ enum class SchedulerLevel {
 class ZoneAdmin {
 
 public:
-    typedef std::vector<std::tuple<std::string, std::string>> NetdevAttrs;
+    typedef netdev::Attrs NetdevAttrs;
 
     /**
      * ZoneAdmin constructor

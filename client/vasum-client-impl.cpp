@@ -40,6 +40,10 @@
 #include <cassert>
 #include <fstream>
 #include <arpa/inet.h>
+#include <linux/if.h>
+
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 using namespace std;
 using namespace dbus;
@@ -202,7 +206,6 @@ GVariant* createTupleArray(const vector<tuple<string, string>>& dict)
     return g_variant_builder_end(&builder);
 }
 
-
 VsmStatus toStatus(const exception& ex)
 {
     if (typeid(DbusCustomException) == typeid(ex)) {
@@ -231,6 +234,29 @@ bool readFirstLineOfFile(const string& path, string& ret)
 }
 
 } //namespace
+
+VsmStatus Client::getNetdevAttrs(const string& zone,
+                                 const string& netdev,
+                                 NetdevAttrs& attrs) noexcept
+{
+    GVariant* out = NULL;
+    GVariant* args_in = g_variant_new("(ss)", zone.c_str(), netdev.c_str());
+    VsmStatus ret = callMethod(HOST_INTERFACE,
+                               api::host::METHOD_GET_NETDEV_ATTRS,
+                               args_in,
+                               "(a(ss))",
+                               &out);
+    if (ret != VSMCLIENT_SUCCESS) {
+        return ret;
+    }
+    GVariant* unpacked;
+    g_variant_get(out, "(*)", &unpacked);
+    attrs = toDict(unpacked);
+    g_variant_unref(unpacked);
+    g_variant_unref(out);
+    mStatus = Status();
+    return vsm_get_status();
+}
 
 VsmStatus Client::vsm_start_glib_loop() noexcept
 {
@@ -608,36 +634,37 @@ VsmStatus Client::vsm_netdev_get_ipv4_addr(const char* zone,
                                            const char* netdevId,
                                            struct in_addr* addr) noexcept
 {
+    using namespace boost::algorithm;
+
     assert(zone);
     assert(netdevId);
     assert(addr);
 
-    GVariant* out = NULL;
-    GVariant* args_in = g_variant_new("(ss)", zone, netdevId);
-    VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_GET_NETDEV_ATTRS,
-                               args_in,
-                               "(a(ss))",
-                               &out);
+    NetdevAttrs attrs;
+    VsmStatus ret = getNetdevAttrs(zone, netdevId, attrs);
     if (ret != VSMCLIENT_SUCCESS) {
         return ret;
     }
-    GVariant* unpacked;
-    g_variant_get(out, "(*)", &unpacked);
-    vector<tuple<string, string>> attrs = toDict(unpacked);
-    g_variant_unref(unpacked);
-    g_variant_unref(out);
 
     auto it = find_if(attrs.begin(), attrs.end(), [](const tuple<string, string>& entry) {
             return get<0>(entry) == "ipv4";
     });
     if (it != attrs.end()) {
-       if (inet_pton(AF_INET, get<1>(*it).c_str(), addr) != 1) {
-           mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Invalid response data");
-           return vsm_get_status();
-       }
-       mStatus = Status();
-       return vsm_get_status();
+        vector<string> addrAttrs;
+        for(auto addrAttr : split(addrAttrs, get<1>(*it), is_any_of(","))) {
+            size_t pos = addrAttr.find(":");
+            if (addrAttr.substr(0, pos) == "ip") {
+                if (pos != string::npos && pos < addrAttr.length() &&
+                    inet_pton(AF_INET, addrAttr.substr(pos + 1).c_str(), addr) == 1) {
+                    //XXX: return only one address
+                    mStatus = Status();
+                    return vsm_get_status();
+                } else {
+                    mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Invalid response data");
+                    return vsm_get_status();
+                }
+            }
+        }
     }
     mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Address not found");
     return vsm_get_status();
@@ -647,37 +674,37 @@ VsmStatus Client::vsm_netdev_get_ipv6_addr(const char* zone,
                                            const char* netdevId,
                                            struct in6_addr* addr) noexcept
 {
+    using namespace boost::algorithm;
+
     assert(zone);
     assert(netdevId);
     assert(addr);
 
-    GVariant* out = NULL;
-    GVariant* args_in = g_variant_new("(ss)", zone, netdevId);
-    VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_GET_NETDEV_ATTRS,
-                               args_in,
-                               "(a(ss))",
-                               &out);
+    NetdevAttrs attrs;
+    VsmStatus ret = getNetdevAttrs(zone, netdevId, attrs);
     if (ret != VSMCLIENT_SUCCESS) {
         return ret;
     }
-    GVariant* unpacked;
-    g_variant_get(out, "(*)", &unpacked);
-    vector<tuple<string, string>> attrs = toDict(unpacked);
-    g_variant_unref(unpacked);
-    g_variant_unref(out);
 
-    //XXX: return only one address
     auto it = find_if(attrs.begin(), attrs.end(), [](const tuple<string, string>& entry) {
             return get<0>(entry) == "ipv6";
     });
     if (it != attrs.end()) {
-       if (inet_pton(AF_INET6, get<1>(*it).c_str(), addr) != 1) {
-           mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Invalid response data");
-           return vsm_get_status();
-       }
-       mStatus = Status();
-       return vsm_get_status();
+        vector<string> addrAttrs;
+        for(auto addrAttr : split(addrAttrs, get<1>(*it), is_any_of(","))) {
+            size_t pos = addrAttr.find(":");
+            if (addrAttr.substr(0, pos) == "ip") {
+                if (pos != string::npos && pos < addrAttr.length() &&
+                    inet_pton(AF_INET6, addrAttr.substr(pos + 1).c_str(), addr) == 1) {
+                    //XXX: return only one address
+                    mStatus = Status();
+                    return vsm_get_status();
+                } else {
+                    mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Invalid response data");
+                    return vsm_get_status();
+                }
+            }
+        }
     }
     mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Address not found");
     return vsm_get_status();
@@ -689,8 +716,9 @@ VsmStatus Client::vsm_netdev_set_ipv4_addr(const char* zone,
                                            int mask) noexcept
 {
     try {
-        GVariant* dict = createTupleArray({make_tuple("ipv4", toString(addr)),
-                                          make_tuple("mask", to_string(mask))});
+        GVariant* dict = createTupleArray({make_tuple("ipv4",
+                                            "ip:" + toString(addr) + ","
+                                            "prefixlen:" + to_string(mask))});
         GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
         return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
     } catch (exception& ex) {
@@ -705,8 +733,9 @@ VsmStatus Client::vsm_netdev_set_ipv6_addr(const char* zone,
                                            int mask) noexcept
 {
     try {
-        GVariant* dict = createTupleArray({make_tuple("ipv6", toString(addr)),
-                                          make_tuple("mask", to_string(mask))});
+        GVariant* dict = createTupleArray({make_tuple("ipv6",
+                                            "ip:" + toString(addr) + ","
+                                            "prefixlen:" + to_string(mask))});
         GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
         return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
     } catch (exception& ex) {
@@ -718,7 +747,8 @@ VsmStatus Client::vsm_netdev_set_ipv6_addr(const char* zone,
 VsmStatus Client::vsm_netdev_up(const char* zone, const char* netdevId) noexcept
 {
     try {
-        GVariant* dict = createTupleArray({make_tuple("up", "true")});
+        GVariant* dict = createTupleArray({make_tuple("flags", to_string(IFF_UP)),
+                                           make_tuple("change", to_string(IFF_UP))});
         GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
         return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
     } catch (exception& ex) {
@@ -730,7 +760,8 @@ VsmStatus Client::vsm_netdev_up(const char* zone, const char* netdevId) noexcept
 VsmStatus Client::vsm_netdev_down(const char* zone, const char* netdevId) noexcept
 {
     try {
-        GVariant* dict = createTupleArray({make_tuple("up", "false")});
+        GVariant* dict = createTupleArray({make_tuple("flags", to_string(~IFF_UP)),
+                                           make_tuple("change", to_string(IFF_UP))});
         GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
         return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
     } catch (exception& ex) {
@@ -762,9 +793,44 @@ VsmStatus Client::vsm_create_netdev_phys(const char* zone, const char* devId) no
     return callMethod(HOST_INTERFACE, api::host::METHOD_CREATE_NETDEV_PHYS, args_in);
 }
 
-VsmStatus Client::vsm_lookup_netdev_by_name(const char*, const char*, VsmNetdev*) noexcept
+VsmStatus Client::vsm_lookup_netdev_by_name(const char* zone,
+                                            const char* netdevId,
+                                            VsmNetdev* netdev) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
+    using namespace boost::algorithm;
+
+    assert(zone);
+    assert(netdevId);
+    assert(netdev);
+
+    NetdevAttrs attrs;
+    VsmStatus ret = getNetdevAttrs(zone, netdevId, attrs);
+    if (ret != VSMCLIENT_SUCCESS) {
+        return ret;
+    }
+
+    auto it = find_if(attrs.begin(), attrs.end(), [](const tuple<string, string>& entry) {
+            return get<0>(entry) == "type";
+    });
+
+    VsmNetdevType type;
+    if (it == attrs.end()) {
+        mStatus = Status(VSMCLIENT_OTHER_ERROR, "Can't fetch netdev type");
+        return vsm_get_status();
+    }
+
+    switch (stoi(get<1>(*it))) {
+        case 1<<0  /*IFF_802_1Q_VLAN*/: type = VSMNETDEV_VETH; break;
+        case 1<<21 /*IFF_MACVLAN*/: type = VSMNETDEV_MACVLAN; break;
+        default:
+            mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Unknown netdev type: " + get<1>(*it));
+            return vsm_get_status();
+    }
+
+    *netdev = reinterpret_cast<VsmNetdev>(malloc(sizeof(**netdev)));
+    (*netdev)->name = strdup(zone);
+    (*netdev)->type = type;
+    mStatus = Status();
     return vsm_get_status();
 }
 

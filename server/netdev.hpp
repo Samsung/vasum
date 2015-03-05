@@ -27,11 +27,14 @@
 
 #include <string>
 #include <vector>
+#include <tuple>
 #include <linux/if_link.h>
 #include <sys/types.h>
 
 namespace vasum {
 namespace netdev {
+
+typedef std::vector<std::tuple<std::string, std::string>> Attrs;
 
 void createVeth(const pid_t& nsPid, const std::string& nsDev, const std::string& hostDev);
 void createMacvlan(const pid_t& nsPid,
@@ -50,6 +53,9 @@ void destroyNetdev(const std::string& netdev, const pid_t pid = 0);
  * @param netdev bridge name
  */
 void createBridge(const std::string& netdev);
+
+Attrs getAttrs(const pid_t nsPid, const std::string& netdev);
+void setAttrs(const pid_t nsPid, const std::string& netdev, const Attrs& attrs);
 
 } //namespace netdev
 } //namespace vasum

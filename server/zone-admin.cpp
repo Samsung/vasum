@@ -307,14 +307,14 @@ void ZoneAdmin::destroyNetdev(const std::string& devId)
     netdev::destroyNetdev(devId, mZone.getInitPid());
 }
 
-void ZoneAdmin::setNetdevAttrs(const std::string& /* netdev */, const NetdevAttrs& /* attrs */)
+void ZoneAdmin::setNetdevAttrs(const std::string& netdev, const NetdevAttrs& attrs)
 {
-    throw ZoneOperationException("Not implemented");
+    netdev::setAttrs(mZone.getInitPid(), netdev, attrs);
 }
 
-ZoneAdmin::NetdevAttrs ZoneAdmin::getNetdevAttrs(const std::string& /* netdev */)
+ZoneAdmin::NetdevAttrs ZoneAdmin::getNetdevAttrs(const std::string& netdev)
 {
-    throw ZoneOperationException("Not implemented");
+    return netdev::getAttrs(mZone.getInitPid(), netdev);
 }
 
 std::vector<std::string> ZoneAdmin::getNetdevList()

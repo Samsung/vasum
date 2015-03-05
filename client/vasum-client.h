@@ -160,9 +160,9 @@ typedef VsmZoneStructure* VsmZone;
  * Netowrk device type
  */
 typedef enum {
-    VETH,
-    PHYS,
-    MACVLAN
+    VSMNETDEV_VETH,
+    VSMNETDEV_PHYS,
+    VSMNETDEV_MACVLAN
 } VsmNetdevType;
 
 /**

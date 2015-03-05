@@ -29,6 +29,8 @@
 #include "vasum-client.h"
 #include <dbus/connection.hpp>
 #include <exception>
+#include <vector>
+#include <tuple>
 #include <linux/if_link.h>
 
 /**
@@ -53,6 +55,7 @@ struct DbusInterfaceInfo {
  */
 class Client {
 private:
+    typedef std::vector<std::tuple<std::string, std::string>> NetdevAttrs;
     typedef std::function<void(GVariant* parameters)> SignalCallback;
     struct Status {
         Status();
@@ -74,6 +77,9 @@ private:
                               SignalCallback signalCallback,
                               VsmSubscriptionId* subscriptionId);
     VsmStatus signalUnsubscribe(VsmSubscriptionId id);
+    VsmStatus getNetdevAttrs(const std::string& zone,
+                             const std::string& netdev,
+                             NetdevAttrs& attrs) noexcept;
 
 public:
     Client() noexcept;

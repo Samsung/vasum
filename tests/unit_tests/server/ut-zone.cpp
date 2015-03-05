@@ -40,8 +40,10 @@
 #include <string>
 #include <thread>
 #include <chrono>
+#include <sys/socket.h>
 #include <linux/in6.h>
 #include <linux/if_bridge.h>
+#include <linux/if.h>
 
 using namespace vasum;
 using namespace vasum::netdev;
@@ -169,8 +171,6 @@ BOOST_AUTO_TEST_CASE(ListNetdevTest)
     NetdevList hostNetdevs = netdev::listNetdev(0);
     // Check if we get interfaces from zone net namespace
     BOOST_CHECK(hostNetdevs != netdevs);
-
-    c->stop(false);
 }
 
 BOOST_AUTO_TEST_CASE(CreateNetdevVethTest)
@@ -206,7 +206,147 @@ BOOST_AUTO_TEST_CASE(CreateNetdevMacvlanTest)
     c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME);
     NetdevList netdevs = c->getNetdevList();
     BOOST_CHECK(find(netdevs.begin(), netdevs.end(), ZONE_NETDEV) != netdevs.end());
-    c->stop(false);
+}
+
+BOOST_AUTO_TEST_CASE(GetNetdevAttrsTest)
+{
+    setupBridge(BRIDGE_NAME);
+    auto c = create(TEST_CONFIG_PATH);
+    c->start();
+    ensureStarted();
+    c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME);
+    ZoneAdmin::NetdevAttrs attrs = c->getNetdevAttrs(ZONE_NETDEV);
+    bool gotMtu = false;
+    bool gotFlags = false;
+    bool gotType = false;
+    for (auto& attr : attrs) {
+        if (std::get<0>(attr) == "mtu") {
+            BOOST_CHECK(!gotMtu);
+            gotMtu = true;
+        } else if (std::get<0>(attr) == "flags") {
+            BOOST_CHECK(!gotFlags);
+            BOOST_CHECK(IFF_BROADCAST & stol(std::get<1>(attr)));
+            gotFlags = true;
+        } else if (std::get<0>(attr) == "type") {
+            BOOST_CHECK(!gotType);
+            BOOST_CHECK_EQUAL(1 /*IFF_802_1Q_VLAN */, stol(std::get<1>(attr)));
+            gotType = true;
+        } else {
+            BOOST_CHECK_MESSAGE(false, "Got unexpected option " + std::get<0>(attr));
+        }
+    }
+    BOOST_CHECK(gotMtu);
+    BOOST_CHECK(gotFlags);
+    BOOST_CHECK(gotType);
+}
+
+BOOST_AUTO_TEST_CASE(SetNetdevAttrsTest)
+{
+    setupBridge(BRIDGE_NAME);
+    auto c = create(TEST_CONFIG_PATH);
+    c->start();
+    ensureStarted();
+    c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME);
+    ZoneAdmin::NetdevAttrs attrsIn;
+    attrsIn.push_back(std::make_tuple("mtu", "500"));
+    c->setNetdevAttrs(ZONE_NETDEV, attrsIn);
+
+    bool gotMtu = false;
+    ZoneAdmin::NetdevAttrs attrsOut = c->getNetdevAttrs(ZONE_NETDEV);
+    for (auto& attr : attrsOut) {
+        if (std::get<0>(attr) == "mtu") {
+            BOOST_CHECK(!gotMtu);
+            BOOST_CHECK_EQUAL(std::get<1>(attr), "500");
+            gotMtu = true;
+        }
+    }
+    BOOST_CHECK(gotMtu);
+
+    attrsIn.clear();
+    attrsIn.push_back(std::make_tuple("does_not_exists", "500"));
+    BOOST_REQUIRE_EXCEPTION(c->setNetdevAttrs(ZONE_NETDEV, attrsIn),
+                            VasumException,
+                            WhatEquals("Unsupported attribute: does_not_exists"));
+}
+
+BOOST_AUTO_TEST_CASE(SetNetdevIpv4Test)
+{
+    setupBridge(BRIDGE_NAME);
+    auto c = create(TEST_CONFIG_PATH);
+    c->start();
+    ensureStarted();
+    c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME);
+    ZoneAdmin::NetdevAttrs attrsIn;
+    attrsIn.push_back(std::make_tuple("ipv4", "ip:192.168.4.1,prefixlen:24"));
+    c->setNetdevAttrs(ZONE_NETDEV, attrsIn);
+
+    ZoneAdmin::NetdevAttrs attrsOut = c->getNetdevAttrs(ZONE_NETDEV);
+    int gotIp = 0;
+    for (auto& attr : attrsOut) {
+        if (std::get<0>(attr) == "ipv4") {
+            BOOST_CHECK(std::get<1>(attr).find("ip:192.168.4.1") != std::string::npos);
+            BOOST_CHECK(std::get<1>(attr).find("prefixlen:24") != std::string::npos);
+            gotIp++;
+        }
+    }
+    BOOST_CHECK_EQUAL(gotIp, 1);
+
+    attrsIn.clear();
+    attrsIn.push_back(std::make_tuple("ipv4", "ip:192.168.4.2,prefixlen:24"));
+    attrsIn.push_back(std::make_tuple("ipv4", "ip:192.168.4.3,prefixlen:24"));
+    c->setNetdevAttrs(ZONE_NETDEV, attrsIn);
+    attrsOut = c->getNetdevAttrs(ZONE_NETDEV);
+    gotIp = 0;
+    for (auto& attr : attrsOut) {
+        if (std::get<0>(attr) == "ipv4") {
+            BOOST_CHECK(std::get<1>(attr).find("ip:192.168.4.1") != std::string::npos ||
+                        std::get<1>(attr).find("ip:192.168.4.2") != std::string::npos ||
+                        std::get<1>(attr).find("ip:192.168.4.3") != std::string::npos);
+            BOOST_CHECK(std::get<1>(attr).find("prefixlen:24") != std::string::npos);
+            gotIp++;
+        }
+    }
+    BOOST_CHECK_EQUAL(gotIp, 3);
+}
+
+BOOST_AUTO_TEST_CASE(SetNetdevIpv6Test)
+{
+    setupBridge(BRIDGE_NAME);
+    auto c = create(TEST_CONFIG_PATH);
+    c->start();
+    ensureStarted();
+    c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME);
+    ZoneAdmin::NetdevAttrs attrsIn;
+    attrsIn.push_back(std::make_tuple("ipv6", "ip:2001:db8::1,prefixlen:64"));
+    c->setNetdevAttrs(ZONE_NETDEV, attrsIn);
+
+    ZoneAdmin::NetdevAttrs attrsOut = c->getNetdevAttrs(ZONE_NETDEV);
+    int gotIp = 0;
+    for (auto& attr : attrsOut) {
+        if (std::get<0>(attr) == "ipv6") {
+            BOOST_CHECK(std::get<1>(attr).find("ip:2001:db8::1") != std::string::npos);
+            BOOST_CHECK(std::get<1>(attr).find("prefixlen:64") != std::string::npos);
+            gotIp++;
+        }
+    }
+    BOOST_CHECK_EQUAL(gotIp, 1);
+
+    attrsIn.clear();
+    attrsIn.push_back(std::make_tuple("ipv6", "ip:2001:db8::2,prefixlen:64"));
+    attrsIn.push_back(std::make_tuple("ipv6", "ip:2001:db8::3,prefixlen:64"));
+    c->setNetdevAttrs(ZONE_NETDEV, attrsIn);
+    attrsOut = c->getNetdevAttrs(ZONE_NETDEV);
+    gotIp = 0;
+    for (auto& attr : attrsOut) {
+        if (std::get<0>(attr) == "ipv6") {
+            BOOST_CHECK(std::get<1>(attr).find("ip:2001:db8::1") != std::string::npos ||
+                        std::get<1>(attr).find("ip:2001:db8::2") != std::string::npos ||
+                        std::get<1>(attr).find("ip:2001:db8::3") != std::string::npos);
+            BOOST_CHECK(std::get<1>(attr).find("prefixlen:64") != std::string::npos);
+            gotIp++;
+        }
+    }
+    BOOST_CHECK_EQUAL(gotIp, 3);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

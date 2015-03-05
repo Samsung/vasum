@@ -36,17 +36,22 @@
 #include <cstdint>
 #include <cstring>
 #include <cassert>
+#include <sstream>
+#include <set>
+
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include <net/if.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <linux/rtnetlink.h>
 #include <linux/veth.h>
 #include <linux/sockios.h>
 #include <linux/if_link.h>
 #include <linux/rtnetlink.h>
-#include <linux/in6.h>
 #include <linux/if_bridge.h>
 
 //IFLA_BRIDGE_FLAGS and BRIDGE_FLAGS_MASTER
@@ -97,6 +102,22 @@ uint32_t getInterfaceIndex(const string& name) {
         throw ZoneOperationException("Can't find interface");
     }
     return index;
+}
+
+uint32_t getInterfaceIndex(const string& name, pid_t nsPid) {
+    NetlinkMessage nlm(RTM_GETLINK, NLM_F_REQUEST | NLM_F_ACK);
+    ifinfomsg infoPeer = utils::make_clean<ifinfomsg>();
+    infoPeer.ifi_family = AF_UNSPEC;
+    infoPeer.ifi_change = 0xFFFFFFFF;
+    nlm.put(infoPeer)
+        .put(IFLA_IFNAME, name);
+    NetlinkResponse response = send(nlm, nsPid);
+    if (!response.hasMessage()) {
+        throw VasumException("Can't get interface index");
+    }
+
+    response.fetch(infoPeer);
+    return infoPeer.ifi_index;
 }
 
 void validateNetdevName(const string& name)
@@ -209,6 +230,107 @@ void createMacvlan(const string& master, const string& slave, const macvlan_mode
     send(nlm);
 }
 
+std::vector<Attrs> getIpAddresses(const pid_t nsPid, int family, uint32_t index)
+{
+    NetlinkMessage nlm(RTM_GETADDR, NLM_F_REQUEST | NLM_F_ACK | NLM_F_DUMP);
+    ifaddrmsg infoAddr = utils::make_clean<ifaddrmsg>();
+    infoAddr.ifa_family = family;
+    nlm.put(infoAddr);
+    NetlinkResponse response = send(nlm, nsPid);
+    if (!response.hasMessage()) {
+        //There is no interfaces with addresses
+        return std::vector<Attrs>();
+    }
+
+    std::vector<Attrs> addresses;
+    while (response.hasMessage()) {
+        ifaddrmsg addrmsg;
+        response.fetch(addrmsg);
+        if (addrmsg.ifa_index == index) {
+            Attrs attrs;
+            attrs.push_back(make_tuple("prefixlen", std::to_string(addrmsg.ifa_prefixlen)));
+            attrs.push_back(make_tuple("flags", std::to_string(addrmsg.ifa_flags)));
+            attrs.push_back(make_tuple("scope", std::to_string(addrmsg.ifa_scope)));
+            attrs.push_back(make_tuple("family", std::to_string(addrmsg.ifa_family)));
+            while (response.hasAttribute()) {
+                assert(INET6_ADDRSTRLEN >= INET_ADDRSTRLEN);
+                char buf[INET6_ADDRSTRLEN];
+                in6_addr addr6;
+                in_addr addr4;
+                const void* addr = NULL;
+                int attrType = response.getAttributeType();
+                switch (attrType) {
+                    case IFA_ADDRESS:
+                        if (family == AF_INET6) {
+                            response.fetch(IFA_ADDRESS, addr6);
+                            addr = &addr6;
+                        } else {
+                            assert(family == AF_INET);
+                            response.fetch(IFA_ADDRESS, addr4);
+                            addr = &addr4;
+                        }
+                        addr = inet_ntop(family, addr, buf, sizeof(buf));
+                        if (addr == NULL) {
+                            LOGE("Can't convert ip address: " << getSystemErrorMessage());
+                            throw VasumException("Can't get ip address");
+                        }
+                        attrs.push_back(make_tuple("ip", buf));
+                        break;
+                    default:
+                        response.skipAttribute();
+                        break;
+                }
+            }
+            addresses.push_back(std::move(attrs));
+        }
+        response.fetchNextMessage();
+    }
+    return addresses;
+}
+
+void  setIpAddresses(const pid_t nsPid,
+                     const uint32_t index,
+                     const Attrs& attrs,
+                     int family)
+{
+    NetlinkMessage nlm(RTM_NEWADDR, NLM_F_CREATE | NLM_F_REQUEST | NLM_F_ACK);
+    ifaddrmsg infoAddr = utils::make_clean<ifaddrmsg>();
+    infoAddr.ifa_family = family;
+    infoAddr.ifa_index = index;
+    for (const auto& attr : attrs) {
+        if (get<0>(attr) == "prefixlen") {
+            infoAddr.ifa_prefixlen = stoul(get<1>(attr));
+        }
+        if (get<0>(attr) == "flags") {
+            infoAddr.ifa_flags = stoul(get<1>(attr));
+        }
+        if (get<0>(attr) == "scope") {
+            infoAddr.ifa_scope = stoul(get<1>(attr));
+        }
+    }
+    nlm.put(infoAddr);
+    for (const auto& attr : attrs) {
+        if (get<0>(attr) == "ip") {
+            if (family == AF_INET6) {
+                in6_addr addr6;
+                if (inet_pton(AF_INET6, get<1>(attr).c_str(), &addr6) != 1) {
+                    throw VasumException("Can't set ipv4 address");
+                };
+                nlm.put(IFA_ADDRESS, addr6);
+                nlm.put(IFA_LOCAL, addr6);
+            } else {
+                assert(family == AF_INET);
+                in_addr addr4;
+                if (inet_pton(AF_INET, get<1>(attr).c_str(), &addr4) != 1) {
+                    throw VasumException("Can't set ipv6 address");
+                };
+                nlm.put(IFA_LOCAL, addr4);
+            }
+        }
+    }
+    send(nlm, nsPid);
+}
+
 } // namespace
 
 void createVeth(const pid_t& nsPid, const string& nsDev, const string& hostDev)
@@ -310,6 +432,138 @@ void createBridge(const string& netdev)
     send(nlm);
 }
 
+Attrs getAttrs(const pid_t nsPid, const std::string& netdev)
+{
+    auto joinAddresses = [](const Attrs& attrs) -> std::string {
+        bool first = true;
+        stringstream ss;
+        for (const auto& attr : attrs) {
+            ss << (first ? "" : ",") << get<0>(attr) << ":" << get<1>(attr);
+            first = false;
+        }
+        return ss.str();
+    };
+
+    LOGT("Getting network device informations: " << netdev);
+    validateNetdevName(netdev);
+
+    NetlinkMessage nlm(RTM_GETLINK, NLM_F_REQUEST | NLM_F_ACK);
+    ifinfomsg infoPeer = utils::make_clean<ifinfomsg>();
+    infoPeer.ifi_family = AF_UNSPEC;
+    infoPeer.ifi_change = 0xFFFFFFFF;
+    nlm.put(infoPeer)
+        .put(IFLA_IFNAME, netdev);
+    NetlinkResponse response = send(nlm, nsPid);
+    if (!response.hasMessage()) {
+        throw VasumException("Can't get interface information");
+    }
+    response.fetch(infoPeer);
+
+    Attrs attrs;
+    while (response.hasAttribute()) {
+        uint32_t mtu, link;
+        int attrType = response.getAttributeType();
+        switch (attrType) {
+            case IFLA_MTU:
+                response.fetch(IFLA_MTU, mtu);
+                attrs.push_back(make_tuple("mtu", std::to_string(mtu)));
+                break;
+            case IFLA_LINK:
+                response.fetch(IFLA_LINK, link);
+                attrs.push_back(make_tuple("link", std::to_string(link)));
+                break;
+            default:
+                response.skipAttribute();
+                break;
+        }
+    }
+    attrs.push_back(make_tuple("flags", std::to_string(infoPeer.ifi_flags)));
+    attrs.push_back(make_tuple("type", std::to_string(infoPeer.ifi_type)));
+    for (const auto& address : getIpAddresses(nsPid, AF_INET, infoPeer.ifi_index)) {
+        attrs.push_back(make_tuple("ipv4", joinAddresses(address)));
+    }
+    for (const auto& address : getIpAddresses(nsPid, AF_INET6, infoPeer.ifi_index)) {
+        attrs.push_back(make_tuple("ipv6", joinAddresses(address)));
+    }
+
+    return attrs;
+}
+
+void setAttrs(const pid_t nsPid, const std::string& netdev, const Attrs& attrs)
+{
+    const set<string> supportedAttrs{"flags", "change", "type", "mtu", "link", "ipv4", "ipv6"};
+
+    LOGT("Setting network device informations: " << netdev);
+    validateNetdevName(netdev);
+    for (const auto& attr : attrs) {
+        if (supportedAttrs.find(get<0>(attr)) == supportedAttrs.end()) {
+            throw VasumException("Unsupported attribute: " + get<0>(attr));
+        }
+    }
+
+    NetlinkMessage nlm(RTM_NEWLINK, NLM_F_REQUEST | NLM_F_CREATE | NLM_F_ACK);
+    ifinfomsg infoPeer = utils::make_clean<ifinfomsg>();
+    infoPeer.ifi_family = AF_UNSPEC;
+    infoPeer.ifi_index = getInterfaceIndex(netdev, nsPid);
+    infoPeer.ifi_change = 0xFFFFFFFF;
+    for (const auto& attr : attrs) {
+        if (get<0>(attr) == "flags") {
+            infoPeer.ifi_flags = stoul(get<1>(attr));
+        }
+        if (get<0>(attr) == "change") {
+            infoPeer.ifi_change = stoul(get<1>(attr));
+        }
+        if (get<0>(attr) == "type") {
+            infoPeer.ifi_type = stoul(get<1>(attr));
+        }
+    }
+    nlm.put(infoPeer);
+    for (const auto& attr : attrs) {
+        if (get<0>(attr) == "mtu") {
+            nlm.put<uint32_t>(IFLA_MTU, stoul(get<1>(attr)));
+        }
+        if (get<0>(attr) == "link") {
+            nlm.put<uint32_t>(IFLA_LINK, stoul(get<1>(attr)));
+        }
+    }
+
+    NetlinkResponse response = send(nlm, nsPid);
+    if (!response.hasMessage()) {
+        throw VasumException("Can't set interface information");
+    }
+
+    //TODO: Multiple addresses should be set at once (add support NLM_F_MULTI to NetlinkMessage).
+    vector<string> ipv4;
+    vector<string> ipv6;
+    for (const auto& attr : attrs) {
+        if (get<0>(attr) == "ipv4") {
+            ipv4.push_back(get<1>(attr));
+        }
+        if (get<0>(attr) == "ipv6") {
+            ipv6.push_back(get<1>(attr));
+        }
+    }
+
+    auto setIp = [nsPid](const vector<string>& ips, uint32_t index, int family) -> void {
+        using namespace boost::algorithm;
+        for (const auto& ip : ips) {
+            Attrs attrs;
+            vector<string> params;
+            for (const auto& addrAttr : split(params, ip, is_any_of(","))) {
+                size_t pos = addrAttr.find(":");
+                if (pos == string::npos || pos == addrAttr.length()) {
+                    LOGE("Wrong input data format: ill formed address attribute: " << addrAttr);
+                    VasumException("Wrong input data format: ill formed address attribute");
+                }
+                attrs.push_back(make_tuple(addrAttr.substr(0, pos), addrAttr.substr(pos + 1)));
+            }
+            setIpAddresses(nsPid, index, attrs, family);
+        }
+    };
+
+    setIp(ipv4, infoPeer.ifi_index, AF_INET);
+    setIp(ipv6, infoPeer.ifi_index, AF_INET6);
+}
 
 } //namespace netdev
 } //namespace vasum

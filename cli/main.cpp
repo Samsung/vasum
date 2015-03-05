@@ -173,6 +173,15 @@ std::map<std::string, CommandLineInterface> commands = {
         }
     },
     {
+        "lookup_netdev_by_name", {
+            lookup_netdev_by_name,
+            "lookup_netdev_by_name zone_id devId",
+            "Get netdev flags",
+            {{"zone_id", "id zone name"},
+             {"devId", "network device id"}}
+        }
+    },
+    {
         "destroy_netdev", {
             destroy_netdev,
             "destroy_netdev zone_id devId",

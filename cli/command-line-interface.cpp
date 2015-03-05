@@ -128,6 +128,23 @@ ostream& operator<<(ostream& out, const VsmZone& zone)
     return out;
 }
 
+ostream& operator<<(ostream& out, const VsmNetdevType& netdevType)
+{
+    switch (netdevType) {
+        case VSMNETDEV_VETH: out << "VETH"; break;
+        case VSMNETDEV_PHYS: out << "PHYS"; break;
+        case VSMNETDEV_MACVLAN: out << "MACVLAN"; break;
+    }
+    return out;
+}
+
+ostream& operator<<(ostream& out, const VsmNetdev& netdev)
+{
+    out << "Name: " << netdev->name
+        << "\nType: " << netdev->type;
+    return out;
+}
+
 typedef vector<vector<string>> Table;
 
 ostream& operator<<(ostream& out, const Table& table)
@@ -395,6 +412,24 @@ void create_netdev_phys(int pos, int argc, const char** argv)
                   _1,
                   argv[pos + 1],
                   argv[pos + 2]));
+}
+
+void lookup_netdev_by_name(int pos, int argc, const char** argv)
+{
+    using namespace std::placeholders;
+
+    if (argc <= pos + 2) {
+        throw runtime_error("Not enough parameters");
+    }
+    VsmNetdev vsmNetdev = NULL;
+    one_shot(bind(vsm_lookup_netdev_by_name,
+                  _1,
+                  argv[pos + 1],
+                  argv[pos + 2],
+                  &vsmNetdev));
+    cout << vsmNetdev << endl;
+    vsm_netdev_free(vsmNetdev);
+
 }
 
 void destroy_netdev(int pos, int argc, const char** argv)
