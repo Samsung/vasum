@@ -19,35 +19,53 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Thread epoll dispatcher
+ * @brief   Epoll events
  */
 
 #include "config.hpp"
-#include "utils/thread-poll-dispatcher.hpp"
+#include "epoll/events.hpp"
 
-#include <sys/epoll.h>
+#include <sstream>
 
 namespace vasum {
-namespace utils {
+namespace epoll {
 
-ThreadPollDispatcher::ThreadPollDispatcher(EventPoll& poll)
-    : mPoll(poll)
-    , mThread([&]{ poll.dispatchLoop(); })
+namespace {
+
+std::string eventToString(Events event)
 {
-    auto controlCallback = [this](int, EventPoll::Events) -> bool {
-        mStopEvent.receive();
-        return false; // break the loop
-    };
-
-    poll.addFD(mStopEvent.getFD(), EPOLLIN, std::move(controlCallback));
+    switch (event) {
+    case EPOLLIN: return "IN";
+    case EPOLLOUT: return "OUT";
+    case EPOLLERR: return "ERR";
+    case EPOLLHUP: return "HUP";
+    case EPOLLRDHUP: return "RDHUP";
+    default:
+        std::ostringstream ss;
+        ss << "0x" << std::hex << event;
+        return ss.str();
+    }
 }
 
-ThreadPollDispatcher::~ThreadPollDispatcher()
+} // namespace
+
+std::string eventsToString(Events events)
 {
-    mStopEvent.send();
-    mThread.join();
-    mPoll.removeFD(mStopEvent.getFD());
+    if (events == 0) {
+        return "<NONE>";
+    }
+    std::string ret;
+    for (unsigned int i = 0; i<32; ++i) {
+        Events event = 1u << i;
+        if (events & event) {
+            if (!ret.empty()) {
+                ret.append(", ");
+            }
+            ret.append(eventToString(event));
+        }
+    }
+    return ret;
 }
 
-} // namespace utils
+} // namespace epoll
 } // namespace vasum

@@ -22,8 +22,10 @@
  * @brief   C++ epoll wrapper
  */
 
-#ifndef COMMON_UTILS_EVENT_POLL_HPP
-#define COMMON_UTILS_EVENT_POLL_HPP
+#ifndef COMMON_EPOLL_EVENT_POLL_HPP
+#define COMMON_EPOLL_EVENT_POLL_HPP
+
+#include "epoll/events.hpp"
 
 #include <functional>
 #include <mutex>
@@ -31,12 +33,10 @@
 #include <memory>
 
 namespace vasum {
-namespace utils {
+namespace epoll {
 
 class EventPoll {
 public:
-
-    typedef unsigned int Events;
     typedef std::function<bool(int fd, Events events)> Callback;
 
     EventPoll();
@@ -62,7 +62,7 @@ private:
 };
 
 
-} // namespace utils
+} // namespace epoll
 } // namespace vasum
 
-#endif // COMMON_UTILS_EVENT_POLL_HPP
+#endif // COMMON_EPOLL_EVENT_POLL_HPP

@@ -22,31 +22,36 @@
  * @brief   Thread epoll dispatcher
  */
 
-#ifndef COMMON_UTILS_THREAD_POLL_DISPATCHER_HPP
-#define COMMON_UTILS_THREAD_POLL_DISPATCHER_HPP
-
-#include "utils/event-poll.hpp"
-#include "utils/eventfd.hpp"
-
-#include <thread>
+#include "config.hpp"
+#include "epoll/thread-poll-dispatcher.hpp"
 
 namespace vasum {
-namespace utils {
+namespace epoll {
 
-/**
- * Will dispatch poll events in a newly created thread
- */
-class ThreadPollDispatcher {
-public:
-    ThreadPollDispatcher(EventPoll& poll);
-    ~ThreadPollDispatcher();
-private:
-    EventPoll& mPoll;
-    EventFD mStopEvent;
-    std::thread mThread;
-};
+ThreadPollDispatcher::ThreadPollDispatcher()
+{
+    auto controlCallback = [this](int, Events) -> bool {
+        mStopEvent.receive();
+        return false; // break the loop
+    };
 
-} // namespace utils
+    mPoll.addFD(mStopEvent.getFD(), EPOLLIN, std::move(controlCallback));
+    mThread = std::thread([this] {
+        mPoll.dispatchLoop();
+    });
+}
+
+ThreadPollDispatcher::~ThreadPollDispatcher()
+{
+    mStopEvent.send();
+    mThread.join();
+    mPoll.removeFD(mStopEvent.getFD());
+}
+
+EventPoll& ThreadPollDispatcher::getPoll()
+{
+    return mPoll;
+}
+
+} // namespace epoll
 } // namespace vasum
-
-#endif // COMMON_UTILS_THREAD_POLL_DISPATCHER_HPP

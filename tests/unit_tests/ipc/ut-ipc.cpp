@@ -70,7 +70,6 @@ const std::string SOCKET_PATH = TEST_DIR + "/test.socket";
 
 struct Fixture {
     ScopedDir mTestPathGuard;
-    std::string SOCKET_PATH;
 
     Fixture()
         : mTestPathGuard(TEST_DIR)

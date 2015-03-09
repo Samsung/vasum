@@ -23,7 +23,7 @@
  */
 
 #include "config.hpp"
-#include "utils/event-poll.hpp"
+#include "epoll/event-poll.hpp"
 #include "utils/fd-utils.hpp"
 #include "utils/exception.hpp"
 #include "logger/logger.hpp"
@@ -34,7 +34,7 @@
 #include <assert.h>
 
 namespace vasum {
-namespace utils {
+namespace epoll {
 
 EventPoll::EventPoll()
     : mPollFD(::epoll_create1(EPOLL_CLOEXEC))
@@ -147,5 +147,5 @@ void EventPoll::removeFDInternal(const int fd)
     }
 }
 
-} // namespace utils
+} // namespace epoll
 } // namespace vasum

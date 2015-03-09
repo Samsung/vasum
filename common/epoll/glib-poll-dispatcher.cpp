@@ -23,22 +23,22 @@
  */
 
 #include "config.hpp"
-#include "utils/glib-poll-dispatcher.hpp"
+#include "epoll/glib-poll-dispatcher.hpp"
 #include "utils/callback-wrapper.hpp"
 
 namespace vasum {
-namespace utils {
+namespace epoll {
 
-GlibPollDispatcher::GlibPollDispatcher(EventPoll& poll)
+GlibPollDispatcher::GlibPollDispatcher()
 {
-    mChannel = g_io_channel_unix_new(poll.getPollFD());
+    mChannel = g_io_channel_unix_new(mPoll.getPollFD());
 
-    auto dispatchCallback = [&]() {
-        poll.dispatchIteration(0);
+    auto dispatchCallback = [this]() {
+        mPoll.dispatchIteration(0);
     };
 
     auto cCallback = [](GIOChannel*, GIOCondition, gpointer data) -> gboolean {
-        getCallbackFromPointer<decltype(dispatchCallback)>(data)();
+        utils::getCallbackFromPointer<decltype(dispatchCallback)>(data)();
         return TRUE;
     };
 
@@ -46,8 +46,8 @@ GlibPollDispatcher::GlibPollDispatcher(EventPoll& poll)
                                    G_PRIORITY_DEFAULT,
                                    G_IO_IN,
                                    cCallback,
-                                   createCallbackWrapper(dispatchCallback, mGuard.spawn()),
-                                   &deleteCallbackWrapper<decltype(dispatchCallback)>);
+                                   utils::createCallbackWrapper(dispatchCallback, mGuard.spawn()),
+                                   &utils::deleteCallbackWrapper<decltype(dispatchCallback)>);
 }
 
 GlibPollDispatcher::~GlibPollDispatcher()
@@ -57,5 +57,10 @@ GlibPollDispatcher::~GlibPollDispatcher()
     // mGuard destructor will wait for full unregister of dispatchCallback
 }
 
-} // namespace utils
+EventPoll& GlibPollDispatcher::getPoll()
+{
+    return mPoll;
+}
+
+} // namespace epoll
 } // namespace vasum

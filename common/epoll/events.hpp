@@ -19,35 +19,23 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   glib epoll dispatcher
+ * @brief   Epoll events
  */
 
-#ifndef COMMON_UTILS_GLIB_POLL_DISPATCHER_HPP
-#define COMMON_UTILS_GLIB_POLL_DISPATCHER_HPP
+#ifndef COMMON_EPOLL_EVENTS_HPP
+#define COMMON_EPOLL_EVENTS_HPP
 
-#include "utils/event-poll.hpp"
-#include "utils/callback-guard.hpp"
-
-#include <gio/gio.h>
+#include <string>
+#include <sys/epoll.h> // for EPOLL* constatnts
 
 namespace vasum {
-namespace utils {
+namespace epoll {
 
-/**
- * Will dispatch poll events in glib thread
- */
-class GlibPollDispatcher {
-public:
-    GlibPollDispatcher(EventPoll& poll);
-    ~GlibPollDispatcher();
-private:
-    CallbackGuard mGuard;
-    GIOChannel* mChannel;
-    guint mWatchId;
-};
+typedef unsigned int Events; ///< bitmask of EPOLL* constants
 
+std::string eventsToString(Events events);
 
-} // namespace utils
+} // namespace epoll
 } // namespace vasum
 
-#endif // COMMON_UTILS_GLIB_POLL_DISPATCHER_HPP
+#endif // COMMON_EPOLL_EVENTS_HPP

@@ -26,54 +26,21 @@
 #include "config.hpp"
 #include "ut.hpp"
 
-#include "utils/event-poll.hpp"
+#include "epoll/event-poll.hpp"
 #include "logger/logger.hpp"
 #include "ipc/internals/socket.hpp"
 #include "utils/latch.hpp"
 #include "utils/glib-loop.hpp"
-#include "utils/glib-poll-dispatcher.hpp"
-#include "utils/thread-poll-dispatcher.hpp"
-
-#include <map>
-#include <sys/epoll.h>
+#include "epoll/glib-poll-dispatcher.hpp"
+#include "epoll/thread-poll-dispatcher.hpp"
 
 using namespace vasum::utils;
+using namespace vasum::epoll;
 using namespace vasum::ipc;
 
 namespace {
 
 const int unsigned TIMEOUT = 1000;
-#define ADD_EVENT(e) {EPOLL##e, #e}
-const std::map<EventPoll::Events, std::string> EVENT_NAMES = {
-    ADD_EVENT(IN),
-    ADD_EVENT(OUT),
-    ADD_EVENT(ERR),
-    ADD_EVENT(HUP),
-    ADD_EVENT(RDHUP),
-};
-#undef ADD_EVENT
-
-std::string strEvents(EventPoll::Events events)
-{
-    if (events == 0) {
-        return "<none>";
-    }
-    std::ostringstream ss;
-    for (const auto& p : EVENT_NAMES) {
-        if (events & p.first) {
-            ss << p.second << ", ";
-            events &= ~p.first;
-        }
-    }
-    if (events != 0) {
-        ss << std::hex << events;
-        return ss.str();
-    } else {
-        std::string ret = ss.str();
-        ret.resize(ret.size() - 2);
-        return ret;
-    }
-}
 
 } // namespace
 
@@ -87,28 +54,29 @@ BOOST_AUTO_TEST_CASE(EmptyPoll)
 
 BOOST_AUTO_TEST_CASE(ThreadedPoll)
 {
-    EventPoll poll;
-    ThreadPollDispatcher dispatcher(poll);
+    ThreadPollDispatcher dispatcher;
 }
 
 BOOST_AUTO_TEST_CASE(GlibPoll)
 {
     ScopedGlibLoop loop;
 
-    EventPoll poll;
-    GlibPollDispatcher dispatcher(poll);
+    GlibPollDispatcher dispatcher;
 }
 
-void doSocketTest(EventPoll& poll, Latch& goodMessage, Latch& remoteClosed)
+void doSocketTest(EventPoll& poll)
 {
     const std::string PATH = "/tmp/ut-poll.sock";
     const std::string MESSAGE = "This is a test message";
 
+    Latch goodMessage;
+    Latch remoteClosed;
+
     Socket listen = Socket::createSocket(PATH);
     std::shared_ptr<Socket> server;
 
-    auto serverCallback = [&](int, EventPoll::Events events) -> bool {
-        LOGD("Server events: " << strEvents(events));
+    auto serverCallback = [&](int, Events events) -> bool {
+        LOGD("Server events: " << eventsToString(events));
 
         if (events & EPOLLOUT) {
             server->write(MESSAGE.data(), MESSAGE.size());
@@ -118,8 +86,8 @@ void doSocketTest(EventPoll& poll, Latch& goodMessage, Latch& remoteClosed)
         return true;
     };
 
-    auto listenCallback = [&](int, EventPoll::Events events) -> bool {
-        LOGD("Listen events: " << strEvents(events));
+    auto listenCallback = [&](int, Events events) -> bool {
+        LOGD("Listen events: " << eventsToString(events));
         if (events & EPOLLIN) {
             server = listen.accept();
             poll.addFD(server->getFD(), EPOLLHUP | EPOLLRDHUP | EPOLLOUT, serverCallback);
@@ -131,8 +99,8 @@ void doSocketTest(EventPoll& poll, Latch& goodMessage, Latch& remoteClosed)
 
     Socket client = Socket::connectSocket(PATH);
 
-    auto clientCallback = [&](int, EventPoll::Events events) -> bool {
-        LOGD("Client events: " << strEvents(events));
+    auto clientCallback = [&](int, Events events) -> bool {
+        LOGD("Client events: " << eventsToString(events));
 
         if (events & EPOLLIN) {
             std::string ret(MESSAGE.size(), 'x');
@@ -158,47 +126,33 @@ void doSocketTest(EventPoll& poll, Latch& goodMessage, Latch& remoteClosed)
 
 BOOST_AUTO_TEST_CASE(ThreadedPollSocket)
 {
-    Latch goodMessage;
-    Latch remoteClosed;
+    ThreadPollDispatcher dispatcher;
 
-    EventPoll poll;
-    ThreadPollDispatcher dispatcher(poll);
-
-    doSocketTest(poll, goodMessage, remoteClosed);
+    doSocketTest(dispatcher.getPoll());
 }
 
 BOOST_AUTO_TEST_CASE(GlibPollSocket)
 {
-    Latch goodMessage;
-    Latch remoteClosed;
-
     ScopedGlibLoop loop;
 
-    EventPoll poll;
-    GlibPollDispatcher dispatcher(poll);
+    GlibPollDispatcher dispatcher;
 
-    doSocketTest(poll, goodMessage, remoteClosed);
+    doSocketTest(dispatcher.getPoll());
 }
 
 BOOST_AUTO_TEST_CASE(PollStacking)
 {
-    Latch goodMessage;
-    Latch remoteClosed;
+    ThreadPollDispatcher dispatcher;
 
-    EventPoll outer;
-    EventPoll inner;
+    EventPoll innerPoll;
 
-    auto dispatchInner = [&](int, EventPoll::Events) -> bool {
-        inner.dispatchIteration(0);
+    auto dispatchInner = [&](int, Events) -> bool {
+        innerPoll.dispatchIteration(0);
         return true;
     };
-
-    outer.addFD(inner.getPollFD(), EPOLLIN, dispatchInner);
-
-    ThreadPollDispatcher dispatcher(outer);
-    doSocketTest(inner, goodMessage, remoteClosed);
-
-    outer.removeFD(inner.getPollFD());
+    dispatcher.getPoll().addFD(innerPoll.getPollFD(), EPOLLIN, dispatchInner);
+    doSocketTest(innerPoll);
+    dispatcher.getPoll().removeFD(innerPoll.getPollFD());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
