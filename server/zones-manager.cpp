@@ -40,6 +40,7 @@
 #include "utils/fs.hpp"
 #include "utils/img.hpp"
 #include "utils/environment.hpp"
+#include "api/messages.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
@@ -56,7 +57,7 @@ namespace {
 
 bool regexMatchVector(const std::string& str, const std::vector<boost::regex>& v)
 {
-    for (const boost::regex& toMatch: v) {
+    for (const boost::regex& toMatch : v) {
         if (boost::regex_match(str, toMatch)) {
             return true;
         }
@@ -129,7 +130,7 @@ ZonesManager::ZonesManager(const std::string& configPath)
     mHostConnection.setProxyCallCallback(bind(&ZonesManager::handleProxyCall,
                                               this, HOST_ID, _1, _2, _3, _4, _5, _6, _7));
 
-    mHostConnection.setGetZoneDbusesCallback(bind(&ZonesManager::handleGetZoneDbuses,
+    mHostConnection.setGetZoneDbusesCallback(bind(&ZonesManager::handleGetZoneDbusesCall,
                                                   this, _1));
 
     mHostConnection.setGetZoneIdsCallback(bind(&ZonesManager::handleGetZoneIdsCall,
@@ -142,22 +143,22 @@ ZonesManager::ZonesManager(const std::string& configPath)
                                                 this, _1, _2));
 
     mHostConnection.setSetNetdevAttrsCallback(bind(&ZonesManager::handleSetNetdevAttrsCall,
-                                                this, _1, _2, _3, _4));
+                                                   this, _1, _2, _3, _4));
 
     mHostConnection.setGetNetdevAttrsCallback(bind(&ZonesManager::handleGetNetdevAttrsCall,
-                                                this, _1, _2, _3));
+                                                   this, _1, _2, _3));
 
     mHostConnection.setGetNetdevListCallback(bind(&ZonesManager::handleGetNetdevListCall,
-                                                this, _1, _2));
+                                                  this, _1, _2));
 
     mHostConnection.setCreateNetdevVethCallback(bind(&ZonesManager::handleCreateNetdevVethCall,
-                                                this, _1, _2, _3, _4));
+                                                     this, _1, _2, _3, _4));
 
     mHostConnection.setCreateNetdevMacvlanCallback(bind(&ZonesManager::handleCreateNetdevMacvlanCall,
-                                                this, _1, _2, _3, _4, _5));
+                                                        this, _1, _2, _3, _4, _5));
 
     mHostConnection.setCreateNetdevPhysCallback(bind(&ZonesManager::handleCreateNetdevPhysCall,
-                                                this, _1, _2, _3));
+                                                     this, _1, _2, _3));
 
     mHostConnection.setDeclareFileCallback(bind(&ZonesManager::handleDeclareFileCall,
                                                 this, _1, _2, _3, _4, _5, _6));
@@ -172,7 +173,7 @@ ZonesManager::ZonesManager(const std::string& configPath)
                                                     this, _1, _2));
 
     mHostConnection.setRemoveDeclarationCallback(bind(&ZonesManager::handleRemoveDeclarationCall,
-                                                    this, _1, _2, _3));
+                                                      this, _1, _2, _3));
 
     mHostConnection.setSetActiveZoneCallback(bind(&ZonesManager::handleSetActiveZoneCall,
                                                   this, _1, _2));
@@ -212,9 +213,9 @@ ZonesManager::ZonesManager(const std::string& configPath)
     if (mConfig.inputConfig.enabled) {
         LOGI("Registering input monitor [" << mConfig.inputConfig.device.c_str() << "]");
         mSwitchingSequenceMonitor.reset(
-                new InputMonitor(mConfig.inputConfig,
-                                 std::bind(&ZonesManager::switchingSequenceMonitorNotify,
-                                           this)));
+            new InputMonitor(mConfig.inputConfig,
+                             std::bind(&ZonesManager::switchingSequenceMonitorNotify,
+                                       this)));
     }
 
 
@@ -307,13 +308,13 @@ void ZonesManager::insertZone(const std::string& zoneId, const std::string& zone
                                         mConfig.runMountPointPrefix));
 
     using namespace std::placeholders;
-    zone->setNotifyActiveZoneCallback(bind(&ZonesManager::notifyActiveZoneHandler,
-                                           this, zoneId, _1, _2));
+    zone->setNotifyActiveZoneCallback(bind(&ZonesManager::handleNotifyActiveZoneCall,
+                                           this, zoneId, _1, _2, _3));
 
-    zone->setDisplayOffCallback(bind(&ZonesManager::displayOffHandler,
+    zone->setDisplayOffCallback(bind(&ZonesManager::handleDisplayOffCall,
                                      this, zoneId));
 
-    zone->setFileMoveRequestCallback(bind(&ZonesManager::handleZoneMoveFileRequest,
+    zone->setFileMoveCallback(bind(&ZonesManager::handleFileMoveCall,
                                           this, zoneId, _1, _2, _3));
 
     zone->setProxyCallCallback(bind(&ZonesManager::handleProxyCall,
@@ -547,11 +548,12 @@ void ZonesManager::setZonesDetachOnExit()
     }
 }
 
-void ZonesManager::notifyActiveZoneHandler(const std::string& caller,
-                                           const std::string& application,
-                                           const std::string& message)
+void ZonesManager::handleNotifyActiveZoneCall(const std::string& caller,
+                                          const std::string& application,
+                                          const std::string& message,
+                                          api::MethodResultBuilder::Pointer result)
 {
-    LOGI("notifyActiveZoneHandler(" << caller << ", " << application << ", " << message
+    LOGI("handleNotifyActiveZoneCall(" << caller << ", " << application << ", " << message
          << ") called");
 
     Lock lock(mMutex);
@@ -561,12 +563,14 @@ void ZonesManager::notifyActiveZoneHandler(const std::string& caller,
         if (iter != mZones.end() && caller != get(iter).getId()) {
             get(iter).sendNotification(caller, application, message);
         }
-    } catch(const VasumException&) {
+        result->setVoid();
+    } catch (const VasumException&) {
         LOGE("Notification from " << caller << " hasn't been sent");
+        result->setError(api::ERROR_INTERNAL, "Notification hasn't been sent");
     }
 }
 
-void ZonesManager::displayOffHandler(const std::string& /*caller*/)
+void ZonesManager::handleDisplayOffCall(const std::string& /*caller*/)
 {
     // get config of currently set zone and switch if switchToDefaultAfterTimeout is true
     Lock lock(mMutex);
@@ -584,10 +588,10 @@ void ZonesManager::displayOffHandler(const std::string& /*caller*/)
     }
 }
 
-void ZonesManager::handleZoneMoveFileRequest(const std::string& srcZoneId,
-                                             const std::string& dstZoneId,
-                                             const std::string& path,
-                                             dbus::MethodResultBuilder::Pointer result)
+void ZonesManager::handleFileMoveCall(const std::string& srcZoneId,
+                                         const std::string& dstZoneId,
+                                         const std::string& path,
+                                         api::MethodResultBuilder::Pointer result)
 {
     // TODO: this implementation is only a placeholder.
     // There are too many unanswered questions and security concerns:
@@ -622,29 +626,35 @@ void ZonesManager::handleZoneMoveFileRequest(const std::string& srcZoneId,
     }
     Zone& srcZone = get(srcIter);
 
+    auto status = std::make_shared<api::FileMoveRequestStatus>();
+
     auto dstIter = findZone(dstZoneId);
     if (dstIter == mZones.end()) {
         LOGE("Destination zone '" << dstZoneId << "' not found");
-        result->set(g_variant_new("(s)", api::zone::FILE_MOVE_DESTINATION_NOT_FOUND.c_str()));
+        status->value = api::zone::FILE_MOVE_DESTINATION_NOT_FOUND;
+        result->set(status);
         return;
     }
     Zone& dstContanier = get(dstIter);
 
     if (srcZoneId == dstZoneId) {
         LOGE("Cannot send a file to yourself");
-        result->set(g_variant_new("(s)", api::zone::FILE_MOVE_WRONG_DESTINATION.c_str()));
+        status->value = api::zone::FILE_MOVE_WRONG_DESTINATION;
+        result->set(status);
         return;
     }
 
     if (!regexMatchVector(path, srcZone.getPermittedToSend())) {
         LOGE("Source zone has no permissions to send the file: " << path);
-        result->set(g_variant_new("(s)", api::zone::FILE_MOVE_NO_PERMISSIONS_SEND.c_str()));
+        status->value = api::zone::FILE_MOVE_NO_PERMISSIONS_SEND;
+        result->set(status);
         return;
     }
 
     if (!regexMatchVector(path, dstContanier.getPermittedToRecv())) {
         LOGE("Destination zone has no permissions to receive the file: " << path);
-        result->set(g_variant_new("(s)", api::zone::FILE_MOVE_NO_PERMISSIONS_RECEIVE.c_str()));
+        status->value = api::zone::FILE_MOVE_NO_PERMISSIONS_RECEIVE;
+        result->set(status);
         return;
     }
 
@@ -654,9 +664,11 @@ void ZonesManager::handleZoneMoveFileRequest(const std::string& srcZoneId,
 
     if (!utils::moveFile(srcPath, dstPath)) {
         LOGE("Failed to move the file: " << path);
-        result->set(g_variant_new("(s)", api::zone::FILE_MOVE_FAILED.c_str()));
+        status->value = api::zone::FILE_MOVE_FAILED;
+        result->set(status);
     } else {
-        result->set(g_variant_new("(s)", api::zone::FILE_MOVE_SUCCEEDED.c_str()));
+        status->value = api::zone::FILE_MOVE_SUCCEEDED;
+        result->set(status);
         try {
             dstContanier.sendNotification(srcZoneId, path, api::zone::FILE_MOVE_SUCCEEDED);
         } catch (ServerException&) {
@@ -681,15 +693,15 @@ void ZonesManager::handleProxyCall(const std::string& caller,
                                               targetInterface,
                                               targetMethod)) {
         LOGW("Forbidden proxy call; " << caller << " -> " << target << "; " << targetBusName
-                << "; " << targetObjectPath << "; " << targetInterface << "; " << targetMethod);
+             << "; " << targetObjectPath << "; " << targetInterface << "; " << targetMethod);
         result->setError(api::ERROR_FORBIDDEN, "Proxy call forbidden");
         return;
     }
 
     LOGI("Proxy call; " << caller << " -> " << target << "; " << targetBusName
-            << "; " << targetObjectPath << "; " << targetInterface << "; " << targetMethod);
+         << "; " << targetObjectPath << "; " << targetInterface << "; " << targetMethod);
 
-    auto asyncResultCallback = [result](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
+    auto asyncResultCallback = [result](dbus::AsyncMethodCallResult & asyncMethodCallResult) {
         try {
             GVariant* targetResult = asyncMethodCallResult.get();
             result->set(g_variant_new("(v)", targetResult));
@@ -719,26 +731,22 @@ void ZonesManager::handleProxyCall(const std::string& caller,
 
     Zone& targetZone = get(targetIter);
     targetZone.proxyCallAsync(targetBusName,
-                                   targetObjectPath,
-                                   targetInterface,
-                                   targetMethod,
-                                   parameters,
-                                   asyncResultCallback);
+                              targetObjectPath,
+                              targetInterface,
+                              targetMethod,
+                              parameters,
+                              asyncResultCallback);
 }
 
-void ZonesManager::handleGetZoneDbuses(dbus::MethodResultBuilder::Pointer result)
+void ZonesManager::handleGetZoneDbusesCall(api::MethodResultBuilder::Pointer result)
 {
     Lock lock(mMutex);
 
-    std::vector<GVariant*> entries;
+    auto dbuses = std::make_shared<api::Dbuses>();
     for (auto& zone : mZones) {
-        GVariant* zoneId = g_variant_new_string(zone->getId().c_str());
-        GVariant* dbusAddress = g_variant_new_string(zone->getDbusAddress().c_str());
-        GVariant* entry = g_variant_new_dict_entry(zoneId, dbusAddress);
-        entries.push_back(entry);
+        dbuses->values.push_back({zone->getId(), zone->getDbusAddress()});
     }
-    GVariant* dict = g_variant_new_array(G_VARIANT_TYPE("{ss}"), entries.data(), entries.size());
-    result->set(g_variant_new("(@a{ss})", dict));
+    result->set(dbuses);
 }
 
 void ZonesManager::handleDbusStateChanged(const std::string& zoneId,
@@ -747,31 +755,28 @@ void ZonesManager::handleDbusStateChanged(const std::string& zoneId,
     mHostConnection.signalZoneDbusState(zoneId, dbusAddress);
 }
 
-void ZonesManager::handleGetZoneIdsCall(dbus::MethodResultBuilder::Pointer result)
+void ZonesManager::handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result)
 {
     Lock lock(mMutex);
 
-    std::vector<GVariant*> zoneIds;
-    for(auto& zone: mZones){
-        zoneIds.push_back(g_variant_new_string(zone->getId().c_str()));
+    auto zoneIds = std::make_shared<api::ZoneIds>();
+    for (const auto& zone : mZones) {
+        zoneIds->values.push_back(zone->getId());
     }
 
-    GVariant* array = g_variant_new_array(G_VARIANT_TYPE("s"),
-                                          zoneIds.data(),
-                                          zoneIds.size());
-    result->set(g_variant_new("(@as)", array));
+    result->set(zoneIds);
 }
 
-void ZonesManager::handleGetActiveZoneIdCall(dbus::MethodResultBuilder::Pointer result)
+void ZonesManager::handleGetActiveZoneIdCall(api::MethodResultBuilder::Pointer result)
 {
     LOGI("GetActiveZoneId call");
-
-    std::string id = getRunningForegroundZoneId();
-    result->set(g_variant_new("(s)", id.c_str()));
+    auto zoneId = std::make_shared<api::ZoneId>();
+    zoneId->value = getRunningForegroundZoneId();
+    result->set(zoneId);
 }
 
 void ZonesManager::handleGetZoneInfoCall(const std::string& id,
-                                         dbus::MethodResultBuilder::Pointer result)
+                                         api::MethodResultBuilder::Pointer result)
 {
     LOGI("GetZoneInfo call");
 
@@ -783,38 +788,33 @@ void ZonesManager::handleGetZoneInfoCall(const std::string& id,
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
         return;
     }
+
     Zone& zone = get(iter);
-    const char* state;
+    auto zoneInfo = std::make_shared<api::ZoneInfo>();
 
     if (zone.isRunning()) {
-        state = "RUNNING";
+        zoneInfo->state = "RUNNING";
     } else if (zone.isStopped()) {
-        state = "STOPPED";
+        zoneInfo->state = "STOPPED";
     } else if (zone.isPaused()) {
-        state = "FROZEN";
+        zoneInfo->state = "FROZEN";
     } else {
         LOGE("Unrecognized state of zone id=" << id);
         result->setError(api::ERROR_INTERNAL, "Unrecognized state of zone");
         return;
     }
 
-    result->set(g_variant_new("((siss))",
-                              id.c_str(),
-                              zone.getVT(),
-                              state,
-                              zone.getRootPath().c_str()));
+    result->set(zoneInfo);
 }
 
 void ZonesManager::handleSetNetdevAttrsCall(const std::string& zone,
                                             const std::string& netdev,
-                                            const std::vector<
-                                                std::tuple<std::string, std::string>>& attrs,
-                                            dbus::MethodResultBuilder::Pointer result)
+                                            const std::vector<std::tuple<std::string, std::string>>& attrs,
+                                            api::MethodResultBuilder::Pointer result)
 {
     LOGI("SetNetdevAttrs call");
     try {
         Lock lock(mMutex);
-
         getZone(zone).setNetdevAttrs(netdev, attrs);
         result->setVoid();
     } catch (const InvalidZoneIdException&) {
@@ -828,23 +828,18 @@ void ZonesManager::handleSetNetdevAttrsCall(const std::string& zone,
 
 void ZonesManager::handleGetNetdevAttrsCall(const std::string& zone,
                                             const std::string& netdev,
-                                            dbus::MethodResultBuilder::Pointer result)
+                                            api::MethodResultBuilder::Pointer result)
 {
     LOGI("GetNetdevAttrs call");
     try {
         Lock lock(mMutex);
-
+        auto netDevAttrs = std::make_shared<api::NetDevAttrs>();
         const auto attrs = getZone(zone).getNetdevAttrs(netdev);
 
-        GVariantBuilder builder;
-        g_variant_builder_init(&builder, G_VARIANT_TYPE_ARRAY);
-        for (const auto entry : attrs) {
-            g_variant_builder_add(&builder,
-                                  "(ss)",
-                                  std::get<0>(entry).c_str(),
-                                  std::get<1>(entry).c_str());
+        for (size_t i = 0; i < attrs.size(); ++i) {
+            netDevAttrs->values.push_back({std::get<0>(attrs[i]), std::get<1>(attrs[i])});
         }
-        result->set(g_variant_builder_end(&builder));
+        result->set(netDevAttrs);
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -855,19 +850,14 @@ void ZonesManager::handleGetNetdevAttrsCall(const std::string& zone,
 }
 
 void ZonesManager::handleGetNetdevListCall(const std::string& zone,
-                                           dbus::MethodResultBuilder::Pointer result)
+                                           api::MethodResultBuilder::Pointer result)
 {
     LOGI("GetNetdevList call");
     try {
         Lock lock(mMutex);
-        std::vector<GVariant*> netdevs;
-        for(auto& netdev: getZone(zone).getNetdevList()){
-            netdevs.push_back(g_variant_new_string(netdev.c_str()));
-        }
-        GVariant* array = g_variant_new_array(G_VARIANT_TYPE("s"),
-                                              netdevs.data(),
-                                              netdevs.size());
-        result->set(g_variant_new("(@as)", array));
+        auto netDevList = std::make_shared<api::NetDevList>();
+        netDevList->values = getZone(zone).getNetdevList();
+        result->set(netDevList);
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -880,7 +870,7 @@ void ZonesManager::handleGetNetdevListCall(const std::string& zone,
 void ZonesManager::handleCreateNetdevVethCall(const std::string& zone,
                                               const std::string& zoneDev,
                                               const std::string& hostDev,
-                                              dbus::MethodResultBuilder::Pointer result)
+                                              api::MethodResultBuilder::Pointer result)
 {
     LOGI("CreateNetdevVeth call");
     try {
@@ -901,7 +891,7 @@ void ZonesManager::handleCreateNetdevMacvlanCall(const std::string& zone,
                                                  const std::string& zoneDev,
                                                  const std::string& hostDev,
                                                  const uint32_t& mode,
-                                                 dbus::MethodResultBuilder::Pointer result)
+                                                 api::MethodResultBuilder::Pointer result)
 {
     LOGI("CreateNetdevMacvlan call");
     try {
@@ -920,7 +910,7 @@ void ZonesManager::handleCreateNetdevMacvlanCall(const std::string& zone,
 
 void ZonesManager::handleCreateNetdevPhysCall(const std::string& zone,
                                               const std::string& devId,
-                                              dbus::MethodResultBuilder::Pointer result)
+                                              api::MethodResultBuilder::Pointer result)
 {
     LOGI("CreateNetdevPhys call");
     try {
@@ -942,15 +932,15 @@ void ZonesManager::handleDeclareFileCall(const std::string& zone,
                                          const std::string& path,
                                          const int32_t& flags,
                                          const int32_t& mode,
-                                         dbus::MethodResultBuilder::Pointer result)
+                                         api::MethodResultBuilder::Pointer result)
 {
     LOGI("DeclareFile call");
 
     try {
         Lock lock(mMutex);
-
-        const std::string id = getZone(zone).declareFile(type, path, flags, mode);
-        result->set(g_variant_new("(s)", id.c_str()));
+        auto declaration = std::make_shared<api::Declaration>();
+        declaration->value = getZone(zone).declareFile(type, path, flags, mode);
+        result->set(declaration);
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -966,15 +956,15 @@ void ZonesManager::handleDeclareMountCall(const std::string& source,
                                           const std::string& type,
                                           const uint64_t& flags,
                                           const std::string& data,
-                                          dbus::MethodResultBuilder::Pointer result)
+                                          api::MethodResultBuilder::Pointer result)
 {
     LOGI("DeclareMount call");
 
     try {
         Lock lock(mMutex);
-
-        const std::string id = getZone(zone).declareMount(source, target, type, flags, data);
-        result->set(g_variant_new("(s)", id.c_str()));
+        auto declaration = std::make_shared<api::Declaration>();
+        declaration->value = getZone(zone).declareMount(source, target, type, flags, data);
+        result->set(declaration);
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -987,14 +977,14 @@ void ZonesManager::handleDeclareMountCall(const std::string& source,
 void ZonesManager::handleDeclareLinkCall(const std::string& source,
                                          const std::string& zone,
                                          const std::string& target,
-                                         dbus::MethodResultBuilder::Pointer result)
+                                         api::MethodResultBuilder::Pointer result)
 {
     LOGI("DeclareLink call");
     try {
         Lock lock(mMutex);
-
-        const std::string id = getZone(zone).declareLink(source, target);
-        result->set(g_variant_new("(s)", id.c_str()));
+        auto declaration = std::make_shared<api::Declaration>();
+        declaration->value = getZone(zone).declareLink(source, target);
+        result->set(declaration);
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -1005,23 +995,14 @@ void ZonesManager::handleDeclareLinkCall(const std::string& source,
 }
 
 void ZonesManager::handleGetDeclarationsCall(const std::string& zone,
-                                             dbus::MethodResultBuilder::Pointer result)
+                                             api::MethodResultBuilder::Pointer result)
 {
     LOGI("GetDeclarations call Id=" << zone);
     try {
         Lock lock(mMutex);
-
-        std::vector<std::string> declarations = getZone(zone).getDeclarations();
-
-        std::vector<GVariant*> out;
-        for (auto declaration : declarations) {
-            out.push_back(g_variant_new_string(declaration.c_str()));
-        }
-
-        GVariant* array = g_variant_new_array(G_VARIANT_TYPE("s"),
-                                              out.data(),
-                                              out.size());
-        result->set(g_variant_new("(@as)", array));
+        auto declarations = std::make_shared<api::Declarations>();
+        declarations->values = getZone(zone).getDeclarations();
+        result->set(declarations);
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
@@ -1029,12 +1010,11 @@ void ZonesManager::handleGetDeclarationsCall(const std::string& zone,
         LOGE(ex.what());
         result->setError(api::ERROR_INTERNAL, ex.what());
     }
-
 }
 
 void ZonesManager::handleRemoveDeclarationCall(const std::string& zone,
                                                const std::string& declarationId,
-                                               dbus::MethodResultBuilder::Pointer result)
+                                               api::MethodResultBuilder::Pointer result)
 {
     LOGI("RemoveDeclaration call Id=" << zone);
     try {
@@ -1053,20 +1033,20 @@ void ZonesManager::handleRemoveDeclarationCall(const std::string& zone,
 }
 
 void ZonesManager::handleSetActiveZoneCall(const std::string& id,
-                                           dbus::MethodResultBuilder::Pointer result)
+                                           api::MethodResultBuilder::Pointer result)
 {
     LOGI("SetActiveZone call; Id=" << id );
 
     Lock lock(mMutex);
 
     auto iter = findZone(id);
-    if (iter == mZones.end()){
+    if (iter == mZones.end()) {
         LOGE("No zone with id=" << id );
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
         return;
     }
 
-    if (!get(iter).isRunning()){
+    if (!get(iter).isRunning()) {
         LOGE("Could not activate stopped or paused zone");
         result->setError(api::host::ERROR_ZONE_NOT_RUNNING,
                          "Could not activate stopped or paused zone");
@@ -1170,11 +1150,11 @@ void ZonesManager::createZone(const std::string& id,
         }
     }
 
-    auto removeAllWrapper = [](const std::string& path) -> bool {
+    auto removeAllWrapper = [](const std::string & path) -> bool {
         try {
             LOGD("Removing copied data");
             fs::remove_all(fs::path(path));
-        } catch(const std::exception& e) {
+        } catch (const std::exception& e) {
             LOGW("Failed to remove data: " << boost::diagnostic_information(e));
         }
         return true;
@@ -1208,7 +1188,7 @@ void ZonesManager::createZone(const std::string& id,
 
 void ZonesManager::handleCreateZoneCall(const std::string& id,
                                         const std::string& templateName,
-                                        dbus::MethodResultBuilder::Pointer result)
+                                        api::MethodResultBuilder::Pointer result)
 {
     try {
         createZone(id, templateName);
@@ -1221,7 +1201,7 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
 }
 
 void ZonesManager::handleDestroyZoneCall(const std::string& id,
-                                         dbus::MethodResultBuilder::Pointer result)
+                                         api::MethodResultBuilder::Pointer result)
 {
     auto destroyer = [id, result, this] {
         try {
@@ -1243,7 +1223,7 @@ void ZonesManager::handleDestroyZoneCall(const std::string& id,
 }
 
 void ZonesManager::handleShutdownZoneCall(const std::string& id,
-                                          dbus::MethodResultBuilder::Pointer result)
+                                          api::MethodResultBuilder::Pointer result)
 {
     LOGI("ShutdownZone call; Id=" << id );
 
@@ -1272,7 +1252,7 @@ void ZonesManager::handleShutdownZoneCall(const std::string& id,
 }
 
 void ZonesManager::handleStartZoneCall(const std::string& id,
-                                       dbus::MethodResultBuilder::Pointer result)
+                                       api::MethodResultBuilder::Pointer result)
 {
     LOGI("StartZone call; Id=" << id );
 
@@ -1299,7 +1279,7 @@ void ZonesManager::handleStartZoneCall(const std::string& id,
 }
 
 void ZonesManager::handleLockZoneCall(const std::string& id,
-                                      dbus::MethodResultBuilder::Pointer result)
+                                      api::MethodResultBuilder::Pointer result)
 {
     LOGI("LockZone call; Id=" << id );
 
@@ -1334,7 +1314,7 @@ void ZonesManager::handleLockZoneCall(const std::string& id,
 }
 
 void ZonesManager::handleUnlockZoneCall(const std::string& id,
-                                        dbus::MethodResultBuilder::Pointer result)
+                                        api::MethodResultBuilder::Pointer result)
 {
     LOGI("UnlockZone call; Id=" << id );
 
@@ -1369,7 +1349,7 @@ void ZonesManager::handleUnlockZoneCall(const std::string& id,
 void ZonesManager::handleGrantDeviceCall(const std::string& id,
                                          const std::string& device,
                                          uint32_t flags,
-                                         dbus::MethodResultBuilder::Pointer result)
+                                         api::MethodResultBuilder::Pointer result)
 {
     LOGI("GrantDevice call; id=" << id << "; dev=" << device);
 
@@ -1409,7 +1389,7 @@ void ZonesManager::handleGrantDeviceCall(const std::string& id,
 
 void ZonesManager::handleRevokeDeviceCall(const std::string& id,
                                           const std::string& device,
-                                          dbus::MethodResultBuilder::Pointer result)
+                                          api::MethodResultBuilder::Pointer result)
 {
     LOGI("RevokeDevice call; id=" << id << "; dev=" << device);
 

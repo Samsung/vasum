@@ -32,6 +32,7 @@
 #include "input-monitor.hpp"
 #include "proxy-call-policy.hpp"
 #include "utils/worker.hpp"
+#include "api/method-result-builder.hpp"
 
 #include <string>
 #include <memory>
@@ -145,14 +146,15 @@ private:
     int getVTForNewZone();
     void insertZone(const std::string& zoneId, const std::string& templatePath);
 
-    void notifyActiveZoneHandler(const std::string& caller,
-                                 const std::string& appliaction,
-                                 const std::string& message);
-    void displayOffHandler(const std::string& caller);
-    void handleZoneMoveFileRequest(const std::string& srcZoneId,
-                                   const std::string& dstZoneId,
-                                   const std::string& path,
-                                   dbus::MethodResultBuilder::Pointer result);
+    void handleNotifyActiveZoneCall(const std::string& caller,
+                                    const std::string& appliaction,
+                                    const std::string& message,
+                                    api::MethodResultBuilder::Pointer result);
+    void handleDisplayOffCall(const std::string& caller);
+    void handleFileMoveCall(const std::string& srcZoneId,
+                               const std::string& dstZoneId,
+                               const std::string& path,
+                               api::MethodResultBuilder::Pointer result);
     void handleProxyCall(const std::string& caller,
                          const std::string& target,
                          const std::string& targetBusName,
@@ -161,76 +163,76 @@ private:
                          const std::string& targetMethod,
                          GVariant* parameters,
                          dbus::MethodResultBuilder::Pointer result);
-    void handleGetZoneDbuses(dbus::MethodResultBuilder::Pointer result);
+    void handleGetZoneDbusesCall(api::MethodResultBuilder::Pointer result);
     void handleDbusStateChanged(const std::string& zoneId, const std::string& dbusAddress);
-    void handleGetZoneIdsCall(dbus::MethodResultBuilder::Pointer result);
-    void handleGetActiveZoneIdCall(dbus::MethodResultBuilder::Pointer result);
-    void handleGetZoneInfoCall(const std::string& id, dbus::MethodResultBuilder::Pointer result);
+    void handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result);
+    void handleGetActiveZoneIdCall(api::MethodResultBuilder::Pointer result);
+    void handleGetZoneInfoCall(const std::string& id, api::MethodResultBuilder::Pointer result);
     void handleSetNetdevAttrsCall(const std::string& zone,
                                   const std::string& netdev,
                                   const std::vector<std::tuple<std::string, std::string>>& attrs,
-                                  dbus::MethodResultBuilder::Pointer result);
+                                  api::MethodResultBuilder::Pointer result);
     void handleGetNetdevAttrsCall(const std::string& zone,
                                   const std::string& netdev,
-                                  dbus::MethodResultBuilder::Pointer result);
+                                  api::MethodResultBuilder::Pointer result);
     void handleGetNetdevListCall(const std::string& zone,
-                                 dbus::MethodResultBuilder::Pointer result);
+                                 api::MethodResultBuilder::Pointer result);
     void handleCreateNetdevVethCall(const std::string& zone,
                                     const std::string& zoneDev,
                                     const std::string& hostDev,
-                                    dbus::MethodResultBuilder::Pointer result);
+                                    api::MethodResultBuilder::Pointer result);
     void handleCreateNetdevMacvlanCall(const std::string& zone,
                                        const std::string& zoneDev,
                                        const std::string& hostDev,
                                        const uint32_t& mode,
-                                       dbus::MethodResultBuilder::Pointer result);
+                                       api::MethodResultBuilder::Pointer result);
     void handleCreateNetdevPhysCall(const std::string& zone,
                                     const std::string& devId,
-                                    dbus::MethodResultBuilder::Pointer result);
+                                    api::MethodResultBuilder::Pointer result);
     void handleDeclareFileCall(const std::string& zone,
                                const int32_t& type,
                                const std::string& path,
                                const int32_t& flags,
                                const int32_t& mode,
-                               dbus::MethodResultBuilder::Pointer result);
+                               api::MethodResultBuilder::Pointer result);
     void handleDeclareMountCall(const std::string& source,
                                 const std::string& zone,
                                 const std::string& target,
                                 const std::string& type,
                                 const uint64_t& flags,
                                 const std::string& data,
-                                dbus::MethodResultBuilder::Pointer result);
+                                api::MethodResultBuilder::Pointer result);
     void handleDeclareLinkCall(const std::string& source,
                                const std::string& zone,
                                const std::string& target,
-                               dbus::MethodResultBuilder::Pointer result);
+                               api::MethodResultBuilder::Pointer result);
     void handleGetDeclarationsCall(const std::string& zone,
-                                   dbus::MethodResultBuilder::Pointer result);
+                                   api::MethodResultBuilder::Pointer result);
     void handleRemoveDeclarationCall(const std::string& zone,
                                      const std::string& declarationId,
-                                     dbus::MethodResultBuilder::Pointer result);
+                                     api::MethodResultBuilder::Pointer result);
     void handleSetActiveZoneCall(const std::string& id,
-                                 dbus::MethodResultBuilder::Pointer result);
+                                 api::MethodResultBuilder::Pointer result);
     void handleCreateZoneCall(const std::string& id,
                               const std::string& templateName,
-                              dbus::MethodResultBuilder::Pointer result);
+                              api::MethodResultBuilder::Pointer result);
     void handleDestroyZoneCall(const std::string& id,
-                               dbus::MethodResultBuilder::Pointer result);
+                               api::MethodResultBuilder::Pointer result);
     void handleShutdownZoneCall(const std::string& id,
-                                dbus::MethodResultBuilder::Pointer result);
+                                api::MethodResultBuilder::Pointer result);
     void handleStartZoneCall(const std::string& id,
-                             dbus::MethodResultBuilder::Pointer result);
+                             api::MethodResultBuilder::Pointer result);
     void handleLockZoneCall(const std::string& id,
-                            dbus::MethodResultBuilder::Pointer result);
+                            api::MethodResultBuilder::Pointer result);
     void handleUnlockZoneCall(const std::string& id,
-                              dbus::MethodResultBuilder::Pointer result);
+                              api::MethodResultBuilder::Pointer result);
     void handleGrantDeviceCall(const std::string& id,
                                const std::string& device,
                                uint32_t flags,
-                               dbus::MethodResultBuilder::Pointer result);
+                               api::MethodResultBuilder::Pointer result);
     void handleRevokeDeviceCall(const std::string& id,
                                 const std::string& device,
-                                dbus::MethodResultBuilder::Pointer result);
+                                api::MethodResultBuilder::Pointer result);
 };
 
 

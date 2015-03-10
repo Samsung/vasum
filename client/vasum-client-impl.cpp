@@ -74,7 +74,7 @@ void toDict(GVariant* in, VsmArrayString* keys, VsmArrayString* values)
     value_type* outv = (value_type*)calloc(size + 1, sizeof(value_type));
 
     g_variant_iter_init(&iter, in);
-    for (int i = 0; g_variant_iter_loop(&iter, "{ss}", &key, &value); i++) {
+    for (int i = 0; g_variant_iter_loop(&iter, "(ss)", &key, &value); i++) {
         outk[i] = strdup(key);
         outv[i] = strdup(value);
     }
@@ -377,7 +377,7 @@ VsmStatus Client::vsm_get_zone_dbuses(VsmArrayString* keys, VsmArrayString* valu
     VsmStatus ret = callMethod(HOST_INTERFACE,
                                api::host::METHOD_GET_ZONE_DBUSES,
                                NULL,
-                               "(a{ss})",
+                               "(a(ss))",
                                &out);
     if (ret != VSMCLIENT_SUCCESS) {
         return ret;

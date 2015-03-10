@@ -256,7 +256,7 @@ public:
                                                  api::host::INTERFACE,
                                                  api::host::METHOD_GET_ZONE_DBUSES,
                                                  NULL,
-                                                 "(a{ss})");
+                                                 "(a(ss))");
         GVariant* array = NULL;
         g_variant_get(result.get(), "(*)", &array);
         dbus::GVariantPtr autounref(array, g_variant_unref);
@@ -264,7 +264,7 @@ public:
         for (size_t n = 0; n < count; ++n) {
             const char* zoneId = NULL;
             const char* dbusAddress = NULL;
-            g_variant_get_child(array, n, "{&s&s}", &zoneId, &dbusAddress);
+            g_variant_get_child(array, n, "(&s&s)", &zoneId, &dbusAddress);
             dbuses.insert(Dbuses::value_type(zoneId, dbusAddress));
         }
         return dbuses;

@@ -79,7 +79,7 @@ const std::string DEFINITION =
     "      <arg type='v' name='result' direction='out'/>"
     "    </method>"
     "    <method name='" + METHOD_GET_ZONE_DBUSES + "'>"
-    "      <arg type='a{ss}' name='dbuses' direction='out'/>"
+    "      <arg type='a(ss)' name='dbuses' direction='out'/>"
     "    </method>"
     "    <method name='" + METHOD_GET_ZONE_ID_LIST + "'>"
     "      <arg type='as' name='result' direction='out'/>"

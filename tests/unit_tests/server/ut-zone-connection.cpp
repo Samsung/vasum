@@ -41,6 +41,8 @@
 #include "utils/fs.hpp"
 #include "utils/scoped-dir.hpp"
 
+#include "api/method-result-builder.hpp"
+
 
 using namespace vasum;
 using namespace vasum::utils;
@@ -141,10 +143,11 @@ BOOST_AUTO_TEST_CASE(NotifyActiveZoneApiTest)
     Latch notifyCalled;
     ZoneConnection connection(acquireAddress(), nullptr);
 
-    auto callback = [&](const std::string& application, const std::string& message) {
+    auto callback = [&](const std::string& application, const std::string& message, api::MethodResultBuilder::Pointer result) {
         if (application == "testapp" && message == "testmessage") {
             notifyCalled.set();
         }
+        result->setVoid();
     };
     connection.setNotifyActiveZoneCallback(callback);
 
@@ -169,19 +172,19 @@ BOOST_AUTO_TEST_CASE(SignalNotificationApiTest)
                        const std::string& objectPath,
                        const std::string& interface,
                        const std::string& signalName,
-                       GVariant* parameters) {
+    GVariant* parameters) {
         if (objectPath == api::zone::OBJECT_PATH &&
-            interface == api::zone::INTERFACE &&
-            signalName == api::zone::SIGNAL_NOTIFICATION &&
-            g_variant_is_of_type(parameters, G_VARIANT_TYPE("(sss)"))) {
+                interface == api::zone::INTERFACE &&
+                signalName == api::zone::SIGNAL_NOTIFICATION &&
+                g_variant_is_of_type(parameters, G_VARIANT_TYPE("(sss)"))) {
 
             const gchar* zone = NULL;
             const gchar* application = NULL;
             const gchar* message = NULL;
             g_variant_get(parameters, "(&s&s&s)", &zone, &application, &message);
             if (zone == std::string("testzone") &&
-                application == std::string("testapp") &&
-                message == std::string("testmessage")) {
+                    application == std::string("testapp") &&
+                    message == std::string("testmessage")) {
                 signalEmitted.set();
             }
         }

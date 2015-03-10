@@ -67,7 +67,7 @@ public:
 
     typedef ZoneConnection::NotifyActiveZoneCallback NotifyActiveZoneCallback;
     typedef ZoneConnection::DisplayOffCallback DisplayOffCallback;
-    typedef ZoneConnection::FileMoveRequestCallback FileMoveRequestCallback;
+    typedef ZoneConnection::FileMoveCallback FileMoveCallback;
     typedef ZoneConnection::ProxyCallCallback ProxyCallCallback;
 
     typedef std::function<void(const std::string& address)> DbusStateChangedCallback;
@@ -210,7 +210,7 @@ public:
     /**
      * Register file move request callback
      */
-    void setFileMoveRequestCallback(const FileMoveRequestCallback& callback);
+    void setFileMoveCallback(const FileMoveCallback& callback);
 
     /**
      * Register dbus state changed callback
@@ -319,7 +319,7 @@ private:
     mutable std::recursive_mutex mReconnectMutex;
     NotifyActiveZoneCallback mNotifyCallback;
     DisplayOffCallback mDisplayOffCallback;
-    FileMoveRequestCallback mFileMoveCallback;
+    FileMoveCallback mFileMoveCallback;
     ProxyCallCallback mProxyCallCallback;
     DbusStateChangedCallback mDbusStateChangedCallback;
     std::string mDbusAddress;

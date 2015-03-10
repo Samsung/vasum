@@ -27,10 +27,10 @@
 #define SERVER_ZONE_CONNECTION_HPP
 
 #include "dbus/connection.hpp"
+#include "api/method-result-builder.hpp"
 
 #include <mutex>
 #include <condition_variable>
-
 
 namespace vasum {
 
@@ -47,13 +47,14 @@ public:
     // ------------- API --------------
 
     typedef std::function<void(const std::string& application,
-                               const std::string& message
+                               const std::string& message,
+                               api::MethodResultBuilder::Pointer result
                               )> NotifyActiveZoneCallback;
 
     typedef std::function<void(const std::string& destination,
                                const std::string& path,
-                               dbus::MethodResultBuilder::Pointer result
-                              )> FileMoveRequestCallback;
+                               api::MethodResultBuilder::Pointer result
+                              )> FileMoveCallback;
 
     typedef std::function<void(const std::string& target,
                                const std::string& targetBusName,
@@ -62,7 +63,7 @@ public:
                                const std::string& targetMethod,
                                GVariant* parameters,
                                dbus::MethodResultBuilder::Pointer result
-                               )> ProxyCallCallback;
+                              )> ProxyCallCallback;
 
     /**
      * Register notification request callback
@@ -77,7 +78,7 @@ public:
     /*
      * Register file move request callback
      */
-    void setFileMoveRequestCallback(const FileMoveRequestCallback& callback);
+    void setFileMoveCallback(const FileMoveCallback& callback);
 
     /**
      * Register proxy call callback
@@ -110,7 +111,7 @@ private:
     OnNameLostCallback mOnNameLostCallback;
     NotifyActiveZoneCallback mNotifyActiveZoneCallback;
     DisplayOffCallback mDisplayOffCallback;
-    FileMoveRequestCallback mFileMoveRequestCallback;
+    FileMoveCallback mFileMoveCallback;
     ProxyCallCallback mProxyCallCallback;
 
     void onNameAcquired();

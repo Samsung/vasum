@@ -30,6 +30,9 @@
 // TODO: Switch to real power-manager dbus defs when they will be implemented in power-manager
 #include "fake-power-manager-dbus-definitions.hpp"
 
+#include "api/dbus-method-result-builder.hpp"
+#include "api/messages.hpp"
+
 #include "logger/logger.hpp"
 
 
@@ -139,10 +142,10 @@ void ZoneConnection::setDisplayOffCallback(const DisplayOffCallback& callback)
     mDisplayOffCallback = callback;
 }
 
-void ZoneConnection::setFileMoveRequestCallback(
-    const FileMoveRequestCallback& callback)
+void ZoneConnection::setFileMoveCallback(
+    const FileMoveCallback& callback)
 {
-    mFileMoveRequestCallback = callback;
+    mFileMoveCallback = callback;
 }
 
 void ZoneConnection::setProxyCallCallback(const ProxyCallCallback& callback)
@@ -165,8 +168,8 @@ void ZoneConnection::onMessageCall(const std::string& objectPath,
         const gchar* message = NULL;
         g_variant_get(parameters, "(&s&s)", &application, &message);
         if (mNotifyActiveZoneCallback) {
-            mNotifyActiveZoneCallback(application, message);
-            result->setVoid();
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mNotifyActiveZoneCallback(application, message, rb);
         }
     }
 
@@ -174,8 +177,9 @@ void ZoneConnection::onMessageCall(const std::string& objectPath,
         const gchar* destination = NULL;
         const gchar* path = NULL;
         g_variant_get(parameters, "(&s&s)", &destination, &path);
-        if (mFileMoveRequestCallback) {
-            mFileMoveRequestCallback(destination, path, result);
+        if (mFileMoveCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::FileMoveRequestStatus>>(result);
+            mFileMoveCallback(destination, path, rb);
         }
     }
 

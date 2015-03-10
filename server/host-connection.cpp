@@ -27,6 +27,8 @@
 #include "host-connection.hpp"
 #include "host-dbus-definitions.hpp"
 #include "exception.hpp"
+#include "api/dbus-method-result-builder.hpp"
+#include "api/messages.hpp"
 
 #include "logger/logger.hpp"
 
@@ -65,7 +67,7 @@ HostConnection::HostConnection()
     mDbusConnection->registerObject(api::host::OBJECT_PATH,
                                     api::host::DEFINITION,
                                     std::bind(&HostConnection::onMessageCall,
-                                              this, _1, _2, _3, _4, _5));
+                                            this, _1, _2, _3, _4, _5));
 
     LOGD("Connected");
 }
@@ -246,14 +248,16 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         g_variant_get(parameters, "(&s)", &id);
 
         if (mSetActiveZoneCallback) {
-            mSetActiveZoneCallback(id, result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mSetActiveZoneCallback(id, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_GET_ZONE_DBUSES) {
         if (mGetZoneDbusesCallback) {
-            mGetZoneDbusesCallback(result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Dbuses>>(result);
+            mGetZoneDbusesCallback(rb);
         }
         return;
     }
@@ -287,31 +291,34 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::host::METHOD_GET_ZONE_ID_LIST){
-        if (mGetZoneIdsCallback){
-            mGetZoneIdsCallback(result);
+    if (methodName == api::host::METHOD_GET_ZONE_ID_LIST) {
+        if (mGetZoneIdsCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneIds>>(result);
+            mGetZoneIdsCallback(rb);
         }
         return;
     }
 
-    if (methodName == api::host::METHOD_GET_ACTIVE_ZONE_ID){
-        if (mGetActiveZoneIdCallback){
-            mGetActiveZoneIdCallback(result);
+    if (methodName == api::host::METHOD_GET_ACTIVE_ZONE_ID) {
+        if (mGetActiveZoneIdCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneId>>(result);
+            mGetActiveZoneIdCallback(rb);
         }
         return;
     }
 
-    if (methodName == api::host::METHOD_GET_ZONE_INFO){
+    if (methodName == api::host::METHOD_GET_ZONE_INFO) {
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
 
         if (mGetZoneInfoCallback) {
-            mGetZoneInfoCallback(id, result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneInfo>>(result);
+            mGetZoneInfoCallback(id, rb);
         }
         return;
     }
 
-    if (methodName == api::host::METHOD_SET_NETDEV_ATTRS){
+    if (methodName == api::host::METHOD_SET_NETDEV_ATTRS) {
         const gchar* zone = NULL;
         const gchar* netdev = NULL;
         GVariantIter* iter;
@@ -324,26 +331,29 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         }
         g_variant_iter_free(iter);
         if (mSetNetdevAttrsCallback) {
-            mSetNetdevAttrsCallback(zone, netdev, attrs, result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mSetNetdevAttrsCallback(zone, netdev, attrs, rb);
         }
         return;
     }
 
-    if (methodName == api::host::METHOD_GET_NETDEV_ATTRS){
+    if (methodName == api::host::METHOD_GET_NETDEV_ATTRS) {
         const gchar* zone = NULL;
         const gchar* netdev = NULL;
         g_variant_get(parameters, "(&s&s)", &zone, &netdev);
         if (mGetNetdevAttrsCallback) {
-            mGetNetdevAttrsCallback(zone, netdev, result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::NetDevAttrs>>(result);
+            mGetNetdevAttrsCallback(zone, netdev, rb);
         }
         return;
     }
 
-    if (methodName == api::host::METHOD_GET_NETDEV_LIST){
+    if (methodName == api::host::METHOD_GET_NETDEV_LIST) {
         const gchar* zone = NULL;
         g_variant_get(parameters, "(&s)", &zone);
         if (mGetNetdevListCallback) {
-            mGetNetdevListCallback(zone, result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::NetDevList>>(result);
+            mGetNetdevListCallback(zone, rb);
         }
         return;
     }
@@ -355,7 +365,8 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         const gchar* hostDev = NULL;
         g_variant_get(parameters, "(&s&s&s)", &id, &zoneDev, &hostDev);
         if (mCreateNetdevVethCallback) {
-            mCreateNetdevVethCallback(id, zoneDev, hostDev, result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mCreateNetdevVethCallback(id, zoneDev, hostDev, rb);
         }
         return;
     }
@@ -367,7 +378,8 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         guint32 mode;
         g_variant_get(parameters, "(&s&s&su)", &id, &zoneDev, &hostDev, &mode);
         if (mCreateNetdevMacvlanCallback) {
-            mCreateNetdevMacvlanCallback(id, zoneDev, hostDev, mode, result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mCreateNetdevMacvlanCallback(id, zoneDev, hostDev, mode, rb);
         }
     }
 
@@ -376,7 +388,8 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         const gchar* devId = NULL;
         g_variant_get(parameters, "(&s&s)", &id, &devId);
         if (mCreateNetdevPhysCallback) {
-            mCreateNetdevPhysCallback(id, devId, result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mCreateNetdevPhysCallback(id, devId, rb);
         }
     }
 
@@ -389,7 +402,8 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         g_variant_get(parameters, "(&si&sii)", &zone, &type, &path, &flags, &mode);
 
         if (mDeclareFileCallback) {
-            mDeclareFileCallback(zone, type, path, flags, mode, result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
+            mDeclareFileCallback(zone, type, path, flags, mode, rb);
         }
         return;
     }
@@ -411,7 +425,8 @@ void HostConnection::onMessageCall(const std::string& objectPath,
                       &data);
 
         if (mDeclareMountCallback) {
-            mDeclareMountCallback(source, zone, target, type, flags, data, result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
+            mDeclareMountCallback(source, zone, target, type, flags, data, rb);
         }
         return;
     }
@@ -423,7 +438,8 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         g_variant_get(parameters, "(&s&s&s)", &source, &zone, &target);
 
         if (mDeclareLinkCallback) {
-            mDeclareLinkCallback(source, zone, target, result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
+            mDeclareLinkCallback(source, zone, target, rb);
         }
         return;
     }
@@ -433,7 +449,8 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         g_variant_get(parameters, "(&s)", &zone);
 
         if (mGetDeclarationsCallback) {
-            mGetDeclarationsCallback(zone, result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declarations>>(result);
+            mGetDeclarationsCallback(zone, rb);
         }
         return;
     }
@@ -444,7 +461,8 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         g_variant_get(parameters, "(&s&s)", &zone, &declarationId);
 
         if (mRemoveDeclarationCallback) {
-            mRemoveDeclarationCallback(zone, declarationId, result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mRemoveDeclarationCallback(zone, declarationId, rb);
         }
         return;
     }
@@ -454,8 +472,9 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         const gchar* templateName = NULL;
         g_variant_get(parameters, "(&s&s)", &id, &templateName);
 
-        if (mCreateZoneCallback){
-            mCreateZoneCallback(id, templateName, result);
+        if (mCreateZoneCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mCreateZoneCallback(id, templateName, rb);
         }
         return;
     }
@@ -464,8 +483,9 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
 
-        if (mDestroyZoneCallback){
-            mDestroyZoneCallback(id, result);
+        if (mDestroyZoneCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mDestroyZoneCallback(id, rb);
         }
         return;
     }
@@ -474,8 +494,9 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
 
-        if (mShutdownZoneCallback){
-            mShutdownZoneCallback(id, result);
+        if (mShutdownZoneCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mShutdownZoneCallback(id, rb);
         }
     }
 
@@ -483,8 +504,9 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
 
-        if (mStartZoneCallback){
-            mStartZoneCallback(id, result);
+        if (mStartZoneCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mStartZoneCallback(id, rb);
         }
     }
 
@@ -492,8 +514,9 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
 
-        if (mLockZoneCallback){
-            mLockZoneCallback(id, result);
+        if (mLockZoneCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mLockZoneCallback(id, rb);
         }
         return;
     }
@@ -502,8 +525,9 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         const gchar* id = NULL;
         g_variant_get(parameters, "(&s)", &id);
 
-        if (mUnlockZoneCallback){
-            mUnlockZoneCallback(id, result);
+        if (mUnlockZoneCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mUnlockZoneCallback(id, rb);
         }
         return;
     }
@@ -514,8 +538,9 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         uint32_t flags;
         g_variant_get(parameters, "(&s&su)", &id, &device, &flags);
 
-        if (mGrantDeviceCallback){
-            mGrantDeviceCallback(id, device, flags, result);
+        if (mGrantDeviceCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mGrantDeviceCallback(id, device, flags, rb);
         }
         return;
     }
@@ -525,8 +550,9 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         const gchar* device = NULL;
         g_variant_get(parameters, "(&s&s)", &id, &device);
 
-        if (mRevokeDeviceCallback){
-            mRevokeDeviceCallback(id, device, result);
+        if (mRevokeDeviceCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mRevokeDeviceCallback(id, device, rb);
         }
         return;
     }

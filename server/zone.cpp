@@ -206,7 +206,7 @@ void Zone::connect()
         mConnection->setDisplayOffCallback(mDisplayOffCallback);
     }
     if (mFileMoveCallback) {
-        mConnection->setFileMoveRequestCallback(mFileMoveCallback);
+        mConnection->setFileMoveCallback(mFileMoveCallback);
     }
     if (mProxyCallCallback) {
         mConnection->setProxyCallCallback(mProxyCallCallback);
@@ -411,13 +411,13 @@ void Zone::setDisplayOffCallback(const DisplayOffCallback& callback)
     }
 }
 
-void Zone::setFileMoveRequestCallback(const FileMoveRequestCallback& callback)
+void Zone::setFileMoveCallback(const FileMoveCallback& callback)
 {
     Lock lock(mReconnectMutex);
 
     mFileMoveCallback = callback;
     if (mConnection) {
-        mConnection->setFileMoveRequestCallback(callback);
+        mConnection->setFileMoveCallback(callback);
     }
 }
 

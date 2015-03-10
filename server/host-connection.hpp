@@ -27,6 +27,7 @@
 #define SERVER_HOST_CONNECTION_HPP
 
 #include "dbus/connection.hpp"
+#include "api/method-result-builder.hpp"
 
 #include <mutex>
 #include <condition_variable>
@@ -53,48 +54,48 @@ public:
                                GVariant* parameters,
                                dbus::MethodResultBuilder::Pointer result
                               )> ProxyCallCallback;
-    typedef std::function<void(dbus::MethodResultBuilder::Pointer result
+    typedef std::function<void(api::MethodResultBuilder::Pointer result
                               )> GetZoneDbusesCallback;
-    typedef std::function<void(dbus::MethodResultBuilder::Pointer result
+    typedef std::function<void(api::MethodResultBuilder::Pointer result
                               )> GetZoneIdsCallback;
-    typedef std::function<void(dbus::MethodResultBuilder::Pointer result
+    typedef std::function<void(api::MethodResultBuilder::Pointer result
                               )> GetActiveZoneIdCallback;
     typedef std::function<void(const std::string& id,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> GetZoneInfoCallback;
     typedef std::function<void(const std::string& zone,
                                const std::string& netdev,
                                const std::vector<std::tuple<std::string, std::string>>& attrs,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> SetNetdevAttrsCallback;
     typedef std::function<void(const std::string& zone,
                                const std::string& netdev,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> GetNetdevAttrsCallback;
     typedef std::function<void(const std::string& zone,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> GetNetdevListCallback;
     typedef std::function<void(const std::string& zone,
                                const std::string& netdev,
                                const std::string& hostDev,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> CreateNetdevVethCallback;
     typedef std::function<void(const std::string& id,
                                const std::string& zoneDev,
                                const std::string& hostDev,
                                const uint32_t& mode,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> CreateNetdevMacvlanCallback;
     typedef std::function<void(const std::string& id,
                                const std::string& devId,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> CreateNetdevPhysCallback;
     typedef std::function<void(const std::string& zone,
                                const int32_t& type,
                                const std::string& path,
                                const int32_t& flags,
                                const int32_t& mode,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> DeclareFileCallback;
     typedef std::function<void(const std::string& source,
                                const std::string& zone,
@@ -102,50 +103,50 @@ public:
                                const std::string& type,
                                const uint64_t& flags,
                                const std::string& data,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> DeclareMountCallback;
     typedef std::function<void(const std::string& source,
                                const std::string& zone,
                                const std::string& target,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> DeclareLinkCallback;
     typedef std::function<void(const std::string& id,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> GetDeclarationsCallback;
     typedef std::function<void(const std::string& id,
                                const std::string& declarationId,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> RemoveDeclarationCallback;
     typedef std::function<void(const std::string& id,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> SetActiveZoneCallback;
     typedef std::function<void(const std::string& id,
                                const std::string& templateName,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> CreateZoneCallback;
     typedef std::function<void(const std::string& id,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> DestroyZoneCallback;
     typedef std::function<void(const std::string& id,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> ShutdownZoneCallback;
     typedef std::function<void(const std::string& id,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> StartZoneCallback;
     typedef std::function<void(const std::string& id,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> LockZoneCallback;
     typedef std::function<void(const std::string& id,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> UnlockZoneCallback;
     typedef std::function<void(const std::string& id,
                                const std::string& device,
                                uint32_t flags,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> GrantDeviceCallback;
     typedef std::function<void(const std::string& id,
                                const std::string& device,
-                               dbus::MethodResultBuilder::Pointer result
+                               api::MethodResultBuilder::Pointer result
                               )> RevokeDeviceCallback;
 
     /**
@@ -171,7 +172,7 @@ public:
     /**
      * Register a callback called to get the active zone id
      */
-    void setGetActiveZoneIdCallback(const GetZoneIdsCallback& callback);
+    void setGetActiveZoneIdCallback(const GetActiveZoneIdCallback& callback);
 
     /**
      * Register a callback called to get the zone informations
