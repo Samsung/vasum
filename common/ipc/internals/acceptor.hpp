@@ -28,11 +28,9 @@
 #include "config.hpp"
 
 #include "ipc/internals/socket.hpp"
-#include "ipc/internals/event-queue.hpp"
 #include "ipc/types.hpp"
 
 #include <string>
-#include <thread>
 
 namespace vasum {
 namespace ipc {
@@ -59,31 +57,10 @@ public:
     Acceptor& operator=(const Acceptor&) = delete;
 
     /**
-     * Starts the thread accepting the new connections.
-     */
-    void start();
-
-    /**
-     * Stops the accepting thread.
-     */
-    void stop();
-
-    /**
      * Handle one incoming connection.
      * Used with external polling
      */
     void handleConnection();
-
-    /**
-     * Handle one event from the internal event's queue
-     * Used with external polling
-     */
-    void handleEvent();
-
-    /**
-     * @return file descriptor of internal event's queue
-     */
-    FileDescriptor getEventFD();
 
     /**
      * @return file descriptor for the connection socket
@@ -91,19 +68,8 @@ public:
     FileDescriptor getConnectionFD();
 
 private:
-    enum class Event : int {
-        FINISH  // Shutdown request
-    };
-
-    bool mIsRunning;
-
     NewConnectionCallback mNewConnectionCallback;
     Socket mSocket;
-
-    EventQueue<Event> mEventQueue;
-    std::thread mThread;
-
-    void run();
 };
 
 } // namespace ipc

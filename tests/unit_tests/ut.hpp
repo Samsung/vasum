@@ -28,7 +28,21 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <boost/mpl/vector.hpp>
+
 #include <string>
+
+/**
+ * Usage example:
+ *
+ * MULTI_FIXTURE_TEST_CASE(Test, T, Fixture1, Fixture2, Fixture3) {
+ *     std::cout << T::i << "\n";
+ * }
+ */
+#define MULTI_FIXTURE_TEST_CASE(NAME, TPARAM, ...) \
+    typedef boost::mpl::vector<__VA_ARGS__> NAME##_fixtures; \
+    BOOST_FIXTURE_TEST_CASE_TEMPLATE(NAME, TPARAM, NAME##_fixtures, TPARAM)
+
 
 /**
  * An exception message checker

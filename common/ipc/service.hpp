@@ -27,9 +27,9 @@
 
 #include "ipc/internals/processor.hpp"
 #include "ipc/internals/acceptor.hpp"
-#include "ipc/ipc-gsource.hpp"
 #include "ipc/types.hpp"
 #include "ipc/result.hpp"
+#include "epoll/event-poll.hpp"
 #include "logger/logger.hpp"
 
 #include <string>
@@ -42,18 +42,16 @@ namespace ipc {
  * This class wraps communication via UX sockets.
  * It uses serialization mechanism from libConfig.
  *
- * There are two working threads:
- * - ACCEPTOR accepts incoming connections and passes them to PROCESSOR
- * - PROCESSOR is responsible for the communication and calling the callbacks
- *
  * For message format @see ipc::Processor
  */
 class Service {
 public:
     /**
+     * @param eventPoll event poll
      * @param path path to the socket
      */
-    Service(const std::string& path,
+    Service(epoll::EventPoll& eventPoll,
+            const std::string& path,
             const PeerCallback& addPeerCallback = nullptr,
             const PeerCallback& removePeerCallback = nullptr);
     ~Service();
@@ -62,11 +60,9 @@ public:
     Service& operator=(const Service&) = delete;
 
     /**
-     * Starts the worker and acceptor threads
-     *
-     * @param usesExternalPolling internal or external polling is used
+     * Starts processing
      */
-    void start(const bool usesExternalPolling = false);
+    void start();
 
     /**
     * @return is the communication thread running
@@ -77,16 +73,6 @@ public:
      * Stops all working threads
      */
     void stop();
-
-    /**
-     * Used with an external polling loop.
-     * Handles one event from the file descriptor.
-     *
-     * @param fd file descriptor
-     * @param pollEvent event on the fd. Defined in poll.h
-     *
-     */
-    void handle(const FileDescriptor fd, const short pollEvent);
 
     /**
     * Set the callback called for each new connection to a peer
@@ -175,14 +161,11 @@ public:
     void signal(const MethodID methodID,
                 const std::shared_ptr<SentDataType>& data);
 private:
-
-    void startPoll();
-    void stopPoll();
-
-    typedef std::lock_guard<std::mutex> Lock;
+    epoll::EventPoll& mEventPoll;
     Processor mProcessor;
     Acceptor mAcceptor;
-    IPCGSource::Pointer mIPCGSourcePtr;
+
+    void handle(const FileDescriptor fd, const epoll::Events pollEvents);
 };
 
 

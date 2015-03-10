@@ -35,7 +35,7 @@ class Logger(object):
 
     __indentChar = "    "
     def testCaseSummary(self, testSuite, testName, testResult, recLevel):
-        msg = self.__indentChar * recLevel + BOLD + "{:<50}".format(testName)
+        msg = self.__indentChar * recLevel + BOLD + "{:<50} ".format(testName)
 
         if testResult == "passed":
             msg += GREEN

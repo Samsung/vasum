@@ -34,6 +34,8 @@
 #include "ipc/client.hpp"
 #include "ipc/types.hpp"
 #include "ipc/result.hpp"
+#include "epoll/thread-dispatcher.hpp"
+#include "epoll/glib-dispatcher.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
 #include "utils/value-latch.hpp"
@@ -51,10 +53,9 @@
 
 using namespace vasum;
 using namespace vasum::ipc;
+using namespace vasum::epoll;
 using namespace vasum::utils;
 using namespace std::placeholders;
-
-namespace {
 
 // Timeout for sending one message
 const int TIMEOUT = 1000 /*ms*/;
@@ -68,13 +69,26 @@ const int LONG_OPERATION_TIME = 1000 + TIMEOUT;
 const std::string TEST_DIR = "/tmp/ut-ipc";
 const std::string SOCKET_PATH = TEST_DIR + "/test.socket";
 
-struct Fixture {
+struct FixtureBase {
     ScopedDir mTestPathGuard;
 
-    Fixture()
+    FixtureBase()
         : mTestPathGuard(TEST_DIR)
     {
     }
+};
+
+struct ThreadedFixture : FixtureBase {
+    ThreadDispatcher dispatcher;
+
+    EventPoll& getPoll() { return dispatcher.getPoll(); }
+};
+
+struct GlibFixture : FixtureBase {
+    ScopedGlibLoop glibLoop;
+    GlibDispatcher dispatcher;
+
+    EventPoll& getPoll() { return dispatcher.getPoll(); }
 };
 
 struct SendData {
@@ -167,7 +181,7 @@ void longEchoCallback(const PeerID,
     methodResult->set(returnData);
 }
 
-PeerID connect(Service& s, Client& c, bool isServiceGlib = false, bool isClientGlib = false)
+PeerID connect(Service& s, Client& c)
 {
     // Connects the Client to the Service and returns Clients PeerID
     ValueLatch<PeerID> peerIDLatch;
@@ -178,25 +192,15 @@ PeerID connect(Service& s, Client& c, bool isServiceGlib = false, bool isClientG
     s.setNewPeerCallback(newPeerCallback);
 
     if (!s.isStarted()) {
-        s.start(isServiceGlib);
+        s.start();
     }
 
-    c.start(isClientGlib);
+    c.start();
 
     PeerID peerID = peerIDLatch.get(TIMEOUT);
     s.setNewPeerCallback(nullptr);
     BOOST_REQUIRE_NE(peerID, 0);
     return peerID;
-}
-
-PeerID connectServiceGSource(Service& s, Client& c)
-{
-    return connect(s, c, true, false);
-}
-
-PeerID connectClientGSource(Service& s, Client& c)
-{
-    return connect(s, c, false, true);
 }
 
 void testEcho(Client& c, const MethodID methodID)
@@ -215,20 +219,17 @@ void testEcho(Service& s, const MethodID methodID, const PeerID peerID)
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
-} // namespace
+BOOST_AUTO_TEST_SUITE(IPCSuite)
 
-
-BOOST_FIXTURE_TEST_SUITE(IPCSuite, Fixture)
-
-BOOST_AUTO_TEST_CASE(ConstructorDestructor)
+MULTI_FIXTURE_TEST_CASE(ConstructorDestructor, F, ThreadedFixture, GlibFixture)
 {
-    Service s(SOCKET_PATH);
-    Client c(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
 }
 
-BOOST_AUTO_TEST_CASE(ServiceAddRemoveMethod)
+MULTI_FIXTURE_TEST_CASE(ServiceAddRemoveMethod, F, ThreadedFixture, GlibFixture)
 {
-    Service s(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
     s.setMethodHandler<EmptyData, EmptyData>(1, returnEmptyCallback);
     s.setMethodHandler<SendData, RecvData>(1, returnDataCallback);
 
@@ -237,7 +238,7 @@ BOOST_AUTO_TEST_CASE(ServiceAddRemoveMethod)
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.setMethodHandler<SendData, RecvData>(2, returnDataCallback);
 
-    Client c(SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     connect(s, c);
     testEcho(c, 1);
 
@@ -247,10 +248,10 @@ BOOST_AUTO_TEST_CASE(ServiceAddRemoveMethod)
     BOOST_CHECK_THROW(testEcho(c, 2), IPCException);
 }
 
-BOOST_AUTO_TEST_CASE(ClientAddRemoveMethod)
+MULTI_FIXTURE_TEST_CASE(ClientAddRemoveMethod, F, ThreadedFixture, GlibFixture)
 {
-    Service s(SOCKET_PATH);
-    Client c(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     c.setMethodHandler<EmptyData, EmptyData>(1, returnEmptyCallback);
     c.setMethodHandler<SendData, RecvData>(1, returnDataCallback);
 
@@ -267,9 +268,9 @@ BOOST_AUTO_TEST_CASE(ClientAddRemoveMethod)
     BOOST_CHECK_THROW(testEcho(s, 1, peerID), IPCException);
 }
 
-BOOST_AUTO_TEST_CASE(ServiceStartStop)
+MULTI_FIXTURE_TEST_CASE(ServiceStartStop, F, ThreadedFixture, GlibFixture)
 {
-    Service s(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
 
     s.setMethodHandler<SendData, RecvData>(1, returnDataCallback);
 
@@ -282,10 +283,10 @@ BOOST_AUTO_TEST_CASE(ServiceStartStop)
     s.start();
 }
 
-BOOST_AUTO_TEST_CASE(ClientStartStop)
+MULTI_FIXTURE_TEST_CASE(ClientStartStop, F, ThreadedFixture, GlibFixture)
 {
-    Service s(SOCKET_PATH);
-    Client c(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     c.setMethodHandler<SendData, RecvData>(1, returnDataCallback);
 
     c.start();
@@ -300,27 +301,27 @@ BOOST_AUTO_TEST_CASE(ClientStartStop)
     c.stop();
 }
 
-BOOST_AUTO_TEST_CASE(SyncClientToServiceEcho)
+MULTI_FIXTURE_TEST_CASE(SyncClientToServiceEcho, F, ThreadedFixture, GlibFixture)
 {
-    Service s(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.setMethodHandler<SendData, RecvData>(2, echoCallback);
 
-    Client c(SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     connect(s, c);
 
     testEcho(c, 1);
     testEcho(c, 2);
 }
 
-BOOST_AUTO_TEST_CASE(Restart)
+MULTI_FIXTURE_TEST_CASE(Restart, F, ThreadedFixture, GlibFixture)
 {
-    Service s(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.start();
     s.setMethodHandler<SendData, RecvData>(2, echoCallback);
 
-    Client c(SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     c.start();
     testEcho(c, 1);
     testEcho(c, 2);
@@ -334,14 +335,19 @@ BOOST_AUTO_TEST_CASE(Restart)
     s.stop();
     s.start();
 
+    BOOST_CHECK_THROW(testEcho(c, 2), IPCException);
+
+    c.stop();
+    c.start();
+
     testEcho(c, 1);
     testEcho(c, 2);
 }
 
-BOOST_AUTO_TEST_CASE(SyncServiceToClientEcho)
+MULTI_FIXTURE_TEST_CASE(SyncServiceToClientEcho, F, ThreadedFixture, GlibFixture)
 {
-    Service s(SOCKET_PATH);
-    Client c(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     c.setMethodHandler<SendData, RecvData>(1, echoCallback);
     PeerID peerID = connect(s, c);
 
@@ -351,16 +357,16 @@ BOOST_AUTO_TEST_CASE(SyncServiceToClientEcho)
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
-BOOST_AUTO_TEST_CASE(AsyncClientToServiceEcho)
+MULTI_FIXTURE_TEST_CASE(AsyncClientToServiceEcho, F, ThreadedFixture, GlibFixture)
 {
     std::shared_ptr<SendData> sentData(new SendData(34));
     ValueLatch<std::shared_ptr<RecvData>> recvDataLatch;
 
     // Setup Service and Client
-    Service s(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.start();
-    Client c(SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     c.start();
 
     //Async call
@@ -374,13 +380,13 @@ BOOST_AUTO_TEST_CASE(AsyncClientToServiceEcho)
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
-BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
+MULTI_FIXTURE_TEST_CASE(AsyncServiceToClientEcho, F, ThreadedFixture, GlibFixture)
 {
     std::shared_ptr<SendData> sentData(new SendData(56));
     ValueLatch<std::shared_ptr<RecvData>> recvDataLatch;
 
-    Service s(SOCKET_PATH);
-    Client c(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     c.setMethodHandler<SendData, RecvData>(1, echoCallback);
     PeerID peerID = connect(s, c);
 
@@ -397,24 +403,24 @@ BOOST_AUTO_TEST_CASE(AsyncServiceToClientEcho)
 }
 
 
-BOOST_AUTO_TEST_CASE(SyncTimeout)
+MULTI_FIXTURE_TEST_CASE(SyncTimeout, F, ThreadedFixture, GlibFixture)
 {
-    Service s(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, longEchoCallback);
 
-    Client c(SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     connect(s, c);
 
     std::shared_ptr<SendData> sentData(new SendData(78));
     BOOST_REQUIRE_THROW((c.callSync<SendData, RecvData>(1, sentData, TIMEOUT)), IPCException);
 }
 
-BOOST_AUTO_TEST_CASE(SerializationError)
+MULTI_FIXTURE_TEST_CASE(SerializationError, F, ThreadedFixture, GlibFixture)
 {
-    Service s(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
 
-    Client c(SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     connect(s, c);
 
     std::shared_ptr<ThrowOnAcceptData> throwingData(new ThrowOnAcceptData());
@@ -423,23 +429,24 @@ BOOST_AUTO_TEST_CASE(SerializationError)
 
 }
 
-BOOST_AUTO_TEST_CASE(ParseError)
+MULTI_FIXTURE_TEST_CASE(ParseError, F, ThreadedFixture, GlibFixture)
 {
-    Service s(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.start();
 
-    Client c(SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     c.start();
 
     std::shared_ptr<SendData> sentData(new SendData(78));
     BOOST_CHECK_THROW((c.callSync<SendData, ThrowOnAcceptData>(1, sentData, 10000)), IPCParsingException);
 }
 
-BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
+MULTI_FIXTURE_TEST_CASE(DisconnectedPeerError, F, ThreadedFixture, GlibFixture)
 {
     ValueLatch<Result<RecvData>> retStatusLatch;
-    Service s(SOCKET_PATH);
+
+    Service s(F::getPoll(), SOCKET_PATH);
 
     auto method = [](const PeerID, std::shared_ptr<ThrowOnAcceptData>&, MethodResult::Pointer methodResult) {
         auto resultData = std::make_shared<SendData>(1);
@@ -450,7 +457,7 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
     s.setMethodHandler<SendData, ThrowOnAcceptData>(1, method);
     s.start();
 
-    Client c(SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     c.start();
 
     auto dataBack = [&retStatusLatch](Result<RecvData> && r) {
@@ -470,16 +477,16 @@ BOOST_AUTO_TEST_CASE(DisconnectedPeerError)
 }
 
 
-BOOST_AUTO_TEST_CASE(ReadTimeout)
+MULTI_FIXTURE_TEST_CASE(ReadTimeout, F, ThreadedFixture, GlibFixture)
 {
-    Service s(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
     auto longEchoCallback = [](const PeerID, std::shared_ptr<RecvData>& data, MethodResult::Pointer methodResult) {
         auto resultData = std::make_shared<LongSendData>(data->intVal, LONG_OPERATION_TIME);
         methodResult->set<LongSendData>(resultData);
     };
     s.setMethodHandler<LongSendData, RecvData>(1, longEchoCallback);
 
-    Client c(SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     connect(s, c);
 
     // Test timeout on read
@@ -488,13 +495,13 @@ BOOST_AUTO_TEST_CASE(ReadTimeout)
 }
 
 
-BOOST_AUTO_TEST_CASE(WriteTimeout)
+MULTI_FIXTURE_TEST_CASE(WriteTimeout, F, ThreadedFixture, GlibFixture)
 {
-    Service s(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
     s.start();
 
-    Client c(SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     c.start();
 
     // Test echo with a minimal timeout
@@ -509,13 +516,13 @@ BOOST_AUTO_TEST_CASE(WriteTimeout)
 }
 
 
-BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
+MULTI_FIXTURE_TEST_CASE(AddSignalInRuntime, F, ThreadedFixture, GlibFixture)
 {
     ValueLatch<std::shared_ptr<RecvData>> recvDataLatchA;
     ValueLatch<std::shared_ptr<RecvData>> recvDataLatchB;
 
-    Service s(SOCKET_PATH);
-    Client c(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     connect(s, c);
 
     auto handlerA = [&recvDataLatchA](const PeerID, std::shared_ptr<RecvData>& data) {
@@ -545,13 +552,13 @@ BOOST_AUTO_TEST_CASE(AddSignalInRuntime)
 }
 
 
-BOOST_AUTO_TEST_CASE(AddSignalOffline)
+MULTI_FIXTURE_TEST_CASE(AddSignalOffline, F, ThreadedFixture, GlibFixture)
 {
     ValueLatch<std::shared_ptr<RecvData>> recvDataLatchA;
     ValueLatch<std::shared_ptr<RecvData>> recvDataLatchB;
 
-    Service s(SOCKET_PATH);
-    Client c(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
 
     auto handlerA = [&recvDataLatchA](const PeerID, std::shared_ptr<RecvData>& data) {
         recvDataLatchA.set(data);
@@ -581,66 +588,13 @@ BOOST_AUTO_TEST_CASE(AddSignalOffline)
     BOOST_CHECK_EQUAL(recvDataB->intVal, sendDataB->intVal);
 }
 
-
-BOOST_AUTO_TEST_CASE(ServiceGSource)
-{
-    utils::Latch l;
-    ScopedGlibLoop loop;
-
-    auto signalHandler = [&l](const PeerID, std::shared_ptr<RecvData>&) {
-        l.set();
-    };
-
-    Service s(SOCKET_PATH);
-    s.setMethodHandler<SendData, RecvData>(1, echoCallback);
-
-    Client c(SOCKET_PATH);
-    s.setSignalHandler<RecvData>(2, signalHandler);
-
-    connectServiceGSource(s, c);
-
-    testEcho(c, 1);
-
-    auto data = std::make_shared<SendData>(1);
-    c.signal<SendData>(2, data);
-
-    BOOST_CHECK(l.wait(TIMEOUT));
-}
-
-
-BOOST_AUTO_TEST_CASE(ClientGSource)
-{
-    utils::Latch l;
-    ScopedGlibLoop loop;
-
-    auto signalHandler = [&l](const PeerID, std::shared_ptr<RecvData>&) {
-        l.set();
-    };
-
-    Service s(SOCKET_PATH);
-    s.start();
-
-    Client c(SOCKET_PATH);
-    c.setMethodHandler<SendData, RecvData>(1, echoCallback);
-    c.setSignalHandler<RecvData>(2, signalHandler);
-
-    PeerID peerID = connectClientGSource(s, c);
-
-    testEcho(s, 1, peerID);
-
-    auto data = std::make_shared<SendData>(1);
-    s.signal<SendData>(2, data);
-
-    BOOST_CHECK(l.wait(TIMEOUT));
-}
-
-BOOST_AUTO_TEST_CASE(UsersError)
+MULTI_FIXTURE_TEST_CASE(UsersError, F, ThreadedFixture, GlibFixture)
 {
     const int TEST_ERROR_CODE = -234;
     const std::string TEST_ERROR_MESSAGE = "Ay, caramba!";
 
-    Service s(SOCKET_PATH);
-    Client c(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     auto clientID = connect(s, c);
 
     auto throwingMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>&, MethodResult::Pointer) {
@@ -668,13 +622,13 @@ BOOST_AUTO_TEST_CASE(UsersError)
     BOOST_CHECK_EXCEPTION((s.callSync<SendData, RecvData>(2, clientID, sentData, TIMEOUT)), IPCUserException, hasProperData);
 }
 
-BOOST_AUTO_TEST_CASE(AsyncResult)
+MULTI_FIXTURE_TEST_CASE(AsyncResult, F, ThreadedFixture, GlibFixture)
 {
     const int TEST_ERROR_CODE = -567;
     const std::string TEST_ERROR_MESSAGE = "Ooo jooo!";
 
-    Service s(SOCKET_PATH);
-    Client c(SOCKET_PATH);
+    Service s(F::getPoll(), SOCKET_PATH);
+    Client c(F::getPoll(), SOCKET_PATH);
     auto clientID = connect(s, c);
 
     auto errorMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>&, MethodResult::Pointer methodResult) {
@@ -724,20 +678,44 @@ BOOST_AUTO_TEST_CASE(AsyncResult)
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
-// BOOST_AUTO_TEST_CASE(ConnectionLimitTest)
+MULTI_FIXTURE_TEST_CASE(MixOperations, F, ThreadedFixture, GlibFixture)
+{
+    utils::Latch l;
+
+    auto signalHandler = [&l](const PeerID, std::shared_ptr<RecvData>&) {
+        l.set();
+    };
+
+    Service s(F::getPoll(), SOCKET_PATH);
+    s.setMethodHandler<SendData, RecvData>(1, echoCallback);
+
+    Client c(F::getPoll(), SOCKET_PATH);
+    s.setSignalHandler<RecvData>(2, signalHandler);
+
+    connect(s, c);
+
+    testEcho(c, 1);
+
+    auto data = std::make_shared<SendData>(1);
+    c.signal<SendData>(2, data);
+
+    BOOST_CHECK(l.wait(TIMEOUT));
+}
+
+// MULTI_FIXTURE_TEST_CASE(ConnectionLimitTest, F, ThreadedFixture, GlibFixture)
 // {
 //     unsigned oldLimit = ipc::getMaxFDNumber();
 //     ipc::setMaxFDNumber(50);
 
 //     // Setup Service and many Clients
-//     Service s(SOCKET_PATH);
+//     Service s(F::getPoll(), SOCKET_PATH);
 //     s.setMethodHandler<SendData, RecvData>(1, echoCallback);
 //     s.start();
 
 //     std::list<Client> clients;
 //     for (int i = 0; i < 100; ++i) {
 //         try {
-//             clients.push_back(Client(SOCKET_PATH));
+//             clients.push_back(Client(F::getPoll(), SOCKET_PATH));
 //             clients.back().start();
 //         } catch (...) {}
 //     }

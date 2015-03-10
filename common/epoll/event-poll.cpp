@@ -49,6 +49,9 @@ EventPoll::~EventPoll()
 {
     if (!mCallbacks.empty()) {
         LOGW("Not removed callbacks: " << mCallbacks.size());
+        for (const auto& item : mCallbacks) {
+            LOGT("Not removed fd: " << item.first);
+        }
         assert(0 && "Not removed callbacks left");
     }
     utils::close(mPollFD);
@@ -73,7 +76,7 @@ void EventPoll::addFD(const int fd, const Events events, Callback&& callback)
     }
 
     mCallbacks.insert({fd, std::make_shared<Callback>(std::move(callback))});
-    LOGT("Callback added for " << fd);
+    LOGT("Callback added for fd: " << fd);
 }
 
 void EventPoll::removeFD(const int fd)
@@ -87,7 +90,7 @@ void EventPoll::removeFD(const int fd)
     }
     mCallbacks.erase(iter);
     removeFDInternal(fd);
-    LOGT("Callback removed for " << fd);
+    LOGT("Callback removed for fd: " << fd);
 }
 
 bool EventPoll::dispatchIteration(const int timeoutMs)
@@ -115,7 +118,13 @@ bool EventPoll::dispatchIteration(const int timeoutMs)
 
         // add ref because removeFD(self) can be called inside callback
         std::shared_ptr<Callback> callback(iter->second);
-        return (*callback)(event.data.fd, event.events);
+        try {
+            LOGT("Dispatch fd: " << event.data.fd << ", events: " << eventsToString(event.events));
+            return (*callback)(event.data.fd, event.events);
+        } catch (std::exception& e) {
+            LOGE("Got unexpected exception: " << e.what());
+            assert(0 && "Callback should not throw any exceptions");
+        }
     }
 }
 

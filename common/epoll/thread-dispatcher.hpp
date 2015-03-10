@@ -22,8 +22,8 @@
  * @brief   Thread epoll dispatcher
  */
 
-#ifndef COMMON_EPOLL_THREAD_POLL_DISPATCHER_HPP
-#define COMMON_EPOLL_THREAD_POLL_DISPATCHER_HPP
+#ifndef COMMON_EPOLL_THREAD_DISPATCHER_HPP
+#define COMMON_EPOLL_THREAD_DISPATCHER_HPP
 
 #include "epoll/event-poll.hpp"
 #include "utils/eventfd.hpp"
@@ -36,10 +36,10 @@ namespace epoll {
 /**
  * Will dispatch poll events in a newly created thread
  */
-class ThreadPollDispatcher {
+class ThreadDispatcher {
 public:
-    ThreadPollDispatcher();
-    ~ThreadPollDispatcher();
+    ThreadDispatcher();
+    ~ThreadDispatcher();
 
     EventPoll& getPoll();
 private:
@@ -51,4 +51,4 @@ private:
 } // namespace epoll
 } // namespace vasum
 
-#endif // COMMON_EPOLL_THREAD_POLL_DISPATCHER_HPP
+#endif // COMMON_EPOLL_THREAD_DISPATCHER_HPP

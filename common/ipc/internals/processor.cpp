@@ -26,7 +26,6 @@
 
 #include "ipc/exception.hpp"
 #include "ipc/internals/processor.hpp"
-#include "utils/signal.hpp"
 #include "utils/exception.hpp"
 
 #include <cerrno>
@@ -65,8 +64,6 @@ Processor::Processor(const std::string& logName,
 {
     LOGS(mLogPrefix + "Processor Constructor");
 
-    utils::signalBlock(SIGPIPE);
-
     using namespace std::placeholders;
     setSignalHandlerInternal<RegisterSignalsProtocolMessage>(REGISTER_SIGNAL_METHOD_ID,
                                                              std::bind(&Processor::onNewSignals, this, _1, _2));
@@ -104,7 +101,7 @@ bool Processor::isStarted()
     return mIsRunning;
 }
 
-void Processor::start(bool usesExternalPolling)
+void Processor::start()
 {
     LOGS(mLogPrefix + "Processor start");
 
@@ -112,10 +109,6 @@ void Processor::start(bool usesExternalPolling)
     if (!mIsRunning) {
         LOGI(mLogPrefix + "Processor start");
         mIsRunning = true;
-        mUsesExternalPolling = usesExternalPolling;
-        if (!usesExternalPolling) {
-            mThread = std::thread(&Processor::run, this);
-        }
     }
 }
 
@@ -133,15 +126,12 @@ void Processor::stop()
 
         LOGD(mLogPrefix + "Waiting for the Processor to stop");
 
-        if (mThread.joinable()) {
-            mThread.join();
-        } else {
-            // Wait till the FINISH request is served
-            Lock lock(mStateMutex);
-            conditionPtr->wait(lock, [this]() {
-                return !mIsRunning;
-            });
-        }
+        // Wait till the FINISH request is served
+        Lock lock(mStateMutex);
+        conditionPtr->wait(lock, [this]() {
+            return !mIsRunning;
+        });
+        assert(mPeerInfo.empty());
     }
 }
 
@@ -204,7 +194,8 @@ PeerID Processor::addPeer(const std::shared_ptr<Socket>& socketPtr)
     auto requestPtr = std::make_shared<AddPeerRequest>(socketPtr);
     mRequestQueue.pushBack(Event::ADD_PEER, requestPtr);
 
-    LOGI(mLogPrefix + "Add Peer Request. Id: " << requestPtr->peerID);
+    LOGI(mLogPrefix + "Add Peer Request. Id: " << requestPtr->peerID
+            << ", fd: " << socketPtr->getFD());
 
     return requestPtr->peerID;
 }
@@ -233,13 +224,13 @@ void Processor::removePeerSyncInternal(const PeerID peerID, Lock& lock)
 
 void Processor::removePeerInternal(Peers::iterator peerIt, const std::exception_ptr& exceptionPtr)
 {
-    LOGS(mLogPrefix + "Processor removePeerInternal peerID: " << peerIt->peerID);
-    LOGI(mLogPrefix + "Removing peer. peerID: " << peerIt->peerID);
-
     if (peerIt == mPeerInfo.end()) {
         LOGW("Peer already removed");
         return;
     }
+
+    LOGS(mLogPrefix + "Processor removePeerInternal peerID: " << peerIt->peerID);
+    LOGI(mLogPrefix + "Removing peer. peerID: " << peerIt->peerID);
 
     // Remove from signal addressees
     for (auto it = mSignalsPeers.begin(); it != mSignalsPeers.end();) {
@@ -270,100 +261,6 @@ void Processor::removePeerInternal(Peers::iterator peerIt, const std::exception_
     mPeerInfo.erase(peerIt);
 }
 
-void Processor::resetPolling()
-{
-    LOGS(mLogPrefix + "Processor resetPolling");
-
-    if (mUsesExternalPolling) {
-        return;
-    }
-
-    // Setup polling on eventfd and sockets
-    mFDs.resize(mPeerInfo.size() + 1);
-    LOGI(mLogPrefix + "Reseting mFDS.size: " << mFDs.size());
-
-    mFDs[0].fd = mRequestQueue.getFD();
-    mFDs[0].events = POLLIN;
-
-    for (unsigned int i = 1; i < mFDs.size(); ++i) {
-        auto fd = mPeerInfo[i - 1].socketPtr->getFD();
-
-        LOGI(mLogPrefix + "Reseting fd: " << fd);
-
-        mFDs[i].fd = fd;
-        mFDs[i].events = POLLIN | POLLHUP; // Listen for input events
-        // TODO: It's possible to block on writing to fd. Maybe listen for POLLOUT too?
-    }
-}
-
-void Processor::run()
-{
-    LOGS(mLogPrefix + "Processor run");
-
-    {
-        Lock lock(mStateMutex);
-        resetPolling();
-    }
-
-    while (isStarted()) {
-        LOGT(mLogPrefix + "Waiting for communication...");
-        int ret = poll(mFDs.data(), mFDs.size(), -1 /*blocking call*/);
-        LOGT(mLogPrefix + "... incoming communication!");
-        if (ret == -1 || ret == 0) {
-            if (errno == EINTR) {
-                continue;
-            }
-            LOGE(mLogPrefix + "Error in poll: " << std::string(strerror(errno)));
-            throw IPCException("Error in poll: " + std::string(strerror(errno)));
-        }
-
-        // Check for lost connections:
-        if (handleLostConnections()) {
-            // mFDs changed
-            resetPolling();
-            continue;
-        }
-
-        // Check for incoming data.
-        if (handleInputs()) {
-            // mFDs changed
-            resetPolling();
-            continue;
-        }
-
-        // Check for incoming events
-        if (mFDs[0].revents & POLLIN) {
-            mFDs[0].revents &= ~(POLLIN);
-            if (handleEvent()) {
-                // mFDs changed
-                resetPolling();
-                continue;
-            }
-        }
-
-    }
-}
-
-bool Processor::handleLostConnections()
-{
-    Lock lock(mStateMutex);
-
-    bool isPeerRemoved = false;
-
-    for (unsigned int i = 1; i < mFDs.size(); ++i) {
-        if (mFDs[i].revents & POLLHUP) {
-            auto peerIt = getPeerInfoIterator(mFDs[i].fd);
-            LOGI(mLogPrefix + "Lost connection to peer: " << peerIt->peerID);
-            mFDs[i].revents &= ~(POLLHUP);
-            removePeerInternal(peerIt,
-                               std::make_exception_ptr(IPCPeerDisconnectedException()));
-            isPeerRemoved = true;
-        }
-    }
-
-    return isPeerRemoved;
-}
-
 bool Processor::handleLostConnection(const FileDescriptor fd)
 {
     Lock lock(mStateMutex);
@@ -371,21 +268,6 @@ bool Processor::handleLostConnection(const FileDescriptor fd)
     removePeerInternal(peerIt,
                        std::make_exception_ptr(IPCPeerDisconnectedException()));
     return true;
-}
-
-bool Processor::handleInputs()
-{
-    // Lock not needed, mFDs won't be changed by handleInput
-
-    bool pollChanged = false;
-    for (unsigned int i = 1; i < mFDs.size(); ++i) {
-        if (mFDs[i].revents & POLLIN) {
-            mFDs[i].revents &= ~(POLLIN);
-            pollChanged = pollChanged || handleInput(mFDs[i].fd);
-        }
-    }
-
-    return pollChanged;
 }
 
 bool Processor::handleInput(const FileDescriptor fd)
@@ -793,6 +675,12 @@ bool Processor::onFinishRequest(FinishRequest& request)
         case Event::FINISH:
             break;
         }
+    }
+
+    // Close peers
+    while (!mPeerInfo.empty()) {
+        removePeerInternal(--mPeerInfo.end(),
+                           std::make_exception_ptr(IPCClosingException()));
     }
 
     mIsRunning = false;

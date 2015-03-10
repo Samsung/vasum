@@ -24,21 +24,14 @@
 
 #include "config.hpp"
 
-#include "ipc/exception.hpp"
 #include "ipc/internals/acceptor.hpp"
 #include "logger/logger.hpp"
-
-#include <poll.h>
-#include <cerrno>
-#include <cstring>
-#include <vector>
 
 namespace vasum {
 namespace ipc {
 
 Acceptor::Acceptor(const std::string& socketPath, const NewConnectionCallback& newConnectionCallback)
-    : mIsRunning(false),
-      mNewConnectionCallback(newConnectionCallback),
+    : mNewConnectionCallback(newConnectionCallback),
       mSocket(Socket::createSocket(socketPath))
 {
     LOGT("Creating Acceptor for socket " << socketPath);
@@ -46,96 +39,13 @@ Acceptor::Acceptor(const std::string& socketPath, const NewConnectionCallback& n
 
 Acceptor::~Acceptor()
 {
-    LOGT("Destroying Acceptor");
-    try {
-        stop();
-    } catch (std::exception& e) {
-        LOGE("Error in destructor: " << e.what());
-    }
     LOGT("Destroyed Acceptor");
-}
-
-void Acceptor::start()
-{
-    LOGT("Starting Acceptor");
-    if (!mThread.joinable()) {
-        mThread = std::thread(&Acceptor::run, this);
-    }
-    LOGT("Started Acceptor");
-}
-
-void Acceptor::stop()
-{
-    LOGT("Stopping Acceptor");
-
-    if (mThread.joinable()) {
-        mEventQueue.send(Event::FINISH);
-        LOGT("Waiting for Acceptor to finish");
-        mThread.join();
-    }
-
-    LOGT("Stopped Acceptor");
-}
-
-void Acceptor::run()
-{
-    // Setup polling structure
-    std::vector<struct pollfd> fds(2);
-
-    fds[0].fd = mEventQueue.getFD();
-    fds[0].events = POLLIN;
-
-    fds[1].fd = mSocket.getFD();
-    fds[1].events = POLLIN;
-
-    mIsRunning = true;
-    while (mIsRunning) {
-        LOGT("Waiting for new connections...");
-
-        int ret = ::poll(fds.data(), fds.size(), -1 /*blocking call*/);
-
-        LOGT("...Incoming connection!");
-
-        if (ret == -1 || ret == 0) {
-            if (errno == EINTR) {
-                continue;
-            }
-            LOGE("Error in poll: " << std::string(strerror(errno)));
-            throw IPCException("Error in poll: " + std::string(strerror(errno)));
-        }
-
-        // Check for incoming connections
-        if (fds[1].revents & POLLIN) {
-            fds[1].revents = 0;
-            handleConnection();
-        }
-
-        // Check for incoming events
-        if (fds[0].revents & POLLIN) {
-            fds[0].revents = 0;
-            handleEvent();
-        }
-    }
-    LOGT("Exiting run");
 }
 
 void Acceptor::handleConnection()
 {
     std::shared_ptr<Socket> tmpSocket = mSocket.accept();
     mNewConnectionCallback(tmpSocket);
-}
-
-void Acceptor::handleEvent()
-{
-    if (mEventQueue.receive() == Event::FINISH) {
-        LOGD("Event FINISH");
-        mIsRunning = false;
-    }
-}
-
-FileDescriptor Acceptor::getEventFD()
-{
-    return mEventQueue.getFD();
 }
 
 FileDescriptor Acceptor::getConnectionFD()

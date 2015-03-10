@@ -19,39 +19,38 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Thread epoll dispatcher
+ * @brief   glib epoll dispatcher
  */
 
-#include "config.hpp"
-#include "epoll/thread-poll-dispatcher.hpp"
+#ifndef COMMON_EPOLL_GLIB_DISPATCHER_HPP
+#define COMMON_EPOLL_GLIB_DISPATCHER_HPP
+
+#include "epoll/event-poll.hpp"
+#include "utils/callback-guard.hpp"
+
+#include <gio/gio.h>
 
 namespace vasum {
 namespace epoll {
 
-ThreadPollDispatcher::ThreadPollDispatcher()
-{
-    auto controlCallback = [this](int, Events) -> bool {
-        mStopEvent.receive();
-        return false; // break the loop
-    };
+/**
+ * Will dispatch poll events in glib thread
+ */
+class GlibDispatcher {
+public:
+    GlibDispatcher();
+    ~GlibDispatcher();
 
-    mPoll.addFD(mStopEvent.getFD(), EPOLLIN, std::move(controlCallback));
-    mThread = std::thread([this] {
-        mPoll.dispatchLoop();
-    });
-}
+    EventPoll& getPoll();
+private:
+    EventPoll mPoll; // before mGuard!
+    utils::CallbackGuard mGuard;
+    GIOChannel* mChannel;
+    guint mWatchId;
+};
 
-ThreadPollDispatcher::~ThreadPollDispatcher()
-{
-    mStopEvent.send();
-    mThread.join();
-    mPoll.removeFD(mStopEvent.getFD());
-}
-
-EventPoll& ThreadPollDispatcher::getPoll()
-{
-    return mPoll;
-}
 
 } // namespace epoll
 } // namespace vasum
+
+#endif // COMMON_UTILS_GLIB_DISPATCHER_HPP

@@ -23,13 +23,13 @@
  */
 
 #include "config.hpp"
-#include "epoll/glib-poll-dispatcher.hpp"
+#include "epoll/glib-dispatcher.hpp"
 #include "utils/callback-wrapper.hpp"
 
 namespace vasum {
 namespace epoll {
 
-GlibPollDispatcher::GlibPollDispatcher()
+GlibDispatcher::GlibDispatcher()
 {
     mChannel = g_io_channel_unix_new(mPoll.getPollFD());
 
@@ -50,14 +50,14 @@ GlibPollDispatcher::GlibPollDispatcher()
                                    &utils::deleteCallbackWrapper<decltype(dispatchCallback)>);
 }
 
-GlibPollDispatcher::~GlibPollDispatcher()
+GlibDispatcher::~GlibDispatcher()
 {
     g_source_remove(mWatchId);
     g_io_channel_unref(mChannel);
     // mGuard destructor will wait for full unregister of dispatchCallback
 }
 
-EventPoll& GlibPollDispatcher::getPoll()
+EventPoll& GlibDispatcher::getPoll()
 {
     return mPoll;
 }

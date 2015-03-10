@@ -33,10 +33,12 @@ using namespace std::placeholders;
 namespace vasum {
 namespace ipc {
 
-Service::Service(const std::string& socketPath,
+Service::Service(epoll::EventPoll& eventPoll,
+                 const std::string& socketPath,
                  const PeerCallback& addPeerCallback,
                  const PeerCallback& removePeerCallback)
-    : mProcessor("[SERVICE] "),
+    : mEventPoll(eventPoll),
+      mProcessor("[SERVICE] "),
       mAcceptor(socketPath, std::bind(&Processor::addPeer, &mProcessor, _1))
 
 {
@@ -55,19 +57,23 @@ Service::~Service()
     }
 }
 
-void Service::start(const bool usesExternalPolling)
+void Service::start()
 {
+    if (mProcessor.isStarted()) {
+        return;
+    }
     LOGS("Service start");
-    if (usesExternalPolling) {
-        startPoll();
-    }
-    mProcessor.start(usesExternalPolling);
-
-    // There can be an incoming connection from mAcceptor before mProcessor is listening,
-    // but it's OK. It will handle the connection when ready. So no need to wait for mProcessor.
-    if (!usesExternalPolling) {
-        mAcceptor.start();
-    }
+    auto handleConnection = [&](int, epoll::Events) -> bool {
+        mAcceptor.handleConnection();
+        return true;
+    };
+    auto handleProcessorEvent = [&](int, epoll::Events) -> bool {
+        mProcessor.handleEvent();
+        return true;
+    };
+    mEventPoll.addFD(mAcceptor.getConnectionFD(), EPOLLIN, handleConnection);
+    mEventPoll.addFD(mProcessor.getEventFD(), EPOLLIN, handleProcessorEvent);
+    mProcessor.start();
 }
 
 bool Service::isStarted()
@@ -77,39 +83,19 @@ bool Service::isStarted()
 
 void Service::stop()
 {
+    if (!mProcessor.isStarted()) {
+        return;
+    }
     LOGS("Service stop");
-    mAcceptor.stop();
     mProcessor.stop();
 
-    if (mIPCGSourcePtr) {
-        stopPoll();
-    }
+    mEventPoll.removeFD(mAcceptor.getConnectionFD());
+    mEventPoll.removeFD(mProcessor.getEventFD());
 }
 
-void Service::startPoll()
+void Service::handle(const FileDescriptor fd, const epoll::Events pollEvents)
 {
-    LOGS("Service startPoll");
-
-    mIPCGSourcePtr = IPCGSource::create(std::bind(&Service::handle, this, _1, _2));
-    mIPCGSourcePtr->addFD(mAcceptor.getEventFD());
-    mIPCGSourcePtr->addFD(mAcceptor.getConnectionFD());
-    mIPCGSourcePtr->addFD(mProcessor.getEventFD());
-    mIPCGSourcePtr->attach();
-}
-
-void Service::stopPoll()
-{
-    LOGS("Service stopPoll");
-
-    mIPCGSourcePtr->removeFD(mAcceptor.getEventFD());
-    mIPCGSourcePtr->removeFD(mAcceptor.getConnectionFD());
-    mIPCGSourcePtr->removeFD(mProcessor.getEventFD());
-    mIPCGSourcePtr->detach();
-    mIPCGSourcePtr.reset();
-}
-
-void Service::handle(const FileDescriptor fd, const short pollEvent)
-{
+    //TODO remove handle method
     LOGS("Service handle");
 
     if (!isStarted()) {
@@ -117,25 +103,12 @@ void Service::handle(const FileDescriptor fd, const short pollEvent)
         return;
     }
 
-    if (fd == mProcessor.getEventFD() && (pollEvent & POLLIN)) {
-        mProcessor.handleEvent();
-        return;
-
-    } else if (fd == mAcceptor.getConnectionFD() && (pollEvent & POLLIN)) {
-        mAcceptor.handleConnection();
-        return;
-
-    } else if (fd == mAcceptor.getEventFD() && (pollEvent & POLLIN)) {
-        mAcceptor.handleEvent();
-        return;
-
-    } else if (pollEvent & POLLIN) {
+    if (pollEvents & EPOLLIN) {
         mProcessor.handleInput(fd);
-        return;
+    }
 
-    } else if (pollEvent & POLLHUP) {
+    if ((pollEvents & EPOLLHUP) || (pollEvents & EPOLLRDHUP)) {
         mProcessor.handleLostConnection(fd);
-        return;
     }
 }
 
@@ -143,9 +116,11 @@ void Service::setNewPeerCallback(const PeerCallback& newPeerCallback)
 {
     LOGS("Service setNewPeerCallback");
     auto callback = [newPeerCallback, this](PeerID peerID, FileDescriptor fd) {
-        if (mIPCGSourcePtr) {
-            mIPCGSourcePtr->addFD(fd);
-        }
+        auto handleFd = [&](FileDescriptor fd, epoll::Events events) -> bool {
+            handle(fd, events);
+            return true;
+        };
+        mEventPoll.addFD(fd, EPOLLIN | EPOLLHUP | EPOLLRDHUP, handleFd);
         if (newPeerCallback) {
             newPeerCallback(peerID, fd);
         }
@@ -157,9 +132,7 @@ void Service::setRemovedPeerCallback(const PeerCallback& removedPeerCallback)
 {
     LOGS("Service setRemovedPeerCallback");
     auto callback = [removedPeerCallback, this](PeerID peerID, FileDescriptor fd) {
-        if (mIPCGSourcePtr) {
-            mIPCGSourcePtr->removeFD(fd);
-        }
+        mEventPoll.removeFD(fd);
         if (removedPeerCallback) {
             removedPeerCallback(peerID, fd);
         }

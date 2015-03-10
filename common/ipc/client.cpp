@@ -31,8 +31,9 @@
 namespace vasum {
 namespace ipc {
 
-Client::Client(const std::string& socketPath)
-    : mProcessor("[CLIENT]  "),
+Client::Client(epoll::EventPoll& eventPoll, const std::string& socketPath)
+    : mEventPoll(eventPoll),
+      mProcessor("[CLIENT]  "),
       mSocketPath(socketPath)
 {
     LOGS("Client Constructor");
@@ -50,14 +51,19 @@ Client::~Client()
     }
 }
 
-void Client::start(const bool usesExternalPolling)
+void Client::start()
 {
+    if (mProcessor.isStarted()) {
+        return;
+    }
     LOGS("Client start");
     // Initialize the connection with the server
-    if (usesExternalPolling) {
-        startPoll();
-    }
-    mProcessor.start(usesExternalPolling);
+    auto handleEvent = [&](int, epoll::Events) -> bool {
+        mProcessor.handleEvent();
+        return true;
+    };
+    mEventPoll.addFD(mProcessor.getEventFD(), EPOLLIN, handleEvent);
+    mProcessor.start();
 
     LOGD("Connecting to " + mSocketPath);
     auto socketPtr = std::make_shared<Socket>(Socket::connectSocket(mSocketPath));
@@ -71,34 +77,18 @@ bool Client::isStarted()
 
 void Client::stop()
 {
+    if (!mProcessor.isStarted()) {
+        return;
+    }
     LOGS("Client stop");
     mProcessor.stop();
 
-    if (mIPCGSourcePtr) {
-        stopPoll();
-    }
+    mEventPoll.removeFD(mProcessor.getEventFD());
 }
 
-void Client::startPoll()
+void Client::handle(const FileDescriptor fd, const epoll::Events pollEvents)
 {
-    LOGS("Client startPoll");
-    using namespace std::placeholders;
-    mIPCGSourcePtr = IPCGSource::create(std::bind(&Client::handle, this, _1, _2));
-    mIPCGSourcePtr->addFD(mProcessor.getEventFD());
-    mIPCGSourcePtr->attach();
-}
-
-void Client::stopPoll()
-{
-    LOGS("Client stopPoll");
-
-    mIPCGSourcePtr->removeFD(mProcessor.getEventFD());
-    mIPCGSourcePtr->detach();
-    mIPCGSourcePtr.reset();
-}
-
-void Client::handle(const FileDescriptor fd, const short pollEvent)
-{
+    //TODO remove handle method
     LOGS("Client handle");
 
     if (!isStarted()) {
@@ -106,17 +96,12 @@ void Client::handle(const FileDescriptor fd, const short pollEvent)
         return;
     }
 
-    if (fd == mProcessor.getEventFD() && (pollEvent & POLLIN)) {
-        mProcessor.handleEvent();
-        return;
-
-    } else if (pollEvent & POLLIN) {
+    if (pollEvents & EPOLLIN) {
         mProcessor.handleInput(fd);
-        return;
+    }
 
-    } else if (pollEvent & POLLHUP) {
+    if ((pollEvents & EPOLLHUP) || (pollEvents & EPOLLRDHUP)) {
         mProcessor.handleLostConnection(fd);
-        return;
     }
 }
 
@@ -124,9 +109,11 @@ void Client::setNewPeerCallback(const PeerCallback& newPeerCallback)
 {
     LOGS("Client setNewPeerCallback");
     auto callback = [newPeerCallback, this](PeerID peerID, FileDescriptor fd) {
-        if (mIPCGSourcePtr) {
-            mIPCGSourcePtr->addFD(fd);
-        }
+        auto handleFd = [&](FileDescriptor fd, epoll::Events events) -> bool {
+            handle(fd, events);
+            return true;
+        };
+        mEventPoll.addFD(fd, EPOLLIN | EPOLLHUP | EPOLLRDHUP, handleFd);
         if (newPeerCallback) {
             newPeerCallback(peerID, fd);
         }
@@ -138,9 +125,7 @@ void Client::setRemovedPeerCallback(const PeerCallback& removedPeerCallback)
 {
     LOGS("Client setRemovedPeerCallback");
     auto callback = [removedPeerCallback, this](PeerID peerID, FileDescriptor fd) {
-        if (mIPCGSourcePtr) {
-            mIPCGSourcePtr->removeFD(fd);
-        }
+        mEventPoll.removeFD(fd);
         if (removedPeerCallback) {
             removedPeerCallback(peerID, fd);
         }

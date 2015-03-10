@@ -43,7 +43,6 @@
 #include "logger/logger-scope.hpp"
 
 #include <ostream>
-#include <poll.h>
 #include <condition_variable>
 #include <mutex>
 #include <chrono>
@@ -136,12 +135,9 @@ public:
 
 
     /**
-     * Start the processing thread.
-     * Quits immediately after starting the thread.
-     *
-     * @param usesExternalPolling internal or external polling is used
+     * Start processing.
      */
-    void start(const bool usesExternalPolling);
+    void start();
 
     /**
      * @return is processor running
@@ -432,14 +428,12 @@ private:
     RequestQueue<Event> mRequestQueue;
 
     bool mIsRunning;
-    bool mUsesExternalPolling;
 
     std::unordered_map<MethodID, std::shared_ptr<MethodHandlers>> mMethodsCallbacks;
     std::unordered_map<MethodID, std::shared_ptr<SignalHandlers>> mSignalsCallbacks;
     std::unordered_map<MethodID, std::list<PeerID>> mSignalsPeers;
 
     Peers mPeerInfo;
-    std::vector<struct pollfd> mFDs;
 
     std::unordered_map<MessageID, ReturnCallbacks> mReturnCallbacks;
 
@@ -450,8 +444,6 @@ private:
     PeerCallback mRemovedPeerCallback;
 
     unsigned int mMaxNumberOfPeers;
-
-    std::thread mThread;
 
     template<typename SentDataType, typename ReceivedDataType>
     void setMethodHandlerInternal(const MethodID methodID,
@@ -466,8 +458,6 @@ private:
                         const PeerID peerID,
                         const std::shared_ptr<SentDataType>& data);
 
-    void run();
-
     // Request handlers
     bool onMethodRequest(MethodRequest& request);
     bool onSignalRequest(SignalRequest& request);
@@ -475,9 +465,6 @@ private:
     bool onRemovePeerRequest(RemovePeerRequest& request);
     bool onSendResultRequest(SendResultRequest& request);
     bool onFinishRequest(FinishRequest& request);
-
-    bool handleLostConnections();
-    bool handleInputs();
 
     bool onReturnValue(Peers::iterator& peerIt,
                        const MessageID messageID);
@@ -489,7 +476,6 @@ private:
                         const MethodID methodID,
                         const MessageID messageID,
                         std::shared_ptr<SignalHandlers> signalCallbacks);
-    void resetPolling();
 
     void removePeerInternal(Peers::iterator peerIt,
                             const std::exception_ptr& exceptionPtr);

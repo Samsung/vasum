@@ -31,8 +31,8 @@
 #include "ipc/internals/socket.hpp"
 #include "utils/latch.hpp"
 #include "utils/glib-loop.hpp"
-#include "epoll/glib-poll-dispatcher.hpp"
-#include "epoll/thread-poll-dispatcher.hpp"
+#include "epoll/glib-dispatcher.hpp"
+#include "epoll/thread-dispatcher.hpp"
 
 using namespace vasum::utils;
 using namespace vasum::epoll;
@@ -54,14 +54,14 @@ BOOST_AUTO_TEST_CASE(EmptyPoll)
 
 BOOST_AUTO_TEST_CASE(ThreadedPoll)
 {
-    ThreadPollDispatcher dispatcher;
+    ThreadDispatcher dispatcher;
 }
 
 BOOST_AUTO_TEST_CASE(GlibPoll)
 {
     ScopedGlibLoop loop;
 
-    GlibPollDispatcher dispatcher;
+    GlibDispatcher dispatcher;
 }
 
 void doSocketTest(EventPoll& poll)
@@ -126,7 +126,7 @@ void doSocketTest(EventPoll& poll)
 
 BOOST_AUTO_TEST_CASE(ThreadedPollSocket)
 {
-    ThreadPollDispatcher dispatcher;
+    ThreadDispatcher dispatcher;
 
     doSocketTest(dispatcher.getPoll());
 }
@@ -135,14 +135,14 @@ BOOST_AUTO_TEST_CASE(GlibPollSocket)
 {
     ScopedGlibLoop loop;
 
-    GlibPollDispatcher dispatcher;
+    GlibDispatcher dispatcher;
 
     doSocketTest(dispatcher.getPoll());
 }
 
 BOOST_AUTO_TEST_CASE(PollStacking)
 {
-    ThreadPollDispatcher dispatcher;
+    ThreadDispatcher dispatcher;
 
     EventPoll innerPoll;
 

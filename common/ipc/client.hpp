@@ -26,9 +26,9 @@
 #define COMMON_IPC_CLIENT_HPP
 
 #include "ipc/internals/processor.hpp"
-#include "ipc/ipc-gsource.hpp"
 #include "ipc/types.hpp"
 #include "ipc/result.hpp"
+#include "epoll/event-poll.hpp"
 #include "logger/logger.hpp"
 
 #include <string>
@@ -40,28 +40,24 @@ namespace ipc {
  * This class wraps communication via UX sockets for client applications.
  * It uses serialization mechanism from libConfig.
  *
- * There is one additional thread:
- * - PROCESSOR is responsible for the communication and calling the callbacks
- *
  * For message format @see ipc::Processor
  */
 class Client {
 public:
     /**
+     * @param eventPoll event poll
      * @param serverPath path to the server's socket
      */
-    Client(const std::string& serverPath);
+    Client(epoll::EventPoll& eventPoll, const std::string& serverPath);
     ~Client();
 
     Client(const Client&) = delete;
     Client& operator=(const Client&) = delete;
 
     /**
-     * Starts the worker thread
-     *
-     * @param usesExternalPolling internal or external polling is used
+     * Starts processing
      */
-    void start(const bool usesExternalPolling = false);
+    void start();
 
     /**
     * @return is the communication thread running
@@ -69,19 +65,9 @@ public:
     bool isStarted();
 
     /**
-     * Stops all worker thread
+     * Stops processing
      */
     void stop();
-
-    /**
-     * Used with an external polling loop.
-     * Handles one event from the file descriptor.
-     *
-     * @param fd file descriptor
-     * @param pollEvent event on the fd. Defined in poll.h
-     *
-     */
-    void handle(const FileDescriptor fd, const short pollEvent);
 
     /**
      * Set the callback called for each new connection to a peer
@@ -170,14 +156,13 @@ public:
                 const std::shared_ptr<SentDataType>& data);
 
 private:
-
-    void startPoll();
-    void stopPoll();
-
+    epoll::EventPoll& mEventPoll;
     PeerID mServiceID;
     Processor mProcessor;
     std::string mSocketPath;
-    IPCGSource::Pointer mIPCGSourcePtr;
+
+    void handle(const FileDescriptor fd, const epoll::Events pollEvents);
+
 };
 
 template<typename SentDataType, typename ReceivedDataType>
