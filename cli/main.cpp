@@ -29,6 +29,7 @@
 #include <stdexcept>
 #include <string>
 #include <iostream>
+#include <algorithm>
 
 using namespace vasum::cli;
 
@@ -241,7 +242,7 @@ std::map<std::string, CommandLineInterface> commands = {
 
 void printUsage(std::ostream& out, const std::string& name)
 {
-    out << "Usage: " << name << " [command [args]]\n\n"
+    out << "Usage: " << name << " [command [-h|args]]\n\n"
         << "command can be one of the following:\n";
 
     for (const auto& command : commands) {
@@ -263,6 +264,12 @@ int main(const int argc, const char** argv)
     }
 
     CommandLineInterface& command = commands[argv[1]];
+    auto it = std::find(argv, argv+argc, std::string("-h"));
+    if (it != argv + argc) {
+            command.printUsage(std::cout);
+            return EXIT_SUCCESS;
+    }
+
     try {
         command.execute(1, argc, argv);
     } catch (const std::runtime_error& ex) {

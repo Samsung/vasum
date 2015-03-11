@@ -33,6 +33,11 @@ INCLUDE_DIRECTORIES(${CLIENT_FOLDER})
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 TARGET_LINK_LIBRARIES(${CLI_CODENAME} ${LIB_DEPS_LIBRARIES} ${PROJECT_NAME})
 
+CONFIGURE_FILE(support/vasum-cli-completion.sh.in
+               ${CMAKE_BINARY_DIR}/vasum-cli-completion.sh
+               @ONLY)
 
 ## Install #####################################################################
 INSTALL(TARGETS ${CLI_CODENAME} DESTINATION bin)
+INSTALL(FILES   ${CMAKE_BINARY_DIR}/vasum-cli-completion.sh
+        DESTINATION ${SYSCONF_INSTALL_DIR}/bash_completion.d)

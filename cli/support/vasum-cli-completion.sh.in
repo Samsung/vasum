@@ -1,0 +1,15 @@
+# Check for bash
+[ -z "$BASH_VERSION" ] && return
+
+__@PROJECT_NAME@_cli() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+
+    COMPREPLY=()
+    if [ "$COMP_CWORD" == "1" ]; then
+        COMPREPLY=($(compgen -W "$(@CLI_CODENAME@ | grep -e '^\S' | tail -n +3 | cut -f1 -d' ')" -- $cur))
+    elif [ "$COMP_CWORD" == "2" ]; then
+        COMPREPLY=($(compgen -W "-h" -- $cur))
+    fi
+}
+
+complete -F __@PROJECT_NAME@_cli @CLI_CODENAME@

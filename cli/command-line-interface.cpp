@@ -174,10 +174,12 @@ void CommandLineInterface::printUsage(std::ostream& out) const
 {
     out << mUsage << "\n\n"
         << "\tDescription\n"
-        << "\t\t" << mUsageInfo << "\n\n"
-        << "\tOptions\n";
-    for (const auto& args : mArgsSpec) {
-        out << "\t\t" << args.first << " -- " << args.second << "\n";
+        << "\t\t" << mUsageInfo << "\n";
+    if (!mArgsSpec.empty()) {
+        out << "\n\tOptions\n";
+        for (const auto& args : mArgsSpec) {
+            out << "\t\t" << args.first << " -- " << args.second << "\n";
+        }
     }
     out << "\n";
 }
