@@ -26,14 +26,32 @@
 #define COMMON_UTILS_EXECUTE_HPP
 
 #include <sys/types.h>
+#include <functional>
 
 namespace vasum {
 namespace utils {
 
+/**
+ * Execute binary
+ */
+///@{
 bool executeAndWait(const char* fname, const char* const* argv);
 
 bool executeAndWait(const char* fname, const char* const* argv, int& status);
+///@}
 
+/**
+ * Execute function in child process
+ */
+///@{
+bool executeAndWait(const std::function<void()>& func, int& status);
+
+bool executeAndWait(const std::function<void()>& func);
+///@}
+
+/**
+ * Wait until child processes ends
+ */
 bool waitPid(pid_t pid, int& status);
 
 } // namespace utils

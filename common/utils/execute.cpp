@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+#include "base-exception.hpp"
 #include "utils/execute.hpp"
 #include "logger/logger.hpp"
 
@@ -46,22 +47,65 @@ std::ostream& operator<< (std::ostream& out, const char* const* argv)
     return out;
 }
 
+bool isExecutionSuccessful(int status)
+{
+    if (!WIFEXITED(status)) {
+        if (WIFSIGNALED(status)) {
+            LOGE("Child terminated by signal, signal: " << WTERMSIG(status));
+        } else if (WIFSTOPPED(status)) {
+            LOGW("Child was stopped by signal " << WSTOPSIG(status));
+        } else {
+            LOGE("Child exited abnormally, status: " << status);
+        }
+        return false;
+    }
+    if (WEXITSTATUS(status) != EXIT_SUCCESS) {
+        LOGE("Child exit status: " << WEXITSTATUS(status));
+        return false;
+    }
+    return true;
+}
+
 } // namespace
+
+bool executeAndWait(const std::function<void()>& func, int& status)
+{
+    LOGD("Execute child process");
+
+    pid_t pid = fork();
+    if (pid == -1) {
+        LOGE("Fork failed: " << vasum::getSystemErrorMessage());
+        return false;
+    }
+    if (pid == 0) {
+        func();
+        _exit(EXIT_SUCCESS);
+    }
+    return waitPid(pid, status);
+}
+
+bool executeAndWait(const std::function<void()>& func)
+{
+    int status;
+    if (!executeAndWait(func, status)) {
+        return false;
+    }
+    return isExecutionSuccessful(status);
+}
+
 
 bool executeAndWait(const char* fname, const char* const* argv, int& status)
 {
     LOGD("Execute " << fname << argv);
 
-    pid_t pid = fork();
-    if (pid == -1) {
-        LOGE("Fork failed");
-        return false;
-    }
-    if (pid == 0) {
+    bool success = executeAndWait([=]() {
         execv(fname, const_cast<char* const*>(argv));
         _exit(EXIT_FAILURE);
+    }, status);
+    if (!success) {
+        LOGW("Process " << fname << " has exited abnormally");
     }
-    return waitPid(pid, status);
+    return success;
 }
 
 bool executeAndWait(const char* fname, const char* const* argv)
@@ -70,17 +114,7 @@ bool executeAndWait(const char* fname, const char* const* argv)
     if (!executeAndWait(fname, argv, status)) {
         return false;
     }
-    if (status != EXIT_SUCCESS) {
-        if (WIFEXITED(status)) {
-            LOGW("Process " << fname << " has exited with status " << WEXITSTATUS(status));
-        } else if (WIFSIGNALED(status)) {
-            LOGW("Process " << fname << " was killed by signal " << WTERMSIG(status));
-        } else if (WIFSTOPPED(status)) {
-            LOGW("Process " << fname << " was stopped by signal " << WSTOPSIG(status));
-        }
-        return false;
-    }
-    return true;
+    return isExecutionSuccessful(status);
 }
 
 bool waitPid(pid_t pid, int& status)

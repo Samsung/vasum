@@ -52,6 +52,15 @@ bool dropRoot(uid_t uid, gid_t gid, const std::vector<unsigned int>& caps);
  */
 bool launchAsRoot(const std::function<bool()>& func);
 
+/**
+ * Join to namespace
+ */
+bool joinToNs(int nsPid, int ns);
+
+/**
+ * Pass file descriptor from namespace of some process
+ */
+int passNemaspacedFd(int nsPid, int ns, const std::function<int()>& fdFactory);
 
 } // namespace utils
 } // namespace vasum

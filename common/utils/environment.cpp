@@ -26,6 +26,8 @@
 
 #include "utils/environment.hpp"
 #include "utils/execute.hpp"
+#include "utils/make-clean.hpp"
+#include "base-exception.hpp"
 #include "logger/logger.hpp"
 
 #include <cap-ng.h>
@@ -34,7 +36,95 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <cstring>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <map>
+#include <cassert>
+#include <features.h>
 
+#if !__GLIBC_PREREQ(2, 14)
+
+#include <sys/syscall.h>
+
+#ifdef __NR_setns
+static inline int setns(int fd, int nstype)
+{
+    // setns system call are available since v2.6.39-6479-g7b21fdd
+    return syscall(__NR_setns, fd, nstype);
+}
+#else
+#error "setns syscall isn't available"
+#endif
+
+#endif
+
+using namespace vasum::utils;
+
+namespace {
+
+const std::map<int, std::string> NAMESPACES = {
+    {CLONE_NEWIPC, "ipc"},
+    {CLONE_NEWNET, "net"},
+    {CLONE_NEWNS, "mnt"},
+    {CLONE_NEWPID, "pid"},
+    {CLONE_NEWUSER, "user"},
+    {CLONE_NEWUTS, "uts"}};
+
+int fdRecv(int socket)
+{
+    msghdr msg = make_clean<msghdr>();
+    iovec iov = make_clean<iovec>();
+    char cmsgBuff[CMSG_SPACE(sizeof(int))];
+
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+
+    msg.msg_control = cmsgBuff;
+    msg.msg_controllen = sizeof(cmsgBuff);
+
+    int ret = recvmsg(socket, &msg, MSG_CMSG_CLOEXEC);
+    if (ret != 0 || msg.msg_flags & (MSG_TRUNC | MSG_ERRQUEUE | MSG_OOB | MSG_CTRUNC | MSG_EOR)) {
+        LOGE("Can't receive fd: ret: " << ret << ", flags: " << msg.msg_flags);
+        return -1;
+    }
+
+    cmsghdr* cmsg = CMSG_FIRSTHDR(&msg);
+    assert(cmsg->cmsg_level == SOL_SOCKET);
+    assert(cmsg->cmsg_type == SCM_RIGHTS);
+    assert(CMSG_NXTHDR(&msg, cmsg) == NULL);
+    return *reinterpret_cast<int*>(CMSG_DATA(cmsg));
+}
+
+bool fdSend(int socket, int fd)
+{
+    msghdr msg = make_clean<msghdr>();
+    struct iovec iov = make_clean<iovec>();
+    struct cmsghdr *cmsg = NULL;
+    char cmsgBuff[CMSG_SPACE(sizeof(int))];
+
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+
+    msg.msg_control = cmsgBuff;
+    msg.msg_controllen = sizeof(cmsgBuff);
+
+    cmsg = CMSG_FIRSTHDR(&msg);
+    cmsg->cmsg_level = SOL_SOCKET;
+    cmsg->cmsg_type = SCM_RIGHTS;
+    cmsg->cmsg_len = CMSG_LEN(sizeof(int));
+    *reinterpret_cast<int*>(CMSG_DATA(cmsg)) = fd;
+
+    int ret = sendmsg(socket, &msg, 0);
+    if (ret < 0) {
+        LOGE("Can't send fd: ret: " << ret);
+        return false;
+    }
+    return true;
+}
+
+} // namespace
 
 namespace vasum {
 namespace utils {
@@ -88,43 +178,76 @@ bool dropRoot(uid_t uid, gid_t gid, const std::vector<unsigned int>& caps)
 bool launchAsRoot(const std::function<bool()>& func)
 {
     // TODO optimize if getuid() == 0
-    pid_t pid = fork();
-    if (pid < 0) {
-        LOGE("Fork failed: " << strerror(errno));
-        return false;
-    }
-
-    if (pid == 0) {
+    return executeAndWait([&func]() {
         if (::setuid(0) < 0) {
-            LOGW("Failed to become root: " << strerror(errno));
+            LOGW("Failed to become root: " << getSystemErrorMessage());
             _exit(EXIT_FAILURE);
         }
 
-        try {
-            if (!func()) {
-                LOGE("Failed to successfully execute func");
-                _exit(EXIT_FAILURE);
-            }
-        } catch (const std::exception& e) {
-            LOGE("Failed to successfully execute func: " << e.what());
+        if (!func()) {
+            LOGE("Failed to successfully execute func");
             _exit(EXIT_FAILURE);
         }
+    });
+}
 
-        _exit(EXIT_SUCCESS);
-    }
-
-    int status;
-    if (!waitPid(pid, status)) {
+bool joinToNs(int nsPid, int ns)
+{
+    auto ins = NAMESPACES.find(ns);
+    if (ins == NAMESPACES.end()) {
+        LOGE("Namespace isn't supported: " << ns);
         return false;
     }
-    if (status != 0) {
-        LOGE("Function launched as root exited with status " << status);
+    std::string nsPath = "/proc/" + std::to_string(nsPid) + "/ns/" + ins->second;
+    int nsFd = ::open(nsPath.c_str(), O_RDONLY);
+    if (nsFd == -1) {
+        LOGE("Can't open namesace: " + getSystemErrorMessage());
         return false;
     }
-
+    int ret = setns(nsFd, ins->first);
+    if (ret != 0) {
+        LOGE("Can't set namesace: " + getSystemErrorMessage());
+        close(nsFd);
+        return false;
+    }
+    close(nsFd);
     return true;
 }
 
+int passNemaspacedFd(int nsPid, int ns, const std::function<int()>& fdFactory)
+{
+    int fds[2];
+    int ret = socketpair(PF_LOCAL, SOCK_RAW, 0, fds);
+    if (ret == -1) {
+        LOGE("Can't create socket pair: " << vasum::getSystemErrorMessage());
+        return -1;
+    }
+    bool success = executeAndWait([&, fds, nsPid, ns]() {
+        close(fds[0]);
+
+        int fd = -1;
+        if (joinToNs(nsPid, ns)) {
+            fd = fdFactory();
+        }
+        if (fd == -1) {
+            close(fds[1]);
+            _exit(EXIT_FAILURE);
+        }
+        LOGT("FD pass, send: " << fd);
+        fdSend(fds[1], fd);
+        close(fds[1]);
+        close(fd);
+    });
+
+    close(fds[1]);
+    int fd = -1;
+    if (success) {
+        fd = fdRecv(fds[0]);
+    }
+    close(fds[0]);
+    LOGT("FD pass, rcv: " << fd);
+    return fd;
+}
 
 } // namespace utils
 } // namespace vasum
