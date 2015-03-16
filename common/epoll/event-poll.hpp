@@ -37,7 +37,7 @@ namespace epoll {
 
 class EventPoll {
 public:
-    typedef std::function<bool(int fd, Events events)> Callback;
+    typedef std::function<void(int fd, Events events)> Callback;
 
     EventPoll();
     ~EventPoll();
@@ -45,10 +45,16 @@ public:
     int getPollFD() const;
 
     void addFD(const int fd, const Events events, Callback&& callback);
+    void modifyFD(const int fd, const Events events);
     void removeFD(const int fd);
 
+    /**
+     * Dispatch at most one signalled FD
+     * @param timeoutMs how long should wait in case of no pending events
+     *        (0 - return immediately, -1 - wait forever)
+     * @return false on timeout
+     */
     bool dispatchIteration(const int timeoutMs);
-    void dispatchLoop();
 
 private:
     typedef std::recursive_mutex Mutex;
@@ -58,6 +64,7 @@ private:
     std::unordered_map<int, std::shared_ptr<Callback>> mCallbacks;
 
     bool addFDInternal(const int fd, const Events events);
+    bool modifyFDInternal(const int fd, const Events events);
     void removeFDInternal(const int fd);
 };
 

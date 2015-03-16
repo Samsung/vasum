@@ -63,17 +63,15 @@ void Service::start()
         return;
     }
     LOGS("Service start");
-    auto handleConnection = [&](int, epoll::Events) -> bool {
+    auto handleConnection = [&](int, epoll::Events) {
         mAcceptor.handleConnection();
-        return true;
     };
-    auto handleProcessorEvent = [&](int, epoll::Events) -> bool {
+    auto handleProcessorEvent = [&](int, epoll::Events) {
         mProcessor.handleEvent();
-        return true;
     };
-    mEventPoll.addFD(mAcceptor.getConnectionFD(), EPOLLIN, handleConnection);
     mEventPoll.addFD(mProcessor.getEventFD(), EPOLLIN, handleProcessorEvent);
     mProcessor.start();
+    mEventPoll.addFD(mAcceptor.getConnectionFD(), EPOLLIN, handleConnection);
 }
 
 bool Service::isStarted()
@@ -87,9 +85,8 @@ void Service::stop()
         return;
     }
     LOGS("Service stop");
-    mProcessor.stop();
-
     mEventPoll.removeFD(mAcceptor.getConnectionFD());
+    mProcessor.stop();
     mEventPoll.removeFD(mProcessor.getEventFD());
 }
 
@@ -105,6 +102,7 @@ void Service::handle(const FileDescriptor fd, const epoll::Events pollEvents)
 
     if (pollEvents & EPOLLIN) {
         mProcessor.handleInput(fd);
+        return; // because handleInput will handle RDHUP
     }
 
     if ((pollEvents & EPOLLHUP) || (pollEvents & EPOLLRDHUP)) {
@@ -116,9 +114,8 @@ void Service::setNewPeerCallback(const PeerCallback& newPeerCallback)
 {
     LOGS("Service setNewPeerCallback");
     auto callback = [newPeerCallback, this](PeerID peerID, FileDescriptor fd) {
-        auto handleFd = [&](FileDescriptor fd, epoll::Events events) -> bool {
+        auto handleFd = [&](FileDescriptor fd, epoll::Events events) {
             handle(fd, events);
-            return true;
         };
         mEventPoll.addFD(fd, EPOLLIN | EPOLLHUP | EPOLLRDHUP, handleFd);
         if (newPeerCallback) {

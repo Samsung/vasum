@@ -26,12 +26,11 @@
 #include "config.hpp"
 #include "ut.hpp"
 
-#include "utils/latch.hpp"
 #include "utils/glib-loop.hpp"
 
 #include <atomic>
 
-BOOST_AUTO_TEST_SUITE(UtilsGlibLoopSuite)
+BOOST_AUTO_TEST_SUITE(GlibLoopSuite)
 
 using namespace vasum;
 using namespace vasum::utils;
@@ -39,22 +38,25 @@ using namespace vasum::utils;
 
 namespace {
 
-const unsigned int TIMER_INTERVAL_MS = 10;
-const unsigned int TIMER_NUMBER      = 5;
+const unsigned int TIMER_INTERVAL_MS = 100;
+const unsigned int TIMER_NUMBER      = 4;
 const unsigned int TIMER_WAIT_FOR    = 2 * TIMER_NUMBER * TIMER_INTERVAL_MS;
 
 } // namespace
 
+BOOST_AUTO_TEST_CASE(GlibLoopTest)
+{
+    ScopedGlibLoop loop;
+}
+
 BOOST_AUTO_TEST_CASE(GlibTimerEventTest)
 {
     ScopedGlibLoop loop;
-    Latch latch;
     std::atomic_uint counter(0);
 
     CallbackGuard guard;
 
-    Glib::OnTimerEventCallback callback = [&]()->bool {
-        latch.set();
+    auto callback = [&]()-> bool {
         if (++counter >= TIMER_NUMBER) {
             return false;
         }
@@ -63,8 +65,9 @@ BOOST_AUTO_TEST_CASE(GlibTimerEventTest)
 
     Glib::addTimerEvent(TIMER_INTERVAL_MS, callback, guard);
 
-    BOOST_REQUIRE(latch.waitForN(TIMER_NUMBER, TIMER_WAIT_FOR));
-    BOOST_REQUIRE(latch.wait(TIMER_WAIT_FOR) == false);
+    BOOST_CHECK(counter < TIMER_NUMBER);
+    BOOST_CHECK(guard.waitForTrackers(TIMER_WAIT_FOR));
+    BOOST_CHECK_EQUAL(counter, TIMER_NUMBER);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

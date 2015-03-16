@@ -80,11 +80,8 @@ const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
 *  - new way to generate UIDs
 *  - callbacks for serialization/parsing
 *  - store Sockets in a vector, maybe SocketStore?
-*  - poll loop outside.
 *  - waiting till the EventQueue is empty before leaving stop()
 *  - no new events added after stop() called
-*  - when using IPCGSource: addFD and removeFD can be called from addPeer removePeer callbacks, but
-*    there is no mechanism to ensure the IPCSource exists.. therefore SIGSEGV :)
 *
 */
 class Processor {

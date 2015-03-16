@@ -29,6 +29,7 @@
 #include "utils/eventfd.hpp"
 
 #include <thread>
+#include <atomic>
 
 namespace vasum {
 namespace epoll {
@@ -45,6 +46,7 @@ public:
 private:
     EventPoll mPoll;
     utils::EventFD mStopEvent;
+    std::atomic_bool mStopped;
     std::thread mThread;
 };
 

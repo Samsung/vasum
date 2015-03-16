@@ -29,15 +29,18 @@ namespace vasum {
 namespace epoll {
 
 ThreadDispatcher::ThreadDispatcher()
+    : mStopped(false)
 {
-    auto controlCallback = [this](int, Events) -> bool {
+    auto controlCallback = [this](int, Events) {
         mStopEvent.receive();
-        return false; // break the loop
+        mStopped.store(true, std::memory_order_release);
     };
 
     mPoll.addFD(mStopEvent.getFD(), EPOLLIN, std::move(controlCallback));
     mThread = std::thread([this] {
-        mPoll.dispatchLoop();
+        while (!mStopped.load(std::memory_order_acquire)) {
+            mPoll.dispatchIteration(-1);
+        }
     });
 }
 

@@ -96,11 +96,6 @@ std::string getInterfaceFromIntrospectionXML(const std::string& xml, const std::
 
 } // namespace
 
-BOOST_AUTO_TEST_CASE(GlibLoopTest)
-{
-    ScopedGlibLoop loop;
-}
-
 BOOST_AUTO_TEST_CASE(DbusDaemonTest)
 {
     ScopedDbusDaemon daemon;

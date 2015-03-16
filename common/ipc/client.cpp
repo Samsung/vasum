@@ -58,9 +58,8 @@ void Client::start()
     }
     LOGS("Client start");
     // Initialize the connection with the server
-    auto handleEvent = [&](int, epoll::Events) -> bool {
+    auto handleEvent = [&](int, epoll::Events) {
         mProcessor.handleEvent();
-        return true;
     };
     mEventPoll.addFD(mProcessor.getEventFD(), EPOLLIN, handleEvent);
     mProcessor.start();
@@ -98,6 +97,7 @@ void Client::handle(const FileDescriptor fd, const epoll::Events pollEvents)
 
     if (pollEvents & EPOLLIN) {
         mProcessor.handleInput(fd);
+        return; // because handleInput will handle RDHUP
     }
 
     if ((pollEvents & EPOLLHUP) || (pollEvents & EPOLLRDHUP)) {
@@ -109,9 +109,8 @@ void Client::setNewPeerCallback(const PeerCallback& newPeerCallback)
 {
     LOGS("Client setNewPeerCallback");
     auto callback = [newPeerCallback, this](PeerID peerID, FileDescriptor fd) {
-        auto handleFd = [&](FileDescriptor fd, epoll::Events events) -> bool {
+        auto handleFd = [&](FileDescriptor fd, epoll::Events events) {
             handle(fd, events);
-            return true;
         };
         mEventPoll.addFD(fd, EPOLLIN | EPOLLHUP | EPOLLRDHUP, handleFd);
         if (newPeerCallback) {

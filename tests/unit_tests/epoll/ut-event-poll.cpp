@@ -29,11 +29,12 @@
 #include "epoll/event-poll.hpp"
 #include "logger/logger.hpp"
 #include "ipc/internals/socket.hpp"
-#include "utils/latch.hpp"
+#include "utils/value-latch.hpp"
 #include "utils/glib-loop.hpp"
 #include "epoll/glib-dispatcher.hpp"
 #include "epoll/thread-dispatcher.hpp"
 
+using namespace vasum;
 using namespace vasum::utils;
 using namespace vasum::epoll;
 using namespace vasum::ipc;
@@ -66,62 +67,152 @@ BOOST_AUTO_TEST_CASE(GlibPoll)
 
 void doSocketTest(EventPoll& poll)
 {
+    using namespace std::placeholders;
+
+    //TODO don't use ipc socket
     const std::string PATH = "/tmp/ut-poll.sock";
-    const std::string MESSAGE = "This is a test message";
+    const size_t REQUEST_LEN = 5;
+    const std::string REQUEST_GOOD = "GET 1";
+    const std::string REQUEST_BAD = "GET 7";
+    const std::string RESPONSE = "This is a response message";
 
-    Latch goodMessage;
-    Latch remoteClosed;
+    // Scenario 1:
+    // client connects to server listening socket
+    // client ---good-request---> server
+    // server ---response---> client
+    // client disconnects
+    //
+    // Scenario 2:
+    // client connects to server listening socket
+    // client ---bad-request----> server
+    // server disconnects
 
-    Socket listen = Socket::createSocket(PATH);
-    std::shared_ptr<Socket> server;
+    // { server setup
 
-    auto serverCallback = [&](int, Events events) -> bool {
+    auto serverCallback = [&](int /*fd*/,
+                              Events events,
+                              std::shared_ptr<Socket> socket,
+                              CallbackGuard::Tracker) {
         LOGD("Server events: " << eventsToString(events));
 
-        if (events & EPOLLOUT) {
-            server->write(MESSAGE.data(), MESSAGE.size());
-            poll.removeFD(server->getFD());
-            server.reset();
-        }
-        return true;
-    };
-
-    auto listenCallback = [&](int, Events events) -> bool {
-        LOGD("Listen events: " << eventsToString(events));
         if (events & EPOLLIN) {
-            server = listen.accept();
-            poll.addFD(server->getFD(), EPOLLHUP | EPOLLRDHUP | EPOLLOUT, serverCallback);
-        }
-        return true;
-    };
-
-    poll.addFD(listen.getFD(), EPOLLIN, listenCallback);
-
-    Socket client = Socket::connectSocket(PATH);
-
-    auto clientCallback = [&](int, Events events) -> bool {
-        LOGD("Client events: " << eventsToString(events));
-
-        if (events & EPOLLIN) {
-            std::string ret(MESSAGE.size(), 'x');
-            client.read(&ret.front(), ret.size());
-            if (ret == MESSAGE) {
-                goodMessage.set();
+            std::string request(REQUEST_LEN, 'x');
+            socket->read(&request.front(), request.size());
+            if (request == REQUEST_GOOD) {
+                poll.modifyFD(socket->getFD(), EPOLLRDHUP | EPOLLOUT);
+            } else {
+                // disconnect (socket is kept in callback)
+                poll.removeFD(socket->getFD());
             }
         }
-        if (events & EPOLLRDHUP) {
-            poll.removeFD(client.getFD());
-            remoteClosed.set();
+
+        if (events & EPOLLOUT) {
+            socket->write(RESPONSE.data(), RESPONSE.size());
+            poll.modifyFD(socket->getFD(), EPOLLRDHUP);
         }
-        return true;
+
+        if (events & EPOLLRDHUP) {
+            // client has disconnected
+            poll.removeFD(socket->getFD());
+        }
     };
 
-    poll.addFD(client.getFD(), EPOLLHUP | EPOLLRDHUP | EPOLLIN, clientCallback);
+    Socket listenSocket = Socket::createSocket(PATH);
+    CallbackGuard serverSocketsGuard;
 
-    BOOST_CHECK(goodMessage.wait(TIMEOUT));
-    BOOST_CHECK(remoteClosed.wait(TIMEOUT));
+    auto listenCallback = [&](int /*fd*/, Events events) {
+        LOGD("Listen events: " << eventsToString(events));
+        if (events & EPOLLIN) {
+            // accept new server connection
+            std::shared_ptr<Socket> socket = listenSocket.accept();
+            poll.addFD(socket->getFD(),
+                       EPOLLRDHUP | EPOLLIN,
+                       std::bind(serverCallback, _1, _2, socket, serverSocketsGuard.spawn()));
+        }
+    };
 
-    poll.removeFD(listen.getFD());
+    poll.addFD(listenSocket.getFD(), EPOLLIN, listenCallback);
+
+    // } server setup
+
+    // { client setup
+
+    auto clientCallback = [&](int /*fd*/,
+                              Events events,
+                              Socket& socket,
+                              const std::string& request,
+                              ValueLatch<std::string>& response) {
+        LOGD("Client events: " << eventsToString(events));
+
+        if (events & EPOLLOUT) {
+            socket.write(request.data(), request.size());
+            poll.modifyFD(socket.getFD(), EPOLLRDHUP | EPOLLIN);
+        }
+
+        if (events & EPOLLIN) {
+            try {
+                std::string msg(RESPONSE.size(), 'x');
+                socket.read(&msg.front(), msg.size());
+                response.set(msg);
+            } catch (UtilsException&) {
+                response.set(std::string());
+            }
+            poll.modifyFD(socket.getFD(), EPOLLRDHUP);
+        }
+
+        if (events & EPOLLRDHUP) {
+            LOGD("Server has disconnected");
+            poll.removeFD(socket.getFD()); //prevent active loop
+        }
+    };
+
+    // } client setup
+
+    // Scenario 1
+    LOGD("Scerario 1");
+    {
+        Socket client = Socket::connectSocket(PATH);
+        ValueLatch<std::string> response;
+
+        poll.addFD(client.getFD(),
+                   EPOLLRDHUP | EPOLLOUT,
+                   std::bind(clientCallback,
+                             _1,
+                             _2,
+                             std::ref(client),
+                             REQUEST_GOOD,
+                             std::ref(response)));
+
+        BOOST_CHECK(response.get(TIMEOUT) == RESPONSE);
+
+        poll.removeFD(client.getFD());
+    }
+
+    // Scenario 2
+    LOGD("Scerario 2");
+    {
+        Socket client = Socket::connectSocket(PATH);
+        ValueLatch<std::string> response;
+
+        poll.addFD(client.getFD(),
+                   EPOLLRDHUP | EPOLLOUT,
+                   std::bind(clientCallback,
+                             _1,
+                             _2,
+                             std::ref(client),
+                             REQUEST_BAD,
+                             std::ref(response)));
+
+        BOOST_CHECK(response.get(TIMEOUT) == std::string());
+
+        poll.removeFD(client.getFD());
+    }
+    LOGD("Done");
+
+    poll.removeFD(listenSocket.getFD());
+
+    // wait for all server sockets (ensure all EPOLLRDHUP are processed)
+    BOOST_REQUIRE(serverSocketsGuard.waitForTrackers(TIMEOUT));
 }
 
 BOOST_AUTO_TEST_CASE(ThreadedPollSocket)
@@ -146,9 +237,8 @@ BOOST_AUTO_TEST_CASE(PollStacking)
 
     EventPoll innerPoll;
 
-    auto dispatchInner = [&](int, Events) -> bool {
+    auto dispatchInner = [&](int, Events) {
         innerPoll.dispatchIteration(0);
-        return true;
     };
     dispatcher.getPoll().addFD(innerPoll.getPollFD(), EPOLLIN, dispatchInner);
     doSocketTest(innerPoll);

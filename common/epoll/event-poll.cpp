@@ -79,14 +79,22 @@ void EventPoll::addFD(const int fd, const Events events, Callback&& callback)
     LOGT("Callback added for fd: " << fd);
 }
 
+void EventPoll::modifyFD(const int fd, const Events events)
+{
+    // No need to lock and check mCallbacks map
+    if (!modifyFDInternal(fd, events)) {
+        throw UtilsException("Could not modify fd");
+    }
+}
+
 void EventPoll::removeFD(const int fd)
 {
     std::lock_guard<Mutex> lock(mMutex);
 
     auto iter = mCallbacks.find(fd);
     if (iter == mCallbacks.end()) {
-        LOGW("Failed to remove nonexistent fd: " << fd);
-        throw UtilsException("FD does not exist");
+        LOGT("Callback not found, probably already removed fd: " << fd);
+        return;
     }
     mCallbacks.erase(iter);
     removeFDInternal(fd);
@@ -94,6 +102,7 @@ void EventPoll::removeFD(const int fd)
 }
 
 bool EventPoll::dispatchIteration(const int timeoutMs)
+
 {
     for (;;) {
         epoll_event event;
@@ -120,17 +129,14 @@ bool EventPoll::dispatchIteration(const int timeoutMs)
         std::shared_ptr<Callback> callback(iter->second);
         try {
             LOGT("Dispatch fd: " << event.data.fd << ", events: " << eventsToString(event.events));
-            return (*callback)(event.data.fd, event.events);
+            (*callback)(event.data.fd, event.events);
+            return true;
         } catch (std::exception& e) {
             LOGE("Got unexpected exception: " << e.what());
             assert(0 && "Callback should not throw any exceptions");
+            return true;
         }
     }
-}
-
-void EventPoll::dispatchLoop()
-{
-    while (dispatchIteration(-1)) {}
 }
 
 bool EventPoll::addFDInternal(const int fd, const Events events)
@@ -142,6 +148,20 @@ bool EventPoll::addFDInternal(const int fd, const Events events)
 
     if (epoll_ctl(mPollFD, EPOLL_CTL_ADD, fd, &event) == -1) {
         LOGE("Failed to add fd to poll: " << getSystemErrorMessage());
+        return false;
+    }
+    return true;
+}
+
+bool EventPoll::modifyFDInternal(const int fd, const Events events)
+{
+    epoll_event event;
+    memset(&event, 0, sizeof(event));
+    event.events = events;
+    event.data.fd = fd;
+
+    if (epoll_ctl(mPollFD, EPOLL_CTL_MOD, fd, &event) == -1) {
+        LOGE("Failed to modify fd in poll: " << getSystemErrorMessage());
         return false;
     }
     return true;
