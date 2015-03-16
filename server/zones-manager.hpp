@@ -146,15 +146,16 @@ private:
     int getVTForNewZone();
     void insertZone(const std::string& zoneId, const std::string& templatePath);
 
+    // Zone's handlers---------------------------------------------------------
     void handleNotifyActiveZoneCall(const std::string& caller,
                                     const std::string& appliaction,
                                     const std::string& message,
                                     api::MethodResultBuilder::Pointer result);
     void handleDisplayOffCall(const std::string& caller);
     void handleFileMoveCall(const std::string& srcZoneId,
-                               const std::string& dstZoneId,
-                               const std::string& path,
-                               api::MethodResultBuilder::Pointer result);
+                            const std::string& dstZoneId,
+                            const std::string& path,
+                            api::MethodResultBuilder::Pointer result);
     void handleProxyCall(const std::string& caller,
                          const std::string& target,
                          const std::string& targetBusName,
@@ -164,77 +165,55 @@ private:
                          GVariant* parameters,
                          dbus::MethodResultBuilder::Pointer result);
     void handleGetZoneDbusesCall(api::MethodResultBuilder::Pointer result);
-    void handleDbusStateChanged(const std::string& zoneId, const std::string& dbusAddress);
+
+    void handleDbusStateChanged(const std::string& zoneId,
+                                const std::string& dbusAddress);
+    // Host's handlers --------------------------------------------------------
     void handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result);
     void handleGetActiveZoneIdCall(api::MethodResultBuilder::Pointer result);
-    void handleGetZoneInfoCall(const std::string& id, api::MethodResultBuilder::Pointer result);
-    void handleSetNetdevAttrsCall(const std::string& zone,
-                                  const std::string& netdev,
-                                  const std::vector<std::tuple<std::string, std::string>>& attrs,
+    void handleGetZoneInfoCall(const api::ZoneId& data,
+                               api::MethodResultBuilder::Pointer result);
+    void handleSetNetdevAttrsCall(const api::SetNetDevAttrsIn& data,
                                   api::MethodResultBuilder::Pointer result);
-    void handleGetNetdevAttrsCall(const std::string& zone,
-                                  const std::string& netdev,
+    void handleGetNetdevAttrsCall(const api::GetNetDevAttrsIn& data,
                                   api::MethodResultBuilder::Pointer result);
-    void handleGetNetdevListCall(const std::string& zone,
+    void handleGetNetdevListCall(const api::ZoneId& data,
                                  api::MethodResultBuilder::Pointer result);
-    void handleCreateNetdevVethCall(const std::string& zone,
-                                    const std::string& zoneDev,
-                                    const std::string& hostDev,
+    void handleCreateNetdevVethCall(const api::CreateNetDevVethIn& data,
                                     api::MethodResultBuilder::Pointer result);
-    void handleCreateNetdevMacvlanCall(const std::string& zone,
-                                       const std::string& zoneDev,
-                                       const std::string& hostDev,
-                                       const uint32_t& mode,
+    void handleCreateNetdevMacvlanCall(const api::CreateNetDevMacvlanIn& data,
                                        api::MethodResultBuilder::Pointer result);
-    void handleCreateNetdevPhysCall(const std::string& zone,
-                                    const std::string& devId,
+    void handleCreateNetdevPhysCall(const api::CreateNetDevPhysIn& data,
                                     api::MethodResultBuilder::Pointer result);
-    void handleDestroyNetdevCall(const std::string& zone,
-                                 const std::string& devId,
+    void handleDestroyNetdevCall(const api::DestroyNetDevIn& data,
                                  api::MethodResultBuilder::Pointer result);
-    void handleDeclareFileCall(const std::string& zone,
-                               const int32_t& type,
-                               const std::string& path,
-                               const int32_t& flags,
-                               const int32_t& mode,
+    void handleDeclareFileCall(const api::DeclareFileIn& data,
                                api::MethodResultBuilder::Pointer result);
-    void handleDeclareMountCall(const std::string& source,
-                                const std::string& zone,
-                                const std::string& target,
-                                const std::string& type,
-                                const uint64_t& flags,
-                                const std::string& data,
+    void handleDeclareMountCall(const api::DeclareMountIn& data,
                                 api::MethodResultBuilder::Pointer result);
-    void handleDeclareLinkCall(const std::string& source,
-                               const std::string& zone,
-                               const std::string& target,
+    void handleDeclareLinkCall(const api::DeclareLinkIn& data,
                                api::MethodResultBuilder::Pointer result);
-    void handleGetDeclarationsCall(const std::string& zone,
+    void handleGetDeclarationsCall(const api::ZoneId& data,
                                    api::MethodResultBuilder::Pointer result);
-    void handleRemoveDeclarationCall(const std::string& zone,
-                                     const std::string& declarationId,
+    void handleRemoveDeclarationCall(const api::RemoveDeclarationIn& data,
                                      api::MethodResultBuilder::Pointer result);
-    void handleSetActiveZoneCall(const std::string& id,
+    void handleSetActiveZoneCall(const api::ZoneId& data,
                                  api::MethodResultBuilder::Pointer result);
-    void handleCreateZoneCall(const std::string& id,
-                              const std::string& templateName,
+    void handleCreateZoneCall(const api::CreateZoneIn& data,
                               api::MethodResultBuilder::Pointer result);
-    void handleDestroyZoneCall(const std::string& id,
+    void handleDestroyZoneCall(const api::ZoneId& data,
                                api::MethodResultBuilder::Pointer result);
-    void handleShutdownZoneCall(const std::string& id,
+    void handleShutdownZoneCall(const api::ZoneId& data,
                                 api::MethodResultBuilder::Pointer result);
-    void handleStartZoneCall(const std::string& id,
+    void handleStartZoneCall(const api::ZoneId& data,
                              api::MethodResultBuilder::Pointer result);
-    void handleLockZoneCall(const std::string& id,
+    void handleLockZoneCall(const api::ZoneId& data,
                             api::MethodResultBuilder::Pointer result);
-    void handleUnlockZoneCall(const std::string& id,
+    void handleUnlockZoneCall(const api::ZoneId& data,
                               api::MethodResultBuilder::Pointer result);
-    void handleGrantDeviceCall(const std::string& id,
-                               const std::string& device,
-                               uint32_t flags,
+    void handleGrantDeviceCall(const api::GrantDeviceIn& data,
                                api::MethodResultBuilder::Pointer result);
-    void handleRevokeDeviceCall(const std::string& id,
-                                const std::string& device,
+    void handleRevokeDeviceCall(const api::RevokeDeviceIn& data,
                                 api::MethodResultBuilder::Pointer result);
 };
 

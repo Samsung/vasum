@@ -143,46 +143,46 @@ ZonesManager::ZonesManager(const std::string& configPath)
                                                 this, _1, _2));
 
     mHostConnection.setSetNetdevAttrsCallback(bind(&ZonesManager::handleSetNetdevAttrsCall,
-                                                   this, _1, _2, _3, _4));
+                                                   this, _1, _2));
 
     mHostConnection.setGetNetdevAttrsCallback(bind(&ZonesManager::handleGetNetdevAttrsCall,
-                                                   this, _1, _2, _3));
+                                                   this, _1, _2));
 
     mHostConnection.setGetNetdevListCallback(bind(&ZonesManager::handleGetNetdevListCall,
                                                   this, _1, _2));
 
     mHostConnection.setCreateNetdevVethCallback(bind(&ZonesManager::handleCreateNetdevVethCall,
-                                                     this, _1, _2, _3, _4));
+                                                     this, _1, _2));
 
     mHostConnection.setCreateNetdevMacvlanCallback(bind(&ZonesManager::handleCreateNetdevMacvlanCall,
-                                                        this, _1, _2, _3, _4, _5));
+                                                        this, _1, _2));
 
     mHostConnection.setCreateNetdevPhysCallback(bind(&ZonesManager::handleCreateNetdevPhysCall,
-                                                     this, _1, _2, _3));
+                                                     this, _1, _2));
 
     mHostConnection.setDestroyNetdevCallback(bind(&ZonesManager::handleDestroyNetdevCall,
-                                                  this, _1, _2, _3));
+                                                  this, _1, _2));
 
     mHostConnection.setDeclareFileCallback(bind(&ZonesManager::handleDeclareFileCall,
-                                                this, _1, _2, _3, _4, _5, _6));
+                                                this, _1, _2));
 
     mHostConnection.setDeclareMountCallback(bind(&ZonesManager::handleDeclareMountCall,
-                                                 this, _1, _2, _3, _4, _5, _6, _7));
+                                                 this, _1, _2));
 
     mHostConnection.setDeclareLinkCallback(bind(&ZonesManager::handleDeclareLinkCall,
-                                                this, _1, _2, _3, _4));
+                                                this, _1, _2));
 
     mHostConnection.setGetDeclarationsCallback(bind(&ZonesManager::handleGetDeclarationsCall,
                                                     this, _1, _2));
 
     mHostConnection.setRemoveDeclarationCallback(bind(&ZonesManager::handleRemoveDeclarationCall,
-                                                      this, _1, _2, _3));
+                                                      this, _1, _2));
 
     mHostConnection.setSetActiveZoneCallback(bind(&ZonesManager::handleSetActiveZoneCall,
                                                   this, _1, _2));
 
     mHostConnection.setCreateZoneCallback(bind(&ZonesManager::handleCreateZoneCall,
-                                               this, _1, _2, _3));
+                                               this, _1, _2));
 
     mHostConnection.setDestroyZoneCallback(bind(&ZonesManager::handleDestroyZoneCall,
                                                 this, _1, _2));
@@ -200,10 +200,10 @@ ZonesManager::ZonesManager(const std::string& configPath)
                                                this, _1, _2));
 
     mHostConnection.setGrantDeviceCallback(bind(&ZonesManager::handleGrantDeviceCall,
-                                                this, _1, _2, _3, _4));
+                                                this, _1, _2));
 
     mHostConnection.setRevokeDeviceCallback(bind(&ZonesManager::handleRevokeDeviceCall,
-                                                 this, _1, _2, _3));
+                                                 this, _1, _2));
 
     for (const auto& zoneId : mDynamicConfig.zoneIds) {
         insertZone(zoneId, getTemplatePathForExistingZone(zoneId));
@@ -778,22 +778,22 @@ void ZonesManager::handleGetActiveZoneIdCall(api::MethodResultBuilder::Pointer r
     result->set(zoneId);
 }
 
-void ZonesManager::handleGetZoneInfoCall(const std::string& id,
+void ZonesManager::handleGetZoneInfoCall(const api::ZoneId& zoneId,
                                          api::MethodResultBuilder::Pointer result)
 {
     LOGI("GetZoneInfo call");
 
     Lock lock(mMutex);
 
-    auto iter = findZone(id);
+    auto iter = findZone(zoneId.value);
     if (iter == mZones.end()) {
-        LOGE("No zone with id=" << id);
+        LOGE("No zone with id=" << zoneId.value);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
         return;
     }
 
     Zone& zone = get(iter);
-    auto zoneInfo = std::make_shared<api::ZoneInfo>();
+    auto zoneInfo = std::make_shared<api::ZoneInfoOut>();
 
     if (zone.isRunning()) {
         zoneInfo->state = "RUNNING";
@@ -802,7 +802,7 @@ void ZonesManager::handleGetZoneInfoCall(const std::string& id,
     } else if (zone.isPaused()) {
         zoneInfo->state = "FROZEN";
     } else {
-        LOGE("Unrecognized state of zone id=" << id);
+        LOGE("Unrecognized state of zone id=" << zoneId.value);
         result->setError(api::ERROR_INTERNAL, "Unrecognized state of zone");
         return;
     }
@@ -810,18 +810,23 @@ void ZonesManager::handleGetZoneInfoCall(const std::string& id,
     result->set(zoneInfo);
 }
 
-void ZonesManager::handleSetNetdevAttrsCall(const std::string& zone,
-                                            const std::string& netdev,
-                                            const std::vector<std::tuple<std::string, std::string>>& attrs,
+void ZonesManager::handleSetNetdevAttrsCall(const api::SetNetDevAttrsIn& data,
                                             api::MethodResultBuilder::Pointer result)
 {
     LOGI("SetNetdevAttrs call");
     try {
         Lock lock(mMutex);
-        getZone(zone).setNetdevAttrs(netdev, attrs);
+
+        // TODO: Use vector<StringPair> instead of tuples
+        std::vector<std::tuple<std::string, std::string>> attrsAsTuples;
+        for(const auto& entry: data.attrs){
+            attrsAsTuples.push_back(std::make_tuple(entry.first, entry.second));
+        }
+
+        getZone(data.id).setNetdevAttrs(data.netDev, attrsAsTuples);
         result->setVoid();
     } catch (const InvalidZoneIdException&) {
-        LOGE("No zone with id=" << zone);
+        LOGE("No zone with id=" << data.id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
         LOGE("Can't set attributes: " << ex.what());
@@ -829,22 +834,21 @@ void ZonesManager::handleSetNetdevAttrsCall(const std::string& zone,
     }
 }
 
-void ZonesManager::handleGetNetdevAttrsCall(const std::string& zone,
-                                            const std::string& netdev,
+void ZonesManager::handleGetNetdevAttrsCall(const api::GetNetDevAttrsIn& data,
                                             api::MethodResultBuilder::Pointer result)
 {
     LOGI("GetNetdevAttrs call");
     try {
         Lock lock(mMutex);
-        auto netDevAttrs = std::make_shared<api::NetDevAttrs>();
-        const auto attrs = getZone(zone).getNetdevAttrs(netdev);
+        auto netDevAttrs = std::make_shared<api::GetNetDevAttrs>();
+        const auto attrs = getZone(data.first).getNetdevAttrs(data.second);
 
         for (size_t i = 0; i < attrs.size(); ++i) {
             netDevAttrs->values.push_back({std::get<0>(attrs[i]), std::get<1>(attrs[i])});
         }
         result->set(netDevAttrs);
     } catch (const InvalidZoneIdException&) {
-        LOGE("No zone with id=" << zone);
+        LOGE("No zone with id=" << data.first);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
         LOGE("Can't set attributes: " << ex.what());
@@ -852,17 +856,17 @@ void ZonesManager::handleGetNetdevAttrsCall(const std::string& zone,
     }
 }
 
-void ZonesManager::handleGetNetdevListCall(const std::string& zone,
+void ZonesManager::handleGetNetdevListCall(const api::ZoneId& zoneId,
                                            api::MethodResultBuilder::Pointer result)
 {
     LOGI("GetNetdevList call");
     try {
         Lock lock(mMutex);
         auto netDevList = std::make_shared<api::NetDevList>();
-        netDevList->values = getZone(zone).getNetdevList();
+        netDevList->values = getZone(zoneId.value).getNetdevList();
         result->set(netDevList);
     } catch (const InvalidZoneIdException&) {
-        LOGE("No zone with id=" << zone);
+        LOGE("No zone with id=" << zoneId.value);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
         LOGE("Can't set attributes: " << ex.what());
@@ -870,19 +874,17 @@ void ZonesManager::handleGetNetdevListCall(const std::string& zone,
     }
 }
 
-void ZonesManager::handleCreateNetdevVethCall(const std::string& zone,
-                                              const std::string& zoneDev,
-                                              const std::string& hostDev,
+void ZonesManager::handleCreateNetdevVethCall(const api::CreateNetDevVethIn& data,
                                               api::MethodResultBuilder::Pointer result)
 {
     LOGI("CreateNetdevVeth call");
     try {
         Lock lock(mMutex);
 
-        getZone(zone).createNetdevVeth(zoneDev, hostDev);
+        getZone(data.id).createNetdevVeth(data.zoneDev, data.hostDev);
         result->setVoid();
     } catch (const InvalidZoneIdException&) {
-        LOGE("No zone with id=" << zone);
+        LOGE("No zone with id=" << data.id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
         LOGE("Can't create veth: " << ex.what());
@@ -890,20 +892,16 @@ void ZonesManager::handleCreateNetdevVethCall(const std::string& zone,
     }
 }
 
-void ZonesManager::handleCreateNetdevMacvlanCall(const std::string& zone,
-                                                 const std::string& zoneDev,
-                                                 const std::string& hostDev,
-                                                 const uint32_t& mode,
+void ZonesManager::handleCreateNetdevMacvlanCall(const api::CreateNetDevMacvlanIn& data,
                                                  api::MethodResultBuilder::Pointer result)
 {
     LOGI("CreateNetdevMacvlan call");
     try {
         Lock lock(mMutex);
-
-        getZone(zone).createNetdevMacvlan(zoneDev, hostDev, mode);
+        getZone(data.id).createNetdevMacvlan(data.zoneDev, data.hostDev, data.mode);
         result->setVoid();
     } catch (const InvalidZoneIdException&) {
-        LOGE("No zone with id=" << zone);
+        LOGE("No zone with id=" << data.id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
         LOGE("Can't create macvlan: " << ex.what());
@@ -911,18 +909,17 @@ void ZonesManager::handleCreateNetdevMacvlanCall(const std::string& zone,
     }
 }
 
-void ZonesManager::handleCreateNetdevPhysCall(const std::string& zone,
-                                              const std::string& devId,
+void ZonesManager::handleCreateNetdevPhysCall(const api::CreateNetDevPhysIn& data,
                                               api::MethodResultBuilder::Pointer result)
 {
     LOGI("CreateNetdevPhys call");
     try {
         Lock lock(mMutex);
 
-        getZone(zone).moveNetdev(devId);
+        getZone(data.first).moveNetdev(data.second);
         result->setVoid();
     } catch (const InvalidZoneIdException&) {
-        LOGE("No zone with id=" << zone);
+        LOGE("No zone with id=" << data.first);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
         LOGE("Can't create netdev: " << ex.what());
@@ -930,18 +927,17 @@ void ZonesManager::handleCreateNetdevPhysCall(const std::string& zone,
     }
 }
 
-void ZonesManager::handleDestroyNetdevCall(const std::string& zone,
-                                           const std::string& devId,
+void ZonesManager::handleDestroyNetdevCall(const api::DestroyNetDevIn& data,
                                            api::MethodResultBuilder::Pointer result)
 {
     LOGI("DestroyNetdev call");
     try {
         Lock lock(mMutex);
 
-        getZone(zone).destroyNetdev(devId);
+        getZone(data.first).destroyNetdev(data.second);
         result->setVoid();
     } catch (const InvalidZoneIdException&) {
-        LOGE("No zone with id=" << zone);
+        LOGE("No zone with id=" << data.first);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
         LOGE("Can't create netdev: " << ex.what());
@@ -949,11 +945,7 @@ void ZonesManager::handleDestroyNetdevCall(const std::string& zone,
     }
 }
 
-void ZonesManager::handleDeclareFileCall(const std::string& zone,
-                                         const int32_t& type,
-                                         const std::string& path,
-                                         const int32_t& flags,
-                                         const int32_t& mode,
+void ZonesManager::handleDeclareFileCall(const api::DeclareFileIn& data,
                                          api::MethodResultBuilder::Pointer result)
 {
     LOGI("DeclareFile call");
@@ -961,10 +953,10 @@ void ZonesManager::handleDeclareFileCall(const std::string& zone,
     try {
         Lock lock(mMutex);
         auto declaration = std::make_shared<api::Declaration>();
-        declaration->value = getZone(zone).declareFile(type, path, flags, mode);
+        declaration->value = getZone(data.zone).declareFile(data.type, data.path, data.flags, data.mode);
         result->set(declaration);
     } catch (const InvalidZoneIdException&) {
-        LOGE("No zone with id=" << zone);
+        LOGE("No zone with id=" << data.zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const config::ConfigException& ex) {
         LOGE("Can't declare file: " << ex.what());
@@ -972,12 +964,7 @@ void ZonesManager::handleDeclareFileCall(const std::string& zone,
     }
 }
 
-void ZonesManager::handleDeclareMountCall(const std::string& source,
-                                          const std::string& zone,
-                                          const std::string& target,
-                                          const std::string& type,
-                                          const uint64_t& flags,
-                                          const std::string& data,
+void ZonesManager::handleDeclareMountCall(const api::DeclareMountIn& data,
                                           api::MethodResultBuilder::Pointer result)
 {
     LOGI("DeclareMount call");
@@ -985,10 +972,10 @@ void ZonesManager::handleDeclareMountCall(const std::string& source,
     try {
         Lock lock(mMutex);
         auto declaration = std::make_shared<api::Declaration>();
-        declaration->value = getZone(zone).declareMount(source, target, type, flags, data);
+        declaration->value = getZone(data.zone).declareMount(data.source, data.target, data.type, data.flags, data.data);
         result->set(declaration);
     } catch (const InvalidZoneIdException&) {
-        LOGE("No zone with id=" << zone);
+        LOGE("No zone with id=" << data.zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const config::ConfigException& ex) {
         LOGE("Can't declare mount: " << ex.what());
@@ -996,19 +983,17 @@ void ZonesManager::handleDeclareMountCall(const std::string& source,
     }
 }
 
-void ZonesManager::handleDeclareLinkCall(const std::string& source,
-                                         const std::string& zone,
-                                         const std::string& target,
+void ZonesManager::handleDeclareLinkCall(const api::DeclareLinkIn& data,
                                          api::MethodResultBuilder::Pointer result)
 {
     LOGI("DeclareLink call");
     try {
         Lock lock(mMutex);
         auto declaration = std::make_shared<api::Declaration>();
-        declaration->value = getZone(zone).declareLink(source, target);
+        declaration->value = getZone(data.zone).declareLink(data.source, data.target);
         result->set(declaration);
     } catch (const InvalidZoneIdException&) {
-        LOGE("No zone with id=" << zone);
+        LOGE("No zone with id=" << data.zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const config::ConfigException& ex) {
         LOGE("Can't declare link: " << ex.what());
@@ -1016,17 +1001,17 @@ void ZonesManager::handleDeclareLinkCall(const std::string& source,
     }
 }
 
-void ZonesManager::handleGetDeclarationsCall(const std::string& zone,
+void ZonesManager::handleGetDeclarationsCall(const api::ZoneId& zoneId,
                                              api::MethodResultBuilder::Pointer result)
 {
-    LOGI("GetDeclarations call Id=" << zone);
+    LOGI("GetDeclarations call Id=" << zoneId.value);
     try {
         Lock lock(mMutex);
         auto declarations = std::make_shared<api::Declarations>();
-        declarations->values = getZone(zone).getDeclarations();
+        declarations->values = getZone(zoneId.value).getDeclarations();
         result->set(declarations);
     } catch (const InvalidZoneIdException&) {
-        LOGE("No zone with id=" << zone);
+        LOGE("No zone with id=" << zoneId.value);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
         LOGE(ex.what());
@@ -1034,19 +1019,16 @@ void ZonesManager::handleGetDeclarationsCall(const std::string& zone,
     }
 }
 
-void ZonesManager::handleRemoveDeclarationCall(const std::string& zone,
-                                               const std::string& declarationId,
+void ZonesManager::handleRemoveDeclarationCall(const api::RemoveDeclarationIn& data,
                                                api::MethodResultBuilder::Pointer result)
 {
-    LOGI("RemoveDeclaration call Id=" << zone);
+    LOGI("RemoveDeclaration call Id=" << data.first);
     try {
         Lock lock(mMutex);
-
-        getZone(zone).removeDeclaration(declarationId);
-
+        getZone(data.first).removeDeclaration(data.second);
         result->setVoid();
     } catch (const InvalidZoneIdException&) {
-        LOGE("No zone with id=" << zone);
+        LOGE("No zone with id=" << data.first);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
         LOGE(ex.what());
@@ -1054,16 +1036,16 @@ void ZonesManager::handleRemoveDeclarationCall(const std::string& zone,
     }
 }
 
-void ZonesManager::handleSetActiveZoneCall(const std::string& id,
+void ZonesManager::handleSetActiveZoneCall(const api::ZoneId& zoneId,
                                            api::MethodResultBuilder::Pointer result)
 {
-    LOGI("SetActiveZone call; Id=" << id );
+    LOGI("SetActiveZone call; Id=" << zoneId.value );
 
     Lock lock(mMutex);
 
-    auto iter = findZone(id);
+    auto iter = findZone(zoneId.value);
     if (iter == mZones.end()) {
-        LOGE("No zone with id=" << id );
+        LOGE("No zone with id=" << zoneId.value);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
         return;
     }
@@ -1208,12 +1190,11 @@ void ZonesManager::createZone(const std::string& id,
     updateDefaultId();
 }
 
-void ZonesManager::handleCreateZoneCall(const std::string& id,
-                                        const std::string& templateName,
+void ZonesManager::handleCreateZoneCall(const api::CreateZoneIn& data,
                                         api::MethodResultBuilder::Pointer result)
 {
     try {
-        createZone(id, templateName);
+        createZone(data.first, data.second);
         result->setVoid();
     } catch (const InvalidZoneIdException& e) {
         result->setError(api::ERROR_INVALID_ID, "Existing or invalid zone id");
@@ -1222,16 +1203,15 @@ void ZonesManager::handleCreateZoneCall(const std::string& id,
     }
 }
 
-void ZonesManager::handleDestroyZoneCall(const std::string& id,
+void ZonesManager::handleDestroyZoneCall(const api::ZoneId& zoneId,
                                          api::MethodResultBuilder::Pointer result)
 {
-    auto destroyer = [id, result, this] {
+    auto destroyer = [zoneId, result, this] {
         try {
-            LOGI("Destroying zone " << id);
-
-            destroyZone(id);
+            LOGI("Destroying zone " << zoneId.value);
+            destroyZone(zoneId.value);
         } catch (const InvalidZoneIdException&) {
-            LOGE("Failed to destroy zone - no such zone id: " << id);
+            LOGE("Failed to destroy zone - no such zone id: " << zoneId.value);
             result->setError(api::ERROR_INVALID_ID, "No such zone id");
         } catch (const VasumException& e) {
             LOGE("Error during zone destruction: " << e.what());
@@ -1244,19 +1224,19 @@ void ZonesManager::handleDestroyZoneCall(const std::string& id,
     mWorker->addTask(destroyer);
 }
 
-void ZonesManager::handleShutdownZoneCall(const std::string& id,
+void ZonesManager::handleShutdownZoneCall(const api::ZoneId& zoneId,
                                           api::MethodResultBuilder::Pointer result)
 {
-    LOGI("ShutdownZone call; Id=" << id );
+    LOGI("ShutdownZone call; Id=" << zoneId.value);
 
-    auto shutdown = [id, result, this] {
+    auto shutdown = [zoneId, result, this] {
         try {
-            LOGT("Shutdown zone " << id);
+            LOGT("Shutdown zone " << zoneId.value);
 
             Lock lock(mMutex);
-            auto iter = findZone(id);
+            auto iter = findZone(zoneId.value);
             if (iter == mZones.end()) {
-                LOGE("Failed to shutdown zone - no such zone id: " << id);
+                LOGE("Failed to shutdown zone - no such zone id: " << zoneId.value);
                 result->setError(api::ERROR_INVALID_ID, "No such zone id");
                 return;
             }
@@ -1273,19 +1253,19 @@ void ZonesManager::handleShutdownZoneCall(const std::string& id,
     mWorker->addTask(shutdown);
 }
 
-void ZonesManager::handleStartZoneCall(const std::string& id,
+void ZonesManager::handleStartZoneCall(const api::ZoneId& zoneId,
                                        api::MethodResultBuilder::Pointer result)
 {
-    LOGI("StartZone call; Id=" << id );
+    LOGI("StartZone call; Id=" << zoneId.value);
 
-    auto startAsync = [this, id, result]() {
+    auto startAsync = [this, zoneId, result]() {
         try {
-            LOGT("Start zone " << id );
+            LOGT("Start zone " << zoneId.value);
 
             Lock lock(mMutex);
-            auto iter = findZone(id);
+            auto iter = findZone(zoneId.value);
             if (iter == mZones.end()) {
-                LOGE("Failed to start zone - no such zone id: " << id);
+                LOGE("Failed to start zone - no such zone id: " << zoneId.value);
                 result->setError(api::ERROR_INVALID_ID, "No such zone id");
                 return;
             }
@@ -1293,30 +1273,30 @@ void ZonesManager::handleStartZoneCall(const std::string& id,
             focusInternal(iter);
             result->setVoid();
         } catch (const std::exception& e) {
-            LOGE(id << ": failed to start: " << e.what());
+            LOGE(zoneId.value << ": failed to start: " << e.what());
             result->setError(api::ERROR_INTERNAL, "Failed to start zone");
         }
     };
     mWorker->addTask(startAsync);
 }
 
-void ZonesManager::handleLockZoneCall(const std::string& id,
+void ZonesManager::handleLockZoneCall(const api::ZoneId& zoneId,
                                       api::MethodResultBuilder::Pointer result)
 {
-    LOGI("LockZone call; Id=" << id );
+    LOGI("LockZone call; Id=" << zoneId.value );
 
     Lock lock(mMutex);
 
-    auto iter = findZone(id);
+    auto iter = findZone(zoneId.value);
     if (iter == mZones.end()) {
-        LOGE("Failed to lock zone - no such zone id: " << id);
+        LOGE("Failed to lock zone - no such zone id: " << zoneId.value);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
         return;
     }
 
     Zone& zone = get(iter);
     if (!zone.isRunning()) {
-        LOGE("Zone id=" << id << " is not running.");
+        LOGE("Zone id=" << zoneId.value << " is not running.");
         result->setError(api::ERROR_INVALID_STATE, "Zone is not running");
         return;
     }
@@ -1335,23 +1315,23 @@ void ZonesManager::handleLockZoneCall(const std::string& id,
     result->setVoid();
 }
 
-void ZonesManager::handleUnlockZoneCall(const std::string& id,
+void ZonesManager::handleUnlockZoneCall(const api::ZoneId& zoneId,
                                         api::MethodResultBuilder::Pointer result)
 {
-    LOGI("UnlockZone call; Id=" << id );
+    LOGI("UnlockZone call; Id=" << zoneId.value );
 
     Lock lock(mMutex);
 
-    auto iter = findZone(id);
+    auto iter = findZone(zoneId.value);
     if (iter == mZones.end()) {
-        LOGE("Failed to unlock zone - no such zone id: " << id);
+        LOGE("Failed to unlock zone - no such zone id: " << zoneId.value);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
         return;
     }
 
     Zone& zone = get(iter);
     if (!zone.isPaused()) {
-        LOGE("Zone id=" << id << " is not paused.");
+        LOGE("Zone id=" << zoneId.value << " is not paused.");
         result->setError(api::ERROR_INVALID_STATE, "Zone is not paused");
         return;
     }
@@ -1368,40 +1348,38 @@ void ZonesManager::handleUnlockZoneCall(const std::string& id,
     result->setVoid();
 }
 
-void ZonesManager::handleGrantDeviceCall(const std::string& id,
-                                         const std::string& device,
-                                         uint32_t flags,
+void ZonesManager::handleGrantDeviceCall(const api::GrantDeviceIn& data,
                                          api::MethodResultBuilder::Pointer result)
 {
-    LOGI("GrantDevice call; id=" << id << "; dev=" << device);
+    LOGI("GrantDevice call; id=" << data.id << "; dev=" << data.device);
 
     Lock lock(mMutex);
 
-    auto iter = findZone(id);
+    auto iter = findZone(data.id);
     if (iter == mZones.end()) {
-        LOGE("Failed to grant device - no such zone id: " << id);
+        LOGE("Failed to grant device - no such zone id: " << data.id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
         return;
     }
 
     Zone& zone = get(iter);
     if (!zone.isRunning() && !zone.isPaused()) {
-        LOGE("Zone id=" << id << " is not running");
+        LOGE("Zone id=" << data.id << " is not running");
         result->setError(api::ERROR_INVALID_STATE, "Zone is not running");
         return;
     }
 
-    std::string devicePath = "/dev/" + device;
+    std::string devicePath = "/dev/" + data.device;
 
     if (!lxc::isDevice(devicePath)) {
-        LOGE("Failed to grant device - cannot acces device: " << device);
+        LOGE("Failed to grant device - cannot acces device: " << data.device);
         result->setError(api::ERROR_FORBIDDEN, "Cannot access device");
         return;
     }
 
     // assume device node is created inside zone
-    if (!lxc::setDeviceAccess(id, devicePath, true, flags)) {
-        LOGE("Failed to grant device: " << device << " for zone: " << id);
+    if (!lxc::setDeviceAccess(data.id, devicePath, true, data.flags)) {
+        LOGE("Failed to grant device: " << data.device << " for zone: " << data.id);
         result->setError(api::ERROR_INTERNAL, "Cannot grant device");
         return;
     }
@@ -1409,37 +1387,36 @@ void ZonesManager::handleGrantDeviceCall(const std::string& id,
     result->setVoid();
 }
 
-void ZonesManager::handleRevokeDeviceCall(const std::string& id,
-                                          const std::string& device,
+void ZonesManager::handleRevokeDeviceCall(const api::RevokeDeviceIn& data,
                                           api::MethodResultBuilder::Pointer result)
 {
-    LOGI("RevokeDevice call; id=" << id << "; dev=" << device);
+    LOGI("RevokeDevice call; id=" << data.first << "; dev=" << data.second);
 
     Lock lock(mMutex);
 
-    auto iter = findZone(id);
+    auto iter = findZone(data.first);
     if (iter == mZones.end()) {
-        LOGE("Failed to revoke device - no such zone id: " << id);
+        LOGE("Failed to revoke device - no such zone id: " << data.first);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
         return;
     }
 
     Zone& zone = get(iter);
     if (!zone.isRunning() && !zone.isPaused()) {
-        LOGE("Zone id=" << id << " is not running");
+        LOGE("Zone id=" << data.first << " is not running");
         result->setError(api::ERROR_INVALID_STATE, "Zone is not running");
         return;
     }
-    std::string devicePath = "/dev/" + device;
+    std::string devicePath = "/dev/" + data.second;
 
     if (!lxc::isDevice(devicePath)) {
-        LOGE("Failed to revoke device - cannot acces device: " << device);
+        LOGE("Failed to revoke device - cannot acces device: " << data.second);
         result->setError(api::ERROR_FORBIDDEN, "Cannot access device");
         return;
     }
 
-    if (!lxc::setDeviceAccess(id, devicePath, false, 0)) {
-        LOGE("Failed to revoke device: " << device << " for zone: " << id);
+    if (!lxc::setDeviceAccess(data.first, devicePath, false, 0)) {
+        LOGE("Failed to revoke device: " << data.second << " for zone: " << data.first);
         result->setError(api::ERROR_INTERNAL, "Cannot revoke device");
         return;
     }

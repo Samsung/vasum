@@ -60,6 +60,8 @@ BOOST_AUTO_TEST_CASE(FromJsonString)
 
     BOOST_CHECK_EQUAL(12345, testConfig.intVal);
     BOOST_CHECK_EQUAL(-1234567890123456789ll, testConfig.int64Val);
+    BOOST_CHECK_EQUAL(123456, testConfig.uint32Val);
+    BOOST_CHECK_EQUAL(1234567890123456789ll, testConfig.uint64Val);
     BOOST_CHECK_EQUAL("blah", testConfig.stringVal);
     BOOST_CHECK_CLOSE(-1.234, testConfig.doubleVal, TOLERANCE);
     BOOST_CHECK_EQUAL(true, testConfig.boolVal);

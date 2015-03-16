@@ -78,13 +78,19 @@ struct VectorOfStringPairs {
 typedef api::String ZoneId;
 typedef api::String Declaration;
 typedef api::String FileMoveRequestStatus;
+typedef api::StringPair GetNetDevAttrsIn;
+typedef api::StringPair CreateNetDevPhysIn;
+typedef api::StringPair RemoveDeclarationIn;
+typedef api::StringPair CreateZoneIn;
+typedef api::StringPair RevokeDeviceIn;
+typedef api::StringPair DestroyNetDevIn;
 typedef api::VectorOfStrings ZoneIds;
 typedef api::VectorOfStrings Declarations;
 typedef api::VectorOfStrings NetDevList;
 typedef api::VectorOfStringPairs Dbuses;
-typedef api::VectorOfStringPairs NetDevAttrs;
+typedef api::VectorOfStringPairs GetNetDevAttrs;
 
-struct ZoneInfo {
+struct ZoneInfoOut {
     std::string id;
     int vt;
     std::string state;
@@ -99,304 +105,110 @@ struct ZoneInfo {
     )
 };
 
-// struct MethodSetActiveZoneConfig {
-//     std::string id;
+struct SetNetDevAttrsIn {
+    std::string id; // Zone's id
+    std::string netDev;
+    std::vector<StringPair> attrs;
 
-//     CONFIG_REGISTER
-//     (
-//         id
-//     )
-// };
+    CONFIG_REGISTER
+    (
+        id,
+        netDev,
+        attrs
+    )
+};
 
-// struct MethodGetZoneDbusesConfig {
-//     CONFIG_REGISTER_EMPTY
-// };
+struct CreateNetDevVethIn {
+    std::string id;
+    std::string zoneDev;
+    std::string hostDev;
 
-// struct MethodGetZoneIdListConfig {
-//     CONFIG_REGISTER_EMPTY
-// };
+    CONFIG_REGISTER
+    (
+        id,
+        zoneDev,
+        hostDev
+    )
+};
 
+struct CreateNetDevMacvlanIn {
+    std::string id;
+    std::string zoneDev;
+    std::string hostDev;
+    uint32_t mode;
 
-// struct MethodGetActiveZoneIdConfig {
-//     CONFIG_REGISTER_EMPTY
-// };
+    CONFIG_REGISTER
+    (
+        id,
+        zoneDev,
+        hostDev,
+        mode
+    )
+};
 
+struct DeclareFileIn {
+    std::string zone;
+    int32_t type;
+    std::string path;
+    int32_t flags;
+    int32_t mode;
 
-// struct MethodGetZoneInfoConfig {
-//     std::string id;
+    CONFIG_REGISTER
+    (
+        zone,
+        type,
+        path,
+        flags,
+        mode
+    )
+};
 
-//     CONFIG_REGISTER
-//     (
-//         id
-//     )
-// };
+struct DeclareMountIn {
+    std::string source;
+    std::string zone;
+    std::string target;
+    std::string type;
+    uint64_t flags;
+    std::string data;
 
-// struct MethodSetNetDevAttrsConfig {
-//     std::string zone;
-//     std::string netdev;
+    CONFIG_REGISTER
+    (
+        source,
+        zone,
+        target,
+        type,
+        flags,
+        data
+    )
+};
 
-//     struct Store {
-//         std::string key;
-//         std::string value;
+struct DeclareLinkIn
+{
+    std::string source;
+    std::string zone;
+    std::string target;
 
-//         CONFIG_REGISTER
-//         (
-//             key,
-//             value
-//         )
-//     };
+    CONFIG_REGISTER
+    (
+        source,
+        zone,
+        target
+    )
+};
 
-//     std::vector<Store> attrs;
+struct GrantDeviceIn
+{
+    std::string id;
+    std::string device;
+    uint32_t flags;
 
-//     CONFIG_REGISTER
-//     (
-//         zone,
-//         netdev,
-//         attrs
-//     )
-// };
-
-// struct MethodGetNetDevAttrsConfig {
-//     std::string zone;
-//     std::string netdev;
-
-//     CONFIG_REGISTER
-//     (
-//         zone,
-//         netdev
-//     )
-// };
-
-// struct MethodGetNetDevListConfig {
-//     std::string zone;
-
-//     CONFIG_REGISTER
-//     (
-//         zone
-//     )
-// };
-
-// struct MethodCreateNetDevVethConfig {
-//     std::string id;
-//     std::string zoneDev;
-//     std::string hostDev;
-
-//     CONFIG_REGISTER
-//     (
-//         id,
-//         zoneDev,
-//         hostDev
-//     )
-// };
-
-// struct MethodCreateNetDevMacvlanConfig {
-//     std::string id;
-//     std::string zoneDev;
-//     std::string hostDev;
-
-//     CONFIG_REGISTER
-//     (
-//         id,
-//         zoneDev,
-//         hostDev
-//     )
-// };
-
-// struct MethodCreateNetDevPhysConfig {
-//     std::string id;
-//     std::string devId;
-
-//     CONFIG_REGISTER
-//     (
-//         id,
-//         devId
-//     )
-// };
-
-// struct MethodGetDeclareFileConfig {
-//     std::string zone;
-//     int32_t type;
-//     std::string path;
-//     int32_t flags;
-//     int32_t mode;
-
-//     CONFIG_REGISTER
-//     (
-//         zone,
-//         type,
-//         path,
-//         flags,
-//         mode
-//     )
-// };
-
-// struct MethodGetDeclareMountConfig {
-//     std::string source;
-//     std::string zone;
-//     std::string target;
-//     uint64_t flags;
-//     std::string data;
-
-//     CONFIG_REGISTER
-//     (
-//         source,
-//         zone,
-//         target,
-//         flags,
-//         data
-//     )
-// };
-
-// struct MethodGetDeclareLinkConfig {
-//     std::string source;
-//     std::string zone;
-//     std::string target;
-
-//     CONFIG_REGISTER
-//     (
-//         source,
-//         zone,
-//         target
-//     )
-// };
-
-// struct MethodGetDeclarationConfig {
-//     std::string zone;
-//     std::string declarationId;
-
-//     CONFIG_REGISTER
-//     (
-//         zone,
-//         declarationId
-//     )
-// };
-
-// struct MethodRemoveDeclarationConfig {
-//     std::string id;
-//     std::string declarationId;
-
-//     CONFIG_REGISTER
-//     (
-//         id,
-//         declarationId
-//     )
-// };
-
-// struct MethodCreateZoneConfig {
-//     std::string id;
-//     std::string templateName;
-
-//     CONFIG_REGISTER
-//     (
-//         id,
-//         templateName
-//     )
-// };
-
-// struct MethodDestroyZoneConfig {
-//     std::string id;
-
-//     CONFIG_REGISTER
-//     (
-//         id
-//     )
-// };
-
-
-// struct MethodShutdownZoneConfig {
-//     std::string id;
-
-//     CONFIG_REGISTER
-//     (
-//         id
-//     )
-// };
-
-// struct MethodStartZoneConfig {
-//     std::string id;
-
-//     CONFIG_REGISTER
-//     (
-//         id
-//     )
-// };
-
-// struct MethodLockZoneConfig {
-//     std::string id;
-
-//     CONFIG_REGISTER
-//     (
-//         id
-//     )
-// };
-
-// struct MethodUnlockZoneConfig {
-//     std::string id;
-
-//     CONFIG_REGISTER
-//     (
-//         id
-//     )
-// };
-
-// struct MethodGrantDeviceConfig {
-//     std::string id;
-//     std::string device;
-//     uint32_t flags;
-
-//     CONFIG_REGISTER
-//     (
-//         id,
-//         device,
-//         flags
-//     )
-// };
-
-// struct MethodRevokeDeviceConfig {
-//     std::string id;
-//     std::string device;
-
-//     CONFIG_REGISTER
-//     (
-//         id,
-//         device
-//     )
-// };
-
-// TODO: Agregate configs if it makes sense. For example: MethodLockZoneConfig and MethodUnlockZoneConfig
-
-
-// Zone:
-// struct MethodNotifyActiveZoneConfig {
-//     std::string application;
-//     std::string message;
-
-//     CONFIG_REGISTER
-//     (
-//         application,
-//         message
-//     )
-// };
-
-// struct MethodFileMoveRequest {
-//     std::string destination;
-//     std::string path;
-
-//     CONFIG_REGISTER
-//     (
-//         destination,
-//         path
-//     )
-// };
-
-// struct MethodFileMoveRequestResult {
-//     std::string result;
-
-//     CONFIG_REGISTER
-//     (
-//         result
-//     )
-// };
+    CONFIG_REGISTER
+    (
+        id,
+        device,
+        flags
+    )
+};
 
 } // namespace api
 } // namespace vasum

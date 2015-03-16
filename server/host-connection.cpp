@@ -31,7 +31,7 @@
 #include "api/messages.hpp"
 
 #include "logger/logger.hpp"
-
+#include "config/manager.hpp"
 
 namespace vasum {
 
@@ -81,9 +81,9 @@ bool HostConnection::waitForName(const unsigned int timeoutMs)
     std::unique_lock<std::mutex> lock(mNameMutex);
     mNameCondition.wait_for(lock,
                             std::chrono::milliseconds(timeoutMs),
-                            [this] {
-                                return mNameAcquired || mNameLost;
-                            });
+    [this] {
+        return mNameAcquired || mNameLost;
+    });
 
     return mNameAcquired;
 }
@@ -249,12 +249,12 @@ void HostConnection::onMessageCall(const std::string& objectPath,
     }
 
     if (methodName == api::host::METHOD_SET_ACTIVE_ZONE) {
-        const gchar* id = NULL;
-        g_variant_get(parameters, "(&s)", &id);
+        api::ZoneId zoneId;
+        config::loadFromGVariant(parameters, zoneId);
 
         if (mSetActiveZoneCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mSetActiveZoneCallback(id, rb);
+            mSetActiveZoneCallback(zoneId, rb);
         }
         return;
     }
@@ -313,261 +313,227 @@ void HostConnection::onMessageCall(const std::string& objectPath,
     }
 
     if (methodName == api::host::METHOD_GET_ZONE_INFO) {
-        const gchar* id = NULL;
-        g_variant_get(parameters, "(&s)", &id);
+        api::ZoneId zoneId;
+        config::loadFromGVariant(parameters, zoneId);
 
         if (mGetZoneInfoCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneInfo>>(result);
-            mGetZoneInfoCallback(id, rb);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneInfoOut>>(result);
+            mGetZoneInfoCallback(zoneId, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_SET_NETDEV_ATTRS) {
-        const gchar* zone = NULL;
-        const gchar* netdev = NULL;
-        GVariantIter* iter;
-        g_variant_get(parameters, "(&s&sa(ss))", &zone, &netdev, &iter);
-        gchar* key = NULL;
-        gchar* value = NULL;
-        std::vector<std::tuple<std::string, std::string>> attrs;
-        while (g_variant_iter_loop(iter, "(&s&s)", &key, &value)) {
-            attrs.push_back(std::make_tuple<std::string, std::string>(key, value));
-        }
-        g_variant_iter_free(iter);
+        api::SetNetDevAttrsIn data;
+        config::loadFromGVariant(parameters, data);
+
         if (mSetNetdevAttrsCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mSetNetdevAttrsCallback(zone, netdev, attrs, rb);
+            mSetNetdevAttrsCallback(data, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_GET_NETDEV_ATTRS) {
-        const gchar* zone = NULL;
-        const gchar* netdev = NULL;
-        g_variant_get(parameters, "(&s&s)", &zone, &netdev);
+        api::GetNetDevAttrsIn data;
+        config::loadFromGVariant(parameters, data);
+
         if (mGetNetdevAttrsCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::NetDevAttrs>>(result);
-            mGetNetdevAttrsCallback(zone, netdev, rb);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::GetNetDevAttrs>>(result);
+            mGetNetdevAttrsCallback(data, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_GET_NETDEV_LIST) {
-        const gchar* zone = NULL;
-        g_variant_get(parameters, "(&s)", &zone);
+        api::ZoneId data;
+        config::loadFromGVariant(parameters, data);
+
         if (mGetNetdevListCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::NetDevList>>(result);
-            mGetNetdevListCallback(zone, rb);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::GetNetDevAttrs>>(result);
+            mGetNetdevListCallback(data, rb);
         }
         return;
     }
 
-
     if (methodName == api::host::METHOD_CREATE_NETDEV_VETH) {
-        const gchar* id = NULL;
-        const gchar* zoneDev = NULL;
-        const gchar* hostDev = NULL;
-        g_variant_get(parameters, "(&s&s&s)", &id, &zoneDev, &hostDev);
+        api::CreateNetDevVethIn data;
+        config::loadFromGVariant(parameters, data);
+
         if (mCreateNetdevVethCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mCreateNetdevVethCallback(id, zoneDev, hostDev, rb);
+            mCreateNetdevVethCallback(data, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_CREATE_NETDEV_MACVLAN) {
-        const gchar* id = NULL;
-        const gchar* zoneDev = NULL;
-        const gchar* hostDev = NULL;
-        guint32 mode;
-        g_variant_get(parameters, "(&s&s&su)", &id, &zoneDev, &hostDev, &mode);
+        api::CreateNetDevMacvlanIn data;
+        config::loadFromGVariant(parameters, data);
+
         if (mCreateNetdevMacvlanCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mCreateNetdevMacvlanCallback(id, zoneDev, hostDev, mode, rb);
+            mCreateNetdevMacvlanCallback(data, rb);
         }
     }
 
     if (methodName == api::host::METHOD_CREATE_NETDEV_PHYS) {
-        const gchar* id = NULL;
-        const gchar* devId = NULL;
-        g_variant_get(parameters, "(&s&s)", &id, &devId);
+        api::CreateNetDevPhysIn data;
+        config::loadFromGVariant(parameters, data);
+
         if (mCreateNetdevPhysCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mCreateNetdevPhysCallback(id, devId, rb);
+            mCreateNetdevPhysCallback(data, rb);
         }
     }
 
     if (methodName == api::host::METHOD_DESTROY_NETDEV) {
-        const gchar* id = NULL;
-        const gchar* devId = NULL;
-        g_variant_get(parameters, "(&s&s)", &id, &devId);
+        api::DestroyNetDevIn data;
+        config::loadFromGVariant(parameters, data);
+
         if (mDestroyNetdevCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mDestroyNetdevCallback(id, devId, rb);
+            mDestroyNetdevCallback(data, rb);
         }
     }
 
     if (methodName == api::host::METHOD_DECLARE_FILE) {
-        const gchar* zone;
-        int32_t type;
-        const gchar* path;
-        int32_t flags;
-        int32_t mode;
-        g_variant_get(parameters, "(&si&sii)", &zone, &type, &path, &flags, &mode);
+        api::DeclareFileIn data;
+        config::loadFromGVariant(parameters, data);
 
         if (mDeclareFileCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
-            mDeclareFileCallback(zone, type, path, flags, mode, rb);
+            mDeclareFileCallback(data, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_DECLARE_MOUNT) {
-        const gchar* source;
-        const gchar* zone;
-        const gchar* target;
-        const gchar* type;
-        uint64_t flags;
-        const gchar* data;
-        g_variant_get(parameters,
-                      "(&s&s&s&st&s)",
-                      &source,
-                      &zone,
-                      &target,
-                      &type,
-                      &flags,
-                      &data);
+        api::DeclareMountIn data;
+        config::loadFromGVariant(parameters, data);
 
         if (mDeclareMountCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
-            mDeclareMountCallback(source, zone, target, type, flags, data, rb);
+            mDeclareMountCallback(data, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_DECLARE_LINK) {
-        const gchar* source;
-        const gchar* zone;
-        const gchar* target;
-        g_variant_get(parameters, "(&s&s&s)", &source, &zone, &target);
+        api::DeclareLinkIn data;
+        config::loadFromGVariant(parameters, data);
 
         if (mDeclareLinkCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
-            mDeclareLinkCallback(source, zone, target, rb);
+            mDeclareLinkCallback(data, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_GET_DECLARATIONS) {
-        const gchar* zone;
-        g_variant_get(parameters, "(&s)", &zone);
+        api::ZoneId data;
+        config::loadFromGVariant(parameters, data);
 
         if (mGetDeclarationsCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declarations>>(result);
-            mGetDeclarationsCallback(zone, rb);
+            mGetDeclarationsCallback(data, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_REMOVE_DECLARATION) {
-        const gchar* zone;
-        const gchar* declarationId;
-        g_variant_get(parameters, "(&s&s)", &zone, &declarationId);
+        api::RemoveDeclarationIn data;
+        config::loadFromGVariant(parameters, data);
 
         if (mRemoveDeclarationCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mRemoveDeclarationCallback(zone, declarationId, rb);
+            mRemoveDeclarationCallback(data, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_CREATE_ZONE) {
-        const gchar* id = NULL;
-        const gchar* templateName = NULL;
-        g_variant_get(parameters, "(&s&s)", &id, &templateName);
+        api::CreateZoneIn data;
+        config::loadFromGVariant(parameters, data);
 
         if (mCreateZoneCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mCreateZoneCallback(id, templateName, rb);
+            mCreateZoneCallback(data, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_DESTROY_ZONE) {
-        const gchar* id = NULL;
-        g_variant_get(parameters, "(&s)", &id);
+        api::ZoneId data;
+        config::loadFromGVariant(parameters, data);
 
         if (mDestroyZoneCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mDestroyZoneCallback(id, rb);
+            mDestroyZoneCallback(data, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_SHUTDOWN_ZONE) {
-        const gchar* id = NULL;
-        g_variant_get(parameters, "(&s)", &id);
+        api::ZoneId data;
+        config::loadFromGVariant(parameters, data);
 
         if (mShutdownZoneCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mShutdownZoneCallback(id, rb);
+            mShutdownZoneCallback(data, rb);
         }
     }
 
     if (methodName == api::host::METHOD_START_ZONE) {
-        const gchar* id = NULL;
-        g_variant_get(parameters, "(&s)", &id);
+        api::ZoneId data;
+        config::loadFromGVariant(parameters, data);
 
         if (mStartZoneCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mStartZoneCallback(id, rb);
+            mStartZoneCallback(data, rb);
         }
     }
 
     if (methodName == api::host::METHOD_LOCK_ZONE) {
-        const gchar* id = NULL;
-        g_variant_get(parameters, "(&s)", &id);
+        api::ZoneId data;
+        config::loadFromGVariant(parameters, data);
 
         if (mLockZoneCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mLockZoneCallback(id, rb);
+            mLockZoneCallback(data, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_UNLOCK_ZONE) {
-        const gchar* id = NULL;
-        g_variant_get(parameters, "(&s)", &id);
+        api::ZoneId data;
+        config::loadFromGVariant(parameters, data);
 
         if (mUnlockZoneCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mUnlockZoneCallback(id, rb);
+            mUnlockZoneCallback(data, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_GRANT_DEVICE) {
-        const gchar* id = NULL;
-        const gchar* device = NULL;
-        uint32_t flags;
-        g_variant_get(parameters, "(&s&su)", &id, &device, &flags);
+        api::GrantDeviceIn data;
+        config::loadFromGVariant(parameters, data);
 
         if (mGrantDeviceCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mGrantDeviceCallback(id, device, flags, rb);
+            mGrantDeviceCallback(data, rb);
         }
         return;
     }
 
     if (methodName == api::host::METHOD_REVOKE_DEVICE) {
-        const gchar* id = NULL;
-        const gchar* device = NULL;
-        g_variant_get(parameters, "(&s&s)", &id, &device);
+        api::RevokeDeviceIn data;
+        config::loadFromGVariant(parameters, data);
 
         if (mRevokeDeviceCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mRevokeDeviceCallback(id, device, rb);
+            mRevokeDeviceCallback(data, rb);
         }
         return;
     }
@@ -590,7 +556,7 @@ void HostConnection::proxyCallAsync(const std::string& busName,
 }
 
 void HostConnection::signalZoneDbusState(const std::string& zoneId,
-                                         const std::string& dbusAddress)
+        const std::string& dbusAddress)
 {
     GVariant* parameters = g_variant_new("(ss)", zoneId.c_str(), dbusAddress.c_str());
     mDbusConnection->emitSignal(api::host::OBJECT_PATH,

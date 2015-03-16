@@ -28,6 +28,7 @@
 
 #include "dbus/connection.hpp"
 #include "api/method-result-builder.hpp"
+#include "api/messages.hpp"
 
 #include <mutex>
 #include <condition_variable>
@@ -60,96 +61,70 @@ public:
                               )> GetZoneIdsCallback;
     typedef std::function<void(api::MethodResultBuilder::Pointer result
                               )> GetActiveZoneIdCallback;
-    typedef std::function<void(const std::string& id,
+    typedef std::function<void(const api::ZoneId& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> GetZoneInfoCallback;
-    typedef std::function<void(const std::string& zone,
-                               const std::string& netdev,
-                               const std::vector<std::tuple<std::string, std::string>>& attrs,
+    typedef std::function<void(const api::SetNetDevAttrsIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> SetNetdevAttrsCallback;
-    typedef std::function<void(const std::string& zone,
-                               const std::string& netdev,
+    typedef std::function<void(const api::GetNetDevAttrsIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> GetNetdevAttrsCallback;
-    typedef std::function<void(const std::string& zone,
+    typedef std::function<void(const api::ZoneId& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> GetNetdevListCallback;
-    typedef std::function<void(const std::string& zone,
-                               const std::string& netdev,
-                               const std::string& hostDev,
+    typedef std::function<void(const api::CreateNetDevVethIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> CreateNetdevVethCallback;
-    typedef std::function<void(const std::string& id,
-                               const std::string& zoneDev,
-                               const std::string& hostDev,
-                               const uint32_t& mode,
+    typedef std::function<void(const api::CreateNetDevMacvlanIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> CreateNetdevMacvlanCallback;
-    typedef std::function<void(const std::string& id,
-                               const std::string& devId,
+    typedef std::function<void(const api::CreateNetDevPhysIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> CreateNetdevPhysCallback;
-    typedef std::function<void(const std::string& id,
-                               const std::string& devId,
+    typedef std::function<void(const api::DestroyNetDevIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> DestroyNetdevCallback;
-    typedef std::function<void(const std::string& zone,
-                               const int32_t& type,
-                               const std::string& path,
-                               const int32_t& flags,
-                               const int32_t& mode,
+    typedef std::function<void(const api::DeclareFileIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> DeclareFileCallback;
-    typedef std::function<void(const std::string& source,
-                               const std::string& zone,
-                               const std::string& target,
-                               const std::string& type,
-                               const uint64_t& flags,
-                               const std::string& data,
+    typedef std::function<void(const api::DeclareMountIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> DeclareMountCallback;
-    typedef std::function<void(const std::string& source,
-                               const std::string& zone,
-                               const std::string& target,
+    typedef std::function<void(const api::DeclareLinkIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> DeclareLinkCallback;
-    typedef std::function<void(const std::string& id,
+    typedef std::function<void(const api::ZoneId& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> GetDeclarationsCallback;
-    typedef std::function<void(const std::string& id,
-                               const std::string& declarationId,
+    typedef std::function<void(const api::RemoveDeclarationIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> RemoveDeclarationCallback;
-    typedef std::function<void(const std::string& id,
+    typedef std::function<void(const api::ZoneId& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> SetActiveZoneCallback;
-    typedef std::function<void(const std::string& id,
-                               const std::string& templateName,
+    typedef std::function<void(const api::CreateZoneIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> CreateZoneCallback;
-    typedef std::function<void(const std::string& id,
+    typedef std::function<void(const api::ZoneId& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> DestroyZoneCallback;
-    typedef std::function<void(const std::string& id,
+    typedef std::function<void(const api::ZoneId& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> ShutdownZoneCallback;
-    typedef std::function<void(const std::string& id,
+    typedef std::function<void(const api::ZoneId& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> StartZoneCallback;
-    typedef std::function<void(const std::string& id,
+    typedef std::function<void(const api::ZoneId& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> LockZoneCallback;
-    typedef std::function<void(const std::string& id,
+    typedef std::function<void(const api::ZoneId& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> UnlockZoneCallback;
-    typedef std::function<void(const std::string& id,
-                               const std::string& device,
-                               uint32_t flags,
+    typedef std::function<void(const api::GrantDeviceIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> GrantDeviceCallback;
-    typedef std::function<void(const std::string& id,
-                               const std::string& device,
+    typedef std::function<void(const api::RevokeDeviceIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> RevokeDeviceCallback;
 

@@ -84,6 +84,8 @@ struct TestConfig {
 
     int intVal;
     std::int64_t int64Val;
+    std::uint32_t uint32Val;
+    std::uint64_t uint64Val;
     std::string stringVal;
     double doubleVal;
     bool boolVal;
@@ -104,6 +106,8 @@ struct TestConfig {
     (
         intVal,
         int64Val,
+        uint32Val,
+        uint64Val,
         stringVal,
         doubleVal,
         boolVal,
@@ -142,6 +146,8 @@ struct PartialTestConfig {
 const std::string jsonTestString =
     "{ \"intVal\": 12345, "
     "\"int64Val\": -1234567890123456789, "
+    "\"uint32Val\": 123456, "
+    "\"uint64Val\": 1234567890123456789, "
     "\"stringVal\": \"blah\", "
     "\"doubleVal\": -1.234000, "
     "\"boolVal\": true, "
@@ -163,6 +169,8 @@ const std::string jsonTestString =
 const std::string jsonEmptyTestString =
     "{ \"intVal\": 0, "
     "\"int64Val\": 0, "
+    "\"uint32Val\": 0, "
+    "\"uint64Val\": 0, "
     "\"stringVal\": \"\", "
     "\"boolVal\": false, "
     "\"emptyIntVector\": [ ], "
