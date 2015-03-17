@@ -513,4 +513,10 @@ std::vector<std::string> Zone::getNetdevList()
     return mAdmin->getNetdevList();
 }
 
+void Zone::deleteNetdevIpAddress(const std::string& netdev, const std::string& ip)
+{
+    Lock lock(mReconnectMutex);
+    mAdmin->deleteNetdevIpAddress(netdev, ip);
+}
+
 } // namespace vasum

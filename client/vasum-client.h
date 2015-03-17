@@ -552,6 +552,38 @@ VsmStatus vsm_netdev_set_ipv6_addr(VsmClient client,
                                    int prefix);
 
 /**
+ * Remove ipv4 address from netdev
+ *
+ * @param[in] client vasum-server's client
+ * @param[in] zone zone name
+ * @param[in] netdevId network device id
+ * @param[in] addr ipv4 address
+ * @param[in] prefix bit-length of the network prefix
+ * @return status of this function call
+ */
+VsmStatus vsm_netdev_del_ipv4_addr(VsmClient client,
+                                   const char* zone,
+                                   const char* netdevId,
+                                   struct in_addr* addr,
+                                   int prefix);
+
+/**
+ * Remove ipv6 address from netdev
+ *
+ * @param[in] client vasum-server's client
+ * @param[in] zone zone name
+ * @param[in] netdevId network device id
+ * @param[in] addr ipv6 address
+ * @param[in] prefix bit-length of the network prefix
+ * @return status of this function call
+ */
+VsmStatus vsm_netdev_del_ipv6_addr(VsmClient client,
+                                   const char* zone,
+                                   const char* netdevId,
+                                   struct in6_addr* addr,
+                                   int prefix);
+
+/**
  * Turn up a network device in the zone
  *
  * @param[in] client vasum-server's client
@@ -750,9 +782,9 @@ VsmStatus vsm_remove_declaration(VsmClient client,
  * @param data custom user's data pointer passed to vsm_add_notification_callback()
  */
 typedef void (*VsmNotificationCallback)(const char* zone,
-                                       const char* application,
-                                       const char* message,
-                                       void* data);
+                                        const char* application,
+                                        const char* message,
+                                        void* data);
 /**
  * Send message to active zone.
  *

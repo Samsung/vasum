@@ -169,6 +169,11 @@ public:
      */
     std::vector<std::string> getNetdevList();
 
+    /**
+     * Remove ipv4/ipv6 address from network device
+     */
+    void deleteNetdevIpAddress(const std::string& netdev, const std::string& ip);
+
 private:
     const ZoneConfig& mConfig;
     const ZoneDynamicConfig& mDynamicConfig;

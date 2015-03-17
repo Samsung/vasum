@@ -322,4 +322,9 @@ std::vector<std::string> ZoneAdmin::getNetdevList()
     return netdev::listNetdev(mZone.getInitPid());
 }
 
+void ZoneAdmin::deleteNetdevIpAddress(const std::string& netdev, const std::string& ip)
+{
+    netdev::deleteIpAddress(mZone.getInitPid(), netdev, ip);
+}
+
 } // namespace vasum

@@ -744,6 +744,44 @@ VsmStatus Client::vsm_netdev_set_ipv6_addr(const char* zone,
     }
 }
 
+VsmStatus Client::vsm_netdev_del_ipv4_addr(const char* zone,
+                                           const char* netdevId,
+                                           struct in_addr* addr,
+                                           int prefix) noexcept
+{
+    std::string ip;
+    try {
+        //CIDR notation
+        ip = toString(addr) + "/" + to_string(prefix);
+    } catch(const std::exception& ex) {
+        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
+        return vsm_get_status();
+    }
+
+    GVariant* args_in = g_variant_new("(sss)", zone, netdevId, ip.c_str());
+    return callMethod(HOST_INTERFACE, api::host::METHOD_DELETE_NETDEV_IP_ADDRESS, args_in);
+}
+
+VsmStatus Client::vsm_netdev_del_ipv6_addr(const char* zone,
+                                           const char* netdevId,
+                                           struct in6_addr* addr,
+                                           int prefix) noexcept
+{
+
+    std::string ip;
+    try {
+        //CIDR notation
+        ip = toString(addr) + "/" + to_string(prefix);
+    } catch(const std::exception& ex) {
+        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
+        return vsm_get_status();
+    }
+
+    GVariant* args_in = g_variant_new("(sss)", zone, netdevId, ip.c_str());
+    return callMethod(HOST_INTERFACE, api::host::METHOD_DELETE_NETDEV_IP_ADDRESS, args_in);
+}
+
+
 VsmStatus Client::vsm_netdev_up(const char* zone, const char* netdevId) noexcept
 {
     try {

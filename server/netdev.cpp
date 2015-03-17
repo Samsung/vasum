@@ -120,6 +120,11 @@ uint32_t getInterfaceIndex(const string& name, pid_t nsPid) {
     return infoPeer.ifi_index;
 }
 
+int getIpFamily(const std::string& ip)
+{
+    return ip.find(':') == std::string::npos ? AF_INET : AF_INET6;
+}
+
 void validateNetdevName(const string& name)
 {
     if (name.size() <= 1 || name.size() >= IFNAMSIZ) {
@@ -327,6 +332,36 @@ void  setIpAddresses(const pid_t nsPid,
                 nlm.put(IFA_LOCAL, addr4);
             }
         }
+    }
+    send(nlm, nsPid);
+}
+
+void deleteIpAddress(const pid_t nsPid,
+                     const uint32_t index,
+                     const std::string& ip,
+                     int prefixlen,
+                     int family)
+{
+    NetlinkMessage nlm(RTM_DELADDR, NLM_F_REQUEST | NLM_F_ACK);
+    ifaddrmsg infoAddr = utils::make_clean<ifaddrmsg>();
+    infoAddr.ifa_family = family;
+    infoAddr.ifa_index = index;
+    infoAddr.ifa_prefixlen = prefixlen;
+    nlm.put(infoAddr);
+    if (family == AF_INET6) {
+        in6_addr addr6;
+        if (inet_pton(AF_INET6, ip.c_str(), &addr6) != 1) {
+            throw VasumException("Can't delete ipv6 address");
+        };
+        nlm.put(IFA_ADDRESS, addr6);
+        nlm.put(IFA_LOCAL, addr6);
+    } else {
+        assert(family == AF_INET);
+        in_addr addr4;
+        if (inet_pton(AF_INET, ip.c_str(), &addr4) != 1) {
+            throw VasumException("Can't delete ipv4 address");
+        };
+        nlm.put(IFA_LOCAL, addr4);
     }
     send(nlm, nsPid);
 }
@@ -564,6 +599,27 @@ void setAttrs(const pid_t nsPid, const std::string& netdev, const Attrs& attrs)
     setIp(ipv4, infoPeer.ifi_index, AF_INET);
     setIp(ipv6, infoPeer.ifi_index, AF_INET6);
 }
+
+void deleteIpAddress(const pid_t nsPid,
+                     const std::string& netdev,
+                     const std::string& ip)
+{
+    uint32_t index = getInterfaceIndex(netdev, nsPid);
+    size_t slash = ip.find('/');
+    if (slash == string::npos) {
+        LOGE("Wrong address format: it is not CIDR notation: can't find '/'");
+        throw VasumException("Wrong address format");
+    }
+    int prefixlen = 0;
+    try {
+        prefixlen = stoi(ip.substr(slash + 1));
+    } catch (const std::exception& ex) {
+        LOGE("Wrong address format: invalid prefixlen");
+        throw VasumException("Wrong address format: invalid prefixlen");
+    }
+    deleteIpAddress(nsPid, index, ip.substr(0, slash), prefixlen, getIpFamily(ip));
+}
+
 
 } //namespace netdev
 } //namespace vasum

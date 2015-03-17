@@ -167,6 +167,11 @@ void HostConnection::setDestroyNetdevCallback(const DestroyNetdevCallback& callb
     mDestroyNetdevCallback = callback;
 }
 
+void HostConnection::setDeleleNetdevIpAddressCallback(const DeleteNetdevIpAddressCallback& callback)
+{
+    mDeleteNetdevIpAddressCallback = callback;
+}
+
 void HostConnection::setDeclareFileCallback(const DeclareFileCallback& callback)
 {
     mDeclareFileCallback = callback;
@@ -394,6 +399,15 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         if (mDestroyNetdevCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
             mDestroyNetdevCallback(data, rb);
+        }
+    }
+
+    if (methodName == api::host::METHOD_DELETE_NETDEV_IP_ADDRESS) {
+        api::DeleteNetdevIpAddressIn data;
+        config::loadFromGVariant(parameters, data);
+        if (mDeleteNetdevIpAddressCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+            mDeleteNetdevIpAddressCallback(data, rb);
         }
     }
 

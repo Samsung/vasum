@@ -163,6 +163,9 @@ ZonesManager::ZonesManager(const std::string& configPath)
     mHostConnection.setDestroyNetdevCallback(bind(&ZonesManager::handleDestroyNetdevCall,
                                                   this, _1, _2));
 
+    mHostConnection.setDeleleNetdevIpAddressCallback(bind(&ZonesManager::handleDeleteNetdevIpAddressCall,
+                                                          this, _1, _2));
+
     mHostConnection.setDeclareFileCallback(bind(&ZonesManager::handleDeclareFileCall,
                                                 this, _1, _2));
 
@@ -941,6 +944,23 @@ void ZonesManager::handleDestroyNetdevCall(const api::DestroyNetDevIn& data,
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
     } catch (const VasumException& ex) {
         LOGE("Can't create netdev: " << ex.what());
+        result->setError(api::ERROR_INTERNAL, ex.what());
+    }
+}
+
+void ZonesManager::handleDeleteNetdevIpAddressCall(const api::DeleteNetdevIpAddressIn& data,
+                                                   api::MethodResultBuilder::Pointer result)
+{
+    LOGI("DelNetdevIpAddress call");
+    try {
+        Lock lock(mMutex);
+        getZone(data.zone).deleteNetdevIpAddress(data.netdev, data.ip);
+        result->setVoid();
+    } catch (const InvalidZoneIdException&) {
+        LOGE("No zone with id=" << data.zone);
+        result->setError(api::ERROR_INVALID_ID, "No such zone id");
+    } catch (const VasumException& ex) {
+        LOGE("Can't delete address: " << ex.what());
         result->setError(api::ERROR_INTERNAL, ex.what());
     }
 }

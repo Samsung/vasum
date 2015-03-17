@@ -146,6 +146,19 @@ struct CreateNetDevMacvlanIn {
     )
 };
 
+struct DeleteNetdevIpAddressIn {
+    std::string zone;
+    std::string netdev;
+    std::string ip;
+
+    CONFIG_REGISTER
+    (
+        zone,
+        netdev,
+        ip
+    )
+};
+
 struct DeclareFileIn {
     std::string zone;
     int32_t type;

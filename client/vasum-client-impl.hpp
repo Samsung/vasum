@@ -235,6 +235,22 @@ public:
                                        int prefix) noexcept;
 
     /**
+     *  @see ::vsm_netdev_del_ipv4_addr
+     */
+    VsmStatus vsm_netdev_del_ipv4_addr(const char* zone,
+                                      const char* netdevId,
+                                      struct in_addr* addr,
+                                      int prefix) noexcept;
+
+    /**
+     *  @see ::vsm_netdev_del_ipv6_addr
+     */
+    VsmStatus vsm_netdev_del_ipv6_addr(const char* zone,
+                                      const char* netdevId,
+                                      struct in6_addr* addr,
+                                      int prefix) noexcept;
+
+    /**
      *  @see ::vsm_netdev_up
      */
     VsmStatus vsm_netdev_up(const char* zone, const char* netdevId) noexcept;

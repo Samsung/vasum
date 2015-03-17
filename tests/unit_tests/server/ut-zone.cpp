@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(DbusConnection)
     c->stop(true);
 }
 
-// TODO: DbusReconnectionTest
+// TODO: DbusReconnection
 
 BOOST_AUTO_TEST_CASE(ListNetdev)
 {
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(CreateNetdevMacvlan)
     BOOST_CHECK(find(netdevs.begin(), netdevs.end(), ZONE_NETDEV) != netdevs.end());
 }
 
-BOOST_AUTO_TEST_CASE(GetNetdevAttrsTest)
+BOOST_AUTO_TEST_CASE(GetNetdevAttrs)
 {
     setupBridge(BRIDGE_NAME);
     auto c = create(TEST_CONFIG_PATH);
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(GetNetdevAttrsTest)
     BOOST_CHECK(gotType);
 }
 
-BOOST_AUTO_TEST_CASE(SetNetdevAttrsTest)
+BOOST_AUTO_TEST_CASE(SetNetdevAttrs)
 {
     setupBridge(BRIDGE_NAME);
     auto c = create(TEST_CONFIG_PATH);
@@ -269,7 +269,7 @@ BOOST_AUTO_TEST_CASE(SetNetdevAttrsTest)
                             WhatEquals("Unsupported attribute: does_not_exists"));
 }
 
-BOOST_AUTO_TEST_CASE(SetNetdevIpv4Test)
+BOOST_AUTO_TEST_CASE(SetNetdevIpv4)
 {
     setupBridge(BRIDGE_NAME);
     auto c = create(TEST_CONFIG_PATH);
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(SetNetdevIpv4Test)
     BOOST_CHECK_EQUAL(gotIp, 3);
 }
 
-BOOST_AUTO_TEST_CASE(SetNetdevIpv6Test)
+BOOST_AUTO_TEST_CASE(SetNetdevIpv6)
 {
     setupBridge(BRIDGE_NAME);
     auto c = create(TEST_CONFIG_PATH);
@@ -347,6 +347,43 @@ BOOST_AUTO_TEST_CASE(SetNetdevIpv6Test)
         }
     }
     BOOST_CHECK_EQUAL(gotIp, 3);
+}
+
+BOOST_AUTO_TEST_CASE(DelNetdevIpAddress)
+{
+    auto contain = [](const ZoneAdmin::NetdevAttrs& container, const std::string& key) {
+        return container.end() != find_if(container.begin(),
+                                          container.end(),
+                                          [&](const ZoneAdmin::NetdevAttrs::value_type& value) {
+                                              return std::get<0>(value) == key;
+                                          });
+    };
+
+    setupBridge(BRIDGE_NAME);
+    auto c = create(TEST_CONFIG_PATH);
+    c->start();
+    ensureStarted();
+    c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME);
+    ZoneAdmin::NetdevAttrs attrs;
+    attrs.push_back(std::make_tuple("ipv6", "ip:2001:db8::1,prefixlen:64"));
+    attrs.push_back(std::make_tuple("ipv4", "ip:192.168.4.1,prefixlen:24"));
+    c->setNetdevAttrs(ZONE_NETDEV, attrs);
+    attrs = c->getNetdevAttrs(ZONE_NETDEV);
+    BOOST_REQUIRE(contain(attrs, "ipv4"));
+    BOOST_REQUIRE(contain(attrs, "ipv6"));
+
+    c->deleteNetdevIpAddress(ZONE_NETDEV, "192.168.4.1/24");
+    attrs = c->getNetdevAttrs(ZONE_NETDEV);
+    BOOST_CHECK(!contain(attrs, "ipv4"));
+    BOOST_CHECK(contain(attrs, "ipv6"));
+
+    c->deleteNetdevIpAddress(ZONE_NETDEV, "2001:db8::1/64");
+    attrs = c->getNetdevAttrs(ZONE_NETDEV);
+    BOOST_REQUIRE(!contain(attrs, "ipv4"));
+    BOOST_REQUIRE(!contain(attrs, "ipv6"));
+
+    BOOST_CHECK_THROW(c->deleteNetdevIpAddress(ZONE_NETDEV, "192.168.4.1/24"), VasumException);
+    BOOST_CHECK_THROW(c->deleteNetdevIpAddress(ZONE_NETDEV, "2001:db8::1/64"), VasumException);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

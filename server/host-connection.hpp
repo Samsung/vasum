@@ -82,6 +82,9 @@ public:
     typedef std::function<void(const api::CreateNetDevPhysIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> CreateNetdevPhysCallback;
+    typedef std::function<void(const api::DeleteNetdevIpAddressIn& dataIn,
+                               api::MethodResultBuilder::Pointer result
+                              )> DeleteNetdevIpAddressCallback;
     typedef std::function<void(const api::DestroyNetDevIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> DestroyNetdevCallback;
@@ -194,6 +197,11 @@ public:
     void setDestroyNetdevCallback(const DestroyNetdevCallback& callback);
 
     /**
+     * Register a callback called to remove ip address from netdev
+     */
+    void setDeleleNetdevIpAddressCallback(const DeleteNetdevIpAddressCallback& callback);
+
+    /**
      * Register a callback called to declare file
      */
     void setDeclareFileCallback(const DeclareFileCallback& callback);
@@ -291,6 +299,7 @@ private:
     CreateNetdevMacvlanCallback mCreateNetdevMacvlanCallback;
     CreateNetdevPhysCallback mCreateNetdevPhysCallback;
     DestroyNetdevCallback mDestroyNetdevCallback;
+    DeleteNetdevIpAddressCallback mDeleteNetdevIpAddressCallback;
     DeclareFileCallback mDeclareFileCallback;
     DeclareMountCallback mDeclareMountCallback;
     DeclareLinkCallback mDeclareLinkCallback;

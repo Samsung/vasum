@@ -32,39 +32,40 @@ namespace vasum {
 namespace api {
 namespace host {
 
-const std::string BUS_NAME                     = "org.tizen.vasum.host";
-const std::string OBJECT_PATH                  = "/org/tizen/vasum/host";
-const std::string INTERFACE                    = "org.tizen.vasum.host.manager";
+const std::string BUS_NAME                        = "org.tizen.vasum.host";
+const std::string OBJECT_PATH                     = "/org/tizen/vasum/host";
+const std::string INTERFACE                       = "org.tizen.vasum.host.manager";
 
-const std::string ERROR_ZONE_NOT_RUNNING       = "org.tizen.vasum.host.Error.ZonesNotRunning";
+const std::string ERROR_ZONE_NOT_RUNNING          = "org.tizen.vasum.host.Error.ZonesNotRunning";
 
-const std::string METHOD_GET_ZONE_DBUSES       = "GetZoneDbuses";
-const std::string METHOD_GET_ZONE_ID_LIST      = "GetZoneIds";
-const std::string METHOD_GET_ACTIVE_ZONE_ID    = "GetActiveZoneId";
-const std::string METHOD_GET_ZONE_INFO         = "GetZoneInfo";
-const std::string METHOD_SET_NETDEV_ATTRS      = "SetNetdevAttrs";
-const std::string METHOD_GET_NETDEV_ATTRS      = "GetNetdevAttrs";
-const std::string METHOD_GET_NETDEV_LIST       = "GetNetdevList";
-const std::string METHOD_CREATE_NETDEV_VETH    = "CreateNetdevVeth";
-const std::string METHOD_CREATE_NETDEV_MACVLAN = "CreateNetdevMacvlan";
-const std::string METHOD_CREATE_NETDEV_PHYS    = "CreateNetdevPhys";
-const std::string METHOD_DESTROY_NETDEV        = "DestroyNetdev";
-const std::string METHOD_DECLARE_FILE          = "DeclareFile";
-const std::string METHOD_DECLARE_MOUNT         = "DeclareMount";
-const std::string METHOD_DECLARE_LINK          = "DeclareLink";
-const std::string METHOD_GET_DECLARATIONS      = "GetDeclarations";
-const std::string METHOD_REMOVE_DECLARATION    = "RemoveDeclaration";
-const std::string METHOD_SET_ACTIVE_ZONE       = "SetActiveZone";
-const std::string METHOD_CREATE_ZONE           = "CreateZone";
-const std::string METHOD_DESTROY_ZONE          = "DestroyZone";
-const std::string METHOD_SHUTDOWN_ZONE         = "ShutdownZone";
-const std::string METHOD_START_ZONE            = "StartZone";
-const std::string METHOD_LOCK_ZONE             = "LockZone";
-const std::string METHOD_UNLOCK_ZONE           = "UnlockZone";
-const std::string METHOD_GRANT_DEVICE          = "GrantDevice";
-const std::string METHOD_REVOKE_DEVICE         = "RevokeDevice";
+const std::string METHOD_GET_ZONE_DBUSES          = "GetZoneDbuses";
+const std::string METHOD_GET_ZONE_ID_LIST         = "GetZoneIds";
+const std::string METHOD_GET_ACTIVE_ZONE_ID       = "GetActiveZoneId";
+const std::string METHOD_GET_ZONE_INFO            = "GetZoneInfo";
+const std::string METHOD_SET_NETDEV_ATTRS         = "SetNetdevAttrs";
+const std::string METHOD_GET_NETDEV_ATTRS         = "GetNetdevAttrs";
+const std::string METHOD_GET_NETDEV_LIST          = "GetNetdevList";
+const std::string METHOD_CREATE_NETDEV_VETH       = "CreateNetdevVeth";
+const std::string METHOD_CREATE_NETDEV_MACVLAN    = "CreateNetdevMacvlan";
+const std::string METHOD_CREATE_NETDEV_PHYS       = "CreateNetdevPhys";
+const std::string METHOD_DESTROY_NETDEV           = "DestroyNetdev";
+const std::string METHOD_DELETE_NETDEV_IP_ADDRESS = "DeleteNetdevIpAddress";
+const std::string METHOD_DECLARE_FILE             = "DeclareFile";
+const std::string METHOD_DECLARE_MOUNT            = "DeclareMount";
+const std::string METHOD_DECLARE_LINK             = "DeclareLink";
+const std::string METHOD_GET_DECLARATIONS         = "GetDeclarations";
+const std::string METHOD_REMOVE_DECLARATION       = "RemoveDeclaration";
+const std::string METHOD_SET_ACTIVE_ZONE          = "SetActiveZone";
+const std::string METHOD_CREATE_ZONE              = "CreateZone";
+const std::string METHOD_DESTROY_ZONE             = "DestroyZone";
+const std::string METHOD_SHUTDOWN_ZONE            = "ShutdownZone";
+const std::string METHOD_START_ZONE               = "StartZone";
+const std::string METHOD_LOCK_ZONE                = "LockZone";
+const std::string METHOD_UNLOCK_ZONE              = "UnlockZone";
+const std::string METHOD_GRANT_DEVICE             = "GrantDevice";
+const std::string METHOD_REVOKE_DEVICE            = "RevokeDevice";
 
-const std::string SIGNAL_ZONE_DBUS_STATE       = "ZoneDbusState";
+const std::string SIGNAL_ZONE_DBUS_STATE          = "ZoneDbusState";
 
 
 const std::string DEFINITION =
@@ -124,6 +125,11 @@ const std::string DEFINITION =
     "    <method name='" + METHOD_DESTROY_NETDEV + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "      <arg type='s' name='devId' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_DELETE_NETDEV_IP_ADDRESS + "'>"
+    "      <arg type='s' name='id' direction='in'/>"
+    "      <arg type='s' name='devId' direction='in'/>"
+    "      <arg type='s' name='ip' direction='in'/>"
     "    </method>"
     "    <method name='" + METHOD_DECLARE_FILE + "'>"
     "      <arg type='s' name='zone' direction='in'/>"

@@ -187,6 +187,8 @@ private:
                                     api::MethodResultBuilder::Pointer result);
     void handleDestroyNetdevCall(const api::DestroyNetDevIn& data,
                                  api::MethodResultBuilder::Pointer result);
+    void handleDeleteNetdevIpAddressCall(const api::DeleteNetdevIpAddressIn& data,
+                                         api::MethodResultBuilder::Pointer result);
     void handleDeclareFileCall(const api::DeclareFileIn& data,
                                api::MethodResultBuilder::Pointer result);
     void handleDeclareMountCall(const api::DeclareMountIn& data,

@@ -57,6 +57,11 @@ void createBridge(const std::string& netdev);
 Attrs getAttrs(const pid_t nsPid, const std::string& netdev);
 void setAttrs(const pid_t nsPid, const std::string& netdev, const Attrs& attrs);
 
+/**
+ * Remove ipv4/ipv6 address from interface
+ */
+void deleteIpAddress(const pid_t nsPid, const std::string& netdev, const std::string& ip);
+
 } //namespace netdev
 } //namespace vasum
 
