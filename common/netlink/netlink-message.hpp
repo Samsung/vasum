@@ -149,7 +149,7 @@ public:
     /**
      * Fetch attribute
      */
-    NetlinkResponse& fetch(int ifla, std::string& value, int maxSize = std::string::npos);
+    NetlinkResponse& fetch(int ifla, std::string& value, int maxSize = -1);
     template<class T>
     NetlinkResponse& fetch(int ifla, T& value);
     ///@}

@@ -232,7 +232,7 @@ const char* NetlinkResponse::get(int ifla, int len) const
         throw VasumException("Wrong attribute type");
     }
     if (len >= 0 && rta->rta_len != RTA_LENGTH(len)) {
-        LOGE("Wrong attribute length, expected: " << rta->rta_len + ", got " << len);
+        LOGE("Wrong attribute length, expected: " << rta->rta_len << ", got " << len);
         throw VasumException("Wrong attribute length");
     }
     return reinterpret_cast<const char*>(RTA_DATA(get(rta->rta_len)));
