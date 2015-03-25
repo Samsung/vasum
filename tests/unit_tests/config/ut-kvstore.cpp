@@ -98,7 +98,7 @@ BOOST_FIXTURE_TEST_SUITE(KVStoreSuite, Fixture)
 
 const std::string KEY = "KEY";
 
-BOOST_AUTO_TEST_CASE(SimpleConstructorDestructorTest)
+BOOST_AUTO_TEST_CASE(SimpleConstructorDestructor)
 {
     std::unique_ptr<KVStore> conPtr;
     BOOST_REQUIRE_NO_THROW(conPtr.reset(new KVStore(dbPath)));
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(SimpleConstructorDestructorTest)
     BOOST_CHECK(fs::exists(dbPath));
 }
 
-BOOST_AUTO_TEST_CASE(EscapedCharactersTest)
+BOOST_AUTO_TEST_CASE(EscapedCharacters)
 {
     // '*' ?' '[' ']' are escaped
     // They shouldn't influence the internal implementation
@@ -162,7 +162,7 @@ void testSingleValue(Fixture& f, const A& a, const B& b)
 } // namespace
 
 
-BOOST_AUTO_TEST_CASE(SingleValueTest)
+BOOST_AUTO_TEST_CASE(SingleValue)
 {
     testSingleValue<std::string, std::string>(*this, "A", "B");
     testSingleValue<int, int>(*this, 1, 2);
@@ -202,7 +202,7 @@ void testVectorOfValues(Fixture& f,
 }
 } // namespace
 
-BOOST_AUTO_TEST_CASE(VectorOfValuesTest)
+BOOST_AUTO_TEST_CASE(VectorOfValues)
 {
     testVectorOfValues<std::string>(*this, {"A", "B"}, {"A", "C"}, {"A", "B", "C"});
     testVectorOfValues<int>(*this, {1, 2}, {1, 3}, {1, 2, 3});
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE(VectorOfValuesTest)
     testVectorOfValues<TestClass>(*this, {1, 2}, {1, 3}, {1, 2, 3});
 }
 
-BOOST_AUTO_TEST_CASE(ClearTest)
+BOOST_AUTO_TEST_CASE(Clear)
 {
     BOOST_CHECK_NO_THROW(c.clear());
     std::vector<std::string> vec = {"A", "B"};
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(ClearTest)
     BOOST_CHECK_THROW(c.get(KEY), ConfigException);
 }
 
-BOOST_AUTO_TEST_CASE(TransactionTest)
+BOOST_AUTO_TEST_CASE(Transaction)
 {
     {
         KVStore::Transaction trans(c);
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(TransactionTest)
     }
 }
 
-BOOST_AUTO_TEST_CASE(TransactionStackedTest)
+BOOST_AUTO_TEST_CASE(TransactionStacked)
 {
     {
         KVStore::Transaction transOuter(c);
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(TransactionStackedTest)
     }
 }
 
-BOOST_AUTO_TEST_CASE(TransactionThreadsTest)
+BOOST_AUTO_TEST_CASE(TransactionThreads)
 {
     Latch trans1Started, trans1Release, trans2Released;
     std::thread thread1([&] {
@@ -306,7 +306,7 @@ BOOST_AUTO_TEST_CASE(TransactionThreadsTest)
     thread2.join();
 }
 
-BOOST_AUTO_TEST_CASE(KeyTest)
+BOOST_AUTO_TEST_CASE(Key)
 {
     BOOST_CHECK_EQUAL(key(), "");
     BOOST_CHECK_EQUAL(key<>(), "");

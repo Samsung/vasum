@@ -39,14 +39,14 @@ using namespace vasum::utils;
 
 const int unsigned TIMEOUT = 1000;
 
-BOOST_AUTO_TEST_CASE(EmptyTest)
+BOOST_AUTO_TEST_CASE(Empty)
 {
     CallbackGuard guard;
     BOOST_CHECK_EQUAL(0, guard.getTrackersCount());
     BOOST_CHECK(guard.waitForTrackers(TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(SimpleTest)
+BOOST_AUTO_TEST_CASE(Simple)
 {
     CallbackGuard guard;
     guard.spawn();
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(SimpleTest)
     BOOST_CHECK(guard.waitForTrackers(TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(ThreadTest)
+BOOST_AUTO_TEST_CASE(Thread)
 {
     Latch trackerCreated;
     Latch trackerCanBeDestroyed;

@@ -96,24 +96,24 @@ std::string getInterfaceFromIntrospectionXML(const std::string& xml, const std::
 
 } // namespace
 
-BOOST_AUTO_TEST_CASE(DbusDaemonTest)
+BOOST_AUTO_TEST_CASE(DbusDaemon)
 {
     ScopedDbusDaemon daemon;
 }
 
-BOOST_AUTO_TEST_CASE(NoDbusTest)
+BOOST_AUTO_TEST_CASE(NoDbus)
 {
     ScopedGlibLoop loop;
     BOOST_CHECK_THROW(DbusConnection::create(DBUS_ADDRESS), DbusIOException);
 }
 
-BOOST_AUTO_TEST_CASE(ConnectionTest)
+BOOST_AUTO_TEST_CASE(Connection)
 {
     ScopedGlibLoop loop;
     DbusConnection::Pointer connSystem = DbusConnection::createSystem();
 }
 
-BOOST_AUTO_TEST_CASE(SimpleTest)
+BOOST_AUTO_TEST_CASE(Simple)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(SimpleTest)
     BOOST_CHECK(nameLost.empty());
 }
 
-BOOST_AUTO_TEST_CASE(ConnectionLostTest)
+BOOST_AUTO_TEST_CASE(ConnectionLost)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(ConnectionLostTest)
     BOOST_CHECK(nameLost.wait(EVENT_TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(NameOwnerTest)
+BOOST_AUTO_TEST_CASE(NameOwner)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(NameOwnerTest)
     //BOOST_CHECK(nameAcquired2.wait(EVENT_TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(GenericSignalTest)
+BOOST_AUTO_TEST_CASE(GenericSignal)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(GenericSignalTest)
     BOOST_CHECK(signalEmitted.wait(EVENT_TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(FilteredSignalTest)
+BOOST_AUTO_TEST_CASE(FilteredSignal)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(FilteredSignalTest)
     BOOST_CHECK(wrongSignalEmitted.empty());
 }
 
-BOOST_AUTO_TEST_CASE(RegisterObjectTest)
+BOOST_AUTO_TEST_CASE(RegisterObject)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(RegisterObjectTest)
     BOOST_CHECK_NO_THROW(conn->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, callback));
 }
 
-BOOST_AUTO_TEST_CASE(IntrospectSystemTest)
+BOOST_AUTO_TEST_CASE(IntrospectSystem)
 {
     ScopedGlibLoop loop;
     DbusConnection::Pointer conn = DbusConnection::createSystem();
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(IntrospectSystemTest)
     BOOST_CHECK(!iface.empty());
 }
 
-BOOST_AUTO_TEST_CASE(IntrospectTest)
+BOOST_AUTO_TEST_CASE(Introspect)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(IntrospectTest)
     BOOST_CHECK(std::string::npos != iface.find(TESTAPI_SIGNAL_NOTIFY));
 }
 
-BOOST_AUTO_TEST_CASE(MethodCallTest)
+BOOST_AUTO_TEST_CASE(MethodCall)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -372,7 +372,7 @@ BOOST_AUTO_TEST_CASE(MethodCallTest)
                       DbusCustomException);
 }
 
-BOOST_AUTO_TEST_CASE(MethodAsyncCallTest)
+BOOST_AUTO_TEST_CASE(MethodAsyncCall)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -457,7 +457,7 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallTest)
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(MethodAsyncCallAsyncHandlerTest)
+BOOST_AUTO_TEST_CASE(MethodAsyncCallAsyncHandler)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -513,7 +513,7 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallAsyncHandlerTest)
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(MethodCallExceptionTest)
+BOOST_AUTO_TEST_CASE(MethodCallException)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -559,7 +559,7 @@ BOOST_AUTO_TEST_CASE(MethodCallExceptionTest)
                       DbusOperationException);
 }
 
-BOOST_AUTO_TEST_CASE(DbusApiTest)
+BOOST_AUTO_TEST_CASE(DbusApi)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -575,7 +575,7 @@ BOOST_AUTO_TEST_CASE(DbusApiTest)
                           WhatEquals("Argument: 666"));
 }
 
-BOOST_AUTO_TEST_CASE(DbusApiNotifyTest)
+BOOST_AUTO_TEST_CASE(DbusApiNotify)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -594,7 +594,7 @@ BOOST_AUTO_TEST_CASE(DbusApiNotifyTest)
     BOOST_CHECK(notified.wait(EVENT_TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(DbusApiNameAcquiredTest)
+BOOST_AUTO_TEST_CASE(DbusApiNameAcquired)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -606,7 +606,7 @@ BOOST_AUTO_TEST_CASE(DbusApiNameAcquiredTest)
     BOOST_CHECK_NO_THROW(client.noop());
 }
 
-BOOST_AUTO_TEST_CASE(DbusApiConnectionLost1Test)
+BOOST_AUTO_TEST_CASE(DbusApiConnectionLost)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;
@@ -622,7 +622,7 @@ BOOST_AUTO_TEST_CASE(DbusApiConnectionLost1Test)
     BOOST_CHECK_THROW(client.noop(), DbusIOException);
 }
 
-BOOST_AUTO_TEST_CASE(DbusApiConnectionLost2Test)
+BOOST_AUTO_TEST_CASE(DbusApiConnectionLostDelayedCallbackSet)
 {
     ScopedDbusDaemon daemon;
     ScopedGlibLoop loop;

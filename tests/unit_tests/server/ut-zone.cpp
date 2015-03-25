@@ -117,27 +117,27 @@ struct Fixture {
 
 BOOST_FIXTURE_TEST_SUITE(ZoneSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
+BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 {
     auto c = create(TEST_CONFIG_PATH);
     c.reset();
 }
 
-BOOST_AUTO_TEST_CASE(BuggyConfigTest)
+BOOST_AUTO_TEST_CASE(BuggyConfig)
 {
     BOOST_REQUIRE_EXCEPTION(create(BUGGY_CONFIG_PATH),
                             ZoneOperationException,
                             WhatEquals("Could not create zone"));
 }
 
-BOOST_AUTO_TEST_CASE(MissingConfigTest)
+BOOST_AUTO_TEST_CASE(MissingConfig)
 {
     BOOST_REQUIRE_EXCEPTION(create(MISSING_CONFIG_PATH),
                             ConfigException,
                             WhatEquals("Could not load " + MISSING_CONFIG_PATH));
 }
 
-BOOST_AUTO_TEST_CASE(StartStopTest)
+BOOST_AUTO_TEST_CASE(StartStop)
 {
     auto c = create(TEST_CONFIG_PATH);
     c->start();
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(StartStopTest)
     c->stop(true);
 }
 
-BOOST_AUTO_TEST_CASE(DbusConnectionTest)
+BOOST_AUTO_TEST_CASE(DbusConnection)
 {
     mRunGuard.create("/tmp/ut-run"); // the same path as in lxc template
 
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(DbusConnectionTest)
 
 // TODO: DbusReconnectionTest
 
-BOOST_AUTO_TEST_CASE(ListNetdevTest)
+BOOST_AUTO_TEST_CASE(ListNetdev)
 {
     typedef std::vector<std::string> NetdevList;
 
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(ListNetdevTest)
     BOOST_CHECK(hostNetdevs != netdevs);
 }
 
-BOOST_AUTO_TEST_CASE(CreateNetdevVethTest)
+BOOST_AUTO_TEST_CASE(CreateNetdevVeth)
 {
     typedef std::vector<std::string> NetdevList;
 
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(CreateNetdevVethTest)
                                   hostNetdevsThrow.begin(), hostNetdevsThrow.end());
 }
 
-BOOST_AUTO_TEST_CASE(CreateNetdevMacvlanTest)
+BOOST_AUTO_TEST_CASE(CreateNetdevMacvlan)
 {
     typedef std::vector<std::string> NetdevList;
 

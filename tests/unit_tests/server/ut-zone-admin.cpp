@@ -79,20 +79,20 @@ struct Fixture {
 
 BOOST_FIXTURE_TEST_SUITE(ZoneAdminSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
+BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 {
     auto admin = create(TEST_CONFIG_PATH);
     admin.reset();
 }
 
-BOOST_AUTO_TEST_CASE(MissingConfigTest)
+BOOST_AUTO_TEST_CASE(MissingConfig)
 {
     BOOST_REQUIRE_EXCEPTION(create(MISSING_CONFIG_PATH),
                             ZoneOperationException,
                             WhatEquals("Could not create zone"));
 }
 
-BOOST_AUTO_TEST_CASE(StartTest)
+BOOST_AUTO_TEST_CASE(Start)
 {
     auto admin = create(TEST_CONFIG_PATH);
 
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(StartTest)
     BOOST_CHECK(admin->isRunning());
 }
 
-BOOST_AUTO_TEST_CASE(StartBuggyTest)
+BOOST_AUTO_TEST_CASE(StartBuggy)
 {
     auto admin = create(BUGGY_CONFIG_PATH);
     BOOST_REQUIRE_EXCEPTION(admin->start(),
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(StartBuggyTest)
                             WhatEquals("Could not start zone"));
 }
 
-BOOST_AUTO_TEST_CASE(StopShutdownTest)
+BOOST_AUTO_TEST_CASE(StopShutdown)
 {
     auto admin = create(TEST_CONFIG_PATH);
 
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(StopShutdownTest)
 }
 
 // This test needs to wait for a shutdown timer in stop() method. This takes 10s+.
-BOOST_AUTO_TEST_CASE(StopDestroyTest)
+BOOST_AUTO_TEST_CASE(StopDestroy)
 {
     auto admin = create(TEST_NO_SHUTDOWN_CONFIG_PATH);
 
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(StopDestroyTest)
     BOOST_CHECK(admin->isStopped());
 }
 
-BOOST_AUTO_TEST_CASE(SuspendResumeTest)
+BOOST_AUTO_TEST_CASE(SuspendResume)
 {
     auto admin = create(TEST_NO_SHUTDOWN_CONFIG_PATH);
 
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(SuspendResumeTest)
     BOOST_CHECK(admin->isRunning());
 }
 
-BOOST_AUTO_TEST_CASE(SchedulerLevelTest)
+BOOST_AUTO_TEST_CASE(ForegroundBackgroundSchedulerLevel)
 {
     auto admin = create(TEST_CONFIG_PATH);
 

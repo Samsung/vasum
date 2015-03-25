@@ -89,12 +89,12 @@ struct Fixture {
 
 BOOST_FIXTURE_TEST_SUITE(InputMonitorSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(Config_OK)
+BOOST_AUTO_TEST_CASE(ConfigOK)
 {
     InputMonitor inputMonitor(inputConfig, InputMonitor::NotifyCallback());
 }
 
-BOOST_AUTO_TEST_CASE(Config_timeWindowMsTooHigh)
+BOOST_AUTO_TEST_CASE(ConfigTimeWindowMsTooHigh)
 {
     inputConfig.timeWindowMs = 50000;
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(Config_timeWindowMsTooHigh)
                             WhatEquals("Time window exceeds maximum"));
 }
 
-BOOST_AUTO_TEST_CASE(Config_deviceFilePathNotExisting)
+BOOST_AUTO_TEST_CASE(ConfigDeviceFilePathNotExisting)
 {
     inputConfig.device = TEST_INPUT_DEVICE + "notExisting";
 
@@ -148,12 +148,12 @@ void sendNEvents(Fixture& f, unsigned int noOfEventsToSend)
 
 } // namespace
 
-BOOST_AUTO_TEST_CASE(Event_oneAtATime)
+BOOST_AUTO_TEST_CASE(EventOneAtATime)
 {
     sendNEvents(*this, 1);
 }
 
-BOOST_AUTO_TEST_CASE(Event_tenAtATime)
+BOOST_AUTO_TEST_CASE(EventTenAtATime)
 {
     sendNEvents(*this, 10);
 }
@@ -199,12 +199,12 @@ void sendNEventsWithPauses(Fixture& f, unsigned int noOfEventsToSend)
 
 } // namespace
 
-BOOST_AUTO_TEST_CASE(Event_oneAtATimeWithPauses)
+BOOST_AUTO_TEST_CASE(EventOneAtATimeWithPauses)
 {
     sendNEventsWithPauses(*this, 1);
 }
 
-BOOST_AUTO_TEST_CASE(Event_tenAtATimeWithPauses)
+BOOST_AUTO_TEST_CASE(EventTenAtATimeWithPauses)
 {
     sendNEventsWithPauses(*this, 10);
 }

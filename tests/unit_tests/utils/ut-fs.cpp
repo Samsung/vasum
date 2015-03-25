@@ -72,7 +72,7 @@ struct Fixture {
 
 BOOST_FIXTURE_TEST_SUITE(UtilsFSSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(ReadFileContentTest)
+BOOST_AUTO_TEST_CASE(ReadFileContent)
 {
     BOOST_CHECK_EQUAL(REFERENCE_FILE_CONTENT, readFileContent(REFERENCE_FILE_PATH));
     BOOST_CHECK_EXCEPTION(readFileContent(BUGGY_FILE_PATH),
@@ -80,20 +80,20 @@ BOOST_AUTO_TEST_CASE(ReadFileContentTest)
                           WhatEquals("Read failed"));
 }
 
-BOOST_AUTO_TEST_CASE(SaveFileContentTest)
+BOOST_AUTO_TEST_CASE(SaveFileContent)
 {
     BOOST_REQUIRE(saveFileContent(FILE_PATH, REFERENCE_FILE_CONTENT));
     BOOST_CHECK_EQUAL(REFERENCE_FILE_CONTENT, readFileContent(FILE_PATH));
 }
 
-BOOST_AUTO_TEST_CASE(RemoveFileTest)
+BOOST_AUTO_TEST_CASE(RemoveFile)
 {
     BOOST_REQUIRE(saveFileContent(FILE_PATH, REFERENCE_FILE_CONTENT));
     BOOST_REQUIRE(removeFile(FILE_PATH));
     BOOST_REQUIRE(!boost::filesystem::exists(FILE_PATH));
 }
 
-BOOST_AUTO_TEST_CASE(MountPointTest)
+BOOST_AUTO_TEST_CASE(MountPoint)
 {
     bool result;
     namespace fs = boost::filesystem;
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(MountPointTest)
     BOOST_REQUIRE(fs::remove(MOUNT_POINT_1, ec));
 }
 
-BOOST_AUTO_TEST_CASE(MoveFileTest)
+BOOST_AUTO_TEST_CASE(MoveFile)
 {
     namespace fs = boost::filesystem;
     boost::system::error_code ec;
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(MoveFileTest)
     BOOST_REQUIRE(fs::remove(MOUNT_POINT_2, ec));
 }
 
-BOOST_AUTO_TEST_CASE(CopyDirContentsTest)
+BOOST_AUTO_TEST_CASE(CopyDirContents)
 {
     namespace fs = boost::filesystem;
     std::string src, src_inner, src_inner2, dst, dst_inner, dst_inner2;

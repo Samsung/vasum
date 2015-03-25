@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_SUITE(SameThreadGuardSuite)
 
 using namespace vasum::utils;
 
-BOOST_AUTO_TEST_CASE(SimpleTest)
+BOOST_AUTO_TEST_CASE(Simple)
 {
     SameThreadGuard guard;
     BOOST_CHECK(guard.check());
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(SimpleTest)
     BOOST_CHECK(guard.check());
 }
 
-BOOST_AUTO_TEST_CASE(ThreadTest)
+BOOST_AUTO_TEST_CASE(Thread)
 {
     SameThreadGuard guard;
 

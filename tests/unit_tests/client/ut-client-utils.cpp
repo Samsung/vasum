@@ -30,7 +30,7 @@
 
 BOOST_AUTO_TEST_SUITE(ClientUtils)
 
-BOOST_AUTO_TEST_CASE(ParseZoneIdFromCpuSetTest)
+BOOST_AUTO_TEST_CASE(ParseZoneIdFromCpuSet)
 {
     auto testBad = [](const std::string& input) {
         std::string ret;

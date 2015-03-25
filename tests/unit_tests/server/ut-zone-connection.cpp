@@ -133,12 +133,12 @@ private:
 
 BOOST_FIXTURE_TEST_SUITE(ZoneConnectionSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(ConstructorDestructorConnectTest)
+BOOST_AUTO_TEST_CASE(ConstructorDestructorConnect)
 {
     ZoneConnection(acquireAddress(), nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(NotifyActiveZoneApiTest)
+BOOST_AUTO_TEST_CASE(NotifyActiveZoneApi)
 {
     Latch notifyCalled;
     ZoneConnection connection(acquireAddress(), nullptr);
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(NotifyActiveZoneApiTest)
     BOOST_CHECK(notifyCalled.wait(EVENT_TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(SignalNotificationApiTest)
+BOOST_AUTO_TEST_CASE(SignalNotificationApi)
 {
     Latch signalEmitted;
     ZoneConnection connection(acquireAddress(), nullptr);
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(SignalNotificationApiTest)
     BOOST_CHECK(signalEmitted.wait(EVENT_TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(SignalDisplayOffApiTest)
+BOOST_AUTO_TEST_CASE(SignalDisplayOffApi)
 {
     Latch displayOffCalled;
     ZoneConnection connection(acquireAddress(), nullptr);

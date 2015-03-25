@@ -73,34 +73,34 @@ BOOST_FIXTURE_TEST_SUITE(ServerSuite, Fixture)
 using namespace vasum;
 using namespace config;
 
-BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
+BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 {
     std::unique_ptr<Server> s;
     s.reset(new Server(TEST_CONFIG_PATH));
     s.reset();
 }
 
-BOOST_AUTO_TEST_CASE(MissingConfigTest)
+BOOST_AUTO_TEST_CASE(MissingConfig)
 {
     BOOST_REQUIRE_EXCEPTION(Server(MISSING_CONFIG_PATH).run(AS_ROOT),
                             ConfigException,
                             WhatEquals("Could not load " + MISSING_CONFIG_PATH));
 }
 
-BOOST_AUTO_TEST_CASE(TerminateTest)
+BOOST_AUTO_TEST_CASE(Terminate)
 {
     Server s(TEST_CONFIG_PATH);
     s.terminate();
 }
 
-BOOST_AUTO_TEST_CASE(TerminateRunTest)
+BOOST_AUTO_TEST_CASE(TerminateRun)
 {
     Server s(TEST_CONFIG_PATH);
     s.terminate();
     s.run(AS_ROOT);
 }
 
-BOOST_AUTO_TEST_CASE(RunTerminateTest)
+BOOST_AUTO_TEST_CASE(RunTerminate)
 {
     Server s(TEST_CONFIG_PATH);
     std::future<void> runFuture = std::async(std::launch::async, [&] {s.run(AS_ROOT);});

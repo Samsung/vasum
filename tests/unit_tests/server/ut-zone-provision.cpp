@@ -94,7 +94,7 @@ struct Fixture {
 
 BOOST_FIXTURE_TEST_SUITE(ZoneProvisionSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(DestructorTest)
+BOOST_AUTO_TEST_CASE(Destructor)
 {
     const fs::path mountTarget = fs::path("/opt/usr/data/ut-from-host-provision");
     const fs::path mountSource = fs::path("/tmp/ut-provision");
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(DestructorTest)
     BOOST_CHECK(!fs::exists(mountSource));
 }
 
-BOOST_AUTO_TEST_CASE(FileTest)
+BOOST_AUTO_TEST_CASE(File)
 {
     //TODO: Test Fifo
     const fs::path regularFile = fs::path("/opt/usr/data/ut-regular-file");
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(FileTest)
     zoneProvision.stop();
 }
 
-BOOST_AUTO_TEST_CASE(MountTest)
+BOOST_AUTO_TEST_CASE(Mount)
 {
     //TODO: Test Fifo
     const fs::path mountTarget = fs::path("/opt/usr/data/ut-from-host-provision");
@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(MountTest)
     zoneProvision.stop();
 }
 
-BOOST_AUTO_TEST_CASE(LinkTest)
+BOOST_AUTO_TEST_CASE(Link)
 {
     const fs::path linkFile = fs::path("/ut-from-host-file.txt");
 
@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE(LinkTest)
     }
 }
 
-BOOST_AUTO_TEST_CASE(DeclareFileTest)
+BOOST_AUTO_TEST_CASE(DeclareFile)
 {
     ZoneProvision zoneProvision = create({});
     zoneProvision.declareFile(1, "path", 0747, 0777);
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(DeclareFileTest)
     BOOST_CHECK_EQUAL(provision.mode, 0777);
 }
 
-BOOST_AUTO_TEST_CASE(DeclareMountTest)
+BOOST_AUTO_TEST_CASE(DeclareMount)
 {
     ZoneProvision zoneProvision = create({});
     zoneProvision.declareMount("/fake/path1", "/fake/path2", "tmpfs", 077, "fake");
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(DeclareMountTest)
     BOOST_CHECK_EQUAL(provision.data, "fake");
 }
 
-BOOST_AUTO_TEST_CASE(DeclareLinkTest)
+BOOST_AUTO_TEST_CASE(DeclareLink)
 {
     ZoneProvision zoneProvision = create({});
     zoneProvision.declareLink("/fake/path1", "/fake/path2");
@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE(DeclareLinkTest)
     BOOST_CHECK_EQUAL(provision.target, "/fake/path2");
 }
 
-BOOST_AUTO_TEST_CASE(ProvisionedAlreadyTest)
+BOOST_AUTO_TEST_CASE(ProvisionedAlready)
 {
     const fs::path dir = fs::path("/opt/usr/data/ut-from-host");
     const fs::path linkFile = fs::path("/ut-from-host-file.txt");
@@ -341,7 +341,7 @@ BOOST_AUTO_TEST_CASE(ProvisionedAlreadyTest)
     zoneProvision.stop();
 }
 
-BOOST_AUTO_TEST_CASE(ListTest)
+BOOST_AUTO_TEST_CASE(List)
 {
     std::vector<std::string> expected;
     ZoneProvision zoneProvision = create({});
@@ -369,7 +369,7 @@ BOOST_AUTO_TEST_CASE(ListTest)
     }
 }
 
-BOOST_AUTO_TEST_CASE(RemoveTest)
+BOOST_AUTO_TEST_CASE(Remove)
 {
     std::vector<std::string> expected;
     ZoneProvision zoneProvision = create({});

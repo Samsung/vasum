@@ -702,7 +702,7 @@ MULTI_FIXTURE_TEST_CASE(MixOperations, F, ThreadedFixture, GlibFixture)
     BOOST_CHECK(l.wait(TIMEOUT));
 }
 
-// MULTI_FIXTURE_TEST_CASE(ConnectionLimitTest, F, ThreadedFixture, GlibFixture)
+// MULTI_FIXTURE_TEST_CASE(ConnectionLimit, F, ThreadedFixture, GlibFixture)
 // {
 //     unsigned oldLimit = ipc::getMaxFDNumber();
 //     ipc::setMaxFDNumber(50);

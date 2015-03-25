@@ -97,7 +97,7 @@ void exampleTestLogs(void)
 
 } // namespace
 
-BOOST_AUTO_TEST_CASE(LogLevelSetandGet)
+BOOST_AUTO_TEST_CASE(LogLevelSetAndGet)
 {
     Logger::setLogLevel(LogLevel::TRACE);
     BOOST_CHECK(LogLevel::TRACE == Logger::getLogLevel());
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(LogLevelSetandGet)
     BOOST_CHECK(LogLevel::ERROR == Logger::getLogLevel());
 }
 
-BOOST_AUTO_TEST_CASE(StringLogLevelSetandGet)
+BOOST_AUTO_TEST_CASE(StringLogLevelSetAndGet)
 {
     Logger::setLogLevel("TRACE");
     BOOST_CHECK(LogLevel::TRACE == Logger::getLogLevel());
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(StringLogLevelSetandGet)
                             WhatEquals("Invalid LogLevel to parse")); //TODO change message
 }
 
-BOOST_AUTO_TEST_CASE(TestLogsError)
+BOOST_AUTO_TEST_CASE(LogsLevelError)
 {
     TestLog tf(LogLevel::ERROR);
     exampleTestLogs();
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(TestLogsError)
     BOOST_CHECK(tf.logContains("[TRACE]") == false);
 }
 
-BOOST_AUTO_TEST_CASE(TestLogsWarn)
+BOOST_AUTO_TEST_CASE(LogsLevelWarn)
 {
     TestLog tf(LogLevel::WARN);
     exampleTestLogs();
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(TestLogsWarn)
     BOOST_CHECK(tf.logContains("[TRACE]") == false);
 }
 
-BOOST_AUTO_TEST_CASE(TestLogsInfo)
+BOOST_AUTO_TEST_CASE(LogsLevelInfo)
 {
     TestLog tf(LogLevel::INFO);
     exampleTestLogs();
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(TestLogsInfo)
     BOOST_CHECK(tf.logContains("[TRACE]") == false);
 }
 
-BOOST_AUTO_TEST_CASE(TestLogsDebug)
+BOOST_AUTO_TEST_CASE(LogsLevelDebug)
 {
     TestLog tf(LogLevel::DEBUG);
     exampleTestLogs();
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(TestLogsDebug)
     BOOST_CHECK(tf.logContains("[TRACE]") == false);
 }
 
-BOOST_AUTO_TEST_CASE(TestLogsTrace)
+BOOST_AUTO_TEST_CASE(LogsLevelTrace)
 {
     TestLog tf(LogLevel::TRACE);
     exampleTestLogs();
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(TestLogsTrace)
     BOOST_CHECK(tf.logContains("[TRACE]") == true);
 }
 
-BOOST_AUTO_TEST_CASE(TestLoggerScope)
+BOOST_AUTO_TEST_CASE(LoggerScope)
 {
     LOGS("Main function scope");
 

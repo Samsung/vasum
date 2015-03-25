@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_SUITE(UtilsPathsSuite)
 
 using namespace vasum::utils;
 
-BOOST_AUTO_TEST_CASE(CreateFilePathTest)
+BOOST_AUTO_TEST_CASE(CreateFilePath)
 {
     BOOST_CHECK_EQUAL("", createFilePath());
 
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(CreateFilePathTest)
     BOOST_CHECK_EQUAL("a/b/.txt", createFilePath("a", "/b/", "/.txt"));
 }
 
-BOOST_AUTO_TEST_CASE(DirNameTest)
+BOOST_AUTO_TEST_CASE(DirName)
 {
     BOOST_CHECK_EQUAL(".", dirName(""));
     BOOST_CHECK_EQUAL(".", dirName("."));

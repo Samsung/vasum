@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(GlibLoopTest)
     ScopedGlibLoop loop;
 }
 
-BOOST_AUTO_TEST_CASE(GlibTimerEventTest)
+BOOST_AUTO_TEST_CASE(GlibTimerEvent)
 {
     ScopedGlibLoop loop;
     std::atomic_uint counter(0);

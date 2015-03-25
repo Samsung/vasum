@@ -80,12 +80,12 @@ struct Fixture {
 
 BOOST_FIXTURE_TEST_SUITE(LxcZoneSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
+BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 {
     LxcZone lxc(LXC_PATH, ZONE_NAME);
 }
 
-BOOST_AUTO_TEST_CASE(CreateDestroyTest)
+BOOST_AUTO_TEST_CASE(CreateDestroy)
 {
     LxcZone lxc(LXC_PATH, ZONE_NAME);
     BOOST_CHECK(!lxc.isDefined());
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(CreateDestroyTest)
     BOOST_CHECK(!lxc.isDefined());
 }
 
-BOOST_AUTO_TEST_CASE(StartShutdownTest)
+BOOST_AUTO_TEST_CASE(StartShutdown)
 {
     {
         LxcZone lxc(LXC_PATH, ZONE_NAME);
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(StartShutdownTest)
     BOOST_CHECK(lxc.destroy());
 }
 
-BOOST_AUTO_TEST_CASE(StartStopTest)
+BOOST_AUTO_TEST_CASE(StartStop)
 {
     {
         LxcZone lxc(LXC_PATH, ZONE_NAME);
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(StartStopTest)
     BOOST_CHECK(lxc.destroy());
 }
 
-BOOST_AUTO_TEST_CASE(StartHasStoppedTest)
+BOOST_AUTO_TEST_CASE(StartHasStopped)
 {
     {
         LxcZone lxc(LXC_PATH, ZONE_NAME);
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(StartHasStoppedTest)
     BOOST_CHECK(lxc.destroy());
 }
 
-BOOST_AUTO_TEST_CASE(FreezeUnfreezeTest)
+BOOST_AUTO_TEST_CASE(FreezeUnfreeze)
 {
     LxcZone lxc(LXC_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(FreezeUnfreezeTest)
     BOOST_CHECK(lxc.destroy());
 }
 
-BOOST_AUTO_TEST_CASE(FreezeStopTest)
+BOOST_AUTO_TEST_CASE(FreezeStop)
 {
     LxcZone lxc(LXC_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(FreezeStopTest)
     BOOST_CHECK(lxc.destroy());
 }
 
-BOOST_AUTO_TEST_CASE(RepeatTest)
+BOOST_AUTO_TEST_CASE(Repeat)
 {
     LxcZone lxc(LXC_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));

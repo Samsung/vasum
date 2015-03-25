@@ -52,7 +52,7 @@ struct Fixture {
 
 BOOST_FIXTURE_TEST_SUITE(ConfigurationSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(FromJsonStringTest)
+BOOST_AUTO_TEST_CASE(FromJsonString)
 {
     TestConfig testConfig;
 
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(FromJsonStringTest)
 }
 
 
-BOOST_AUTO_TEST_CASE(ToJsonStringTest)
+BOOST_AUTO_TEST_CASE(ToJsonString)
 {
     TestConfig testConfig;
     BOOST_REQUIRE_NO_THROW(loadFromJsonString(jsonTestString, testConfig));
@@ -153,7 +153,7 @@ struct UnionConfig {
 
 } // namespace loadErrorsTest
 
-BOOST_AUTO_TEST_CASE(JsonLoadErrorsTest)
+BOOST_AUTO_TEST_CASE(JsonLoadErrors)
 {
     using namespace loadErrorsTest;
 
@@ -256,7 +256,7 @@ struct NotFunction {
 
 } // namespace hasVisitableTest
 
-BOOST_AUTO_TEST_CASE(HasVisibleInternalHelperTest)
+BOOST_AUTO_TEST_CASE(HasVisibleInternalHelper)
 {
     using namespace hasVisitableTest;
 
@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE(HasVisibleInternalHelperTest)
     BOOST_CHECK(isVisitable<Visitable>());
 }
 
-BOOST_AUTO_TEST_CASE(FromToKVStoreTest)
+BOOST_AUTO_TEST_CASE(FromToKVStore)
 {
     TestConfig config;
     loadFromJsonString(jsonTestString, config);
@@ -286,7 +286,7 @@ BOOST_AUTO_TEST_CASE(FromToKVStoreTest)
     BOOST_CHECK_EQUAL(out, jsonTestString);
 }
 
-BOOST_AUTO_TEST_CASE(FromToFDTest)
+BOOST_AUTO_TEST_CASE(FromToFD)
 {
     TestConfig config;
     loadFromJsonString(jsonTestString, config);
@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(FromToFDTest)
     BOOST_CHECK(::close(fd) >= 0);
 }
 
-BOOST_AUTO_TEST_CASE(FromKVWithDefaultsTest)
+BOOST_AUTO_TEST_CASE(FromKVWithDefaults)
 {
     TestConfig config;
     loadFromJsonString(jsonTestString, config);
@@ -328,7 +328,7 @@ BOOST_AUTO_TEST_CASE(FromKVWithDefaultsTest)
     BOOST_CHECK_EQUAL(out2, jsonTestString);
 }
 
-BOOST_AUTO_TEST_CASE(PartialConfigTest)
+BOOST_AUTO_TEST_CASE(PartialConfig)
 {
     // check if partial config is fully supported
     TestConfig config;
@@ -379,7 +379,7 @@ BOOST_AUTO_TEST_CASE(PartialConfigTest)
     }
 }
 
-BOOST_AUTO_TEST_CASE(ConfigUnionTest)
+BOOST_AUTO_TEST_CASE(ConfigUnion)
 {
     TestConfig testConfig;
     BOOST_REQUIRE_NO_THROW(loadFromJsonString(jsonTestString, testConfig));
@@ -426,7 +426,7 @@ BOOST_AUTO_TEST_CASE(ConfigUnionTest)
 }
 
 
-BOOST_AUTO_TEST_CASE(GVariantVisitorTest)
+BOOST_AUTO_TEST_CASE(GVariantVisitor)
 {
     TestConfig testConfig;
     BOOST_REQUIRE_NO_THROW(loadFromJsonString(jsonTestString, testConfig));

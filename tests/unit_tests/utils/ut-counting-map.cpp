@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_SUITE(CountingMapSuite)
 
 using namespace vasum::utils;
 
-BOOST_AUTO_TEST_CASE(CountingTest)
+BOOST_AUTO_TEST_CASE(Counting)
 {
     CountingMap<std::string> map;
 

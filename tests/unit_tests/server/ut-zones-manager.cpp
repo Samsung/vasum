@@ -481,28 +481,28 @@ struct Fixture {
 
 BOOST_FIXTURE_TEST_SUITE(ZonesManagerSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(ConstructorDestructorTest)
+BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 {
     std::unique_ptr<ZonesManager> cm;
     cm.reset(new ZonesManager(TEST_CONFIG_PATH));
     cm.reset();
 }
 
-BOOST_AUTO_TEST_CASE(MissingConfigTest)
+BOOST_AUTO_TEST_CASE(MissingConfig)
 {
     BOOST_REQUIRE_EXCEPTION(ZonesManager{MISSING_CONFIG_PATH},
                             ConfigException,
                             WhatEquals("Could not load " + MISSING_CONFIG_PATH));
 }
 
-BOOST_AUTO_TEST_CASE(CreateTest)
+BOOST_AUTO_TEST_CASE(Create)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
 }
 
-BOOST_AUTO_TEST_CASE(StartStopTest)
+BOOST_AUTO_TEST_CASE(StartStop)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
@@ -514,7 +514,7 @@ BOOST_AUTO_TEST_CASE(StartStopTest)
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "");
 }
 
-BOOST_AUTO_TEST_CASE(DetachOnExitTest)
+BOOST_AUTO_TEST_CASE(DetachOnExit)
 {
     {
         ZonesManager cm(TEST_CONFIG_PATH);
@@ -531,7 +531,7 @@ BOOST_AUTO_TEST_CASE(DetachOnExitTest)
     }
 }
 
-BOOST_AUTO_TEST_CASE(FocusTest)
+BOOST_AUTO_TEST_CASE(Focus)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
@@ -548,7 +548,7 @@ BOOST_AUTO_TEST_CASE(FocusTest)
     BOOST_CHECK(cm.getRunningForegroundZoneId() == "zone3");
 }
 
-BOOST_AUTO_TEST_CASE(NotifyActiveZoneTest)
+BOOST_AUTO_TEST_CASE(NotifyActiveZone)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     cm.createZone("zone1", DBUS_TEMPLATE);
@@ -618,7 +618,7 @@ BOOST_AUTO_TEST_CASE(NotifyActiveZoneTest)
     dbuses.clear();
 }
 
-BOOST_AUTO_TEST_CASE(DisplayOffTest)
+BOOST_AUTO_TEST_CASE(DisplayOff)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     cm.createZone("zone1", DBUS_TEMPLATE);
@@ -655,7 +655,7 @@ BOOST_AUTO_TEST_CASE(DisplayOffTest)
     }
 }
 
-BOOST_AUTO_TEST_CASE(MoveFileTest)
+BOOST_AUTO_TEST_CASE(MoveFile)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     cm.createZone("zone1", DBUS_TEMPLATE);
@@ -757,7 +757,7 @@ BOOST_AUTO_TEST_CASE(MoveFileTest)
     fs::remove_all(ZONE2PATH, ec);
 }
 
-BOOST_AUTO_TEST_CASE(AllowSwitchToDefaultTest)
+BOOST_AUTO_TEST_CASE(AllowSwitchToDefault)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     cm.createZone("zone1", DBUS_TEMPLATE);
@@ -806,7 +806,7 @@ BOOST_AUTO_TEST_CASE(AllowSwitchToDefaultTest)
     }
 }
 
-BOOST_AUTO_TEST_CASE(ProxyCallTest)
+BOOST_AUTO_TEST_CASE(ProxyCall)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     cm.createZone("zone1", DBUS_TEMPLATE);
@@ -895,7 +895,7 @@ namespace {
          "unix:path=/tmp/ut-run/zone3/dbus/system_bus_socket"}};
 } // namespace
 
-BOOST_AUTO_TEST_CASE(GetZoneDbusesTest)
+BOOST_AUTO_TEST_CASE(GetZoneDbuses)
 {
     DbusAccessory host(DbusAccessory::HOST_ID);
     ZonesManager cm(TEST_CONFIG_PATH);
@@ -910,7 +910,7 @@ BOOST_AUTO_TEST_CASE(GetZoneDbusesTest)
     BOOST_CHECK(EXPECTED_DBUSES_NONE == host.callMethodGetZoneDbuses());
 }
 
-BOOST_AUTO_TEST_CASE(GetZoneDbusesNoDbusTest)
+BOOST_AUTO_TEST_CASE(GetZoneDbusesNoDbus)
 {
     DbusAccessory host(DbusAccessory::HOST_ID);
     ZonesManager cm(TEST_CONFIG_PATH);
@@ -925,7 +925,7 @@ BOOST_AUTO_TEST_CASE(GetZoneDbusesNoDbusTest)
     BOOST_CHECK(EXPECTED_DBUSES_NONE == host.callMethodGetZoneDbuses());
 }
 
-BOOST_AUTO_TEST_CASE(ZoneDbusesSignalsTest)
+BOOST_AUTO_TEST_CASE(ZoneDbusesSignals)
 {
     Latch signalLatch;
     DbusAccessory::Dbuses collectedDbuses;
@@ -975,7 +975,7 @@ BOOST_AUTO_TEST_CASE(ZoneDbusesSignalsTest)
 }
 
 
-BOOST_AUTO_TEST_CASE(GetZoneIdsTest)
+BOOST_AUTO_TEST_CASE(GetZoneIds)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
@@ -992,7 +992,7 @@ BOOST_AUTO_TEST_CASE(GetZoneIdsTest)
     BOOST_CHECK(returnedIds == zoneIds);// order should be preserved
 }
 
-BOOST_AUTO_TEST_CASE(GetActiveZoneIdTest)
+BOOST_AUTO_TEST_CASE(GetActiveZoneId)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
@@ -1015,7 +1015,7 @@ BOOST_AUTO_TEST_CASE(GetActiveZoneIdTest)
     BOOST_CHECK(dbus.callMethodGetActiveZoneId() == "");
 }
 
-BOOST_AUTO_TEST_CASE(SetActiveZoneTest)
+BOOST_AUTO_TEST_CASE(SetActiveZone)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
@@ -1044,7 +1044,7 @@ BOOST_AUTO_TEST_CASE(SetActiveZoneTest)
                             WhatEquals("Could not activate stopped or paused zone"));
 }
 
-BOOST_AUTO_TEST_CASE(CreateDestroyZoneTest)
+BOOST_AUTO_TEST_CASE(CreateDestroyZone)
 {
     const std::string zone1 = "test1";
     const std::string zone2 = "test2";
@@ -1096,7 +1096,7 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZoneTest)
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "");
 }
 
-BOOST_AUTO_TEST_CASE(CreateDestroyZonePersistenceTest)
+BOOST_AUTO_TEST_CASE(CreateDestroyZonePersistence)
 {
     const std::string zone = "test1";
 
@@ -1140,7 +1140,7 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZonePersistenceTest)
     BOOST_CHECK(getZoneIds().empty());
 }
 
-BOOST_AUTO_TEST_CASE(ZoneStatePersistenceTest)
+BOOST_AUTO_TEST_CASE(ZoneStatePersistence)
 {
     const std::string zone1 = "zone1";
     const std::string zone2 = "zone2";
@@ -1211,7 +1211,7 @@ BOOST_AUTO_TEST_CASE(ZoneStatePersistenceTest)
     }
 }
 
-BOOST_AUTO_TEST_CASE(StartShutdownZoneTest)
+BOOST_AUTO_TEST_CASE(StartShutdownZone)
 {
     const std::string zone1 = "zone1";
     const std::string zone2 = "zone2";
@@ -1251,7 +1251,7 @@ BOOST_AUTO_TEST_CASE(StartShutdownZoneTest)
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "");
 }
 
-BOOST_AUTO_TEST_CASE(LockUnlockZoneTest)
+BOOST_AUTO_TEST_CASE(LockUnlockZone)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     cm.createZone("zone1", DBUS_TEMPLATE);

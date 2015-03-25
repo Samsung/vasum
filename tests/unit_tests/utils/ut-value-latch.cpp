@@ -58,7 +58,7 @@ namespace
     };
 } // namespace
 
-BOOST_AUTO_TEST_CASE(SimpleTypeTest)
+BOOST_AUTO_TEST_CASE(SimpleValue)
 {
     ValueLatch<int> testLatch;
 
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(SimpleTypeTest)
     BOOST_REQUIRE_EQUAL(testLatch.get(TIMEOUT), 3);
 }
 
-BOOST_AUTO_TEST_CASE(ComplexTypeTest)
+BOOST_AUTO_TEST_CASE(ComplexValue)
 {
     ValueLatch<ComplexType> testLatch;
 
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(ComplexTypeTest)
     BOOST_REQUIRE_EQUAL(test.str, TEST_STRING);
 }
 
-BOOST_AUTO_TEST_CASE(ComplexMovableTypeTest)
+BOOST_AUTO_TEST_CASE(ComplexMovableValue)
 {
     ValueLatch<ComplexMovableType> testLatch;
 
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(ComplexMovableTypeTest)
     BOOST_REQUIRE_EQUAL(test.value.str, TEST_STRING);
 }
 
-BOOST_AUTO_TEST_CASE(TimeoutTest)
+BOOST_AUTO_TEST_CASE(Timeout)
 {
     ValueLatch<int> testLatch;
 
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(TimeoutTest)
                             WhatEquals("Timeout occured"));
 }
 
-BOOST_AUTO_TEST_CASE(MultipleSetTest)
+BOOST_AUTO_TEST_CASE(MultipleSet)
 {
     ValueLatch<int> testLatch;
 
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(MultipleSetTest)
                             WhatEquals("Cannot set value multiple times"));
 }
 
-BOOST_AUTO_TEST_CASE(MultipleGetTest)
+BOOST_AUTO_TEST_CASE(MultipleGet)
 {
     ValueLatch<int> testLatch;
 

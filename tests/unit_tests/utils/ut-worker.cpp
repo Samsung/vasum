@@ -39,12 +39,12 @@ using namespace vasum::utils;
 
 const int unsigned TIMEOUT = 1000;
 
-BOOST_AUTO_TEST_CASE(NoTasksTest)
+BOOST_AUTO_TEST_CASE(NoTasks)
 {
     Worker::Pointer worker = Worker::create();
 }
 
-BOOST_AUTO_TEST_CASE(NoTasks2Test)
+BOOST_AUTO_TEST_CASE(NoTasksWithSubWorkers)
 {
     Worker::Pointer worker = Worker::create();
     Worker::Pointer sub1 = worker->createSubWorker();
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(NoTasks2Test)
     worker.reset();
 }
 
-BOOST_AUTO_TEST_CASE(SimpleTest)
+BOOST_AUTO_TEST_CASE(Simple)
 {
     Latch done;
 
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(SimpleTest)
     BOOST_CHECK(done.wait(TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(QueueTest)
+BOOST_AUTO_TEST_CASE(Queue)
 {
     std::mutex mutex;
     std::string result;
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(QueueTest)
     BOOST_CHECK_EQUAL("0123456789", result);
 }
 
-BOOST_AUTO_TEST_CASE(ThreadResumeTest)
+BOOST_AUTO_TEST_CASE(ThreadResume)
 {
     Latch done;
 
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(ThreadResumeTest)
     BOOST_CHECK(done.wait(TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(SubWorkerTest)
+BOOST_AUTO_TEST_CASE(SubWorker)
 {
     std::mutex mutex;
     std::string result;
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(SubWorkerTest)
     }
 }
 
-BOOST_AUTO_TEST_CASE(NoCopyTest)
+BOOST_AUTO_TEST_CASE(NoCopy)
 {
     typedef std::atomic_int Counter;
 

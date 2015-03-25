@@ -151,7 +151,7 @@ std::ostream& operator<<(std::ostream& out, VsmStatus status)
 
 BOOST_FIXTURE_TEST_SUITE(ClientSuite, Fixture)
 
-BOOST_AUTO_TEST_CASE(NotRunningServerTest)
+BOOST_AUTO_TEST_CASE(NotRunningServer)
 {
     cm.shutdownAll();
 
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(NotRunningServerTest)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(GetZoneDbusesTest)
+BOOST_AUTO_TEST_CASE(GetZoneDbuses)
 {
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(GetZoneDbusesTest)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(GetZoneIdsTest)
+BOOST_AUTO_TEST_CASE(GetZoneIds)
 {
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(GetZoneIdsTest)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(GetActiveZoneIdTest)
+BOOST_AUTO_TEST_CASE(GetActiveZoneId)
 {
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(GetActiveZoneIdTest)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(SetActiveZoneTest)
+BOOST_AUTO_TEST_CASE(SetActiveZone)
 {
     const std::string newActiveZoneId = "zone2";
 
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(SetActiveZoneTest)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(CreateZoneTest)
+BOOST_AUTO_TEST_CASE(CreateZone)
 {
     const std::string newActiveZoneId = "";
 
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(CreateZoneTest)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(StartShutdownZoneTest)
+BOOST_AUTO_TEST_CASE(StartShutdownZone)
 {
     const std::string newActiveZoneId = "zone1";
 
@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE(StartShutdownZoneTest)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(LockUnlockZoneTest)
+BOOST_AUTO_TEST_CASE(LockUnlockZone)
 {
     const std::string newActiveZoneId = "zone2";
 
@@ -276,7 +276,7 @@ BOOST_AUTO_TEST_CASE(LockUnlockZoneTest)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(FileMoveRequestTest)
+BOOST_AUTO_TEST_CASE(FileMoveRequest)
 {
     const std::string path = "/tmp/fake_path";
     const std::string secondZone = "fake_zone";
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE(FileMoveRequestTest)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(NotificationTest)
+BOOST_AUTO_TEST_CASE(Notification)
 {
     const std::string MSG_CONTENT = "msg";
     const std::string MSG_APP = "app";
@@ -346,7 +346,7 @@ BOOST_AUTO_TEST_CASE(NotificationTest)
     }
 }
 
-BOOST_AUTO_TEST_CASE(GetZoneIdByPidTest1)
+BOOST_AUTO_TEST_CASE(GetZoneIdByPidTestSingle)
 {
     VsmClient client = vsm_client_create();
     VsmString zone;
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(GetZoneIdByPidTest1)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(GetZoneIdByPidTest2)
+BOOST_AUTO_TEST_CASE(GetZoneIdByPidTestMultiple)
 {
     std::set<std::string> ids;
 
@@ -383,7 +383,7 @@ BOOST_AUTO_TEST_CASE(GetZoneIdByPidTest2)
     }
 }
 
-BOOST_AUTO_TEST_CASE(GrantRevokeTest)
+BOOST_AUTO_TEST_CASE(GrantRevoke)
 {
     const std::string zoneId = "zone2";
     const std::string dev = "tty3";
@@ -405,7 +405,7 @@ BOOST_AUTO_TEST_CASE(GrantRevokeTest)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(ProvisionTest)
+BOOST_AUTO_TEST_CASE(Provision)
 {
     VsmClient client = vsm_client_create();
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_connect(client));
