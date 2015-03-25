@@ -713,12 +713,12 @@ VsmStatus Client::vsm_netdev_get_ipv6_addr(const char* zone,
 VsmStatus Client::vsm_netdev_set_ipv4_addr(const char* zone,
                                            const char* netdevId,
                                            struct in_addr* addr,
-                                           int mask) noexcept
+                                           int prefix) noexcept
 {
     try {
         GVariant* dict = createTupleArray({make_tuple("ipv4",
                                             "ip:" + toString(addr) + ","
-                                            "prefixlen:" + to_string(mask))});
+                                            "prefixlen:" + to_string(prefix))});
         GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
         return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
     } catch (exception& ex) {
@@ -730,12 +730,12 @@ VsmStatus Client::vsm_netdev_set_ipv4_addr(const char* zone,
 VsmStatus Client::vsm_netdev_set_ipv6_addr(const char* zone,
                                            const char* netdevId,
                                            struct in6_addr* addr,
-                                           int mask) noexcept
+                                           int prefix) noexcept
 {
     try {
         GVariant* dict = createTupleArray({make_tuple("ipv6",
                                             "ip:" + toString(addr) + ","
-                                            "prefixlen:" + to_string(mask))});
+                                            "prefixlen:" + to_string(prefix))});
         GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
         return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
     } catch (exception& ex) {

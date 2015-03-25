@@ -145,40 +145,40 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "create_netdev_veth", {
             create_netdev_veth,
-            "create_netdev_veth zone_id zoneDev hostDev",
+            "create_netdev_veth zone_id zone_netdev_id host_netdev_id",
             "Create netdev in zone",
             {{"zone_id", "id zone name"},
-             {"zoneDev", "network device id"},
-             {"hostDev", "host bridge id"}}
+             {"zone_netdev_id", "network device id"},
+             {"host_netdev_id", "host bridge id"}}
         }
     },
     {
         "create_netdev_macvlan", {
             create_netdev_macvlan,
-            "create_netdev_macvlan zone_id zoneDev hostDev mode",
+            "create_netdev_macvlan zone_id zone_netdev_id host_netdev_id mode",
             "Create netdev in zone",
             {{"zone_id", "id zone name"},
-             {"zoneDev", "network device id"},
-             {"hostDev", "host bridge id"},
+             {"zone_netdev_id", "network device id"},
+             {"host_netdev_id", "host bridge id"},
              {"mode", "macvlan mode (private, vepa, bridge, passthru)"}}
         }
     },
     {
         "create_netdev_phys", {
             create_netdev_phys,
-            "create_netdev_phys zone_id devId",
+            "create_netdev_phys zone_id netdev_id",
             "Create/move netdev to zone",
             {{"zone_id", "id zone name"},
-             {"devId", "network device id"}}
+             {"netdev_id", "network device name"}}
         }
     },
     {
         "lookup_netdev_by_name", {
             lookup_netdev_by_name,
-            "lookup_netdev_by_name zone_id devId",
+            "lookup_netdev_by_name zone_id netdev_id",
             "Get netdev flags",
             {{"zone_id", "id zone name"},
-             {"devId", "network device id"}}
+             {"netdev_id", "network device name"}}
         }
     },
     {
@@ -187,7 +187,7 @@ std::map<std::string, CommandLineInterface> commands = {
             "destroy_netdev zone_id devId",
             "Destroy netdev in zone",
             {{"zone_id", "id zone name"},
-             {"devId", "network device id"}}
+             {"netdev_id", "network device name"}}
         }
     },
     {
@@ -243,6 +243,15 @@ std::map<std::string, CommandLineInterface> commands = {
             netdev_up,
             "netdev_up zone_id netdev_id",
             "Turn up a network device in the zone",
+            {{"zone_id", "id zone name"},
+             {"netdev_id", "network device id"}}
+        }
+    },
+    {
+        "netdev_down", {
+            netdev_down,
+            "netdev_down zone_id netdev_id",
+            "Turn down a network device in the zone",
             {{"zone_id", "id zone name"},
              {"netdev_id", "network device id"}}
         }
