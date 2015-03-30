@@ -221,6 +221,26 @@ BOOST_AUTO_TEST_CASE(GetActiveZoneId)
     vsm_client_free(client);
 }
 
+BOOST_AUTO_TEST_CASE(LookupZoneById)
+{
+    const std::string activeZoneId = "zone1";
+
+    VsmClient client = vsm_client_create();
+    VsmStatus status = vsm_connect(client);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    VsmZone info;
+    status = vsm_lookup_zone_by_id(client, activeZoneId.c_str(), &info);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+
+    BOOST_CHECK_EQUAL(info->id, activeZoneId);
+    BOOST_CHECK_EQUAL(info->state, RUNNING);
+    BOOST_CHECK_EQUAL(info->terminal, -1);
+    BOOST_CHECK_EQUAL(info->rootfs_path, "/tmp/ut-zones/" + activeZoneId + "/rootfs");
+
+    vsm_zone_free(info);
+    vsm_client_free(client);
+}
+
 BOOST_AUTO_TEST_CASE(SetActiveZone)
 {
     const std::string newActiveZoneId = "zone2";
@@ -424,5 +444,28 @@ BOOST_AUTO_TEST_CASE(Provision)
     vsm_array_string_free(declarations);
     vsm_client_free(client);
 }
+
+BOOST_AUTO_TEST_CASE(ZoneGetNetdevs)
+{
+    const std::string activeZoneId = "zone1";
+
+    VsmClient client = vsm_client_create();
+    VsmStatus status = vsm_connect(client);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    VsmArrayString netdevs;
+    status = vsm_zone_get_netdevs(client, activeZoneId.c_str(), &netdevs);
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
+    BOOST_REQUIRE(netdevs != NULL);
+    vsm_array_string_free(netdevs);
+    vsm_client_free(client);
+}
+
+//TODO: We need createBridge from vasum::netdev
+//BOOST_AUTO_TEST_CASE(CreateDestroyNetdev)
+//BOOST_AUTO_TEST_CASE(LookupNetdev)
+//BOOST_AUTO_TEST_CASE(GetSetDeleteIpAddr)
+//BOOST_AUTO_TEST_CASE(NetdevUpDown)
+
+
 
 BOOST_AUTO_TEST_SUITE_END()

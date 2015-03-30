@@ -810,6 +810,9 @@ void ZonesManager::handleGetZoneInfoCall(const api::ZoneId& zoneId,
         return;
     }
 
+    zoneInfo->id = zone.getId();
+    zoneInfo->vt = zone.getVT();
+    zoneInfo->rootPath = zone.getRootPath();
     result->set(zoneInfo);
 }
 

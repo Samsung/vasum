@@ -355,7 +355,7 @@ void HostConnection::onMessageCall(const std::string& objectPath,
         config::loadFromGVariant(parameters, data);
 
         if (mGetNetdevListCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::GetNetDevAttrs>>(result);
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::NetDevList>>(result);
             mGetNetdevListCallback(data, rb);
         }
         return;

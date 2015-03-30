@@ -491,15 +491,12 @@ VsmStatus Client::vsm_lookup_zone_by_id(const char* id, VsmZone* zone) noexcept
     VsmStatus ret = callMethod(HOST_INTERFACE,
                                api::host::METHOD_GET_ZONE_INFO,
                                args_in,
-                               "((siss))",
+                               "(siss)",
                                &out);
     if (ret != VSMCLIENT_SUCCESS) {
         return ret;
     }
-    GVariant* unpacked;
-    g_variant_get(out, "(*)", &unpacked);
-    toBasic(unpacked, zone);
-    g_variant_unref(unpacked);
+    toBasic(out, zone);
     g_variant_unref(out);
     return ret;
 }
