@@ -26,15 +26,16 @@
 #include <config.hpp>
 #include "vasum-client-impl.hpp"
 #include "utils.hpp"
+#include "exception.hpp"
+#include "host-dbus-connection.hpp"
+#include "zone-dbus-connection.hpp"
+#include <zone-dbus-definitions.hpp>
+
 #include <dbus/connection.hpp>
 #include <dbus/exception.hpp>
 #include <utils/glib-loop.hpp>
-#include <host-dbus-definitions.hpp>
-#include <zone-dbus-definitions.hpp>
-#include <base-exception.hpp>
 
 #include <algorithm>
-#include <tuple>
 #include <vector>
 #include <cstring>
 #include <cassert>
@@ -46,71 +47,11 @@
 #include <boost/algorithm/string/classification.hpp>
 
 using namespace std;
-using namespace dbus;
 using namespace vasum;
-using namespace vasum::utils;
 
 namespace {
 
-const DbusInterfaceInfo HOST_INTERFACE(api::host::BUS_NAME,
-                                       api::host::OBJECT_PATH,
-                                       api::host::INTERFACE);
-const DbusInterfaceInfo ZONE_INTERFACE(api::zone::BUS_NAME,
-                                            api::zone::OBJECT_PATH,
-                                            api::zone::INTERFACE);
-
-unique_ptr<ScopedGlibLoop> gGlibLoop;
-
-void toDict(GVariant* in, VsmArrayString* keys, VsmArrayString* values)
-{
-    assert(in);
-    assert(keys);
-    assert(values);
-
-    typedef char* key_type;
-    typedef char* value_type;
-
-    GVariantIter iter;
-    value_type value;
-    key_type key;
-    gsize size = g_variant_n_children(in);
-    key_type* outk = (key_type*)calloc(size + 1, sizeof(key_type));
-    value_type* outv = (value_type*)calloc(size + 1, sizeof(value_type));
-
-    g_variant_iter_init(&iter, in);
-    for (int i = 0; g_variant_iter_loop(&iter, "(ss)", &key, &value); i++) {
-        outk[i] = strdup(key);
-        outv[i] = strdup(value);
-    }
-    *keys = outk;
-    *values = outv;
-}
-
-vector<tuple<string, string>> toDict(GVariant* in)
-{
-    assert(in);
-
-    const gchar* key;
-    const gchar* value;
-    vector<tuple<string, string>> dict;
-    GVariantIter iter;
-    g_variant_iter_init(&iter, in);
-    while (g_variant_iter_loop(&iter, "(&s&s)", &key, &value)) {
-        dict.push_back(make_tuple<string, string>(key, value));
-    }
-    return dict;
-}
-
-void toBasic(GVariant* in, char** str)
-{
-    assert(in);
-    assert(str);
-
-    gsize length;
-    const gchar* src = g_variant_get_string(in, &length);
-    char* buf = strndup(src, length);
-    *str = buf;
-}
+unique_ptr<utils::ScopedGlibLoop> gGlibLoop;
 
 VsmZoneState getZoneState(const char* state)
 {
@@ -137,43 +78,35 @@ VsmZoneState getZoneState(const char* state)
     } else if (strcmp(state, "ACTIVATING") == 0) {
         return ACTIVATING;
     }
-    assert(0 && "UNKNOWN STATE");
-    return (VsmZoneState)-1;
+    throw InvalidResponseException("Unknown state");
 }
 
-void toBasic(GVariant* in, VsmZone* zone)
+void convert(const api::VectorOfStrings& in, VsmArrayString& out)
 {
-    const char* id;
-    const char* path;
-    const char* state;
-    int terminal;
-    VsmZone vsmZone = (VsmZone)malloc(sizeof(*vsmZone));
-    g_variant_get(in, "(siss)", &id, &terminal, &state, &path);
-    vsmZone->id = strdup(id);
-    vsmZone->terminal = terminal;
-    vsmZone->state = getZoneState(state);
-    vsmZone->rootfs_path = strdup(path);
-    *zone = vsmZone;
-}
-
-template<typename T>
-void toArray(GVariant* in, T** scArray)
-{
-    assert(in);
-    assert(scArray);
-
-    gsize size = g_variant_n_children(in);
-    T* ids = (T*)calloc(size + 1, sizeof(T));
-
-    GVariantIter iter;
-    GVariant* child;
-
-    g_variant_iter_init(&iter, in);
-    for (int i = 0; (child = g_variant_iter_next_value(&iter)); i++) {
-        toBasic(child, &ids[i]);
-        g_variant_unref(child);
+    out = reinterpret_cast<char**>(calloc(in.values.size() + 1, sizeof(char*)));
+    for (size_t i = 0; i < in.values.size(); ++i) {
+        out[i] = ::strdup(in.values[i].c_str());
     }
-    *scArray = ids;
+}
+
+void convert(const api::VectorOfStringPairs& in, VsmArrayString& keys, VsmArrayString& values)
+{
+    keys = reinterpret_cast<char**>(calloc(in.values.size() + 1, sizeof(char*)));
+    values = reinterpret_cast<char**>(calloc(in.values.size() + 1, sizeof(char*)));
+    for (size_t i = 0; i < in.values.size(); ++i) {
+        keys[i] = ::strdup(in.values[i].first.c_str());
+        values[i] = ::strdup(in.values[i].second.c_str());
+    }
+}
+
+void convert(const api::ZoneInfoOut& info, VsmZone& zone)
+{
+    VsmZone vsmZone = reinterpret_cast<VsmZone>(malloc(sizeof(*vsmZone)));
+    vsmZone->id = ::strdup(info.id.c_str());
+    vsmZone->terminal = info.vt;
+    vsmZone->state = getZoneState(info.state.c_str());
+    vsmZone->rootfs_path = ::strdup(info.rootPath.c_str());
+    zone = vsmZone;
 }
 
 string toString(const in_addr* addr)
@@ -181,7 +114,7 @@ string toString(const in_addr* addr)
     char buf[INET_ADDRSTRLEN];
     const char* ret = inet_ntop(AF_INET, addr, buf, INET_ADDRSTRLEN);
     if (ret == NULL) {
-        throw runtime_error(getSystemErrorMessage());
+        throw InvalidArgumentException(getSystemErrorMessage());
     }
     return ret;
 }
@@ -191,35 +124,9 @@ string toString(const in6_addr* addr)
     char buf[INET6_ADDRSTRLEN];
     const char* ret = inet_ntop(AF_INET6, addr, buf, INET6_ADDRSTRLEN);
     if (ret == NULL) {
-        throw runtime_error(getSystemErrorMessage());
+        throw InvalidArgumentException(getSystemErrorMessage());
     }
     return ret;
-}
-
-GVariant* createTupleArray(const vector<tuple<string, string>>& dict)
-{
-    GVariantBuilder builder;
-    g_variant_builder_init(&builder, G_VARIANT_TYPE_ARRAY);
-    for (const auto entry : dict) {
-        g_variant_builder_add(&builder, "(ss)", get<0>(entry).c_str(), get<1>(entry).c_str());
-    }
-    return g_variant_builder_end(&builder);
-}
-
-VsmStatus toStatus(const exception& ex)
-{
-    if (typeid(DbusCustomException) == typeid(ex)) {
-        return VSMCLIENT_CUSTOM_ERROR;
-    } else if (typeid(DbusIOException) == typeid(ex)) {
-        return VSMCLIENT_IO_ERROR;
-    } else if (typeid(DbusOperationException) == typeid(ex)) {
-        return VSMCLIENT_OPERATION_FAILED;
-    } else if (typeid(DbusInvalidArgumentException) == typeid(ex)) {
-        return VSMCLIENT_INVALID_ARGUMENT;
-    } else if (typeid(DbusException) == typeid(ex)) {
-        return VSMCLIENT_OTHER_ERROR;
-    }
-    return VSMCLIENT_OTHER_ERROR;
 }
 
 bool readFirstLineOfFile(const string& path, string& ret)
@@ -235,39 +142,15 @@ bool readFirstLineOfFile(const string& path, string& ret)
 
 } //namespace
 
-VsmStatus Client::getNetdevAttrs(const string& zone,
-                                 const string& netdev,
-                                 NetdevAttrs& attrs) noexcept
-{
-    GVariant* out = NULL;
-    GVariant* args_in = g_variant_new("(ss)", zone.c_str(), netdev.c_str());
-    VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_GET_NETDEV_ATTRS,
-                               args_in,
-                               "(a(ss))",
-                               &out);
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
-    GVariant* unpacked;
-    g_variant_get(out, "(*)", &unpacked);
-    attrs = toDict(unpacked);
-    g_variant_unref(unpacked);
-    g_variant_unref(out);
-    mStatus = Status();
-    return vsm_get_status();
-}
-
 VsmStatus Client::vsm_start_glib_loop() noexcept
 {
     try {
         if (!gGlibLoop) {
-            gGlibLoop.reset(new ScopedGlibLoop());
+            gGlibLoop.reset(new utils::ScopedGlibLoop());
         }
     } catch (const exception&) {
         return VSMCLIENT_OTHER_ERROR;
     }
-
     return VSMCLIENT_SUCCESS;
 }
 
@@ -299,89 +182,55 @@ Client::~Client() noexcept
 {
 }
 
-VsmStatus Client::createSystem() noexcept
+VsmStatus Client::coverException(const function<void(void)> worker) noexcept
 {
     try {
-        mConnection = DbusConnection::createSystem();
-        mStatus = Status();
+        worker();
+        mStatus = Status(VSMCLIENT_SUCCESS);
+    } catch (const vasum::IOException& ex) {
+        mStatus = Status(VSMCLIENT_IO_ERROR, ex.what());
+    } catch (const vasum::OperationFailedException& ex) {
+        mStatus = Status(VSMCLIENT_OPERATION_FAILED, ex.what());
+    } catch (const vasum::InvalidArgumentException& ex) {
+        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
+    } catch (const vasum::InvalidResponseException& ex) {
+        mStatus = Status(VSMCLIENT_OTHER_ERROR, ex.what());
+    } catch (const vasum::ClientException& ex) {
+        mStatus = Status(VSMCLIENT_CUSTOM_ERROR, ex.what());
+    } catch (const dbus::DbusCustomException& ex) {
+        mStatus = Status(VSMCLIENT_CUSTOM_ERROR, ex.what());
+    } catch (const dbus::DbusIOException& ex) {
+        mStatus = Status(VSMCLIENT_IO_ERROR, ex.what());
+    } catch (const dbus::DbusOperationException& ex) {
+        mStatus = Status(VSMCLIENT_OPERATION_FAILED, ex.what());
+    } catch (const dbus::DbusInvalidArgumentException& ex) {
+        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
+    } catch (const dbus::DbusException& ex) {
+        mStatus = Status(VSMCLIENT_OTHER_ERROR, ex.what());
     } catch (const exception& ex) {
-        mStatus = Status(toStatus(ex), ex.what());
+        mStatus = Status(VSMCLIENT_CUSTOM_ERROR, ex.what());
     }
-    return vsm_get_status();
+    return mStatus.mVsmStatus;
+}
+
+VsmStatus Client::createSystem() noexcept
+{
+    return coverException([&] {
+        shared_ptr<dbus::DbusConnection> connection(dbus::DbusConnection::createSystem().release());
+
+        mHostClient.create(connection);
+        mZoneClient.create(connection);
+    });
 }
 
 VsmStatus Client::create(const string& address) noexcept
 {
-    try {
-        mConnection = DbusConnection::create(address);
-        mStatus = Status();
-    } catch (const exception& ex) {
-        mStatus = Status(toStatus(ex), ex.what());
-    }
-    return vsm_get_status();
-}
+    return coverException([&] {
+        shared_ptr<dbus::DbusConnection> connection(dbus::DbusConnection::create(address).release());
 
-VsmStatus Client::callMethod(const DbusInterfaceInfo& info,
-                             const string& method,
-                             GVariant* args_in,
-                             const string& args_spec_out,
-                             GVariant** args_out)
-{
-    try {
-        GVariantPtr ret = mConnection->callMethod(info.busName,
-                                                  info.objectPath,
-                                                  info.interface,
-                                                  method,
-                                                  args_in,
-                                                  args_spec_out);
-        if (args_out != NULL) {
-            *args_out = ret.release();
-        }
-        mStatus = Status();
-    } catch (const exception& ex)  {
-        mStatus = Status(toStatus(ex), ex.what());
-    }
-    return vsm_get_status();
-}
-
-VsmStatus Client::signalSubscribe(const DbusInterfaceInfo& info,
-                                  const string& name,
-                                  SignalCallback signalCallback,
-                                  VsmSubscriptionId* subscriptionId)
-{
-    auto onSignal = [=](const string& /*senderBusName*/,
-                        const string & objectPath,
-                        const string & interface,
-                        const string & signalName,
-                        GVariant * parameters) {
-        if (objectPath == info.objectPath &&
-            interface == info.interface &&
-            signalName == name) {
-
-            signalCallback(parameters);
-        }
-    };
-    try {
-        guint id = mConnection->signalSubscribe(onSignal, info.busName);
-        if (subscriptionId) {
-            *subscriptionId = id;
-        }
-        mStatus = Status();
-    } catch (const exception& ex) {
-        mStatus = Status(toStatus(ex), ex.what());
-    }
-    return vsm_get_status();
-}
-
-VsmStatus Client::signalUnsubscribe(VsmSubscriptionId id)
-{
-    try {
-        mConnection->signalUnsubscribe(id);
-        mStatus = Status();
-    } catch (const exception& ex) {
-        mStatus = Status(toStatus(ex), ex.what());
-    }
-    return vsm_get_status();
+        mHostClient.create(connection);
+        mZoneClient.create(connection);
+    });
 }
 
 const char* Client::vsm_get_status_message() const noexcept
@@ -399,86 +248,54 @@ VsmStatus Client::vsm_get_zone_dbuses(VsmArrayString* keys, VsmArrayString* valu
     assert(keys);
     assert(values);
 
-    GVariant* out = NULL;
-    VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_GET_ZONE_DBUSES,
-                               NULL,
-                               "(a(ss))",
-                               &out);
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
-    GVariant* unpacked;
-    g_variant_get(out, "(*)", &unpacked);
-    toDict(unpacked, keys, values);
-    g_variant_unref(unpacked);
-    g_variant_unref(out);
-    return ret;
+    return coverException([&] {
+        api::Dbuses dbuses;
+        mHostClient.callGetZoneDbuses(dbuses);
+        convert(dbuses, *keys, *values);
+    });
 }
 
 VsmStatus Client::vsm_get_zone_ids(VsmArrayString* array) noexcept
 {
     assert(array);
 
-    GVariant* out = NULL;
-    VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_GET_ZONE_ID_LIST,
-                               NULL,
-                               "(as)",
-                               &out);
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
-    GVariant* unpacked;
-    g_variant_get(out, "(*)", &unpacked);
-    toArray(unpacked, array);
-    g_variant_unref(unpacked);
-    g_variant_unref(out);
-    return ret;
+    return coverException([&] {
+        api::ZoneIds zoneIds;
+        mHostClient.callGetZoneIds(zoneIds);
+        convert(zoneIds, *array);
+    });
 }
 
 VsmStatus Client::vsm_get_active_zone_id(VsmString* id) noexcept
 {
     assert(id);
 
-    GVariant* out = NULL;
-    VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_GET_ACTIVE_ZONE_ID,
-                               NULL,
-                               "(s)",
-                               &out);
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
-    GVariant* unpacked;
-    g_variant_get(out, "(*)", &unpacked);
-    toBasic(unpacked, id);
-    g_variant_unref(unpacked);
-    g_variant_unref(out);
-    return ret;
+    return coverException([&] {
+        api::ZoneId zoneId;
+        mHostClient.callGetActiveZoneId(zoneId);
+        *id = ::strdup(zoneId.value.c_str());
+    });
 }
 
 VsmStatus Client::vsm_lookup_zone_by_pid(int pid, VsmString* id) noexcept
 {
     assert(id);
 
-    const string path = "/proc/" + to_string(pid) + "/cpuset";
+    return coverException([&] {
+        const string path = "/proc/" + to_string(pid) + "/cpuset";
 
-    string cpuset;
-    if (!readFirstLineOfFile(path, cpuset)) {
-        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, "Process not found");
-        return vsm_get_status();
-    }
+        string cpuset;
+        if (!readFirstLineOfFile(path, cpuset)) {
+            throw InvalidArgumentException("Process not found");
+        }
 
-    string zoneId;
-    if (!parseZoneIdFromCpuSet(cpuset, zoneId)) {
-        mStatus = Status(VSMCLIENT_OTHER_ERROR, "unknown format of cpuset");
-        return vsm_get_status();
-    }
+        string zoneId;
+        if (!parseZoneIdFromCpuSet(cpuset, zoneId)) {
+            throw OperationFailedException("unknown format of cpuset");
+        }
 
-    *id = strdup(zoneId.c_str());
-    mStatus = Status();
-    return vsm_get_status();
+        *id = ::strdup(zoneId.c_str());
+    });
 }
 
 VsmStatus Client::vsm_lookup_zone_by_id(const char* id, VsmZone* zone) noexcept
@@ -486,104 +303,111 @@ VsmStatus Client::vsm_lookup_zone_by_id(const char* id, VsmZone* zone) noexcept
     assert(id);
     assert(zone);
 
-    GVariant* out = NULL;
-    GVariant* args_in = g_variant_new("(s)", id);
-    VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_GET_ZONE_INFO,
-                               args_in,
-                               "(siss)",
-                               &out);
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
-    toBasic(out, zone);
-    g_variant_unref(out);
-    return ret;
+    return coverException([&] {
+        api::ZoneInfoOut info;
+        mHostClient.callGetZoneInfo({ id }, info);
+        convert(info, *zone);
+    });
 }
 
 VsmStatus Client::vsm_lookup_zone_by_terminal_id(int, VsmString*) noexcept
 {
-    mStatus = Status(VSMCLIENT_OTHER_ERROR, "Not implemented");
-    return vsm_get_status();
+    return coverException([&] {
+        throw OperationFailedException("Not implemented");
+    });
 }
 
 VsmStatus Client::vsm_set_active_zone(const char* id) noexcept
 {
     assert(id);
 
-    GVariant* args_in = g_variant_new("(s)", id);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_SET_ACTIVE_ZONE, args_in);
+    return coverException([&] {
+        mHostClient.callSetActiveZone({ id });
+    });
 }
 
 VsmStatus Client::vsm_create_zone(const char* id, const char* tname) noexcept
 {
     assert(id);
-    const char* template_name = tname ? tname : "default";
 
-    GVariant* args_in = g_variant_new("(ss)", id, template_name);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_CREATE_ZONE, args_in);
+    return coverException([&] {
+        string template_name = tname ? tname : "default";
+        mHostClient.callCreateZone({ id, template_name });
+    });
 }
 
 VsmStatus Client::vsm_destroy_zone(const char* id) noexcept
 {
     assert(id);
-    GVariant* args_in = g_variant_new("(s)", id);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_DESTROY_ZONE, args_in);
+
+    return coverException([&] {
+        mHostClient.callDestroyZone({ id });
+    });
 }
 
 VsmStatus Client::vsm_shutdown_zone(const char* id) noexcept
 {
     assert(id);
-    GVariant* args_in = g_variant_new("(s)", id);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_SHUTDOWN_ZONE, args_in);
+
+    return coverException([&] {
+        mHostClient.callShutdownZone({ id });
+    });
 }
 
 VsmStatus Client::vsm_start_zone(const char* id) noexcept
 {
     assert(id);
-    GVariant* args_in = g_variant_new("(s)", id);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_START_ZONE, args_in);
+
+    return coverException([&] {
+        mHostClient.callStartZone({ id });
+    });
 }
 
 VsmStatus Client::vsm_lock_zone(const char* id) noexcept
 {
     assert(id);
 
-    GVariant* args_in = g_variant_new("(s)", id);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_LOCK_ZONE, args_in);
+    return coverException([&] {
+        mHostClient.callLockZone({ id });
+    });
 }
 
 VsmStatus Client::vsm_unlock_zone(const char* id) noexcept
 {
     assert(id);
 
-    GVariant* args_in = g_variant_new("(s)", id);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_UNLOCK_ZONE, args_in);
+    return coverException([&] {
+        mHostClient.callUnlockZone({ id });
+    });
 }
 
 VsmStatus Client::vsm_add_state_callback(VsmZoneDbusStateCallback zoneDbusStateCallback,
-                                         void* data,
-                                         VsmSubscriptionId* subscriptionId) noexcept
+                                    void* data,
+                                    VsmSubscriptionId* subscriptionId) noexcept
 {
     assert(zoneDbusStateCallback);
 
-    auto onSigal = [=](GVariant * parameters)
-    {
-        const char* zone;
-        const char* dbusAddress;
-        g_variant_get(parameters, "(&s&s)", &zone, &dbusAddress);
-        zoneDbusStateCallback(zone, dbusAddress, data);
-    };
+    return coverException([&] {
+        auto onSigal = [=](const api::DbusState& dbus)
+        {
+            zoneDbusStateCallback(dbus.first.c_str(),
+                                  dbus.second.c_str(),
+                                  data);
+        };
 
-    return signalSubscribe(HOST_INTERFACE,
-                           api::host::SIGNAL_ZONE_DBUS_STATE,
-                           onSigal,
-                           subscriptionId);
+        VsmSubscriptionId id;
+        id = mHostClient.subscribeZoneDbusState(onSigal);
+        if (subscriptionId) {
+            *subscriptionId = id;
+        }
+    });
 }
 
 VsmStatus Client::vsm_del_state_callback(VsmSubscriptionId subscriptionId) noexcept
 {
-    return signalUnsubscribe(subscriptionId);
+    return coverException([&] {
+        mHostClient.unsubscribe(subscriptionId);
+    });
 }
 
 VsmStatus Client::vsm_grant_device(const char* id, const char* device, uint32_t flags) noexcept
@@ -591,8 +415,9 @@ VsmStatus Client::vsm_grant_device(const char* id, const char* device, uint32_t 
     assert(id);
     assert(device);
 
-    GVariant* args_in = g_variant_new("(ssu)", id, device, flags);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_GRANT_DEVICE, args_in);
+    return coverException([&] {
+        mHostClient.callGrantDevice({ id, device, flags });
+    });
 }
 
 VsmStatus Client::vsm_revoke_device(const char* id, const char* device) noexcept
@@ -600,403 +425,328 @@ VsmStatus Client::vsm_revoke_device(const char* id, const char* device) noexcept
     assert(id);
     assert(device);
 
-    GVariant* args_in = g_variant_new("(ss)", id, device);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_REVOKE_DEVICE, args_in);
+    return coverException([&] {
+        mHostClient.callRevokeDevice({ id, device });
+    });
 }
 
-VsmStatus Client::vsm_zone_get_netdevs(const char* zone, VsmArrayString* netdevIds) noexcept
+VsmStatus Client::vsm_zone_get_netdevs(const char* id, VsmArrayString* netdevIds) noexcept
 {
-    assert(zone);
+    assert(id);
     assert(netdevIds);
 
-    GVariant* out = NULL;
-    GVariant* args_in = g_variant_new("(s)", zone);
-    VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_GET_NETDEV_LIST,
-                               args_in,
-                               "(as)",
-                               &out);
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
-    GVariant* unpacked;
-    g_variant_get(out, "(*)", &unpacked);
-    toArray(unpacked, netdevIds);
-    g_variant_unref(unpacked);
-    g_variant_unref(out);
-    return ret;
+    return coverException([&] {
+        api::NetDevList netdevs;
+        mHostClient.callGetNetdevList({ id }, netdevs);
+        convert(netdevs, *netdevIds);
+    });
 }
 
-VsmStatus Client::vsm_netdev_get_ipv4_addr(const char* zone,
-                                           const char* netdevId,
-                                           struct in_addr* addr) noexcept
+VsmStatus Client::vsm_netdev_get_ip_addr(const char* id,
+                                         const char* netdevId,
+                                         int type,
+                                         void* addr) noexcept
 {
     using namespace boost::algorithm;
 
-    assert(zone);
+    assert(id);
     assert(netdevId);
     assert(addr);
 
-    NetdevAttrs attrs;
-    VsmStatus ret = getNetdevAttrs(zone, netdevId, attrs);
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
+    return coverException([&] {
+        api::GetNetDevAttrs attrs;
+        mHostClient.callGetNetdevAttrs({ id, netdevId }, attrs);
 
-    auto it = find_if(attrs.begin(), attrs.end(), [](const tuple<string, string>& entry) {
-            return get<0>(entry) == "ipv4";
-    });
-    if (it != attrs.end()) {
-        vector<string> addrAttrs;
-        for(auto addrAttr : split(addrAttrs, get<1>(*it), is_any_of(","))) {
-            size_t pos = addrAttr.find(":");
-            if (addrAttr.substr(0, pos) == "ip") {
-                if (pos != string::npos && pos < addrAttr.length() &&
-                    inet_pton(AF_INET, addrAttr.substr(pos + 1).c_str(), addr) == 1) {
-                    //XXX: return only one address
-                    mStatus = Status();
-                    return vsm_get_status();
-                } else {
-                    mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Invalid response data");
-                    return vsm_get_status();
+        auto it = find_if(attrs.values.begin(),
+                          attrs.values.end(),
+                          [type](const api::StringPair& entry) {
+                return entry.first == (type == AF_INET ? "ipv4" : "ipv6");
+        });
+
+        if (it != attrs.values.end()) {
+            vector<string> addrAttrs;
+            for(auto addrAttr : split(addrAttrs, it->second, is_any_of(","))) {
+                size_t pos = addrAttr.find(":");
+                if (addrAttr.substr(0, pos) == "ip") {
+                    if (pos != string::npos && pos < addrAttr.length() &&
+                        inet_pton(type, addrAttr.substr(pos + 1).c_str(), addr) == 1) {
+                        //XXX: return only one address
+                        return;
+                    } else {
+                        throw InvalidResponseException("Wrong address format returned");
+                    }
                 }
             }
         }
-    }
-    mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Address not found");
-    return vsm_get_status();
+        throw OperationFailedException("Address not found");
+    });
 }
 
-VsmStatus Client::vsm_netdev_get_ipv6_addr(const char* zone,
-                                           const char* netdevId,
-                                           struct in6_addr* addr) noexcept
+VsmStatus Client::vsm_netdev_get_ipv4_addr(const char* id,
+                                      const char* netdevId,
+                                      struct in_addr* addr) noexcept
 {
-    using namespace boost::algorithm;
+    return vsm_netdev_get_ip_addr(id, netdevId, AF_INET, addr);
+}
 
-    assert(zone);
+VsmStatus Client::vsm_netdev_get_ipv6_addr(const char* id,
+                                      const char* netdevId,
+                                      struct in6_addr* addr) noexcept
+{
+    return vsm_netdev_get_ip_addr(id, netdevId, AF_INET6, addr);
+}
+
+VsmStatus Client::vsm_netdev_set_ipv4_addr(const char* id,
+                                      const char* netdevId,
+                                      struct in_addr* addr,
+                                      int prefix) noexcept
+{
+    assert(id);
     assert(netdevId);
     assert(addr);
 
-    NetdevAttrs attrs;
-    VsmStatus ret = getNetdevAttrs(zone, netdevId, attrs);
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
-
-    auto it = find_if(attrs.begin(), attrs.end(), [](const tuple<string, string>& entry) {
-            return get<0>(entry) == "ipv6";
+    return coverException([&] {
+        string value = "ip:" + toString(addr) + ",""prefixlen:" + to_string(prefix);
+        mHostClient.callSetNetdevAttrs({ id, netdevId, { { "ipv4", value } }  } );
     });
-    if (it != attrs.end()) {
-        vector<string> addrAttrs;
-        for(auto addrAttr : split(addrAttrs, get<1>(*it), is_any_of(","))) {
-            size_t pos = addrAttr.find(":");
-            if (addrAttr.substr(0, pos) == "ip") {
-                if (pos != string::npos && pos < addrAttr.length() &&
-                    inet_pton(AF_INET6, addrAttr.substr(pos + 1).c_str(), addr) == 1) {
-                    //XXX: return only one address
-                    mStatus = Status();
-                    return vsm_get_status();
-                } else {
-                    mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Invalid response data");
-                    return vsm_get_status();
-                }
-            }
-        }
-    }
-    mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Address not found");
-    return vsm_get_status();
 }
 
-VsmStatus Client::vsm_netdev_set_ipv4_addr(const char* zone,
-                                           const char* netdevId,
-                                           struct in_addr* addr,
-                                           int prefix) noexcept
+VsmStatus Client::vsm_netdev_set_ipv6_addr(const char* id,
+                                      const char* netdevId,
+                                      struct in6_addr* addr,
+                                      int prefix) noexcept
 {
-    try {
-        GVariant* dict = createTupleArray({make_tuple("ipv4",
-                                            "ip:" + toString(addr) + ","
-                                            "prefixlen:" + to_string(prefix))});
-        GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
-        return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
-    } catch (exception& ex) {
-        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
-        return vsm_get_status();
-    }
+    assert(id);
+    assert(netdevId);
+    assert(addr);
+
+    return coverException([&] {
+        string value = "ip:" + toString(addr) + ",""prefixlen:" + to_string(prefix);
+        mHostClient.callSetNetdevAttrs({ id, netdevId, { { "ipv6", value } }  } );
+    });
 }
 
-VsmStatus Client::vsm_netdev_set_ipv6_addr(const char* zone,
-                                           const char* netdevId,
-                                           struct in6_addr* addr,
-                                           int prefix) noexcept
+VsmStatus Client::vsm_netdev_del_ipv4_addr(const char* id,
+                                      const char* netdevId,
+                                      struct in_addr* addr,
+                                      int prefix) noexcept
 {
-    try {
-        GVariant* dict = createTupleArray({make_tuple("ipv6",
-                                            "ip:" + toString(addr) + ","
-                                            "prefixlen:" + to_string(prefix))});
-        GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
-        return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
-    } catch (exception& ex) {
-        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
-        return vsm_get_status();
-    }
-}
+    assert(id);
+    assert(netdevId);
+    assert(addr);
 
-VsmStatus Client::vsm_netdev_del_ipv4_addr(const char* zone,
-                                           const char* netdevId,
-                                           struct in_addr* addr,
-                                           int prefix) noexcept
-{
-    std::string ip;
-    try {
+    return coverException([&] {
         //CIDR notation
-        ip = toString(addr) + "/" + to_string(prefix);
-    } catch(const std::exception& ex) {
-        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
-        return vsm_get_status();
-    }
-
-    GVariant* args_in = g_variant_new("(sss)", zone, netdevId, ip.c_str());
-    return callMethod(HOST_INTERFACE, api::host::METHOD_DELETE_NETDEV_IP_ADDRESS, args_in);
+        string ip = toString(addr) + "/" + to_string(prefix);
+        mHostClient.callDeleteNetdevIpAddress({ id, netdevId, ip });
+    });
 }
 
-VsmStatus Client::vsm_netdev_del_ipv6_addr(const char* zone,
-                                           const char* netdevId,
-                                           struct in6_addr* addr,
-                                           int prefix) noexcept
+VsmStatus Client::vsm_netdev_del_ipv6_addr(const char* id,
+                                      const char* netdevId,
+                                      struct in6_addr* addr,
+                                      int prefix) noexcept
 {
+    assert(id);
+    assert(netdevId);
+    assert(addr);
 
-    std::string ip;
-    try {
+    return coverException([&] {
         //CIDR notation
-        ip = toString(addr) + "/" + to_string(prefix);
-    } catch(const std::exception& ex) {
-        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
-        return vsm_get_status();
-    }
-
-    GVariant* args_in = g_variant_new("(sss)", zone, netdevId, ip.c_str());
-    return callMethod(HOST_INTERFACE, api::host::METHOD_DELETE_NETDEV_IP_ADDRESS, args_in);
+        string ip = toString(addr) + "/" + to_string(prefix);
+        mHostClient.callDeleteNetdevIpAddress({ id, netdevId, ip });
+    });
 }
 
 
-VsmStatus Client::vsm_netdev_up(const char* zone, const char* netdevId) noexcept
+VsmStatus Client::vsm_netdev_up(const char* id, const char* netdevId) noexcept
 {
-    try {
-        GVariant* dict = createTupleArray({make_tuple("flags", to_string(IFF_UP)),
-                                           make_tuple("change", to_string(IFF_UP))});
-        GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
-        return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
-    } catch (exception& ex) {
-        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
-        return vsm_get_status();
-    }
+    assert(id);
+    assert(netdevId);
+
+    return coverException([&] {
+        mHostClient.callSetNetdevAttrs({ id, netdevId, { { "flags", to_string(IFF_UP) },
+                                                          { "change", to_string(IFF_UP) }  }  } );
+    });
 }
 
-VsmStatus Client::vsm_netdev_down(const char* zone, const char* netdevId) noexcept
+VsmStatus Client::vsm_netdev_down(const char* id, const char* netdevId) noexcept
 {
-    try {
-        GVariant* dict = createTupleArray({make_tuple("flags", to_string(~IFF_UP)),
-                                           make_tuple("change", to_string(IFF_UP))});
-        GVariant* args_in = g_variant_new("(ss@a(ss))", zone, netdevId, dict);
-        return callMethod(HOST_INTERFACE, api::host::METHOD_SET_NETDEV_ATTRS, args_in);
-    } catch (exception& ex) {
-        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
-        return vsm_get_status();
-    }
+    assert(id);
+    assert(netdevId);
+
+    return coverException([&] {
+        mHostClient.callSetNetdevAttrs({ id, netdevId, { { "flags", to_string(~IFF_UP) },
+                                                          { "change", to_string(IFF_UP) }  }  } );
+    });
 }
 
-VsmStatus Client::vsm_create_netdev_veth(const char* zone,
-                                         const char* zoneDev,
-                                         const char* hostDev) noexcept
+VsmStatus Client::vsm_create_netdev_veth(const char* id,
+                                    const char* zoneDev,
+                                    const char* hostDev) noexcept
 {
-    GVariant* args_in = g_variant_new("(sss)", zone, zoneDev, hostDev);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_CREATE_NETDEV_VETH, args_in);
+    assert(id);
+    assert(zoneDev);
+    assert(hostDev);
+
+    return coverException([&] {
+        mHostClient.callCreateNetdevVeth({ id, zoneDev, hostDev });
+    });
 }
 
-VsmStatus Client::vsm_create_netdev_macvlan(const char* zone,
-                                            const char* zoneDev,
-                                            const char* hostDev,
-                                            enum macvlan_mode mode) noexcept
+VsmStatus Client::vsm_create_netdev_macvlan(const char* id,
+                                       const char* zoneDev,
+                                       const char* hostDev,
+                                       enum macvlan_mode mode) noexcept
 {
-    GVariant* args_in = g_variant_new("(sssu)", zone, zoneDev, hostDev, mode);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_CREATE_NETDEV_MACVLAN, args_in);
+    assert(id);
+    assert(zoneDev);
+    assert(hostDev);
+
+    return coverException([&] {
+        mHostClient.callCreateNetdevMacvlan({ id, zoneDev, hostDev, mode });
+    });
 }
 
-VsmStatus Client::vsm_create_netdev_phys(const char* zone, const char* devId) noexcept
+VsmStatus Client::vsm_create_netdev_phys(const char* id, const char* devId) noexcept
 {
-    GVariant* args_in = g_variant_new("(ss)", zone, devId);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_CREATE_NETDEV_PHYS, args_in);
+    assert(id);
+    assert(devId);
+
+    return coverException([&] {
+        mHostClient.callCreateNetdevPhys({ id, devId });
+    });
 }
 
-VsmStatus Client::vsm_lookup_netdev_by_name(const char* zone,
-                                            const char* netdevId,
-                                            VsmNetdev* netdev) noexcept
+VsmStatus Client::vsm_lookup_netdev_by_name(const char* id,
+                                       const char* netdevId,
+                                       VsmNetdev* netdev) noexcept
 {
     using namespace boost::algorithm;
 
-    assert(zone);
+    assert(id);
     assert(netdevId);
     assert(netdev);
 
-    NetdevAttrs attrs;
-    VsmStatus ret = getNetdevAttrs(zone, netdevId, attrs);
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
+    return coverException([&] {
+        api::GetNetDevAttrs attrs;
+        mHostClient.callGetNetdevAttrs({ id, netdevId }, attrs);
+        auto it = find_if(attrs.values.begin(),
+                          attrs.values.end(),
+                          [](const api::StringPair& entry) {
+                return entry.first == "type";
+        });
 
-    auto it = find_if(attrs.begin(), attrs.end(), [](const tuple<string, string>& entry) {
-            return get<0>(entry) == "type";
+        VsmNetdevType type;
+        if (it == attrs.values.end()) {
+            throw OperationFailedException("Can't fetch netdev type");
+        }
+
+        switch (stoi(it->second)) {
+            case 1<<0  /*IFF_802_1Q_VLAN*/: type = VSMNETDEV_VETH; break;
+            case 1<<21 /*IFF_MACVLAN*/: type = VSMNETDEV_MACVLAN; break;
+            default:
+                throw InvalidResponseException("Unknown netdev type: " + it->second);
+        }
+
+        *netdev = reinterpret_cast<VsmNetdev>(malloc(sizeof(**netdev)));
+        (*netdev)->name = ::strdup(id);
+        (*netdev)->type = type;
     });
-
-    VsmNetdevType type;
-    if (it == attrs.end()) {
-        mStatus = Status(VSMCLIENT_OTHER_ERROR, "Can't fetch netdev type");
-        return vsm_get_status();
-    }
-
-    switch (stoi(get<1>(*it))) {
-        case 1<<0  /*IFF_802_1Q_VLAN*/: type = VSMNETDEV_VETH; break;
-        case 1<<21 /*IFF_MACVLAN*/: type = VSMNETDEV_MACVLAN; break;
-        default:
-            mStatus = Status(VSMCLIENT_CUSTOM_ERROR, "Unknown netdev type: " + get<1>(*it));
-            return vsm_get_status();
-    }
-
-    *netdev = reinterpret_cast<VsmNetdev>(malloc(sizeof(**netdev)));
-    (*netdev)->name = strdup(zone);
-    (*netdev)->type = type;
-    mStatus = Status();
-    return vsm_get_status();
 }
 
-VsmStatus Client::vsm_destroy_netdev(const char* zone, const char* devId) noexcept
+VsmStatus Client::vsm_destroy_netdev(const char* id, const char* devId) noexcept
 {
-    GVariant* args_in = g_variant_new("(ss)", zone, devId);
-    return callMethod(HOST_INTERFACE, api::host::METHOD_DESTROY_NETDEV, args_in);
+    assert(id);
+    assert(devId);
+
+    return coverException([&] {
+        mHostClient.callDestroyNetdev({ id, devId });
+    });
 }
 
-VsmStatus Client::vsm_declare_file(const char* zone,
-                                   VsmFileType type,
-                                   const char *path,
-                                   int32_t flags,
-                                   mode_t mode,
-                                   VsmString* id) noexcept
+VsmStatus Client::vsm_declare_file(const char* id,
+                              VsmFileType type,
+                              const char *path,
+                              int32_t flags,
+                              mode_t mode,
+                              VsmString* declarationId) noexcept
 {
+    assert(id);
     assert(path);
 
-    GVariant* out = NULL;
-    GVariant* args_in = g_variant_new("(sisii)", zone, type, path, flags, mode);
-    VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_DECLARE_FILE,
-                               args_in,
-                               "(s)",
-                               &out);
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
-    GVariant* unpacked;
-    if (id != NULL) {
-        g_variant_get(out, "(*)", &unpacked);
-        toBasic(unpacked, id);
-        g_variant_unref(unpacked);
-    }
-    g_variant_unref(out);
-    return ret;
+    return coverException([&] {
+        api::Declaration declaration;
+        mHostClient.callDeclareFile({ id, type, path, flags, (int)mode }, declaration);
+        if (declarationId != NULL) {
+            *declarationId = ::strdup(declaration.value.c_str());
+        }
+    });
 }
 
 VsmStatus Client::vsm_declare_mount(const char *source,
-                                    const char* zone,
-                                    const char *target,
-                                    const char *type,
-                                    uint64_t flags,
-                                    const char *data,
-                                    VsmString* id) noexcept
+                               const char* id,
+                               const char *target,
+                               const char *type,
+                               uint64_t flags,
+                               const char *data,
+                               VsmString* declarationId) noexcept
 {
     assert(source);
+    assert(id);
     assert(target);
     assert(type);
     if (!data) {
         data = "";
     }
 
-    GVariant* out = NULL;
-    GVariant* args_in = g_variant_new("(ssssts)", source, zone, target, type, flags, data);
-    VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_DECLARE_MOUNT,
-                               args_in,
-                               "(s)",
-                               &out);
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
-    GVariant* unpacked;
-    if (id != NULL) {
-        g_variant_get(out, "(*)", &unpacked);
-        toBasic(unpacked, id);
-        g_variant_unref(unpacked);
-    }
-    g_variant_unref(out);
-    return ret;
+    return coverException([&] {
+        api::Declaration declaration;
+        mHostClient.callDeclareMount({ source, id, target, type, flags, data }, declaration);
+        if (declarationId != NULL) {
+            *declarationId = ::strdup(declaration.value.c_str());
+        }
+    });
 }
 
-VsmStatus Client::vsm_declare_link(const char *source,
-                                   const char* zone,
-                                   const char *target,
-                                   VsmString* id) noexcept
+VsmStatus Client::vsm_declare_link(const char* source,
+                              const char* id,
+                              const char* target,
+                              VsmString* declarationId) noexcept
 {
     assert(source);
+    assert(id);
     assert(target);
 
-    GVariant* out = NULL;
-    GVariant* args_in = g_variant_new("(sss)", source, zone, target);
-    VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_DECLARE_LINK,
-                               args_in,
-                               "(s)",
-                               &out);
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
-    GVariant* unpacked;
-    if (id != NULL) {
-        g_variant_get(out, "(*)", &unpacked);
-        toBasic(unpacked, id);
-        g_variant_unref(unpacked);
-    }
-    g_variant_unref(out);
-    return ret;
+    return coverException([&] {
+        api::Declaration declaration;
+        mHostClient.callDeclareLink({ source, id, target }, declaration);
+        if (declarationId != NULL) {
+            *declarationId = ::strdup(declaration.value.c_str());
+        }
+    });
 }
 
-VsmStatus Client::vsm_list_declarations(const char* zone, VsmArrayString* declarations)
+VsmStatus Client::vsm_list_declarations(const char* id, VsmArrayString* declarations) noexcept
 {
+    assert(id);
     assert(declarations);
 
-    GVariant* out = NULL;
-    GVariant* args_in = g_variant_new("(s)", zone);
-    VsmStatus ret = callMethod(HOST_INTERFACE,
-                               api::host::METHOD_GET_DECLARATIONS,
-                               args_in,
-                               "(as)",
-                               &out);
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
-    GVariant* unpacked;
-    g_variant_get(out, "(*)", &unpacked);
-    toArray(unpacked, declarations);
-    g_variant_unref(unpacked);
-    g_variant_unref(out);
-    return ret;
+    return coverException([&] {
+        api::Declarations declarationsOut;
+        mHostClient.callGetDeclarations({ id }, declarationsOut);
+        convert(declarationsOut, *declarations);
+    });
 }
 
-VsmStatus Client::vsm_remove_declaration(const char* zone, VsmString declaration)
+VsmStatus Client::vsm_remove_declaration(const char* id, VsmString declaration) noexcept
 {
+    assert(id);
     assert(declaration);
 
-    GVariant* args_in = g_variant_new("(ss)", zone, declaration);
-    return callMethod(HOST_INTERFACE,
-                      api::host::METHOD_REMOVE_DECLARATION,
-                      args_in);
+    return coverException([&] {
+        mHostClient.callRemoveDeclaration({ id, declaration });
+    });
 }
 
 VsmStatus Client::vsm_notify_active_zone(const char* application, const char* message) noexcept
@@ -1004,10 +754,9 @@ VsmStatus Client::vsm_notify_active_zone(const char* application, const char* me
     assert(application);
     assert(message);
 
-    GVariant* args_in = g_variant_new("(ss)", application, message);
-    return callMethod(ZONE_INTERFACE,
-                      api::zone::METHOD_NOTIFY_ACTIVE_ZONE,
-                      args_in);
+    return coverException([&] {
+        mZoneClient.callNotifyActiveZone({ application, message });
+    });
 }
 
 VsmStatus Client::vsm_file_move_request(const char* destZone, const char* path) noexcept
@@ -1015,50 +764,42 @@ VsmStatus Client::vsm_file_move_request(const char* destZone, const char* path) 
     assert(destZone);
     assert(path);
 
-    GVariant* out = NULL;
-    GVariant* args_in = g_variant_new("(ss)", destZone, path);
-    VsmStatus ret = callMethod(ZONE_INTERFACE,
-                               api::zone::METHOD_FILE_MOVE_REQUEST,
-                               args_in,
-                               "(s)",
-                               &out);
-
-    if (ret != VSMCLIENT_SUCCESS) {
-        return ret;
-    }
-    const gchar* retcode = NULL;;
-    g_variant_get(out, "(&s)", &retcode);
-    if (strcmp(retcode, api::zone::FILE_MOVE_SUCCEEDED.c_str()) != 0) {
-        mStatus = Status(VSMCLIENT_CUSTOM_ERROR, retcode);
-        g_variant_unref(out);
-        return vsm_get_status();
-    }
-    g_variant_unref(out);
-    return ret;
+    return coverException([&] {
+        api::FileMoveRequestStatus status;
+        mZoneClient.callFileMoveRequest({ destZone, path }, status);
+        if (status.value != api::zone::FILE_MOVE_SUCCEEDED) {
+            throw ClientException(status.value);
+        }
+    });
 }
 
 VsmStatus Client::vsm_add_notification_callback(VsmNotificationCallback notificationCallback,
-                                                void* data,
-                                                VsmSubscriptionId* subscriptionId) noexcept
+                                           void* data,
+                                           VsmSubscriptionId* subscriptionId) noexcept
 {
     assert(notificationCallback);
 
-    auto onSigal = [=](GVariant * parameters) {
-        const char* zone;
-        const char* application;
-        const char* message;
-        g_variant_get(parameters, "(&s&s&s)", &zone, &application, &message);
-        notificationCallback(zone, application, message, data);
-    };
+    return coverException([&] {
+        auto onSignal = [=](const api::Notification& notification)
+        {
+            notificationCallback(notification.zone.c_str(),
+                                 notification.application.c_str(),
+                                 notification.message.c_str(),
+                                 data);
+        };
 
-    return signalSubscribe(ZONE_INTERFACE,
-                           api::zone::SIGNAL_NOTIFICATION,
-                           onSigal,
-                           subscriptionId);
+        VsmSubscriptionId id;
+        id = mZoneClient.subscribeNotification(onSignal);
+        if (subscriptionId) {
+            *subscriptionId = id;
+        }
+    });
 }
 
 VsmStatus Client::vsm_del_notification_callback(VsmSubscriptionId subscriptionId) noexcept
 {
-    return signalUnsubscribe(subscriptionId);
+    return coverException([&] {
+        mZoneClient.unsubscribe(subscriptionId);
+    });
 }
 

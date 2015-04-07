@@ -84,6 +84,9 @@ typedef api::StringPair RemoveDeclarationIn;
 typedef api::StringPair CreateZoneIn;
 typedef api::StringPair RevokeDeviceIn;
 typedef api::StringPair DestroyNetDevIn;
+typedef api::StringPair DbusState;
+typedef api::StringPair NotifActiveZoneIn;
+typedef api::StringPair FileMoveRequestIn;
 typedef api::VectorOfStrings ZoneIds;
 typedef api::VectorOfStrings Declarations;
 typedef api::VectorOfStrings NetDevList;
@@ -220,6 +223,20 @@ struct GrantDeviceIn
         id,
         device,
         flags
+    )
+};
+
+struct Notification
+{
+    std::string zone;
+    std::string application;
+    std::string message;
+
+    CONFIG_REGISTER
+    (
+        zone,
+        application,
+        message
     )
 };
 

@@ -27,26 +27,12 @@
 #define VASUM_CLIENT_IMPL_HPP
 
 #include "vasum-client.h"
-#include <dbus/connection.hpp>
-#include <exception>
-#include <vector>
-#include <tuple>
-#include <linux/if_link.h>
 
-/**
- * Structure which defines the dbus interface.
- */
-struct DbusInterfaceInfo {
-    DbusInterfaceInfo(const std::string& busName,
-                      const std::string& objectPath,
-                      const std::string& interface)
-        : busName(busName),
-          objectPath(objectPath),
-          interface(interface) {}
-    const std::string busName;
-    const std::string objectPath;
-    const std::string interface;
-};
+#include "host-dbus-connection.hpp"
+#include "zone-dbus-connection.hpp"
+
+#include <functional>
+#include <linux/if_link.h>
 
 /**
  * vasum's client definition.
@@ -54,33 +40,6 @@ struct DbusInterfaceInfo {
  * Client uses dbus API.
  */
 class Client {
-private:
-    typedef std::vector<std::tuple<std::string, std::string>> NetdevAttrs;
-    typedef std::function<void(GVariant* parameters)> SignalCallback;
-    struct Status {
-        Status();
-        Status(VsmStatus status, const std::string& msg);
-        VsmStatus mVsmStatus;
-        std::string mMsg;
-    };
-
-    dbus::DbusConnection::Pointer mConnection;
-    Status mStatus;
-
-    VsmStatus callMethod(const DbusInterfaceInfo& info,
-                         const std::string& method,
-                         GVariant* args_in,
-                         const std::string& args_spec_out = std::string(),
-                         GVariant** args_out = NULL);
-    VsmStatus signalSubscribe(const DbusInterfaceInfo& info,
-                              const std::string& name,
-                              SignalCallback signalCallback,
-                              VsmSubscriptionId* subscriptionId);
-    VsmStatus signalUnsubscribe(VsmSubscriptionId id);
-    VsmStatus getNetdevAttrs(const std::string& zone,
-                             const std::string& netdev,
-                             NetdevAttrs& attrs) noexcept;
-
 public:
     Client() noexcept;
     ~Client() noexcept;
@@ -323,12 +282,12 @@ public:
     /**
      * @see ::vsm_list_declarations
      */
-    VsmStatus vsm_list_declarations(const char* zone, VsmArrayString* declarations);
+    VsmStatus vsm_list_declarations(const char* zone, VsmArrayString* declarations) noexcept;
 
     /**
      * @see ::vsm_remove_declaration
      */
-    VsmStatus vsm_remove_declaration(const char* zone, VsmString declaration);
+    VsmStatus vsm_remove_declaration(const char* zone, VsmString declaration) noexcept;
 
     /**
      *  @see ::vsm_notify_active_zone
@@ -361,6 +320,23 @@ public:
      *  @see ::vsm_stop_glib_loop
      */
     static VsmStatus vsm_stop_glib_loop() noexcept;
+private:
+    struct Status {
+        Status();
+        Status(VsmStatus status, const std::string& msg = "");
+        VsmStatus mVsmStatus;
+        std::string mMsg;
+    };
+
+    Status mStatus;
+    vasum::client::HostDbusConnection mHostClient;
+    vasum::client::ZoneDbusConnection mZoneClient;
+
+    VsmStatus coverException(const std::function<void(void)> worker) noexcept;
+    VsmStatus vsm_netdev_get_ip_addr(const char* zone,
+                                     const char* netdevId,
+                                     int type,
+                                     void* addr) noexcept;
 };
 
 #endif /* VASUM_CLIENT_IMPL_HPP */
