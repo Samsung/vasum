@@ -41,13 +41,6 @@
 
 namespace vasum {
 
-namespace {
-
-// TODO: this should be in zone's configuration file
-const int SHUTDOWN_WAIT = 10;
-
-} // namespace
-
 const std::uint64_t DEFAULT_CPU_SHARES = 1024;
 const std::uint64_t DEFAULT_VCPU_PERIOD_MS = 100000;
 
@@ -163,7 +156,7 @@ void ZoneAdmin::stop()
         return;
     }
 
-    if (!mZone.shutdown(SHUTDOWN_WAIT)) {
+    if (!mZone.shutdown(mConfig.shutdownTimeout)) {
         // force stop
         if (!mZone.stop()) {
             throw ZoneOperationException("Could not stop zone");

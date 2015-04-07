@@ -92,6 +92,14 @@ struct ZoneConfig {
      */
     std::vector<std::string> validLinkPrefixes;
 
+    /**
+     * Timeout in seconds for zone to gracefully shut down.
+     * After given time, if Zone is not off, forced shutdown occurs.
+     *
+     * To wait forever, set -1 timeout. To skip waiting, set 0 timeout.
+     */
+    int shutdownTimeout;
+
     CONFIG_REGISTER
     (
         lxcTemplate,
@@ -103,7 +111,8 @@ struct ZoneConfig {
         cpuQuotaBackground,
         permittedToSend, // TODO move to dynamic and add an API to change
         permittedToRecv, // TODO move to dynamic and add an API to change
-        validLinkPrefixes
+        validLinkPrefixes,
+        shutdownTimeout
     )
 };
 
