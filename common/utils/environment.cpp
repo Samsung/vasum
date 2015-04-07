@@ -177,18 +177,22 @@ bool dropRoot(uid_t uid, gid_t gid, const std::vector<unsigned int>& caps)
 
 bool launchAsRoot(const std::function<bool()>& func)
 {
-    // TODO optimize if getuid() == 0
-    return executeAndWait([&func]() {
-        if (::setuid(0) < 0) {
-            LOGW("Failed to become root: " << getSystemErrorMessage());
-            _exit(EXIT_FAILURE);
-        }
+    if (::getuid() == 0) {
+        // we are already root, no need to fork
+        return func();
+    } else {
+        return executeAndWait([&func]() {
+            if (::setuid(0) < 0) {
+                LOGW("Failed to become root: " << getSystemErrorMessage());
+                _exit(EXIT_FAILURE);
+            }
 
-        if (!func()) {
-            LOGE("Failed to successfully execute func");
-            _exit(EXIT_FAILURE);
-        }
-    });
+            if (!func()) {
+                LOGE("Failed to successfully execute func");
+                _exit(EXIT_FAILURE);
+            }
+        });
+    }
 }
 
 bool joinToNs(int nsPid, int ns)
