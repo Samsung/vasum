@@ -152,6 +152,20 @@ WantedBy=graphical.target
 EOF
 chmod 644 ${path}/systemd/system/display-manager-run.service
 
+# TODO temporary solution to set proper access rights
+cat <<EOF >>${path}/systemd/system/ptmx-fix.service
+[Unit]
+Description=Temporary fix access rights
+
+[Service]
+ExecStart=/bin/sh -c '/bin/chmod 666 /dev/ptmx; /bin/chown root:tty /dev/ptmx; /bin/chsmack -a "*" /dev/ptmx'
+
+[Install]
+WantedBy=multi-user.target
+EOF
+chmod 644 ${path}/systemd/system/ptmx-fix.service
+/bin/ln -s ${path}/systemd/system/ptmx-fix.service ${path}/systemd/system/multi-user.target.wants/ptmx-fix.service
+
 sed -e 's/run\/display/tmp/g' /usr/lib/systemd/system/display-manager.path >> ${path}/systemd/system/display-manager.path
 chmod 644 ${path}/systemd/system/display-manager.path
 sed -e 's/run\/display/tmp/g' /usr/lib/systemd/system/display-manager.service >> ${path}/systemd/system/display-manager.service
