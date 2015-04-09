@@ -28,6 +28,7 @@
 #include "utils.hpp"
 #include "exception.hpp"
 #include "host-dbus-connection.hpp"
+#include "host-ipc-connection.hpp"
 #include "zone-dbus-connection.hpp"
 #include <zone-dbus-definitions.hpp>
 
@@ -182,7 +183,7 @@ Client::~Client() noexcept
 {
 }
 
-VsmStatus Client::coverException(const function<void(void)> worker) noexcept
+VsmStatus Client::coverException(const function<void(void)>& worker) noexcept
 {
     try {
         worker();
@@ -218,7 +219,11 @@ VsmStatus Client::createSystem() noexcept
     return coverException([&] {
         shared_ptr<dbus::DbusConnection> connection(dbus::DbusConnection::createSystem().release());
 
+#ifdef DBUS_CONNECTION
         mHostClient.create(connection);
+#else
+        mHostClient.createSystem();
+#endif
         mZoneClient.create(connection);
     });
 }
@@ -228,7 +233,11 @@ VsmStatus Client::create(const string& address) noexcept
     return coverException([&] {
         shared_ptr<dbus::DbusConnection> connection(dbus::DbusConnection::create(address).release());
 
+#ifdef DBUS_CONNECTION
         mHostClient.create(connection);
+#else
+        mHostClient.createSystem();
+#endif
         mZoneClient.create(connection);
     });
 }

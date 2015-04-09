@@ -100,13 +100,17 @@ void Service::handle(const FileDescriptor fd, const epoll::Events pollEvents)
         return;
     }
 
-    if (pollEvents & EPOLLIN) {
-        mProcessor.handleInput(fd);
-        return; // because handleInput will handle RDHUP
+    if ((pollEvents & EPOLLHUP) || (pollEvents & EPOLLRDHUP)) {
+        //IN, HUP, RDHUP are set when client is disconnecting but there is 0 bytes to read, so
+        //assume that if IN and HUP or RDHUP are set then input data is garbage.
+        //Assumption is harmless because handleInput processes all message data.
+        mProcessor.handleLostConnection(fd);
+        return;
     }
 
-    if ((pollEvents & EPOLLHUP) || (pollEvents & EPOLLRDHUP)) {
-        mProcessor.handleLostConnection(fd);
+    if (pollEvents & EPOLLIN) {
+        //Process all message data
+        mProcessor.handleInput(fd);
     }
 }
 

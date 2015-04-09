@@ -25,7 +25,17 @@ FILE(GLOB common_SRCS ${COMMON_FOLDER}/utils/callback-guard.hpp
                       ${COMMON_FOLDER}/utils/glib-loop.cpp
                       ${COMMON_FOLDER}/utils/glib-loop.hpp
                       ${COMMON_FOLDER}/base-exception.hpp
-                      ${COMMON_FOLDER}/base-exception.cpp)
+                      ${COMMON_FOLDER}/base-exception.cpp
+                      ${COMMON_FOLDER}/utils/eventfd.hpp
+                      ${COMMON_FOLDER}/utils/eventfd.cpp
+                      ${COMMON_FOLDER}/utils/fd-utils.hpp
+                      ${COMMON_FOLDER}/utils/fd-utils.cpp
+                      ${COMMON_FOLDER}/epoll/*.hpp
+                      ${COMMON_FOLDER}/epoll/*.cpp
+                      ${COMMON_FOLDER}/ipc/*.hpp
+                      ${COMMON_FOLDER}/ipc/*.cpp
+                      ${COMMON_FOLDER}/ipc/internals/*.hpp
+                      ${COMMON_FOLDER}/ipc/internals/*.cpp)
 
 SET(_LIB_VERSION_ "0.0.1")
 SET(_LIB_SOVERSION_ "0")
@@ -44,11 +54,12 @@ SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY   VERSION ${_LIB_VERSION_})
 
 
 ## Link libraries ##############################################################
-PKG_CHECK_MODULES(LIB_DEPS REQUIRED gio-2.0 libSimpleDbus libLogger libConfig)
-INCLUDE_DIRECTORIES(SYSTEM ${LIB_DEPS_INCLUDE_DIRS})
+FIND_PACKAGE(Boost COMPONENTS system filesystem)
+PKG_CHECK_MODULES(LIB_DEPS REQUIRED gio-2.0 libSimpleDbus libLogger libConfig libsystemd-daemon)
+INCLUDE_DIRECTORIES(SYSTEM ${LIB_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(${SERVER_FOLDER})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_DEPS_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_DEPS_LIBRARIES} ${Boost_LIBRARIES})
 
 ## Generate the pc file ########################################################
 CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_BINARY_DIR}/${PC_FILE} @ONLY)

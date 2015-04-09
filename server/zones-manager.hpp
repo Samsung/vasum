@@ -28,7 +28,11 @@
 
 #include "zone.hpp"
 #include "zones-manager-config.hpp"
-#include "host-connection.hpp"
+#ifdef DBUS_CONNECTION
+#include "host-dbus-connection.hpp"
+#else
+#include "host-ipc-connection.hpp"
+#endif
 #include "input-monitor.hpp"
 #include "proxy-call-policy.hpp"
 #include "utils/worker.hpp"
@@ -114,6 +118,11 @@ public:
 private:
     typedef std::recursive_mutex Mutex;
     typedef std::unique_lock<Mutex> Lock;
+#ifdef DBUS_CONNECTION
+    typedef HostDbusConnection HostConnection;
+#else
+    typedef HostIPCConnection HostConnection;
+#endif
 
     utils::Worker::Pointer mWorker;
     Mutex mMutex; // used to protect mZones

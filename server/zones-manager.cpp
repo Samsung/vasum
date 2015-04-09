@@ -127,8 +127,10 @@ ZonesManager::ZonesManager(const std::string& configPath)
     mProxyCallPolicy.reset(new ProxyCallPolicy(mConfig.proxyCallRules));
 
     using namespace std::placeholders;
+#ifdef DBUS_CONNECTION
     mHostConnection.setProxyCallCallback(bind(&ZonesManager::handleProxyCall,
                                               this, HOST_ID, _1, _2, _3, _4, _5, _6, _7));
+#endif
 
     mHostConnection.setGetZoneDbusesCallback(bind(&ZonesManager::handleGetZoneDbusesCall,
                                                   this, _1));
@@ -163,7 +165,7 @@ ZonesManager::ZonesManager(const std::string& configPath)
     mHostConnection.setDestroyNetdevCallback(bind(&ZonesManager::handleDestroyNetdevCall,
                                                   this, _1, _2));
 
-    mHostConnection.setDeleleNetdevIpAddressCallback(bind(&ZonesManager::handleDeleteNetdevIpAddressCall,
+    mHostConnection.setDeleteNetdevIpAddressCallback(bind(&ZonesManager::handleDeleteNetdevIpAddressCall,
                                                           this, _1, _2));
 
     mHostConnection.setDeclareFileCallback(bind(&ZonesManager::handleDeclareFileCall,
@@ -717,12 +719,16 @@ void ZonesManager::handleProxyCall(const std::string& caller,
     };
 
     if (target == HOST_ID) {
+#ifdef DBUS_CONNECTION
         mHostConnection.proxyCallAsync(targetBusName,
                                        targetObjectPath,
                                        targetInterface,
                                        targetMethod,
                                        parameters,
                                        asyncResultCallback);
+#else
+        result->setError(api::ERROR_INVALID_ID, "Unsupported proxy call target");
+#endif
         return;
     }
 
@@ -755,10 +761,10 @@ void ZonesManager::handleGetZoneDbusesCall(api::MethodResultBuilder::Pointer res
     result->set(dbuses);
 }
 
-void ZonesManager::handleDbusStateChanged(const std::string& zoneId,
+void ZonesManager::handleDbusStateChanged(const std::string& zoneId ,
                                           const std::string& dbusAddress)
 {
-    mHostConnection.signalZoneDbusState(zoneId, dbusAddress);
+    mHostConnection.signalZoneDbusState({zoneId, dbusAddress});
 }
 
 void ZonesManager::handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result)

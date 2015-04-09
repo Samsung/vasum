@@ -24,7 +24,7 @@
 
 #include "config.hpp"
 
-#include "host-connection.hpp"
+#include "host-dbus-connection.hpp"
 #include "host-dbus-definitions.hpp"
 #include "exception.hpp"
 #include "api/dbus-method-result-builder.hpp"
@@ -45,7 +45,7 @@ const unsigned int NAME_ACQUIRED_TIMEOUT = 5 * 1000;
 } // namespace
 
 
-HostConnection::HostConnection()
+HostDbusConnection::HostDbusConnection()
     : mNameAcquired(false)
     , mNameLost(false)
 {
@@ -54,8 +54,8 @@ HostConnection::HostConnection()
 
     LOGT("Setting DBUS name");
     mDbusConnection->setName(api::host::BUS_NAME,
-                             std::bind(&HostConnection::onNameAcquired, this),
-                             std::bind(&HostConnection::onNameLost, this));
+                             std::bind(&HostDbusConnection::onNameAcquired, this),
+                             std::bind(&HostDbusConnection::onNameLost, this));
 
     if (!waitForName(NAME_ACQUIRED_TIMEOUT)) {
         LOGE("Could not acquire dbus name: " << api::host::BUS_NAME);
@@ -66,17 +66,17 @@ HostConnection::HostConnection()
     using namespace std::placeholders;
     mDbusConnection->registerObject(api::host::OBJECT_PATH,
                                     api::host::DEFINITION,
-                                    std::bind(&HostConnection::onMessageCall,
+                                    std::bind(&HostDbusConnection::onMessageCall,
                                             this, _1, _2, _3, _4, _5));
 
     LOGD("Connected");
 }
 
-HostConnection::~HostConnection()
+HostDbusConnection::~HostDbusConnection()
 {
 }
 
-bool HostConnection::waitForName(const unsigned int timeoutMs)
+bool HostDbusConnection::waitForName(const unsigned int timeoutMs)
 {
     std::unique_lock<std::mutex> lock(mNameMutex);
     mNameCondition.wait_for(lock,
@@ -88,14 +88,14 @@ bool HostConnection::waitForName(const unsigned int timeoutMs)
     return mNameAcquired;
 }
 
-void HostConnection::onNameAcquired()
+void HostDbusConnection::onNameAcquired()
 {
     std::unique_lock<std::mutex> lock(mNameMutex);
     mNameAcquired = true;
     mNameCondition.notify_one();
 }
 
-void HostConnection::onNameLost()
+void HostDbusConnection::onNameLost()
 {
     std::unique_lock<std::mutex> lock(mNameMutex);
     mNameLost = true;
@@ -107,143 +107,143 @@ void HostConnection::onNameLost()
     }
 }
 
-void HostConnection::setProxyCallCallback(const ProxyCallCallback& callback)
+void HostDbusConnection::setProxyCallCallback(const ProxyCallCallback& callback)
 {
     mProxyCallCallback = callback;
 }
 
-void HostConnection::setGetZoneDbusesCallback(const GetZoneDbusesCallback& callback)
+void HostDbusConnection::setGetZoneDbusesCallback(const GetZoneDbusesCallback& callback)
 {
     mGetZoneDbusesCallback = callback;
 }
 
-void HostConnection::setGetZoneIdsCallback(const GetZoneIdsCallback& callback)
+void HostDbusConnection::setGetZoneIdsCallback(const GetZoneIdsCallback& callback)
 {
     mGetZoneIdsCallback = callback;
 }
 
-void HostConnection::setGetActiveZoneIdCallback(const GetActiveZoneIdCallback& callback)
+void HostDbusConnection::setGetActiveZoneIdCallback(const GetActiveZoneIdCallback& callback)
 {
     mGetActiveZoneIdCallback = callback;
 }
 
-void HostConnection::setGetZoneInfoCallback(const GetZoneInfoCallback& callback)
+void HostDbusConnection::setGetZoneInfoCallback(const GetZoneInfoCallback& callback)
 {
     mGetZoneInfoCallback = callback;
 }
 
-void HostConnection::setSetNetdevAttrsCallback(const SetNetdevAttrsCallback& callback)
+void HostDbusConnection::setSetNetdevAttrsCallback(const SetNetdevAttrsCallback& callback)
 {
     mSetNetdevAttrsCallback = callback;
 }
 
-void HostConnection::setGetNetdevAttrsCallback(const GetNetdevAttrsCallback& callback)
+void HostDbusConnection::setGetNetdevAttrsCallback(const GetNetdevAttrsCallback& callback)
 {
     mGetNetdevAttrsCallback = callback;
 }
 
-void HostConnection::setGetNetdevListCallback(const GetNetdevListCallback& callback)
+void HostDbusConnection::setGetNetdevListCallback(const GetNetdevListCallback& callback)
 {
     mGetNetdevListCallback = callback;
 }
 
-void HostConnection::setCreateNetdevVethCallback(const CreateNetdevVethCallback& callback)
+void HostDbusConnection::setCreateNetdevVethCallback(const CreateNetdevVethCallback& callback)
 {
     mCreateNetdevVethCallback = callback;
 }
 
-void HostConnection::setCreateNetdevMacvlanCallback(const CreateNetdevMacvlanCallback& callback)
+void HostDbusConnection::setCreateNetdevMacvlanCallback(const CreateNetdevMacvlanCallback& callback)
 {
     mCreateNetdevMacvlanCallback = callback;
 }
 
-void HostConnection::setCreateNetdevPhysCallback(const CreateNetdevPhysCallback& callback)
+void HostDbusConnection::setCreateNetdevPhysCallback(const CreateNetdevPhysCallback& callback)
 {
     mCreateNetdevPhysCallback = callback;
 }
 
-void HostConnection::setDestroyNetdevCallback(const DestroyNetdevCallback& callback)
+void HostDbusConnection::setDestroyNetdevCallback(const DestroyNetdevCallback& callback)
 {
     mDestroyNetdevCallback = callback;
 }
 
-void HostConnection::setDeleleNetdevIpAddressCallback(const DeleteNetdevIpAddressCallback& callback)
+void HostDbusConnection::setDeleteNetdevIpAddressCallback(const DeleteNetdevIpAddressCallback& callback)
 {
     mDeleteNetdevIpAddressCallback = callback;
 }
 
-void HostConnection::setDeclareFileCallback(const DeclareFileCallback& callback)
+void HostDbusConnection::setDeclareFileCallback(const DeclareFileCallback& callback)
 {
     mDeclareFileCallback = callback;
 }
 
-void HostConnection::setDeclareMountCallback(const DeclareMountCallback& callback)
+void HostDbusConnection::setDeclareMountCallback(const DeclareMountCallback& callback)
 {
     mDeclareMountCallback = callback;
 }
 
-void HostConnection::setDeclareLinkCallback(const DeclareLinkCallback& callback)
+void HostDbusConnection::setDeclareLinkCallback(const DeclareLinkCallback& callback)
 {
     mDeclareLinkCallback = callback;
 }
 
-void HostConnection::setGetDeclarationsCallback(const GetDeclarationsCallback& callback)
+void HostDbusConnection::setGetDeclarationsCallback(const GetDeclarationsCallback& callback)
 {
     mGetDeclarationsCallback = callback;
 }
 
-void HostConnection::setRemoveDeclarationCallback(const RemoveDeclarationCallback& callback)
+void HostDbusConnection::setRemoveDeclarationCallback(const RemoveDeclarationCallback& callback)
 {
     mRemoveDeclarationCallback =  callback;
 }
 
-void HostConnection::setSetActiveZoneCallback(const SetActiveZoneCallback& callback)
+void HostDbusConnection::setSetActiveZoneCallback(const SetActiveZoneCallback& callback)
 {
     mSetActiveZoneCallback = callback;
 }
 
-void HostConnection::setCreateZoneCallback(const CreateZoneCallback& callback)
+void HostDbusConnection::setCreateZoneCallback(const CreateZoneCallback& callback)
 {
     mCreateZoneCallback = callback;
 }
 
-void HostConnection::setDestroyZoneCallback(const DestroyZoneCallback& callback)
+void HostDbusConnection::setDestroyZoneCallback(const DestroyZoneCallback& callback)
 {
     mDestroyZoneCallback = callback;
 }
 
-void HostConnection::setShutdownZoneCallback(const ShutdownZoneCallback& callback)
+void HostDbusConnection::setShutdownZoneCallback(const ShutdownZoneCallback& callback)
 {
     mShutdownZoneCallback = callback;
 }
 
-void HostConnection::setStartZoneCallback(const StartZoneCallback& callback)
+void HostDbusConnection::setStartZoneCallback(const StartZoneCallback& callback)
 {
     mStartZoneCallback = callback;
 }
 
-void HostConnection::setLockZoneCallback(const LockZoneCallback& callback)
+void HostDbusConnection::setLockZoneCallback(const LockZoneCallback& callback)
 {
     mLockZoneCallback = callback;
 }
 
-void HostConnection::setUnlockZoneCallback(const UnlockZoneCallback& callback)
+void HostDbusConnection::setUnlockZoneCallback(const UnlockZoneCallback& callback)
 {
     mUnlockZoneCallback = callback;
 }
 
-void HostConnection::setGrantDeviceCallback(const GrantDeviceCallback& callback)
+void HostDbusConnection::setGrantDeviceCallback(const GrantDeviceCallback& callback)
 {
     mGrantDeviceCallback = callback;
 }
 
-void HostConnection::setRevokeDeviceCallback(const RevokeDeviceCallback& callback)
+void HostDbusConnection::setRevokeDeviceCallback(const RevokeDeviceCallback& callback)
 {
     mRevokeDeviceCallback = callback;
 }
 
 
-void HostConnection::onMessageCall(const std::string& objectPath,
+void HostDbusConnection::onMessageCall(const std::string& objectPath,
                                    const std::string& interface,
                                    const std::string& methodName,
                                    GVariant* parameters,
@@ -553,7 +553,7 @@ void HostConnection::onMessageCall(const std::string& objectPath,
     }
 }
 
-void HostConnection::proxyCallAsync(const std::string& busName,
+void HostDbusConnection::proxyCallAsync(const std::string& busName,
                                     const std::string& objectPath,
                                     const std::string& interface,
                                     const std::string& method,
@@ -569,10 +569,9 @@ void HostConnection::proxyCallAsync(const std::string& busName,
                                      callback);
 }
 
-void HostConnection::signalZoneDbusState(const std::string& zoneId,
-        const std::string& dbusAddress)
+void HostDbusConnection::signalZoneDbusState(const api::DbusState& state)
 {
-    GVariant* parameters = g_variant_new("(ss)", zoneId.c_str(), dbusAddress.c_str());
+    GVariant* parameters = g_variant_new("(ss)", state.first.c_str(), state.second.c_str());
     mDbusConnection->emitSignal(api::host::OBJECT_PATH,
                                 api::host::INTERFACE,
                                 api::host::SIGNAL_ZONE_DBUS_STATE,

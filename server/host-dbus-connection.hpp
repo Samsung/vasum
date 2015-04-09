@@ -23,13 +23,14 @@
  */
 
 
-#ifndef SERVER_HOST_CONNECTION_HPP
-#define SERVER_HOST_CONNECTION_HPP
+#ifndef SERVER_HOST_DBUS_CONNECTION_HPP
+#define SERVER_HOST_DBUS_CONNECTION_HPP
 
 #include "dbus/connection.hpp"
 #include "api/method-result-builder.hpp"
 #include "api/messages.hpp"
 
+#include <functional>
 #include <mutex>
 #include <condition_variable>
 #include <tuple>
@@ -39,11 +40,11 @@
 namespace vasum {
 
 
-class HostConnection {
+class HostDbusConnection {
 
 public:
-    HostConnection();
-    ~HostConnection();
+    HostDbusConnection();
+    ~HostDbusConnection();
 
     // ------------- API --------------
 
@@ -144,7 +145,7 @@ public:
     /**
      * Send signal describing dbus address state change
      */
-    void signalZoneDbusState(const std::string& zoneId, const std::string& dbusAddress);
+    void signalZoneDbusState(const api::DbusState& state);
 
     /**
      * Register a callback called to get a list of zone ids
@@ -199,7 +200,7 @@ public:
     /**
      * Register a callback called to remove ip address from netdev
      */
-    void setDeleleNetdevIpAddressCallback(const DeleteNetdevIpAddressCallback& callback);
+    void setDeleteNetdevIpAddressCallback(const DeleteNetdevIpAddressCallback& callback);
 
     /**
      * Register a callback called to declare file
@@ -330,4 +331,4 @@ private:
 } // namespace vasum
 
 
-#endif // SERVER_HOST_CONNECTION_HPP
+#endif // SERVER_HOST_DBUS_CONNECTION_HPP

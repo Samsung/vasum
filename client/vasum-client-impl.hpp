@@ -27,8 +27,11 @@
 #define VASUM_CLIENT_IMPL_HPP
 
 #include "vasum-client.h"
-
+#ifdef DBUS_CONNECTION
 #include "host-dbus-connection.hpp"
+#else
+#include "host-ipc-connection.hpp"
+#endif
 #include "zone-dbus-connection.hpp"
 
 #include <functional>
@@ -321,6 +324,12 @@ public:
      */
     static VsmStatus vsm_stop_glib_loop() noexcept;
 private:
+#ifdef DBUS_CONNECTION
+    typedef vasum::client::HostDbusConnection HostConnection;
+#else
+    typedef vasum::client::HostIPCConnection HostConnection;
+#endif
+    typedef vasum::client::ZoneDbusConnection ZoneConnection;
     struct Status {
         Status();
         Status(VsmStatus status, const std::string& msg = "");
@@ -329,10 +338,11 @@ private:
     };
 
     Status mStatus;
-    vasum::client::HostDbusConnection mHostClient;
-    vasum::client::ZoneDbusConnection mZoneClient;
 
-    VsmStatus coverException(const std::function<void(void)> worker) noexcept;
+    HostConnection mHostClient;
+    ZoneConnection mZoneClient;
+
+    VsmStatus coverException(const std::function<void(void)>& worker) noexcept;
     VsmStatus vsm_netdev_get_ip_addr(const char* zone,
                                      const char* netdevId,
                                      int type,
