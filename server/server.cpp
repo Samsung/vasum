@@ -107,7 +107,8 @@ void Server::run(bool asRoot)
         utils::ScopedGlibLoop loop;
         ZonesManager manager(mConfigPath);
 
-        manager.restoreAll();
+        // Do not restore zones state at Vasum start
+        // manager.restoreAll();
         LOGI("Daemon started");
 
         gSignalLatch.wait();
