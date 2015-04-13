@@ -28,7 +28,14 @@
 
 #include "zones-manager.hpp"
 #include "zone-dbus-definitions.hpp"
+#ifdef DBUS_CONNECTION
 #include "host-dbus-definitions.hpp"
+#else
+#include "host-ipc-definitions.hpp"
+#include <api/messages.hpp>
+#include <epoll/thread-dispatcher.hpp>
+#include <ipc/client.hpp>
+#endif
 #include "test-dbus-definitions.hpp"
 // TODO: Switch to real power-manager dbus defs when they will be implemented in power-manager
 #include "fake-power-manager-dbus-definitions.hpp"
@@ -77,6 +84,7 @@ const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
 const std::string SIMPLE_TEMPLATE = "console";
 const std::string DBUS_TEMPLATE = "console-dbus";
 
+#ifdef DBUS_CONNECTION
 /**
  * Currently there is no way to propagate an error from async call
  * dropException are used to prevent system crash
@@ -101,8 +109,18 @@ public:
                                MethodResultBuilder::Pointer result
                               )> TestApiMethodCallback;
     typedef std::function<void()> VoidResultCallback;
+    typedef std::function<void(const std::string& zoneId,
+                               const std::string& dbusAddress)> SignalCallback;
 
     typedef std::map<std::string, std::string> Dbuses;
+
+    DbusAccessory()
+        : mId(0),
+          mClient(DbusConnection::create(acquireAddress())),
+          mNameAcquired(false),
+          mPendingDisconnect(false)
+    {
+    }
 
     DbusAccessory(int id)
         : mId(id),
@@ -148,6 +166,26 @@ public:
     void signalSubscribe(const DbusConnection::SignalCallback& callback)
     {
         mClient->signalSubscribe(callback, isHost() ? api::host::BUS_NAME : api::zone::BUS_NAME);
+    }
+
+    void subscribeZoneDbusState(const SignalCallback& callback) {
+        assert(isHost());
+        auto onSignal = [callback] (const std::string& /*senderBusName*/,
+                             const std::string& objectPath,
+                             const std::string& interface,
+                             const std::string& signalName,
+                             GVariant* parameters) {
+            if (objectPath == api::host::OBJECT_PATH &&
+                interface == api::host::INTERFACE &&
+                signalName == api::host::SIGNAL_ZONE_DBUS_STATE) {
+
+                const gchar* zoneId = NULL;
+                const gchar* dbusAddress = NULL;
+                g_variant_get(parameters, "(&s&s)", &zoneId, &dbusAddress);
+                callback(zoneId, dbusAddress);
+            }
+        };
+        mClient->signalSubscribe(onSignal, api::host::BUS_NAME);
     }
 
     void emitSignal(const std::string& objectPath,
@@ -451,6 +489,308 @@ private:
     }
 };
 
+typedef DbusAccessory HostAccessory;
+typedef DbusAccessory ZoneAccessory;
+
+#else
+//#ifdef DBUS_CONNECTION
+
+class HostIPCAccessory {
+public:
+    typedef std::function<void(const std::string& argument,
+                               MethodResultBuilder::Pointer result
+                              )> TestApiMethodCallback;
+    typedef std::function<void()> VoidResultCallback;
+    typedef std::function<void(const std::string& zoneId,
+                               const std::string& dbusAddress)> SignalCallback;
+
+    typedef std::map<std::string, std::string> Dbuses;
+
+    HostIPCAccessory()
+        : mClient(mDispatcher.getPoll(), HOST_IPC_SOCKET)
+    {
+        mClient.start();
+    }
+
+    void subscribeZoneDbusState(const SignalCallback& callback)
+    {
+        auto callbackWrapper = [callback] (const ipc::PeerID, std::shared_ptr<api::DbusState>& data) {
+            callback(data->first, data->second);
+        };
+        mClient.setSignalHandler<api::DbusState>(api::host::SIGNAL_ZONE_DBUS_STATE, callbackWrapper);
+    }
+
+    Dbuses callMethodGetZoneDbuses()
+    {
+        const auto out = mClient.callSync<api::Void, api::Dbuses>(api::host::METHOD_GET_ZONE_DBUSES,
+                                                                  std::make_shared<api::Void>());
+        Dbuses dbuses;
+        for (const auto& dbus : out->values) {
+            dbuses.insert(Dbuses::value_type(dbus.first, dbus.second));
+        }
+        return dbuses;
+    }
+
+    std::vector<std::string> callMethodGetZoneIds()
+    {
+        const auto out = mClient.callSync<api::Void, api::ZoneIds>(api::host::METHOD_GET_ZONE_ID_LIST,
+                                                                    std::make_shared<api::Void>());
+        return out->values;
+    }
+
+    std::string callMethodGetActiveZoneId()
+    {
+        const auto out = mClient.callSync<api::Void, api::ZoneId>(api::host::METHOD_GET_ACTIVE_ZONE_ID,
+                                                                  std::make_shared<api::Void>());
+        return out->value;
+    }
+
+    void callMethodSetActiveZone(const std::string& id)
+    {
+        mClient.callSync<api::ZoneId, api::Void>(api::host::METHOD_SET_ACTIVE_ZONE,
+                                                 std::make_shared<api::ZoneId>(api::ZoneId{id}));
+    }
+
+    void callAsyncMethodCreateZone(const std::string& id,
+                                   const std::string& templateName,
+                                   const VoidResultCallback& result)
+    {
+        auto asyncResult = [result](ipc::Result<api::Void>&& out) {
+            if (out.isValid()) {
+                result();
+            }
+        };
+        mClient.callAsync<api::CreateZoneIn, api::Void>(api::host::METHOD_CREATE_ZONE,
+                           std::make_shared<api::CreateZoneIn>(api::CreateZoneIn{id, templateName}),
+                           asyncResult);
+    }
+
+    void callAsyncMethodDestroyZone(const std::string& id,
+                                    const VoidResultCallback& result)
+    {
+        auto asyncResult = [result](ipc::Result<api::Void>&& out) {
+            if (out.isValid()) {
+                result();
+            }
+        };
+        mClient.callAsync<api::ZoneId, api::Void>(api::host::METHOD_DESTROY_ZONE,
+                           std::make_shared<api::ZoneId>(api::ZoneId{id}),
+                           asyncResult);
+    }
+
+    void callAsyncMethodShutdownZone(const std::string& id,
+                                     const VoidResultCallback& result)
+    {
+        auto asyncResult = [result](ipc::Result<api::Void>&& out) {
+            if (out.isValid()) {
+                result();
+            }
+        };
+        mClient.callAsync<api::ZoneId, api::Void>(api::host::METHOD_SHUTDOWN_ZONE,
+                           std::make_shared<api::ZoneId>(api::ZoneId{id}),
+                           asyncResult);
+    }
+
+    void callAsyncMethodStartZone(const std::string& id,
+                                  const VoidResultCallback& result)
+    {
+        auto asyncResult = [result](ipc::Result<api::Void>&& out) {
+            if (out.isValid()) {
+                result();
+            }
+        };
+        mClient.callAsync<api::ZoneId, api::Void>(api::host::METHOD_START_ZONE,
+                           std::make_shared<api::ZoneId>(api::ZoneId{id}),
+                           asyncResult);
+    }
+
+    void callMethodLockZone(const std::string& id)
+    {
+        mClient.callSync<api::ZoneId, api::Void>(api::host::METHOD_LOCK_ZONE,
+                                                  std::make_shared<api::ZoneId>(api::ZoneId{id}),
+                                                  EVENT_TIMEOUT*10); //Prevent from IPCTimeoutException see LockUnlockZone
+    }
+
+    void callMethodUnlockZone(const std::string& id)
+    {
+        mClient.callSync<api::ZoneId, api::Void>(api::host::METHOD_UNLOCK_ZONE,
+                                                  std::make_shared<api::ZoneId>(api::ZoneId{id}),
+                                                  EVENT_TIMEOUT*10); //Prevent from IPCTimeoutException see LockUnlockZone
+    }
+
+private:
+    epoll::ThreadDispatcher mDispatcher;
+    ipc::Client mClient;
+};
+
+class ZoneDbusAccessory {
+public:
+    typedef std::function<void(const std::string& argument,
+                               MethodResultBuilder::Pointer result
+                              )> TestApiMethodCallback;
+
+    typedef std::map<std::string, std::string> Dbuses;
+
+    ZoneDbusAccessory(int id)
+        : mId(id),
+          mClient(DbusConnection::create(acquireAddress())),
+          mNameAcquired(false),
+          mPendingDisconnect(false)
+    {
+    }
+
+    void setName(const std::string& name)
+    {
+        mClient->setName(name,
+                         std::bind(&ZoneDbusAccessory::onNameAcquired, this),
+                         std::bind(&ZoneDbusAccessory::onDisconnect, this));
+
+        if(!waitForName()) {
+            mClient.reset();
+            throw dbus::DbusOperationException("Could not acquire name.");
+        }
+    }
+
+    bool waitForName()
+    {
+        std::unique_lock<std::mutex> lock(mMutex);
+        mNameCondition.wait(lock, [this] {return mNameAcquired || mPendingDisconnect;});
+        return mNameAcquired;
+    }
+
+    void onNameAcquired()
+    {
+        std::unique_lock<std::mutex> lock(mMutex);
+        mNameAcquired = true;
+        mNameCondition.notify_one();
+    }
+
+    void onDisconnect()
+    {
+        std::unique_lock<std::mutex> lock(mMutex);
+        mPendingDisconnect = true;
+        mNameCondition.notify_one();
+    }
+
+    void signalSubscribe(const DbusConnection::SignalCallback& callback)
+    {
+        mClient->signalSubscribe(callback, api::zone::BUS_NAME);
+    }
+
+    void emitSignal(const std::string& objectPath,
+                    const std::string& interface,
+                    const std::string& name,
+                    GVariant* parameters)
+    {
+        mClient->emitSignal(objectPath, interface, name, parameters);
+    }
+
+    void callMethodNotify()
+    {
+        GVariant* parameters = g_variant_new("(ss)", TEST_APP_NAME.c_str(), TEST_MESSAGE.c_str());
+        mClient->callMethod(api::zone::BUS_NAME,
+                            api::zone::OBJECT_PATH,
+                            api::zone::INTERFACE,
+                            api::zone::METHOD_NOTIFY_ACTIVE_ZONE,
+                            parameters,
+                            "()");
+    }
+
+    std::string callMethodMove(const std::string& dest, const std::string& path)
+    {
+        GVariant* parameters = g_variant_new("(ss)", dest.c_str(), path.c_str());
+        GVariantPtr result = mClient->callMethod(api::zone::BUS_NAME,
+                                                 api::zone::OBJECT_PATH,
+                                                 api::zone::INTERFACE,
+                                                 api::zone::METHOD_FILE_MOVE_REQUEST,
+                                                 parameters,
+                                                 "(s)");
+
+        const gchar* retcode = NULL;
+        g_variant_get(result.get(), "(&s)", &retcode);
+        return std::string(retcode);
+    }
+
+    void registerTestApiObject(const TestApiMethodCallback& callback)
+    {
+        auto handler = [callback](const std::string& objectPath,
+                          const std::string& interface,
+                          const std::string& methodName,
+                          GVariant* parameters,
+                          MethodResultBuilder::Pointer result) {
+            if (objectPath == testapi::OBJECT_PATH &&
+                interface == testapi::INTERFACE &&
+                methodName == testapi::METHOD) {
+                const gchar* argument = NULL;
+                g_variant_get(parameters, "(&s)", &argument);
+                if (callback) {
+                    callback(argument, result);
+                }
+            }
+        };
+        mClient->registerObject(testapi::OBJECT_PATH, testapi::DEFINITION, handler);
+    }
+
+    std::string testApiProxyCall(const std::string& target, const std::string& argument)
+    {
+        GVariant* parameters = g_variant_new("(s)", argument.c_str());
+        GVariantPtr result = proxyCall(target,
+                                       testapi::BUS_NAME,
+                                       testapi::OBJECT_PATH,
+                                       testapi::INTERFACE,
+                                       testapi::METHOD,
+                                       parameters);
+        const gchar* ret = NULL;
+        g_variant_get(result.get(), "(&s)", &ret);
+        return ret;
+    }
+
+
+    GVariantPtr proxyCall(const std::string& target,
+                          const std::string& busName,
+                          const std::string& objectPath,
+                          const std::string& interface,
+                          const std::string& method,
+                          GVariant* parameters)
+    {
+        GVariant* packedParameters = g_variant_new("(sssssv)",
+                                                   target.c_str(),
+                                                   busName.c_str(),
+                                                   objectPath.c_str(),
+                                                   interface.c_str(),
+                                                   method.c_str(),
+                                                   parameters);
+        GVariantPtr result = mClient->callMethod(api::zone::BUS_NAME,
+                                                 api::zone::OBJECT_PATH,
+                                                 api::zone::INTERFACE,
+                                                 api::METHOD_PROXY_CALL,
+                                                 packedParameters,
+                                                 "(v)");
+        GVariant* unpackedResult = NULL;
+        g_variant_get(result.get(), "(v)", &unpackedResult);
+        return GVariantPtr(unpackedResult, g_variant_unref);
+    }
+
+private:
+    const int mId;
+    DbusConnection::Pointer mClient;
+    bool mNameAcquired;
+    bool mPendingDisconnect;
+    std::mutex mMutex;
+    std::condition_variable mNameCondition;
+
+    std::string acquireAddress() const
+    {
+        std::string zoneId = "zone" + std::to_string(mId);
+        return "unix:path=/tmp/ut-run/" + zoneId + "/dbus/system_bus_socket";
+    }
+};
+
+typedef HostIPCAccessory HostAccessory;
+typedef ZoneDbusAccessory ZoneAccessory;
+
+#endif //DBUS_CONNECTION
+
 template<class Predicate>
 bool spinWaitFor(int timeoutMs, Predicate pred)
 {
@@ -559,9 +899,9 @@ BOOST_AUTO_TEST_CASE(NotifyActiveZone)
     Latch signalReceivedLatch;
     std::map<int, std::vector<std::string>> signalReceivedSourcesMap;
 
-    std::map<int, std::unique_ptr<DbusAccessory>> dbuses;
+    std::map<int, std::unique_ptr<ZoneAccessory>> dbuses;
     for (int i = 1; i <= TEST_DBUS_CONNECTION_ZONES_COUNT; ++i) {
-        dbuses[i] = std::unique_ptr<DbusAccessory>(new DbusAccessory(i));
+        dbuses[i] = std::unique_ptr<ZoneAccessory>(new ZoneAccessory(i));
     }
 
     auto handler = [](Latch& latch,
@@ -626,9 +966,9 @@ BOOST_AUTO_TEST_CASE(DisplayOff)
     cm.createZone("zone3", DBUS_TEMPLATE);
     cm.restoreAll();
 
-    std::vector<std::unique_ptr<DbusAccessory>> clients;
+    std::vector<std::unique_ptr<ZoneAccessory>> clients;
     for (int i = 1; i <= TEST_DBUS_CONNECTION_ZONES_COUNT; ++i) {
-        clients.push_back(std::unique_ptr<DbusAccessory>(new DbusAccessory(i)));
+        clients.push_back(std::unique_ptr<ZoneAccessory>(new ZoneAccessory(i)));
     }
 
     for (auto& client : clients) {
@@ -668,9 +1008,9 @@ BOOST_AUTO_TEST_CASE(MoveFile)
     std::string notificationPath;
     std::string notificationRetcode;
 
-    std::map<int, std::unique_ptr<DbusAccessory>> dbuses;
+    std::map<int, std::unique_ptr<ZoneAccessory>> dbuses;
     for (int i = 1; i <= 2; ++i) {
-        dbuses[i] = std::unique_ptr<DbusAccessory>(new DbusAccessory(i));
+        dbuses[i] = std::unique_ptr<ZoneAccessory>(new ZoneAccessory(i));
     }
 
     auto handler = [&](const std::string& /*senderBusName*/,
@@ -765,9 +1105,9 @@ BOOST_AUTO_TEST_CASE(AllowSwitchToDefault)
     cm.createZone("zone3", DBUS_TEMPLATE);
     cm.restoreAll();
 
-    std::vector<std::unique_ptr<DbusAccessory>> clients;
+    std::vector<std::unique_ptr<ZoneAccessory>> clients;
     for (int i = 1; i <= TEST_DBUS_CONNECTION_ZONES_COUNT; ++i) {
-        clients.push_back(std::unique_ptr<DbusAccessory>(new DbusAccessory(i)));
+        clients.push_back(std::unique_ptr<ZoneAccessory>(new ZoneAccessory(i)));
     }
 
     for (auto& client : clients) {
@@ -806,6 +1146,7 @@ BOOST_AUTO_TEST_CASE(AllowSwitchToDefault)
     }
 }
 
+#ifdef DBUS_CONNECTION
 BOOST_AUTO_TEST_CASE(ProxyCall)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
@@ -815,8 +1156,9 @@ BOOST_AUTO_TEST_CASE(ProxyCall)
     cm.restoreAll();
 
     std::map<int, std::unique_ptr<DbusAccessory>> dbuses;
-    for (int i = 0; i <= TEST_DBUS_CONNECTION_ZONES_COUNT; ++i) {
-        dbuses[i] = std::unique_ptr<DbusAccessory>(new DbusAccessory(i));
+    dbuses[0] = std::unique_ptr<DbusAccessory>(new HostAccessory());
+    for (int i = 1; i <= TEST_DBUS_CONNECTION_ZONES_COUNT; ++i) {
+        dbuses[i] = std::unique_ptr<DbusAccessory>(new ZoneAccessory(i));
     }
 
     for (auto& dbus : dbuses) {
@@ -879,14 +1221,15 @@ BOOST_AUTO_TEST_CASE(ProxyCall)
                           DbusCustomException,
                           WhatEquals("Proxy call forbidden"));
 }
+#endif // DBUS_CONNECTION
 
 namespace {
-    const DbusAccessory::Dbuses EXPECTED_DBUSES_NONE = {
+    const HostAccessory::Dbuses EXPECTED_DBUSES_NONE = {
         {"zone1", ""},
         {"zone2", ""},
         {"zone3", ""}};
 
-    const DbusAccessory::Dbuses EXPECTED_DBUSES_ALL = {
+    const HostAccessory::Dbuses EXPECTED_DBUSES_ALL = {
         {"zone1",
          "unix:path=/tmp/ut-run/zone1/dbus/system_bus_socket"},
         {"zone2",
@@ -897,8 +1240,8 @@ namespace {
 
 BOOST_AUTO_TEST_CASE(GetZoneDbuses)
 {
-    DbusAccessory host(DbusAccessory::HOST_ID);
     ZonesManager cm(TEST_CONFIG_PATH);
+    HostAccessory host;
     cm.createZone("zone1", DBUS_TEMPLATE);
     cm.createZone("zone2", DBUS_TEMPLATE);
     cm.createZone("zone3", DBUS_TEMPLATE);
@@ -912,8 +1255,8 @@ BOOST_AUTO_TEST_CASE(GetZoneDbuses)
 
 BOOST_AUTO_TEST_CASE(GetZoneDbusesNoDbus)
 {
-    DbusAccessory host(DbusAccessory::HOST_ID);
     ZonesManager cm(TEST_CONFIG_PATH);
+    HostAccessory host;
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
@@ -928,32 +1271,19 @@ BOOST_AUTO_TEST_CASE(GetZoneDbusesNoDbus)
 BOOST_AUTO_TEST_CASE(ZoneDbusesSignals)
 {
     Latch signalLatch;
-    DbusAccessory::Dbuses collectedDbuses;
+    HostAccessory::Dbuses collectedDbuses;
+    std::mutex collectedDbusesMutex;
 
-    DbusAccessory host(DbusAccessory::HOST_ID);
-
-    auto onSignal = [&] (const std::string& /*senderBusName*/,
-                         const std::string& objectPath,
-                         const std::string& interface,
-                         const std::string& signalName,
-                         GVariant* parameters) {
-        if (objectPath == api::host::OBJECT_PATH &&
-            interface == api::host::INTERFACE &&
-            signalName == api::host::SIGNAL_ZONE_DBUS_STATE) {
-
-            const gchar* zoneId = NULL;
-            const gchar* dbusAddress = NULL;
-            g_variant_get(parameters, "(&s&s)", &zoneId, &dbusAddress);
-
-            collectedDbuses.insert(DbusAccessory::Dbuses::value_type(zoneId, dbusAddress));
-            signalLatch.set();
-        }
+    auto onSignal = [&] (const std::string& zoneId, const std::string& dbusAddress) {
+        std::unique_lock<std::mutex> lock(collectedDbusesMutex);
+        collectedDbuses.insert(HostAccessory::Dbuses::value_type(zoneId, dbusAddress));
+        signalLatch.set();
     };
-
-    host.signalSubscribe(onSignal);
 
     {
         ZonesManager cm(TEST_CONFIG_PATH);
+        HostAccessory host;
+        host.subscribeZoneDbusState(onSignal);
         cm.createZone("zone1", DBUS_TEMPLATE);
         cm.createZone("zone2", DBUS_TEMPLATE);
         cm.createZone("zone3", DBUS_TEMPLATE);
@@ -965,13 +1295,10 @@ BOOST_AUTO_TEST_CASE(ZoneDbusesSignals)
 
         BOOST_REQUIRE(signalLatch.waitForN(TEST_DBUS_CONNECTION_ZONES_COUNT, EVENT_TIMEOUT));
         BOOST_CHECK(signalLatch.empty());
+        std::unique_lock<std::mutex> lock(collectedDbusesMutex);
         BOOST_CHECK(EXPECTED_DBUSES_ALL == collectedDbuses);
         collectedDbuses.clear();
     }
-
-    BOOST_CHECK(signalLatch.waitForN(TEST_DBUS_CONNECTION_ZONES_COUNT, EVENT_TIMEOUT));
-    BOOST_CHECK(signalLatch.empty());
-    BOOST_CHECK(EXPECTED_DBUSES_NONE == collectedDbuses);
 }
 
 
@@ -982,12 +1309,12 @@ BOOST_AUTO_TEST_CASE(GetZoneIds)
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
 
-    DbusAccessory dbus(DbusAccessory::HOST_ID);
+    HostAccessory host;
 
     std::vector<std::string> zoneIds = {"zone1",
                                         "zone2",
                                         "zone3"};
-    std::vector<std::string> returnedIds = dbus.callMethodGetZoneIds();
+    std::vector<std::string> returnedIds = host.callMethodGetZoneIds();
 
     BOOST_CHECK(returnedIds == zoneIds);// order should be preserved
 }
@@ -1000,7 +1327,7 @@ BOOST_AUTO_TEST_CASE(GetActiveZoneId)
     cm.createZone("zone3", SIMPLE_TEMPLATE);
     cm.restoreAll();
 
-    DbusAccessory dbus(DbusAccessory::HOST_ID);
+    HostAccessory host;
 
     std::vector<std::string> zoneIds = {"zone1",
                                         "zone2",
@@ -1008,11 +1335,11 @@ BOOST_AUTO_TEST_CASE(GetActiveZoneId)
 
     for (const std::string& zoneId: zoneIds){
         cm.focus(zoneId);
-        BOOST_CHECK(dbus.callMethodGetActiveZoneId() == zoneId);
+        BOOST_CHECK(host.callMethodGetActiveZoneId() == zoneId);
     }
 
     cm.shutdownAll();
-    BOOST_CHECK(dbus.callMethodGetActiveZoneId() == "");
+    BOOST_CHECK(host.callMethodGetActiveZoneId() == "");
 }
 
 BOOST_AUTO_TEST_CASE(SetActiveZone)
@@ -1023,24 +1350,24 @@ BOOST_AUTO_TEST_CASE(SetActiveZone)
     cm.createZone("zone3", SIMPLE_TEMPLATE);
     cm.restoreAll();
 
-    DbusAccessory dbus(DbusAccessory::HOST_ID);
+    HostAccessory host;
 
     std::vector<std::string> zoneIds = {"zone1",
                                         "zone2",
                                         "zone3"};
 
     for (const std::string& zoneId: zoneIds){
-        dbus.callMethodSetActiveZone(zoneId);
-        BOOST_CHECK(dbus.callMethodGetActiveZoneId() == zoneId);
+        host.callMethodSetActiveZone(zoneId);
+        BOOST_CHECK(host.callMethodGetActiveZoneId() == zoneId);
     }
 
-    BOOST_REQUIRE_EXCEPTION(dbus.callMethodSetActiveZone(NON_EXISTANT_ZONE_ID),
-                            DbusException,
+    BOOST_REQUIRE_EXCEPTION(host.callMethodSetActiveZone(NON_EXISTANT_ZONE_ID),
+                            std::exception, //TODO: exception should be more specific
                             WhatEquals("No such zone id"));
 
     cm.shutdownAll();
-    BOOST_REQUIRE_EXCEPTION(dbus.callMethodSetActiveZone("zone1"),
-                            DbusException,
+    BOOST_REQUIRE_EXCEPTION(host.callMethodSetActiveZone("zone1"),
+                            std::exception, //TODO: exception should be more specific
                             WhatEquals("Could not activate stopped or paused zone"));
 }
 
@@ -1060,18 +1387,18 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZone)
         callDone.set();
     };
 
-    DbusAccessory dbus(DbusAccessory::HOST_ID);
+    HostAccessory host;
 
     // create zone1
-    dbus.callAsyncMethodCreateZone(zone1, SIMPLE_TEMPLATE, resultCallback);
+    host.callAsyncMethodCreateZone(zone1, SIMPLE_TEMPLATE, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 
     // create zone2
-    dbus.callAsyncMethodCreateZone(zone2, SIMPLE_TEMPLATE, resultCallback);
+    host.callAsyncMethodCreateZone(zone2, SIMPLE_TEMPLATE, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 
     // create zone3
-    dbus.callAsyncMethodCreateZone(zone3, SIMPLE_TEMPLATE, resultCallback);
+    host.callAsyncMethodCreateZone(zone3, SIMPLE_TEMPLATE, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 
     cm.restoreAll();
@@ -1081,17 +1408,17 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZone)
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone3);
 
     // destroy zone2
-    dbus.callAsyncMethodDestroyZone(zone2, resultCallback);
+    host.callAsyncMethodDestroyZone(zone2, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone3);
 
     // destroy zone3
-    dbus.callAsyncMethodDestroyZone(zone3, resultCallback);
+    host.callAsyncMethodDestroyZone(zone3, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone1);
 
     // destroy zone1
-    dbus.callAsyncMethodDestroyZone(zone1, resultCallback);
+    host.callAsyncMethodDestroyZone(zone1, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "");
 }
@@ -1109,8 +1436,8 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZonePersistence)
         ZonesManager cm(TEST_CONFIG_PATH);
         cm.restoreAll();
 
-        DbusAccessory dbus(DbusAccessory::HOST_ID);
-        return dbus.callMethodGetZoneIds();
+        HostAccessory host;
+        return host.callMethodGetZoneIds();
     };
 
     BOOST_CHECK(getZoneIds().empty());
@@ -1118,8 +1445,8 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZonePersistence)
     // create zone
     {
         ZonesManager cm(TEST_CONFIG_PATH);
-        DbusAccessory dbus(DbusAccessory::HOST_ID);
-        dbus.callAsyncMethodCreateZone(zone, SIMPLE_TEMPLATE, resultCallback);
+        HostAccessory host;
+        host.callAsyncMethodCreateZone(zone, SIMPLE_TEMPLATE, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
     }
 
@@ -1132,8 +1459,8 @@ BOOST_AUTO_TEST_CASE(CreateDestroyZonePersistence)
     // destroy zone
     {
         ZonesManager cm(TEST_CONFIG_PATH);
-        DbusAccessory dbus(DbusAccessory::HOST_ID);
-        dbus.callAsyncMethodDestroyZone(zone, resultCallback);
+        HostAccessory host;
+        host.callAsyncMethodDestroyZone(zone, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
     }
 
@@ -1156,44 +1483,44 @@ BOOST_AUTO_TEST_CASE(ZoneStatePersistence)
     // firts run
     {
         ZonesManager cm(TEST_CONFIG_PATH);
-        DbusAccessory dbus(DbusAccessory::HOST_ID);
+        HostAccessory host;
 
         // zone1 - created
-        dbus.callAsyncMethodCreateZone(zone1, SIMPLE_TEMPLATE, resultCallback);
+        host.callAsyncMethodCreateZone(zone1, SIMPLE_TEMPLATE, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
 
         // zone2 - started
-        dbus.callAsyncMethodCreateZone(zone2, SIMPLE_TEMPLATE, resultCallback);
+        host.callAsyncMethodCreateZone(zone2, SIMPLE_TEMPLATE, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
-        dbus.callAsyncMethodStartZone(zone2, resultCallback);
+        host.callAsyncMethodStartZone(zone2, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
         BOOST_CHECK(cm.isRunning(zone2));
 
         // zone3 - started then paused
-        dbus.callAsyncMethodCreateZone(zone3, SIMPLE_TEMPLATE, resultCallback);
+        host.callAsyncMethodCreateZone(zone3, SIMPLE_TEMPLATE, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
-        dbus.callAsyncMethodStartZone(zone3, resultCallback);
+        host.callAsyncMethodStartZone(zone3, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
-        dbus.callMethodLockZone(zone3);
+        host.callMethodLockZone(zone3);
         BOOST_CHECK(cm.isPaused(zone3));
 
         // zone4 - started then stopped
-        dbus.callAsyncMethodCreateZone(zone4, SIMPLE_TEMPLATE, resultCallback);
+        host.callAsyncMethodCreateZone(zone4, SIMPLE_TEMPLATE, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
-        dbus.callAsyncMethodStartZone(zone4, resultCallback);
+        host.callAsyncMethodStartZone(zone4, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
-        dbus.callAsyncMethodShutdownZone(zone4, resultCallback);
+        host.callAsyncMethodShutdownZone(zone4, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
         BOOST_CHECK(cm.isStopped(zone4));
 
         // zone5 - started then stopped then started
-        dbus.callAsyncMethodCreateZone(zone5, SIMPLE_TEMPLATE, resultCallback);
+        host.callAsyncMethodCreateZone(zone5, SIMPLE_TEMPLATE, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
-        dbus.callAsyncMethodStartZone(zone5, resultCallback);
+        host.callAsyncMethodStartZone(zone5, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
-        dbus.callAsyncMethodShutdownZone(zone5, resultCallback);
+        host.callAsyncMethodShutdownZone(zone5, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
-        dbus.callAsyncMethodStartZone(zone5, resultCallback);
+        host.callAsyncMethodStartZone(zone5, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
         BOOST_CHECK(cm.isRunning(zone5));
     }
@@ -1225,27 +1552,27 @@ BOOST_AUTO_TEST_CASE(StartShutdownZone)
         callDone.set();
     };
 
-    DbusAccessory dbus(DbusAccessory::HOST_ID);
+    HostAccessory host;
 
     // start zone1
-    dbus.callAsyncMethodStartZone(zone1, resultCallback);
+    host.callAsyncMethodStartZone(zone1, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
     BOOST_CHECK(cm.isRunning(zone1));
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone1);
 
     // start zone2
-    dbus.callAsyncMethodStartZone(zone2, resultCallback);
+    host.callAsyncMethodStartZone(zone2, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
     BOOST_CHECK(cm.isRunning(zone2));
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), zone2);
 
     // shutdown zone2
-    dbus.callAsyncMethodShutdownZone(zone2, resultCallback);
+    host.callAsyncMethodShutdownZone(zone2, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
     BOOST_CHECK(!cm.isRunning(zone2));
 
     // shutdown zone1
-    dbus.callAsyncMethodShutdownZone(zone1, resultCallback);
+    host.callAsyncMethodShutdownZone(zone1, resultCallback);
     BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
     BOOST_CHECK(!cm.isRunning(zone1));
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "");
@@ -1259,32 +1586,41 @@ BOOST_AUTO_TEST_CASE(LockUnlockZone)
     cm.createZone("zone3", DBUS_TEMPLATE);
     cm.restoreAll();
 
-    DbusAccessory dbus(DbusAccessory::HOST_ID);
+    HostAccessory host;
 
     std::vector<std::string> zoneIds = {"zone1",
                                         "zone2",
                                         "zone3"};
 
     for (const std::string& zoneId: zoneIds){
-        dbus.callMethodLockZone(zoneId);
+        try {
+            host.callMethodLockZone(zoneId);
+        } catch(const std::exception&) {
+            //This try catch clause is for prevent from test crashing
+            //and should be removed after resolve following errors
+            //TODO: Abort when zone is locked on destroying ZonesManager
+            HostAccessory host2; //TODO: After IPCTimeoutException host is useless -- fix it
+            try { host2.callMethodUnlockZone(zoneId); } catch (...) {};
+            throw;
+        }
         BOOST_CHECK(cm.isPaused(zoneId));
-        dbus.callMethodUnlockZone(zoneId);
+        host.callMethodUnlockZone(zoneId);
         BOOST_CHECK(cm.isRunning(zoneId));
     }
 
-    BOOST_REQUIRE_EXCEPTION(dbus.callMethodLockZone(NON_EXISTANT_ZONE_ID),
-                            DbusException,
+    BOOST_REQUIRE_EXCEPTION(host.callMethodLockZone(NON_EXISTANT_ZONE_ID),
+                            std::exception, //TODO: exception should be more specific
                             WhatEquals("No such zone id"));
-    BOOST_REQUIRE_EXCEPTION(dbus.callMethodUnlockZone(NON_EXISTANT_ZONE_ID),
-                            DbusException,
+    BOOST_REQUIRE_EXCEPTION(host.callMethodUnlockZone(NON_EXISTANT_ZONE_ID),
+                            std::exception, //TODO: exception should be more specific
                             WhatEquals("No such zone id"));
 
     cm.shutdownAll();
-    BOOST_REQUIRE_EXCEPTION(dbus.callMethodLockZone("zone1"),
-                            DbusException,
+    BOOST_REQUIRE_EXCEPTION(host.callMethodLockZone("zone1"),
+                            std::exception, //TODO: exception should be more specific
                             WhatEquals("Zone is not running"));
-    BOOST_REQUIRE_EXCEPTION(dbus.callMethodUnlockZone("zone1"),
-                            DbusException,
+    BOOST_REQUIRE_EXCEPTION(host.callMethodUnlockZone("zone1"),
+                            std::exception, //TODO: exception should be more specific
                             WhatEquals("Zone is not paused"));
 }
 
