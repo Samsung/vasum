@@ -20,9 +20,9 @@
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Zone Daemon...")
 FILE(GLOB project_SRCS *.cpp *.hpp)
-FILE(GLOB common_SRCS ${COMMON_FOLDER}/dbus/*.cpp  ${COMMON_FOLDER}/dbus/*.hpp
-                      ${COMMON_FOLDER}/log/*.cpp   ${COMMON_FOLDER}/log/*.hpp
-                      ${COMMON_FOLDER}/utils/*.cpp ${COMMON_FOLDER}/utils/*.hpp
+FILE(GLOB common_SRCS ${COMMON_FOLDER}/dbus/*.cpp   ${COMMON_FOLDER}/dbus/*.hpp
+                      ${COMMON_FOLDER}/logger/*.cpp ${COMMON_FOLDER}/logger/*.hpp
+                      ${COMMON_FOLDER}/utils/*.cpp  ${COMMON_FOLDER}/utils/*.hpp
                       ${COMMON_FOLDER}/*.cpp)
 
 ## Setup target ################################################################
@@ -33,8 +33,8 @@ ADD_EXECUTABLE(${ZONE_DAEMON_CODENAME} ${project_SRCS} ${common_SRCS})
 ## Link libraries ##############################################################
 FIND_PACKAGE (Boost COMPONENTS program_options system filesystem)
 
-PKG_CHECK_MODULES(ZONE_DAEMON_DEPS REQUIRED gio-2.0 libsystemd-journal libcap-ng
-                                                 libLogger libSimpleDbus libConfig)
+PKG_CHECK_MODULES(ZONE_DAEMON_DEPS REQUIRED gio-2.0 libsystemd-journal libcap-ng)
+
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${ZONE_DAEMON_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 

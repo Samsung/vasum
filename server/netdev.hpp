@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <sys/socket.h>
 #include <linux/if_link.h>
 #include <sys/types.h>
 

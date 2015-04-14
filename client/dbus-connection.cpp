@@ -20,7 +20,7 @@
 /**
  * @file
  * @author  Mateusz Malicki (m.malicki2@samsung.com)
- * @brief   libSimpleDbus's wrapper
+ * @brief   SimpleDbus's wrapper
  */
 
 #include <config.hpp>

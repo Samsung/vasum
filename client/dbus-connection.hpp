@@ -20,7 +20,7 @@
 /**
  * @file
  * @author  Mateusz Malicki (m.malicki2@samsung.com)
- * @brief   libSimpleDbus's wrapper
+ * @brief   SimpleDbus's wrapper
  */
 
 #ifndef VASUM_CLIENT_DBUS_CONNECTION_HPP
@@ -37,9 +37,9 @@ namespace vasum {
 namespace client {
 
 /**
- * libSimpleDbus client definition.
+ * SimpleDbus client definition.
  *
- * DbusConnection uses libSimpleDbus API.
+ * DbusConnection uses SimpleDbus API.
  */
 class DbusConnection {
 public:

@@ -21,9 +21,6 @@ BuildRequires:  boost-devel
 BuildRequires:  libjson-devel >= 0.10
 BuildRequires:  libcap-ng-devel
 BuildRequires:  lxc-devel
-BuildRequires:  pkgconfig(libConfig)
-BuildRequires:  pkgconfig(libLogger)
-BuildRequires:  pkgconfig(libSimpleDbus)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(libsystemd-journal)
 BuildRequires:  pkgconfig(libsystemd-daemon)

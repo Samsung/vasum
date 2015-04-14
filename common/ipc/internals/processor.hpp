@@ -62,7 +62,7 @@ const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
 * This class wraps communication via UX sockets
 *
 * It's intended to be used both in Client and Service classes.
-* It uses a serialization mechanism from libConfig.
+* It uses a serialization mechanism from Config.
 * Library user will only have to pass the types that each call will send and receive
 *
 * Message format:

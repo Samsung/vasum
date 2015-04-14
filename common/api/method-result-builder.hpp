@@ -47,7 +47,7 @@ public:
     template<typename Data>
     void set(const std::shared_ptr<Data>& data)
     {
-        static_assert(config::isVisitable<Data>::value, "Use only libConfig's structures");
+        static_assert(config::isVisitable<Data>::value, "Use only Config's structures");
         setImpl(data);
     }
 

@@ -40,7 +40,7 @@ namespace ipc {
 
 /**
  * This class wraps communication via UX sockets.
- * It uses serialization mechanism from libConfig.
+ * It uses serialization mechanism from Config.
  *
  * For message format @see ipc::Processor
  */

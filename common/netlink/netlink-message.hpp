@@ -31,6 +31,7 @@
 #include <stack>
 #include <type_traits>
 #include <cstdlib>
+#include <sys/socket.h>
 #include <linux/netlink.h>
 
 namespace vasum {

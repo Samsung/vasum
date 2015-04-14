@@ -20,22 +20,15 @@
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Client...")
 FILE(GLOB project_SRCS *.cpp *.hpp *.h)
-FILE(GLOB common_SRCS ${COMMON_FOLDER}/utils/callback-guard.hpp
-                      ${COMMON_FOLDER}/utils/callback-guard.cpp
-                      ${COMMON_FOLDER}/utils/glib-loop.cpp
-                      ${COMMON_FOLDER}/utils/glib-loop.hpp
-                      ${COMMON_FOLDER}/base-exception.hpp
-                      ${COMMON_FOLDER}/base-exception.cpp
-                      ${COMMON_FOLDER}/utils/eventfd.hpp
-                      ${COMMON_FOLDER}/utils/eventfd.cpp
-                      ${COMMON_FOLDER}/utils/fd-utils.hpp
-                      ${COMMON_FOLDER}/utils/fd-utils.cpp
-                      ${COMMON_FOLDER}/epoll/*.hpp
-                      ${COMMON_FOLDER}/epoll/*.cpp
-                      ${COMMON_FOLDER}/ipc/*.hpp
-                      ${COMMON_FOLDER}/ipc/*.cpp
-                      ${COMMON_FOLDER}/ipc/internals/*.hpp
-                      ${COMMON_FOLDER}/ipc/internals/*.cpp)
+FILE(GLOB common_SRCS ${COMMON_FOLDER}/config/*.hpp             ${COMMON_FOLDER}/config/*.cpp
+                      ${COMMON_FOLDER}/config/sqlite3/*.hpp     ${COMMON_FOLDER}/config/sqlite3/*.cpp
+                      ${COMMON_FOLDER}/dbus/*.hpp               ${COMMON_FOLDER}/dbus/*.cpp
+                      ${COMMON_FOLDER}/epoll/*.hpp              ${COMMON_FOLDER}/epoll/*.cpp
+                      ${COMMON_FOLDER}/ipc/*.hpp                ${COMMON_FOLDER}/ipc/*.cpp
+                      ${COMMON_FOLDER}/ipc/internals/*.hpp      ${COMMON_FOLDER}/ipc/internals/*.cpp
+                      ${COMMON_FOLDER}/logger/*.hpp             ${COMMON_FOLDER}/logger/*.cpp
+                      ${COMMON_FOLDER}/utils/*.hpp              ${COMMON_FOLDER}/utils/*.cpp
+                      ${COMMON_FOLDER}/*.hpp                    ${COMMON_FOLDER}/*.cpp)
 
 SET(_LIB_VERSION_ "0.0.1")
 SET(_LIB_SOVERSION_ "0")
@@ -55,7 +48,7 @@ SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY   VERSION ${_LIB_VERSION_})
 
 ## Link libraries ##############################################################
 FIND_PACKAGE(Boost COMPONENTS system filesystem)
-PKG_CHECK_MODULES(LIB_DEPS REQUIRED gio-2.0 libSimpleDbus libLogger libConfig libsystemd-daemon)
+PKG_CHECK_MODULES(LIB_DEPS REQUIRED gio-2.0 libsystemd-daemon libsystemd-journal libcap-ng sqlite3)
 INCLUDE_DIRECTORIES(SYSTEM ${LIB_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(${SERVER_FOLDER})
