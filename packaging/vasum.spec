@@ -147,11 +147,10 @@ Development package including the header files for the client library
 %defattr(644,root,root,755)
 %{_libdir}/libvasum.so
 %{_includedir}/vasum
-%{_libdir}/pkgconfig/*.pc
+%{_libdir}/pkgconfig/vasum.pc
 
 
 ## Zone Support Package ###################################################
-# TODO move to a separate repository
 %package zone-support
 Summary:          Vasum Support
 Group:            Security/Other
@@ -166,7 +165,6 @@ Zones support installed inside every zone.
 
 
 ## Zone Daemon Package ####################################################
-# TODO move to a separate repository
 %package zone-daemon
 Summary:          Vasum Zones Daemon
 Group:            Security/Other
@@ -247,3 +245,108 @@ systemctl daemon-reload
 %config /etc/dbus-1/system.d/org.tizen.vasum.tests.conf
 %{_unitdir}/vasum-socket-test.socket
 %{_unitdir}/vasum-socket-test.service
+
+## libLogger Package ###########################################################
+%package -n libLogger
+Summary:            Logger library
+Group:              Security/Other
+Requires(post):     /sbin/ldconfig
+Requires(postun):   /sbin/ldconfig
+
+%description -n libLogger
+The package provides libLogger library.
+
+%post -n libLogger -p /sbin/ldconfig
+
+%postun -n libLogger -p /sbin/ldconfig
+
+%files -n libLogger
+%defattr(644,root,root,755)
+%{_libdir}/libLogger.so.0
+%attr(755,root,root) %{_libdir}/libLogger.so.0.0.1
+
+%package -n libLogger-devel
+Summary:        Development logger library
+Group:          Development/Libraries
+Requires:       libLogger = %{version}-%{release}
+
+%description -n libLogger-devel
+The package provides libLogger development tools and libs.
+
+%files -n libLogger-devel
+%defattr(644,root,root,755)
+%{_libdir}/libLogger.so
+%{_includedir}/vasum-tools/logger
+%{_libdir}/pkgconfig/libLogger.pc
+
+## libSimpleDbus Package #######################################################
+%package -n libSimpleDbus
+Summary:            Simple dbus library
+Group:              Security/Other
+Requires(post):     /sbin/ldconfig
+Requires(postun):   /sbin/ldconfig
+
+%description -n libSimpleDbus
+The package provides libSimpleDbus library.
+
+%post -n libSimpleDbus -p /sbin/ldconfig
+
+%postun -n libSimpleDbus -p /sbin/ldconfig
+
+%files -n libSimpleDbus
+%defattr(644,root,root,755)
+%{_libdir}/libSimpleDbus.so.0
+%attr(755,root,root) %{_libdir}/libSimpleDbus.so.0.0.1
+
+%package -n libSimpleDbus-devel
+Summary:        Development Simple dbus library
+Group:          Development/Libraries
+Requires:       libSimpleDbus = %{version}-%{release}
+Requires:       pkgconfig(libLogger)
+
+%description -n libSimpleDbus-devel
+The package provides libSimpleDbus development tools and libs.
+
+%files -n libSimpleDbus-devel
+%defattr(644,root,root,755)
+%{_libdir}/libSimpleDbus.so
+%{_includedir}/vasum-tools/dbus
+%{_libdir}/pkgconfig/libSimpleDbus.pc
+
+## libConfig Package ##########################################################
+%package -n libConfig
+Summary:            Config library
+Group:              Security/Other
+Requires(post):     /sbin/ldconfig
+Requires(postun):   /sbin/ldconfig
+
+%description -n libConfig
+The package provides libConfig library.
+
+%post -n libConfig -p /sbin/ldconfig
+
+%postun -n libConfig -p /sbin/ldconfig
+
+%files -n libConfig
+%defattr(644,root,root,755)
+%{_libdir}/libConfig.so.0
+%attr(755,root,root) %{_libdir}/libConfig.so.0.0.1
+
+%package -n libConfig-devel
+Summary:        Development Config library
+Group:          Development/Libraries
+Requires:       libConfig = %{version}-%{release}
+Requires:       boost-devel
+Requires:       pkgconfig(libLogger)
+Requires:       libjson-devel
+
+%description -n libConfig-devel
+The package provides libConfig development tools and libs.
+
+%files -n libConfig-devel
+%defattr(644,root,root,755)
+%{_libdir}/libConfig.so
+%{_includedir}/vasum-tools/config
+%{_libdir}/pkgconfig/libConfig.pc
+
+

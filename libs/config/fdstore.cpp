@@ -22,7 +22,7 @@
  * @brief  Definition of a class for writing and reading data from a file descriptor
  */
 
-#include "config.hpp"
+#include "config/config.hpp"
 
 #include "config/fdstore.hpp"
 #include "config/exception.hpp"

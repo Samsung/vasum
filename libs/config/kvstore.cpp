@@ -22,7 +22,7 @@
  * @brief  Definition of a class for key-value storage in a sqlite3 database
  */
 
-#include "config.hpp"
+#include "config/config.hpp"
 
 #include "config/kvstore.hpp"
 #include "config/exception.hpp"

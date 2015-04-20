@@ -22,7 +22,7 @@
  * @brief   Stderr backend for logger
  */
 
-#include "config.hpp"
+#include "logger/config.hpp"
 #include "logger/backend-stderr.hpp"
 #include "logger/formatter.hpp"
 

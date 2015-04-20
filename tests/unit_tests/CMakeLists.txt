@@ -48,9 +48,9 @@ ADD_EXECUTABLE(${SOCKET_TEST_CODENAME} ${socket_test_SRCS} ${common_SRCS})
 FIND_PACKAGE (Boost COMPONENTS unit_test_framework system filesystem regex)
 
 PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED lxc json gio-2.0 libsystemd-daemon
-                  libsystemd-journal libcap-ng sqlite3)
+                  libsystemd-journal libcap-ng)
 INCLUDE_DIRECTORIES(${COMMON_FOLDER} ${SERVER_FOLDER} ${UNIT_TESTS_FOLDER} ${CLIENT_FOLDER}
-                    ${SOCKET_TEST_FOLDER})
+                    ${LIBS_FOLDER} ${SOCKET_TEST_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${UT_SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 SET_TARGET_PROPERTIES(${UT_SERVER_CODENAME} PROPERTIES
@@ -65,8 +65,10 @@ SET_TARGET_PROPERTIES(${SOCKET_TEST_CODENAME} PROPERTIES
     LINK_FLAGS "-pthread"
 )
 
-TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(${SOCKET_TEST_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
+                      Logger Config SimpleDbus)
+TARGET_LINK_LIBRARIES(${SOCKET_TEST_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
+                      Logger Config SimpleDbus)
 
 ## Subdirectories ##############################################################
 SET(VSM_TEST_CONFIG_INSTALL_DIR ${VSM_CONFIG_INSTALL_DIR}/tests)

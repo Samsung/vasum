@@ -20,9 +20,7 @@
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Zone Daemon...")
 FILE(GLOB project_SRCS *.cpp *.hpp)
-FILE(GLOB common_SRCS ${COMMON_FOLDER}/dbus/*.cpp   ${COMMON_FOLDER}/dbus/*.hpp
-                      ${COMMON_FOLDER}/logger/*.cpp ${COMMON_FOLDER}/logger/*.hpp
-                      ${COMMON_FOLDER}/utils/*.cpp  ${COMMON_FOLDER}/utils/*.hpp
+FILE(GLOB common_SRCS ${COMMON_FOLDER}/utils/*.cpp  ${COMMON_FOLDER}/utils/*.hpp
                       ${COMMON_FOLDER}/*.cpp)
 
 ## Setup target ################################################################
@@ -36,6 +34,7 @@ FIND_PACKAGE (Boost COMPONENTS program_options system filesystem)
 PKG_CHECK_MODULES(ZONE_DAEMON_DEPS REQUIRED gio-2.0 libsystemd-journal libcap-ng)
 
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
+INCLUDE_DIRECTORIES(${LIBS_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${ZONE_DAEMON_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 SET_TARGET_PROPERTIES(${ZONE_DAEMON_CODENAME} PROPERTIES
@@ -43,7 +42,8 @@ SET_TARGET_PROPERTIES(${ZONE_DAEMON_CODENAME} PROPERTIES
     LINK_FLAGS "-pthread"
 )
 
-TARGET_LINK_LIBRARIES(${ZONE_DAEMON_CODENAME} ${ZONE_DAEMON_DEPS_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(${ZONE_DAEMON_CODENAME} ${ZONE_DAEMON_DEPS_LIBRARIES}
+                      ${Boost_LIBRARIES} Logger SimpleDbus)
 
 
 ## Install #####################################################################

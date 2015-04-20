@@ -22,7 +22,7 @@
  * @brief   Functions to handle LogLevel
  */
 
-#include "config.hpp"
+#include "logger/config.hpp"
 #include "logger/level.hpp"
 
 #include <stdexcept>

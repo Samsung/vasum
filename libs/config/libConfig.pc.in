@@ -1,0 +1,12 @@
+# Package Information for pkg-config
+
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@LIB_INSTALL_DIR@
+includedir=@INCLUDE_INSTALL_DIR@
+
+Name: libConfig
+Description: Config library
+Version: @_LIB_VERSION_@
+Libs: -L${libdir} -lConfig
+Cflags: -I${includedir}/vasum-tools

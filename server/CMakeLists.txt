@@ -30,10 +30,10 @@ ADD_EXECUTABLE(${SERVER_CODENAME} ${project_SRCS} ${common_SRCS})
 
 ## Link libraries ##############################################################
 FIND_PACKAGE(Boost COMPONENTS program_options system filesystem regex)
-PKG_CHECK_MODULES(SERVER_DEPS REQUIRED lxc json gio-2.0 libsystemd-journal libsystemd-daemon
-                  libcap-ng sqlite3)
+PKG_CHECK_MODULES(SERVER_DEPS REQUIRED lxc json gio-2.0 libsystemd-journal libsystemd-daemon libcap-ng)
 
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
+INCLUDE_DIRECTORIES(${LIBS_FOLDER})
 INCLUDE_DIRECTORIES(${CLIENT_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
@@ -43,7 +43,8 @@ SET_TARGET_PROPERTIES(${SERVER_CODENAME} PROPERTIES
     LINK_FLAGS "-pthread"
 )
 
-TARGET_LINK_LIBRARIES(${SERVER_CODENAME} ${SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(${SERVER_CODENAME} ${SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
+                      Logger Config SimpleDbus)
 
 ## Subdirectories ##############################################################
 ADD_SUBDIRECTORY(configs)

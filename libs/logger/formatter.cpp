@@ -22,7 +22,7 @@
  * @brief   Helper formatter for logger
  */
 
-#include "config.hpp"
+#include "logger/config.hpp"
 #include "logger/formatter.hpp"
 #include "logger/ccolor.hpp"
 

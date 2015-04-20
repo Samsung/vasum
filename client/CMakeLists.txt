@@ -20,13 +20,9 @@
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Client...")
 FILE(GLOB project_SRCS *.cpp *.hpp *.h)
-FILE(GLOB common_SRCS ${COMMON_FOLDER}/config/*.hpp             ${COMMON_FOLDER}/config/*.cpp
-                      ${COMMON_FOLDER}/config/sqlite3/*.hpp     ${COMMON_FOLDER}/config/sqlite3/*.cpp
-                      ${COMMON_FOLDER}/dbus/*.hpp               ${COMMON_FOLDER}/dbus/*.cpp
-                      ${COMMON_FOLDER}/epoll/*.hpp              ${COMMON_FOLDER}/epoll/*.cpp
+FILE(GLOB common_SRCS ${COMMON_FOLDER}/epoll/*.hpp              ${COMMON_FOLDER}/epoll/*.cpp
                       ${COMMON_FOLDER}/ipc/*.hpp                ${COMMON_FOLDER}/ipc/*.cpp
                       ${COMMON_FOLDER}/ipc/internals/*.hpp      ${COMMON_FOLDER}/ipc/internals/*.cpp
-                      ${COMMON_FOLDER}/logger/*.hpp             ${COMMON_FOLDER}/logger/*.cpp
                       ${COMMON_FOLDER}/utils/*.hpp              ${COMMON_FOLDER}/utils/*.cpp
                       ${COMMON_FOLDER}/*.hpp                    ${COMMON_FOLDER}/*.cpp)
 
@@ -47,14 +43,15 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
         VERSION ${_LIB_VERSION_}
         COMPILE_DEFINITIONS HOST_IPC_SOCKET="${VSM_SERVER_IPC_SOCKET_PATH}")
 
-
 ## Link libraries ##############################################################
 FIND_PACKAGE(Boost COMPONENTS system filesystem)
-PKG_CHECK_MODULES(LIB_DEPS REQUIRED gio-2.0 libsystemd-daemon libsystemd-journal libcap-ng sqlite3)
+PKG_CHECK_MODULES(LIB_DEPS REQUIRED gio-2.0 libsystemd-daemon libcap-ng)
 INCLUDE_DIRECTORIES(SYSTEM ${LIB_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
+INCLUDE_DIRECTORIES(${LIBS_FOLDER})
 INCLUDE_DIRECTORIES(${SERVER_FOLDER})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_DEPS_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_DEPS_LIBRARIES} ${Boost_LIBRARIES}
+                      Config SimpleDbus)
 
 ## Generate the pc file ########################################################
 CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_BINARY_DIR}/${PC_FILE} @ONLY)

@@ -22,7 +22,7 @@
  * @brief   Systemd journal backend for logger
  */
 
-#include "config.hpp"
+#include "logger/config.hpp"
 #include "logger/backend-journal.hpp"
 
 #define SD_JOURNAL_SUPPRESS_LOCATION
