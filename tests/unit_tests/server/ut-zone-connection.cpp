@@ -196,18 +196,18 @@ BOOST_AUTO_TEST_CASE(SignalNotificationApi)
     BOOST_CHECK(signalEmitted.wait(EVENT_TIMEOUT));
 }
 
-BOOST_AUTO_TEST_CASE(SignalDisplayOffApi)
+BOOST_AUTO_TEST_CASE(SignalSwitchToDefaultApi)
 {
-    Latch displayOffCalled;
+    Latch switchToDefaultCalled;
     ZoneConnection connection(acquireAddress(), nullptr);
 
     DbusConnection::Pointer client = DbusConnection::create(acquireAddress());
 
     auto callback = [&]() {
-        displayOffCalled.set();
+        switchToDefaultCalled.set();
     };
 
-    connection.setDisplayOffCallback(callback);
+    connection.setSwitchToDefaultCallback(callback);
 
     client->emitSignal(fake_power_manager_api::OBJECT_PATH,
                        fake_power_manager_api::INTERFACE,
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(SignalDisplayOffApi)
                        nullptr);
 
     // timeout should occur, since no name is set to client
-    BOOST_CHECK(!displayOffCalled.wait(EVENT_TIMEOUT));
+    BOOST_CHECK(!switchToDefaultCalled.wait(EVENT_TIMEOUT));
 
     DbusNameSetter setter;
 
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(SignalDisplayOffApi)
                        nullptr);
 
     // now signal should be delivered correctly
-    BOOST_CHECK(displayOffCalled.wait(EVENT_TIMEOUT));
+    BOOST_CHECK(switchToDefaultCalled.wait(EVENT_TIMEOUT));
 }
 
 

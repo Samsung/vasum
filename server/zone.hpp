@@ -66,11 +66,11 @@ public:
     ~Zone();
 
     typedef ZoneConnection::NotifyActiveZoneCallback NotifyActiveZoneCallback;
-    typedef ZoneConnection::DisplayOffCallback DisplayOffCallback;
+    typedef ZoneConnection::SwitchToDefaultCallback SwitchToDefaultCallback;
     typedef ZoneConnection::FileMoveCallback FileMoveCallback;
     typedef ZoneConnection::ProxyCallCallback ProxyCallCallback;
 
-    typedef std::function<void(const std::string& address)> DbusStateChangedCallback;
+    typedef std::function<void(const std::string& address)> ConnectionStateChangedCallback;
     typedef std::function<void(bool succeeded)> StartAsyncResultCallback;
 
     /**
@@ -189,7 +189,7 @@ public:
     /**
      * Register callback used when switching to default zone.
      */
-    void setDisplayOffCallback(const DisplayOffCallback& callback);
+    void setSwitchToDefaultCallback(const SwitchToDefaultCallback& callback);
 
     /**
      * Register proxy call callback
@@ -215,7 +215,7 @@ public:
     /**
      * Register dbus state changed callback
      */
-    void setDbusStateChangedCallback(const DbusStateChangedCallback& callback);
+    void setConnectionStateChangedCallback(const ConnectionStateChangedCallback& callback);
 
     /**
      * Make a proxy call
@@ -230,7 +230,7 @@ public:
     /**
      * Get a dbus address
      */
-    std::string getDbusAddress() const;
+    std::string getConnectionAddress() const;
 
     /**
      * Get id of VT
@@ -328,11 +328,11 @@ private:
     std::unique_ptr<ZoneProvision> mProvision;
     mutable std::recursive_mutex mReconnectMutex;
     NotifyActiveZoneCallback mNotifyCallback;
-    DisplayOffCallback mDisplayOffCallback;
+    SwitchToDefaultCallback mSwitchToDefaultCallback;
     FileMoveCallback mFileMoveCallback;
     ProxyCallCallback mProxyCallCallback;
-    DbusStateChangedCallback mDbusStateChangedCallback;
-    std::string mDbusAddress;
+    ConnectionStateChangedCallback mConnectionStateChangedCallback;
+    std::string mConnectionAddress;
     std::string mRunMountPoint;
     std::string mRootPath;
     std::string mDbPath;

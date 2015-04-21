@@ -164,12 +164,12 @@ void Zone::start()
     Lock lock(mReconnectMutex);
     updateRequestedState(STATE_RUNNING);
     mProvision->start();
-    if (mConfig.enableDbusIntegration) {
+    if (mConfig.enableZoneConnection) {
         mConnectionTransport.reset(new ZoneConnectionTransport(mRunMountPoint));
     }
 
     mAdmin->start();
-    if (mConfig.enableDbusIntegration) {
+    if (mConfig.enableZoneConnection) {
         // Increase cpu quota before connect, otherwise it'd take ages.
         goForeground();
         connect();
@@ -196,14 +196,14 @@ void Zone::stop(bool saveState)
 void Zone::connect()
 {
     // assume called under reconnect lock
-    mDbusAddress = mConnectionTransport->acquireAddress();
-    mConnection.reset(new ZoneConnection(mDbusAddress,
-                                              std::bind(&Zone::onNameLostCallback, this)));
+    mConnectionAddress = mConnectionTransport->acquireAddress();
+    mConnection.reset(new ZoneConnection(mConnectionAddress,
+                                         std::bind(&Zone::onNameLostCallback, this)));
     if (mNotifyCallback) {
         mConnection->setNotifyActiveZoneCallback(mNotifyCallback);
     }
-    if (mDisplayOffCallback) {
-        mConnection->setDisplayOffCallback(mDisplayOffCallback);
+    if (mSwitchToDefaultCallback) {
+        mConnection->setSwitchToDefaultCallback(mSwitchToDefaultCallback);
     }
     if (mFileMoveCallback) {
         mConnection->setFileMoveCallback(mFileMoveCallback);
@@ -211,8 +211,8 @@ void Zone::connect()
     if (mProxyCallCallback) {
         mConnection->setProxyCallCallback(mProxyCallCallback);
     }
-    if (mDbusStateChangedCallback) {
-        mDbusStateChangedCallback(mDbusAddress);
+    if (mConnectionStateChangedCallback) {
+        mConnectionStateChangedCallback(mConnectionAddress);
     }
 }
 
@@ -221,18 +221,18 @@ void Zone::disconnect()
     // assume called under reconnect lock
     if (mConnection) {
         mConnection.reset();
-        mDbusAddress.clear();
-        if (mDbusStateChangedCallback) {
-            // notify about invalid dbusAddress for this zone
-            mDbusStateChangedCallback(std::string());
+        mConnectionAddress.clear();
+        if (mConnectionStateChangedCallback) {
+            // notify about invalid address for this zone
+            mConnectionStateChangedCallback(std::string());
         }
     }
 }
 
-std::string Zone::getDbusAddress() const
+std::string Zone::getConnectionAddress() const
 {
     Lock lock(mReconnectMutex);
-    return mDbusAddress;
+    return mConnectionAddress;
 }
 
 int Zone::getVT() const
@@ -407,13 +407,13 @@ void Zone::sendNotification(const std::string& zone,
     }
 }
 
-void Zone::setDisplayOffCallback(const DisplayOffCallback& callback)
+void Zone::setSwitchToDefaultCallback(const SwitchToDefaultCallback& callback)
 {
     Lock lock(mReconnectMutex);
 
-    mDisplayOffCallback = callback;
+    mSwitchToDefaultCallback = callback;
     if (mConnection) {
-        mConnection->setDisplayOffCallback(callback);
+        mConnection->setSwitchToDefaultCallback(callback);
     }
 }
 
@@ -437,9 +437,9 @@ void Zone::setProxyCallCallback(const ProxyCallCallback& callback)
     }
 }
 
-void Zone::setDbusStateChangedCallback(const DbusStateChangedCallback& callback)
+void Zone::setConnectionStateChangedCallback(const ConnectionStateChangedCallback& callback)
 {
-    mDbusStateChangedCallback = callback;
+    mConnectionStateChangedCallback = callback;
 }
 
 void Zone::proxyCallAsync(const std::string& busName,

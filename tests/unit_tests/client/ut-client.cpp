@@ -88,7 +88,7 @@ struct Fixture {
 };
 
 const int EVENT_TIMEOUT = 5000; ///< ms
-const std::map<std::string, std::string> EXPECTED_DBUSES_STARTED = {
+const std::map<std::string, std::string> EXPECTED_CONNECTIONS = {
     {
         "zone1",
         "unix:path=/tmp/ut-run/zone1/dbus/system_bus_socket"
@@ -157,12 +157,12 @@ BOOST_AUTO_TEST_CASE(NotRunningServer)
 
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect_custom(client,
-                                          EXPECTED_DBUSES_STARTED.begin()->second.c_str());
+                                          EXPECTED_CONNECTIONS.begin()->second.c_str());
     BOOST_CHECK_EQUAL(VSMCLIENT_IO_ERROR, status);
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(GetZoneDbuses)
+BOOST_AUTO_TEST_CASE(GetZoneConnections)
 {
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
@@ -172,14 +172,14 @@ BOOST_AUTO_TEST_CASE(GetZoneDbuses)
     //TODO: Clean up if BOOST_REQUIRE_EQUAL fail (remove client). Same in other client tests.
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
 
-    BOOST_CHECK_EQUAL(getArrayStringLength(keys, EXPECTED_DBUSES_STARTED.size() + 1u),
-                      EXPECTED_DBUSES_STARTED.size());
-    BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_DBUSES_STARTED.size() + 1u),
-                      EXPECTED_DBUSES_STARTED.size());
+    BOOST_CHECK_EQUAL(getArrayStringLength(keys, EXPECTED_CONNECTIONS.size() + 1u),
+                      EXPECTED_CONNECTIONS.size());
+    BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_CONNECTIONS.size() + 1u),
+                      EXPECTED_CONNECTIONS.size());
 
     std::map<std::string, std::string> zones;
     convertDictToMap(keys, values, zones);
-    BOOST_CHECK(zones == EXPECTED_DBUSES_STARTED);
+    BOOST_CHECK(zones == EXPECTED_CONNECTIONS);
     vsm_array_string_free(keys);
     vsm_array_string_free(values);
     vsm_client_free(client);
@@ -193,14 +193,14 @@ BOOST_AUTO_TEST_CASE(GetZoneIds)
     VsmArrayString values;
     status = vsm_get_zone_ids(client, &values);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_DBUSES_STARTED.size() + 1u),
-                      EXPECTED_DBUSES_STARTED.size());
+    BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_CONNECTIONS.size() + 1u),
+                      EXPECTED_CONNECTIONS.size());
 
     std::set<std::string> zones;
     convertArrayToSet(values, zones);
 
     for (const auto& zone : zones) {
-        BOOST_CHECK(EXPECTED_DBUSES_STARTED.find(zone) != EXPECTED_DBUSES_STARTED.cend());
+        BOOST_CHECK(EXPECTED_CONNECTIONS.find(zone) != EXPECTED_CONNECTIONS.cend());
     }
     vsm_array_string_free(values);
     vsm_client_free(client);
@@ -302,7 +302,7 @@ BOOST_AUTO_TEST_CASE(FileMoveRequest)
     const std::string secondZone = "fake_zone";
 
     VsmClient client = vsm_client_create();
-    VsmStatus status = vsm_connect_custom(client, EXPECTED_DBUSES_STARTED.begin()->second.c_str());
+    VsmStatus status = vsm_connect_custom(client, EXPECTED_CONNECTIONS.begin()->second.c_str());
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     status = vsm_file_move_request(client, secondZone.c_str(), path.c_str());
     BOOST_REQUIRE_EQUAL(VSMCLIENT_CUSTOM_ERROR, status);
@@ -332,7 +332,7 @@ BOOST_AUTO_TEST_CASE(Notification)
 
     CallbackData callbackData;
     std::map<std::string, VsmClient> clients;
-    for (const auto& it : EXPECTED_DBUSES_STARTED) {
+    for (const auto& it : EXPECTED_CONNECTIONS) {
         VsmClient client = vsm_client_create();
         VsmStatus status = vsm_connect_custom(client, it.second.c_str());
         BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
@@ -398,7 +398,7 @@ BOOST_AUTO_TEST_CASE(GetZoneIdByPidTestMultiple)
 
     BOOST_CHECK(ids.count("host") == 1);
 
-    for (const auto& dbus : EXPECTED_DBUSES_STARTED) {
+    for (const auto& dbus : EXPECTED_CONNECTIONS) {
         BOOST_CHECK(ids.count(dbus.first) == 1);
     }
 }

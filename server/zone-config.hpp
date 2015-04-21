@@ -63,7 +63,7 @@ struct ZoneConfig {
       * Specify, if D-Bus communication with the zone will be enabled.
       * Setting this value to "false" will make the zone API not work inside the zone.
       */
-    bool enableDbusIntegration;
+    bool enableZoneConnection;
 
     /**
      * Zone's CFS quota in us when it's in the foreground
@@ -106,7 +106,7 @@ struct ZoneConfig {
         initWithArgs,
         privilege, // TODO not needed?
         switchToDefaultAfterTimeout, // TODO move to dynamic and add an API to change
-        enableDbusIntegration,
+        enableZoneConnection,
         cpuQuotaForeground,
         cpuQuotaBackground,
         permittedToSend, // TODO move to dynamic and add an API to change

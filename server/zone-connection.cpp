@@ -137,9 +137,9 @@ void ZoneConnection::setNotifyActiveZoneCallback(
     mNotifyActiveZoneCallback = callback;
 }
 
-void ZoneConnection::setDisplayOffCallback(const DisplayOffCallback& callback)
+void ZoneConnection::setSwitchToDefaultCallback(const SwitchToDefaultCallback& callback)
 {
-    mDisplayOffCallback = callback;
+    mSwitchToDefaultCallback = callback;
 }
 
 void ZoneConnection::setFileMoveCallback(
@@ -223,8 +223,8 @@ void ZoneConnection::onSignalReceived(const std::string& senderBusName,
     if (objectPath == fake_power_manager_api::OBJECT_PATH &&
         interface == fake_power_manager_api::INTERFACE) {
         //power-manager sent us a signal, check it
-        if (signalName == fake_power_manager_api::SIGNAL_DISPLAY_OFF && mDisplayOffCallback) {
-            mDisplayOffCallback();
+        if (signalName == fake_power_manager_api::SIGNAL_DISPLAY_OFF && mSwitchToDefaultCallback) {
+            mSwitchToDefaultCallback();
         }
     }
 }

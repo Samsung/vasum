@@ -258,8 +258,8 @@ VsmStatus Client::vsm_get_zone_dbuses(VsmArrayString* keys, VsmArrayString* valu
     assert(values);
 
     return coverException([&] {
-        api::Dbuses dbuses;
-        mHostClient.callGetZoneDbuses(dbuses);
+        api::Connections dbuses;
+        mHostClient.callGetZoneConnections(dbuses);
         convert(dbuses, *keys, *values);
     });
 }
@@ -397,7 +397,7 @@ VsmStatus Client::vsm_add_state_callback(VsmZoneDbusStateCallback zoneDbusStateC
     assert(zoneDbusStateCallback);
 
     return coverException([&] {
-        auto onSigal = [=](const api::DbusState& dbus)
+        auto onSigal = [=](const api::ConnectionState& dbus)
         {
             zoneDbusStateCallback(dbus.first.c_str(),
                                   dbus.second.c_str(),
@@ -405,7 +405,7 @@ VsmStatus Client::vsm_add_state_callback(VsmZoneDbusStateCallback zoneDbusStateC
         };
 
         VsmSubscriptionId id;
-        id = mHostClient.subscribeZoneDbusState(onSigal);
+        id = mHostClient.subscribeZoneConnectionState(onSigal);
         if (subscriptionId) {
             *subscriptionId = id;
         }

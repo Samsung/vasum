@@ -31,7 +31,7 @@ namespace vasum {
 namespace api {
 namespace host {
 
-const vasum::ipc::MethodID METHOD_GET_ZONE_DBUSES          = 1;
+const vasum::ipc::MethodID METHOD_GET_ZONE_CONNECTIONS     = 1;
 const vasum::ipc::MethodID METHOD_GET_ZONE_ID_LIST         = 2;
 const vasum::ipc::MethodID METHOD_GET_ACTIVE_ZONE_ID       = 3;
 const vasum::ipc::MethodID METHOD_GET_ZONE_INFO            = 4;
@@ -58,7 +58,7 @@ const vasum::ipc::MethodID METHOD_UNLOCK_ZONE              = 24;
 const vasum::ipc::MethodID METHOD_GRANT_DEVICE             = 25;
 const vasum::ipc::MethodID METHOD_REVOKE_DEVICE            = 26;
 
-const vasum::ipc::MethodID SIGNAL_ZONE_DBUS_STATE          = 27;
+const vasum::ipc::MethodID SIGNAL_ZONE_CONNECTION_STATE    = 27;
 
 } // namespace host
 } // namespace api

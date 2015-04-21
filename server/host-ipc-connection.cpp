@@ -52,11 +52,11 @@ HostIPCConnection::~HostIPCConnection()
 {
 }
 
-void HostIPCConnection::setGetZoneDbusesCallback(const Callback<api::Dbuses>::type& callback)
+void HostIPCConnection::setGetZoneConnectionsCallback(const Callback<api::Connections>::type& callback)
 {
-    typedef Callback<api::Dbuses> Callback;
+    typedef Callback<api::Connections> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::host::METHOD_GET_ZONE_DBUSES,
+        api::host::METHOD_GET_ZONE_CONNECTIONS,
         Callback::getCallbackWrapper(callback));
 
 }
@@ -263,10 +263,10 @@ void HostIPCConnection::setRevokeDeviceCallback(const Callback<const api::Revoke
         Callback::getCallbackWrapper(callback));
 }
 
-void HostIPCConnection::signalZoneDbusState(const api::DbusState& dbusState)
+void HostIPCConnection::signalZoneConnectionState(const api::ConnectionState& connectionState)
 {
-   mService->signal(api::host::SIGNAL_ZONE_DBUS_STATE,
-                    std::make_shared<api::DbusState>(dbusState));
+   mService->signal(api::host::SIGNAL_ZONE_CONNECTION_STATE,
+                    std::make_shared<api::ConnectionState>(connectionState));
 }
 
 } // namespace vasum

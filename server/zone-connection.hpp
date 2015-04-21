@@ -39,7 +39,7 @@ class ZoneConnection {
 
 public:
     typedef std::function<void()> OnNameLostCallback;
-    typedef std::function<void()> DisplayOffCallback;
+    typedef std::function<void()> SwitchToDefaultCallback;
 
     ZoneConnection(const std::string& address, const OnNameLostCallback& callback);
     ~ZoneConnection();
@@ -71,9 +71,9 @@ public:
     void setNotifyActiveZoneCallback(const NotifyActiveZoneCallback& callback);
 
     /**
-     * Register callback to handle turning off the display
+     * Register switch to default request callback
      */
-    void setDisplayOffCallback(const DisplayOffCallback& callback);
+    void setSwitchToDefaultCallback(const SwitchToDefaultCallback& callback);
 
     /*
      * Register file move request callback
@@ -110,7 +110,7 @@ private:
     bool mNameLost;
     OnNameLostCallback mOnNameLostCallback;
     NotifyActiveZoneCallback mNotifyActiveZoneCallback;
-    DisplayOffCallback mDisplayOffCallback;
+    SwitchToDefaultCallback mSwitchToDefaultCallback;
     FileMoveCallback mFileMoveCallback;
     ProxyCallCallback mProxyCallCallback;
 

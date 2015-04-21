@@ -57,7 +57,7 @@ public:
                                dbus::MethodResultBuilder::Pointer result
                               )> ProxyCallCallback;
     typedef std::function<void(api::MethodResultBuilder::Pointer result
-                              )> GetZoneDbusesCallback;
+                              )> GetZoneConnectionsCallback;
     typedef std::function<void(api::MethodResultBuilder::Pointer result
                               )> GetZoneIdsCallback;
     typedef std::function<void(api::MethodResultBuilder::Pointer result
@@ -138,14 +138,14 @@ public:
     void setProxyCallCallback(const ProxyCallCallback& callback);
 
     /**
-     * Register get zone dbuses callback
+     * Register get zone connections callback
      */
-    void setGetZoneDbusesCallback(const GetZoneDbusesCallback& callback);
+    void setGetZoneConnectionsCallback(const GetZoneConnectionsCallback& callback);
 
     /**
      * Send signal describing dbus address state change
      */
-    void signalZoneDbusState(const api::DbusState& state);
+    void signalZoneConnectionState(const api::ConnectionState& state);
 
     /**
      * Register a callback called to get a list of zone ids
@@ -289,7 +289,7 @@ private:
     bool mNameAcquired;
     bool mNameLost;
     ProxyCallCallback mProxyCallCallback;
-    GetZoneDbusesCallback mGetZoneDbusesCallback;
+    GetZoneConnectionsCallback mGetZoneConnectionsCallback;
     GetZoneIdsCallback mGetZoneIdsCallback;
     GetActiveZoneIdCallback mGetActiveZoneIdCallback;
     GetZoneInfoCallback mGetZoneInfoCallback;

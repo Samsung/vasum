@@ -160,7 +160,7 @@ private:
                                     const std::string& appliaction,
                                     const std::string& message,
                                     api::MethodResultBuilder::Pointer result);
-    void handleDisplayOffCall(const std::string& caller);
+    void handleSwitchToDefaultCall(const std::string& caller);
     void handleFileMoveCall(const std::string& srcZoneId,
                             const std::string& dstZoneId,
                             const std::string& path,
@@ -173,10 +173,9 @@ private:
                          const std::string& targetMethod,
                          GVariant* parameters,
                          dbus::MethodResultBuilder::Pointer result);
-    void handleGetZoneDbusesCall(api::MethodResultBuilder::Pointer result);
-
-    void handleDbusStateChanged(const std::string& zoneId,
-                                const std::string& dbusAddress);
+    void handleGetZoneConnectionsCall(api::MethodResultBuilder::Pointer result);
+    void handleConnectionStateChanged(const std::string& zoneId,
+                                      const std::string& address);
     // Host's handlers --------------------------------------------------------
     void handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result);
     void handleGetActiveZoneIdCall(api::MethodResultBuilder::Pointer result);

@@ -81,7 +81,7 @@ public:
     HostIPCConnection();
     ~HostIPCConnection();
 
-    void setGetZoneDbusesCallback(const Callback<api::Dbuses>::type& callback);
+    void setGetZoneConnectionsCallback(const Callback<api::Connections>::type& callback);
     void setGetZoneIdsCallback(const Callback<api::ZoneIds>::type& callback);
     void setGetActiveZoneIdCallback(const Callback<api::ZoneId>::type& callback);
     void setGetZoneInfoCallback(const Callback<const api::ZoneId, api::ZoneInfoOut>::type& callback);
@@ -107,7 +107,7 @@ public:
     void setUnlockZoneCallback(const Callback<const api::ZoneId>::type& callback);
     void setGrantDeviceCallback(const Callback<const api::GrantDeviceIn>::type& callback);
     void setRevokeDeviceCallback(const Callback<const api::RevokeDeviceIn>::type& callback);
-    void signalZoneDbusState(const api::DbusState& dbusState);
+    void signalZoneConnectionState(const api::ConnectionState& connectionState);
 
 private:
     epoll::ThreadDispatcher mDispatcher;

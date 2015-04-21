@@ -112,9 +112,9 @@ void HostDbusConnection::setProxyCallCallback(const ProxyCallCallback& callback)
     mProxyCallCallback = callback;
 }
 
-void HostDbusConnection::setGetZoneDbusesCallback(const GetZoneDbusesCallback& callback)
+void HostDbusConnection::setGetZoneConnectionsCallback(const GetZoneConnectionsCallback& callback)
 {
-    mGetZoneDbusesCallback = callback;
+    mGetZoneConnectionsCallback = callback;
 }
 
 void HostDbusConnection::setGetZoneIdsCallback(const GetZoneIdsCallback& callback)
@@ -264,10 +264,10 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::host::METHOD_GET_ZONE_DBUSES) {
-        if (mGetZoneDbusesCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Dbuses>>(result);
-            mGetZoneDbusesCallback(rb);
+    if (methodName == api::host::METHOD_GET_ZONE_CONNECTIONS) {
+        if (mGetZoneConnectionsCallback) {
+            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Connections>>(result);
+            mGetZoneConnectionsCallback(rb);
         }
         return;
     }
@@ -569,12 +569,12 @@ void HostDbusConnection::proxyCallAsync(const std::string& busName,
                                      callback);
 }
 
-void HostDbusConnection::signalZoneDbusState(const api::DbusState& state)
+void HostDbusConnection::signalZoneConnectionState(const api::ConnectionState& state)
 {
     GVariant* parameters = g_variant_new("(ss)", state.first.c_str(), state.second.c_str());
     mDbusConnection->emitSignal(api::host::OBJECT_PATH,
                                 api::host::INTERFACE,
-                                api::host::SIGNAL_ZONE_DBUS_STATE,
+                                api::host::SIGNAL_ZONE_CONNECTION_STATE,
                                 parameters);
 }
 

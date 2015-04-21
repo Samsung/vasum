@@ -161,17 +161,17 @@ void HostIPCConnection::callRevokeDevice(const vasum::api::RevokeDeviceIn& argIn
     mConnection.call(vasum::api::host::METHOD_REVOKE_DEVICE, argIn);
 }
 
-void HostIPCConnection::callGetZoneDbuses(vasum::api::Dbuses& argOut)
+void HostIPCConnection::callGetZoneConnections(vasum::api::Connections& argOut)
 {
-    mConnection.call(vasum::api::host::METHOD_GET_ZONE_DBUSES, argOut);
+    mConnection.call(vasum::api::host::METHOD_GET_ZONE_CONNECTIONS, argOut);
 }
 
 HostIPCConnection::SubscriptionId
-HostIPCConnection::subscribeZoneDbusState(const ZoneDbusStateCallback& callback)
+HostIPCConnection::subscribeZoneConnectionState(const ZoneConnectionStateCallback& callback)
 {
-    mConnection.subscribe<ZoneDbusStateCallback, vasum::api::DbusState>(
-            vasum::api::host::SIGNAL_ZONE_DBUS_STATE, callback);
-    return vasum::api::host::SIGNAL_ZONE_DBUS_STATE;
+    mConnection.subscribe<ZoneConnectionStateCallback, vasum::api::ConnectionState>(
+            vasum::api::host::SIGNAL_ZONE_CONNECTION_STATE, callback);
+    return vasum::api::host::SIGNAL_ZONE_CONNECTION_STATE;
 }
 
 void HostIPCConnection::unsubscribe(const SubscriptionId& id)

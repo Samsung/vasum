@@ -84,13 +84,13 @@ typedef api::StringPair RemoveDeclarationIn;
 typedef api::StringPair CreateZoneIn;
 typedef api::StringPair RevokeDeviceIn;
 typedef api::StringPair DestroyNetDevIn;
-typedef api::StringPair DbusState;
+typedef api::StringPair ConnectionState;
 typedef api::StringPair NotifActiveZoneIn;
 typedef api::StringPair FileMoveRequestIn;
 typedef api::VectorOfStrings ZoneIds;
 typedef api::VectorOfStrings Declarations;
 typedef api::VectorOfStrings NetDevList;
-typedef api::VectorOfStringPairs Dbuses;
+typedef api::VectorOfStringPairs Connections;
 typedef api::VectorOfStringPairs GetNetDevAttrs;
 
 struct ZoneInfoOut {

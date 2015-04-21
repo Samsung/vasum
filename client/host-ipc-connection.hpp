@@ -38,7 +38,7 @@ namespace client {
 class HostIPCConnection {
 public:
     typedef unsigned int SubscriptionId;
-    typedef std::function<void(const vasum::api::DbusState&)> ZoneDbusStateCallback;
+    typedef std::function<void(const vasum::api::ConnectionState&)> ZoneConnectionStateCallback;
     void createSystem();
 
     void callGetZoneIds(vasum::api::ZoneIds& argOut);
@@ -66,8 +66,8 @@ public:
     void callUnlockZone(const vasum::api::ZoneId& argIn);
     void callGrantDevice(const vasum::api::GrantDeviceIn& argIn);
     void callRevokeDevice(const vasum::api::RevokeDeviceIn& argIn);
-    void callGetZoneDbuses(vasum::api::Dbuses& argOut);
-    SubscriptionId subscribeZoneDbusState(const ZoneDbusStateCallback& callback);
+    void callGetZoneConnections(vasum::api::Connections& argOut);
+    SubscriptionId subscribeZoneConnectionState(const ZoneConnectionStateCallback& callback);
     void unsubscribe(const SubscriptionId& id);
 
 private:

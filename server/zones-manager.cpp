@@ -132,8 +132,8 @@ ZonesManager::ZonesManager(const std::string& configPath)
                                               this, HOST_ID, _1, _2, _3, _4, _5, _6, _7));
 #endif
 
-    mHostConnection.setGetZoneDbusesCallback(bind(&ZonesManager::handleGetZoneDbusesCall,
-                                                  this, _1));
+    mHostConnection.setGetZoneConnectionsCallback(bind(&ZonesManager::handleGetZoneConnectionsCall,
+                                                       this, _1));
 
     mHostConnection.setGetZoneIdsCallback(bind(&ZonesManager::handleGetZoneIdsCall,
                                                this, _1));
@@ -319,7 +319,7 @@ void ZonesManager::insertZone(const std::string& zoneId, const std::string& zone
     zone->setNotifyActiveZoneCallback(bind(&ZonesManager::handleNotifyActiveZoneCall,
                                            this, zoneId, _1, _2, _3));
 
-    zone->setDisplayOffCallback(bind(&ZonesManager::handleDisplayOffCall,
+    zone->setSwitchToDefaultCallback(bind(&ZonesManager::handleSwitchToDefaultCall,
                                      this, zoneId));
 
     zone->setFileMoveCallback(bind(&ZonesManager::handleFileMoveCall,
@@ -328,8 +328,8 @@ void ZonesManager::insertZone(const std::string& zoneId, const std::string& zone
     zone->setProxyCallCallback(bind(&ZonesManager::handleProxyCall,
                                     this, zoneId, _1, _2, _3, _4, _5, _6, _7));
 
-    zone->setDbusStateChangedCallback(bind(&ZonesManager::handleDbusStateChanged,
-                                           this, zoneId, _1));
+    zone->setConnectionStateChangedCallback(bind(&ZonesManager::handleConnectionStateChanged,
+                                                 this, zoneId, _1));
 
     mZones.push_back(std::move(zone));
 
@@ -578,7 +578,7 @@ void ZonesManager::handleNotifyActiveZoneCall(const std::string& caller,
     }
 }
 
-void ZonesManager::handleDisplayOffCall(const std::string& /*caller*/)
+void ZonesManager::handleSwitchToDefaultCall(const std::string& /*caller*/)
 {
     // get config of currently set zone and switch if switchToDefaultAfterTimeout is true
     Lock lock(mMutex);
@@ -750,21 +750,21 @@ void ZonesManager::handleProxyCall(const std::string& caller,
                               asyncResultCallback);
 }
 
-void ZonesManager::handleGetZoneDbusesCall(api::MethodResultBuilder::Pointer result)
+void ZonesManager::handleGetZoneConnectionsCall(api::MethodResultBuilder::Pointer result)
 {
     Lock lock(mMutex);
 
-    auto dbuses = std::make_shared<api::Dbuses>();
+    auto connections = std::make_shared<api::Connections>();
     for (auto& zone : mZones) {
-        dbuses->values.push_back({zone->getId(), zone->getDbusAddress()});
+        connections->values.push_back({zone->getId(), zone->getConnectionAddress()});
     }
-    result->set(dbuses);
+    result->set(connections);
 }
 
-void ZonesManager::handleDbusStateChanged(const std::string& zoneId ,
-                                          const std::string& dbusAddress)
+void ZonesManager::handleConnectionStateChanged(const std::string& zoneId ,
+                                                const std::string& address)
 {
-    mHostConnection.signalZoneDbusState({zoneId, dbusAddress});
+    mHostConnection.signalZoneConnectionState({zoneId, address});
 }
 
 void ZonesManager::handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result)

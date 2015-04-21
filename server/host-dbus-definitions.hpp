@@ -38,7 +38,7 @@ const std::string INTERFACE                       = "org.tizen.vasum.host.manage
 
 const std::string ERROR_ZONE_NOT_RUNNING          = "org.tizen.vasum.host.Error.ZonesNotRunning";
 
-const std::string METHOD_GET_ZONE_DBUSES          = "GetZoneDbuses";
+const std::string METHOD_GET_ZONE_CONNECTIONS     = "GetZoneConnections";
 const std::string METHOD_GET_ZONE_ID_LIST         = "GetZoneIds";
 const std::string METHOD_GET_ACTIVE_ZONE_ID       = "GetActiveZoneId";
 const std::string METHOD_GET_ZONE_INFO            = "GetZoneInfo";
@@ -65,7 +65,7 @@ const std::string METHOD_UNLOCK_ZONE              = "UnlockZone";
 const std::string METHOD_GRANT_DEVICE             = "GrantDevice";
 const std::string METHOD_REVOKE_DEVICE            = "RevokeDevice";
 
-const std::string SIGNAL_ZONE_DBUS_STATE          = "ZoneDbusState";
+const std::string SIGNAL_ZONE_CONNECTION_STATE    = "ZoneConnectionState";
 
 
 const std::string DEFINITION =
@@ -80,8 +80,8 @@ const std::string DEFINITION =
     "      <arg type='v' name='parameters' direction='in'/>"
     "      <arg type='v' name='result' direction='out'/>"
     "    </method>"
-    "    <method name='" + METHOD_GET_ZONE_DBUSES + "'>"
-    "      <arg type='a(ss)' name='dbuses' direction='out'/>"
+    "    <method name='" + METHOD_GET_ZONE_CONNECTIONS + "'>"
+    "      <arg type='a(ss)' name='connections' direction='out'/>"
     "    </method>"
     "    <method name='" + METHOD_GET_ZONE_ID_LIST + "'>"
     "      <arg type='as' name='result' direction='out'/>"
@@ -196,9 +196,9 @@ const std::string DEFINITION =
     "      <arg type='s' name='id' direction='in'/>"
     "      <arg type='s' name='device' direction='in'/>"
     "    </method>"
-    "    <signal name='" + SIGNAL_ZONE_DBUS_STATE + "'>"
+    "    <signal name='" + SIGNAL_ZONE_CONNECTION_STATE + "'>"
     "      <arg type='s' name='zone'/>"
-    "      <arg type='s' name='dbusAddress'/>"
+    "      <arg type='s' name='address'/>"
     "    </signal>"
     "  </interface>"
     "</node>";

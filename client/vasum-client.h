@@ -293,11 +293,11 @@ void vsm_netdev_free(VsmNetdev netdev);
  * Zone's D-Bus state change callback function signature.
  *
  * @param[in] zoneId affected zone id
- * @param[in] dbusAddress new D-Bus address
+ * @param[in] address new D-Bus address
  * @param data custom user's data pointer passed to vsm_add_state_callback() function
  */
 typedef void (*VsmZoneDbusStateCallback)(const char* zoneId,
-                                             const char* dbusAddress,
+                                             const char* address,
                                              void* data);
 
 /**

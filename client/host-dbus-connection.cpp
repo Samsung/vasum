@@ -170,16 +170,16 @@ void HostDbusConnection::callRevokeDevice(const vasum::api::RevokeDeviceIn& argI
     mConnection.call(vasum::api::host::METHOD_REVOKE_DEVICE, argIn);
 }
 
-void HostDbusConnection::callGetZoneDbuses(vasum::api::Dbuses& argOut)
+void HostDbusConnection::callGetZoneConnections(vasum::api::Connections& argOut)
 {
-    mConnection.call(vasum::api::host::METHOD_GET_ZONE_DBUSES, argOut);
+    mConnection.call(vasum::api::host::METHOD_GET_ZONE_CONNECTIONS, argOut);
 }
 
 HostDbusConnection::SubscriptionId
-HostDbusConnection::subscribeZoneDbusState(const ZoneDbusStateCallback& callback)
+HostDbusConnection::subscribeZoneConnectionState(const ZoneConnectionStateCallback& callback)
 {
-    return mConnection.signalSubscribe<vasum::api::DbusState>(
-        vasum::api::host::SIGNAL_ZONE_DBUS_STATE, callback);
+    return mConnection.signalSubscribe<vasum::api::ConnectionState>(
+        vasum::api::host::SIGNAL_ZONE_CONNECTION_STATE, callback);
 }
 
 void HostDbusConnection::unsubscribe(const SubscriptionId& id)

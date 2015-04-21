@@ -82,7 +82,7 @@ const std::string FILE_CONTENT = "File content\n"
 const std::string NON_EXISTANT_ZONE_ID = "NON_EXISTANT_ZONE_ID";
 const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
 const std::string SIMPLE_TEMPLATE = "console";
-const std::string DBUS_TEMPLATE = "console-dbus";
+const std::string ZONE_ACCESS_TEMPLATE = "console-dbus";
 
 #ifdef DBUS_CONNECTION
 /**
@@ -110,9 +110,9 @@ public:
                               )> TestApiMethodCallback;
     typedef std::function<void()> VoidResultCallback;
     typedef std::function<void(const std::string& zoneId,
-                               const std::string& dbusAddress)> SignalCallback;
+                               const std::string& address)> SignalCallback;
 
-    typedef std::map<std::string, std::string> Dbuses;
+    typedef std::map<std::string, std::string> Connections;
 
     DbusAccessory()
         : mId(0),
@@ -168,7 +168,7 @@ public:
         mClient->signalSubscribe(callback, isHost() ? api::host::BUS_NAME : api::zone::BUS_NAME);
     }
 
-    void subscribeZoneDbusState(const SignalCallback& callback) {
+    void subscribeZoneConnectionState(const SignalCallback& callback) {
         assert(isHost());
         auto onSignal = [callback] (const std::string& /*senderBusName*/,
                              const std::string& objectPath,
@@ -177,12 +177,12 @@ public:
                              GVariant* parameters) {
             if (objectPath == api::host::OBJECT_PATH &&
                 interface == api::host::INTERFACE &&
-                signalName == api::host::SIGNAL_ZONE_DBUS_STATE) {
+                signalName == api::host::SIGNAL_ZONE_CONNECTION_STATE) {
 
                 const gchar* zoneId = NULL;
-                const gchar* dbusAddress = NULL;
-                g_variant_get(parameters, "(&s&s)", &zoneId, &dbusAddress);
-                callback(zoneId, dbusAddress);
+                const gchar* address = NULL;
+                g_variant_get(parameters, "(&s&s)", &zoneId, &address);
+                callback(zoneId, address);
             }
         };
         mClient->signalSubscribe(onSignal, api::host::BUS_NAME);
@@ -285,14 +285,14 @@ public:
         return GVariantPtr(unpackedResult, g_variant_unref);
     }
 
-    Dbuses callMethodGetZoneDbuses()
+    Connections callMethodGetZoneConnections()
     {
         assert(isHost());
-        Dbuses dbuses;
+        Connections connections;
         GVariantPtr result = mClient->callMethod(api::host::BUS_NAME,
                                                  api::host::OBJECT_PATH,
                                                  api::host::INTERFACE,
-                                                 api::host::METHOD_GET_ZONE_DBUSES,
+                                                 api::host::METHOD_GET_ZONE_CONNECTIONS,
                                                  NULL,
                                                  "(a(ss))");
         GVariant* array = NULL;
@@ -301,11 +301,11 @@ public:
         size_t count = g_variant_n_children(array);
         for (size_t n = 0; n < count; ++n) {
             const char* zoneId = NULL;
-            const char* dbusAddress = NULL;
-            g_variant_get_child(array, n, "(&s&s)", &zoneId, &dbusAddress);
-            dbuses.insert(Dbuses::value_type(zoneId, dbusAddress));
+            const char* address = NULL;
+            g_variant_get_child(array, n, "(&s&s)", &zoneId, &address);
+            connections.insert(Connections::value_type(zoneId, address));
         }
-        return dbuses;
+        return connections;
     }
 
     std::vector<std::string> callMethodGetZoneIds()
@@ -502,9 +502,9 @@ public:
                               )> TestApiMethodCallback;
     typedef std::function<void()> VoidResultCallback;
     typedef std::function<void(const std::string& zoneId,
-                               const std::string& dbusAddress)> SignalCallback;
+                               const std::string& address)> SignalCallback;
 
-    typedef std::map<std::string, std::string> Dbuses;
+    typedef std::map<std::string, std::string> Connections;
 
     HostIPCAccessory()
         : mClient(mDispatcher.getPoll(), HOST_IPC_SOCKET)
@@ -512,23 +512,24 @@ public:
         mClient.start();
     }
 
-    void subscribeZoneDbusState(const SignalCallback& callback)
+    void subscribeZoneConnectionState(const SignalCallback& callback)
     {
-        auto callbackWrapper = [callback] (const ipc::PeerID, std::shared_ptr<api::DbusState>& data) {
+        auto callbackWrapper = [callback] (const ipc::PeerID, std::shared_ptr<api::ConnectionState>& data) {
             callback(data->first, data->second);
         };
-        mClient.setSignalHandler<api::DbusState>(api::host::SIGNAL_ZONE_DBUS_STATE, callbackWrapper);
+        mClient.setSignalHandler<api::ConnectionState>(api::host::SIGNAL_ZONE_CONNECTION_STATE,
+                                                       callbackWrapper);
     }
 
-    Dbuses callMethodGetZoneDbuses()
+    Connections callMethodGetZoneConnections()
     {
-        const auto out = mClient.callSync<api::Void, api::Dbuses>(api::host::METHOD_GET_ZONE_DBUSES,
-                                                                  std::make_shared<api::Void>());
-        Dbuses dbuses;
+        const auto out = mClient.callSync<api::Void, api::Connections>(api::host::METHOD_GET_ZONE_CONNECTIONS,
+                                                                       std::make_shared<api::Void>());
+        Connections connections;
         for (const auto& dbus : out->values) {
-            dbuses.insert(Dbuses::value_type(dbus.first, dbus.second));
+            connections.insert(Connections::value_type(dbus.first, dbus.second));
         }
-        return dbuses;
+        return connections;
     }
 
     std::vector<std::string> callMethodGetZoneIds()
@@ -629,7 +630,7 @@ public:
                                MethodResultBuilder::Pointer result
                               )> TestApiMethodCallback;
 
-    typedef std::map<std::string, std::string> Dbuses;
+    typedef std::map<std::string, std::string> Connections;
 
     ZoneDbusAccessory(int id)
         : mId(id),
@@ -891,17 +892,17 @@ BOOST_AUTO_TEST_CASE(Focus)
 BOOST_AUTO_TEST_CASE(NotifyActiveZone)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
-    cm.createZone("zone1", DBUS_TEMPLATE);
-    cm.createZone("zone2", DBUS_TEMPLATE);
-    cm.createZone("zone3", DBUS_TEMPLATE);
+    cm.createZone("zone1", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone2", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone3", ZONE_ACCESS_TEMPLATE);
     cm.restoreAll();
 
     Latch signalReceivedLatch;
     std::map<int, std::vector<std::string>> signalReceivedSourcesMap;
 
-    std::map<int, std::unique_ptr<ZoneAccessory>> dbuses;
+    std::map<int, std::unique_ptr<ZoneAccessory>> connections;
     for (int i = 1; i <= TEST_DBUS_CONNECTION_ZONES_COUNT; ++i) {
-        dbuses[i] = std::unique_ptr<ZoneAccessory>(new ZoneAccessory(i));
+        connections[i] = std::unique_ptr<ZoneAccessory>(new ZoneAccessory(i));
     }
 
     auto handler = [](Latch& latch,
@@ -930,16 +931,16 @@ BOOST_AUTO_TEST_CASE(NotifyActiveZone)
 
     using namespace std::placeholders;
     for (int i = 1; i <= TEST_DBUS_CONNECTION_ZONES_COUNT; ++i) {
-        dbuses[i]->signalSubscribe(std::bind(handler,
+        connections[i]->signalSubscribe(std::bind(handler,
                                              std::ref(signalReceivedLatch),
                                              std::ref(signalReceivedSourcesMap[i]),
                                              _1, _2, _3, _4, _5));
     }
-    for (auto& dbus : dbuses) {
+    for (auto& dbus : connections) {
         dbus.second->callMethodNotify();
     }
 
-    BOOST_REQUIRE(signalReceivedLatch.waitForN(dbuses.size() - 1u, EVENT_TIMEOUT));
+    BOOST_REQUIRE(signalReceivedLatch.waitForN(connections.size() - 1u, EVENT_TIMEOUT));
     BOOST_REQUIRE(signalReceivedLatch.empty());
 
     //check if there are no signals that was received more than once
@@ -949,21 +950,21 @@ BOOST_AUTO_TEST_CASE(NotifyActiveZone)
                                      source), 1);
     }
     //check if all signals was received by active zone
-    BOOST_CHECK_EQUAL(signalReceivedSourcesMap[1].size(), dbuses.size() - 1);
+    BOOST_CHECK_EQUAL(signalReceivedSourcesMap[1].size(), connections.size() - 1);
     //check if no signals was received by inactive zone
-    for (size_t i = 2; i <= dbuses.size(); ++i) {
+    for (size_t i = 2; i <= connections.size(); ++i) {
         BOOST_CHECK(signalReceivedSourcesMap[i].empty());
     }
 
-    dbuses.clear();
+    connections.clear();
 }
 
-BOOST_AUTO_TEST_CASE(DisplayOff)
+BOOST_AUTO_TEST_CASE(SwitchToDefault)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
-    cm.createZone("zone1", DBUS_TEMPLATE);
-    cm.createZone("zone2", DBUS_TEMPLATE);
-    cm.createZone("zone3", DBUS_TEMPLATE);
+    cm.createZone("zone1", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone2", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone3", ZONE_ACCESS_TEMPLATE);
     cm.restoreAll();
 
     std::vector<std::unique_ptr<ZoneAccessory>> clients;
@@ -998,9 +999,9 @@ BOOST_AUTO_TEST_CASE(DisplayOff)
 BOOST_AUTO_TEST_CASE(MoveFile)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
-    cm.createZone("zone1", DBUS_TEMPLATE);
-    cm.createZone("zone2", DBUS_TEMPLATE);
-    cm.createZone("zone3", DBUS_TEMPLATE);
+    cm.createZone("zone1", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone2", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone3", ZONE_ACCESS_TEMPLATE);
     cm.restoreAll();
 
     Latch notificationLatch;
@@ -1008,9 +1009,9 @@ BOOST_AUTO_TEST_CASE(MoveFile)
     std::string notificationPath;
     std::string notificationRetcode;
 
-    std::map<int, std::unique_ptr<ZoneAccessory>> dbuses;
+    std::map<int, std::unique_ptr<ZoneAccessory>> connections;
     for (int i = 1; i <= 2; ++i) {
-        dbuses[i] = std::unique_ptr<ZoneAccessory>(new ZoneAccessory(i));
+        connections[i] = std::unique_ptr<ZoneAccessory>(new ZoneAccessory(i));
     }
 
     auto handler = [&](const std::string& /*senderBusName*/,
@@ -1037,7 +1038,7 @@ BOOST_AUTO_TEST_CASE(MoveFile)
         };
 
     // subscribe the second (destination) zone for notifications
-    dbuses.at(2)->signalSubscribe(handler);
+    connections.at(2)->signalSubscribe(handler);
 
     const std::string TMP = "/tmp/ut-zones";
     const std::string NO_PATH = "path_doesnt_matter_here";
@@ -1049,28 +1050,28 @@ BOOST_AUTO_TEST_CASE(MoveFile)
     const std::string ZONE2PATH = TMP + "/" + ZONE2 + TMP;
 
     // sending to a non existing zone
-    BOOST_CHECK_EQUAL(dbuses.at(1)->callMethodMove(BUGGY_ZONE, NO_PATH),
+    BOOST_CHECK_EQUAL(connections.at(1)->callMethodMove(BUGGY_ZONE, NO_PATH),
                       api::zone::FILE_MOVE_DESTINATION_NOT_FOUND);
     BOOST_CHECK(notificationLatch.empty());
 
     // sending to self
-    BOOST_CHECK_EQUAL(dbuses.at(1)->callMethodMove(ZONE1, NO_PATH),
+    BOOST_CHECK_EQUAL(connections.at(1)->callMethodMove(ZONE1, NO_PATH),
                       api::zone::FILE_MOVE_WRONG_DESTINATION);
     BOOST_CHECK(notificationLatch.empty());
 
     // no permission to send
-    BOOST_CHECK_EQUAL(dbuses.at(1)->callMethodMove(ZONE2, "/etc/secret1"),
+    BOOST_CHECK_EQUAL(connections.at(1)->callMethodMove(ZONE2, "/etc/secret1"),
                       api::zone::FILE_MOVE_NO_PERMISSIONS_SEND);
     BOOST_CHECK(notificationLatch.empty());
 
     // no permission to receive
     // TODO uncomment this after adding an api to change 'permittedTo*' config
-    //BOOST_CHECK_EQUAL(dbuses.at(1)->callMethodMove(ZONE2, "/etc/secret2"),
+    //BOOST_CHECK_EQUAL(connections.at(1)->callMethodMove(ZONE2, "/etc/secret2"),
     //                  api::zone::FILE_MOVE_NO_PERMISSIONS_RECEIVE);
     //BOOST_CHECK(notificationLatch.empty());
 
     // non existing file
-    BOOST_CHECK_EQUAL(dbuses.at(1)->callMethodMove(ZONE2, BUGGY_PATH),
+    BOOST_CHECK_EQUAL(connections.at(1)->callMethodMove(ZONE2, BUGGY_PATH),
                       api::zone::FILE_MOVE_FAILED);
     BOOST_CHECK(notificationLatch.empty());
 
@@ -1083,7 +1084,7 @@ BOOST_AUTO_TEST_CASE(MoveFile)
     BOOST_REQUIRE(fs::create_directories(ZONE2PATH, ec));
     BOOST_REQUIRE(utils::saveFileContent(ZONE1PATH + "/file", FILE_CONTENT));
 
-    BOOST_CHECK_EQUAL(dbuses.at(1)->callMethodMove(ZONE2, TMP + "/file"),
+    BOOST_CHECK_EQUAL(connections.at(1)->callMethodMove(ZONE2, TMP + "/file"),
                       api::zone::FILE_MOVE_SUCCEEDED);
     BOOST_REQUIRE(notificationLatch.wait(EVENT_TIMEOUT));
     BOOST_REQUIRE(notificationLatch.empty());
@@ -1100,9 +1101,9 @@ BOOST_AUTO_TEST_CASE(MoveFile)
 BOOST_AUTO_TEST_CASE(AllowSwitchToDefault)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
-    cm.createZone("zone1", DBUS_TEMPLATE);
-    cm.createZone("zone2", DBUS_TEMPLATE);
-    cm.createZone("zone3", DBUS_TEMPLATE);
+    cm.createZone("zone1", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone2", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone3", ZONE_ACCESS_TEMPLATE);
     cm.restoreAll();
 
     std::vector<std::unique_ptr<ZoneAccessory>> clients;
@@ -1150,18 +1151,18 @@ BOOST_AUTO_TEST_CASE(AllowSwitchToDefault)
 BOOST_AUTO_TEST_CASE(ProxyCall)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
-    cm.createZone("zone1", DBUS_TEMPLATE);
-    cm.createZone("zone2", DBUS_TEMPLATE);
-    cm.createZone("zone3", DBUS_TEMPLATE);
+    cm.createZone("zone1", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone2", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone3", ZONE_ACCESS_TEMPLATE);
     cm.restoreAll();
 
-    std::map<int, std::unique_ptr<DbusAccessory>> dbuses;
-    dbuses[0] = std::unique_ptr<DbusAccessory>(new HostAccessory());
+    std::map<int, std::unique_ptr<DbusAccessory>> connections;
+    connections[0] = std::unique_ptr<DbusAccessory>(new HostAccessory());
     for (int i = 1; i <= TEST_DBUS_CONNECTION_ZONES_COUNT; ++i) {
-        dbuses[i] = std::unique_ptr<DbusAccessory>(new ZoneAccessory(i));
+        connections[i] = std::unique_ptr<DbusAccessory>(new ZoneAccessory(i));
     }
 
-    for (auto& dbus : dbuses) {
+    for (auto& dbus : connections) {
         dbus.second->setName(testapi::BUS_NAME);
 
         const int id = dbus.first;
@@ -1178,58 +1179,58 @@ BOOST_AUTO_TEST_CASE(ProxyCall)
 
     // host -> zone2
     BOOST_CHECK_EQUAL("reply from 2: param1",
-                      dbuses.at(0)->testApiProxyCall("zone2",
+                      connections.at(0)->testApiProxyCall("zone2",
                                                      "param1"));
 
     // host -> host
     BOOST_CHECK_EQUAL("reply from 0: param2",
-                      dbuses.at(0)->testApiProxyCall("host",
+                      connections.at(0)->testApiProxyCall("host",
                                                      "param2"));
 
     // zone1 -> host
     BOOST_CHECK_EQUAL("reply from 0: param3",
-                      dbuses.at(1)->testApiProxyCall("host",
+                      connections.at(1)->testApiProxyCall("host",
                                                      "param3"));
 
     // zone1 -> zone2
     BOOST_CHECK_EQUAL("reply from 2: param4",
-                      dbuses.at(1)->testApiProxyCall("zone2",
+                      connections.at(1)->testApiProxyCall("zone2",
                                                      "param4"));
 
     // zone2 -> zone2
     BOOST_CHECK_EQUAL("reply from 2: param5",
-                      dbuses.at(2)->testApiProxyCall("zone2",
+                      connections.at(2)->testApiProxyCall("zone2",
                                                      "param5"));
 
     // host -> unknown
-    BOOST_CHECK_EXCEPTION(dbuses.at(0)->testApiProxyCall("unknown", "param"),
+    BOOST_CHECK_EXCEPTION(connections.at(0)->testApiProxyCall("unknown", "param"),
                           DbusCustomException,
                           WhatEquals("Unknown proxy call target"));
 
     // forwarding error
-    BOOST_CHECK_EXCEPTION(dbuses.at(0)->testApiProxyCall("host", ""),
+    BOOST_CHECK_EXCEPTION(connections.at(0)->testApiProxyCall("host", ""),
                           DbusCustomException,
                           WhatEquals("Test error"));
 
     // forbidden call
-    BOOST_CHECK_EXCEPTION(dbuses.at(0)->proxyCall("host",
-                                              "org.fake",
-                                              "/a/b",
-                                              "c.d",
-                                              "foo",
-                                              g_variant_new("(s)", "arg")),
+    BOOST_CHECK_EXCEPTION(connections.at(0)->proxyCall("host",
+                                                       "org.fake",
+                                                       "/a/b",
+                                                       "c.d",
+                                                       "foo",
+                                                       g_variant_new("(s)", "arg")),
                           DbusCustomException,
                           WhatEquals("Proxy call forbidden"));
 }
 #endif // DBUS_CONNECTION
 
 namespace {
-    const HostAccessory::Dbuses EXPECTED_DBUSES_NONE = {
+    const HostAccessory::Connections EXPECTED_CONNECTIONS_NONE = {
         {"zone1", ""},
         {"zone2", ""},
         {"zone3", ""}};
 
-    const HostAccessory::Dbuses EXPECTED_DBUSES_ALL = {
+    const HostAccessory::Connections EXPECTED_CONNECTIONS_ALL = {
         {"zone1",
          "unix:path=/tmp/ut-run/zone1/dbus/system_bus_socket"},
         {"zone2",
@@ -1238,22 +1239,22 @@ namespace {
          "unix:path=/tmp/ut-run/zone3/dbus/system_bus_socket"}};
 } // namespace
 
-BOOST_AUTO_TEST_CASE(GetZoneDbuses)
+BOOST_AUTO_TEST_CASE(GetZoneConnections)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     HostAccessory host;
-    cm.createZone("zone1", DBUS_TEMPLATE);
-    cm.createZone("zone2", DBUS_TEMPLATE);
-    cm.createZone("zone3", DBUS_TEMPLATE);
+    cm.createZone("zone1", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone2", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone3", ZONE_ACCESS_TEMPLATE);
 
-    BOOST_CHECK(EXPECTED_DBUSES_NONE == host.callMethodGetZoneDbuses());
+    BOOST_CHECK(EXPECTED_CONNECTIONS_NONE == host.callMethodGetZoneConnections());
     cm.restoreAll();
-    BOOST_CHECK(EXPECTED_DBUSES_ALL == host.callMethodGetZoneDbuses());
+    BOOST_CHECK(EXPECTED_CONNECTIONS_ALL == host.callMethodGetZoneConnections());
     cm.shutdownAll();
-    BOOST_CHECK(EXPECTED_DBUSES_NONE == host.callMethodGetZoneDbuses());
+    BOOST_CHECK(EXPECTED_CONNECTIONS_NONE == host.callMethodGetZoneConnections());
 }
 
-BOOST_AUTO_TEST_CASE(GetZoneDbusesNoDbus)
+BOOST_AUTO_TEST_CASE(GetZoneConnectionsNoDbus)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
     HostAccessory host;
@@ -1261,43 +1262,43 @@ BOOST_AUTO_TEST_CASE(GetZoneDbusesNoDbus)
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
 
-    BOOST_CHECK(EXPECTED_DBUSES_NONE == host.callMethodGetZoneDbuses());
+    BOOST_CHECK(EXPECTED_CONNECTIONS_NONE == host.callMethodGetZoneConnections());
     cm.restoreAll();
-    BOOST_CHECK(EXPECTED_DBUSES_NONE == host.callMethodGetZoneDbuses());
+    BOOST_CHECK(EXPECTED_CONNECTIONS_NONE == host.callMethodGetZoneConnections());
     cm.shutdownAll();
-    BOOST_CHECK(EXPECTED_DBUSES_NONE == host.callMethodGetZoneDbuses());
+    BOOST_CHECK(EXPECTED_CONNECTIONS_NONE == host.callMethodGetZoneConnections());
 }
 
-BOOST_AUTO_TEST_CASE(ZoneDbusesSignals)
+BOOST_AUTO_TEST_CASE(ZoneConnectionsSignals)
 {
     Latch signalLatch;
-    HostAccessory::Dbuses collectedDbuses;
-    std::mutex collectedDbusesMutex;
+    HostAccessory::Connections collectedConnections;
+    std::mutex collectedConnectionsMutex;
 
-    auto onSignal = [&] (const std::string& zoneId, const std::string& dbusAddress) {
-        std::unique_lock<std::mutex> lock(collectedDbusesMutex);
-        collectedDbuses.insert(HostAccessory::Dbuses::value_type(zoneId, dbusAddress));
+    auto onSignal = [&] (const std::string& zoneId, const std::string& address) {
+        std::unique_lock<std::mutex> lock(collectedConnectionsMutex);
+        collectedConnections.insert(HostAccessory::Connections::value_type(zoneId, address));
         signalLatch.set();
     };
 
     {
         ZonesManager cm(TEST_CONFIG_PATH);
         HostAccessory host;
-        host.subscribeZoneDbusState(onSignal);
-        cm.createZone("zone1", DBUS_TEMPLATE);
-        cm.createZone("zone2", DBUS_TEMPLATE);
-        cm.createZone("zone3", DBUS_TEMPLATE);
+        host.subscribeZoneConnectionState(onSignal);
+        cm.createZone("zone1", ZONE_ACCESS_TEMPLATE);
+        cm.createZone("zone2", ZONE_ACCESS_TEMPLATE);
+        cm.createZone("zone3", ZONE_ACCESS_TEMPLATE);
 
         BOOST_CHECK(signalLatch.empty());
-        BOOST_CHECK(collectedDbuses.empty());
+        BOOST_CHECK(collectedConnections.empty());
 
         cm.restoreAll();
 
         BOOST_REQUIRE(signalLatch.waitForN(TEST_DBUS_CONNECTION_ZONES_COUNT, EVENT_TIMEOUT));
         BOOST_CHECK(signalLatch.empty());
-        std::unique_lock<std::mutex> lock(collectedDbusesMutex);
-        BOOST_CHECK(EXPECTED_DBUSES_ALL == collectedDbuses);
-        collectedDbuses.clear();
+        std::unique_lock<std::mutex> lock(collectedConnectionsMutex);
+        BOOST_CHECK(EXPECTED_CONNECTIONS_ALL == collectedConnections);
+        collectedConnections.clear();
     }
 }
 
@@ -1544,8 +1545,8 @@ BOOST_AUTO_TEST_CASE(StartShutdownZone)
     const std::string zone2 = "zone2";
 
     ZonesManager cm(TEST_CONFIG_PATH);
-    cm.createZone(zone1, DBUS_TEMPLATE);
-    cm.createZone(zone2, DBUS_TEMPLATE);
+    cm.createZone(zone1, ZONE_ACCESS_TEMPLATE);
+    cm.createZone(zone2, ZONE_ACCESS_TEMPLATE);
 
     Latch callDone;
     auto resultCallback = [&]() {
@@ -1581,9 +1582,9 @@ BOOST_AUTO_TEST_CASE(StartShutdownZone)
 BOOST_AUTO_TEST_CASE(LockUnlockZone)
 {
     ZonesManager cm(TEST_CONFIG_PATH);
-    cm.createZone("zone1", DBUS_TEMPLATE);
-    cm.createZone("zone2", DBUS_TEMPLATE);
-    cm.createZone("zone3", DBUS_TEMPLATE);
+    cm.createZone("zone1", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone2", ZONE_ACCESS_TEMPLATE);
+    cm.createZone("zone3", ZONE_ACCESS_TEMPLATE);
     cm.restoreAll();
 
     HostAccessory host;
