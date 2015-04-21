@@ -102,7 +102,6 @@ void EventPoll::removeFD(const int fd)
 }
 
 bool EventPoll::dispatchIteration(const int timeoutMs)
-
 {
     for (;;) {
         epoll_event event;

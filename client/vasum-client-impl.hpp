@@ -33,6 +33,26 @@
 #include <linux/if_link.h>
 
 /**
+ * Zone's D-Bus state change callback function signature.
+ *
+ * @param[in] zoneId affected zone id
+ * @param[in] dbusAddress new D-Bus address
+ * @param data custom user's data pointer passed to vsm_add_state_callback() function
+ */
+typedef std::function<void (const char *zoneId, const char *dbusAddress, void *data)> VsmZoneDbusStateFunction;
+
+/**
+ * Notification callback function signature.
+ *
+ * @param[in] zone source zone
+ * @param[in] application sending application name
+ * @param[in] message notification message
+ * @param data custom user's data pointer passed to vsm_add_notification_callback()
+ */
+typedef std::function<void(const char *zone, const char *application, const char *message, void *data)>
+    VsmNotificationFunction;
+
+/**
  * vasum's client definition.
  *
  * Client uses dbus API.
@@ -48,6 +68,8 @@ public:
      * @return status of this function call
      */
     VsmStatus createSystem() noexcept;
+
+    vasum::epoll::EventPoll& getEventPoll() noexcept;
 
     /**
      * Create client.
@@ -135,7 +157,7 @@ public:
     /**
      *  @see ::vsm_add_state_callback
      */
-    VsmStatus vsm_add_state_callback(VsmZoneDbusStateCallback zoneDbusStateCallback,
+    VsmStatus vsm_add_state_callback(VsmZoneDbusStateFunction zoneDbusStateCallback,
                                      void* data,
                                      VsmSubscriptionId* subscriptionId) noexcept;
 
@@ -300,7 +322,7 @@ public:
     /**
      *  @see ::vsm_add_notification_callback
      */
-    VsmStatus vsm_add_notification_callback(VsmNotificationCallback notificationCallback,
+    VsmStatus vsm_add_notification_callback(VsmNotificationFunction notificationCallback,
                                             void* data,
                                             VsmSubscriptionId* subscriptionId) noexcept;
 

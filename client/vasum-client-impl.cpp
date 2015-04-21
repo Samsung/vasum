@@ -28,6 +28,7 @@
 #include "utils.hpp"
 #include "exception.hpp"
 #include "host-ipc-connection.hpp"
+#include "logger/logger.hpp"
 
 #include <algorithm>
 #include <vector>
@@ -176,6 +177,9 @@ VsmStatus Client::coverException(const function<void(void)>& worker) noexcept
     } catch (const exception& ex) {
         mStatus = Status(VSMCLIENT_CUSTOM_ERROR, ex.what());
     }
+    if (mStatus.mVsmStatus!=VSMCLIENT_SUCCESS) {
+        LOGE("Exception: " << mStatus.mMsg);
+    }
     return mStatus.mVsmStatus;
 }
 
@@ -191,6 +195,11 @@ VsmStatus Client::create(const string& address) noexcept
     return coverException([&] {
         mHostClient.create(address);
     });
+}
+
+epoll::EventPoll& Client::getEventPoll() noexcept
+{
+    return mHostClient.getDispatcher().getPoll();
 }
 
 const char* Client::vsm_get_status_message() const noexcept
@@ -338,7 +347,7 @@ VsmStatus Client::vsm_unlock_zone(const char* id) noexcept
     });
 }
 
-VsmStatus Client::vsm_add_state_callback(VsmZoneDbusStateCallback /* zoneDbusStateCallback */,
+VsmStatus Client::vsm_add_state_callback(VsmZoneDbusStateFunction /* zoneDbusStateCallback */,
                                     void* /* data */,
                                     VsmSubscriptionId* /* subscriptionId */) noexcept
 {
@@ -710,7 +719,7 @@ VsmStatus Client::vsm_file_move_request(const char* /*destZone*/, const char* /*
     });
 }
 
-VsmStatus Client::vsm_add_notification_callback(VsmNotificationCallback /*notificationCallback*/,
+VsmStatus Client::vsm_add_notification_callback(VsmNotificationFunction /*notificationCallback*/,
                                            void* /*data*/,
                                            VsmSubscriptionId* /*subscriptionId*/) noexcept
 {

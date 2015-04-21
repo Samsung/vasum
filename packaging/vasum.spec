@@ -10,6 +10,7 @@
 %define tty_group tty
 
 Name:           vasum
+Epoch:          1
 Version:        0.1.1
 Release:        0
 Source0:        %{name}-%{version}.tar.gz
@@ -27,6 +28,7 @@ BuildRequires:  pkgconfig(libsystemd-daemon)
 BuildRequires:  pkgconfig(sqlite3)
 Requires(post): libcap-tools
 Requires:       bridge-utils
+Requires:       libjson >= 0.10
 
 %description
 This package provides a daemon used to manage zones - start, stop and switch
@@ -115,7 +117,8 @@ fi
 %package client
 Summary:          Vasum Client
 Group:            Development/Libraries
-Requires:         vasum = %{version}-%{release}
+Requires:         vasum = %{epoch}:%{version}-%{release}
+Obsoletes:        vasum < 1:0
 Requires(post):   /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
@@ -125,7 +128,9 @@ Library interface to the vasum daemon
 %files client
 %manifest packaging/libvasum-client.manifest
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libvasum.so.0.0.1
+%attr(755,root,root) %{_libdir}/libvasum-client.so.0.1.1
+%{_libdir}/libvasum-client.so.0
+%attr(755,root,root) %{_libdir}/libvasum.so.0.1.1
 %{_libdir}/libvasum.so.0
 
 %post client -p /sbin/ldconfig
@@ -146,6 +151,7 @@ Development package including the header files for the client library
 %files devel
 %manifest packaging/vasum.manifest
 %defattr(644,root,root,755)
+%{_libdir}/libvasum-client.so
 %{_libdir}/libvasum.so
 %{_includedir}/vasum
 %{_libdir}/pkgconfig/vasum.pc

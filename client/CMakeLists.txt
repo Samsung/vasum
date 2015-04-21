@@ -19,14 +19,24 @@
 
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Client...")
+## set client library sources (without vasum-wrapper.cpp)
 FILE(GLOB project_SRCS *.cpp *.hpp *.h)
+FILE(GLOB project_SRCS_rm vasum-wrapper.cpp)
+LIST(REMOVE_ITEM project_SRCS ${project_SRCS_rm})
+
+## set wrapper library sources (without vasum-client.cpp)
+FILE(GLOB wrapper_SRCS *.cpp *.hpp *.h)
+FILE(GLOB wrapper_SRCS_rm vasum-client.cpp)
+LIST(REMOVE_ITEM wrapper_SRCS ${wrapper_SRCS_rm})
+
 FILE(GLOB common_SRCS ${COMMON_FOLDER}/epoll/*.hpp              ${COMMON_FOLDER}/epoll/*.cpp
                       ${COMMON_FOLDER}/ipc/*.hpp                ${COMMON_FOLDER}/ipc/*.cpp
                       ${COMMON_FOLDER}/ipc/internals/*.hpp      ${COMMON_FOLDER}/ipc/internals/*.cpp
                       ${COMMON_FOLDER}/utils/*.hpp              ${COMMON_FOLDER}/utils/*.cpp
                       ${COMMON_FOLDER}/*.hpp                    ${COMMON_FOLDER}/*.cpp)
 
-SET(_LIB_VERSION_ "0.0.1")
+## set version highier then vasum.so.0.1.0
+SET(_LIB_VERSION_ "0.1.1")
 SET(_LIB_SOVERSION_ "0")
 SET(PC_FILE "${PROJECT_NAME}.pc")
 
@@ -37,7 +47,13 @@ SET(PC_FILE "${PROJECT_NAME}.pc")
 ADD_DEFINITIONS(-fvisibility=hidden)
 
 ## Setup target ################################################################
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${project_SRCS} ${common_SRCS})
+ADD_LIBRARY(${PROJECT_NAME}-client SHARED ${project_SRCS} ${common_SRCS})
+SET_TARGET_PROPERTIES(${PROJECT_NAME}-client PROPERTIES
+        SOVERSION ${_LIB_SOVERSION_}
+        VERSION ${_LIB_VERSION_}
+        COMPILE_DEFINITIONS HOST_IPC_SOCKET="${VSM_SERVER_IPC_SOCKET_PATH}")
+
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${wrapper_SRCS} ${common_SRCS})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
         SOVERSION ${_LIB_SOVERSION_}
         VERSION ${_LIB_VERSION_}
@@ -50,6 +66,8 @@ INCLUDE_DIRECTORIES(SYSTEM ${LIB_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(${LIBS_FOLDER})
 INCLUDE_DIRECTORIES(${SERVER_FOLDER})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}-client ${LIB_DEPS_LIBRARIES} ${Boost_LIBRARIES}
+                      Config SimpleDbus)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_DEPS_LIBRARIES} ${Boost_LIBRARIES}
                       Config SimpleDbus)
 
@@ -61,9 +79,9 @@ CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_BINARY_DIR}/${PC_FILE} @ONLY)
 INSTALL(FILES       ${CMAKE_BINARY_DIR}/${PC_FILE}
         DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
 
-INSTALL(TARGETS     ${PROJECT_NAME}
+INSTALL(TARGETS     ${PROJECT_NAME}-client ${PROJECT_NAME}
         DESTINATION ${CMAKE_INSTALL_LIBDIR}
         COMPONENT   RuntimeLibraries)
 
-INSTALL(FILES       vasum-client.h
+INSTALL(FILES       vasum-client.h vasum.h vasum_list.h
         DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME})

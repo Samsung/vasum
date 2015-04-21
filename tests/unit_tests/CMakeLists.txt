@@ -23,6 +23,8 @@ FILE(GLOB_RECURSE project_SRCS *.cpp *.hpp)
 FILE(GLOB_RECURSE common_SRCS ${COMMON_FOLDER}/*.cpp ${COMMON_FOLDER}/*.hpp)
 FILE(GLOB         server_SRCS ${SERVER_FOLDER}/*.cpp ${SERVER_FOLDER}/*.hpp)
 FILE(GLOB         client_SRCS ${CLIENT_FOLDER}/*.cpp ${CLIENT_FOLDER}/*.h)
+FILE(GLOB         client_SRCS_rm ${CLIENT_FOLDER}/vasum-wrapper*.cpp)
+LIST(REMOVE_ITEM client_SRCS ${client_SRCS_rm})
 FILE(GLOB         socket_test_SRCS ${SOCKET_TEST_FOLDER}/*.cpp ${SOCKET_TEST_FOLDER}/*.hpp)
 
 FILE(GLOB         main_SRC ${SERVER_FOLDER}/main.cpp)
@@ -41,7 +43,7 @@ ADD_EXECUTABLE(${UT_SERVER_CODENAME} ${project_SRCS} ${common_SRCS} ${server_SRC
 ADD_EXECUTABLE("vasum-client-c-api-compile-test" client/client-c-api-compile-test.c)
 
 ## A stub mini-service to test socket functionality
-ADD_EXECUTABLE(${SOCKET_TEST_CODENAME} ${socket_test_SRCS} ${common_SRCS})
+ADD_EXECUTABLE(${SOCKET_TEST_CODENAME} ${socket_test_SRCS} ${common_SRCS} ${client_SRCS})
 
 
 ## Link libraries ##############################################################

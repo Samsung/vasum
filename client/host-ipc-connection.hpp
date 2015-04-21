@@ -44,6 +44,7 @@ public:
     typedef std::function<void(const vasum::api::Notification&)> NotificationCallback;
     void createSystem();
     void create(const std::string& address);
+    epoll::ThreadDispatcher& getDispatcher();
 
     void callGetZoneIds(vasum::api::ZoneIds& argOut);
     void callGetActiveZoneId(vasum::api::ZoneId& argOut);

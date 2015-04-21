@@ -187,6 +187,7 @@ typedef enum {
     VSMFILE_REGULAR
 } VsmFileType;
 
+#ifndef __VASUM_WRAPPER_SOURCE__
 /**
  * Start glib loop.
  *
@@ -830,6 +831,8 @@ VsmStatus vsm_add_notification_callback(VsmClient client,
  * @return status of this function call
  */
 VsmStatus vsm_del_notification_callback(VsmClient client, VsmSubscriptionId subscriptionId);
+
+#endif /* __VASUM_WRAPPER_SOURCE__ */
 
 /** @} Zone API */
 

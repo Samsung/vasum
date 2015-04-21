@@ -1,10 +1,21 @@
-#ifndef __SCX_ADT_LIST_H__
-#define __SCX_ADT_LIST_H__
+#ifndef __VASUM_ADT_LIST_H__
+#define __VASUM_ADT_LIST_H__
 
 struct adt_list {
 	struct adt_list* next;
 	struct adt_list* prev;
 };
+
+#undef offsetof
+#ifdef __compiler_offsetof
+#define offsetof(TYPE,MEMBER) __compiler_offsetof(TYPE,MEMBER)
+#else
+#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#endif
+
+#define container_of(ptr, type, member) ({                      \
+		const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
+		(type *)( (char *)__mptr - offsetof(type,member) );})
 
 #define adt_iterate_list(__iterator, __list)    \
     for (__iterator = (__list)->next;   \
@@ -88,4 +99,4 @@ static inline struct adt_list *adt_find_list(struct adt_list* head,
 	return NULL;
 }
 
-#endif /*!__ADT_LIST_H__*/
+#endif /*!__VASUM_ADT_LIST_H__*/

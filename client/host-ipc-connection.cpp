@@ -36,6 +36,10 @@ void HostIPCConnection::createSystem()
     mClient.reset(new ipc::Client(mDispatcher.getPoll(), HOST_IPC_SOCKET));
     mClient->start();
 }
+epoll::ThreadDispatcher& HostIPCConnection::getDispatcher()
+{
+    return mDispatcher;
+}
 
 void HostIPCConnection::create(const std::string& address)
 {
