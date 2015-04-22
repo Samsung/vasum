@@ -178,7 +178,7 @@ void saveToKVStore(const std::string& filename, const Config& config, const std:
  * Load the config from KVStore with defaults given in json
  *
  * @param kvfile    path to the KVStore db
- * @param jsonfile  path to json file with defaults
+ * @param json      path to json file with defaults
  * @param config    visitable structure to save
  * @param kvConfigName name of the config inside the KVStore db
  */

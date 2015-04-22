@@ -227,7 +227,7 @@ std::vector<T> KVStore::getInternal(const std::string& key, std::vector<T>*)
  * Uses '.' to connect the terms.
  * @param args components of the string
  * @tparam delim optional delimiter
- * @tparam typename ... Args any type implementing str
+ * @tparam Args any type implementing str
  * @return string created from he args
  */
 template<char delim = '.', typename Arg1, typename ... Args>
