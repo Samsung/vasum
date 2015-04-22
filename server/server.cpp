@@ -33,6 +33,7 @@
 #include "utils/glib-loop.hpp"
 #include "utils/environment.hpp"
 #include "utils/fs.hpp"
+#include "utils/signal.hpp"
 
 #include <csignal>
 #include <cerrno>
@@ -101,6 +102,7 @@ void Server::run(bool asRoot)
     signal(SIGINT,  signalHandler);
     signal(SIGTERM, signalHandler);
     signal(SIGUSR1, signalHandler);
+    utils::signalBlock(SIGPIPE);
 
     LOGI("Starting daemon...");
     {
