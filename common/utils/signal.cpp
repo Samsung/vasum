@@ -39,18 +39,18 @@ void signalBlock(const int signalToBlock)
     ::sigset_t set;
     if (-1 == ::sigemptyset(&set)) {
         LOGE("Error in sigemptyset: " << std::string(strerror(errno)));
-        UtilsException("Error in sigemptyset: " + std::string(strerror(errno)));
+        throw UtilsException("Error in sigemptyset: " + std::string(strerror(errno)));
     }
 
     if (-1 ==::sigaddset(&set, signalToBlock)) {
         LOGE("Error in sigaddset: " << std::string(strerror(errno)));
-        UtilsException("Error in sigaddset: " + std::string(strerror(errno)));
+        throw UtilsException("Error in sigaddset: " + std::string(strerror(errno)));
     }
 
     int ret = ::pthread_sigmask(SIG_BLOCK, &set, nullptr /*&oldSet*/);
     if (ret != 0) {
         LOGE("Error in pthread_sigmask: " << std::to_string(ret));
-        UtilsException("Error in pthread_sigmask: " + std::to_string(ret));
+        throw UtilsException("Error in pthread_sigmask: " + std::to_string(ret));
     }
 }
 

@@ -44,6 +44,16 @@ namespace ipc {
 
 namespace {
 const int MAX_QUEUE_LENGTH = 1000;
+
+void setFdOptions(int fd)
+{
+    // Prevent from inheriting fd by zones
+    if (-1 == ::fcntl(fd, F_SETFD, FD_CLOEXEC)) {
+        LOGE("Error in fcntl: " + std::string(strerror(errno)));
+        throw IPCException("Error in fcntl: " + std::string(strerror(errno)));
+    }
+}
+
 }
 
 Socket::Socket(int socketFD)
@@ -81,8 +91,9 @@ std::shared_ptr<Socket> Socket::accept()
     int sockfd = ::accept(mFD, nullptr, nullptr);
     if (sockfd == -1) {
         LOGE("Error in accept: " << std::string(strerror(errno)));
-        IPCException("Error in accept: " + std::string(strerror(errno)));
+        throw IPCException("Error in accept: " + std::string(strerror(errno)));
     }
+    setFdOptions(sockfd);
     return std::make_shared<Socket>(sockfd);
 }
 
@@ -109,7 +120,8 @@ int Socket::getSystemdSocket(const std::string& path)
     for (int fd = SD_LISTEN_FDS_START;
             fd < SD_LISTEN_FDS_START + n;
             ++fd) {
-        if (0 < ::sd_is_socket_unix(SD_LISTEN_FDS_START, SOCK_STREAM, 1, path.c_str(), 0)) {
+        if (0 < ::sd_is_socket_unix(fd, SOCK_STREAM, 1, path.c_str(), 0)) {
+            setFdOptions(fd);
             return fd;
         }
     }
@@ -130,6 +142,7 @@ int Socket::createZoneSocket(const std::string& path)
         LOGE("Error in socket: " + std::string(strerror(errno)));
         throw IPCException("Error in socket: " + std::string(strerror(errno)));
     }
+    setFdOptions(sockfd);
 
     ::sockaddr_un serverAddress;
     serverAddress.sun_family = AF_UNIX;
@@ -144,7 +157,7 @@ int Socket::createZoneSocket(const std::string& path)
         std::string message = strerror(errno);
         utils::close(sockfd);
         LOGE("Error in bind: " << message);
-        IPCException("Error in bind: " + message);
+        throw IPCException("Error in bind: " + message);
     }
 
     if (-1 == ::listen(sockfd,
@@ -152,7 +165,7 @@ int Socket::createZoneSocket(const std::string& path)
         std::string message = strerror(errno);
         utils::close(sockfd);
         LOGE("Error in listen: " << message);
-        IPCException("Error in listen: " + message);
+        throw IPCException("Error in listen: " + message);
     }
 
     return sockfd;
@@ -180,6 +193,7 @@ Socket Socket::connectSocket(const std::string& path)
         LOGE("Error in socket: " + std::string(strerror(errno)));
         throw IPCException("Error in socket: " + std::string(strerror(errno)));
     }
+    setFdOptions(fd);
 
     sockaddr_un serverAddress;
     serverAddress.sun_family = AF_UNIX;
