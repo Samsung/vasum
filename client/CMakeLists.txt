@@ -42,8 +42,10 @@ ADD_DEFINITIONS(-fvisibility=hidden)
 
 ## Setup target ################################################################
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${project_SRCS} ${common_SRCS})
-SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY SOVERSION ${_LIB_SOVERSION_})
-SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY   VERSION ${_LIB_VERSION_})
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+        SOVERSION ${_LIB_SOVERSION_}
+        VERSION ${_LIB_VERSION_}
+        COMPILE_DEFINITIONS HOST_IPC_SOCKET="${VSM_SERVER_IPC_SOCKET_PATH}")
 
 
 ## Link libraries ##############################################################
