@@ -24,9 +24,12 @@
 
 #include "config.hpp"
 
+#ifdef DBUS_CONNECTION
 #include "host-dbus-definitions.hpp"
-#include "common-dbus-definitions.hpp"
-#include "zone-dbus-definitions.hpp"
+#else
+#include "host-ipc-definitions.hpp"
+#endif
+#include "common-definitions.hpp"
 #include "dynamic-config-scheme.hpp"
 #include "zones-manager.hpp"
 #include "zone-admin.hpp"
@@ -55,6 +58,7 @@ namespace vasum {
 
 namespace {
 
+#ifdef ZONE_CONNECTION
 bool regexMatchVector(const std::string& str, const std::vector<boost::regex>& v)
 {
     for (const boost::regex& toMatch : v) {
@@ -65,6 +69,7 @@ bool regexMatchVector(const std::string& str, const std::vector<boost::regex>& v
 
     return false;
 }
+#endif
 
 const std::string HOST_ID = "host";
 const std::string ENABLED_FILE_NAME = "enabled";
@@ -124,16 +129,13 @@ ZonesManager::ZonesManager(const std::string& configPath)
                                         mDynamicConfig,
                                         getVasumDbPrefix());
 
-    mProxyCallPolicy.reset(new ProxyCallPolicy(mConfig.proxyCallRules));
 
     using namespace std::placeholders;
 #ifdef DBUS_CONNECTION
+    mProxyCallPolicy.reset(new ProxyCallPolicy(mConfig.proxyCallRules));
     mHostConnection.setProxyCallCallback(bind(&ZonesManager::handleProxyCall,
                                               this, HOST_ID, _1, _2, _3, _4, _5, _6, _7));
 #endif
-
-    mHostConnection.setGetZoneConnectionsCallback(bind(&ZonesManager::handleGetZoneConnectionsCall,
-                                                       this, _1));
 
     mHostConnection.setGetZoneIdsCallback(bind(&ZonesManager::handleGetZoneIdsCall,
                                                this, _1));
@@ -209,6 +211,15 @@ ZonesManager::ZonesManager(const std::string& configPath)
 
     mHostConnection.setRevokeDeviceCallback(bind(&ZonesManager::handleRevokeDeviceCall,
                                                  this, _1, _2));
+
+    mHostConnection.setNotifyActiveZoneCallback(bind(&ZonesManager::handleNotifyActiveZoneCall,
+                                           this, "", _1, _2));
+
+    mHostConnection.setSwitchToDefaultCallback(bind(&ZonesManager::handleSwitchToDefaultCall,
+                                          this, ""));
+
+    mHostConnection.setFileMoveCallback(bind(&ZonesManager::handleFileMoveCall,
+                                        this, "", _1, _2));
 
     for (const auto& zoneId : mDynamicConfig.zoneIds) {
         insertZone(zoneId, getTemplatePathForExistingZone(zoneId));
@@ -307,29 +318,12 @@ void ZonesManager::insertZone(const std::string& zoneId, const std::string& zone
     }
 
     LOGT("Creating Zone " << zoneId);
-    std::unique_ptr<Zone> zone(new Zone(mWorker->createSubWorker(),
-                                        zoneId,
+    std::unique_ptr<Zone> zone(new Zone(zoneId,
                                         mConfig.zonesPath,
                                         zoneTemplatePath,
                                         mConfig.dbPath,
                                         mConfig.lxcTemplatePrefix,
                                         mConfig.runMountPointPrefix));
-
-    using namespace std::placeholders;
-    zone->setNotifyActiveZoneCallback(bind(&ZonesManager::handleNotifyActiveZoneCall,
-                                           this, zoneId, _1, _2, _3));
-
-    zone->setSwitchToDefaultCallback(bind(&ZonesManager::handleSwitchToDefaultCall,
-                                     this, zoneId));
-
-    zone->setFileMoveCallback(bind(&ZonesManager::handleFileMoveCall,
-                                          this, zoneId, _1, _2, _3));
-
-    zone->setProxyCallCallback(bind(&ZonesManager::handleProxyCall,
-                                    this, zoneId, _1, _2, _3, _4, _5, _6, _7));
-
-    zone->setConnectionStateChangedCallback(bind(&ZonesManager::handleConnectionStateChanged,
-                                                 this, zoneId, _1));
 
     mZones.push_back(std::move(zone));
 
@@ -556,28 +550,6 @@ void ZonesManager::setZonesDetachOnExit()
     }
 }
 
-void ZonesManager::handleNotifyActiveZoneCall(const std::string& caller,
-                                          const std::string& application,
-                                          const std::string& message,
-                                          api::MethodResultBuilder::Pointer result)
-{
-    LOGI("handleNotifyActiveZoneCall(" << caller << ", " << application << ", " << message
-         << ") called");
-
-    Lock lock(mMutex);
-
-    try {
-        auto iter = getRunningForegroundZoneIterator();
-        if (iter != mZones.end() && caller != get(iter).getId()) {
-            get(iter).sendNotification(caller, application, message);
-        }
-        result->setVoid();
-    } catch (const VasumException&) {
-        LOGE("Notification from " << caller << " hasn't been sent");
-        result->setError(api::ERROR_INTERNAL, "Notification hasn't been sent");
-    }
-}
-
 void ZonesManager::handleSwitchToDefaultCall(const std::string& /*caller*/)
 {
     // get config of currently set zone and switch if switchToDefaultAfterTimeout is true
@@ -596,10 +568,33 @@ void ZonesManager::handleSwitchToDefaultCall(const std::string& /*caller*/)
     }
 }
 
+#ifdef ZONE_CONNECTION
+void ZonesManager::handleNotifyActiveZoneCall(const std::string& caller,
+                                              const api::NotifActiveZoneIn& notif,
+                                              api::MethodResultBuilder::Pointer result)
+{
+    const std::string& application = notif.first;
+    const std::string& message = notif.second;
+    LOGI("handleNotifyActiveZoneCall(" << caller << ", " << application << ", " << message
+         << ") called");
+
+    Lock lock(mMutex);
+
+    try {
+        auto iter = getRunningForegroundZoneIterator();
+        if (iter != mZones.end() && caller != get(iter).getId()) {
+            //XXX:get(iter).sendNotification(caller, application, message);
+        }
+        result->setVoid();
+    } catch (const VasumException&) {
+        LOGE("Notification from " << caller << " hasn't been sent");
+        result->setError(api::ERROR_INTERNAL, "Notification hasn't been sent");
+    }
+}
+
 void ZonesManager::handleFileMoveCall(const std::string& srcZoneId,
-                                         const std::string& dstZoneId,
-                                         const std::string& path,
-                                         api::MethodResultBuilder::Pointer result)
+                                      const api::FileMoveRequestIn& request,
+                                      api::MethodResultBuilder::Pointer result)
 {
     // TODO: this implementation is only a placeholder.
     // There are too many unanswered questions and security concerns:
@@ -620,6 +615,8 @@ void ZonesManager::handleFileMoveCall(const std::string& srcZoneId,
     // Now when the main process has obtained FDs (by either of those methods)
     // it can do the copying by itself.
 
+    const std::string& dstZoneId = request.first;
+    const std::string& path = request.second;
     LOGI("File move requested\n"
          << "src: " << srcZoneId << "\n"
          << "dst: " << dstZoneId << "\n"
@@ -639,7 +636,7 @@ void ZonesManager::handleFileMoveCall(const std::string& srcZoneId,
     auto dstIter = findZone(dstZoneId);
     if (dstIter == mZones.end()) {
         LOGE("Destination zone '" << dstZoneId << "' not found");
-        status->value = api::zone::FILE_MOVE_DESTINATION_NOT_FOUND;
+        status->value = api::FILE_MOVE_DESTINATION_NOT_FOUND;
         result->set(status);
         return;
     }
@@ -647,21 +644,21 @@ void ZonesManager::handleFileMoveCall(const std::string& srcZoneId,
 
     if (srcZoneId == dstZoneId) {
         LOGE("Cannot send a file to yourself");
-        status->value = api::zone::FILE_MOVE_WRONG_DESTINATION;
+        status->value = api::FILE_MOVE_WRONG_DESTINATION;
         result->set(status);
         return;
     }
 
     if (!regexMatchVector(path, srcZone.getPermittedToSend())) {
         LOGE("Source zone has no permissions to send the file: " << path);
-        status->value = api::zone::FILE_MOVE_NO_PERMISSIONS_SEND;
+        status->value = api::FILE_MOVE_NO_PERMISSIONS_SEND;
         result->set(status);
         return;
     }
 
     if (!regexMatchVector(path, dstContanier.getPermittedToRecv())) {
         LOGE("Destination zone has no permissions to receive the file: " << path);
-        status->value = api::zone::FILE_MOVE_NO_PERMISSIONS_RECEIVE;
+        status->value = api::FILE_MOVE_NO_PERMISSIONS_RECEIVE;
         result->set(status);
         return;
     }
@@ -672,19 +669,36 @@ void ZonesManager::handleFileMoveCall(const std::string& srcZoneId,
 
     if (!utils::moveFile(srcPath, dstPath)) {
         LOGE("Failed to move the file: " << path);
-        status->value = api::zone::FILE_MOVE_FAILED;
+        status->value = api::FILE_MOVE_FAILED;
         result->set(status);
     } else {
-        status->value = api::zone::FILE_MOVE_SUCCEEDED;
+        status->value = api::FILE_MOVE_SUCCEEDED;
         result->set(status);
         try {
-            dstContanier.sendNotification(srcZoneId, path, api::zone::FILE_MOVE_SUCCEEDED);
+            //XXX: dstContanier.sendNotification(srcZoneId, path, api::FILE_MOVE_SUCCEEDED);
         } catch (ServerException&) {
             LOGE("Notification to '" << dstZoneId << "' has not been sent");
         }
     }
 }
+#else
+void ZonesManager::handleNotifyActiveZoneCall(const std::string& /* caller */,
+                                              const api::NotifActiveZoneIn& /*notif*/,
+                                              api::MethodResultBuilder::Pointer result)
+{
+    result->setError(api::ERROR_INTERNAL, "Not implemented");
+}
 
+void ZonesManager::handleFileMoveCall(const std::string& /*srcZoneId*/,
+                                      const api::FileMoveRequestIn& /*request*/,
+                                      api::MethodResultBuilder::Pointer result)
+{
+    result->setError(api::ERROR_INTERNAL, "Not implemented");
+}
+
+#endif /* ZONE_CONNECTION */
+
+#ifdef DBUS_CONNECTION
 void ZonesManager::handleProxyCall(const std::string& caller,
                                    const std::string& target,
                                    const std::string& targetBusName,
@@ -718,54 +732,19 @@ void ZonesManager::handleProxyCall(const std::string& caller,
         }
     };
 
-    if (target == HOST_ID) {
-#ifdef DBUS_CONNECTION
-        mHostConnection.proxyCallAsync(targetBusName,
-                                       targetObjectPath,
-                                       targetInterface,
-                                       targetMethod,
-                                       parameters,
-                                       asyncResultCallback);
-#else
-        result->setError(api::ERROR_INVALID_ID, "Unsupported proxy call target");
-#endif
-        return;
-    }
-
-    Lock lock(mMutex);
-
-    auto targetIter = findZone(target);
-    if (targetIter == mZones.end()) {
-        LOGE("Target zone '" << target << "' not found");
+    if (target != HOST_ID) {
         result->setError(api::ERROR_INVALID_ID, "Unknown proxy call target");
         return;
     }
 
-    Zone& targetZone = get(targetIter);
-    targetZone.proxyCallAsync(targetBusName,
-                              targetObjectPath,
-                              targetInterface,
-                              targetMethod,
-                              parameters,
-                              asyncResultCallback);
+    mHostConnection.proxyCallAsync(targetBusName,
+                                   targetObjectPath,
+                                   targetInterface,
+                                   targetMethod,
+                                   parameters,
+                                   asyncResultCallback);
 }
-
-void ZonesManager::handleGetZoneConnectionsCall(api::MethodResultBuilder::Pointer result)
-{
-    Lock lock(mMutex);
-
-    auto connections = std::make_shared<api::Connections>();
-    for (auto& zone : mZones) {
-        connections->values.push_back({zone->getId(), zone->getConnectionAddress()});
-    }
-    result->set(connections);
-}
-
-void ZonesManager::handleConnectionStateChanged(const std::string& zoneId ,
-                                                const std::string& address)
-{
-    mHostConnection.signalZoneConnectionState({zoneId, address});
-}
+#endif
 
 void ZonesManager::handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result)
 {
@@ -1081,7 +1060,7 @@ void ZonesManager::handleSetActiveZoneCall(const api::ZoneId& zoneId,
 
     if (!get(iter).isRunning()) {
         LOGE("Could not activate stopped or paused zone");
-        result->setError(api::host::ERROR_ZONE_NOT_RUNNING,
+        result->setError(api::ERROR_ZONE_NOT_RUNNING,
                          "Could not activate stopped or paused zone");
         return;
     }

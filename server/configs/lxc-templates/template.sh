@@ -40,7 +40,6 @@ lxc.pts = 256
 lxc.tty = 0
 
 lxc.mount.auto = proc sys cgroup
-lxc.mount.entry = /var/run/zones/${name}/run var/run none rw,bind 0 0
 
 # create a separate network per zone
 # - it forbids traffic sniffing (like macvlan in bridge mode)

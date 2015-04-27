@@ -32,8 +32,6 @@ FILE(GLOB zone_provision_CONF  ut-zone-provision/*.conf)
 
 FILE(GLOB admin_templates_CONF      ut-zone-admin/templates/*.conf)
 
-FILE(GLOB connection_CONF           ut-zone-connection/*.conf)
-
 
 ## Generate ####################################################################
 CONFIGURE_FILE(ut-server/test-daemon.conf.in
@@ -50,6 +48,8 @@ FILE(GLOB manager_manager_CONF_GEN ${CMAKE_BINARY_DIR}/ut-zones-manager/*.conf)
 
 CONFIGURE_FILE(ut-zones-manager/templates/console-dbus.conf.in
                ${CMAKE_BINARY_DIR}/ut-zones-manager/templates/console-dbus.conf @ONLY)
+CONFIGURE_FILE(ut-zones-manager/templates/console-ipc.conf.in
+               ${CMAKE_BINARY_DIR}/ut-zones-manager/templates/console-ipc.conf @ONLY)
 FILE(GLOB manager_templates_CONF_GEN ${CMAKE_BINARY_DIR}/ut-zones-manager/templates/*.conf)
 
 
@@ -82,9 +82,6 @@ INSTALL(FILES        ${zone_provision_CONF}
 
 INSTALL(FILES        ${admin_templates_CONF}
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zone-admin/templates)
-
-INSTALL(FILES        ${connection_CONF}
-        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/server/ut-zone-connection)
 
 INSTALL(FILES        dbus-1/system.d/org.tizen.vasum.tests.conf
         DESTINATION  ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)

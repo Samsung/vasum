@@ -46,25 +46,19 @@ namespace {
 
 typedef std::lock_guard<std::recursive_mutex> Lock;
 
-// TODO: move constants to the config file when default values are implemented there
-const int RECONNECT_RETRIES = 15;
-const int RECONNECT_DELAY = 1 * 1000;
-
 const std::string STATE_STOPPED = "stopped";
 const std::string STATE_RUNNING = "running";
 const std::string STATE_PAUSED = "paused";
 
 } // namespace
 
-Zone::Zone(const utils::Worker::Pointer& worker,
-           const std::string& zoneId,
+Zone::Zone(const std::string& zoneId,
            const std::string& zonesPath,
            const std::string& zoneTemplatePath,
            const std::string& dbPath,
            const std::string& lxcTemplatePrefix,
            const std::string& baseRunMountPointPath)
-    : mWorker(worker)
-    , mDbPath(dbPath)
+    : mDbPath(dbPath)
 {
     const std::string dbPrefix = getZoneDbPrefix(zoneId);
     config::loadFromKVStoreWithJsonFile(dbPath, zoneTemplatePath, mConfig, dbPrefix);
@@ -87,19 +81,6 @@ Zone::Zone(const utils::Worker::Pointer& worker,
     mRootPath = (zonePath / fs::path("rootfs")).string();
 
     mProvision.reset(new ZoneProvision(mRootPath, zoneTemplatePath, dbPath, dbPrefix, mConfig.validLinkPrefixes));
-}
-
-Zone::~Zone()
-{
-    // Make sure all OnNameLostCallbacks get finished and no new will
-    // get called before proceeding further. This guarantees no race
-    // condition on the reconnect thread.
-    {
-        Lock lock(mReconnectMutex);
-        disconnect();
-    }
-    // wait for all tasks to complete
-    mWorker.reset();
 }
 
 const std::vector<boost::regex>& Zone::getPermittedToSend() const
@@ -164,16 +145,9 @@ void Zone::start()
     Lock lock(mReconnectMutex);
     updateRequestedState(STATE_RUNNING);
     mProvision->start();
-    if (mConfig.enableZoneConnection) {
-        mConnectionTransport.reset(new ZoneConnectionTransport(mRunMountPoint));
-    }
-
     mAdmin->start();
-    if (mConfig.enableZoneConnection) {
-        // Increase cpu quota before connect, otherwise it'd take ages.
-        goForeground();
-        connect();
-    }
+    // Increase cpu quota before connect, otherwise it'd take ages.
+    goForeground();
     // refocus in ZonesManager will adjust cpu quota after all
 }
 
@@ -187,52 +161,8 @@ void Zone::stop(bool saveState)
         // boost stopping
         goForeground();
     }
-    disconnect();
     mAdmin->stop();
-    mConnectionTransport.reset();
     mProvision->stop();
-}
-
-void Zone::connect()
-{
-    // assume called under reconnect lock
-    mConnectionAddress = mConnectionTransport->acquireAddress();
-    mConnection.reset(new ZoneConnection(mConnectionAddress,
-                                         std::bind(&Zone::onNameLostCallback, this)));
-    if (mNotifyCallback) {
-        mConnection->setNotifyActiveZoneCallback(mNotifyCallback);
-    }
-    if (mSwitchToDefaultCallback) {
-        mConnection->setSwitchToDefaultCallback(mSwitchToDefaultCallback);
-    }
-    if (mFileMoveCallback) {
-        mConnection->setFileMoveCallback(mFileMoveCallback);
-    }
-    if (mProxyCallCallback) {
-        mConnection->setProxyCallCallback(mProxyCallCallback);
-    }
-    if (mConnectionStateChangedCallback) {
-        mConnectionStateChangedCallback(mConnectionAddress);
-    }
-}
-
-void Zone::disconnect()
-{
-    // assume called under reconnect lock
-    if (mConnection) {
-        mConnection.reset();
-        mConnectionAddress.clear();
-        if (mConnectionStateChangedCallback) {
-            // notify about invalid address for this zone
-            mConnectionStateChangedCallback(std::string());
-        }
-    }
-}
-
-std::string Zone::getConnectionAddress() const
-{
-    Lock lock(mReconnectMutex);
-    return mConnectionAddress;
 }
 
 int Zone::getVT() const
@@ -300,9 +230,6 @@ void Zone::setDetachOnExit()
 {
     Lock lock(mReconnectMutex);
     mAdmin->setDetachOnExit();
-    if (mConnectionTransport) {
-        mConnectionTransport->setDetachOnExit();
-    }
 }
 
 void Zone::setDestroyOnExit()
@@ -346,120 +273,6 @@ bool Zone::isPaused()
 bool Zone::isSwitchToDefaultAfterTimeoutAllowed() const
 {
     return mConfig.switchToDefaultAfterTimeout;
-}
-
-void Zone::onNameLostCallback()
-{
-    LOGI(getId() << ": A connection to the DBUS server has been lost, reconnecting...");
-
-    mWorker->addTask(std::bind(&Zone::reconnectHandler, this));
-}
-
-void Zone::reconnectHandler()
-{
-    {
-        Lock lock(mReconnectMutex);
-        disconnect();
-    }
-
-    for (int i = 0; i < RECONNECT_RETRIES; ++i) {
-        // This sleeps even before the first try to give DBUS some time to come back up
-        std::this_thread::sleep_for(std::chrono::milliseconds(RECONNECT_DELAY));
-
-        Lock lock(mReconnectMutex);
-        if (isStopped()) {
-            LOGI(getId() << ": Has stopped, nothing to reconnect to, bailing out");
-            return;
-        }
-
-        try {
-            LOGT(getId() << ": Reconnect try " << i + 1);
-            connect();
-            LOGI(getId() << ": Reconnected");
-            return;
-        } catch (VasumException&) {
-            LOGT(getId() << ": Reconnect try " << i + 1 << " has been unsuccessful");
-        }
-    }
-
-    LOGE(getId() << ": Reconnecting to the DBUS has failed, stopping the zone");
-    stop(false);
-}
-
-void Zone::setNotifyActiveZoneCallback(const NotifyActiveZoneCallback& callback)
-{
-    Lock lock(mReconnectMutex);
-    mNotifyCallback = callback;
-    if (mConnection) {
-        mConnection->setNotifyActiveZoneCallback(mNotifyCallback);
-    }
-}
-
-void Zone::sendNotification(const std::string& zone,
-                                 const std::string& application,
-                                 const std::string& message)
-{
-    Lock lock(mReconnectMutex);
-    if (mConnection) {
-        mConnection->sendNotification(zone, application, message);
-    } else {
-        LOGE(getId() << ": Can't send notification, no connection to DBUS");
-    }
-}
-
-void Zone::setSwitchToDefaultCallback(const SwitchToDefaultCallback& callback)
-{
-    Lock lock(mReconnectMutex);
-
-    mSwitchToDefaultCallback = callback;
-    if (mConnection) {
-        mConnection->setSwitchToDefaultCallback(callback);
-    }
-}
-
-void Zone::setFileMoveCallback(const FileMoveCallback& callback)
-{
-    Lock lock(mReconnectMutex);
-
-    mFileMoveCallback = callback;
-    if (mConnection) {
-        mConnection->setFileMoveCallback(callback);
-    }
-}
-
-void Zone::setProxyCallCallback(const ProxyCallCallback& callback)
-{
-    Lock lock(mReconnectMutex);
-
-    mProxyCallCallback = callback;
-    if (mConnection) {
-        mConnection->setProxyCallCallback(callback);
-    }
-}
-
-void Zone::setConnectionStateChangedCallback(const ConnectionStateChangedCallback& callback)
-{
-    mConnectionStateChangedCallback = callback;
-}
-
-void Zone::proxyCallAsync(const std::string& busName,
-                               const std::string& objectPath,
-                               const std::string& interface,
-                               const std::string& method,
-                               GVariant* parameters,
-                               const dbus::DbusConnection::AsyncMethodCallCallback& callback)
-{
-    Lock lock(mReconnectMutex);
-    if (mConnection) {
-        mConnection->proxyCallAsync(busName,
-                                    objectPath,
-                                    interface,
-                                    method,
-                                    parameters,
-                                    callback);
-    } else {
-        LOGE(getId() << ": Can't do a proxy call, no connection to DBUS");
-    }
 }
 
 std::string Zone::declareFile(const int32_t& type,

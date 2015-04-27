@@ -23,6 +23,8 @@
  * @brief   Unit tests of the client C API
  */
 
+#ifndef DBUS_CONNECTION
+
 #include <config.hpp>
 #include "ut.hpp"
 #include <vasum-client.h>
@@ -30,7 +32,7 @@
 #include "utils/latch.hpp"
 #include "utils/scoped-dir.hpp"
 #include "zones-manager.hpp"
-#include "zone-dbus-definitions.hpp"
+#include "host-ipc-definitions.hpp"
 #include "logger/logger.hpp"
 
 #include <map>
@@ -49,35 +51,23 @@ namespace {
 const std::string TEST_CONFIG_PATH =
     VSM_TEST_CONFIG_INSTALL_DIR "/client/ut-client/test-daemon.conf";
 const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
-const std::string TEMPLATE_NAME = "console-dbus";
-
-struct Loop {
-    Loop()
-    {
-        vsm_start_glib_loop();
-    }
-    ~Loop()
-    {
-        vsm_stop_glib_loop();
-    }
-};
+const std::string TEMPLATE_NAME = "console-ipc";
 
 struct Fixture {
-    Loop loop;
     utils::ScopedDir mZonesPathGuard;
     utils::ScopedDir mRunGuard;
 
-    ZonesManager cm;
+    std::unique_ptr<ZonesManager> cm;
 
     Fixture()
         : mZonesPathGuard(ZONES_PATH)
         , mRunGuard("/tmp/ut-run")
-        , cm(TEST_CONFIG_PATH)
+        , cm(new ZonesManager(TEST_CONFIG_PATH))
     {
-        cm.createZone("zone1", TEMPLATE_NAME);
-        cm.createZone("zone2", TEMPLATE_NAME);
-        cm.createZone("zone3", TEMPLATE_NAME);
-        cm.restoreAll();
+        cm->createZone("zone1", TEMPLATE_NAME);
+        cm->createZone("zone2", TEMPLATE_NAME);
+        cm->createZone("zone3", TEMPLATE_NAME);
+        cm->restoreAll();
         LOGI("------- setup complete --------");
     }
 
@@ -87,32 +77,7 @@ struct Fixture {
     }
 };
 
-const int EVENT_TIMEOUT = 5000; ///< ms
-const std::map<std::string, std::string> EXPECTED_CONNECTIONS = {
-    {
-        "zone1",
-        "unix:path=/tmp/ut-run/zone1/dbus/system_bus_socket"
-    },
-    {
-        "zone2",
-        "unix:path=/tmp/ut-run/zone2/dbus/system_bus_socket"
-    },
-    {
-        "zone3",
-        "unix:path=/tmp/ut-run/zone3/dbus/system_bus_socket"
-    }
-};
-
-void convertDictToMap(VsmArrayString keys,
-                      VsmArrayString values,
-                      std::map<std::string, std::string>& ret)
-{
-    VsmArrayString iKeys;
-    VsmArrayString iValues;
-    for (iKeys = keys, iValues = values; *iKeys && *iValues; iKeys++, iValues++) {
-        ret.insert(std::make_pair(*iKeys, *iValues));
-    }
-}
+const std::set<std::string> EXPECTED_ZONES = { "zone1", "zone2", "zone3" };
 
 void convertArrayToSet(VsmArrayString values, std::set<std::string>& ret)
 {
@@ -153,35 +118,11 @@ BOOST_FIXTURE_TEST_SUITE(ClientSuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(NotRunningServer)
 {
-    cm.shutdownAll();
+    cm.reset();
 
-    VsmClient client = vsm_client_create();
-    VsmStatus status = vsm_connect_custom(client,
-                                          EXPECTED_CONNECTIONS.begin()->second.c_str());
-    BOOST_CHECK_EQUAL(VSMCLIENT_IO_ERROR, status);
-    vsm_client_free(client);
-}
-
-BOOST_AUTO_TEST_CASE(GetZoneConnections)
-{
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
-    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    VsmArrayString keys, values;
-    status = vsm_get_zone_dbuses(client, &keys, &values);
-    //TODO: Clean up if BOOST_REQUIRE_EQUAL fail (remove client). Same in other client tests.
-    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-
-    BOOST_CHECK_EQUAL(getArrayStringLength(keys, EXPECTED_CONNECTIONS.size() + 1u),
-                      EXPECTED_CONNECTIONS.size());
-    BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_CONNECTIONS.size() + 1u),
-                      EXPECTED_CONNECTIONS.size());
-
-    std::map<std::string, std::string> zones;
-    convertDictToMap(keys, values, zones);
-    BOOST_CHECK(zones == EXPECTED_CONNECTIONS);
-    vsm_array_string_free(keys);
-    vsm_array_string_free(values);
+    BOOST_CHECK_EQUAL(VSMCLIENT_IO_ERROR, status);
     vsm_client_free(client);
 }
 
@@ -193,14 +134,14 @@ BOOST_AUTO_TEST_CASE(GetZoneIds)
     VsmArrayString values;
     status = vsm_get_zone_ids(client, &values);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_CONNECTIONS.size() + 1u),
-                      EXPECTED_CONNECTIONS.size());
+    BOOST_CHECK_EQUAL(getArrayStringLength(values, EXPECTED_ZONES.size() + 1u),
+                      EXPECTED_ZONES.size());
 
     std::set<std::string> zones;
     convertArrayToSet(values, zones);
 
     for (const auto& zone : zones) {
-        BOOST_CHECK(EXPECTED_CONNECTIONS.find(zone) != EXPECTED_CONNECTIONS.cend());
+        BOOST_CHECK(EXPECTED_ZONES.find(zone) != EXPECTED_ZONES.cend());
     }
     vsm_array_string_free(values);
     vsm_client_free(client);
@@ -215,7 +156,7 @@ BOOST_AUTO_TEST_CASE(GetActiveZoneId)
     status = vsm_get_active_zone_id(client, &zone);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
 
-    BOOST_CHECK_EQUAL(zone, cm.getRunningForegroundZoneId());
+    BOOST_CHECK_EQUAL(zone, cm->getRunningForegroundZoneId());
 
     vsm_string_free(zone);
     vsm_client_free(client);
@@ -245,14 +186,14 @@ BOOST_AUTO_TEST_CASE(SetActiveZone)
 {
     const std::string newActiveZoneId = "zone2";
 
-    BOOST_REQUIRE_NE(newActiveZoneId, cm.getRunningForegroundZoneId());
+    BOOST_REQUIRE_NE(newActiveZoneId, cm->getRunningForegroundZoneId());
 
     VsmClient client = vsm_client_create();
     VsmStatus status = vsm_connect(client);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     status = vsm_set_active_zone(client, newActiveZoneId.c_str());
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    BOOST_CHECK_EQUAL(newActiveZoneId, cm.getRunningForegroundZoneId());
+    BOOST_CHECK_EQUAL(newActiveZoneId, cm->getRunningForegroundZoneId());
     vsm_client_free(client);
 }
 
@@ -296,17 +237,18 @@ BOOST_AUTO_TEST_CASE(LockUnlockZone)
     vsm_client_free(client);
 }
 
+#ifdef ZONE_CONNECTION
 BOOST_AUTO_TEST_CASE(FileMoveRequest)
 {
     const std::string path = "/tmp/fake_path";
     const std::string secondZone = "fake_zone";
 
     VsmClient client = vsm_client_create();
-    VsmStatus status = vsm_connect_custom(client, EXPECTED_CONNECTIONS.begin()->second.c_str());
+    VsmStatus status = vsm_connect(client);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
     status = vsm_file_move_request(client, secondZone.c_str(), path.c_str());
     BOOST_REQUIRE_EQUAL(VSMCLIENT_CUSTOM_ERROR, status);
-    BOOST_REQUIRE_EQUAL(api::zone::FILE_MOVE_DESTINATION_NOT_FOUND,
+    BOOST_REQUIRE_EQUAL(api::FILE_MOVE_DESTINATION_NOT_FOUND,
                         vsm_get_status_message(client));
     vsm_client_free(client);
 }
@@ -332,9 +274,9 @@ BOOST_AUTO_TEST_CASE(Notification)
 
     CallbackData callbackData;
     std::map<std::string, VsmClient> clients;
-    for (const auto& it : EXPECTED_CONNECTIONS) {
+    for (const auto& it : EXPECTED_ZONES) {
         VsmClient client = vsm_client_create();
-        VsmStatus status = vsm_connect_custom(client, it.second.c_str());
+        VsmStatus status = vsm_connect_custom(client, it.c_str());
         BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
         clients[it.first] = client;
     }
@@ -365,6 +307,7 @@ BOOST_AUTO_TEST_CASE(Notification)
         vsm_client_free(client.second);
     }
 }
+#endif
 
 BOOST_AUTO_TEST_CASE(GetZoneIdByPidTestSingle)
 {
@@ -398,8 +341,8 @@ BOOST_AUTO_TEST_CASE(GetZoneIdByPidTestMultiple)
 
     BOOST_CHECK(ids.count("host") == 1);
 
-    for (const auto& dbus : EXPECTED_CONNECTIONS) {
-        BOOST_CHECK(ids.count(dbus.first) == 1);
+    for (const auto& dbus : EXPECTED_ZONES) {
+        BOOST_CHECK(ids.count(dbus) == 1);
     }
 }
 
@@ -429,7 +372,7 @@ BOOST_AUTO_TEST_CASE(Provision)
 {
     VsmClient client = vsm_client_create();
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_connect(client));
-    const std::string zone = cm.getRunningForegroundZoneId();
+    const std::string zone = cm->getRunningForegroundZoneId();
     VsmArrayString declarations;
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_list_declarations(client, zone.c_str(), &declarations));
     BOOST_REQUIRE(declarations != NULL && declarations[0] == NULL);
@@ -469,3 +412,5 @@ BOOST_AUTO_TEST_CASE(ZoneGetNetdevs)
 
 
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif /* !DBUS_CONNECTION */

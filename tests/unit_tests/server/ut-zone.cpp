@@ -84,8 +84,7 @@ struct Fixture {
 
     std::unique_ptr<Zone> create(const std::string& configPath)
     {
-        return std::unique_ptr<Zone>(new Zone(utils::Worker::create(),
-                                              "zoneId",
+        return std::unique_ptr<Zone>(new Zone("zoneId",
                                               ZONES_PATH,
                                               configPath,
                                               DB_PATH,

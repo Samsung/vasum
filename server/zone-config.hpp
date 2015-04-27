@@ -60,12 +60,6 @@ struct ZoneConfig {
     bool switchToDefaultAfterTimeout;
 
     /**
-      * Specify, if D-Bus communication with the zone will be enabled.
-      * Setting this value to "false" will make the zone API not work inside the zone.
-      */
-    bool enableZoneConnection;
-
-    /**
      * Zone's CFS quota in us when it's in the foreground
      */
     std::int64_t cpuQuotaForeground;
@@ -106,7 +100,6 @@ struct ZoneConfig {
         initWithArgs,
         privilege, // TODO not needed?
         switchToDefaultAfterTimeout, // TODO move to dynamic and add an API to change
-        enableZoneConnection,
         cpuQuotaForeground,
         cpuQuotaBackground,
         permittedToSend, // TODO move to dynamic and add an API to change

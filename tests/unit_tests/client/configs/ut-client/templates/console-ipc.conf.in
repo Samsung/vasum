@@ -1,5 +1,5 @@
 {
-    "lxcTemplate" : "minimal.sh",
+    "lxcTemplate" : "minimal-dbus.sh",
     "initWithArgs" : ["/bin/sh", "-c", "trap exit SIGTERM; read"],
     "requestedState" : "running",
     "ipv4Gateway" : "",
@@ -10,7 +10,7 @@
     "cpuQuotaForeground" : -1,
     "cpuQuotaBackground" : 1000,
     "shutdownTimeout" : 10,
-    "runMountPoint" : "",
+    "runMountPoint" : "/tmp/ut-run/~NAME~",
     "provisions" : [],
     "permittedToSend" : [ "/tmp/.*" ],
     "permittedToRecv" : [ "/tmp/.*" ],

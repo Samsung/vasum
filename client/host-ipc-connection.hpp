@@ -26,8 +26,11 @@
 #ifndef VASUM_CLIENT_HOST_IPC_CONNECTION_HPP
 #define VASUM_CLIENT_HOST_IPC_CONNECTION_HPP
 
-#include "ipc-connection.hpp"
 #include <api/messages.hpp>
+#include <epoll/thread-dispatcher.hpp>
+#include <ipc/client.hpp>
+
+#include <functional>
 
 namespace vasum {
 namespace client {
@@ -38,8 +41,9 @@ namespace client {
 class HostIPCConnection {
 public:
     typedef unsigned int SubscriptionId;
-    typedef std::function<void(const vasum::api::ConnectionState&)> ZoneConnectionStateCallback;
+    typedef std::function<void(const vasum::api::Notification&)> NotificationCallback;
     void createSystem();
+    void create(const std::string& address);
 
     void callGetZoneIds(vasum::api::ZoneIds& argOut);
     void callGetActiveZoneId(vasum::api::ZoneId& argOut);
@@ -67,11 +71,22 @@ public:
     void callGrantDevice(const vasum::api::GrantDeviceIn& argIn);
     void callRevokeDevice(const vasum::api::RevokeDeviceIn& argIn);
     void callGetZoneConnections(vasum::api::Connections& argOut);
-    SubscriptionId subscribeZoneConnectionState(const ZoneConnectionStateCallback& callback);
+    void callNotifyActiveZone(const vasum::api::NotifActiveZoneIn& argIn);
+    void callFileMoveRequest(const vasum::api::FileMoveRequestIn& argIn,
+                             vasum::api::FileMoveRequestStatus& argOut);
+    void signalSwitchToDefault();
+    SubscriptionId subscribeNotification(const NotificationCallback& callback);
     void unsubscribe(const SubscriptionId& id);
 
 private:
-    IPCConnection mConnection;
+    epoll::ThreadDispatcher mDispatcher;
+    std::unique_ptr<ipc::Client> mClient;
+
+    template<typename ArgIn, typename ArgOut>
+    void call(const ipc::MethodID method, const ArgIn& argIn, ArgOut& argOut, int timeout = 5000) {
+        auto out = mClient->callSync<ArgIn, ArgOut>(method, std::make_shared<ArgIn>(argIn), timeout);
+        argOut = *out;
+    }
 };
 
 } // namespace client

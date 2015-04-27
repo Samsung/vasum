@@ -19,27 +19,33 @@
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Common dbus api definitions
+ * @brief   Common (dbus, IPC) api definitions
  */
 
-#ifndef SERVER_COMMON_DBUS_DEFINITIONS_HPP
-#define SERVER_COMMON_DBUS_DEFINITIONS_HPP
+#ifndef SERVER_COMMON_DEFINITIONS_HPP
+#define SERVER_COMMON_DEFINITIONS_HPP
 
 #include <string>
 
 
 namespace vasum {
 namespace api {
-const std::string ERROR_FORBIDDEN     = "org.tizen.vasum.Error.Forbidden";
-const std::string ERROR_FORWARDED     = "org.tizen.vasum.Error.Forwarded";
-const std::string ERROR_INVALID_ID    = "org.tizen.vasum.Error.InvalidId";
-const std::string ERROR_INVALID_STATE = "org.tizen.vasum.Error.InvalidState";
-const std::string ERROR_INTERNAL      = "org.tizen.vasum.Error.Internal";
 
-const std::string METHOD_PROXY_CALL    = "ProxyCall";
+/**
+ * Error codes that can be set in API handlers
+ */
+//TODO: Errors should use exception handling mechanism
+///@{
+const std::string ERROR_FORBIDDEN         = "org.tizen.vasum.Error.Forbidden";
+const std::string ERROR_FORWARDED         = "org.tizen.vasum.Error.Forwarded";
+const std::string ERROR_INVALID_ID        = "org.tizen.vasum.Error.InvalidId";
+const std::string ERROR_INVALID_STATE     = "org.tizen.vasum.Error.InvalidState";
+const std::string ERROR_INTERNAL          = "org.tizen.vasum.Error.Internal";
+const std::string ERROR_ZONE_NOT_RUNNING  = "org.tizen.vasum.Error.ZonesNotRunning";
+///@}
 
 } // namespace api
 } // namespace vasum
 
 
-#endif // SERVER_COMMON_DBUS_DEFINITIONS_HPP
+#endif // SERVER_COMMON_DEFINITIONS_HPP

@@ -30,11 +30,11 @@
 #include "zones-manager-config.hpp"
 #ifdef DBUS_CONNECTION
 #include "host-dbus-connection.hpp"
+#include "proxy-call-policy.hpp"
 #else
 #include "host-ipc-connection.hpp"
 #endif
 #include "input-monitor.hpp"
-#include "proxy-call-policy.hpp"
 #include "utils/worker.hpp"
 #include "api/method-result-builder.hpp"
 
@@ -131,7 +131,6 @@ private:
     HostConnection mHostConnection;
     // to hold InputMonitor pointer to monitor if zone switching sequence is recognized
     std::unique_ptr<InputMonitor> mSwitchingSequenceMonitor;
-    std::unique_ptr<ProxyCallPolicy> mProxyCallPolicy;
     // like set but keep insertion order
     // smart pointer is needed because Zone is not moveable (because of mutex)
     typedef std::vector<std::unique_ptr<Zone>> Zones;
@@ -157,14 +156,14 @@ private:
 
     // Zone's handlers---------------------------------------------------------
     void handleNotifyActiveZoneCall(const std::string& caller,
-                                    const std::string& appliaction,
-                                    const std::string& message,
+                                    const api::NotifActiveZoneIn& notif,
                                     api::MethodResultBuilder::Pointer result);
     void handleSwitchToDefaultCall(const std::string& caller);
     void handleFileMoveCall(const std::string& srcZoneId,
-                            const std::string& dstZoneId,
-                            const std::string& path,
+                            const api::FileMoveRequestIn& request,
                             api::MethodResultBuilder::Pointer result);
+#ifdef DBUS_CONNECTION
+    std::unique_ptr<ProxyCallPolicy> mProxyCallPolicy;
     void handleProxyCall(const std::string& caller,
                          const std::string& target,
                          const std::string& targetBusName,
@@ -173,10 +172,8 @@ private:
                          const std::string& targetMethod,
                          GVariant* parameters,
                          dbus::MethodResultBuilder::Pointer result);
-    void handleGetZoneConnectionsCall(api::MethodResultBuilder::Pointer result);
-    void handleConnectionStateChanged(const std::string& zoneId,
-                                      const std::string& address);
-    // Host's handlers --------------------------------------------------------
+#endif
+    // Handlers --------------------------------------------------------
     void handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result);
     void handleGetActiveZoneIdCall(api::MethodResultBuilder::Pointer result);
     void handleGetZoneInfoCall(const api::ZoneId& data,

@@ -131,6 +131,14 @@ public:
     typedef std::function<void(const api::RevokeDeviceIn& dataIn,
                                api::MethodResultBuilder::Pointer result
                               )> RevokeDeviceCallback;
+    typedef std::function<void(const api::NotifActiveZoneIn& notify,
+                               api::MethodResultBuilder::Pointer result
+                              )> NotifyActiveZoneCallback;
+    typedef std::function<void(const api::FileMoveRequestIn& request,
+                               api::MethodResultBuilder::Pointer result
+                              )> FileMoveCallback;
+    typedef std::function<void()> SwitchToDefaultCallback;
+
 
     /**
      * Register proxy call callback
@@ -273,6 +281,26 @@ public:
     void setRevokeDeviceCallback(const RevokeDeviceCallback& callback);
 
     /**
+     * Register notification request callback
+     */
+    void setNotifyActiveZoneCallback(const NotifyActiveZoneCallback& callback);
+
+    /**
+     * Register switch to default request callback
+     */
+    void setSwitchToDefaultCallback(const SwitchToDefaultCallback& callback);
+
+    /*
+     * Register file move request callback
+     */
+    void setFileMoveCallback(const FileMoveCallback& callback);
+
+    /**
+     * Send notification signal to this zone
+     */
+    void sendNotification(const api::Notification& notify);
+
+    /**
      * Make a proxy call
      */
     void proxyCallAsync(const std::string& busName,
@@ -288,6 +316,7 @@ private:
     std::condition_variable mNameCondition;
     bool mNameAcquired;
     bool mNameLost;
+    dbus::DbusConnection::SubscriptionId mSubscriptionId;
     ProxyCallCallback mProxyCallCallback;
     GetZoneConnectionsCallback mGetZoneConnectionsCallback;
     GetZoneIdsCallback mGetZoneIdsCallback;
@@ -315,6 +344,9 @@ private:
     UnlockZoneCallback mUnlockZoneCallback;
     GrantDeviceCallback mGrantDeviceCallback;
     RevokeDeviceCallback mRevokeDeviceCallback;
+    NotifyActiveZoneCallback mNotifyActiveZoneCallback;
+    SwitchToDefaultCallback mSwitchToDefaultCallback;
+    FileMoveCallback mFileMoveCallback;
 
     void onNameAcquired();
     void onNameLost();
@@ -325,6 +357,11 @@ private:
                        const std::string& methodName,
                        GVariant* parameters,
                        dbus::MethodResultBuilder::Pointer result);
+    void onSignalCall(const std::string& senderBusName,
+                      const std::string& objectPath,
+                      const std::string& interface,
+                      const std::string& signalName,
+                      GVariant* parameters);
 };
 
 

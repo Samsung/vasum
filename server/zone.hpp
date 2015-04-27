@@ -28,11 +28,9 @@
 
 #include "zone-config.hpp"
 #include "zone-admin.hpp"
-#include "zone-connection.hpp"
-#include "zone-connection-transport.hpp"
 #include "zone-provision.hpp"
-#include "utils/worker.hpp"
 
+#include <mutex>
 #include <string>
 #include <memory>
 #include <thread>
@@ -54,8 +52,7 @@ public:
      * @param lxcTemplatePrefix directory where templates are stored
      * @param baseRunMountPointPath base directory for run mount point
      */
-    Zone(const utils::Worker::Pointer& worker,
-         const std::string& zoneId,
+    Zone(const std::string& zoneId,
          const std::string& zonesPath,
          const std::string& zoneTemplatePath,
          const std::string& dbPath,
@@ -63,14 +60,7 @@ public:
          const std::string& baseRunMountPointPath);
     Zone(const Zone&) = delete;
     Zone& operator=(const Zone&) = delete;
-    ~Zone();
 
-    typedef ZoneConnection::NotifyActiveZoneCallback NotifyActiveZoneCallback;
-    typedef ZoneConnection::SwitchToDefaultCallback SwitchToDefaultCallback;
-    typedef ZoneConnection::FileMoveCallback FileMoveCallback;
-    typedef ZoneConnection::ProxyCallCallback ProxyCallCallback;
-
-    typedef std::function<void(const std::string& address)> ConnectionStateChangedCallback;
     typedef std::function<void(bool succeeded)> StartAsyncResultCallback;
 
     /**
@@ -135,8 +125,7 @@ public:
     /**
      * Set if zone should be detached on exit.
      *
-     * This sends detach flag to ZoneAdmin object and disables unmounting tmpfs
-     * in ZoneConnectionTransport.
+     * This sends detach flag to ZoneAdmin object.
      */
     void setDetachOnExit();
 
@@ -174,63 +163,10 @@ public:
      */
     bool isPaused();
 
-    // ZoneConnection API
-
     /**
      * @return Is switching to default zone after timeout allowed?
      */
     bool isSwitchToDefaultAfterTimeoutAllowed() const;
-
-    /**
-     * Register notification request callback
-     */
-    void setNotifyActiveZoneCallback(const NotifyActiveZoneCallback& callback);
-
-    /**
-     * Register callback used when switching to default zone.
-     */
-    void setSwitchToDefaultCallback(const SwitchToDefaultCallback& callback);
-
-    /**
-     * Register proxy call callback
-     */
-    void setProxyCallCallback(const ProxyCallCallback& callback);
-
-    /**
-     * Send notification signal to this zone
-     *
-     * @param zone   name of zone in which the notification occurred
-     * @param application name of application that cause notification
-     * @param message     message to be send to zone
-     */
-    void sendNotification(const std::string& zone,
-                          const std::string& application,
-                          const std::string& message);
-
-    /**
-     * Register file move request callback
-     */
-    void setFileMoveCallback(const FileMoveCallback& callback);
-
-    /**
-     * Register dbus state changed callback
-     */
-    void setConnectionStateChangedCallback(const ConnectionStateChangedCallback& callback);
-
-    /**
-     * Make a proxy call
-     */
-    void proxyCallAsync(const std::string& busName,
-                        const std::string& objectPath,
-                        const std::string& interface,
-                        const std::string& method,
-                        GVariant* parameters,
-                        const dbus::DbusConnection::AsyncMethodCallCallback& callback);
-
-    /**
-     * Get a dbus address
-     */
-    std::string getConnectionAddress() const;
 
     /**
      * Get id of VT
@@ -317,30 +253,18 @@ public:
     void deleteNetdevIpAddress(const std::string& netdev, const std::string& ip);
 
 private:
-    utils::Worker::Pointer mWorker;
     ZoneConfig mConfig;
     ZoneDynamicConfig mDynamicConfig;
     std::vector<boost::regex> mPermittedToSend;
     std::vector<boost::regex> mPermittedToRecv;
-    std::unique_ptr<ZoneConnectionTransport> mConnectionTransport;
     std::unique_ptr<ZoneAdmin> mAdmin;
-    std::unique_ptr<ZoneConnection> mConnection;
     std::unique_ptr<ZoneProvision> mProvision;
     mutable std::recursive_mutex mReconnectMutex;
-    NotifyActiveZoneCallback mNotifyCallback;
-    SwitchToDefaultCallback mSwitchToDefaultCallback;
-    FileMoveCallback mFileMoveCallback;
-    ProxyCallCallback mProxyCallCallback;
-    ConnectionStateChangedCallback mConnectionStateChangedCallback;
-    std::string mConnectionAddress;
     std::string mRunMountPoint;
     std::string mRootPath;
     std::string mDbPath;
 
     void onNameLostCallback();
-    void reconnectHandler();
-    void connect();
-    void disconnect();
     void saveDynamicConfig();
     void updateRequestedState(const std::string& state);
 };

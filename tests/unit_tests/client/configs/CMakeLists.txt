@@ -26,6 +26,8 @@ FILE(GLOB client_manager_CONF_GEN ${CMAKE_BINARY_DIR}/ut-client/*.conf)
 
 CONFIGURE_FILE(ut-client/templates/console-dbus.conf.in
                ${CMAKE_BINARY_DIR}/ut-client/templates/console-dbus.conf @ONLY)
+CONFIGURE_FILE(ut-client/templates/console-ipc.conf.in
+               ${CMAKE_BINARY_DIR}/ut-client/templates/console-ipc.conf @ONLY)
 FILE(GLOB client_templates_CONF_GEN ${CMAKE_BINARY_DIR}/ut-client/templates/*.conf)
 
 ## Install #####################################################################

@@ -25,20 +25,16 @@
 #ifndef SERVER_HOST_DBUS_DEFINITIONS_HPP
 #define SERVER_HOST_DBUS_DEFINITIONS_HPP
 
-#include "common-dbus-definitions.hpp"
-
+#include <string>
 
 namespace vasum {
 namespace api {
-namespace host {
 
 const std::string BUS_NAME                        = "org.tizen.vasum.host";
 const std::string OBJECT_PATH                     = "/org/tizen/vasum/host";
 const std::string INTERFACE                       = "org.tizen.vasum.host.manager";
 
-const std::string ERROR_ZONE_NOT_RUNNING          = "org.tizen.vasum.host.Error.ZonesNotRunning";
 
-const std::string METHOD_GET_ZONE_CONNECTIONS     = "GetZoneConnections";
 const std::string METHOD_GET_ZONE_ID_LIST         = "GetZoneIds";
 const std::string METHOD_GET_ACTIVE_ZONE_ID       = "GetActiveZoneId";
 const std::string METHOD_GET_ZONE_INFO            = "GetZoneInfo";
@@ -64,8 +60,19 @@ const std::string METHOD_LOCK_ZONE                = "LockZone";
 const std::string METHOD_UNLOCK_ZONE              = "UnlockZone";
 const std::string METHOD_GRANT_DEVICE             = "GrantDevice";
 const std::string METHOD_REVOKE_DEVICE            = "RevokeDevice";
+const std::string METHOD_PROXY_CALL               = "ProxyCall";
 
-const std::string SIGNAL_ZONE_CONNECTION_STATE    = "ZoneConnectionState";
+const std::string METHOD_NOTIFY_ACTIVE_ZONE         = "NotifyActiveZone";
+const std::string METHOD_FILE_MOVE_REQUEST          = "FileMoveRequest";
+const std::string SIGNAL_NOTIFICATION               = "Notification";
+const std::string SIGNAL_SWITCH_TO_DEFAULT          = "SwitchToDefault";
+
+const std::string FILE_MOVE_DESTINATION_NOT_FOUND   = "FILE_MOVE_DESTINATION_NOT_FOUND";
+const std::string FILE_MOVE_WRONG_DESTINATION       = "FILE_MOVE_WRONG_DESTINATION";
+const std::string FILE_MOVE_NO_PERMISSIONS_SEND     = "FILE_MOVE_NO_PERMISSIONS_SEND";
+const std::string FILE_MOVE_NO_PERMISSIONS_RECEIVE  = "FILE_MOVE_NO_PERMISSIONS_RECEIVE";
+const std::string FILE_MOVE_FAILED                  = "FILE_MOVE_FAILED";
+const std::string FILE_MOVE_SUCCEEDED               = "FILE_MOVE_SUCCEEDED";
 
 
 const std::string DEFINITION =
@@ -79,9 +86,6 @@ const std::string DEFINITION =
     "      <arg type='s' name='method' direction='in'/>"
     "      <arg type='v' name='parameters' direction='in'/>"
     "      <arg type='v' name='result' direction='out'/>"
-    "    </method>"
-    "    <method name='" + METHOD_GET_ZONE_CONNECTIONS + "'>"
-    "      <arg type='a(ss)' name='connections' direction='out'/>"
     "    </method>"
     "    <method name='" + METHOD_GET_ZONE_ID_LIST + "'>"
     "      <arg type='as' name='result' direction='out'/>"
@@ -196,14 +200,34 @@ const std::string DEFINITION =
     "      <arg type='s' name='id' direction='in'/>"
     "      <arg type='s' name='device' direction='in'/>"
     "    </method>"
-    "    <signal name='" + SIGNAL_ZONE_CONNECTION_STATE + "'>"
+    "    <method name='" + METHOD_NOTIFY_ACTIVE_ZONE + "'>"
+    "      <arg type='s' name='application' direction='in'/>"
+    "      <arg type='s' name='message' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_FILE_MOVE_REQUEST + "'>"
+    "      <arg type='s' name='destination' direction='in'/>"
+    "      <arg type='s' name='path' direction='in'/>"
+    "      <arg type='s' name='result' direction='out'/>"
+    "    </method>"
+    "    <method name='" + METHOD_PROXY_CALL + "'>"
+    "      <arg type='s' name='target' direction='in'/>"
+    "      <arg type='s' name='busName' direction='in'/>"
+    "      <arg type='s' name='objectPath' direction='in'/>"
+    "      <arg type='s' name='interface' direction='in'/>"
+    "      <arg type='s' name='method' direction='in'/>"
+    "      <arg type='v' name='parameters' direction='in'/>"
+    "      <arg type='v' name='result' direction='out'/>"
+    "    </method>"
+    "    <signal name='" + SIGNAL_NOTIFICATION + "'>"
     "      <arg type='s' name='zone'/>"
-    "      <arg type='s' name='address'/>"
+    "      <arg type='s' name='application'/>"
+    "      <arg type='s' name='message'/>"
+    "    </signal>"
+    "    <signal name='" + SIGNAL_SWITCH_TO_DEFAULT + "'>"
     "    </signal>"
     "  </interface>"
     "</node>";
 
-} // namespace host
 } // namespace api
 } // namespace vasum
 

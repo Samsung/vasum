@@ -33,150 +33,228 @@ namespace client {
 
 void HostIPCConnection::createSystem()
 {
-    mConnection.createSystem();
+    mClient.reset(new ipc::Client(mDispatcher.getPoll(), HOST_IPC_SOCKET));
+    mClient->start();
 }
 
-void HostIPCConnection::callGetZoneIds(vasum::api::ZoneIds& argOut)
+void HostIPCConnection::create(const std::string& address)
 {
-    mConnection.call(vasum::api::host::METHOD_GET_ZONE_ID_LIST, argOut);
+    mClient.reset(new ipc::Client(mDispatcher.getPoll(), address));
+    mClient->start();
 }
 
-void HostIPCConnection::callGetActiveZoneId(vasum::api::ZoneId& argOut)
+void HostIPCConnection::callGetZoneIds(api::ZoneIds& argOut)
 {
-    mConnection.call(vasum::api::host::METHOD_GET_ACTIVE_ZONE_ID, argOut);
+    api::Void argVoid;
+    call(api::METHOD_GET_ZONE_ID_LIST, argVoid, argOut);
 }
 
-void HostIPCConnection::callSetActiveZone(const vasum::api::ZoneId& argIn)
+void HostIPCConnection::callGetActiveZoneId(api::ZoneId& argOut)
 {
-    mConnection.call(vasum::api::host::METHOD_SET_ACTIVE_ZONE, argIn);
+    api::Void argVoid;
+    call(api::METHOD_GET_ACTIVE_ZONE_ID, argVoid, argOut);
 }
 
-void HostIPCConnection::callGetZoneInfo(const vasum::api::ZoneId& argIn, vasum::api::ZoneInfoOut& argOut)
+void HostIPCConnection::callSetActiveZone(const api::ZoneId& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_GET_ZONE_INFO, argIn, argOut);
+    mClient->callSync<api::ZoneId, api::Void>(
+            api::METHOD_SET_ACTIVE_ZONE,
+            std::make_shared<api::ZoneId>(argIn));
 }
 
-void HostIPCConnection::callSetNetdevAttrs(const vasum::api::SetNetDevAttrsIn& argIn)
+void HostIPCConnection::callGetZoneInfo(const api::ZoneId& argIn, api::ZoneInfoOut& argOut)
 {
-    mConnection.call(vasum::api::host::METHOD_SET_NETDEV_ATTRS, argIn);
+    argOut = *mClient->callSync<api::ZoneId, api::ZoneInfoOut>(
+        api::METHOD_GET_ZONE_INFO,
+        std::make_shared<api::ZoneId>(argIn));
 }
 
-void HostIPCConnection::callGetNetdevAttrs(const vasum::api::GetNetDevAttrsIn& argIn, vasum::api::GetNetDevAttrs& argOut)
+void HostIPCConnection::callSetNetdevAttrs(const api::SetNetDevAttrsIn& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_GET_NETDEV_ATTRS, argIn, argOut);
+    mClient->callSync<api::SetNetDevAttrsIn, api::Void>(
+            api::METHOD_SET_NETDEV_ATTRS,
+            std::make_shared<api::SetNetDevAttrsIn>(argIn));
+
+    api::Void argVoid;
+    call(api::METHOD_SET_NETDEV_ATTRS, argIn, argVoid);
 }
 
-void HostIPCConnection::callGetNetdevList(const vasum::api::ZoneId& argIn, vasum::api::NetDevList& argOut)
+void HostIPCConnection::callGetNetdevAttrs(const api::GetNetDevAttrsIn& argIn, api::GetNetDevAttrs& argOut)
 {
-    mConnection.call(vasum::api::host::METHOD_GET_NETDEV_LIST, argIn, argOut);
+    argOut = *mClient->callSync<api::GetNetDevAttrsIn, api::GetNetDevAttrs>(
+        api::METHOD_GET_NETDEV_ATTRS,
+        std::make_shared<api::GetNetDevAttrsIn>(argIn));
 }
 
-void HostIPCConnection::callCreateNetdevVeth(const vasum::api::CreateNetDevVethIn& argIn)
+void HostIPCConnection::callGetNetdevList(const api::ZoneId& argIn, api::NetDevList& argOut)
 {
-    mConnection.call(vasum::api::host::METHOD_CREATE_NETDEV_VETH, argIn);
+    argOut = *mClient->callSync<api::ZoneId, api::NetDevList>(
+        api::METHOD_GET_NETDEV_LIST,
+        std::make_shared<api::ZoneId>(argIn));
 }
 
-void HostIPCConnection::callCreateNetdevMacvlan(const vasum::api::CreateNetDevMacvlanIn& argIn)
+void HostIPCConnection::callCreateNetdevVeth(const api::CreateNetDevVethIn& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_CREATE_NETDEV_MACVLAN, argIn);
+    mClient->callSync<api::CreateNetDevVethIn, api::Void>(
+            api::METHOD_CREATE_NETDEV_VETH,
+            std::make_shared<api::CreateNetDevVethIn>(argIn));
 }
 
-void HostIPCConnection::callCreateNetdevPhys(const vasum::api::CreateNetDevPhysIn& argIn)
+void HostIPCConnection::callCreateNetdevMacvlan(const api::CreateNetDevMacvlanIn& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_CREATE_NETDEV_PHYS, argIn);
+    mClient->callSync<api::CreateNetDevMacvlanIn, api::Void>(
+            api::METHOD_CREATE_NETDEV_MACVLAN,
+            std::make_shared<api::CreateNetDevMacvlanIn>(argIn));
 }
 
-void HostIPCConnection::callDestroyNetdev(const vasum::api::DestroyNetDevIn& argIn)
+void HostIPCConnection::callCreateNetdevPhys(const api::CreateNetDevPhysIn& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_DESTROY_NETDEV, argIn);
+    mClient->callSync<api::CreateNetDevPhysIn, api::Void>(
+            api::METHOD_CREATE_NETDEV_PHYS,
+            std::make_shared<api::CreateNetDevPhysIn>(argIn));
 }
 
-void HostIPCConnection::callDeleteNetdevIpAddress(const vasum::api::DeleteNetdevIpAddressIn& argIn)
+void HostIPCConnection::callDestroyNetdev(const api::DestroyNetDevIn& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_DELETE_NETDEV_IP_ADDRESS, argIn);
+    mClient->callSync<api::DestroyNetDevIn, api::Void>(
+            api::METHOD_DESTROY_NETDEV,
+            std::make_shared<api::DestroyNetDevIn>(argIn));
 }
 
-void HostIPCConnection::callDeclareFile(const vasum::api::DeclareFileIn& argIn, vasum::api::Declaration& argOut)
+void HostIPCConnection::callDeleteNetdevIpAddress(const api::DeleteNetdevIpAddressIn& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_DECLARE_FILE, argIn, argOut);
+    mClient->callSync<api::DeleteNetdevIpAddressIn, api::Void>(
+            api::METHOD_DELETE_NETDEV_IP_ADDRESS,
+            std::make_shared<api::DeleteNetdevIpAddressIn>(argIn));
 }
 
-void HostIPCConnection::callDeclareMount(const vasum::api::DeclareMountIn& argIn, vasum::api::Declaration& argOut)
+void HostIPCConnection::callDeclareFile(const api::DeclareFileIn& argIn, api::Declaration& argOut)
 {
-    mConnection.call(vasum::api::host::METHOD_DECLARE_MOUNT, argIn, argOut);
+    argOut = *mClient->callSync<api::DeclareFileIn, api::Declaration>(
+        api::METHOD_DECLARE_FILE,
+        std::make_shared<api::DeclareFileIn>(argIn));
 }
 
-void HostIPCConnection::callDeclareLink(const vasum::api::DeclareLinkIn& argIn, vasum::api::Declaration& argOut)
+void HostIPCConnection::callDeclareMount(const api::DeclareMountIn& argIn, api::Declaration& argOut)
 {
-    mConnection.call(vasum::api::host::METHOD_DECLARE_LINK, argIn, argOut);
+    argOut = *mClient->callSync<api::DeclareMountIn, api::Declaration>(
+        api::METHOD_DECLARE_MOUNT,
+        std::make_shared<api::DeclareMountIn>(argIn));
 }
 
-void HostIPCConnection::callGetDeclarations(const vasum::api::ZoneId& argIn, vasum::api::Declarations& argOut)
+void HostIPCConnection::callDeclareLink(const api::DeclareLinkIn& argIn, api::Declaration& argOut)
 {
-    mConnection.call(vasum::api::host::METHOD_GET_DECLARATIONS, argIn, argOut);
+    argOut = *mClient->callSync<api::DeclareLinkIn, api::Declaration>(
+        api::METHOD_DECLARE_LINK,
+        std::make_shared<api::DeclareLinkIn>(argIn));
 }
 
-void HostIPCConnection::callRemoveDeclaration(const vasum::api::RemoveDeclarationIn& argIn)
+void HostIPCConnection::callGetDeclarations(const api::ZoneId& argIn, api::Declarations& argOut)
 {
-    mConnection.call(vasum::api::host::METHOD_REMOVE_DECLARATION, argIn);
+    argOut = *mClient->callSync<api::ZoneId, api::Declarations>(
+        api::METHOD_GET_DECLARATIONS,
+        std::make_shared<api::ZoneId>(argIn));
 }
 
-void HostIPCConnection::callCreateZone(const vasum::api::CreateZoneIn& argIn)
+void HostIPCConnection::callRemoveDeclaration(const api::RemoveDeclarationIn& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_CREATE_ZONE, argIn);
+    mClient->callSync<api::RemoveDeclarationIn, api::Void>(
+            api::METHOD_REMOVE_DECLARATION,
+            std::make_shared<api::RemoveDeclarationIn>(argIn));
 }
 
-void HostIPCConnection::callDestroyZone(const vasum::api::ZoneId& argIn)
+void HostIPCConnection::callCreateZone(const api::CreateZoneIn& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_DESTROY_ZONE, argIn);
+    mClient->callSync<api::CreateZoneIn, api::Void>(
+            api::METHOD_CREATE_ZONE,
+            std::make_shared<api::CreateZoneIn>(argIn));
 }
 
-void HostIPCConnection::callShutdownZone(const vasum::api::ZoneId& argIn)
+void HostIPCConnection::callDestroyZone(const api::ZoneId& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_SHUTDOWN_ZONE, argIn);
+    mClient->callSync<api::ZoneId, api::Void>(
+            api::METHOD_DESTROY_ZONE,
+            std::make_shared<api::ZoneId>(argIn));
 }
 
-void HostIPCConnection::callStartZone(const vasum::api::ZoneId& argIn)
+void HostIPCConnection::callShutdownZone(const api::ZoneId& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_START_ZONE, argIn);
+    mClient->callSync<api::ZoneId, api::Void>(
+            api::METHOD_SHUTDOWN_ZONE,
+            std::make_shared<api::ZoneId>(argIn));
 }
 
-void HostIPCConnection::callLockZone(const vasum::api::ZoneId& argIn)
+void HostIPCConnection::callStartZone(const api::ZoneId& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_LOCK_ZONE, argIn);
+    mClient->callSync<api::ZoneId, api::Void>(
+            api::METHOD_START_ZONE,
+            std::make_shared<api::ZoneId>(argIn));
 }
 
-void HostIPCConnection::callUnlockZone(const vasum::api::ZoneId& argIn)
+void HostIPCConnection::callLockZone(const api::ZoneId& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_UNLOCK_ZONE, argIn);
+    mClient->callSync<api::ZoneId, api::Void>(
+            api::METHOD_LOCK_ZONE,
+            std::make_shared<api::ZoneId>(argIn));
 }
 
-void HostIPCConnection::callGrantDevice(const vasum::api::GrantDeviceIn& argIn)
+void HostIPCConnection::callUnlockZone(const api::ZoneId& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_GRANT_DEVICE, argIn);
+    mClient->callSync<api::ZoneId, api::Void>(
+            api::METHOD_UNLOCK_ZONE,
+            std::make_shared<api::ZoneId>(argIn));
 }
 
-void HostIPCConnection::callRevokeDevice(const vasum::api::RevokeDeviceIn& argIn)
+void HostIPCConnection::callGrantDevice(const api::GrantDeviceIn& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_REVOKE_DEVICE, argIn);
+    mClient->callSync<api::GrantDeviceIn, api::Void>(
+            api::METHOD_GRANT_DEVICE,
+            std::make_shared<api::GrantDeviceIn>(argIn));
 }
 
-void HostIPCConnection::callGetZoneConnections(vasum::api::Connections& argOut)
+void HostIPCConnection::callRevokeDevice(const api::RevokeDeviceIn& argIn)
 {
-    mConnection.call(vasum::api::host::METHOD_GET_ZONE_CONNECTIONS, argOut);
+    mClient->callSync<api::RevokeDeviceIn, api::Void>(
+            api::METHOD_REVOKE_DEVICE,
+            std::make_shared<api::RevokeDeviceIn>(argIn));
+}
+
+void HostIPCConnection::callNotifyActiveZone(const api::NotifActiveZoneIn& argIn)
+{
+    mClient->callSync<api::NotifActiveZoneIn, api::Void>(
+            api::METHOD_NOTIFY_ACTIVE_ZONE,
+            std::make_shared<api::NotifActiveZoneIn>(argIn));
+}
+
+void HostIPCConnection::callFileMoveRequest(const api::FileMoveRequestIn& argIn,
+                                            api::FileMoveRequestStatus& argOut)
+{
+    argOut = *mClient->callSync<api::FileMoveRequestIn, api::FileMoveRequestStatus>(
+        api::METHOD_FILE_MOVE_REQUEST,
+        std::make_shared<api::FileMoveRequestIn>(argIn));
+}
+
+void HostIPCConnection::signalSwitchToDefault()
+{
+
+    mClient->signal(api::SIGNAL_SWITCH_TO_DEFAULT,
+                    std::make_shared<api::Void>());
 }
 
 HostIPCConnection::SubscriptionId
-HostIPCConnection::subscribeZoneConnectionState(const ZoneConnectionStateCallback& callback)
+HostIPCConnection::subscribeNotification(const NotificationCallback& callback)
 {
-    mConnection.subscribe<ZoneConnectionStateCallback, vasum::api::ConnectionState>(
-            vasum::api::host::SIGNAL_ZONE_CONNECTION_STATE, callback);
-    return vasum::api::host::SIGNAL_ZONE_CONNECTION_STATE;
+    auto callbackWrapper = [callback] (const ipc::PeerID,
+                                       std::shared_ptr<api::Notification>& data) {
+        callback(*data);
+    };
+    mClient->setSignalHandler<api::Notification>(api::SIGNAL_NOTIFICATION, callbackWrapper);
+    return api::SIGNAL_NOTIFICATION;
 }
 
 void HostIPCConnection::unsubscribe(const SubscriptionId& id)
 {
-    mConnection.unsubscribe(id);
+    mClient->removeMethod(id);
 }
 
 } // namespace client

@@ -27,14 +27,7 @@
 #include "vasum-client-impl.hpp"
 #include "utils.hpp"
 #include "exception.hpp"
-#include "host-dbus-connection.hpp"
 #include "host-ipc-connection.hpp"
-#include "zone-dbus-connection.hpp"
-#include <zone-dbus-definitions.hpp>
-
-#include <dbus/connection.hpp>
-#include <dbus/exception.hpp>
-#include <utils/glib-loop.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -51,8 +44,6 @@ using namespace std;
 using namespace vasum;
 
 namespace {
-
-unique_ptr<utils::ScopedGlibLoop> gGlibLoop;
 
 VsmZoneState getZoneState(const char* state)
 {
@@ -87,16 +78,6 @@ void convert(const api::VectorOfStrings& in, VsmArrayString& out)
     out = reinterpret_cast<char**>(calloc(in.values.size() + 1, sizeof(char*)));
     for (size_t i = 0; i < in.values.size(); ++i) {
         out[i] = ::strdup(in.values[i].c_str());
-    }
-}
-
-void convert(const api::VectorOfStringPairs& in, VsmArrayString& keys, VsmArrayString& values)
-{
-    keys = reinterpret_cast<char**>(calloc(in.values.size() + 1, sizeof(char*)));
-    values = reinterpret_cast<char**>(calloc(in.values.size() + 1, sizeof(char*)));
-    for (size_t i = 0; i < in.values.size(); ++i) {
-        keys[i] = ::strdup(in.values[i].first.c_str());
-        values[i] = ::strdup(in.values[i].second.c_str());
     }
 }
 
@@ -145,23 +126,13 @@ bool readFirstLineOfFile(const string& path, string& ret)
 
 VsmStatus Client::vsm_start_glib_loop() noexcept
 {
-    try {
-        if (!gGlibLoop) {
-            gGlibLoop.reset(new utils::ScopedGlibLoop());
-        }
-    } catch (const exception&) {
-        return VSMCLIENT_OTHER_ERROR;
-    }
+    // TPDP: Remove vsm_start_glib_loop from API
     return VSMCLIENT_SUCCESS;
 }
 
 VsmStatus Client::vsm_stop_glib_loop() noexcept
 {
-    try {
-        gGlibLoop.reset();
-    } catch (const exception&) {
-        return VSMCLIENT_OTHER_ERROR;
-    }
+    // TPDP: Remove vsm_stop_glib_loop from API
     return VSMCLIENT_SUCCESS;
 }
 
@@ -198,16 +169,10 @@ VsmStatus Client::coverException(const function<void(void)>& worker) noexcept
         mStatus = Status(VSMCLIENT_OTHER_ERROR, ex.what());
     } catch (const vasum::ClientException& ex) {
         mStatus = Status(VSMCLIENT_CUSTOM_ERROR, ex.what());
-    } catch (const dbus::DbusCustomException& ex) {
+    } catch (const ipc::IPCUserException& ex) {
         mStatus = Status(VSMCLIENT_CUSTOM_ERROR, ex.what());
-    } catch (const dbus::DbusIOException& ex) {
+    } catch (const ipc::IPCException& ex) {
         mStatus = Status(VSMCLIENT_IO_ERROR, ex.what());
-    } catch (const dbus::DbusOperationException& ex) {
-        mStatus = Status(VSMCLIENT_OPERATION_FAILED, ex.what());
-    } catch (const dbus::DbusInvalidArgumentException& ex) {
-        mStatus = Status(VSMCLIENT_INVALID_ARGUMENT, ex.what());
-    } catch (const dbus::DbusException& ex) {
-        mStatus = Status(VSMCLIENT_OTHER_ERROR, ex.what());
     } catch (const exception& ex) {
         mStatus = Status(VSMCLIENT_CUSTOM_ERROR, ex.what());
     }
@@ -217,28 +182,14 @@ VsmStatus Client::coverException(const function<void(void)>& worker) noexcept
 VsmStatus Client::createSystem() noexcept
 {
     return coverException([&] {
-        shared_ptr<dbus::DbusConnection> connection(dbus::DbusConnection::createSystem().release());
-
-#ifdef DBUS_CONNECTION
-        mHostClient.create(connection);
-#else
         mHostClient.createSystem();
-#endif
-        mZoneClient.create(connection);
     });
 }
 
 VsmStatus Client::create(const string& address) noexcept
 {
     return coverException([&] {
-        shared_ptr<dbus::DbusConnection> connection(dbus::DbusConnection::create(address).release());
-
-#ifdef DBUS_CONNECTION
-        mHostClient.create(connection);
-#else
-        mHostClient.createSystem();
-#endif
-        mZoneClient.create(connection);
+        mHostClient.create(address);
     });
 }
 
@@ -252,15 +203,11 @@ VsmStatus Client::vsm_get_status() const noexcept
     return mStatus.mVsmStatus;
 }
 
-VsmStatus Client::vsm_get_zone_dbuses(VsmArrayString* keys, VsmArrayString* values) noexcept
+VsmStatus Client::vsm_get_zone_dbuses(VsmArrayString* /*keys*/, VsmArrayString* /*values*/) noexcept
 {
-    assert(keys);
-    assert(values);
-
     return coverException([&] {
-        api::Connections dbuses;
-        mHostClient.callGetZoneConnections(dbuses);
-        convert(dbuses, *keys, *values);
+        //TODO: Remove vsm_get_zone_dbuses from API
+        throw OperationFailedException("Not implemented");
     });
 }
 
@@ -322,6 +269,7 @@ VsmStatus Client::vsm_lookup_zone_by_id(const char* id, VsmZone* zone) noexcept
 VsmStatus Client::vsm_lookup_zone_by_terminal_id(int, VsmString*) noexcept
 {
     return coverException([&] {
+        //TODO: Implement vsm_lookup_zone_by_terminal_id
         throw OperationFailedException("Not implemented");
     });
 }
@@ -390,25 +338,13 @@ VsmStatus Client::vsm_unlock_zone(const char* id) noexcept
     });
 }
 
-VsmStatus Client::vsm_add_state_callback(VsmZoneDbusStateCallback zoneDbusStateCallback,
-                                    void* data,
-                                    VsmSubscriptionId* subscriptionId) noexcept
+VsmStatus Client::vsm_add_state_callback(VsmZoneDbusStateCallback /* zoneDbusStateCallback */,
+                                    void* /* data */,
+                                    VsmSubscriptionId* /* subscriptionId */) noexcept
 {
-    assert(zoneDbusStateCallback);
-
     return coverException([&] {
-        auto onSigal = [=](const api::ConnectionState& dbus)
-        {
-            zoneDbusStateCallback(dbus.first.c_str(),
-                                  dbus.second.c_str(),
-                                  data);
-        };
-
-        VsmSubscriptionId id;
-        id = mHostClient.subscribeZoneConnectionState(onSigal);
-        if (subscriptionId) {
-            *subscriptionId = id;
-        }
+        //TODO: Implement vsm_add_state_callback
+        throw OperationFailedException("Not implemented");
     });
 }
 
@@ -758,57 +694,36 @@ VsmStatus Client::vsm_remove_declaration(const char* id, VsmString declaration) 
     });
 }
 
-VsmStatus Client::vsm_notify_active_zone(const char* application, const char* message) noexcept
+VsmStatus Client::vsm_notify_active_zone(const char* /*application*/, const char* /*message*/) noexcept
 {
-    assert(application);
-    assert(message);
-
     return coverException([&] {
-        mZoneClient.callNotifyActiveZone({ application, message });
+        //TODO: Implement vsm_notify_active_zone
+        throw OperationFailedException("Not implemented");
     });
 }
 
-VsmStatus Client::vsm_file_move_request(const char* destZone, const char* path) noexcept
+VsmStatus Client::vsm_file_move_request(const char* /*destZone*/, const char* /*path*/) noexcept
 {
-    assert(destZone);
-    assert(path);
-
     return coverException([&] {
-        api::FileMoveRequestStatus status;
-        mZoneClient.callFileMoveRequest({ destZone, path }, status);
-        if (status.value != api::zone::FILE_MOVE_SUCCEEDED) {
-            throw ClientException(status.value);
-        }
+        //TODO: Implement vsm_file_move_request
+        throw OperationFailedException("Not implemented");
     });
 }
 
-VsmStatus Client::vsm_add_notification_callback(VsmNotificationCallback notificationCallback,
-                                           void* data,
-                                           VsmSubscriptionId* subscriptionId) noexcept
+VsmStatus Client::vsm_add_notification_callback(VsmNotificationCallback /*notificationCallback*/,
+                                           void* /*data*/,
+                                           VsmSubscriptionId* /*subscriptionId*/) noexcept
 {
-    assert(notificationCallback);
-
     return coverException([&] {
-        auto onSignal = [=](const api::Notification& notification)
-        {
-            notificationCallback(notification.zone.c_str(),
-                                 notification.application.c_str(),
-                                 notification.message.c_str(),
-                                 data);
-        };
-
-        VsmSubscriptionId id;
-        id = mZoneClient.subscribeNotification(onSignal);
-        if (subscriptionId) {
-            *subscriptionId = id;
-        }
+        //TODO: Implement vsm_add_notification_callback
+        throw OperationFailedException("Not implemented");
     });
 }
 
 VsmStatus Client::vsm_del_notification_callback(VsmSubscriptionId subscriptionId) noexcept
 {
     return coverException([&] {
-        mZoneClient.unsubscribe(subscriptionId);
+        mHostClient.unsubscribe(subscriptionId);
     });
 }
 
