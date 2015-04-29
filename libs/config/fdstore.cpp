@@ -37,6 +37,15 @@ namespace config {
 
 namespace {
 
+const int ERROR_MESSAGE_BUFFER_CAPACITY = 256;
+
+std::string getSystemErrorMessage()
+{
+    char buf[ERROR_MESSAGE_BUFFER_CAPACITY];
+    return strerror_r(errno, buf, sizeof(buf));
+}
+
+
 void waitForEvent(int fd,
                   short event,
                   const std::chrono::high_resolution_clock::time_point deadline)
@@ -59,7 +68,7 @@ void waitForEvent(int fd,
             if (errno == EINTR) {
                 continue;
             }
-            throw ConfigException("Error in poll: " + std::string(strerror(errno)));
+            throw ConfigException("Error in poll: " + getSystemErrorMessage());
         }
 
         if (ret == 0) {
@@ -110,7 +119,7 @@ void FDStore::write(const void* bufferPtr, const size_t size, const unsigned int
         } else if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
             // Neglected errors
         } else {
-            throw ConfigException("Error during writing: " + std::string(strerror(errno)));
+            throw ConfigException("Error during writing: " + getSystemErrorMessage());
         }
 
         waitForEvent(mFD, POLLOUT, deadline);
@@ -139,7 +148,7 @@ void FDStore::read(void* bufferPtr, const size_t size, const unsigned int timeou
         } else if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
             // Neglected errors
         } else {
-            throw ConfigException("Error during reading: " + std::string(strerror(errno)));
+            throw ConfigException("Error during reading: " + getSystemErrorMessage());
         }
 
         waitForEvent(mFD, POLLIN, deadline);

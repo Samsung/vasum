@@ -147,7 +147,7 @@ bool setSuppGroups(const std::vector<std::string>& groups)
     }
 
     if (::setgroups(gids.size(), gids.data()) != 0) {
-        LOGE("setgroups() failed: " << strerror(errno));
+        LOGE("setgroups() failed: " << getSystemErrorMessage());
         return false;
     }
 

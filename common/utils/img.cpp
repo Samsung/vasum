@@ -27,6 +27,7 @@
 #include "utils/img.hpp"
 #include "utils/fs.hpp"
 #include "utils/paths.hpp"
+#include "base-exception.hpp"
 
 #include <sys/mount.h>
 #include <fcntl.h>
@@ -52,7 +53,7 @@ bool isLoopDevFree(const std::string& loopdev, bool& ret)
     // open loop device FD
     int loopFD = ::open(loopdev.c_str(), O_RDWR);
     if (loopFD < 0) {
-        LOGD("Failed to open loop device descriptor: " << ::strerror(errno));
+        LOGD("Failed to open loop device descriptor: " << getSystemErrorMessage());
         return false;
     }
 
@@ -77,21 +78,21 @@ bool mountLoop(const std::string& img,
     // get image file  FD
     int fileFD = ::open(img.c_str(), O_RDWR);
     if (fileFD < 0) {
-        LOGD("Failed to open image file descriptor: " << ::strerror(errno));
+        LOGD("Failed to open image file descriptor: " << getSystemErrorMessage());
         return false;
     }
 
     // get loop device FD
     int loopFD = ::open(loopdev.c_str(), O_RDWR);
     if (loopFD < 0) {
-        LOGD("Failed to open loop device descriptor: " << ::strerror(errno));
+        LOGD("Failed to open loop device descriptor: " << getSystemErrorMessage());
         ::close(fileFD);
         return false;
     }
 
     // set loop device
     if (::ioctl(loopFD, LOOP_SET_FD, fileFD)) {
-        LOGD("Failed to assign loop device to image: " << ::strerror(errno));
+        LOGD("Failed to assign loop device to image: " << getSystemErrorMessage());
         ::close(fileFD);
         ::close(loopFD);
         return false;
@@ -99,7 +100,7 @@ bool mountLoop(const std::string& img,
 
     // mount loop device to path
     if (::mount(loopdev.c_str(), path.c_str(), type.c_str(), flags, options.c_str()) != 0) {
-        LOGD("Mount failed for '" << path << "', options=" << options << ": " << strerror(errno));
+        LOGD("Mount failed for '" << path << "', options=" << options << ": " << getSystemErrorMessage());
         ::ioctl(loopFD, LOOP_CLR_FD, 0);
         ::close(fileFD);
         ::close(loopFD);
@@ -150,7 +151,7 @@ bool mountImage(const std::string& image, const std::string& path, const std::st
 bool umountImage(const std::string& path, const std::string& loopdev)
 {
     if (::umount(path.c_str()) != 0) {
-        LOGD("Umount failed for '" << path << "': " << strerror(errno));
+        LOGD("Umount failed for '" << path << "': " << getSystemErrorMessage());
         return false;
     }
 

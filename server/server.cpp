@@ -130,8 +130,7 @@ void Server::reloadIfRequired(char* argv[])
 {
     if (gUpdateTriggered) {
         execve(argv[0], argv, environ);
-
-        LOGE("Failed to reload " << argv[0] << ": " << strerror(errno));
+        LOGE("Failed to reload " << argv[0] << ": " << getSystemErrorMessage());
     }
 }
 

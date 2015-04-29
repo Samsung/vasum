@@ -25,6 +25,7 @@
 #include "config.hpp"
 #include "utils/vt.hpp"
 #include "logger/logger.hpp"
+#include "base-exception.hpp"
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -46,14 +47,14 @@ bool activateVT(const int& vt)
 {
     int consoleFD = ::open(TTY_DEV.c_str(), O_WRONLY);
     if (consoleFD < 0) {
-        LOGE("console open failed: " << errno << " (" << strerror(errno) << ")");
+        LOGE("console open failed: " << errno << " (" << getSystemErrorMessage() << ")");
         return false;
     }
 
     struct vt_stat vtstat;
     vtstat.v_active = 0;
     if (::ioctl(consoleFD, VT_GETSTATE, &vtstat)) {
-        LOGE("Failed to get vt state: " << errno << " (" << strerror(errno) << ")");
+        LOGE("Failed to get vt state: " << errno << " (" << getSystemErrorMessage() << ")");
         ::close(consoleFD);
         return false;
     }
@@ -66,14 +67,14 @@ bool activateVT(const int& vt)
 
     // activate vt
     if (::ioctl(consoleFD, VT_ACTIVATE, vt)) {
-        LOGE("Failed to activate vt" << vt << ": " << errno << " (" << strerror(errno) << ")");
+        LOGE("Failed to activate vt" << vt << ": " << errno << " (" << getSystemErrorMessage() << ")");
         ::close(consoleFD);
         return false;
     }
 
     // wait until activation is finished
     if (::ioctl(consoleFD, VT_WAITACTIVE, vt)) {
-        LOGE("Failed to wait for vt" << vt << " activation: " << errno << " (" << strerror(errno) << ")");
+        LOGE("Failed to wait for vt" << vt << " activation: " << errno << " (" << getSystemErrorMessage() << ")");
         ::close(consoleFD);
         return false;
     }

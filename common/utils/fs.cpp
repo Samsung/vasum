@@ -122,7 +122,7 @@ bool removeFile(const std::string& path)
     LOGD(path << ": exists, removing.");
     if (::remove(path.c_str())) {
         if (errno != ENOENT) {
-            LOGE(path << ": failed to delete: " << ::strerror(errno));
+            LOGE(path << ": failed to delete: " << getSystemErrorMessage());
             return false;
         }
     }
@@ -145,7 +145,7 @@ const unsigned long RUN_MOUNT_POINT_FLAGS = MS_NOSUID | MS_NODEV | MS_STRICTATIM
 bool mountTmpfs(const std::string& path, unsigned long flags, const std::string& options)
 {
     if (::mount("tmpfs", path.c_str(), "tmpfs", flags, options.c_str()) != 0) {
-        LOGD("Mount failed for '" << path << "', options=" << options << ": " << strerror(errno));
+        LOGD("Mount failed for '" << path << "', options=" << options << ": " << getSystemErrorMessage());
         return false;
     }
     return true;
@@ -192,7 +192,7 @@ bool mount(const std::string& source,
 bool umount(const std::string& path)
 {
     if (::umount(path.c_str()) != 0) {
-        LOGD("Umount failed for '" << path << "': " << strerror(errno));
+        LOGD("Umount failed for '" << path << "': " << getSystemErrorMessage());
         return false;
     }
     return true;
@@ -213,12 +213,12 @@ bool hasSameMountPoint(const std::string& path1, const std::string& path2, bool&
     struct stat s1, s2;
 
     if (::stat(path1.c_str(), &s1)) {
-        LOGD("Failed to get stat of " << path1 << ": " << strerror(errno));
+        LOGD("Failed to get stat of " << path1 << ": " << getSystemErrorMessage());
         return false;
     }
 
     if (::stat(path2.c_str(), &s2)) {
-        LOGD("Failed to get stat of " << path2 << ": " << strerror(errno));
+        LOGD("Failed to get stat of " << path2 << ": " << getSystemErrorMessage());
         return false;
     }
 
@@ -305,11 +305,11 @@ bool copyDirContentsRec(const boost::filesystem::path& src, const boost::filesys
             ::stat(current.string().c_str(), &info);
             if (fs::is_symlink(destination)) {
                 if (::lchown(destination.string().c_str(), info.st_uid, info.st_gid) < 0) {
-                    LOGW("Failed to change owner of symlink " << destination.string() << ": " << strerror(errno));
+                    LOGW("Failed to change owner of symlink " << destination.string() << ": " << getSystemErrorMessage());
                 }
             } else {
                 if (::chown(destination.string().c_str(), info.st_uid, info.st_gid) < 0) {
-                    LOGW("Failed to change owner of file " << destination.string() << ": " << strerror(errno));
+                    LOGW("Failed to change owner of file " << destination.string() << ": " << getSystemErrorMessage());
                 }
             }
         }
@@ -366,11 +366,12 @@ bool createDir(const std::string& path, uid_t uid, uid_t gid, boost::filesystem:
 
     // set owner
     if (::chown(path.c_str(), uid, gid) != 0) {
+        int err = errno;
         // remove the directory only if it hadn't existed before
         if (runDirCreated) {
             fs::remove(dirPath);
         }
-        LOGE("chown() failed for path '" << path << "': " << strerror(errno));
+        LOGE("chown() failed for path '" << path << "': " << getSystemErrorMessage(err));
         return false;
     }
 

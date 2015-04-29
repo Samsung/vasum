@@ -67,8 +67,9 @@ void waitForEvent(int fd,
             if (errno == EINTR) {
                 continue;
             }
-            LOGE("Error in poll: " + getSystemErrorMessage());
-            throw UtilsException("Error in poll: " + getSystemErrorMessage());
+            const std::string msg = getSystemErrorMessage();
+            LOGE("Error in poll: " + msg);
+            throw UtilsException("Error in poll: " + msg);
         }
 
         if (ret == 0) {
@@ -128,8 +129,9 @@ void write(int fd, const void* bufferPtr, const size_t size, int timeoutMS)
             // Neglected errors
             LOGD("Retrying write");
         } else {
-            LOGE("Error during writing: " + getSystemErrorMessage());
-            throw UtilsException("Error during writing: " + getSystemErrorMessage());
+            const std::string msg = getSystemErrorMessage();
+            LOGE("Error during writing: " + msg);
+            throw UtilsException("Error during writing: " + msg);
         }
 
         waitForEvent(fd, POLLOUT, deadline);
@@ -160,8 +162,9 @@ void read(int fd, void* bufferPtr, const size_t size, int timeoutMS)
             // Neglected errors
             LOGD("Retrying read");
         } else {
-            LOGE("Error during reading: " + getSystemErrorMessage());
-            throw UtilsException("Error during reading: " + getSystemErrorMessage());
+            const std::string msg = getSystemErrorMessage();
+            LOGE("Error during reading: " + msg);
+            throw UtilsException("Error during reading: " + msg);
         }
 
         waitForEvent(fd, POLLIN, deadline);
@@ -172,8 +175,9 @@ unsigned int getMaxFDNumber()
 {
     struct rlimit rlim;
     if (-1 ==  getrlimit(RLIMIT_NOFILE, &rlim)) {
-        LOGE("Error during getrlimit: " + getSystemErrorMessage());
-        throw UtilsException("Error during getrlimit: " + getSystemErrorMessage());
+        const std::string msg = getSystemErrorMessage();
+        LOGE("Error during getrlimit: " + msg);
+        throw UtilsException("Error during getrlimit: " + msg);
     }
     return rlim.rlim_cur;
 }
@@ -184,8 +188,9 @@ void setMaxFDNumber(unsigned int limit)
     rlim.rlim_cur = limit;
     rlim.rlim_max = limit;
     if (-1 ==  setrlimit(RLIMIT_NOFILE, &rlim)) {
-        LOGE("Error during setrlimit: " + getSystemErrorMessage());
-        throw UtilsException("Error during setrlimit: " + getSystemErrorMessage());
+        const std::string msg = getSystemErrorMessage();
+        LOGE("Error during setrlimit: " + msg);
+        throw UtilsException("Error during setrlimit: " + msg);
     }
 }
 
