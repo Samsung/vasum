@@ -128,9 +128,9 @@ Library interface to the vasum daemon
 %files client
 %manifest packaging/libvasum-client.manifest
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libvasum-client.so.0.1.1
+%attr(755,root,root) %{_libdir}/libvasum-client.so.%{version}
 %{_libdir}/libvasum-client.so.0
-%attr(755,root,root) %{_libdir}/libvasum.so.0.1.1
+%attr(755,root,root) %{_libdir}/libvasum.so.%{version}
 %{_libdir}/libvasum.so.0
 
 %post client -p /sbin/ldconfig
@@ -142,8 +142,8 @@ Library interface to the vasum daemon
 %package devel
 Summary:          Vasum Client Devel
 Group:            Development/Libraries
-Requires:         vasum = %{version}-%{release}
-Requires:         vasum-client = %{version}-%{release}
+Requires:         vasum = %{epoch}:%{version}-%{release}
+Requires:         vasum-client = %{epoch}:%{version}-%{release}
 
 %description devel
 Development package including the header files for the client library
@@ -175,7 +175,7 @@ Zones support installed inside every zone.
 %package zone-daemon
 Summary:          Vasum Zones Daemon
 Group:            Security/Other
-Requires:         vasum-zone-support = %{version}-%{release}
+Requires:         vasum-zone-support = %{epoch}:%{version}-%{release}
 
 %description zone-daemon
 Daemon running inside every zone.
@@ -191,7 +191,7 @@ Daemon running inside every zone.
 %package cli
 Summary:          Vasum Command Line Interface
 Group:            Security/Other
-Requires:         vasum-client = %{version}-%{release}
+Requires:         vasum-client = %{epoch}:%{version}-%{release}
 
 %description cli
 Command Line Interface for vasum.
@@ -203,7 +203,7 @@ Command Line Interface for vasum.
 %package cli-completion
 Summary:          Vasum Command Line Interface bash completion
 Group:            Security/Other
-Requires:         vasum-cli = %{version}-%{release}
+Requires:         vasum-cli = %{epoch}:%{version}-%{release}
 #Requires:         bash-completion
 
 %description cli-completion
@@ -216,8 +216,8 @@ Command Line Interface bash completion.
 %package tests
 Summary:          Vasum Tests
 Group:            Development/Libraries
-Requires:         vasum = %{version}-%{release}
-Requires:         vasum-client = %{version}-%{release}
+Requires:         vasum = %{epoch}:%{version}-%{release}
+Requires:         vasum-client = %{epoch}:%{version}-%{release}
 Requires:         python
 Requires:         python-xml
 Requires:         boost-test
@@ -270,7 +270,7 @@ The package provides libLogger library.
 %files -n libLogger
 %defattr(644,root,root,755)
 %{_libdir}/libLogger.so.0
-%attr(755,root,root) %{_libdir}/libLogger.so.0.0.1
+%attr(755,root,root) %{_libdir}/libLogger.so.%{version}
 
 %package -n libLogger-devel
 Summary:        Development logger library
@@ -303,7 +303,7 @@ The package provides libSimpleDbus library.
 %files -n libSimpleDbus
 %defattr(644,root,root,755)
 %{_libdir}/libSimpleDbus.so.0
-%attr(755,root,root) %{_libdir}/libSimpleDbus.so.0.0.1
+%attr(755,root,root) %{_libdir}/libSimpleDbus.so.%{version}
 
 %package -n libSimpleDbus-devel
 Summary:        Development Simple dbus library
@@ -337,7 +337,7 @@ The package provides libConfig library.
 %files -n libConfig
 %defattr(644,root,root,755)
 %{_libdir}/libConfig.so.0
-%attr(755,root,root) %{_libdir}/libConfig.so.0.0.1
+%attr(755,root,root) %{_libdir}/libConfig.so.%{version}
 
 %package -n libConfig-devel
 Summary:        Development Config library

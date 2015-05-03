@@ -177,9 +177,6 @@ VsmStatus Client::coverException(const function<void(void)>& worker) noexcept
     } catch (const exception& ex) {
         mStatus = Status(VSMCLIENT_CUSTOM_ERROR, ex.what());
     }
-    if (mStatus.mVsmStatus!=VSMCLIENT_SUCCESS) {
-        LOGE("Exception: " << mStatus.mMsg);
-    }
     return mStatus.mVsmStatus;
 }
 

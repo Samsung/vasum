@@ -24,7 +24,7 @@ MESSAGE(STATUS "Generating makefile for the libLogger...")
 FILE(GLOB HEADERS   *.hpp)
 FILE(GLOB SRCS      *.cpp *.hpp)
 
-SET(_LIB_VERSION_ "0.0.1")
+SET(_LIB_VERSION_ "${VERSION}")
 SET(_LIB_SOVERSION_ "0")
 SET(PC_FILE "lib${PROJECT_NAME}.pc")
 

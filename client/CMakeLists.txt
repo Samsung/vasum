@@ -21,7 +21,7 @@ MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Client...")
 ## set client library sources (without vasum-wrapper.cpp)
 FILE(GLOB project_SRCS *.cpp *.hpp *.h)
-FILE(GLOB project_SRCS_rm vasum-wrapper.cpp)
+FILE(GLOB project_SRCS_rm vasum-wrapper.cpp wrapper-compat.* vasum.h vasum_list.h)
 LIST(REMOVE_ITEM project_SRCS ${project_SRCS_rm})
 
 ## set wrapper library sources (without vasum-client.cpp)
@@ -36,7 +36,7 @@ FILE(GLOB common_SRCS ${COMMON_FOLDER}/epoll/*.hpp              ${COMMON_FOLDER}
                       ${COMMON_FOLDER}/*.hpp                    ${COMMON_FOLDER}/*.cpp)
 
 ## set version highier then vasum.so.0.1.0
-SET(_LIB_VERSION_ "0.1.1")
+SET(_LIB_VERSION_ "${VERSION}")
 SET(_LIB_SOVERSION_ "0")
 SET(PC_FILE "${PROJECT_NAME}.pc")
 
@@ -53,7 +53,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME}-client PROPERTIES
         VERSION ${_LIB_VERSION_}
         COMPILE_DEFINITIONS HOST_IPC_SOCKET="${VSM_SERVER_IPC_SOCKET_PATH}")
 
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${wrapper_SRCS} ${common_SRCS})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${wrapper_SRCS})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
         SOVERSION ${_LIB_SOVERSION_}
         VERSION ${_LIB_VERSION_}
