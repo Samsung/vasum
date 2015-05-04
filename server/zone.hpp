@@ -152,7 +152,7 @@ public:
 
     /**
      * Check if the zone is stopped. It's NOT equivalent to !isRunning,
-     * because it checks different internal libvirt's states. There are other states,
+     * because it checks different internal LXC states. There are other states,
      * (e.g. paused) when the zone isn't running nor stopped.
      *
      * @return Is the zone stopped?

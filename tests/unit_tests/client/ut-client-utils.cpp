@@ -47,10 +47,6 @@ BOOST_AUTO_TEST_CASE(ParseZoneIdFromCpuSet)
     testBad("/foo");
 
     testOK("/", "host");
-    testOK("/machine/a-b.libvirt-lxc", "a-b");
-    testOK("/machine.slice/machine-lxc\\x2da\\x2db.scope", "a-b");
-    testOK("/machine.slice/machine-lxc\\x2da-b.scope", "a/b");
-
     testOK("/lxc/test", "test");
 }
 
