@@ -70,7 +70,8 @@ between them. A process from inside a zone can request a switch of context
          -DVASUM_USER=%{vsm_user} \
          -DINPUT_EVENT_GROUP=%{input_event_group} \
          -DDISK_GROUP=%{disk_group} \
-         -DTTY_GROUP=%{tty_group}
+         -DTTY_GROUP=%{tty_group} \
+         -DWITHOUT_DBUS=%{?without_dbus}
 make -k %{?jobs:-j%jobs}
 
 %install

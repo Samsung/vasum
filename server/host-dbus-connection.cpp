@@ -53,19 +53,19 @@ HostDbusConnection::HostDbusConnection()
     mDbusConnection = dbus::DbusConnection::createSystem();
 
     LOGT("Setting DBUS name");
-    mDbusConnection->setName(api::BUS_NAME,
+    mDbusConnection->setName(api::dbus::BUS_NAME,
                              std::bind(&HostDbusConnection::onNameAcquired, this),
                              std::bind(&HostDbusConnection::onNameLost, this));
 
     if (!waitForName(NAME_ACQUIRED_TIMEOUT)) {
-        LOGE("Could not acquire dbus name: " << api::BUS_NAME);
-        throw HostConnectionException("Could not acquire dbus name: " + api::BUS_NAME);
+        LOGE("Could not acquire dbus name: " << api::dbus::BUS_NAME);
+        throw HostConnectionException("Could not acquire dbus name: " + api::dbus::BUS_NAME);
     }
 
     LOGT("Registering DBUS interface");
     using namespace std::placeholders;
-    mDbusConnection->registerObject(api::OBJECT_PATH,
-                                    api::DEFINITION,
+    mDbusConnection->registerObject(api::dbus::OBJECT_PATH,
+                                    api::dbus::DEFINITION,
                                     std::bind(&HostDbusConnection::onMessageCall,
                                               this, _1, _2, _3, _4, _5));
 
@@ -267,11 +267,11 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
                                    GVariant* parameters,
                                    dbus::MethodResultBuilder::Pointer result)
 {
-    if (objectPath != api::OBJECT_PATH || interface != api::INTERFACE) {
+    if (objectPath != api::dbus::OBJECT_PATH || interface != api::dbus::INTERFACE) {
         return;
     }
 
-    if (methodName == api::METHOD_SET_ACTIVE_ZONE) {
+    if (methodName == api::dbus::METHOD_SET_ACTIVE_ZONE) {
         api::ZoneId zoneId;
         config::loadFromGVariant(parameters, zoneId);
 
@@ -282,7 +282,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_PROXY_CALL) {
+    if (methodName == api::dbus::METHOD_PROXY_CALL) {
         const gchar* target = NULL;
         const gchar* targetBusName = NULL;
         const gchar* targetObjectPath = NULL;
@@ -311,7 +311,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_GET_ZONE_ID_LIST) {
+    if (methodName == api::dbus::METHOD_GET_ZONE_ID_LIST) {
         if (mGetZoneIdsCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneIds>>(result);
             mGetZoneIdsCallback(rb);
@@ -319,7 +319,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_GET_ACTIVE_ZONE_ID) {
+    if (methodName == api::dbus::METHOD_GET_ACTIVE_ZONE_ID) {
         if (mGetActiveZoneIdCallback) {
             auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneId>>(result);
             mGetActiveZoneIdCallback(rb);
@@ -327,7 +327,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_GET_ZONE_INFO) {
+    if (methodName == api::dbus::METHOD_GET_ZONE_INFO) {
         api::ZoneId zoneId;
         config::loadFromGVariant(parameters, zoneId);
 
@@ -338,7 +338,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_SET_NETDEV_ATTRS) {
+    if (methodName == api::dbus::METHOD_SET_NETDEV_ATTRS) {
         api::SetNetDevAttrsIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -349,7 +349,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_GET_NETDEV_ATTRS) {
+    if (methodName == api::dbus::METHOD_GET_NETDEV_ATTRS) {
         api::GetNetDevAttrsIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -360,7 +360,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_GET_NETDEV_LIST) {
+    if (methodName == api::dbus::METHOD_GET_NETDEV_LIST) {
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
@@ -371,7 +371,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_CREATE_NETDEV_VETH) {
+    if (methodName == api::dbus::METHOD_CREATE_NETDEV_VETH) {
         api::CreateNetDevVethIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -382,7 +382,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_CREATE_NETDEV_MACVLAN) {
+    if (methodName == api::dbus::METHOD_CREATE_NETDEV_MACVLAN) {
         api::CreateNetDevMacvlanIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -392,7 +392,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         }
     }
 
-    if (methodName == api::METHOD_CREATE_NETDEV_PHYS) {
+    if (methodName == api::dbus::METHOD_CREATE_NETDEV_PHYS) {
         api::CreateNetDevPhysIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -402,7 +402,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         }
     }
 
-    if (methodName == api::METHOD_DESTROY_NETDEV) {
+    if (methodName == api::dbus::METHOD_DESTROY_NETDEV) {
         api::DestroyNetDevIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -412,7 +412,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         }
     }
 
-    if (methodName == api::METHOD_DELETE_NETDEV_IP_ADDRESS) {
+    if (methodName == api::dbus::METHOD_DELETE_NETDEV_IP_ADDRESS) {
         api::DeleteNetdevIpAddressIn data;
         config::loadFromGVariant(parameters, data);
         if (mDeleteNetdevIpAddressCallback) {
@@ -421,7 +421,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         }
     }
 
-    if (methodName == api::METHOD_DECLARE_FILE) {
+    if (methodName == api::dbus::METHOD_DECLARE_FILE) {
         api::DeclareFileIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -432,7 +432,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_DECLARE_MOUNT) {
+    if (methodName == api::dbus::METHOD_DECLARE_MOUNT) {
         api::DeclareMountIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -443,7 +443,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_DECLARE_LINK) {
+    if (methodName == api::dbus::METHOD_DECLARE_LINK) {
         api::DeclareLinkIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -454,7 +454,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_GET_DECLARATIONS) {
+    if (methodName == api::dbus::METHOD_GET_DECLARATIONS) {
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
@@ -465,7 +465,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_REMOVE_DECLARATION) {
+    if (methodName == api::dbus::METHOD_REMOVE_DECLARATION) {
         api::RemoveDeclarationIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -476,7 +476,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_CREATE_ZONE) {
+    if (methodName == api::dbus::METHOD_CREATE_ZONE) {
         api::CreateZoneIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -487,7 +487,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_DESTROY_ZONE) {
+    if (methodName == api::dbus::METHOD_DESTROY_ZONE) {
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
@@ -498,7 +498,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_SHUTDOWN_ZONE) {
+    if (methodName == api::dbus::METHOD_SHUTDOWN_ZONE) {
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
@@ -508,7 +508,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         }
     }
 
-    if (methodName == api::METHOD_START_ZONE) {
+    if (methodName == api::dbus::METHOD_START_ZONE) {
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
@@ -518,7 +518,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         }
     }
 
-    if (methodName == api::METHOD_LOCK_ZONE) {
+    if (methodName == api::dbus::METHOD_LOCK_ZONE) {
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
@@ -529,7 +529,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_UNLOCK_ZONE) {
+    if (methodName == api::dbus::METHOD_UNLOCK_ZONE) {
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
@@ -540,7 +540,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_GRANT_DEVICE) {
+    if (methodName == api::dbus::METHOD_GRANT_DEVICE) {
         api::GrantDeviceIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -551,7 +551,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_REVOKE_DEVICE) {
+    if (methodName == api::dbus::METHOD_REVOKE_DEVICE) {
         api::RevokeDeviceIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -562,7 +562,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::METHOD_NOTIFY_ACTIVE_ZONE) {
+    if (methodName == api::dbus::METHOD_NOTIFY_ACTIVE_ZONE) {
         api::NotifActiveZoneIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -572,7 +572,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         }
     }
 
-    if (methodName == api::METHOD_FILE_MOVE_REQUEST) {
+    if (methodName == api::dbus::METHOD_FILE_MOVE_REQUEST) {
         api::FileMoveRequestIn data;
         config::loadFromGVariant(parameters, data);
 
@@ -589,11 +589,11 @@ void HostDbusConnection::onSignalCall(const std::string& /* senderBusName */,
                                       const std::string& signalName,
                                       GVariant* /* parameters */)
 {
-    if (objectPath != api::OBJECT_PATH || interface != api::INTERFACE) {
+    if (objectPath != api::dbus::OBJECT_PATH || interface != api::dbus::INTERFACE) {
         return;
     }
 
-    if (signalName == api::SIGNAL_SWITCH_TO_DEFAULT) {
+    if (signalName == api::dbus::SIGNAL_SWITCH_TO_DEFAULT) {
         if (mSwitchToDefaultCallback) {
             mSwitchToDefaultCallback();
         }
@@ -622,9 +622,9 @@ void HostDbusConnection::sendNotification(const api::Notification& notify)
                                          notify.zone.c_str(),
                                          notify.application.c_str(),
                                          notify.message.c_str());
-    mDbusConnection->emitSignal(api::OBJECT_PATH,
-                                api::INTERFACE,
-                                api::SIGNAL_NOTIFICATION,
+    mDbusConnection->emitSignal(api::dbus::OBJECT_PATH,
+                                api::dbus::INTERFACE,
+                                api::dbus::SIGNAL_NOTIFICATION,
                                 parameters);
 }
 

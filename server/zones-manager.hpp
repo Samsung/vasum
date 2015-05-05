@@ -28,15 +28,15 @@
 
 #include "zone.hpp"
 #include "zones-manager-config.hpp"
-#ifdef DBUS_CONNECTION
-#include "host-dbus-connection.hpp"
-#include "proxy-call-policy.hpp"
-#else
 #include "host-ipc-connection.hpp"
-#endif
 #include "input-monitor.hpp"
 #include "utils/worker.hpp"
 #include "api/method-result-builder.hpp"
+
+#ifdef DBUS_CONNECTION
+#include "host-dbus-connection.hpp"
+#include "proxy-call-policy.hpp"
+#endif //DBUS_CONNECTION
 
 #include <string>
 #include <memory>
@@ -118,17 +118,15 @@ public:
 private:
     typedef std::recursive_mutex Mutex;
     typedef std::unique_lock<Mutex> Lock;
-#ifdef DBUS_CONNECTION
-    typedef HostDbusConnection HostConnection;
-#else
-    typedef HostIPCConnection HostConnection;
-#endif
 
     utils::Worker::Pointer mWorker;
     Mutex mMutex; // used to protect mZones
     ZonesManagerConfig mConfig; //TODO make it const
     ZonesManagerDynamicConfig mDynamicConfig;
-    HostConnection mHostConnection;
+#ifdef DBUS_CONNECTION
+    HostDbusConnection mHostDbusConnection;
+#endif //DBUS_CONNECTION
+    HostIPCConnection mHostIPCConnection;
     // to hold InputMonitor pointer to monitor if zone switching sequence is recognized
     std::unique_ptr<InputMonitor> mSwitchingSequenceMonitor;
     // like set but keep insertion order
@@ -172,7 +170,7 @@ private:
                          const std::string& targetMethod,
                          GVariant* parameters,
                          dbus::MethodResultBuilder::Pointer result);
-#endif
+#endif //DBUS_CONNECTION
     // Handlers --------------------------------------------------------
     void handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result);
     void handleGetActiveZoneIdCall(api::MethodResultBuilder::Pointer result);
@@ -222,6 +220,9 @@ private:
                                api::MethodResultBuilder::Pointer result);
     void handleRevokeDeviceCall(const api::RevokeDeviceIn& data,
                                 api::MethodResultBuilder::Pointer result);
+
+    template<typename Connection>
+    void setHandlers(Connection& connnection);
 };
 
 

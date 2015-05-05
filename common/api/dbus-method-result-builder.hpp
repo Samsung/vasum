@@ -42,7 +42,7 @@ namespace api {
 template<typename Data>
 class DbusMethodResultBuilder: public MethodResultBuilder {
 public:
-    DbusMethodResultBuilder(const dbus::MethodResultBuilder::Pointer& methodResultBuilderPtr);
+    DbusMethodResultBuilder(const ::dbus::MethodResultBuilder::Pointer& methodResultBuilderPtr);
     ~DbusMethodResultBuilder() {}
 
 private:
@@ -50,12 +50,12 @@ private:
     void setVoid() override;
     void setError(const std::string& name, const std::string& message) override;
 
-    dbus::MethodResultBuilder::Pointer mMethodResultBuilderPtr;
+    ::dbus::MethodResultBuilder::Pointer mMethodResultBuilderPtr;
     std::function<GVariant*(std::shared_ptr<void>)> mSerialize;
 };
 
 template<typename Data>
-DbusMethodResultBuilder<Data>::DbusMethodResultBuilder(const dbus::MethodResultBuilder::Pointer& methodResultBuilderPtr)
+DbusMethodResultBuilder<Data>::DbusMethodResultBuilder(const ::dbus::MethodResultBuilder::Pointer& methodResultBuilderPtr)
     : mMethodResultBuilderPtr(methodResultBuilderPtr)
 {
     mSerialize = [](const std::shared_ptr<void> data)->GVariant* {

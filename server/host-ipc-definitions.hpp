@@ -29,6 +29,7 @@
 
 namespace vasum {
 namespace api {
+namespace ipc {
 
 const vasum::ipc::MethodID METHOD_GET_ZONE_ID_LIST         = 2;
 const vasum::ipc::MethodID METHOD_GET_ACTIVE_ZONE_ID       = 3;
@@ -68,6 +69,7 @@ const std::string FILE_MOVE_NO_PERMISSIONS_RECEIVE  = "FILE_MOVE_NO_PERMISSIONS_
 const std::string FILE_MOVE_FAILED                  = "FILE_MOVE_FAILED";
 const std::string FILE_MOVE_SUCCEEDED               = "FILE_MOVE_SUCCEEDED";
 
+} // namespace ipc
 } // namespace api
 } // namespace vasum
 

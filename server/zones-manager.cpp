@@ -24,11 +24,6 @@
 
 #include "config.hpp"
 
-#ifdef DBUS_CONNECTION
-#include "host-dbus-definitions.hpp"
-#else
-#include "host-ipc-definitions.hpp"
-#endif
 #include "common-definitions.hpp"
 #include "dynamic-config-scheme.hpp"
 #include "zones-manager.hpp"
@@ -117,6 +112,95 @@ bool zoneIsRunning(const std::unique_ptr<Zone>& zone) {
 
 } // namespace
 
+template<typename Connection>
+void ZonesManager::setHandlers(Connection& connection)
+{
+    using namespace std::placeholders;
+    connection.setGetZoneIdsCallback(bind(&ZonesManager::handleGetZoneIdsCall,
+                                          this, _1));
+
+    connection.setGetActiveZoneIdCallback(bind(&ZonesManager::handleGetActiveZoneIdCall,
+                                               this, _1));
+
+    connection.setGetZoneInfoCallback(bind(&ZonesManager::handleGetZoneInfoCall,
+                                           this, _1, _2));
+
+    connection.setSetNetdevAttrsCallback(bind(&ZonesManager::handleSetNetdevAttrsCall,
+                                              this, _1, _2));
+
+    connection.setGetNetdevAttrsCallback(bind(&ZonesManager::handleGetNetdevAttrsCall,
+                                              this, _1, _2));
+
+    connection.setGetNetdevListCallback(bind(&ZonesManager::handleGetNetdevListCall,
+                                             this, _1, _2));
+
+    connection.setCreateNetdevVethCallback(bind(&ZonesManager::handleCreateNetdevVethCall,
+                                                this, _1, _2));
+
+    connection.setCreateNetdevMacvlanCallback(bind(&ZonesManager::handleCreateNetdevMacvlanCall,
+                                                   this, _1, _2));
+
+    connection.setCreateNetdevPhysCallback(bind(&ZonesManager::handleCreateNetdevPhysCall,
+                                                this, _1, _2));
+
+    connection.setDestroyNetdevCallback(bind(&ZonesManager::handleDestroyNetdevCall,
+                                             this, _1, _2));
+
+    connection.setDeleteNetdevIpAddressCallback(bind(&ZonesManager::handleDeleteNetdevIpAddressCall,
+                                                     this, _1, _2));
+
+    connection.setDeclareFileCallback(bind(&ZonesManager::handleDeclareFileCall,
+                                           this, _1, _2));
+
+    connection.setDeclareMountCallback(bind(&ZonesManager::handleDeclareMountCall,
+                                            this, _1, _2));
+
+    connection.setDeclareLinkCallback(bind(&ZonesManager::handleDeclareLinkCall,
+                                           this, _1, _2));
+
+    connection.setGetDeclarationsCallback(bind(&ZonesManager::handleGetDeclarationsCall,
+                                               this, _1, _2));
+
+    connection.setRemoveDeclarationCallback(bind(&ZonesManager::handleRemoveDeclarationCall,
+                                                 this, _1, _2));
+
+    connection.setSetActiveZoneCallback(bind(&ZonesManager::handleSetActiveZoneCall,
+                                             this, _1, _2));
+
+    connection.setCreateZoneCallback(bind(&ZonesManager::handleCreateZoneCall,
+                                          this, _1, _2));
+
+    connection.setDestroyZoneCallback(bind(&ZonesManager::handleDestroyZoneCall,
+                                           this, _1, _2));
+
+    connection.setShutdownZoneCallback(bind(&ZonesManager::handleShutdownZoneCall,
+                                            this, _1, _2));
+
+    connection.setStartZoneCallback(bind(&ZonesManager::handleStartZoneCall,
+                                         this, _1, _2));
+
+    connection.setLockZoneCallback(bind(&ZonesManager::handleLockZoneCall,
+                                        this, _1, _2));
+
+    connection.setUnlockZoneCallback(bind(&ZonesManager::handleUnlockZoneCall,
+                                          this, _1, _2));
+
+    connection.setGrantDeviceCallback(bind(&ZonesManager::handleGrantDeviceCall,
+                                           this, _1, _2));
+
+    connection.setRevokeDeviceCallback(bind(&ZonesManager::handleRevokeDeviceCall,
+                                            this, _1, _2));
+
+    connection.setNotifyActiveZoneCallback(bind(&ZonesManager::handleNotifyActiveZoneCall,
+                                      this, "", _1, _2));
+
+    connection.setSwitchToDefaultCallback(bind(&ZonesManager::handleSwitchToDefaultCall,
+                                     this, ""));
+
+    connection.setFileMoveCallback(bind(&ZonesManager::handleFileMoveCall,
+                                        this, "", _1, _2));
+}
+
 ZonesManager::ZonesManager(const std::string& configPath)
     : mWorker(utils::Worker::create())
     , mDetachOnExit(false)
@@ -129,97 +213,14 @@ ZonesManager::ZonesManager(const std::string& configPath)
                                         mDynamicConfig,
                                         getVasumDbPrefix());
 
-
-    using namespace std::placeholders;
+    setHandlers(mHostIPCConnection);
 #ifdef DBUS_CONNECTION
+    using namespace std::placeholders;
     mProxyCallPolicy.reset(new ProxyCallPolicy(mConfig.proxyCallRules));
-    mHostConnection.setProxyCallCallback(bind(&ZonesManager::handleProxyCall,
-                                              this, HOST_ID, _1, _2, _3, _4, _5, _6, _7));
-#endif
-
-    mHostConnection.setGetZoneIdsCallback(bind(&ZonesManager::handleGetZoneIdsCall,
-                                               this, _1));
-
-    mHostConnection.setGetActiveZoneIdCallback(bind(&ZonesManager::handleGetActiveZoneIdCall,
-                                                    this, _1));
-
-    mHostConnection.setGetZoneInfoCallback(bind(&ZonesManager::handleGetZoneInfoCall,
-                                                this, _1, _2));
-
-    mHostConnection.setSetNetdevAttrsCallback(bind(&ZonesManager::handleSetNetdevAttrsCall,
-                                                   this, _1, _2));
-
-    mHostConnection.setGetNetdevAttrsCallback(bind(&ZonesManager::handleGetNetdevAttrsCall,
-                                                   this, _1, _2));
-
-    mHostConnection.setGetNetdevListCallback(bind(&ZonesManager::handleGetNetdevListCall,
-                                                  this, _1, _2));
-
-    mHostConnection.setCreateNetdevVethCallback(bind(&ZonesManager::handleCreateNetdevVethCall,
-                                                     this, _1, _2));
-
-    mHostConnection.setCreateNetdevMacvlanCallback(bind(&ZonesManager::handleCreateNetdevMacvlanCall,
-                                                        this, _1, _2));
-
-    mHostConnection.setCreateNetdevPhysCallback(bind(&ZonesManager::handleCreateNetdevPhysCall,
-                                                     this, _1, _2));
-
-    mHostConnection.setDestroyNetdevCallback(bind(&ZonesManager::handleDestroyNetdevCall,
-                                                  this, _1, _2));
-
-    mHostConnection.setDeleteNetdevIpAddressCallback(bind(&ZonesManager::handleDeleteNetdevIpAddressCall,
-                                                          this, _1, _2));
-
-    mHostConnection.setDeclareFileCallback(bind(&ZonesManager::handleDeclareFileCall,
-                                                this, _1, _2));
-
-    mHostConnection.setDeclareMountCallback(bind(&ZonesManager::handleDeclareMountCall,
-                                                 this, _1, _2));
-
-    mHostConnection.setDeclareLinkCallback(bind(&ZonesManager::handleDeclareLinkCall,
-                                                this, _1, _2));
-
-    mHostConnection.setGetDeclarationsCallback(bind(&ZonesManager::handleGetDeclarationsCall,
-                                                    this, _1, _2));
-
-    mHostConnection.setRemoveDeclarationCallback(bind(&ZonesManager::handleRemoveDeclarationCall,
-                                                      this, _1, _2));
-
-    mHostConnection.setSetActiveZoneCallback(bind(&ZonesManager::handleSetActiveZoneCall,
-                                                  this, _1, _2));
-
-    mHostConnection.setCreateZoneCallback(bind(&ZonesManager::handleCreateZoneCall,
-                                               this, _1, _2));
-
-    mHostConnection.setDestroyZoneCallback(bind(&ZonesManager::handleDestroyZoneCall,
-                                                this, _1, _2));
-
-    mHostConnection.setShutdownZoneCallback(bind(&ZonesManager::handleShutdownZoneCall,
-                                                 this, _1, _2));
-
-    mHostConnection.setStartZoneCallback(bind(&ZonesManager::handleStartZoneCall,
-                                              this, _1, _2));
-
-    mHostConnection.setLockZoneCallback(bind(&ZonesManager::handleLockZoneCall,
-                                             this, _1, _2));
-
-    mHostConnection.setUnlockZoneCallback(bind(&ZonesManager::handleUnlockZoneCall,
-                                               this, _1, _2));
-
-    mHostConnection.setGrantDeviceCallback(bind(&ZonesManager::handleGrantDeviceCall,
-                                                this, _1, _2));
-
-    mHostConnection.setRevokeDeviceCallback(bind(&ZonesManager::handleRevokeDeviceCall,
-                                                 this, _1, _2));
-
-    mHostConnection.setNotifyActiveZoneCallback(bind(&ZonesManager::handleNotifyActiveZoneCall,
-                                           this, "", _1, _2));
-
-    mHostConnection.setSwitchToDefaultCallback(bind(&ZonesManager::handleSwitchToDefaultCall,
-                                          this, ""));
-
-    mHostConnection.setFileMoveCallback(bind(&ZonesManager::handleFileMoveCall,
-                                        this, "", _1, _2));
+    mHostDbusConnection.setProxyCallCallback(bind(&ZonesManager::handleProxyCall,
+                                                  this, HOST_ID, _1, _2, _3, _4, _5, _6, _7));
+    setHandlers(mHostDbusConnection);
+#endif //DBUS_CONNECTION
 
     for (const auto& zoneId : mDynamicConfig.zoneIds) {
         insertZone(zoneId, getTemplatePathForExistingZone(zoneId));
@@ -737,14 +738,14 @@ void ZonesManager::handleProxyCall(const std::string& caller,
         return;
     }
 
-    mHostConnection.proxyCallAsync(targetBusName,
-                                   targetObjectPath,
-                                   targetInterface,
-                                   targetMethod,
-                                   parameters,
-                                   asyncResultCallback);
+    mHostDbusConnection.proxyCallAsync(targetBusName,
+                                       targetObjectPath,
+                                       targetInterface,
+                                       targetMethod,
+                                       parameters,
+                                       asyncResultCallback);
 }
-#endif
+#endif //DBUS_CONNECTION
 
 void ZonesManager::handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result)
 {

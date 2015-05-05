@@ -46,10 +46,6 @@ CONFIGURE_FILE(ut-zones-manager/test-daemon.conf.in
                ${CMAKE_BINARY_DIR}/ut-zones-manager/test-daemon.conf @ONLY)
 FILE(GLOB manager_manager_CONF_GEN ${CMAKE_BINARY_DIR}/ut-zones-manager/*.conf)
 
-CONFIGURE_FILE(ut-zones-manager/templates/console-dbus.conf.in
-               ${CMAKE_BINARY_DIR}/ut-zones-manager/templates/console-dbus.conf @ONLY)
-CONFIGURE_FILE(ut-zones-manager/templates/console-ipc.conf.in
-               ${CMAKE_BINARY_DIR}/ut-zones-manager/templates/console-ipc.conf @ONLY)
 FILE(GLOB manager_templates_CONF_GEN ${CMAKE_BINARY_DIR}/ut-zones-manager/templates/*.conf)
 
 

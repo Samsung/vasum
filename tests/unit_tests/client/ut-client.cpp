@@ -23,8 +23,6 @@
  * @brief   Unit tests of the client C API
  */
 
-#ifndef DBUS_CONNECTION
-
 #include <config.hpp>
 #include "ut.hpp"
 #include <vasum-client.h>
@@ -34,6 +32,10 @@
 #include "zones-manager.hpp"
 #include "host-ipc-definitions.hpp"
 #include "logger/logger.hpp"
+
+#ifdef DBUS_CONNECTION
+#include "utils/glib-loop.hpp"
+#endif //DBUS_CONNECTION
 
 #include <map>
 #include <string>
@@ -56,6 +58,9 @@ const std::string TEMPLATE_NAME = "console-ipc";
 struct Fixture {
     utils::ScopedDir mZonesPathGuard;
     utils::ScopedDir mRunGuard;
+#ifdef DBUS_CONNECTION
+    utils::ScopedGlibLoop mLoop;
+#endif //DBUS_CONNECTION
 
     std::unique_ptr<ZonesManager> cm;
 
@@ -412,5 +417,3 @@ BOOST_AUTO_TEST_CASE(ZoneGetNetdevs)
 
 
 BOOST_AUTO_TEST_SUITE_END()
-
-#endif /* !DBUS_CONNECTION */

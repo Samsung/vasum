@@ -29,6 +29,7 @@
 
 namespace vasum {
 namespace api {
+namespace dbus {
 
 const std::string BUS_NAME                        = "org.tizen.vasum.host";
 const std::string OBJECT_PATH                     = "/org/tizen/vasum/host";
@@ -228,6 +229,7 @@ const std::string DEFINITION =
     "  </interface>"
     "</node>";
 
+} // namespace dbus
 } // namespace api
 } // namespace vasum
 
