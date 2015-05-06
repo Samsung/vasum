@@ -20,7 +20,6 @@ Summary:        Daemon for managing zones
 BuildRequires:  cmake
 BuildRequires:  boost-devel
 BuildRequires:  libjson-devel >= 0.10
-BuildRequires:  libcap-ng-devel
 BuildRequires:  lxc-devel
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(sqlite3)

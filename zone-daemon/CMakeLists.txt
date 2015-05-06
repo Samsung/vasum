@@ -31,7 +31,7 @@ ADD_EXECUTABLE(${ZONE_DAEMON_CODENAME} ${project_SRCS} ${common_SRCS})
 ## Link libraries ##############################################################
 FIND_PACKAGE (Boost COMPONENTS program_options system filesystem)
 
-PKG_CHECK_MODULES(ZONE_DAEMON_DEPS REQUIRED gio-2.0 libcap-ng)
+PKG_CHECK_MODULES(ZONE_DAEMON_DEPS REQUIRED gio-2.0)
 
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(${LIBS_FOLDER})

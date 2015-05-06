@@ -40,7 +40,7 @@ namespace utils {
 bool setSuppGroups(const std::vector<std::string>& groups);
 
 /**
- * Set effective and permited capabilities on the current process and drop root privileges.
+ * Set effective and permitted capabilities on the current process and drop root privileges.
  */
 bool dropRoot(uid_t uid, gid_t gid, const std::vector<unsigned int>& caps);
 

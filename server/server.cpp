@@ -42,10 +42,10 @@
 #include <cstring>
 #include <atomic>
 #include <unistd.h>
-#include <cap-ng.h>
 #include <pwd.h>
 #include <sys/stat.h>
 #include <boost/filesystem.hpp>
+#include <linux/capability.h>
 
 
 #ifndef VASUM_USER

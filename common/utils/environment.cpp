@@ -31,7 +31,6 @@
 #include "base-exception.hpp"
 #include "logger/logger.hpp"
 
-#include <cap-ng.h>
 #include <grp.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -42,12 +41,15 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <map>
+#include <iomanip>
 #include <cassert>
 #include <features.h>
+#include <linux/capability.h>
+#include <sys/prctl.h>
+#include <sys/syscall.h>
+
 
 #if !__GLIBC_PREREQ(2, 14)
-
-#include <sys/syscall.h>
 
 #ifdef __NR_setns
 static inline int setns(int fd, int nstype)
@@ -61,9 +63,36 @@ static inline int setns(int fd, int nstype)
 
 #endif
 
+#ifdef __NR_capset
+static inline int capset(cap_user_header_t header, const cap_user_data_t data)
+{
+    return syscall(__NR_capset, header, data);
+}
+#else
+#error "capset syscall isn't available"
+#endif
+
+#ifdef __NR_capget
+static inline int capget(cap_user_header_t header, cap_user_data_t data)
+{
+    return syscall(__NR_capget, header, data);
+}
+#else
+#error "capget syscall isn't available"
+#endif
+
 using namespace utils;
 
 namespace {
+
+#define CAP_SET_INHERITABLE (1 << 0)
+#define CAP_SET_PERMITTED (1 << 1)
+#define CAP_SET_EFFECTIVE (1 << 2)
+
+// number of __user_cap_data_struct elements needed
+#define CAP_DATA_ELEMENT_COUNT 2
+
+typedef unsigned int CapSet;
 
 const std::map<int, std::string> NAMESPACES = {
     {CLONE_NEWIPC, "ipc"},
@@ -125,6 +154,75 @@ bool fdSend(int socket, int fd)
     return true;
 }
 
+inline bool isValidCap(unsigned int cap)
+{
+    return cap <= CAP_LAST_CAP;
+}
+
+// hasCap assumes that "set" variable will refer to only one set of capabilities
+inline bool hasCap(unsigned int cap, const cap_user_data_t data, CapSet set)
+{
+    // calculate which half of data we need to update
+    int dataInd = 0;
+    if (cap > 31) {
+        dataInd = cap >> 5;
+        cap %= 32;
+    }
+
+    switch (set) {
+    case CAP_SET_INHERITABLE:
+        return CAP_TO_MASK(cap) & data[dataInd].inheritable ? true : false;
+    case CAP_SET_PERMITTED:
+        return CAP_TO_MASK(cap) & data[dataInd].permitted ? true : false;
+    case CAP_SET_EFFECTIVE:
+        return CAP_TO_MASK(cap) & data[dataInd].effective ? true : false;
+    default:
+        return false;
+    };
+}
+
+// these inlines work in-place and update provided "data" array
+// in these inlines, "set" can refer to mulitple sets of capabilities
+inline void addCap(unsigned int cap, cap_user_data_t data, CapSet set)
+{
+    // calculate which half of data we need to update
+    int dataInd = 0;
+    if (cap > 31) {
+        dataInd = cap >> 5;
+        cap %= 32;
+    }
+
+    if ((set & CAP_SET_INHERITABLE) == CAP_SET_INHERITABLE) {
+        data[dataInd].inheritable |= CAP_TO_MASK(cap);
+    }
+    if ((set & CAP_SET_PERMITTED) == CAP_SET_PERMITTED) {
+        data[dataInd].permitted |= CAP_TO_MASK(cap);
+    }
+    if ((set & CAP_SET_EFFECTIVE) == CAP_SET_EFFECTIVE) {
+        data[dataInd].effective |= CAP_TO_MASK(cap);
+    }
+}
+
+inline void removeCap(unsigned int cap, cap_user_data_t data, CapSet set)
+{
+    // calculate which half of data we need to update
+    int dataInd = 0;
+    if (cap > 31) {
+        dataInd = cap >> 5;
+        cap %= 32;
+    }
+
+    if ((set & CAP_SET_INHERITABLE) == CAP_SET_INHERITABLE) {
+        data[dataInd].inheritable &= ~(CAP_TO_MASK(cap));
+    }
+    if ((set & CAP_SET_PERMITTED) == CAP_SET_PERMITTED) {
+        data[dataInd].permitted &= ~(CAP_TO_MASK(cap));
+    }
+    if ((set & CAP_SET_EFFECTIVE) == CAP_SET_EFFECTIVE) {
+        data[dataInd].effective &= ~(CAP_TO_MASK(cap));
+    }
+}
+
 } // namespace
 
 namespace utils {
@@ -156,19 +254,107 @@ bool setSuppGroups(const std::vector<std::string>& groups)
 
 bool dropRoot(uid_t uid, gid_t gid, const std::vector<unsigned int>& caps)
 {
-    ::capng_clear(CAPNG_SELECT_BOTH);
+    ::__user_cap_header_struct header;
+    ::__user_cap_data_struct data[CAP_DATA_ELEMENT_COUNT];
 
+    // initial setup - equivalent to capng_clear
+    header.version = _LINUX_CAPABILITY_VERSION_3;
+    header.pid = ::getpid();
+    memset(data, 0, CAP_DATA_ELEMENT_COUNT*sizeof(__user_cap_data_struct));
+
+    // update cap sets - equivalent to capng_update
     for (const auto cap : caps) {
-        if (::capng_update(CAPNG_ADD, static_cast<capng_type_t>(CAPNG_EFFECTIVE |
-                                                                CAPNG_PERMITTED |
-                                                                CAPNG_INHERITABLE), cap)) {
-            LOGE("Failed to set capability: " << ::capng_capability_to_name(cap));
+        if (!isValidCap(cap)) {
+            LOGE("Capability " << cap << " is invalid.");
+            return false;
+        }
+
+        addCap(cap, data, CAP_SET_INHERITABLE | CAP_SET_PERMITTED | CAP_SET_EFFECTIVE);
+    }
+
+    // perform some checks and cap updates
+    bool updatedSetUid, updatedSetGid;
+    // check if we are capable of switching our UID
+    if (hasCap(CAP_SETUID, data, CAP_SET_EFFECTIVE)) {
+        // we want to keep CAP_SETUID after change
+        updatedSetUid = false;
+    } else {
+        // we don't have CAP_SETUID and switch is needed - add SETUID to effective and permitted set
+        updatedSetUid = true;
+        addCap(CAP_SETUID, data, CAP_SET_PERMITTED | CAP_SET_EFFECTIVE);
+    }
+
+    // do the same routine for CAP_SETGID
+    if (hasCap(CAP_SETGID, data, CAP_SET_EFFECTIVE)) {
+        updatedSetGid = false;
+    } else {
+        updatedSetGid = true;
+        addCap(CAP_SETGID, data, CAP_SET_PERMITTED | CAP_SET_EFFECTIVE);
+    }
+
+    // we need CAP_SETPCAP as well to clear bounding caps
+    if (!hasCap(CAP_SETPCAP, data, CAP_SET_EFFECTIVE)) {
+        addCap(CAP_SETPCAP, data, CAP_SET_PERMITTED | CAP_SET_EFFECTIVE);
+    }
+
+    // now we can work - first, use prctl to tell system we want to keep our caps when changing UID
+    if (::prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0)) {
+        LOGE("prctl failed while trying to enable keepcaps: " << strerror(errno));
+        return false;
+    }
+
+    LOGD("Setting temporary caps to process -" << std::hex << std::setfill('0')
+         << " inh:" << std::setw(8) << data[1].inheritable << std::setw(8) << data[0].inheritable
+         << " prm:" << std::setw(8) << data[1].permitted << std::setw(8) << data[0].permitted
+         << " eff:" << std::setw(8) << data[1].effective << std::setw(8) << data[0].effective);
+
+    // set our modified caps before UID/GID change
+    if (::capset(&header, data)) {
+        LOGE("capset failed: " << strerror(errno));
+        return false;
+    }
+
+    // CAP_SETPCAP is available, drop bounding caps
+    for (int i = 0; i <= CAP_LAST_CAP; ++i) {
+        if (::prctl(PR_CAPBSET_DROP, i, 0, 0, 0)) {
+            LOGE("prctl failed while dropping bounding caps: " << strerror(errno));
             return false;
         }
     }
 
-    if (::capng_change_id(uid, gid, static_cast<capng_flags_t>(CAPNG_CLEAR_BOUNDING))) {
-        LOGE("Failed to change process user");
+    // set up GID and UID
+    if (::setresgid(gid, gid, gid)) {
+        LOGE("setresgid failed: " << strerror(errno));
+        return false;
+    }
+    if (::setresuid(uid, uid, uid)) {
+        LOGE("setresuid failed: " << strerror(errno));
+        return false;
+    }
+
+    // we are after switch now - disable PR_SET_KEEPCAPS
+    if (::prctl(PR_SET_KEEPCAPS, 0, 0, 0, 0)) {
+        LOGE("prctl failed while trying to disable keepcaps: " << strerror(errno));
+        return false;
+    }
+
+    // disable rendundant caps
+    if (updatedSetUid) {
+        removeCap(CAP_SETUID, data, CAP_SET_PERMITTED | CAP_SET_EFFECTIVE);
+    }
+    if (updatedSetGid) {
+        removeCap(CAP_SETGID, data, CAP_SET_PERMITTED | CAP_SET_EFFECTIVE);
+    }
+    removeCap(CAP_SETPCAP, data, CAP_SET_PERMITTED | CAP_SET_EFFECTIVE);
+
+    LOGD("Setting final caps to process -" << std::hex << std::setfill('0')
+         << " inh:" << std::setw(8) << data[1].inheritable << std::setw(8) << data[0].inheritable
+         << " prm:" << std::setw(8) << data[1].permitted << std::setw(8) << data[0].permitted
+         << " eff:" << std::setw(8) << data[1].effective << std::setw(8) << data[0].effective);
+
+    // finally, apply correct caps
+    if (::capset(&header, data)) {
+        LOGE("capset failed: " << strerror(errno));
         return false;
     }
 
