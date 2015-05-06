@@ -82,12 +82,6 @@ public:
 private:
     epoll::ThreadDispatcher mDispatcher;
     std::unique_ptr<ipc::Client> mClient;
-
-    template<typename ArgIn, typename ArgOut>
-    void call(const ipc::MethodID method, const ArgIn& argIn, ArgOut& argOut, int timeout = 5000) {
-        auto out = mClient->callSync<ArgIn, ArgOut>(method, std::make_shared<ArgIn>(argIn), timeout);
-        argOut = *out;
-    }
 };
 
 } // namespace client

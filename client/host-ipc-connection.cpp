@@ -31,6 +31,10 @@
 namespace vasum {
 namespace client {
 
+namespace {
+    const int TIMEOUT_INFINITE = -1;
+} //namespace
+
 void HostIPCConnection::createSystem()
 {
     mClient.reset(new ipc::Client(mDispatcher.getPoll(), HOST_IPC_SOCKET));
@@ -49,21 +53,23 @@ void HostIPCConnection::create(const std::string& address)
 
 void HostIPCConnection::callGetZoneIds(api::ZoneIds& argOut)
 {
-    api::Void argVoid;
-    call(api::ipc::METHOD_GET_ZONE_ID_LIST, argVoid, argOut);
+    argOut = *mClient->callSync<api::Void, api::ZoneIds>(
+       api::ipc::METHOD_GET_ZONE_ID_LIST,
+       std::make_shared<api::Void>());
 }
 
 void HostIPCConnection::callGetActiveZoneId(api::ZoneId& argOut)
 {
-    api::Void argVoid;
-    call(api::ipc::METHOD_GET_ACTIVE_ZONE_ID, argVoid, argOut);
+    argOut = *mClient->callSync<api::Void, api::ZoneId>(
+       api::ipc::METHOD_GET_ACTIVE_ZONE_ID,
+       std::make_shared<api::Void>());
 }
 
 void HostIPCConnection::callSetActiveZone(const api::ZoneId& argIn)
 {
     mClient->callSync<api::ZoneId, api::Void>(
-            api::ipc::METHOD_SET_ACTIVE_ZONE,
-            std::make_shared<api::ZoneId>(argIn));
+       api::ipc::METHOD_SET_ACTIVE_ZONE,
+       std::make_shared<api::ZoneId>(argIn));
 }
 
 void HostIPCConnection::callGetZoneInfo(const api::ZoneId& argIn, api::ZoneInfoOut& argOut)
@@ -76,11 +82,8 @@ void HostIPCConnection::callGetZoneInfo(const api::ZoneId& argIn, api::ZoneInfoO
 void HostIPCConnection::callSetNetdevAttrs(const api::SetNetDevAttrsIn& argIn)
 {
     mClient->callSync<api::SetNetDevAttrsIn, api::Void>(
-            api::ipc::METHOD_SET_NETDEV_ATTRS,
-            std::make_shared<api::SetNetDevAttrsIn>(argIn));
-
-    api::Void argVoid;
-    call(api::ipc::METHOD_SET_NETDEV_ATTRS, argIn, argVoid);
+       api::ipc::METHOD_SET_NETDEV_ATTRS,
+       std::make_shared<api::SetNetDevAttrsIn>(argIn));
 }
 
 void HostIPCConnection::callGetNetdevAttrs(const api::GetNetDevAttrsIn& argIn, api::GetNetDevAttrs& argOut)
@@ -100,36 +103,36 @@ void HostIPCConnection::callGetNetdevList(const api::ZoneId& argIn, api::NetDevL
 void HostIPCConnection::callCreateNetdevVeth(const api::CreateNetDevVethIn& argIn)
 {
     mClient->callSync<api::CreateNetDevVethIn, api::Void>(
-            api::ipc::METHOD_CREATE_NETDEV_VETH,
-            std::make_shared<api::CreateNetDevVethIn>(argIn));
+       api::ipc::METHOD_CREATE_NETDEV_VETH,
+       std::make_shared<api::CreateNetDevVethIn>(argIn));
 }
 
 void HostIPCConnection::callCreateNetdevMacvlan(const api::CreateNetDevMacvlanIn& argIn)
 {
     mClient->callSync<api::CreateNetDevMacvlanIn, api::Void>(
-            api::ipc::METHOD_CREATE_NETDEV_MACVLAN,
-            std::make_shared<api::CreateNetDevMacvlanIn>(argIn));
+       api::ipc::METHOD_CREATE_NETDEV_MACVLAN,
+       std::make_shared<api::CreateNetDevMacvlanIn>(argIn));
 }
 
 void HostIPCConnection::callCreateNetdevPhys(const api::CreateNetDevPhysIn& argIn)
 {
     mClient->callSync<api::CreateNetDevPhysIn, api::Void>(
-            api::ipc::METHOD_CREATE_NETDEV_PHYS,
-            std::make_shared<api::CreateNetDevPhysIn>(argIn));
+       api::ipc::METHOD_CREATE_NETDEV_PHYS,
+       std::make_shared<api::CreateNetDevPhysIn>(argIn));
 }
 
 void HostIPCConnection::callDestroyNetdev(const api::DestroyNetDevIn& argIn)
 {
     mClient->callSync<api::DestroyNetDevIn, api::Void>(
-            api::ipc::METHOD_DESTROY_NETDEV,
-            std::make_shared<api::DestroyNetDevIn>(argIn));
+       api::ipc::METHOD_DESTROY_NETDEV,
+       std::make_shared<api::DestroyNetDevIn>(argIn));
 }
 
 void HostIPCConnection::callDeleteNetdevIpAddress(const api::DeleteNetdevIpAddressIn& argIn)
 {
     mClient->callSync<api::DeleteNetdevIpAddressIn, api::Void>(
-            api::ipc::METHOD_DELETE_NETDEV_IP_ADDRESS,
-            std::make_shared<api::DeleteNetdevIpAddressIn>(argIn));
+       api::ipc::METHOD_DELETE_NETDEV_IP_ADDRESS,
+       std::make_shared<api::DeleteNetdevIpAddressIn>(argIn));
 }
 
 void HostIPCConnection::callDeclareFile(const api::DeclareFileIn& argIn, api::Declaration& argOut)
@@ -163,71 +166,75 @@ void HostIPCConnection::callGetDeclarations(const api::ZoneId& argIn, api::Decla
 void HostIPCConnection::callRemoveDeclaration(const api::RemoveDeclarationIn& argIn)
 {
     mClient->callSync<api::RemoveDeclarationIn, api::Void>(
-            api::ipc::METHOD_REMOVE_DECLARATION,
-            std::make_shared<api::RemoveDeclarationIn>(argIn));
+        api::ipc::METHOD_REMOVE_DECLARATION,
+        std::make_shared<api::RemoveDeclarationIn>(argIn));
 }
 
 void HostIPCConnection::callCreateZone(const api::CreateZoneIn& argIn)
 {
     mClient->callSync<api::CreateZoneIn, api::Void>(
-            api::ipc::METHOD_CREATE_ZONE,
-            std::make_shared<api::CreateZoneIn>(argIn));
+        api::ipc::METHOD_CREATE_ZONE,
+        std::make_shared<api::CreateZoneIn>(argIn));
 }
 
 void HostIPCConnection::callDestroyZone(const api::ZoneId& argIn)
 {
     mClient->callSync<api::ZoneId, api::Void>(
-            api::ipc::METHOD_DESTROY_ZONE,
-            std::make_shared<api::ZoneId>(argIn));
+       api::ipc::METHOD_DESTROY_ZONE,
+       std::make_shared<api::ZoneId>(argIn),
+       TIMEOUT_INFINITE);
 }
 
 void HostIPCConnection::callShutdownZone(const api::ZoneId& argIn)
 {
     mClient->callSync<api::ZoneId, api::Void>(
-            api::ipc::METHOD_SHUTDOWN_ZONE,
-            std::make_shared<api::ZoneId>(argIn));
+        api::ipc::METHOD_SHUTDOWN_ZONE,
+        std::make_shared<api::ZoneId>(argIn),
+        TIMEOUT_INFINITE);
 }
 
 void HostIPCConnection::callStartZone(const api::ZoneId& argIn)
 {
     mClient->callSync<api::ZoneId, api::Void>(
-            api::ipc::METHOD_START_ZONE,
-            std::make_shared<api::ZoneId>(argIn));
+        api::ipc::METHOD_START_ZONE,
+        std::make_shared<api::ZoneId>(argIn),
+        TIMEOUT_INFINITE);
 }
 
 void HostIPCConnection::callLockZone(const api::ZoneId& argIn)
 {
     mClient->callSync<api::ZoneId, api::Void>(
-            api::ipc::METHOD_LOCK_ZONE,
-            std::make_shared<api::ZoneId>(argIn));
+        api::ipc::METHOD_LOCK_ZONE,
+        std::make_shared<api::ZoneId>(argIn),
+        TIMEOUT_INFINITE);
 }
 
 void HostIPCConnection::callUnlockZone(const api::ZoneId& argIn)
 {
     mClient->callSync<api::ZoneId, api::Void>(
-            api::ipc::METHOD_UNLOCK_ZONE,
-            std::make_shared<api::ZoneId>(argIn));
+        api::ipc::METHOD_UNLOCK_ZONE,
+        std::make_shared<api::ZoneId>(argIn));
 }
 
 void HostIPCConnection::callGrantDevice(const api::GrantDeviceIn& argIn)
 {
     mClient->callSync<api::GrantDeviceIn, api::Void>(
-            api::ipc::METHOD_GRANT_DEVICE,
-            std::make_shared<api::GrantDeviceIn>(argIn));
+        api::ipc::METHOD_GRANT_DEVICE,
+        std::make_shared<api::GrantDeviceIn>(argIn));
 }
 
 void HostIPCConnection::callRevokeDevice(const api::RevokeDeviceIn& argIn)
 {
     mClient->callSync<api::RevokeDeviceIn, api::Void>(
-            api::ipc::METHOD_REVOKE_DEVICE,
-            std::make_shared<api::RevokeDeviceIn>(argIn));
+        api::ipc::METHOD_REVOKE_DEVICE,
+        std::make_shared<api::RevokeDeviceIn>(argIn));
 }
 
 void HostIPCConnection::callNotifyActiveZone(const api::NotifActiveZoneIn& argIn)
 {
     mClient->callSync<api::NotifActiveZoneIn, api::Void>(
-            api::ipc::METHOD_NOTIFY_ACTIVE_ZONE,
-            std::make_shared<api::NotifActiveZoneIn>(argIn));
+        api::ipc::METHOD_NOTIFY_ACTIVE_ZONE,
+        std::make_shared<api::NotifActiveZoneIn>(argIn));
 }
 
 void HostIPCConnection::callFileMoveRequest(const api::FileMoveRequestIn& argIn,
