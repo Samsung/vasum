@@ -2,7 +2,7 @@
  * Vasum : Tizen Zone Control Framework
  *
  * Copyright (c) 2000 - 2014 Samsung Electronics Co., Ltd All Rights Reserved
- * 
+ *
  * Contact: Keunhwan Kwak <kh243.kwak@samsung.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -159,7 +159,7 @@ API vsm_error_e vsm_last_error(vsm_context_h ctx);
  * @brief Get vasum error string.
  * \par Description:
  * return string pointer for vasum error string.
- * \param[in] vsm_error_e error.
+ * \param[in] error vsm_error_e.
  * \return string pointer value represent to error code.
  * \warning Do not free returned pointer.
 */
@@ -342,7 +342,7 @@ typedef enum {
  * @brief Definition for zone events
 */
 typedef enum {
-	VSM_ZONE_EVENT_NONE,      /**< Zone has no event */ 
+	VSM_ZONE_EVENT_NONE,      /**< Zone has no event */
 	VSM_ZONE_EVENT_CREATED,   /**< Zone is created */
 	VSM_ZONE_EVENT_DESTROYED, /**< Zone is destroted */
 	VSM_ZONE_EVENT_SWITCHED,  /**< Foreground is switched */
@@ -368,14 +368,13 @@ typedef int (*vsm_zone_event_cb)(vsm_zone_h zone, vsm_zone_event_t event, void *
  * \par Description:
  * This API traverses all zones which are in running state, and callback function will be called on every entry.
  * \param[in] ctx vsm context
- * \param[in] zone_name zone name string
  * \param[in] callback Function to be executed in iteration, which can be NULL
  * \param[in] user_data Parameter to be passed to callback function
  * \return 0 on success, or negative integer error code on error.
  * \retval #VSM_ERROR_NONE           Successful
  * \retval #VSM_ERROR_OUT_OF_MEMORY  Zone handle allocation failed
  * \retval #VSM_ERROR_GENERIC        Zone initialize failed
- * \remark In case of callback and is NULL, 
+ * \remark In case of callback and is NULL,
  *  This API refresh vsm_context which means reloading current running zone to vsm_context again.
 */
 API int vsm_iterate_zone(vsm_context_h ctx, vsm_zone_iter_cb callback, void *user_data);
@@ -384,11 +383,11 @@ API int vsm_iterate_zone(vsm_context_h ctx, vsm_zone_iter_cb callback, void *use
  * @brief Find zone corresponding to the name
  * The function vsm_lookup_zone_by_name() looks for the zone instance corresponding to the given name.
  * \param[in] ctx vsm context
- * \param[in] path zone path to search
+ * \param[in] name zone name
  * \return Zone instance on success, or NULL on error.
- * \retval vsm_zone_h  Successful 
+ * \retval vsm_zone_h  Successful
  * \retval NULL        Failed to lookup
- * \pre  vsm_context_h have to bind by vsm_enter_eventloop() or vsm_context_h does not have current zone status. 
+ * \pre  vsm_context_h have to bind by vsm_enter_eventloop() or vsm_context_h does not have current zone status.
  * \see vsm_create_context(), vsm_enter_eventloop()
 */
 API vsm_zone_h vsm_lookup_zone_by_name(vsm_context_h ctx, const char *name);
@@ -400,9 +399,9 @@ API vsm_zone_h vsm_lookup_zone_by_name(vsm_context_h ctx, const char *name);
  * \param[in] ctx vsm context
  * \param[in] pid Process id
  * \return Zone instance on success, or NULL on error.
- * \retval vsm_zone_h  Successful 
+ * \retval vsm_zone_h  Successful
  * \retval NULL        Failed to lookup
- * \pre  vsm_context_h have to bind by vsm_enter_eventloop() or vsm_context_h does not have current zone status. 
+ * \pre  vsm_context_h have to bind by vsm_enter_eventloop() or vsm_context_h does not have current zone status.
  * \see vsm_create_context(), vsm_enter_eventloop()
 */
 API vsm_zone_h vsm_lookup_zone_by_pid(vsm_context_h ctx, pid_t pid);
@@ -416,7 +415,7 @@ API vsm_zone_h vsm_lookup_zone_by_pid(vsm_context_h ctx, pid_t pid);
  * \return Callback handle on success, or negative error code on error.
  * \retval handle nonnegative handle id for callback.
  * \retval #VSM_ERROR_OUT_OF_MEMORY  Callback hanlder allocation failed.
- * \pre  vsm_context_h have to bind by vsm_enter_eventloop() or callback function does not called. 
+ * \pre  vsm_context_h have to bind by vsm_enter_eventloop() or callback function does not called.
  * \see vsm_create_context(), vsm_enter_eventloop(), vsm_del_state_changed_callback()
 */
 API int vsm_add_state_changed_callback(vsm_context_h ctx, vsm_zone_state_changed_cb callback, void *user_data);
@@ -492,10 +491,10 @@ typedef struct vsm_attach_options_s {
  * @brief Launch a process in a running zone.
  * \par Description:
  * Execute specific command inside the zone with given arguments and environment
- * \param[in] zone vsm_zone_h
+ * \param[in] zone_name vsm_zone_h
  * \param[in] command vsm attach command
  * \param[in] opt vsm attach options (can be NULL), using VSM_ATTACH_OPT_DEFAULT
- * \param[out] attached process pid
+ * \param[out] attached_process process pid
  * \return On sucess 0, otherwise, a negative integer error code on error
  * \retval #VSM_ERROR_NONE           Successful
  * \retval #VSM_ERROR_INVALID        Invalid arguments
@@ -508,7 +507,7 @@ API int vsm_attach_zone(vsm_context_h ctx, const char * zone_name, vsm_attach_co
  * @brief Launch a process in a running zone and wait till child process exited.
  * \par Description:
  * Execute specific command inside the zone with given arguments and environment
- * \param[in] zone vsm_zone_h
+ * \param[in] zone_name vsm_zone_h
  * \param[in] command vsm attach command
  * \param[in] opt vsm attach options (can be NULL), using VSM_ATTACH_OPT_DEFAULT
  * \return On sucess waitpid exit code or attached process, or a negative error code
@@ -621,7 +620,7 @@ API void * vsm_get_userdata(vsm_zone_h zone);
  * @brief join current process into zone.
  * \par Synopsys:
  * Change self peer credential to target zone
- * \param[in] vsm_zone_h zone
+ * \param[in] zone vsm_zone_h
  * \return before vsm_zone on success, or NULL on error.
  * \retval vsm_zone_h before zone handle, If caller process running in host, then host handle returned.
  * \retval NULL       invalid zone handle.
@@ -637,7 +636,7 @@ API vsm_zone_h vsm_join_zone(vsm_zone_h zone);
  * \par Description:
  *    get canonical file path based on current zone.
  * \param[in] input_path requested zone path
- * \param[out] output_path string pointer for canonicalized output path 
+ * \param[out] output_path string pointer for canonicalized output path
  * \return int positive string length of output_path, or negative error code on error.
  * \retval #VSM_ERROR_INVALID Invalid arguments.
  * \retval #VSM_ERROR_GENERIC gethostname() is failed.
@@ -809,7 +808,7 @@ API int vsm_down_netdev(vsm_netdev_h netdev);
  * \par Description:
  * The function vsm_get_ip_addr_netdev() get ip address from a network interface
  * \param[in] netdev Network device to get address
- * \param[in] family Address family
+ * \param[in] addr_family Address family
  * \param[out] addr Buffer to get address from a network device
  * \param[out] size Size of buffer
  * \return 0 on success, or negative integer error code on error.
@@ -826,7 +825,7 @@ API int vsm_get_ip_addr_netdev(vsm_netdev_h netdev, vsm_netdev_addr_t addr_famil
  * \par Description:
  * The function vsm_set_ip_addr_netdev() set ipv4 address to a network interface
  * \param[in] netdev Network device to set address
- * \param[in] family Address family
+ * \param[in] addr_family Address family
  * \param[in] addr IP address string to be set
  * \param[in] prefix prefix ( ex> 192.168.122.1/24, 24 is prefix )
  * \return 0 on success, or negative integer error code on error.
@@ -852,7 +851,7 @@ API int vsm_set_ip_addr_netdev(vsm_netdev_h netdev, vsm_netdev_addr_t addr_famil
  * \par Description:
  * Request permission device file node to target zone.
  * \param[in] zone vsm_zone_h
- * \param[in] name device node path
+ * \param[in] path device node path
  * \param[in] flags requested permission O_RDWR, O_WRONLY, O_RDONLY
  * \return 0 on success, or negative integer error code on error.
  * \retval #VSM_ERROR_NONE           Successful
@@ -868,7 +867,7 @@ API int vsm_grant_device(vsm_zone_h zone, const char *path, uint32_t flags);
  * \par Description:
  * Revoke device node permissions from target zone.
  * \param[in] zone vsm_zone_h
- * \param[in] name device node path
+ * \param[in] path device node path
  * \return 0 on success, or negative integer error code on error.
  * \retval #VSM_ERROR_NONE           Successful
  * \retval #VSM_ERROR_INVALID        Invalid arguments
@@ -907,11 +906,11 @@ typedef mode_t vsm_mode_t;
  * @brief Declare specific file object to every zone.
  * \par Description:
  * Declare host file system to every running zone.
- * In case of host target file exist, create new file in running zone. or create a new file in running zone. 
+ * In case of host target file exist, create new file in running zone. or create a new file in running zone.
  * And add hook info in vsm-resource-provier for automatically link host target file to starting zone.
  * Smack labels are also copied as same as host labels.
  * \param[in] ctx vsm context
- * \param[in] type Type of file system object
+ * \param[in] ftype Type of file system object
  * \param[in] path Path for the file system object
  * \param[in] flags Flasg
  * \param[in] mode mode
@@ -935,7 +934,7 @@ API int vsm_declare_file(vsm_context_h ctx, vsm_fso_type_t ftype, const char *pa
  * \param[in] target target
  * \return zero on success, or negative value on error.
  * \retval #VSM_ERROR_NONE      successful
- * \retval #VSM_ERROR_INVALID   Invalid provision type to db. 
+ * \retval #VSM_ERROR_INVALID   Invalid provision type to db.
  * \retval #VSM_ERROR_GENERIC   Error in vasum server side.
  * \retval #VSM_ERROR_NO_OBJECT Source file is not exist in host filesystem
 */
