@@ -71,7 +71,8 @@ HostDbusConnection::HostDbusConnection()
 
     mSubscriptionId = mDbusConnection->signalSubscribe(std::bind(&HostDbusConnection::onSignalCall,
                                                                  this, _1, _2, _3, _4, _5),
-                                                       std::string());
+                                                       std::string(),
+                                                       api::dbus::INTERFACE);
     LOGD("Connected");
 }
 

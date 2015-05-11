@@ -125,7 +125,11 @@ public:
      * Empty sender means subscribe to all signals
      * Returns a subscription identifier that can be used to unsubscribe signal
      */
-    SubscriptionId signalSubscribe(const SignalCallback& callback, const std::string& senderBusName);
+    SubscriptionId signalSubscribe(const SignalCallback& callback,
+                                   const std::string& senderBusName = "",
+                                   const std::string& interface = "",
+                                   const std::string& objectPath ="",
+                                   const std::string& member = "");
 
     /**
      * Unsubscribes from a signal.

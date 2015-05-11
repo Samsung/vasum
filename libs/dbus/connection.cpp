@@ -213,13 +213,16 @@ void DbusConnection::emitSignal(const std::string& objectPath,
 }
 
 DbusConnection::SubscriptionId DbusConnection::signalSubscribe(const SignalCallback& callback,
-                                                               const std::string& senderBusName)
+                                                               const std::string& senderBusName,
+                                                               const std::string& interface,
+                                                               const std::string& objectPath,
+                                                               const std::string& member)
 {
     return g_dbus_connection_signal_subscribe(mConnection,
                                               senderBusName.empty() ? NULL : senderBusName.c_str(),
-                                              NULL,
-                                              NULL,
-                                              NULL,
+                                              interface.empty() ? NULL : interface.c_str(),
+                                              objectPath.empty() ? NULL : objectPath.c_str(),
+                                              member.empty() ? NULL : member.c_str(),
                                               NULL,
                                               G_DBUS_SIGNAL_FLAGS_NONE,
                                               &DbusConnection::onSignal,
