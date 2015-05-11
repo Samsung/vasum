@@ -125,6 +125,10 @@ Requires(postun): /sbin/ldconfig
 %description client
 Library interface to the vasum daemon
 
+%post -n vasum-client -p /sbin/ldconfig
+
+%postun -n vasum-client -p /sbin/ldconfig
+
 %files client
 %manifest packaging/libvasum-client.manifest
 %defattr(644,root,root,755)
@@ -132,10 +136,6 @@ Library interface to the vasum daemon
 %{_libdir}/libvasum-client.so.0
 %attr(755,root,root) %{_libdir}/libvasum.so.%{version}
 %{_libdir}/libvasum.so.0
-
-%post client -p /sbin/ldconfig
-
-%postun client -p /sbin/ldconfig
 
 
 ## Devel Package ###############################################################
@@ -207,7 +207,7 @@ Requires:         vasum-cli = %{epoch}:%{version}-%{release}
 #Requires:         bash-completion
 
 %description cli-completion
-Command Line Interface bash completion.
+Command Line Interface bash completion for vasum.
 
 %files cli-completion
 %attr(755,root,root) %{_sysconfdir}/bash_completion.d/vasum-cli-completion.sh
@@ -275,7 +275,7 @@ The package provides libLogger library.
 %package -n libLogger-devel
 Summary:        Development logger library
 Group:          Development/Libraries
-Requires:       libLogger = %{version}-%{release}
+Requires:       libLogger = %{epoch}:%{version}-%{release}
 
 %description -n libLogger-devel
 The package provides libLogger development tools and libs.
@@ -308,7 +308,7 @@ The package provides libSimpleDbus library.
 %package -n libSimpleDbus-devel
 Summary:        Development Simple dbus library
 Group:          Development/Libraries
-Requires:       libSimpleDbus = %{version}-%{release}
+Requires:       libSimpleDbus = %{epoch}:%{version}-%{release}
 Requires:       pkgconfig(libLogger)
 
 %description -n libSimpleDbus-devel
@@ -342,7 +342,7 @@ The package provides libConfig library.
 %package -n libConfig-devel
 Summary:        Development Config library
 Group:          Development/Libraries
-Requires:       libConfig = %{version}-%{release}
+Requires:       libConfig = %{epoch}:%{version}-%{release}
 Requires:       boost-devel
 Requires:       pkgconfig(libLogger)
 Requires:       libjson-devel
