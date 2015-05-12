@@ -29,13 +29,11 @@
 #include <algorithm>
 
 #include "config.hpp"
+#include "vasum-client-impl.hpp"
 #include "logger/logger.hpp"
 #include "logger/backend-journal.hpp"
 
-#include "wrapper-compat.h"
-#include "vasum-client-impl.hpp"
-
-#define MAX_EPOLL_EVENTS 16
+#include "wrapper-compatibility.h"
 
 struct WrappedZone
 {

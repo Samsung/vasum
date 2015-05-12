@@ -17,10 +17,15 @@
 # @author Mateusz Malicki (m.malicki2@samsung.com)
 #
 
-PROJECT(vasum-client)
+PROJECT(vasum)
 MESSAGE(STATUS "")
-MESSAGE(STATUS "Generating makefile for the Client...")
-FILE(GLOB project_SRCS *.cpp *.hpp *.h)
+MESSAGE(STATUS "Generating makefile for the Vasum wrapper...")
+
+## set wrapper library sources (without vasum-client.cpp)
+FILE(GLOB wrapper_SRCS *.cpp *.hpp *.h
+     ${CLIENT_FOLDER}/vasum-client-impl.hpp     ${CLIENT_FOLDER}/vasum-client-impl.cpp
+     ${CLIENT_FOLDER}/host-ipc-connection.hpp   ${CLIENT_FOLDER}/host-ipc-connection.cpp
+     ${CLIENT_FOLDER}/utils.hpp                 ${CLIENT_FOLDER}/utils.cpp)
 
 FILE(GLOB common_SRCS ${COMMON_FOLDER}/epoll/*.hpp              ${COMMON_FOLDER}/epoll/*.cpp
                       ${COMMON_FOLDER}/ipc/*.hpp                ${COMMON_FOLDER}/ipc/*.cpp
@@ -38,8 +43,7 @@ SET(PC_FILE "${PROJECT_NAME}.pc")
 ## and prevent symbol clashes
 ADD_DEFINITIONS(-fvisibility=hidden)
 
-## Setup target ################################################################
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${project_SRCS} ${common_SRCS})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${wrapper_SRCS} ${common_SRCS})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
         SOVERSION ${_LIB_SOVERSION_}
         VERSION ${_LIB_VERSION_}
@@ -52,6 +56,7 @@ INCLUDE_DIRECTORIES(SYSTEM ${LIB_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(${LIBS_FOLDER})
 INCLUDE_DIRECTORIES(${SERVER_FOLDER})
+INCLUDE_DIRECTORIES(${CLIENT_FOLDER})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_DEPS_LIBRARIES} ${Boost_LIBRARIES}
                       Config SimpleDbus)
 
@@ -67,5 +72,5 @@ INSTALL(TARGETS     ${PROJECT_NAME}
         DESTINATION ${CMAKE_INSTALL_LIBDIR}
         COMPONENT   RuntimeLibraries)
 
-INSTALL(FILES       vasum-client.h
-        DESTINATION ${INCLUDE_INSTALL_DIR}/vasum)
+INSTALL(FILES       vasum.h vasum_list.h
+        DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME})

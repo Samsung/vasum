@@ -23,7 +23,7 @@
  * @brief   Vasum old API compatibility functions
  */
 
-#include "wrapper-compat.h"
+#include "wrapper-compatibility.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

@@ -23,8 +23,6 @@ FILE(GLOB_RECURSE project_SRCS *.cpp *.hpp)
 FILE(GLOB_RECURSE common_SRCS ${COMMON_FOLDER}/*.cpp ${COMMON_FOLDER}/*.hpp)
 FILE(GLOB         server_SRCS ${SERVER_FOLDER}/*.cpp ${SERVER_FOLDER}/*.hpp)
 FILE(GLOB         client_SRCS ${CLIENT_FOLDER}/*.cpp ${CLIENT_FOLDER}/*.h)
-FILE(GLOB         client_SRCS_rm ${CLIENT_FOLDER}/vasum-wrapper*.cpp)
-LIST(REMOVE_ITEM client_SRCS ${client_SRCS_rm})
 FILE(GLOB         socket_test_SRCS ${SOCKET_TEST_FOLDER}/*.cpp ${SOCKET_TEST_FOLDER}/*.hpp)
 
 FILE(GLOB         main_SRC ${SERVER_FOLDER}/main.cpp)
