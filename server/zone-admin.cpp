@@ -46,7 +46,7 @@ const std::uint64_t DEFAULT_VCPU_PERIOD_MS = 100000;
 
 ZoneAdmin::ZoneAdmin(const std::string& zoneId,
                      const std::string& zonesPath,
-                     const std::string& lxcTemplatePrefix,
+                     const std::string& zoneTemplatePrefix,
                      const ZoneConfig& config,
                      const ZoneDynamicConfig& dynamicConfig)
     : mConfig(config),
@@ -60,9 +60,9 @@ ZoneAdmin::ZoneAdmin(const std::string& zoneId,
 
     if (!mZone.isDefined()) {
 
-        const std::string lxcTemplate = utils::getAbsolutePath(config.lxcTemplate,
-                                                               lxcTemplatePrefix);
-        LOGI(mId << ": Creating zone from template: " << lxcTemplate);
+        const std::string zoneTemplate = utils::getAbsolutePath(config.zoneTemplate,
+                                                               zoneTemplatePrefix);
+        LOGI(mId << ": Creating zone from template: " << zoneTemplate);
         utils::CStringArrayBuilder args;
         if (!dynamicConfig.ipv4Gateway.empty()) {
             args.add("--ipv4-gateway");
@@ -77,7 +77,7 @@ ZoneAdmin::ZoneAdmin(const std::string& zoneId,
             args.add("--vt");
             args.add(vt.c_str());
         }
-        if (!mZone.create(lxcTemplate, args.c_array())) {
+        if (!mZone.create(zoneTemplate, args.c_array())) {
             throw ZoneOperationException("Could not create zone");
         }
     }

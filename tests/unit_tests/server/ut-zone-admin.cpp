@@ -43,7 +43,7 @@ const std::string TEST_NO_SHUTDOWN_CONFIG_PATH = TEMPLATES_DIR + "/test-no-shutd
 const std::string BUGGY_CONFIG_PATH = TEMPLATES_DIR + "/buggy.conf";
 const std::string MISSING_CONFIG_PATH = TEMPLATES_DIR + "/missing.conf";
 const std::string ZONES_PATH = "/tmp/ut-zones";
-const std::string LXC_TEMPLATES_PATH = VSM_TEST_LXC_TEMPLATES_INSTALL_DIR;
+const std::string TEMPLATES_PATH = VSM_TEST_TEMPLATES_INSTALL_DIR;
 
 struct Fixture {
     utils::ScopedGlibLoop mLoop;
@@ -62,7 +62,7 @@ struct Fixture {
         config::loadFromJsonFile(configPath, mDynamicConfig);
         return std::unique_ptr<ZoneAdmin>(new ZoneAdmin("zoneId",
                                                         ZONES_PATH,
-                                                        LXC_TEMPLATES_PATH,
+                                                        TEMPLATES_PATH,
                                                         mConfig,
                                                         mDynamicConfig));
     }

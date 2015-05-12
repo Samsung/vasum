@@ -1,5 +1,5 @@
 {
-    "lxcTemplate" : "minimal-dbus.sh",
+    "zoneTemplate" : "minimal-dbus.sh",
     "initWithArgs" : ["/bin/sh", "-c", "trap exit SIGTERM; /usr/bin/dbus-daemon --config-file=@VSM_TEST_CONFIG_INSTALL_DIR@/server/ut-zones-manager/ut-dbus.conf --fork; read"],
     "requestedState" : "running",
     "ipv4Gateway" : "",

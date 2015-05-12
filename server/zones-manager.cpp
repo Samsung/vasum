@@ -323,7 +323,7 @@ void ZonesManager::insertZone(const std::string& zoneId, const std::string& zone
                                         mConfig.zonesPath,
                                         zoneTemplatePath,
                                         mConfig.dbPath,
-                                        mConfig.lxcTemplatePrefix,
+                                        mConfig.zoneTemplatePrefix,
                                         mConfig.runMountPointPrefix));
 
     mZones.push_back(std::move(zone));

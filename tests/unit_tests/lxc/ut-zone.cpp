@@ -39,16 +39,16 @@ namespace {
 using namespace vasum;
 using namespace vasum::lxc;
 
-const std::string LXC_PATH = "/tmp/ut-lxc/";
+const std::string ZONE_PATH = "/tmp/ut-zone/";
 const std::string ZONE_NAME = "ut-zone";
-const std::string TEMPLATE = VSM_TEST_LXC_TEMPLATES_INSTALL_DIR "/minimal.sh";
+const std::string ZONE_TEMPLATE = VSM_TEST_TEMPLATES_INSTALL_DIR "/minimal.sh";
 const char* TEMPLATE_ARGS[] = {NULL};
 
 struct Fixture {
     utils::ScopedDir mLxcDirGuard;
 
     Fixture()
-        : mLxcDirGuard(LXC_PATH)
+        : mLxcDirGuard(ZONE_PATH)
     {
         cleanup();
     }
@@ -60,7 +60,7 @@ struct Fixture {
 
     void cleanup()
     {
-        LxcZone lxc(LXC_PATH, ZONE_NAME);
+        LxcZone lxc(ZONE_PATH, ZONE_NAME);
         if (lxc.isDefined()) {
             if (lxc.getState() != LxcZone::State::STOPPED) {
                 lxc.stop();
@@ -82,18 +82,18 @@ BOOST_FIXTURE_TEST_SUITE(LxcZoneSuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 {
-    LxcZone lxc(LXC_PATH, ZONE_NAME);
+    LxcZone lxc(ZONE_PATH, ZONE_NAME);
 }
 
 BOOST_AUTO_TEST_CASE(CreateDestroy)
 {
-    LxcZone lxc(LXC_PATH, ZONE_NAME);
+    LxcZone lxc(ZONE_PATH, ZONE_NAME);
     BOOST_CHECK(!lxc.isDefined());
 
-    BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
+    BOOST_CHECK(lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));
 
     BOOST_CHECK(lxc.isDefined());
-    BOOST_CHECK_EQUAL(lxc.getConfigItem("lxc.rootfs"), LXC_PATH + ZONE_NAME + "/rootfs");
+    BOOST_CHECK_EQUAL(lxc.getConfigItem("lxc.rootfs"), ZONE_PATH + ZONE_NAME + "/rootfs");
     BOOST_CHECK_EXCEPTION(lxc.getConfigItem("xxx"), LxcException, WhatEquals("Key not found"));
 
     BOOST_CHECK(lxc.destroy());
@@ -104,10 +104,10 @@ BOOST_AUTO_TEST_CASE(CreateDestroy)
 BOOST_AUTO_TEST_CASE(StartShutdown)
 {
     {
-        LxcZone lxc(LXC_PATH, ZONE_NAME);
-        BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
+        LxcZone lxc(ZONE_PATH, ZONE_NAME);
+        BOOST_CHECK(lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));
     }
-    LxcZone lxc(LXC_PATH, ZONE_NAME);
+    LxcZone lxc(ZONE_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
     const char* argv[] = {
         "/bin/sh",
@@ -127,10 +127,10 @@ BOOST_AUTO_TEST_CASE(StartShutdown)
 BOOST_AUTO_TEST_CASE(StartStop)
 {
     {
-        LxcZone lxc(LXC_PATH, ZONE_NAME);
-        BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
+        LxcZone lxc(ZONE_PATH, ZONE_NAME);
+        BOOST_CHECK(lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));
     }
-    LxcZone lxc(LXC_PATH, ZONE_NAME);
+    LxcZone lxc(ZONE_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
     const char* argv[] = {
         "/bin/sh",
@@ -152,10 +152,10 @@ BOOST_AUTO_TEST_CASE(StartStop)
 BOOST_AUTO_TEST_CASE(StartHasStopped)
 {
     {
-        LxcZone lxc(LXC_PATH, ZONE_NAME);
-        BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
+        LxcZone lxc(ZONE_PATH, ZONE_NAME);
+        BOOST_CHECK(lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));
     }
-    LxcZone lxc(LXC_PATH, ZONE_NAME);
+    LxcZone lxc(ZONE_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
     const char* argv[] = {
         "/bin/sh",
@@ -172,8 +172,8 @@ BOOST_AUTO_TEST_CASE(StartHasStopped)
 
 BOOST_AUTO_TEST_CASE(FreezeUnfreeze)
 {
-    LxcZone lxc(LXC_PATH, ZONE_NAME);
-    BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
+    LxcZone lxc(ZONE_PATH, ZONE_NAME);
+    BOOST_CHECK(lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));
     const char* argv[] = {
         "/bin/sh",
         "-c",
@@ -195,8 +195,8 @@ BOOST_AUTO_TEST_CASE(FreezeUnfreeze)
 
 BOOST_AUTO_TEST_CASE(FreezeStop)
 {
-    LxcZone lxc(LXC_PATH, ZONE_NAME);
-    BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
+    LxcZone lxc(ZONE_PATH, ZONE_NAME);
+    BOOST_CHECK(lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));
     const char* argv[] = {
         "/bin/sh",
         "-c",
@@ -218,9 +218,9 @@ BOOST_AUTO_TEST_CASE(FreezeStop)
 
 BOOST_AUTO_TEST_CASE(Repeat)
 {
-    LxcZone lxc(LXC_PATH, ZONE_NAME);
-    BOOST_CHECK(lxc.create(TEMPLATE, TEMPLATE_ARGS));
-    BOOST_CHECK(!lxc.create(TEMPLATE, TEMPLATE_ARGS));// forbidden
+    LxcZone lxc(ZONE_PATH, ZONE_NAME);
+    BOOST_CHECK(lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));
+    BOOST_CHECK(!lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));// forbidden
     const char* argv[] = {
         "/bin/sh",
         "-c",

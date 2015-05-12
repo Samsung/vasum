@@ -46,17 +46,17 @@ public:
     /**
      * Zone constructor
      * @param zoneId zone id
-     * @param zonesPath directory where zones are defined (lxc configs, rootfs etc)
+     * @param zonesPath directory where zones are defined (configs, rootfs etc)
      * @param zoneTemplatePath path for zones config template
      * @param dbPath path to dynamic config db file
-     * @param lxcTemplatePrefix directory where templates are stored
+     * @param zoneTemplatePrefix directory where templates are stored
      * @param baseRunMountPointPath base directory for run mount point
      */
     Zone(const std::string& zoneId,
          const std::string& zonesPath,
          const std::string& zoneTemplatePath,
          const std::string& dbPath,
-         const std::string& lxcTemplatePrefix,
+         const std::string& zoneTemplatePrefix,
          const std::string& baseRunMountPointPath);
     Zone(const Zone&) = delete;
     Zone& operator=(const Zone&) = delete;
@@ -141,7 +141,7 @@ public:
 
     /**
      * Check if the zone is stopped. It's NOT equivalent to !isRunning,
-     * because it checks different internal LXC states. There are other states,
+     * because it checks different internal zone states. There are other states,
      * (e.g. paused) when the zone isn't running nor stopped.
      *
      * @return Is the zone stopped?

@@ -41,10 +41,9 @@ between them. A process from inside a zone can request a switch of context
 %attr(755,root,root) %{_bindir}/vasum-server
 %dir /etc/vasum
 %dir /etc/vasum/zones
-%dir /etc/vasum/lxc-templates
 %dir /etc/vasum/templates
 %config /etc/vasum/daemon.conf
-%attr(755,root,root) /etc/vasum/lxc-templates/*.sh
+%attr(755,root,root) /etc/vasum/templates/*.sh
 %config /etc/vasum/templates/*.conf
 %{_unitdir}/vasum.service
 %{_unitdir}/vasum.socket
@@ -248,7 +247,7 @@ systemctl daemon-reload
 %attr(755,root,root) %{script_dir}/vsm_launch_test.py
 %{script_dir}/vsm_test_parser.py
 %config /etc/vasum/tests
-%attr(755,root,root) /etc/vasum/tests/lxc-templates
+%attr(755,root,root) /etc/vasum/tests/templates
 %{python_sitelib}/vsm_integration_tests
 %config /etc/dbus-1/system.d/org.tizen.vasum.tests.conf
 %{_unitdir}/vasum-socket-test.socket

@@ -1,5 +1,5 @@
 {
-    "lxcTemplate" : "minimal-dbus.sh",
+    "zoneTemplate" : "minimal-dbus.sh",
     "initWithArgs" : ["/bin/sh", "-c", "trap exit SIGTERM; read"],
     "requestedState" : "running",
     "ipv4Gateway" : "",

@@ -57,7 +57,7 @@ const std::string TEST_DBUS_CONFIG_PATH = TEMPLATES_DIR + "/test-dbus.conf";
 const std::string BUGGY_CONFIG_PATH = TEMPLATES_DIR + "/buggy.conf";
 const std::string MISSING_CONFIG_PATH = TEMPLATES_DIR + "/missing.conf";
 const std::string ZONES_PATH = "/tmp/ut-zones";
-const std::string LXC_TEMPLATES_PATH = VSM_TEST_LXC_TEMPLATES_INSTALL_DIR;
+const std::string TEMPLATES_PATH = VSM_TEST_TEMPLATES_INSTALL_DIR;
 const std::string DB_PATH = ZONES_PATH + "/vasum.db";
 const std::string BRIDGE_NAME = "brtest01";
 const std::string ZONE_NETDEV = "netdevtest01";
@@ -88,7 +88,7 @@ struct Fixture {
                                               ZONES_PATH,
                                               configPath,
                                               DB_PATH,
-                                              LXC_TEMPLATES_PATH,
+                                              TEMPLATES_PATH,
                                               ""));
     }
 
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(StartStop)
 
 BOOST_AUTO_TEST_CASE(DbusConnection)
 {
-    mRunGuard.create("/tmp/ut-run"); // the same path as in lxc template
+    mRunGuard.create("/tmp/ut-run"); // the same path as in zone template
 
     auto c = create(TEST_DBUS_CONFIG_PATH);
     c->start();

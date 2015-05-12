@@ -56,7 +56,7 @@ Zone::Zone(const std::string& zoneId,
            const std::string& zonesPath,
            const std::string& zoneTemplatePath,
            const std::string& dbPath,
-           const std::string& lxcTemplatePrefix,
+           const std::string& zoneTemplatePrefix,
            const std::string& baseRunMountPointPath)
     : mDbPath(dbPath)
 {
@@ -75,7 +75,7 @@ Zone::Zone(const std::string& zoneId,
         mRunMountPoint = fs::absolute(mDynamicConfig.runMountPoint, baseRunMountPointPath).string();
     }
 
-    mAdmin.reset(new ZoneAdmin(zoneId, zonesPath, lxcTemplatePrefix, mConfig, mDynamicConfig));
+    mAdmin.reset(new ZoneAdmin(zoneId, zonesPath, zoneTemplatePrefix, mConfig, mDynamicConfig));
 
     const fs::path zonePath = fs::path(zonesPath) / zoneId;
     mRootPath = (zonePath / fs::path("rootfs")).string();

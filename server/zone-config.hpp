@@ -38,9 +38,9 @@ namespace vasum {
 struct ZoneConfig {
 
     /**
-     * Lxc template name (relative to lxcTemplatePrefix)
+     * Zone template name (relative to zoneTemplatePrefix)
      */
-    std::string lxcTemplate;
+    std::string zoneTemplate;
 
     /**
      * Init program with args (empty means default /sbin/init)
@@ -96,7 +96,7 @@ struct ZoneConfig {
 
     CONFIG_REGISTER
     (
-        lxcTemplate,
+        zoneTemplate,
         initWithArgs,
         privilege, // TODO not needed?
         switchToDefaultAfterTimeout, // TODO move to dynamic and add an API to change

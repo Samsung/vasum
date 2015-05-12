@@ -46,14 +46,14 @@ public:
     /**
      * ZoneAdmin constructor
      * @param zoneId zone id
-     * @param zonesPath directory where zones are defined (lxc configs, rootfs etc)
-     * @param lxcTemplatePrefix directory where templates are stored
+     * @param zonesPath directory where zones are defined (configs, rootfs etc)
+     * @param zoneTemplatePrefix directory where templates are stored
      * @param config zones config
      * @param dynamicConfig zones dynamic config
      */
     ZoneAdmin(const std::string& zoneId,
               const std::string& zonesPath,
-              const std::string& lxcTemplatePrefix,
+              const std::string& zoneTemplatePrefix,
               const ZoneConfig& config,
               const ZoneDynamicConfig& dynamicConfig);
     virtual ~ZoneAdmin();
@@ -85,7 +85,7 @@ public:
 
     /**
      * Check if the zone is stopped. It's NOT equivalent to !isRunning,
-     * because it checks different internal lxc states. There are other states,
+     * because it checks different internal zone states. There are other states,
      * (e.g. paused) when the zone isn't running nor stopped.
      *
      * @return Is the zone stopped?

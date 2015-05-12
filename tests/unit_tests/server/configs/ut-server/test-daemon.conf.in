@@ -6,7 +6,7 @@
     "zoneTemplateDir" : "@VSM_TEST_CONFIG_INSTALL_DIR@/server/ut-server/templates/",
     "runMountPointPrefix" : "",
     "defaultId" : "",
-    "lxcTemplatePrefix" : "@VSM_TEST_LXC_TEMPLATES_INSTALL_DIR@",
+    "zoneTemplatePrefix" : "@VSM_TEST_TEMPLATES_INSTALL_DIR@",
     "availableVTs" : [],
     "inputConfig" : {"enabled" : false,
                      "device" : "gpio-keys.4",
