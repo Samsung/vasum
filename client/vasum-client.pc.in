@@ -5,8 +5,8 @@ exec_prefix=${prefix}
 libdir=@LIB_INSTALL_DIR@
 includedir=${prefix}/include
 
-Name: vasum
+Name: vasum-client
 Description: Vasum library
 Version: @_LIB_VERSION_@
-Libs: -L${libdir} -lvasum
+Libs: -L${libdir} -lvasum-client
 Cflags: -I${includedir}/vasum

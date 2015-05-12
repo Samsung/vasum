@@ -130,45 +130,6 @@ typedef enum {
     ML_EVT_ET   = EPOLLET
 }mainloop_event;
 
-typedef struct vsm_context {
-    struct mxe_endpoint *signal_channel;
-    struct mxe_endpoint *manage_method_channel;
-    struct mxe_endpoint *unpriv_method_channel;
-    vsm_error_e error;
-    pthread_rwlock_t lock;
-    struct adt_list listeners;
-    struct vsm_zone *root_zone;
-    struct vsm_zone *foreground_zone;
-    struct adt_list sc_listeners;
-    struct adt_list ev_listeners;
-    const struct vasum_ops *vsm_ops;
-} vsm_context_s;
-
-typedef struct vsm_zone {
-    struct vsm_zone *parent;
-    char *name;
-    char *type;
-    int terminal;
-    vsm_zone_state_t state;
-    char *rootfs_path;
-    pthread_rwlock_t lock;
-    struct adt_list children;
-    struct adt_list devices;
-    struct adt_list netdevs;
-    void *user_data;
-    struct adt_list list;
-    struct vsm_context *ctx;
-    int id;
-} vsm_zone_s;
-
-typedef struct vsm_netdev {
-    struct vsm_zone *zone;
-    char *name;
-    vsm_netdev_type_t type;
-    struct adt_list list;
-} vsm_netdev_s;
-
-
 typedef int (*dev_enumerator)(int type, int major, int minor, void *data);
 typedef int (*mainloop_callback)(int fd, mainloop_event event, void *data, struct mainloop *mainloop);
 

@@ -19,9 +19,12 @@
 
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Client...")
-## set client library sources (without vasum-wrapper.cpp)
+## set client library sources (without wrapper files)
 FILE(GLOB project_SRCS *.cpp *.hpp *.h)
-FILE(GLOB project_SRCS_rm vasum-wrapper.cpp wrapper-compat.* vasum.h vasum_list.h)
+FILE(GLOB project_SRCS_rm vasum-wrapper.cpp
+                          wrapper-compat.*
+                          vasum.h
+                          vasum_list.h)
 LIST(REMOVE_ITEM project_SRCS ${project_SRCS_rm})
 
 ## set wrapper library sources (without vasum-client.cpp)
@@ -38,6 +41,7 @@ FILE(GLOB common_SRCS ${COMMON_FOLDER}/epoll/*.hpp              ${COMMON_FOLDER}
 ## set version highier then vasum.so.0.1.0
 SET(_LIB_VERSION_ "${VERSION}")
 SET(_LIB_SOVERSION_ "0")
+SET(PC_FILE_CLIENT "${PROJECT_NAME}-client.pc")
 SET(PC_FILE "${PROJECT_NAME}.pc")
 
 ## Set the default ELF image symbol visibility to hidden. Using this feature
@@ -53,7 +57,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME}-client PROPERTIES
         VERSION ${_LIB_VERSION_}
         COMPILE_DEFINITIONS HOST_IPC_SOCKET="${VSM_SERVER_IPC_SOCKET_PATH}")
 
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${wrapper_SRCS})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${wrapper_SRCS} ${common_SRCS})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
         SOVERSION ${_LIB_SOVERSION_}
         VERSION ${_LIB_VERSION_}
@@ -72,11 +76,12 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_DEPS_LIBRARIES} ${Boost_LIBRARIES}
                       Config SimpleDbus)
 
 ## Generate the pc file ########################################################
+CONFIGURE_FILE(${PC_FILE_CLIENT}.in ${CMAKE_BINARY_DIR}/${PC_FILE_CLIENT} @ONLY)
 CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_BINARY_DIR}/${PC_FILE} @ONLY)
 
 
 ## Install #####################################################################
-INSTALL(FILES       ${CMAKE_BINARY_DIR}/${PC_FILE}
+INSTALL(FILES       ${CMAKE_BINARY_DIR}/${PC_FILE_CLIENT} ${CMAKE_BINARY_DIR}/${PC_FILE}
         DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
 
 INSTALL(TARGETS     ${PROJECT_NAME}-client ${PROJECT_NAME}

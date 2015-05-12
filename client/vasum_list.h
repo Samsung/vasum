@@ -2,8 +2,8 @@
 #define __VASUM_ADT_LIST_H__
 
 struct adt_list {
-	struct adt_list* next;
-	struct adt_list* prev;
+    struct adt_list* next;
+    struct adt_list* prev;
 };
 
 #undef offsetof
@@ -14,8 +14,8 @@ struct adt_list {
 #endif
 
 #define container_of(ptr, type, member) ({                      \
-		const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
-		(type *)( (char *)__mptr - offsetof(type,member) );})
+        const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
+        (type *)( (char *)__mptr - offsetof(type,member) );})
 
 #define adt_iterate_list(__iterator, __list)    \
     for (__iterator = (__list)->next;   \
@@ -23,10 +23,10 @@ struct adt_list {
          __iterator = (__iterator)->next)
 
 #define adt_reverse_iterate_list(__iterator, __list)    \
-    for (__iterator = __list;	\
+    for (__iterator = __list;    \
          (__iterator)->next != __list;      \
-         __iterator = (__iterator)->next);	\
-    for ( ;	\
+         __iterator = (__iterator)->next);    \
+    for ( ;    \
          __iterator != __list;      \
          __iterator = (__iterator)->prev)
 
@@ -68,35 +68,35 @@ static inline void adt_unlink_list(struct adt_list* list)
 }
 
 static inline void adt_sort_list(struct adt_list* head,
-		int (*compare_func)(struct adt_list *, struct adt_list *))
+        int (*compare_func)(struct adt_list *, struct adt_list *))
 {
-	struct adt_list *it, *jt, *kt;
+    struct adt_list *it, *jt, *kt;
 
-	if (adt_empty_list(head))
-		return;
+    if (adt_empty_list(head))
+        return;
 
-	for (it = head->next->next; it != head; it = it->next) {
-		for (jt = head->next; jt != it; jt = jt->next) {
-			if (compare_func(it, jt) < 0) {
-				kt = it;
-				it = it->prev;
-				adt_unlink_list(kt);
-				adt_link_list(jt->prev, kt);
-				break;
-			}
-		}
-	}
+    for (it = head->next->next; it != head; it = it->next) {
+        for (jt = head->next; jt != it; jt = jt->next) {
+            if (compare_func(it, jt) < 0) {
+                kt = it;
+                it = it->prev;
+                adt_unlink_list(kt);
+                adt_link_list(jt->prev, kt);
+                break;
+            }
+        }
+    }
 }
 
 static inline struct adt_list *adt_find_list(struct adt_list* head,
-		int (*equal_func)(struct adt_list *, void *), void *value)
+        int (*equal_func)(struct adt_list *, void *), void *value)
 {
-	struct adt_list *it;
-	adt_iterate_list(it, head) {
-		if (equal_func(it, value))
-			return it;
-	}
-	return NULL;
+    struct adt_list *it;
+    adt_iterate_list(it, head) {
+        if (equal_func(it, value))
+            return it;
+    }
+    return NULL;
 }
 
 #endif /*!__VASUM_ADT_LIST_H__*/

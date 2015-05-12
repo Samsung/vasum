@@ -197,7 +197,7 @@ static void init_context_wrap(WrappedContext *w)
     //ctx->data = ep;
 }
 
-API struct vsm_context *vsm_create_context(void)
+API vsm_context_h vsm_create_context(void)
 {
     LOGS(""); callcheck();
     WrappedContext *w = new WrappedContext();
@@ -207,7 +207,7 @@ API struct vsm_context *vsm_create_context(void)
     return ctx;
 }
 
-API int vsm_cleanup_context(struct vsm_context *ctx)
+API int vsm_cleanup_context(vsm_context_h ctx)
 {
     LOGS(""); callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
@@ -367,7 +367,7 @@ API int vsm_attach_zone(struct vsm_context *ctx,
                         vsm_attach_options_t *opts,
                         pid_t *attached_process)
 {
-    return ctx->vsm_ops->attach_zone(ctx, zone_name, command, opts,
+    return dummy_ops.attach_zone(ctx, zone_name, command, opts,
                      attached_process);
 }
 
@@ -377,7 +377,7 @@ API int vsm_attach_zone_wait(struct vsm_context *ctx,
                              vsm_attach_command_t *command,
                              vsm_attach_options_t *opts)
 {
-    return ctx->vsm_ops->attach_zone_wait(ctx, zone_name, command, opts);
+    return dummy_ops.attach_zone_wait(ctx, zone_name, command, opts);
 }
 
 API int vsm_iterate_zone(struct vsm_context *ctx, void (*callback)(struct vsm_zone *zone, void *user_data), void *user_data)

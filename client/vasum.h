@@ -1,23 +1,28 @@
 /*
- * Vasum : Tizen Zone Control Framework
+ *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- * Copyright (c) 2000 - 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *  Contact: Krzysztof Dynowski <k.dynowski@samsung.com>
  *
- * Contact: Keunhwan Kwak <kh243.kwak@samsung.com>
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License
  */
+
+
+/**
+ * @file
+ * @author  Krzysztof Dynowski (k.dynowski@samsung.com)
+ * @brief   Vasum old API
+ */
+
 #ifndef __VASUM_H__
 #define __VASUM_H__
 
@@ -36,18 +41,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/*
- * @file        vasum.h
- * @version     0.3
- * @brief       This file contains APIs of the Zone control Framework
- */
 
 /*
  * <tt>
  * Revision History:
- *   2014-09-01	sungbae you    First created
- *   2014-10-07	sungbae you    First doxygen commented
- *   2015-03-19	kuenhwan Kwak  doxygen revise
  * </tt>
  */
 
@@ -123,26 +120,26 @@ API int vsm_enter_eventloop(vsm_context_h ctx, int flags, int timeout);
  * @brief Enumeration for vasum error.
  */
 typedef enum {
-	VSM_ERROR_NONE,			/**< The operation was successful */
-	VSM_ERROR_GENERIC,		/**< Non-specific cause */
-	VSM_ERROR_INVALID,		/**< Invalid argument */
-	VSM_ERROR_CANCELED,		/**< The requested operation was cancelled */
-	VSM_ERROR_ABORTED,		/**< Operation aborted */
-	VSM_ERROR_REFUSED,		/**< Connection refused */
-	VSM_ERROR_EXIST,		/**< Target exists */
-	VSM_ERROR_BUSY,			/**< Resource is busy */
-	VSM_ERROR_IO,			/**< I/O error*/
-	VSM_ERROR_TIMEOUT,		/**< Timer expired */
-	VSM_ERROR_OVERFLOW,		/**< Value too large to be stored in data type */
-	VSM_ERROR_OUT_OF_MEMORY,	/**< No memory space */
-	VSM_ERROR_OUT_OF_RANGE,		/**< Input is out of range */
-	VSM_ERROR_NOT_PERMITTED,		/**< Operation not permitted */
-	VSM_ERROR_NOT_IMPLEMENTED,	/**< Function is not implemented yet */
-	VSM_ERROR_NOT_SUPPORTED,	/**< Operation is not supported */
-	VSM_ERROR_ACCESS_DENIED,	/**< Access privilege is not sufficient */
-	VSM_ERROR_NO_OBJECT,		/**< Object not found */
-	VSM_ERROR_BAD_STATE,		/**< Bad state */
-	VSM_MAX_ERROR = VSM_ERROR_BAD_STATE
+    VSM_ERROR_NONE,            /**< The operation was successful */
+    VSM_ERROR_GENERIC,        /**< Non-specific cause */
+    VSM_ERROR_INVALID,        /**< Invalid argument */
+    VSM_ERROR_CANCELED,        /**< The requested operation was cancelled */
+    VSM_ERROR_ABORTED,        /**< Operation aborted */
+    VSM_ERROR_REFUSED,        /**< Connection refused */
+    VSM_ERROR_EXIST,        /**< Target exists */
+    VSM_ERROR_BUSY,            /**< Resource is busy */
+    VSM_ERROR_IO,            /**< I/O error*/
+    VSM_ERROR_TIMEOUT,        /**< Timer expired */
+    VSM_ERROR_OVERFLOW,        /**< Value too large to be stored in data type */
+    VSM_ERROR_OUT_OF_MEMORY,    /**< No memory space */
+    VSM_ERROR_OUT_OF_RANGE,        /**< Input is out of range */
+    VSM_ERROR_NOT_PERMITTED,        /**< Operation not permitted */
+    VSM_ERROR_NOT_IMPLEMENTED,    /**< Function is not implemented yet */
+    VSM_ERROR_NOT_SUPPORTED,    /**< Operation is not supported */
+    VSM_ERROR_ACCESS_DENIED,    /**< Access privilege is not sufficient */
+    VSM_ERROR_NO_OBJECT,        /**< Object not found */
+    VSM_ERROR_BAD_STATE,        /**< Bad state */
+    VSM_MAX_ERROR = VSM_ERROR_BAD_STATE
 }vsm_error_e;
 
 /**
@@ -256,7 +253,7 @@ API int vsm_start_zone(vsm_context_h ctx, const char *zone_name);
  * \param[in] ctx vsm context
  * \param[in] zone_name zone name
  * \param[in] force option to shutdown.
- *	- 0 : send SIGPWR signal to init process of target zone.
+ *    - 0 : send SIGPWR signal to init process of target zone.
  *  - non-zero : terminate all processes in target zone.
  * \return 0 on success, or negative integer error code on error.
  * \retval #VSM_ERROR_NONE       Successful
@@ -326,15 +323,15 @@ API vsm_zone_h vsm_get_foreground(vsm_context_h ctx);
  * This definition shows the available states.
 */
 typedef enum {
-	VSM_ZONE_STATE_STOPPED,  /**< Zone stopped */
-	VSM_ZONE_STATE_STARTING, /**< Zone is prepare for running */
-	VSM_ZONE_STATE_RUNNING,  /**< Zone is running on device */
-	VSM_ZONE_STATE_STOPPING, /**< Zone is stopping by request */
-	VSM_ZONE_STATE_ABORTING, /**< Zone is failed to start */
-	VSM_ZONE_STATE_FREEZING, /**< Reserved State */
-	VSM_ZONE_STATE_FROZEN,   /**< Reserved State */
-	VSM_ZONE_STATE_THAWED,   /**< Reserved State */
-	VSM_ZONE_MAX_STATE = VSM_ZONE_STATE_THAWED
+    VSM_ZONE_STATE_STOPPED,  /**< Zone stopped */
+    VSM_ZONE_STATE_STARTING, /**< Zone is prepare for running */
+    VSM_ZONE_STATE_RUNNING,  /**< Zone is running on device */
+    VSM_ZONE_STATE_STOPPING, /**< Zone is stopping by request */
+    VSM_ZONE_STATE_ABORTING, /**< Zone is failed to start */
+    VSM_ZONE_STATE_FREEZING, /**< Reserved State */
+    VSM_ZONE_STATE_FROZEN,   /**< Reserved State */
+    VSM_ZONE_STATE_THAWED,   /**< Reserved State */
+    VSM_ZONE_MAX_STATE = VSM_ZONE_STATE_THAWED
 } vsm_zone_state_t;
 
 
@@ -342,11 +339,11 @@ typedef enum {
  * @brief Definition for zone events
 */
 typedef enum {
-	VSM_ZONE_EVENT_NONE,      /**< Zone has no event */
-	VSM_ZONE_EVENT_CREATED,   /**< Zone is created */
-	VSM_ZONE_EVENT_DESTROYED, /**< Zone is destroted */
-	VSM_ZONE_EVENT_SWITCHED,  /**< Foreground is switched */
-	VSM_ZONE_MAX_EVENT = VSM_ZONE_EVENT_SWITCHED
+    VSM_ZONE_EVENT_NONE,      /**< Zone has no event */
+    VSM_ZONE_EVENT_CREATED,   /**< Zone is created */
+    VSM_ZONE_EVENT_DESTROYED, /**< Zone is destroted */
+    VSM_ZONE_EVENT_SWITCHED,  /**< Foreground is switched */
+    VSM_ZONE_MAX_EVENT = VSM_ZONE_EVENT_SWITCHED
 } vsm_zone_event_t;
 
 
@@ -463,18 +460,18 @@ API int vsm_del_event_callback(vsm_context_h ctx, int handle);
  * Arguments are same as linux system-call execv()
  */
 typedef struct vsm_attach_command_s {
-	char * exec;      /**< Program binary path */
-	char ** argv;     /**< An array of argument pointers to null-terminated strings include program path */
+    char * exec;      /**< Program binary path */
+    char ** argv;     /**< An array of argument pointers to null-terminated strings include program path */
 } vsm_attach_command_s;
 
 /**
  * @brief Zone attach option
  */
 typedef struct vsm_attach_options_s {
-	uid_t uid;        /**< requested uid*/
-	gid_t gid;        /**< requested gid*/
-	int env_num;      /**< requested environ count */
-	char **extra_env; /**< requested environ string pointer array. */
+    uid_t uid;        /**< requested uid*/
+    gid_t gid;        /**< requested gid*/
+    int env_num;      /**< requested environ count */
+    char **extra_env; /**< requested environ string pointer array. */
 } vsm_attach_options_s;
 
 /**
@@ -591,7 +588,6 @@ API vsm_zone_state_t vsm_get_zone_state(vsm_zone_h zone);
 */
 API int vsm_get_zone_id(vsm_zone_h zone);
 
-
 /**
  * @brief Set userdata pointer value in vsm_zone_h.
  * \par Description:
@@ -615,6 +611,7 @@ API int vsm_set_userdata(vsm_zone_h zone, void * userdata);
  * \remark initial value is pointer of self vsm_zone_h
 */
 API void * vsm_get_userdata(vsm_zone_h zone);
+
 
 /**
  * @brief join current process into zone.
@@ -698,14 +695,14 @@ API int vsm_get_host_pid(vsm_zone_h zone, pid_t pid);
  * @brief Types of virtual network interfaces
  */
 typedef enum {
-	VSM_NETDEV_VETH, /**< Virtual Ethernet(veth), this type device will be attached to host-side network bridge */
-	VSM_NETDEV_PHYS, /**< Physical device */
-	VSM_NETDEV_MACVLAN /**< Mac VLAN, this type isn't implemented yet */
+    VSM_NETDEV_VETH, /**< Virtual Ethernet(veth), this type device will be attached to host-side network bridge */
+    VSM_NETDEV_PHYS, /**< Physical device */
+    VSM_NETDEV_MACVLAN /**< Mac VLAN, this type isn't implemented yet */
 } vsm_netdev_type_t;
 
 typedef enum {
-	VSM_NETDEV_ADDR_IPV4, /**< IPV4 Address family */
-	VSM_NETDEV_ADDR_IPV6 /**< IPV6 Address family */
+    VSM_NETDEV_ADDR_IPV4, /**< IPV4 Address family */
+    VSM_NETDEV_ADDR_IPV6 /**< IPV6 Address family */
 } vsm_netdev_addr_t;
 
 /**
@@ -888,18 +885,18 @@ API int vsm_revoke_device(vsm_zone_h zone, const char *path);
  * @brief Definition for declare file type.
 */
 typedef enum {
-	VSM_FSO_TYPE_DIR,  /**< Directoy type */
-	VSM_FSO_TYPE_REG,  /**< Regular file type */
-	VSM_FSO_TYPE_FIFO, /**< Fifo file type */
-	VSM_FSO_TYPE_SOCK, /**< Socket file type */
-	VSM_FSO_TYPE_DEV,  /**< Device node type */
-	VSM_FSO_MAX_TYPE = VSM_FSO_TYPE_DEV
+    VSM_FSO_TYPE_DIR,  /**< Directoy type */
+    VSM_FSO_TYPE_REG,  /**< Regular file type */
+    VSM_FSO_TYPE_FIFO, /**< Fifo file type */
+    VSM_FSO_TYPE_SOCK, /**< Socket file type */
+    VSM_FSO_TYPE_DEV,  /**< Device node type */
+    VSM_FSO_MAX_TYPE = VSM_FSO_TYPE_DEV
 } vsm_fso_type_t;
+
 
 /**
  * @brief Declare file mode.
 */
-
 typedef mode_t vsm_mode_t;
 
 /**
@@ -939,9 +936,61 @@ API int vsm_declare_file(vsm_context_h ctx, vsm_fso_type_t ftype, const char *pa
  * \retval #VSM_ERROR_NO_OBJECT Source file is not exist in host filesystem
 */
 API int vsm_declare_link(vsm_context_h ctx , const char *source, const char *target);
-
 /// @}
 
+
+/*
+    Below datatypes will be opaque.
+*/
+typedef struct vsm_context {
+    void * signal_channel;
+    void * manage_method_channel;
+    void * unpriv_method_channel;
+    vsm_error_e error;
+    pthread_rwlock_t lock;
+    struct adt_list listeners;
+    struct vsm_zone *root_zone;
+    struct vsm_zone *foreground_zone;
+    struct adt_list sc_listeners;
+    struct adt_list ev_listeners;
+    void * vsm_ops;
+} vsm_context_s;
+
+typedef struct vsm_zone {
+    struct vsm_zone *parent;
+    char *name;
+    char *type;
+    int terminal;
+    vsm_zone_state_t state;
+    char *rootfs_path;
+    pthread_rwlock_t lock;
+    struct adt_list children;
+    struct adt_list devices;
+    struct adt_list netdevs;
+    void *user_data;
+    struct adt_list list;
+    struct vsm_context *ctx;
+    int id;
+} vsm_zone_s;
+
+typedef struct vsm_netdev {
+    struct vsm_zone *zone;
+    char *name;
+    vsm_netdev_type_t type;
+    struct adt_list list;
+} vsm_netdev_s;
+
+/*
+    Below APIs will be removed.
+*/
+
+typedef int (*vsm_zone_state_cb)(vsm_zone_h zone, vsm_zone_state_t state ,vsm_zone_event_t event, void *user_data);
+
+API int vsm_add_state_callback(vsm_context_h ctx, vsm_zone_state_cb callback, void *user_data);
+
+API int vsm_del_state_callback(vsm_context_h ctx, int handle);
+
+API int vsm_get_zone_terminal(vsm_zone_h zone);
 
 #ifdef __cplusplus
 }

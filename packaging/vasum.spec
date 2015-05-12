@@ -154,6 +154,7 @@ Development package including the header files for the client library
 %{_libdir}/libvasum-client.so
 %{_libdir}/libvasum.so
 %{_includedir}/vasum
+%{_libdir}/pkgconfig/vasum-client.pc
 %{_libdir}/pkgconfig/vasum.pc
 
 
