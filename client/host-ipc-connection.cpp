@@ -174,7 +174,8 @@ void HostIPCConnection::callCreateZone(const api::CreateZoneIn& argIn)
 {
     mClient->callSync<api::CreateZoneIn, api::Void>(
         api::ipc::METHOD_CREATE_ZONE,
-        std::make_shared<api::CreateZoneIn>(argIn));
+        std::make_shared<api::CreateZoneIn>(argIn),
+        TIMEOUT_INFINITE);
 }
 
 void HostIPCConnection::callDestroyZone(const api::ZoneId& argIn)
