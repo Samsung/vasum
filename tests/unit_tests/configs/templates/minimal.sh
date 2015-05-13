@@ -35,7 +35,9 @@ ${rootfs}/sbin \
 ${rootfs}/sys \
 ${rootfs}/tmp \
 ${rootfs}/usr \
-${rootfs}/opt
+${rootfs}/opt \
+${rootfs}/var \
+${rootfs}/var/run
 "
 /bin/mkdir ${ROOTFS_DIRS}
 
@@ -46,8 +48,8 @@ lxc.utsname = ${name}
 lxc.rootfs = ${rootfs}
 
 # userns 1-to-1 mapping
-lxc.id_map = u 0 0 65536
-lxc.id_map = g 0 0 65536
+#lxc.id_map = u 0 0 65536
+#lxc.id_map = g 0 0 65536
 
 lxc.haltsignal = SIGTERM
 

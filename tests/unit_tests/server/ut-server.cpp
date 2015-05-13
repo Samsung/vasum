@@ -44,7 +44,7 @@ using namespace config;
 
 namespace {
 
-const std::string CONFIG_DIR = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-server";
+const std::string CONFIG_DIR = VSM_TEST_CONFIG_INSTALL_DIR;
 const std::string TEST_CONFIG_PATH = CONFIG_DIR + "/test-daemon.conf";
 const std::string MISSING_CONFIG_PATH = CONFIG_DIR + "/missing-daemon.conf";
 const std::string TEMPLATE_NAME = "default";

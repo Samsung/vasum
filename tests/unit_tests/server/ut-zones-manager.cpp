@@ -69,7 +69,7 @@ using namespace dbus;
 
 namespace {
 
-const std::string CONFIG_DIR = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zones-manager";
+const std::string CONFIG_DIR = VSM_TEST_CONFIG_INSTALL_DIR;
 const std::string TEST_CONFIG_PATH = CONFIG_DIR + "/test-daemon.conf";
 const std::string MISSING_CONFIG_PATH = CONFIG_DIR + "/missing-daemon.conf";
 const int EVENT_TIMEOUT = 5000;
@@ -81,7 +81,7 @@ const std::string FILE_CONTENT = "File content\n"
                                  "Line 2\n";
 const std::string NON_EXISTANT_ZONE_ID = "NON_EXISTANT_ZONE_ID";
 const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
-const std::string SIMPLE_TEMPLATE = "console";
+const std::string SIMPLE_TEMPLATE = "console-ipc";
 
 #ifdef DBUS_CONNECTION
 /**

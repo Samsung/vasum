@@ -246,8 +246,12 @@ systemctl daemon-reload
 %attr(755,root,root) %{script_dir}/vsm_int_tests.py
 %attr(755,root,root) %{script_dir}/vsm_launch_test.py
 %{script_dir}/vsm_test_parser.py
-%config /etc/vasum/tests
-%attr(755,root,root) /etc/vasum/tests/templates
+%config /etc/vasum/tests/*.conf
+%config /etc/vasum/tests/dbus/*.conf
+%config /etc/vasum/tests/provision/*.conf
+%config /etc/vasum/tests/templates/*.conf
+%attr(755,root,root) /etc/vasum/tests/templates/*.sh
+%config /etc/vasum/tests/utils/*.txt
 %{python_sitelib}/vsm_integration_tests
 %config /etc/dbus-1/system.d/org.tizen.vasum.tests.conf
 %{_unitdir}/vasum-socket-test.socket

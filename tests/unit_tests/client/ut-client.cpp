@@ -51,7 +51,7 @@ using namespace utils;
 namespace {
 
 const std::string TEST_CONFIG_PATH =
-    VSM_TEST_CONFIG_INSTALL_DIR "/client/ut-client/test-daemon.conf";
+    VSM_TEST_CONFIG_INSTALL_DIR "/test-daemon.conf";
 const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
 const std::string TEMPLATE_NAME = "console-ipc";
 

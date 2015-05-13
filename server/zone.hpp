@@ -49,14 +49,14 @@ public:
      * @param zonesPath directory where zones are defined (configs, rootfs etc)
      * @param zoneTemplatePath path for zones config template
      * @param dbPath path to dynamic config db file
-     * @param zoneTemplatePrefix directory where templates are stored
+     * @param zoneTemplateDir directory where templates are stored
      * @param baseRunMountPointPath base directory for run mount point
      */
     Zone(const std::string& zoneId,
          const std::string& zonesPath,
          const std::string& zoneTemplatePath,
          const std::string& dbPath,
-         const std::string& zoneTemplatePrefix,
+         const std::string& zoneTemplateDir,
          const std::string& baseRunMountPointPath);
     Zone(const Zone&) = delete;
     Zone& operator=(const Zone&) = delete;

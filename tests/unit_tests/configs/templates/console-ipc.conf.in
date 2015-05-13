@@ -4,15 +4,15 @@
     "requestedState" : "running",
     "ipv4Gateway" : "",
     "ipv4" : "",
-    "privilege" : 10,
+    "privilege" : 20,
     "vt" : -1,
     "switchToDefaultAfterTimeout" : true,
     "cpuQuotaForeground" : -1,
     "cpuQuotaBackground" : 1000,
     "shutdownTimeout" : 10,
-    "runMountPoint" : "",
+    "runMountPoint" : "/tmp/ut-run/~NAME~",
     "provisions" : [],
-    "permittedToSend" : [],
-    "permittedToRecv" : [],
-    "validLinkPrefixes" : [ "/tmp" ]
+    "permittedToSend" : [ "/tmp/.*" ],
+    "permittedToRecv" : [ "/tmp/.*" ],
+    "validLinkPrefixes" : []
 }

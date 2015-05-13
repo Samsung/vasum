@@ -3,15 +3,19 @@
     "zoneIds" : [],
     "zonesPath" : "/tmp/ut-zones",
     "zoneImagePath" : "",
-    "zoneTemplateDir" : "@VSM_TEST_CONFIG_INSTALL_DIR@/server/ut-server/templates/",
+    "zoneTemplateDir" : "@VSM_TEST_CONFIG_INSTALL_DIR@/templates/",
     "runMountPointPrefix" : "",
     "defaultId" : "",
-    "zoneTemplatePrefix" : "@VSM_TEST_TEMPLATES_INSTALL_DIR@",
     "availableVTs" : [],
     "inputConfig" : {"enabled" : false,
                      "device" : "gpio-keys.4",
                      "code" : 139,
                      "numberOfEvents" : 2,
                      "timeWindowMs" : 500},
-    "proxyCallRules" : []
+    "proxyCallRules" : [{"caller" : "*",
+                         "target" : "*",
+                         "targetBusName" : "org.tizen.vasum.tests",
+                         "targetObjectPath" : "*",
+                         "targetInterface" : "*",
+                         "targetMethod" : "*"}]
 }

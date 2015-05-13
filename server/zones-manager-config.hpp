@@ -60,11 +60,6 @@ struct ZonesManagerConfig {
     std::string zoneTemplateDir;
 
     /**
-     * Path prefix for zone templates
-     */
-    std::string zoneTemplatePrefix;
-
-    /**
      * VTs available for zones
      */
     std::vector<int> availableVTs;
@@ -90,7 +85,6 @@ struct ZonesManagerConfig {
         zonesPath,
         zoneImagePath,
         zoneTemplateDir,
-        zoneTemplatePrefix,
         availableVTs,
         inputConfig,
         runMountPointPrefix,

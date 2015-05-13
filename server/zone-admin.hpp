@@ -47,13 +47,13 @@ public:
      * ZoneAdmin constructor
      * @param zoneId zone id
      * @param zonesPath directory where zones are defined (configs, rootfs etc)
-     * @param zoneTemplatePrefix directory where templates are stored
+     * @param zoneTemplateDir directory where templates are stored
      * @param config zones config
      * @param dynamicConfig zones dynamic config
      */
     ZoneAdmin(const std::string& zoneId,
               const std::string& zonesPath,
-              const std::string& zoneTemplatePrefix,
+              const std::string& zoneTemplateDir,
               const ZoneConfig& config,
               const ZoneDynamicConfig& dynamicConfig);
     virtual ~ZoneAdmin();

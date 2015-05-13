@@ -38,7 +38,7 @@ namespace vasum {
 struct ZoneConfig {
 
     /**
-     * Zone template name (relative to zoneTemplatePrefix)
+     * Zone template name (relative to zoneTemplateDir)
      */
     std::string zoneTemplate;
 

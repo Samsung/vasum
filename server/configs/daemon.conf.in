@@ -6,7 +6,6 @@
     "zoneTemplateDir" : "/etc/vasum/templates/",
     "runMountPointPrefix" : "/var/run/zones",
     "defaultId" : "",
-    "zoneTemplatePrefix" : "/etc/vasum/templates",
     "availableVTs" : [3, 4, 5, 6],
     "inputConfig" : {"enabled" : true,
                      "device" : "gpio_keys.6",

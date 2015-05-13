@@ -39,7 +39,7 @@ using namespace utils;
 namespace {
 
 const std::string TEST_PATH = "/tmp/ut-fsutils";
-const std::string REFERENCE_FILE_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/utils/ut-fs/file.txt";
+const std::string REFERENCE_FILE_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/utils/file.txt";
 const std::string REFERENCE_FILE_CONTENT = "File content\n"
                                            "Line 1\n"
                                            "Line 2\n";

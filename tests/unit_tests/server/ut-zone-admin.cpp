@@ -37,13 +37,12 @@ using namespace vasum;
 
 namespace {
 
-const std::string TEMPLATES_DIR = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone-admin/templates";
-const std::string TEST_CONFIG_PATH = TEMPLATES_DIR + "/test.conf";
+const std::string TEMPLATES_DIR = VSM_TEST_TEMPLATES_INSTALL_DIR;
+const std::string TEST_CONFIG_PATH = TEMPLATES_DIR + "/default.conf";
 const std::string TEST_NO_SHUTDOWN_CONFIG_PATH = TEMPLATES_DIR + "/test-no-shutdown.conf";
-const std::string BUGGY_CONFIG_PATH = TEMPLATES_DIR + "/buggy.conf";
+const std::string BUGGY_CONFIG_PATH = TEMPLATES_DIR + "/buggy-init.conf";
 const std::string MISSING_CONFIG_PATH = TEMPLATES_DIR + "/missing.conf";
 const std::string ZONES_PATH = "/tmp/ut-zones";
-const std::string TEMPLATES_PATH = VSM_TEST_TEMPLATES_INSTALL_DIR;
 
 struct Fixture {
     utils::ScopedGlibLoop mLoop;
@@ -62,7 +61,7 @@ struct Fixture {
         config::loadFromJsonFile(configPath, mDynamicConfig);
         return std::unique_ptr<ZoneAdmin>(new ZoneAdmin("zoneId",
                                                         ZONES_PATH,
-                                                        TEMPLATES_PATH,
+                                                        TEMPLATES_DIR,
                                                         mConfig,
                                                         mDynamicConfig));
     }

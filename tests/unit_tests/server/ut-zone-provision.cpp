@@ -49,10 +49,9 @@ namespace fs = boost::filesystem;
 
 namespace {
 
-const std::string TEST_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-zone-provision/test.conf";
+const std::string TEST_CONFIG_PATH = VSM_TEST_CONFIG_INSTALL_DIR "/provision/test-provision.conf";
 const std::string ZONE = "ut-zone-provision-test";
 const fs::path ZONES_PATH = "/tmp/ut-zones";
-const fs::path TEMPLATES_PATH = VSM_TEST_TEMPLATES_INSTALL_DIR;
 const fs::path ZONE_PATH = ZONES_PATH / fs::path(ZONE);
 const fs::path SOME_FILE_PATH = ZONE_PATH / "file.txt";
 const fs::path ROOTFS_PATH = ZONE_PATH / "rootfs";
