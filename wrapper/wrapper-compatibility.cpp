@@ -47,11 +47,11 @@
 extern "C" {
 
 // find_container_by_pid
-char *find_container_by_pid(pid_t  /*pid*/) {
+API char *find_container_by_pid(pid_t  /*pid*/) {
     return NULL;
 }
 // get_domain_pid
-pid_t get_domain_pid(const char * /*name*/, const char * /*target*/) {
+API pid_t get_domain_pid(const char * /*name*/, const char * /*target*/) {
     return -1;
 }
 
@@ -179,27 +179,27 @@ int sock_close_socket(int  /*fd*/) {
     return 0;
 }
 // sock_connect
-int sock_connect(const char * /*path*/) {
+API int sock_connect(const char * /*path*/) {
     return 0;
 }
 // sock_create_socket
-int sock_create_socket(const char * /*path*/, int  /*type*/, int  /*flags*/) {
+API int sock_create_socket(const char * /*path*/, int  /*type*/, int  /*flags*/) {
     return 0;
 }
 // sock_monitor_address
-int sock_monitor_address(char * /*buffer*/, int  /*len*/, const char * /*lxcpath*/) {
+API int sock_monitor_address(char * /*buffer*/, int  /*len*/, const char * /*lxcpath*/) {
     return 0;
 }
 // sock_recv_fd (intern)
-int sock_recv_fd(int  /*fd*/, int * /*recvfd*/, void * /*data*/, size_t  /*size*/) {
+API int sock_recv_fd(int  /*fd*/, int * /*recvfd*/, void * /*data*/, size_t  /*size*/) {
     return 0;
 }
 // sock_send_fd
-int sock_send_fd(int  /*fd*/, int  /*sendfd*/, void * /*data*/, size_t  /*size*/) {
+API int sock_send_fd(int  /*fd*/, int  /*sendfd*/, void * /*data*/, size_t  /*size*/) {
     return 0;
 }
 // vasum_log
-void vasum_log(int  /*type*/, const char *  /*tag*/, const char *  /*fmt*/ , ...) {
+API void vasum_log(int  /*type*/, const char *  /*tag*/, const char *  /*fmt*/ , ...) {
 }
 
 #define MAX_ERROR_MSG    0x1000
@@ -220,7 +220,7 @@ const char *const fso_type_strtab[] = {
     "Device node"
 };
 
-const char *fso_type_to_string(vsm_fso_type_t fso)
+API const char *fso_type_to_string(vsm_fso_type_t fso)
 {
     if (fso < 0 || fso > VSM_FSO_MAX_TYPE) {
         return NULL;
@@ -229,7 +229,7 @@ const char *fso_type_to_string(vsm_fso_type_t fso)
     return fso_type_strtab[fso];
 }
 
-int wait_for_pid_status(pid_t pid)
+API int wait_for_pid_status(pid_t pid)
 {
     int status, ret;
 
@@ -249,7 +249,7 @@ int wait_for_pid_status(pid_t pid)
     return status;
 }
 
-vsm_fso_type_t fso_string_to_type(char *str)
+API vsm_fso_type_t fso_string_to_type(char *str)
 {
     int len;
     int i;
@@ -262,7 +262,7 @@ vsm_fso_type_t fso_string_to_type(char *str)
     return static_cast<vsm_fso_type_t>(-1);
 }
 
-int mkdir_p(const char *dir, mode_t mode)
+API int mkdir_p(const char *dir, mode_t mode)
 {
     const char *tmp = dir;
     const char *orig = dir;
@@ -284,7 +284,7 @@ int mkdir_p(const char *dir, mode_t mode)
     return 0;
 }
 
-int lock_fd(int fd, int wait)
+API int lock_fd(int fd, int wait)
 {
     int ret;
     struct flock f;
@@ -307,7 +307,7 @@ int lock_fd(int fd, int wait)
     }
 }
 
-int unlock_fd(int fd)
+API int unlock_fd(int fd)
 {
     struct flock f;
     f.l_type = F_UNLCK;
@@ -317,12 +317,12 @@ int unlock_fd(int fd)
     return fcntl(fd, F_SETLKW, &f);
 }
 
-int copy_smacklabel(const char * /*source*/, const char * /*dest*/)
+API int copy_smacklabel(const char * /*source*/, const char * /*dest*/)
 {
     return 0;
 }
 
-int remove_file(char *path)
+API int remove_file(char *path)
 {
     struct stat path_stat;
     DIR *dp;
@@ -374,7 +374,7 @@ int remove_file(char *path)
     return status;
 }
 
-int copy_file(const char *source, const char *dest, int /*flags*/)
+API int copy_file(const char *source, const char *dest, int /*flags*/)
 {
     int ret;
     FILE *sfp, *dfp;
@@ -424,7 +424,7 @@ int copy_file(const char *source, const char *dest, int /*flags*/)
     return 0;
 }
 
-int regex_compile(regex_t * r, const char *regex_text)
+API int regex_compile(regex_t * r, const char *regex_text)
 {
     int status = regcomp(r, regex_text, REG_EXTENDED | REG_NEWLINE);
 
@@ -440,7 +440,7 @@ int regex_compile(regex_t * r, const char *regex_text)
     return 0;
 }
 
-int regex_match(regex_t * r, const char *to_match)
+API int regex_match(regex_t * r, const char *to_match)
 {
     const char *p = to_match;
     const int n_matches = 10;
@@ -483,7 +483,7 @@ int regex_match(regex_t * r, const char *to_match)
     return 0;
 }
 
-int get_peer_pid(int fd)
+API int get_peer_pid(int fd)
 {
     struct ucred cred;
     socklen_t cr_len = sizeof(cred);
@@ -493,12 +493,12 @@ int get_peer_pid(int fd)
     return cred.pid;
 }
 
-pid_t gettid(void)
+API pid_t gettid(void)
 {
     return syscall(__NR_gettid);
 }
 
-int set_smacklabel_fd(int fd, const char *xattr_name, const char *label)
+API int set_smacklabel_fd(int fd, const char *xattr_name, const char *label)
 {
     size_t len;
     int ret;
@@ -517,7 +517,7 @@ int set_smacklabel_fd(int fd, const char *xattr_name, const char *label)
     return ret;
 }
 
-int set_smacklabel(const char *path, const char *xattr_name, const char *label)
+API int set_smacklabel(const char *path, const char *xattr_name, const char *label)
 {
     size_t len;
     int ret;
@@ -535,7 +535,7 @@ int set_smacklabel(const char *path, const char *xattr_name, const char *label)
     }
     return ret;
 }
-char *get_self_smacklabel(void)
+API char *get_self_smacklabel(void)
 {
     int ret;
     int fd;
@@ -563,7 +563,7 @@ char *get_self_smacklabel(void)
     return strdup(buffer);
 }
 
-int get_self_cpuset(char *name, int buf_sz)
+API int get_self_cpuset(char *name, int buf_sz)
 {
     int fd;
     int lxc_len, ret;
@@ -607,7 +607,7 @@ int get_self_cpuset(char *name, int buf_sz)
 }
 
 
-char * get_pid_cpuset(int pid)
+API char * get_pid_cpuset(int pid)
 {
     int fd;
     int ret;
@@ -639,7 +639,7 @@ char * get_pid_cpuset(int pid)
     return strdup(current_name);
 }
 
-char * read_namespace_link(const char *ns, int pid)
+API char * read_namespace_link(const char *ns, int pid)
 {
     char ns_path[PATH_MAX];
     char buf[NAME_MAX];
@@ -666,7 +666,7 @@ char * read_namespace_link(const char *ns, int pid)
 
 // libs/device.c
 #define DEV_ITERATE_CONTINUE    0
-int dev_enumerate_nodes(const char *cname, dev_enumerator enumerator,
+API int dev_enumerate_nodes(const char *cname, dev_enumerator enumerator,
             void *data)
 {
     int ret;
@@ -704,7 +704,7 @@ int dev_enumerate_nodes(const char *cname, dev_enumerator enumerator,
     return ret;
 }
 
-int dev_terminal_enumerator(int type, int major, int minor, void *data)
+API int dev_terminal_enumerator(int type, int major, int minor, void *data)
 {
     int *dev = (int*)data;
 
@@ -718,7 +718,7 @@ int dev_terminal_enumerator(int type, int major, int minor, void *data)
 }
 
 // libs/namespace.c
-pid_t get_init_pid(const char *name)
+API pid_t get_init_pid(const char *name)
 {
     char filename[PATH_MAX];
     FILE *fp;
@@ -744,7 +744,7 @@ pid_t get_init_pid(const char *name)
 }
 
 
-pid_t get_zone_pid(const char *name, const char *target)
+API pid_t get_zone_pid(const char *name, const char *target)
 {
     char path[PATH_MAX];
     char cmd[PATH_MAX];
@@ -821,7 +821,7 @@ pid_t get_zone_pid(const char *name, const char *target)
     return ret;
 }
 
-int open_ns(pid_t pid, const char *name)
+API int open_ns(pid_t pid, const char *name)
 {
     int fd, ret;
     char path[PATH_MAX];
@@ -871,7 +871,7 @@ static int open_console(const char *path)
     return fd;
 }
 
-int get_console_fd(const char *path)
+API int get_console_fd(const char *path)
 {
     int fd;
 
@@ -903,7 +903,7 @@ int get_console_fd(const char *path)
     return -1;
 }
 
-int vt_switch_terminal(int id)
+API int vt_switch_terminal(int id)
 {
     int fd, ret = -1;
 
@@ -926,7 +926,7 @@ int vt_switch_terminal(int id)
     return ret;
 }
 
-int vt_find_unused_terminal(void)
+API int vt_find_unused_terminal(void)
 {
     int fd, nr = -1;
 
@@ -947,7 +947,7 @@ int vt_find_unused_terminal(void)
     return nr;
 }
 
-int vt_query_active_terminal(void)
+API int vt_query_active_terminal(void)
 {
     int fd, ret = -1;
     struct vt_stat vtstat;
@@ -977,7 +977,7 @@ struct unit_parser {
     struct unit_keyword_callback *kw;
 };
 
-int parse_stream(const char *name, struct unit_parser *parser);
+API int parse_stream(const char *name, struct unit_parser *parser);
 // libs/parser.c
 #define PARSER_MAXARGS    32
 
@@ -1187,7 +1187,7 @@ static int parse_statement(struct parser_context *ctx, int argc, char **argv,
     return ret;
 }
 
-int parse_stream_core(struct parser_context *ctx, char *s)
+API int parse_stream_core(struct parser_context *ctx, char *s)
 {
     struct unit_keyword_callback *kw;
     struct parser_state state;
@@ -1268,7 +1268,7 @@ static char *open_stream(const char *name, unsigned int *_sz)
     return NULL;
 }
 
-int parse_stream(const char *name, struct unit_parser *parser)
+API int parse_stream(const char *name, struct unit_parser *parser)
 {
     char *stream;
     struct parser_context *ctx;
