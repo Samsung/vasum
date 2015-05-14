@@ -27,6 +27,7 @@
 #include "vasum-client-impl.hpp"
 #include "utils.hpp"
 #include "exception.hpp"
+#include "utils/exception.hpp"
 #include "host-ipc-connection.hpp"
 #include "logger/logger.hpp"
 
@@ -42,6 +43,7 @@
 #include <boost/algorithm/string/classification.hpp>
 
 using namespace std;
+using namespace utils;
 using namespace vasum;
 
 namespace {
@@ -194,7 +196,7 @@ VsmStatus Client::create(const string& address) noexcept
     });
 }
 
-epoll::EventPoll& Client::getEventPoll() noexcept
+ipc::epoll::EventPoll& Client::getEventPoll() noexcept
 {
     return mHostClient.getDispatcher().getPoll();
 }

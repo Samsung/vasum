@@ -27,7 +27,6 @@
 
 #include <condition_variable>
 
-namespace vasum {
 namespace ipc {
 
 class FinishRequest {
@@ -43,6 +42,5 @@ public:
 };
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_FINISH_REQUEST_HPP

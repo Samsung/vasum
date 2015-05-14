@@ -27,7 +27,7 @@
 #define VASUM_CLIENT_HOST_IPC_CONNECTION_HPP
 
 #include <api/messages.hpp>
-#include <epoll/thread-dispatcher.hpp>
+#include <ipc/epoll/thread-dispatcher.hpp>
 #include <ipc/client.hpp>
 
 #include <functional>
@@ -44,7 +44,7 @@ public:
     typedef std::function<void(const vasum::api::Notification&)> NotificationCallback;
     void createSystem();
     void create(const std::string& address);
-    epoll::ThreadDispatcher& getDispatcher();
+    ipc::epoll::ThreadDispatcher& getDispatcher();
 
     void callGetZoneIds(vasum::api::ZoneIds& argOut);
     void callGetActiveZoneId(vasum::api::ZoneId& argOut);
@@ -80,7 +80,7 @@ public:
     void unsubscribe(const SubscriptionId& id);
 
 private:
-    epoll::ThreadDispatcher mDispatcher;
+    ipc::epoll::ThreadDispatcher mDispatcher;
     std::unique_ptr<ipc::Client> mClient;
 };
 

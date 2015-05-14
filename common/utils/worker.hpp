@@ -28,7 +28,6 @@
 #include <functional>
 #include <memory>
 
-namespace vasum {
 namespace utils {
 
 /**
@@ -68,7 +67,6 @@ private:
 };
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_WORKER_HPP

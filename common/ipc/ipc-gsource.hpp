@@ -34,7 +34,6 @@
 #include <list>
 
 
-namespace vasum {
 namespace ipc {
 
 /**
@@ -143,6 +142,5 @@ private:
 };
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_IPC_GSOURCE_HPP

@@ -26,6 +26,7 @@
 #include "netdev.hpp"
 #include "netlink/netlink-message.hpp"
 #include "utils/make-clean.hpp"
+#include "utils/exception.hpp"
 #include "utils.hpp"
 #include "exception.hpp"
 
@@ -64,7 +65,7 @@
 #endif
 
 using namespace std;
-using namespace vasum;
+using namespace utils;
 using namespace vasum::netlink;
 
 namespace vasum {

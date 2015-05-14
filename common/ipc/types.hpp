@@ -29,7 +29,6 @@
 #include <memory>
 #include <string>
 
-namespace vasum {
 namespace ipc {
 
 typedef int FileDescriptor;
@@ -52,6 +51,5 @@ struct SignalHandler {
 };
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_TYPES_HPP

@@ -36,7 +36,7 @@
 #include <memory>
 
 using namespace vasum::socket_test;
-using namespace vasum::ipc;
+using namespace ipc;
 using namespace logger;
 
 // NOTE this is a single-usage program, only meant to test vasum::ipc::Socket module.

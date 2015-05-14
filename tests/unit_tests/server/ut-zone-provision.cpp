@@ -42,6 +42,7 @@
 #include <fcntl.h>
 
 using namespace vasum;
+using namespace utils;
 using namespace config;
 
 namespace fs = boost::filesystem;

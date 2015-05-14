@@ -29,7 +29,7 @@
 
 #include <socket-test.hpp>
 
-using namespace vasum::ipc;
+using namespace ipc;
 
 BOOST_AUTO_TEST_SUITE(SocketSuite)
 

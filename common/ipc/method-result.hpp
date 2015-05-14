@@ -29,7 +29,6 @@
 #include "logger/logger.hpp"
 #include <memory>
 
-namespace vasum {
 namespace ipc {
 
 class Processor;
@@ -70,6 +69,5 @@ struct MethodHandler {
 };
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_METHOD_RESULT_HPP

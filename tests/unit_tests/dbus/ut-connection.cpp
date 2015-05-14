@@ -46,8 +46,8 @@
 
 BOOST_AUTO_TEST_SUITE(DbusSuite)
 
+using namespace utils;
 using namespace vasum;
-using namespace vasum::utils;
 using namespace dbus;
 
 namespace {

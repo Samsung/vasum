@@ -28,13 +28,12 @@
 
 #include "base-exception.hpp"
 
-namespace vasum {
 namespace ipc {
 
 /**
  * Base class for exceptions in IPC
  */
-struct IPCException: public VasumException {
+struct IPCException: public vasum::VasumException {
     IPCException(const std::string& message)
         : VasumException(message) {}
 };
@@ -90,6 +89,5 @@ private:
 };
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_EXCEPTION_HPP

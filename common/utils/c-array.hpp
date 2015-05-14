@@ -27,7 +27,6 @@
 
 #include <vector>
 
-namespace vasum {
 namespace utils {
 
 template<typename T>
@@ -67,7 +66,6 @@ private:
 typedef CArrayBuilder<const char*> CStringArrayBuilder;
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_C_ARRAY_HPP

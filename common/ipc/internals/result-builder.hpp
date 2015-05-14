@@ -30,7 +30,6 @@
 #include <exception>
 #include <memory>
 
-namespace vasum {
 namespace ipc {
 
 class ResultBuilder {
@@ -67,7 +66,6 @@ typedef std::function<void(ResultBuilder&)> ResultBuilderHandler;
 
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_RESULT_BUILDER_HPP
 

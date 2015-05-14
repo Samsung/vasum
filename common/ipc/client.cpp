@@ -28,7 +28,6 @@
 #include "ipc/internals/socket.hpp"
 #include "ipc/exception.hpp"
 
-namespace vasum {
 namespace ipc {
 
 Client::Client(epoll::EventPoll& eventPoll, const std::string& socketPath)
@@ -139,4 +138,3 @@ void Client::removeMethod(const MethodID methodID)
 }
 
 } // namespace ipc
-} // namespace vasum

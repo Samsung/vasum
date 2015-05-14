@@ -29,18 +29,24 @@
 #include "base-exception.hpp"
 
 
-namespace vasum {
+namespace utils {
 
 
 /**
  * Base class for exceptions in utils
  */
-struct UtilsException: public VasumException {
+struct UtilsException: public vasum::VasumException {
 
-    UtilsException(const std::string& error) : VasumException(error) {}
+    UtilsException(const std::string& error) : vasum::VasumException(error) {}
 };
 
+/**
+ * Return string describing error number
+ * it is wrapper for strerror_r
+ */
+std::string getSystemErrorMessage();
+std::string getSystemErrorMessage(int err);
 
-} // namespace vasum
+} // namespace utils
 
 #endif // COMMON_UTILS_EXCEPTION_HPP

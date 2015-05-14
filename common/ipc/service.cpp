@@ -30,7 +30,6 @@
 
 using namespace std::placeholders;
 
-namespace vasum {
 namespace ipc {
 
 Service::Service(epoll::EventPoll& eventPoll,
@@ -149,4 +148,3 @@ void Service::removeMethod(const MethodID methodID)
 
 
 } // namespace ipc
-} // namespace vasum

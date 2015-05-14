@@ -29,7 +29,6 @@
 
 #include <atomic>
 
-namespace vasum {
 namespace ipc {
 
 namespace {
@@ -49,4 +48,3 @@ PeerID getNextPeerID()
 
 
 } // namespace ipc
-} // namespace vasum

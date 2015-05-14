@@ -27,6 +27,7 @@
 #include "ipc/exception.hpp"
 #include "ipc/internals/socket.hpp"
 #include "utils/fd-utils.hpp"
+#include "utils/exception.hpp"
 #include "logger/logger.hpp"
 
 #include <systemd/sd-daemon.h>
@@ -38,8 +39,8 @@
 #include <cerrno>
 #include <cstring>
 
+using namespace utils;
 
-namespace vasum {
 namespace ipc {
 
 namespace {
@@ -225,4 +226,3 @@ Socket Socket::connectSocket(const std::string& path)
 }
 
 } // namespace ipc
-} // namespace vasum

@@ -45,7 +45,8 @@
 
 namespace fs = boost::filesystem;
 
-namespace vasum {
+using namespace vasum;
+
 namespace utils {
 
 
@@ -527,4 +528,3 @@ bool createLink(const std::string& src, const std::string& dest)
 }
 
 } // namespace utils
-} // namespace vasum

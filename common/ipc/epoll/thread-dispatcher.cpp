@@ -19,23 +19,42 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Epoll events
+ * @brief   Thread epoll dispatcher
  */
 
-#ifndef COMMON_EPOLL_EVENTS_HPP
-#define COMMON_EPOLL_EVENTS_HPP
+#include "config.hpp"
+#include "ipc/epoll/thread-dispatcher.hpp"
 
-#include <string>
-#include <sys/epoll.h> // for EPOLL* constatnts
-
-namespace vasum {
+namespace ipc {
 namespace epoll {
 
-typedef unsigned int Events; ///< bitmask of EPOLL* constants
+ThreadDispatcher::ThreadDispatcher()
+    : mStopped(false)
+{
+    auto controlCallback = [this](int, Events) {
+        mStopEvent.receive();
+        mStopped.store(true, std::memory_order_release);
+    };
 
-std::string eventsToString(Events events);
+    mPoll.addFD(mStopEvent.getFD(), EPOLLIN, std::move(controlCallback));
+    mThread = std::thread([this] {
+        while (!mStopped.load(std::memory_order_acquire)) {
+            mPoll.dispatchIteration(-1);
+        }
+    });
+}
+
+ThreadDispatcher::~ThreadDispatcher()
+{
+    mStopEvent.send();
+    mThread.join();
+    mPoll.removeFD(mStopEvent.getFD());
+}
+
+EventPoll& ThreadDispatcher::getPoll()
+{
+    return mPoll;
+}
 
 } // namespace epoll
-} // namespace vasum
-
-#endif // COMMON_EPOLL_EVENTS_HPP
+} // namespace ipc

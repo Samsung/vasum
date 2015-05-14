@@ -28,7 +28,6 @@
 #include <string>
 #include <typeinfo>
 
-namespace vasum {
 namespace utils {
 
 std::string getTypeName(const std::type_info& ti);
@@ -39,7 +38,6 @@ template<class T> std::string getTypeName(const T& t)
 }
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_TYPE_INFO_HPP

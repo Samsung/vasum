@@ -29,7 +29,6 @@
 #include <memory>
 
 
-namespace vasum {
 namespace utils {
 
 /**
@@ -73,7 +72,6 @@ private:
 };
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_CALLBACK_GUARD_HPP

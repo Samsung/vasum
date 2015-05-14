@@ -28,7 +28,6 @@
 #include "ipc/types.hpp"
 #include "logger/logger-scope.hpp"
 
-namespace vasum {
 namespace ipc {
 
 class SendResultRequest {
@@ -53,6 +52,5 @@ public:
 };
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_SEND_RESULT_REQUEST_HPP

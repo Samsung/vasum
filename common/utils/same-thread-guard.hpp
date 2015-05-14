@@ -34,7 +34,6 @@
 #include <cassert>
 #endif
 
-namespace vasum {
 namespace utils {
 
 /**
@@ -74,7 +73,6 @@ private:
 };
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_SAME_THREAD_GUARD_HPP

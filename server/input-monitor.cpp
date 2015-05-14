@@ -49,7 +49,7 @@
 #include <vector>
 #include <functional>
 
-using namespace vasum::utils;
+using namespace utils;
 namespace fs = boost::filesystem;
 
 namespace vasum {

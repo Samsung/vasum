@@ -31,7 +31,6 @@
 #include <cassert>
 
 
-namespace vasum {
 namespace utils {
 
 // Reference counting class like shared_ptr but with the ability to wait for it.
@@ -127,4 +126,3 @@ bool CallbackGuard::waitForTrackers(const unsigned int timeoutMs)
 }
 
 } // namespace utils
-} // namespace vasum

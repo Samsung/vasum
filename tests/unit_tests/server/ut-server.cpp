@@ -37,6 +37,11 @@
 #include <string>
 #include <future>
 
+using namespace utils;
+using namespace vasum;
+using namespace config;
+
+
 namespace {
 
 const std::string CONFIG_DIR = VSM_TEST_CONFIG_INSTALL_DIR "/server/ut-server";
@@ -48,7 +53,7 @@ const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
 const bool AS_ROOT = true;
 
 struct Fixture {
-    vasum::utils::ScopedDir mZonesPathGuard;
+    utils::ScopedDir mZonesPathGuard;
 
     Fixture()
         : mZonesPathGuard(ZONES_PATH)
@@ -59,8 +64,8 @@ struct Fixture {
 
     void prepare()
     {
-        vasum::utils::ScopedGlibLoop loop;
-        vasum::ZonesManager manager(TEST_CONFIG_PATH);
+        ScopedGlibLoop loop;
+        ZonesManager manager(TEST_CONFIG_PATH);
         manager.createZone("zone1", TEMPLATE_NAME);
         manager.createZone("zone2", TEMPLATE_NAME);
         manager.restoreAll();
@@ -69,9 +74,6 @@ struct Fixture {
 } // namespace
 
 BOOST_FIXTURE_TEST_SUITE(ServerSuite, Fixture)
-
-using namespace vasum;
-using namespace config;
 
 BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 {

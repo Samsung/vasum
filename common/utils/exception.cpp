@@ -19,16 +19,16 @@
 /**
  * @file
  * @author  Mateusz Malicki (m.malicki2@samsung.com)
- * @brief   Vasum base exception implementation
+ * @brief   Utils base exception helper implementation
  */
 
-#include "base-exception.hpp"
+#include "utils/exception.hpp"
 
 #include <string>
 #include <cstring>
 #include <cerrno>
 
-namespace vasum {
+namespace utils {
 
 const int ERROR_MESSAGE_BUFFER_CAPACITY = 256;
 
@@ -43,4 +43,4 @@ std::string getSystemErrorMessage(int err)
     return strerror_r(err, buf, sizeof(buf));
 }
 
-} // namespace vasum
+} // namespace utils

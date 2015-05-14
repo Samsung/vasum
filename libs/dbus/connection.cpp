@@ -30,7 +30,7 @@
 #include "utils/glib-utils.hpp"
 #include "logger/logger.hpp"
 
-using namespace vasum::utils;
+using namespace utils;
 
 namespace dbus {
 

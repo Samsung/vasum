@@ -28,7 +28,6 @@
 #include <sys/types.h>
 #include <functional>
 
-namespace vasum {
 namespace utils {
 
 /**
@@ -55,7 +54,6 @@ bool executeAndWait(const std::function<void()>& func);
 bool waitPid(pid_t pid, int& status);
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_EXECUTE_HPP

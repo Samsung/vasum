@@ -27,7 +27,6 @@
 #include "ipc/method-result.hpp"
 #include "ipc/internals/processor.hpp"
 
-namespace vasum {
 namespace ipc {
 
 MethodResult::MethodResult(Processor& processor,
@@ -56,4 +55,3 @@ void MethodResult::setError(const int code, const std::string& message)
 }
 
 } // namespace ipc
-} // namespace vasum

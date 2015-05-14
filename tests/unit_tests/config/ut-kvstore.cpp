@@ -37,7 +37,7 @@
 #include <boost/filesystem.hpp>
 
 using namespace config;
-using namespace vasum::utils;
+using namespace utils;
 namespace fs = boost::filesystem;
 
 namespace {
@@ -45,7 +45,7 @@ namespace {
 const std::string UT_PATH = "/tmp/ut-config/";
 
 struct Fixture {
-    vasum::utils::ScopedDir mUTDirGuard;
+    ScopedDir mUTDirGuard;
     std::string dbPath;
     KVStore c;
 

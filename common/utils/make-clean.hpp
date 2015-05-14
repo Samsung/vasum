@@ -28,7 +28,6 @@
 #include <algorithm>
 #include <type_traits>
 
-namespace vasum {
 namespace utils {
 
 template<class T>
@@ -47,7 +46,6 @@ T make_clean()
 }
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_MAKE_CLEAN_HPP

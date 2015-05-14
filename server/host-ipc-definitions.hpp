@@ -31,36 +31,36 @@ namespace vasum {
 namespace api {
 namespace ipc {
 
-const vasum::ipc::MethodID METHOD_GET_ZONE_ID_LIST         = 2;
-const vasum::ipc::MethodID METHOD_GET_ACTIVE_ZONE_ID       = 3;
-const vasum::ipc::MethodID METHOD_GET_ZONE_INFO            = 4;
-const vasum::ipc::MethodID METHOD_SET_NETDEV_ATTRS         = 5;
-const vasum::ipc::MethodID METHOD_GET_NETDEV_ATTRS         = 6;
-const vasum::ipc::MethodID METHOD_GET_NETDEV_LIST          = 7;
-const vasum::ipc::MethodID METHOD_CREATE_NETDEV_VETH       = 8;
-const vasum::ipc::MethodID METHOD_CREATE_NETDEV_MACVLAN    = 9;
-const vasum::ipc::MethodID METHOD_CREATE_NETDEV_PHYS       = 10;
-const vasum::ipc::MethodID METHOD_DELETE_NETDEV_IP_ADDRESS = 11;
-const vasum::ipc::MethodID METHOD_DESTROY_NETDEV           = 12;
-const vasum::ipc::MethodID METHOD_DECLARE_FILE             = 13;
-const vasum::ipc::MethodID METHOD_DECLARE_MOUNT            = 14;
-const vasum::ipc::MethodID METHOD_DECLARE_LINK             = 15;
-const vasum::ipc::MethodID METHOD_GET_DECLARATIONS         = 16;
-const vasum::ipc::MethodID METHOD_REMOVE_DECLARATION       = 17;
-const vasum::ipc::MethodID METHOD_SET_ACTIVE_ZONE          = 18;
-const vasum::ipc::MethodID METHOD_CREATE_ZONE              = 19;
-const vasum::ipc::MethodID METHOD_DESTROY_ZONE             = 20;
-const vasum::ipc::MethodID METHOD_SHUTDOWN_ZONE            = 21;
-const vasum::ipc::MethodID METHOD_START_ZONE               = 22;
-const vasum::ipc::MethodID METHOD_LOCK_ZONE                = 23;
-const vasum::ipc::MethodID METHOD_UNLOCK_ZONE              = 24;
-const vasum::ipc::MethodID METHOD_GRANT_DEVICE             = 25;
-const vasum::ipc::MethodID METHOD_REVOKE_DEVICE            = 26;
+const ::ipc::MethodID METHOD_GET_ZONE_ID_LIST         = 2;
+const ::ipc::MethodID METHOD_GET_ACTIVE_ZONE_ID       = 3;
+const ::ipc::MethodID METHOD_GET_ZONE_INFO            = 4;
+const ::ipc::MethodID METHOD_SET_NETDEV_ATTRS         = 5;
+const ::ipc::MethodID METHOD_GET_NETDEV_ATTRS         = 6;
+const ::ipc::MethodID METHOD_GET_NETDEV_LIST          = 7;
+const ::ipc::MethodID METHOD_CREATE_NETDEV_VETH       = 8;
+const ::ipc::MethodID METHOD_CREATE_NETDEV_MACVLAN    = 9;
+const ::ipc::MethodID METHOD_CREATE_NETDEV_PHYS       = 10;
+const ::ipc::MethodID METHOD_DELETE_NETDEV_IP_ADDRESS = 11;
+const ::ipc::MethodID METHOD_DESTROY_NETDEV           = 12;
+const ::ipc::MethodID METHOD_DECLARE_FILE             = 13;
+const ::ipc::MethodID METHOD_DECLARE_MOUNT            = 14;
+const ::ipc::MethodID METHOD_DECLARE_LINK             = 15;
+const ::ipc::MethodID METHOD_GET_DECLARATIONS         = 16;
+const ::ipc::MethodID METHOD_REMOVE_DECLARATION       = 17;
+const ::ipc::MethodID METHOD_SET_ACTIVE_ZONE          = 18;
+const ::ipc::MethodID METHOD_CREATE_ZONE              = 19;
+const ::ipc::MethodID METHOD_DESTROY_ZONE             = 20;
+const ::ipc::MethodID METHOD_SHUTDOWN_ZONE            = 21;
+const ::ipc::MethodID METHOD_START_ZONE               = 22;
+const ::ipc::MethodID METHOD_LOCK_ZONE                = 23;
+const ::ipc::MethodID METHOD_UNLOCK_ZONE              = 24;
+const ::ipc::MethodID METHOD_GRANT_DEVICE             = 25;
+const ::ipc::MethodID METHOD_REVOKE_DEVICE            = 26;
 
-const vasum::ipc::MethodID METHOD_NOTIFY_ACTIVE_ZONE         = 100;
-const vasum::ipc::MethodID METHOD_FILE_MOVE_REQUEST          = 101;
-const vasum::ipc::MethodID SIGNAL_NOTIFICATION               = 102;
-const vasum::ipc::MethodID SIGNAL_SWITCH_TO_DEFAULT          = 103;
+const ::ipc::MethodID METHOD_NOTIFY_ACTIVE_ZONE         = 100;
+const ::ipc::MethodID METHOD_FILE_MOVE_REQUEST          = 101;
+const ::ipc::MethodID SIGNAL_NOTIFICATION               = 102;
+const ::ipc::MethodID SIGNAL_SWITCH_TO_DEFAULT          = 103;
 
 const std::string FILE_MOVE_DESTINATION_NOT_FOUND   = "FILE_MOVE_DESTINATION_NOT_FOUND";
 const std::string FILE_MOVE_WRONG_DESTINATION       = "FILE_MOVE_WRONG_DESTINATION";

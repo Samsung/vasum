@@ -30,7 +30,6 @@
 #include "logger/logger.hpp"
 #include "logger/formatter.hpp"
 
-namespace vasum {
 namespace utils {
 
 namespace {
@@ -70,6 +69,5 @@ void SameThreadGuard::reset()
 }
 
 } // namespace utils
-} // namespace vasum
 
 #endif // ENABLE_SAME_THREAD_GUARD

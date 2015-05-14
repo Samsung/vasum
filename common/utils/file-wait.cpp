@@ -30,8 +30,8 @@
 #include <unistd.h>
 #include <stdexcept>
 
+using namespace vasum;
 
-namespace vasum {
 namespace utils {
 
 
@@ -56,4 +56,3 @@ void waitForFile(const std::string& filename, const unsigned int timeoutMs)
 
 
 } // namespace utils
-} // namespace vasum

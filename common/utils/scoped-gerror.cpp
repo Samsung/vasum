@@ -26,7 +26,6 @@
 
 #include "scoped-gerror.hpp"
 
-namespace vasum {
 namespace utils {
 
 ScopedGError::ScopedGError()
@@ -74,4 +73,3 @@ std::ostream& operator<<(std::ostream& os, const ScopedGError& e)
 }
 
 } // namespace utils
-} // namespace vasum

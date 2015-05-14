@@ -33,12 +33,13 @@
 
 namespace {
 
+using namespace utils;
 using namespace config;
 
 const std::string UT_PATH = "/tmp/ut-config/";
 
 struct Fixture {
-    vasum::utils::ScopedDir mUTDirGuard;
+    ScopedDir mUTDirGuard;
     std::string dbPath;
     std::string dbPrefix;
 

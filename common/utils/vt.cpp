@@ -25,7 +25,7 @@
 #include "config.hpp"
 #include "utils/vt.hpp"
 #include "logger/logger.hpp"
-#include "base-exception.hpp"
+#include "utils/exception.hpp"
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -40,7 +40,6 @@ const std::string TTY_DEV = "/dev/tty0";
 
 } // namespace
 
-namespace vasum {
 namespace utils {
 
 bool activateVT(const int& vt)
@@ -84,4 +83,3 @@ bool activateVT(const int& vt)
 }
 
 } // namespace utils
-} // namespace vasum

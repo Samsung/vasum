@@ -27,13 +27,12 @@
 #include "utils/img.hpp"
 #include "utils/fs.hpp"
 #include "utils/paths.hpp"
-#include "base-exception.hpp"
+#include "utils/exception.hpp"
 
 #include <sys/mount.h>
 #include <fcntl.h>
 #include <linux/loop.h>
 
-namespace vasum {
 namespace utils {
 
 namespace {
@@ -238,4 +237,3 @@ bool copyImageContents(const std::string& img, const std::string& dst)
 }
 
 } // namespace utils
-} // namespace vasum

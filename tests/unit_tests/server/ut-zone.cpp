@@ -45,6 +45,7 @@
 #include <linux/if_bridge.h>
 #include <linux/if.h>
 
+using namespace utils;
 using namespace vasum;
 using namespace vasum::netdev;
 using namespace config;
@@ -63,9 +64,9 @@ const std::string BRIDGE_NAME = "brtest01";
 const std::string ZONE_NETDEV = "netdevtest01";
 
 struct Fixture {
-    utils::ScopedGlibLoop mLoop;
-    utils::ScopedDir mZonesPathGuard;
-    utils::ScopedDir mRunGuard;
+    ScopedGlibLoop mLoop;
+    ScopedDir mZonesPathGuard;
+    ScopedDir mRunGuard;
     std::string mBridgeName;
 
     Fixture()

@@ -27,7 +27,6 @@
 #include "ipc/internals/acceptor.hpp"
 #include "logger/logger.hpp"
 
-namespace vasum {
 namespace ipc {
 
 Acceptor::Acceptor(const std::string& socketPath, const NewConnectionCallback& newConnectionCallback)
@@ -54,4 +53,3 @@ FileDescriptor Acceptor::getConnectionFD()
 }
 
 } // namespace ipc
-} // namespace vasum

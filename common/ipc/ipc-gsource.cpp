@@ -31,7 +31,6 @@
 
 #include <algorithm>
 
-namespace vasum {
 namespace ipc {
 
 namespace {
@@ -205,4 +204,3 @@ void  IPCGSource::finalize(GSource* gSource)
 }
 
 } // namespace ipc
-} // namespace vasum

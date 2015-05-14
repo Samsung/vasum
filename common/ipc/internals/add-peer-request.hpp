@@ -28,7 +28,6 @@
 #include "ipc/types.hpp"
 #include "ipc/internals/socket.hpp"
 
-namespace vasum {
 namespace ipc {
 
 class AddPeerRequest {
@@ -47,6 +46,5 @@ public:
 };
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_ADD_PEER_REQUEST_HPP

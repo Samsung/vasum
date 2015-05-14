@@ -30,7 +30,6 @@
 #include <fcntl.h>
 #include <errno.h>
 
-namespace vasum {
 namespace utils {
 
 namespace {
@@ -87,4 +86,3 @@ bool setRunLevel(RunLevel runLevel)
 
 
 } // namespace utils
-} // namespace vasum

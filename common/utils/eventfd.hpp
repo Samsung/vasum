@@ -25,7 +25,6 @@
 #ifndef COMMON_UTILS_EVENTFD_HPP
 #define COMMON_UTILS_EVENTFD_HPP
 
-namespace vasum {
 namespace utils {
 
 class EventFD {
@@ -58,6 +57,5 @@ private:
 };
 
 } // namespace utils
-} // namespace vasum
 
 #endif // COMMON_UTILS_EVENTFD_HPP

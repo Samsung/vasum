@@ -31,7 +31,6 @@
 #include <cstring>
 #include <csignal>
 
-namespace vasum {
 namespace utils {
 
 void signalBlock(const int signalToBlock)
@@ -57,7 +56,6 @@ void signalBlock(const int signalToBlock)
 }
 
 } // namespace utils
-} // namespace vasum
 
 
 

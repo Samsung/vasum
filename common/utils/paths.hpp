@@ -30,7 +30,6 @@
 #include <algorithm>
 
 
-namespace vasum {
 namespace utils {
 
 
@@ -121,7 +120,6 @@ inline std::string getAbsolutePath(const std::string& path, const std::string& b
 
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_PATHS_HPP

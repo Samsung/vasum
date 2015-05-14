@@ -34,8 +34,8 @@
 #include "ipc/client.hpp"
 #include "ipc/types.hpp"
 #include "ipc/result.hpp"
-#include "epoll/thread-dispatcher.hpp"
-#include "epoll/glib-dispatcher.hpp"
+#include "ipc/epoll/thread-dispatcher.hpp"
+#include "ipc/epoll/glib-dispatcher.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
 #include "utils/value-latch.hpp"
@@ -52,9 +52,9 @@
 #include <future>
 
 using namespace vasum;
-using namespace vasum::ipc;
-using namespace vasum::epoll;
-using namespace vasum::utils;
+using namespace ipc;
+using namespace epoll;
+using namespace utils;
 using namespace std::placeholders;
 
 // Timeout for sending one message

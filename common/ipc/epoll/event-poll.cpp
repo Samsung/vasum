@@ -23,7 +23,7 @@
  */
 
 #include "config.hpp"
-#include "epoll/event-poll.hpp"
+#include "ipc/epoll/event-poll.hpp"
 #include "utils/fd-utils.hpp"
 #include "utils/exception.hpp"
 #include "logger/logger.hpp"
@@ -33,7 +33,10 @@
 #include <string.h>
 #include <assert.h>
 
-namespace vasum {
+using namespace vasum;
+using namespace utils;
+
+namespace ipc {
 namespace epoll {
 
 EventPoll::EventPoll()
@@ -176,4 +179,4 @@ void EventPoll::removeFDInternal(const int fd)
 }
 
 } // namespace epoll
-} // namespace vasum
+} // namespace ipc

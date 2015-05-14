@@ -25,7 +25,6 @@
 #ifndef COMMON_UTILS_IMG_HPP
 #define COMMON_UTILS_IMG_HPP
 
-namespace vasum {
 namespace utils {
 
 /**
@@ -50,6 +49,5 @@ bool umountImage(const std::string& path, const std::string& loopdev);
 bool copyImageContents(const std::string& img, const std::string& dst);
 
 } // namespace utils
-} // namespace vasum
 
 #endif // COMMON_UTILS_IMG_HPP

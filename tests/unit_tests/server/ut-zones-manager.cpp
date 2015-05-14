@@ -37,7 +37,7 @@
 #endif //DBUS_CONNECTION
 #include "host-ipc-definitions.hpp"
 #include <api/messages.hpp>
-#include <epoll/thread-dispatcher.hpp>
+#include <ipc/epoll/thread-dispatcher.hpp>
 #include <ipc/client.hpp>
 #include "exception.hpp"
 
@@ -61,7 +61,7 @@
 
 using namespace vasum;
 using namespace config;
-using namespace vasum::utils;
+using namespace utils;
 #ifdef DBUS_CONNECTION
 using namespace dbus;
 #endif //DBUS_CONNECTION
@@ -599,7 +599,7 @@ public:
     }
 
 private:
-    epoll::ThreadDispatcher mDispatcher;
+    ipc::epoll::ThreadDispatcher mDispatcher;
     ipc::Client mClient;
 };
 
@@ -619,10 +619,10 @@ bool spinWaitFor(int timeoutMs, Predicate pred)
 } // namespace
 
 struct Fixture {
-    vasum::utils::ScopedGlibLoop mLoop;
+    ScopedGlibLoop mLoop;
 
-    utils::ScopedDir mZonesPathGuard;
-    utils::ScopedDir mRunGuard;
+    ScopedDir mZonesPathGuard;
+    ScopedDir mRunGuard;
 
     Fixture()
         : mZonesPathGuard(ZONES_PATH)

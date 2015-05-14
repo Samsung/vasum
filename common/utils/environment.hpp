@@ -31,7 +31,6 @@
 #include <sys/types.h>
 
 
-namespace vasum {
 namespace utils {
 
 
@@ -63,7 +62,6 @@ bool joinToNs(int nsPid, int ns);
 int passNemaspacedFd(int nsPid, int ns, const std::function<int()>& fdFactory);
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_ENVIRONMENT_HPP

@@ -27,7 +27,6 @@
 
 #include <unordered_map>
 
-namespace vasum {
 namespace utils {
 
 
@@ -82,7 +81,6 @@ private:
 
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_COUNTING_MAP_HPP

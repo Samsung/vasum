@@ -30,7 +30,6 @@
 #include <condition_variable>
 
 
-namespace vasum {
 namespace ipc {
 
 class RemovePeerRequest {
@@ -50,6 +49,5 @@ public:
 };
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_REMOVE_PEER_REQUEST_HPP

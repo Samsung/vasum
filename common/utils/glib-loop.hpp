@@ -32,7 +32,6 @@
 #include <glib.h>
 
 
-namespace vasum {
 namespace utils {
 
 
@@ -81,7 +80,6 @@ private:
 };
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_GLIB_LOOP_HPP

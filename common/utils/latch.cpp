@@ -28,7 +28,6 @@
 #include <cassert>
 
 
-namespace vasum {
 namespace utils {
 
 
@@ -81,4 +80,3 @@ bool Latch::empty()
 
 
 } // namespace utils
-} // namespace vasum

@@ -28,7 +28,6 @@
 #include "callback-guard.hpp"
 
 
-namespace vasum {
 namespace utils {
 
 
@@ -86,7 +85,6 @@ const Callback& getCallbackFromPointer(const void* pointer)
 
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_CALLBACK_WRAPPER_HPP

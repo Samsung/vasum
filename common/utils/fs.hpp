@@ -31,7 +31,6 @@
 #include <boost/filesystem.hpp>
 
 
-namespace vasum {
 namespace utils {
 
 /**
@@ -149,7 +148,6 @@ bool copyFile(const std::string& src, const std::string& dest);
 bool createLink(const std::string& src, const std::string& dest);
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_FS_HPP

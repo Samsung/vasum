@@ -41,13 +41,6 @@ struct VasumException: public std::runtime_error {
     VasumException(const std::string& error) : std::runtime_error(error) {}
 };
 
-/**
- * Return string describing error number
- * it is wrapper for strerror_r
- */
-std::string getSystemErrorMessage();
-std::string getSystemErrorMessage(int err);
-
 } // namespace vasum
 
 

@@ -54,7 +54,6 @@
 #include <unordered_map>
 #include <utility>
 
-namespace vasum {
 namespace ipc {
 
 const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
@@ -684,6 +683,5 @@ void Processor::signal(const MethodID methodID,
 
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_PROCESSOR_HPP

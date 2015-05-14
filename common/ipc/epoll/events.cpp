@@ -19,42 +19,53 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Thread epoll dispatcher
+ * @brief   Epoll events
  */
 
 #include "config.hpp"
-#include "epoll/thread-dispatcher.hpp"
+#include "ipc/epoll/events.hpp"
 
-namespace vasum {
+#include <sstream>
+
+namespace ipc {
 namespace epoll {
 
-ThreadDispatcher::ThreadDispatcher()
-    : mStopped(false)
-{
-    auto controlCallback = [this](int, Events) {
-        mStopEvent.receive();
-        mStopped.store(true, std::memory_order_release);
-    };
+namespace {
 
-    mPoll.addFD(mStopEvent.getFD(), EPOLLIN, std::move(controlCallback));
-    mThread = std::thread([this] {
-        while (!mStopped.load(std::memory_order_acquire)) {
-            mPoll.dispatchIteration(-1);
+std::string eventToString(Events event)
+{
+    switch (event) {
+    case EPOLLIN: return "IN";
+    case EPOLLOUT: return "OUT";
+    case EPOLLERR: return "ERR";
+    case EPOLLHUP: return "HUP";
+    case EPOLLRDHUP: return "RDHUP";
+    default:
+        std::ostringstream ss;
+        ss << "0x" << std::hex << event;
+        return ss.str();
+    }
+}
+
+} // namespace
+
+std::string eventsToString(Events events)
+{
+    if (events == 0) {
+        return "<NONE>";
+    }
+    std::string ret;
+    for (unsigned int i = 0; i<32; ++i) {
+        Events event = 1u << i;
+        if (events & event) {
+            if (!ret.empty()) {
+                ret.append(", ");
+            }
+            ret.append(eventToString(event));
         }
-    });
-}
-
-ThreadDispatcher::~ThreadDispatcher()
-{
-    mStopEvent.send();
-    mThread.join();
-    mPoll.removeFD(mStopEvent.getFD());
-}
-
-EventPoll& ThreadDispatcher::getPoll()
-{
-    return mPoll;
+    }
+    return ret;
 }
 
 } // namespace epoll
-} // namespace vasum
+} // namespace ipc

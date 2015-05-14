@@ -34,7 +34,8 @@
 #include <cstring>
 #include <cstdint>
 
-namespace vasum {
+using namespace vasum;
+
 namespace utils {
 
 EventFD::EventFD()
@@ -71,4 +72,3 @@ void EventFD::receive()
 
 
 } // namespace utils
-} // namespace vasum

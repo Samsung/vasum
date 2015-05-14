@@ -22,7 +22,7 @@ MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Client...")
 FILE(GLOB project_SRCS *.cpp *.hpp *.h)
 
-FILE(GLOB common_SRCS ${COMMON_FOLDER}/epoll/*.hpp              ${COMMON_FOLDER}/epoll/*.cpp
+FILE(GLOB common_SRCS ${COMMON_FOLDER}/ipc/epoll/*.hpp          ${COMMON_FOLDER}/ipc/epoll/*.cpp
                       ${COMMON_FOLDER}/ipc/*.hpp                ${COMMON_FOLDER}/ipc/*.cpp
                       ${COMMON_FOLDER}/ipc/internals/*.hpp      ${COMMON_FOLDER}/ipc/internals/*.cpp
                       ${COMMON_FOLDER}/utils/*.hpp              ${COMMON_FOLDER}/utils/*.cpp

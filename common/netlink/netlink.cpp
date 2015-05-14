@@ -25,7 +25,7 @@
 #include "config.hpp"
 #include "netlink.hpp"
 #include "utils.hpp"
-#include "base-exception.hpp"
+#include "utils/exception.hpp"
 #include "utils/make-clean.hpp"
 #include "utils/environment.hpp"
 
@@ -40,6 +40,7 @@
 #define PAGE_SIZE 4096
 #endif
 
+using namespace utils;
 using namespace vasum;
 
 namespace {

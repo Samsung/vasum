@@ -19,38 +19,38 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   glib epoll dispatcher
+ * @brief   Thread epoll dispatcher
  */
 
-#ifndef COMMON_EPOLL_GLIB_DISPATCHER_HPP
-#define COMMON_EPOLL_GLIB_DISPATCHER_HPP
+#ifndef COMMON_EPOLL_THREAD_DISPATCHER_HPP
+#define COMMON_EPOLL_THREAD_DISPATCHER_HPP
 
-#include "epoll/event-poll.hpp"
-#include "utils/callback-guard.hpp"
+#include "ipc/epoll/event-poll.hpp"
+#include "utils/eventfd.hpp"
 
-#include <gio/gio.h>
+#include <thread>
+#include <atomic>
 
-namespace vasum {
+namespace ipc {
 namespace epoll {
 
 /**
- * Will dispatch poll events in glib thread
+ * Will dispatch poll events in a newly created thread
  */
-class GlibDispatcher {
+class ThreadDispatcher {
 public:
-    GlibDispatcher();
-    ~GlibDispatcher();
+    ThreadDispatcher();
+    ~ThreadDispatcher();
 
     EventPoll& getPoll();
 private:
-    EventPoll mPoll; // before mGuard!
-    utils::CallbackGuard mGuard;
-    GIOChannel* mChannel;
-    guint mWatchId;
+    EventPoll mPoll;
+    utils::EventFD mStopEvent;
+    std::atomic_bool mStopped;
+    std::thread mThread;
 };
 
-
 } // namespace epoll
-} // namespace vasum
+} // namespace ipc
 
-#endif // COMMON_UTILS_GLIB_DISPATCHER_HPP
+#endif // COMMON_EPOLL_THREAD_DISPATCHER_HPP

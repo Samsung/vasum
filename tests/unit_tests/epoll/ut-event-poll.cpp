@@ -26,18 +26,18 @@
 #include "config.hpp"
 #include "ut.hpp"
 
-#include "epoll/event-poll.hpp"
+#include "ipc/epoll/event-poll.hpp"
 #include "logger/logger.hpp"
 #include "ipc/internals/socket.hpp"
 #include "utils/value-latch.hpp"
 #include "utils/glib-loop.hpp"
-#include "epoll/glib-dispatcher.hpp"
-#include "epoll/thread-dispatcher.hpp"
+#include "ipc/epoll/glib-dispatcher.hpp"
+#include "ipc/epoll/thread-dispatcher.hpp"
 
 using namespace vasum;
-using namespace vasum::utils;
-using namespace vasum::epoll;
-using namespace vasum::ipc;
+using namespace utils;
+using namespace ipc;
+using namespace ipc::epoll;
 
 namespace {
 

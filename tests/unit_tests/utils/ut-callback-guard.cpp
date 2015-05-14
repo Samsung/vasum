@@ -32,10 +32,9 @@
 #include <future>
 #include <thread>
 
-
 BOOST_AUTO_TEST_SUITE(CallbackGuardSuite)
 
-using namespace vasum::utils;
+using namespace utils;
 
 const int unsigned TIMEOUT = 1000;
 

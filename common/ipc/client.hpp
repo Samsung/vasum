@@ -33,7 +33,6 @@
 
 #include <string>
 
-namespace vasum {
 namespace ipc {
 
 /**
@@ -212,6 +211,5 @@ void Client::signal(const MethodID methodID,
 }
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_CLIENT_HPP

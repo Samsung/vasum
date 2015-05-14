@@ -28,7 +28,6 @@
 
 #include <glib-object.h>
 
-namespace vasum {
 namespace utils {
 
 namespace {
@@ -56,4 +55,3 @@ void executeInGlibThread(const VoidCallback& callback, const CallbackGuard& guar
 
 
 } // namespace utils
-} // namespace vasum

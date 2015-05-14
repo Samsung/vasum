@@ -27,7 +27,7 @@
 #define SERVER_HOST_IPC_CONNECTION_HPP
 
 #include "api/messages.hpp"
-#include "epoll/thread-dispatcher.hpp"
+#include "ipc/epoll/thread-dispatcher.hpp"
 #include "ipc/service.hpp"
 #include "ipc-callback-wrapper.hpp"
 
@@ -84,7 +84,7 @@ public:
     void sendNotification(const api::Notification& notification);
 
 private:
-    epoll::ThreadDispatcher mDispatcher;
+    ipc::epoll::ThreadDispatcher mDispatcher;
     std::unique_ptr<ipc::Service> mService;
 };
 

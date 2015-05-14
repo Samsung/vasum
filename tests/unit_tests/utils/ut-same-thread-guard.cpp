@@ -33,7 +33,7 @@
 
 BOOST_AUTO_TEST_SUITE(SameThreadGuardSuite)
 
-using namespace vasum::utils;
+using namespace utils;
 
 BOOST_AUTO_TEST_CASE(Simple)
 {

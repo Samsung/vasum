@@ -27,7 +27,6 @@
 
 #include <cstddef>
 
-namespace vasum {
 namespace utils {
 
 /**
@@ -73,6 +72,5 @@ void setMaxFDNumber(unsigned int limit);
 unsigned int getFDNumber();
 
 } // namespace utils
-} // namespace vasum
 
 #endif // COMMON_UTILS_FD_HPP

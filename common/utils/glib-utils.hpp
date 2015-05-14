@@ -27,7 +27,6 @@
 
 #include "utils/callback-guard.hpp"
 
-namespace vasum {
 namespace utils {
 
 typedef std::function<void()> VoidCallback;
@@ -39,6 +38,5 @@ void executeInGlibThread(const VoidCallback& callback, const CallbackGuard& guar
 
 
 } // namespace utils
-} // namespace vasum
 
 #endif // COMMON_UTILS_GLIB_UTILS_HPP

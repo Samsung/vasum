@@ -28,7 +28,6 @@
 #include <string>
 
 
-namespace vasum {
 namespace utils {
 
 
@@ -58,7 +57,6 @@ private:
 
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // UNIT_TESTS_UTILS_SCOPED_DIR_HPP

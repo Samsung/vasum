@@ -23,7 +23,7 @@
  */
 
 #include "config.hpp"
-#include "base-exception.hpp"
+#include "utils/exception.hpp"
 #include "utils/execute.hpp"
 #include "logger/logger.hpp"
 
@@ -31,7 +31,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-namespace vasum {
 namespace utils {
 
 namespace {
@@ -74,7 +73,7 @@ bool executeAndWait(const std::function<void()>& func, int& status)
 
     pid_t pid = fork();
     if (pid == -1) {
-        LOGE("Fork failed: " << vasum::getSystemErrorMessage());
+        LOGE("Fork failed: " << getSystemErrorMessage());
         return false;
     }
     if (pid == 0) {
@@ -128,4 +127,3 @@ bool waitPid(pid_t pid, int& status)
 }
 
 } // namespace utils
-} // namespace vasum

@@ -40,7 +40,7 @@ void HostIPCConnection::createSystem()
     mClient.reset(new ipc::Client(mDispatcher.getPoll(), HOST_IPC_SOCKET));
     mClient->start();
 }
-epoll::ThreadDispatcher& HostIPCConnection::getDispatcher()
+ipc::epoll::ThreadDispatcher& HostIPCConnection::getDispatcher()
 {
     return mDispatcher;
 }

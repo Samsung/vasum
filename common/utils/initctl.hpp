@@ -26,7 +26,6 @@
 #define COMMON_UTILS_INITCTL_HPP
 
 
-namespace vasum {
 namespace utils {
 
 enum RunLevel : int {
@@ -38,7 +37,6 @@ bool setRunLevel(RunLevel runLevel);
 
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_INITCTL_HPP

@@ -35,7 +35,6 @@
 #include <cassert>
 
 
-namespace vasum {
 namespace utils {
 
 
@@ -183,4 +182,3 @@ void Worker::addTask(const Task& task)
 
 
 } // namespace utils
-} // namespace vasum

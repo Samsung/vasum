@@ -30,7 +30,7 @@
 
 BOOST_AUTO_TEST_SUITE(CountingMapSuite)
 
-using namespace vasum::utils;
+using namespace utils;
 
 BOOST_AUTO_TEST_CASE(Counting)
 {

@@ -35,7 +35,6 @@
 #include <stdexcept>
 
 
-namespace vasum {
 namespace utils {
 
 
@@ -179,4 +178,3 @@ void ScopedDaemon::stop()
 
 
 } // namespace utils
-} // namespace vasum

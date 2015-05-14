@@ -41,6 +41,8 @@
 
 namespace fs = boost::filesystem;
 
+using namespace utils;
+
 namespace vasum {
 
 ZoneProvision::ZoneProvision(const std::string& rootPath,

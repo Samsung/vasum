@@ -32,7 +32,6 @@
 #include "config/manager.hpp"
 #include <utility>
 
-namespace vasum {
 namespace ipc {
 
 class MethodRequest {
@@ -94,6 +93,5 @@ std::shared_ptr<MethodRequest> MethodRequest::create(const MethodID methodID,
 }
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_METHOD_REQUEST_HPP

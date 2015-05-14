@@ -25,14 +25,14 @@
 #ifndef COMMON_EPOLL_EVENT_POLL_HPP
 #define COMMON_EPOLL_EVENT_POLL_HPP
 
-#include "epoll/events.hpp"
+#include "ipc/epoll/events.hpp"
 
 #include <functional>
 #include <mutex>
 #include <unordered_map>
 #include <memory>
 
-namespace vasum {
+namespace ipc {
 namespace epoll {
 
 class EventPoll {
@@ -70,6 +70,6 @@ private:
 
 
 } // namespace epoll
-} // namespace vasum
+} // namespace ipc
 
 #endif // COMMON_EPOLL_EVENT_POLL_HPP

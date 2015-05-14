@@ -23,10 +23,10 @@
  */
 
 #include "config.hpp"
-#include "epoll/glib-dispatcher.hpp"
+#include "ipc/epoll/glib-dispatcher.hpp"
 #include "utils/callback-wrapper.hpp"
 
-namespace vasum {
+namespace ipc {
 namespace epoll {
 
 GlibDispatcher::GlibDispatcher()
@@ -63,4 +63,4 @@ EventPoll& GlibDispatcher::getPoll()
 }
 
 } // namespace epoll
-} // namespace vasum
+} // namespace ipc

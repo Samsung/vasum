@@ -34,6 +34,7 @@
 #include "utils/environment.hpp"
 #include "utils/fs.hpp"
 #include "utils/signal.hpp"
+#include "utils/exception.hpp"
 
 #include <csignal>
 #include <cerrno>
@@ -64,6 +65,8 @@
 #endif
 
 extern char** environ;
+
+using namespace utils;
 
 namespace vasum {
 

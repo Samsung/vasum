@@ -32,7 +32,6 @@
 
 #include <string>
 
-namespace vasum {
 namespace ipc {
 
 /**
@@ -73,6 +72,5 @@ private:
 };
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_ACCEPTOR_HPP

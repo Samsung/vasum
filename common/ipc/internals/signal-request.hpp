@@ -29,7 +29,6 @@
 #include "config/manager.hpp"
 #include "logger/logger-scope.hpp"
 
-namespace vasum {
 namespace ipc {
 
 class SignalRequest {
@@ -75,6 +74,5 @@ std::shared_ptr<SignalRequest> SignalRequest::create(const MethodID methodID,
 }
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_SIGNAL_REQUEST_HPP

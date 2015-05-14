@@ -181,7 +181,7 @@ private:
             : nameAcquired(acquired), nameLost(lost) {}
     };
 
-    vasum::utils::CallbackGuard mGuard;
+    utils::CallbackGuard mGuard;
     GDBusConnection* mConnection;
     guint mNameId;
 

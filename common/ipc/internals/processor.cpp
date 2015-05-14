@@ -36,7 +36,8 @@
 #include <sys/socket.h>
 #include <limits>
 
-namespace vasum {
+using namespace utils;
+
 namespace ipc {
 
 #define IGNORE_EXCEPTIONS(expr)                        \
@@ -728,4 +729,3 @@ std::ostream& operator<<(std::ostream& os, const Processor::Event& event)
 }
 
 } // namespace ipc
-} // namespace vasum

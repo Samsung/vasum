@@ -32,8 +32,7 @@
 
 BOOST_AUTO_TEST_SUITE(GlibLoopSuite)
 
-using namespace vasum;
-using namespace vasum::utils;
+using namespace utils;
 
 
 namespace {

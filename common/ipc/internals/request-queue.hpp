@@ -34,7 +34,6 @@
 #include <mutex>
 #include <algorithm>
 
-namespace vasum {
 namespace ipc {
 
 /**
@@ -184,6 +183,5 @@ bool RequestQueue<RequestIdType>::removeIf(Predicate predicate)
     return true;
 }
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_INTERNALS_MESSAGE_QUEUE_HPP

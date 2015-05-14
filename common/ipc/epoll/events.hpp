@@ -22,50 +22,20 @@
  * @brief   Epoll events
  */
 
-#include "config.hpp"
-#include "epoll/events.hpp"
+#ifndef COMMON_EPOLL_EVENTS_HPP
+#define COMMON_EPOLL_EVENTS_HPP
 
-#include <sstream>
+#include <string>
+#include <sys/epoll.h> // for EPOLL* constatnts
 
-namespace vasum {
+namespace ipc {
 namespace epoll {
 
-namespace {
+typedef unsigned int Events; ///< bitmask of EPOLL* constants
 
-std::string eventToString(Events event)
-{
-    switch (event) {
-    case EPOLLIN: return "IN";
-    case EPOLLOUT: return "OUT";
-    case EPOLLERR: return "ERR";
-    case EPOLLHUP: return "HUP";
-    case EPOLLRDHUP: return "RDHUP";
-    default:
-        std::ostringstream ss;
-        ss << "0x" << std::hex << event;
-        return ss.str();
-    }
-}
-
-} // namespace
-
-std::string eventsToString(Events events)
-{
-    if (events == 0) {
-        return "<NONE>";
-    }
-    std::string ret;
-    for (unsigned int i = 0; i<32; ++i) {
-        Events event = 1u << i;
-        if (events & event) {
-            if (!ret.empty()) {
-                ret.append(", ");
-            }
-            ret.append(eventToString(event));
-        }
-    }
-    return ret;
-}
+std::string eventsToString(Events events);
 
 } // namespace epoll
-} // namespace vasum
+} // namespace ipc
+
+#endif // COMMON_EPOLL_EVENTS_HPP

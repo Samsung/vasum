@@ -26,6 +26,7 @@
 
 #include "utils/environment.hpp"
 #include "utils/execute.hpp"
+#include "utils/exception.hpp"
 #include "utils/make-clean.hpp"
 #include "base-exception.hpp"
 #include "logger/logger.hpp"
@@ -60,7 +61,7 @@ static inline int setns(int fd, int nstype)
 
 #endif
 
-using namespace vasum::utils;
+using namespace utils;
 
 namespace {
 
@@ -126,7 +127,6 @@ bool fdSend(int socket, int fd)
 
 } // namespace
 
-namespace vasum {
 namespace utils {
 
 
@@ -223,7 +223,7 @@ int passNemaspacedFd(int nsPid, int ns, const std::function<int()>& fdFactory)
     int fds[2];
     int ret = socketpair(PF_LOCAL, SOCK_RAW, 0, fds);
     if (ret == -1) {
-        LOGE("Can't create socket pair: " << vasum::getSystemErrorMessage());
+        LOGE("Can't create socket pair: " << getSystemErrorMessage());
         return -1;
     }
     bool success = executeAndWait([&, fds, nsPid, ns]() {
@@ -254,4 +254,3 @@ int passNemaspacedFd(int nsPid, int ns, const std::function<int()>& fdFactory)
 }
 
 } // namespace utils
-} // namespace vasum

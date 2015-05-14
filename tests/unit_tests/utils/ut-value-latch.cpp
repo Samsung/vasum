@@ -33,7 +33,7 @@
 
 BOOST_AUTO_TEST_SUITE(ValueLatchSuite)
 
-using namespace vasum::utils;
+using namespace utils;
 
 namespace
 {
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(Timeout)
     ValueLatch<int> testLatch;
 
     BOOST_REQUIRE_EXCEPTION(testLatch.get(EXPECTED_TIMEOUT),
-                            vasum::UtilsException,
+                            UtilsException,
                             WhatEquals("Timeout occured"));
 }
 
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(MultipleSet)
 
     testLatch.set(3);
     BOOST_REQUIRE_EXCEPTION(testLatch.set(2),
-                            vasum::UtilsException,
+                            UtilsException,
                             WhatEquals("Cannot set value multiple times"));
 }
 
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(MultipleGet)
     testLatch.set(3);
     testLatch.get(TIMEOUT);
     BOOST_REQUIRE_EXCEPTION(testLatch.get(EXPECTED_TIMEOUT),
-                            vasum::UtilsException,
+                            UtilsException,
                             WhatEquals("Timeout occured"));
 }
 

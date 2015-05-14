@@ -31,7 +31,6 @@
 #include <mutex>
 #include <condition_variable>
 
-namespace vasum {
 namespace utils {
 
 template <typename T>
@@ -121,6 +120,5 @@ T ValueLatch<T>::get(const unsigned int timeoutMs)
 }
 
 } // namespace utils
-} // namespace vasum
 
 #endif // COMMON_UTILS_VALUE_LATCH_H

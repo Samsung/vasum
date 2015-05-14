@@ -25,13 +25,11 @@
 #ifndef COMMON_UTILS_SIGNAL_HPP
 #define COMMON_UTILS_SIGNAL_HPP
 
-namespace vasum {
 namespace utils {
 
 void signalBlock(const int signalsToBlock);
 
 } // namespace utils
-} // namespace vasum
 
 
 #endif // COMMON_UTILS_SIGNAL_HPP

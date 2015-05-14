@@ -30,7 +30,6 @@
 #include <cassert>
 #include <glib-object.h>
 
-namespace vasum {
 namespace utils {
 
 namespace {
@@ -85,4 +84,3 @@ gboolean Glib::onTimerEvent(gpointer data)
 
 
 } // namespace utils
-} // namespace vasum

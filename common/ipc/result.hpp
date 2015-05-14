@@ -29,7 +29,6 @@
 #include <exception>
 #include <memory>
 
-namespace vasum {
 namespace ipc {
 
 template<typename Data>
@@ -69,6 +68,5 @@ struct ResultHandler {
 };
 
 } // namespace ipc
-} // namespace vasum
 
 #endif // COMMON_IPC_RESULT_HPP

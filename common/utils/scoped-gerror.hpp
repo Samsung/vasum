@@ -28,7 +28,6 @@
 #include <iostream>
 #include <gio/gio.h>
 
-namespace vasum{
 namespace utils {
 
 class ScopedGError {
@@ -73,6 +72,5 @@ private:
 };
 
 } // namespace utils
-} // namespace vasum
 
 #endif // COMMON_SCOPED_GERROR_HPP

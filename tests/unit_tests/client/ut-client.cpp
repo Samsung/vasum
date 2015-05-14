@@ -46,7 +46,7 @@
 #include <utility>
 
 using namespace vasum;
-using namespace vasum::utils;
+using namespace utils;
 
 namespace {
 

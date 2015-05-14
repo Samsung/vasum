@@ -69,7 +69,7 @@ public:
      */
     VsmStatus createSystem() noexcept;
 
-    vasum::epoll::EventPoll& getEventPoll() noexcept;
+    ipc::epoll::EventPoll& getEventPoll() noexcept;
 
     /**
      * Create client.

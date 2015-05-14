@@ -33,9 +33,9 @@
 #include <thread>
 #include <atomic>
 
-BOOST_AUTO_TEST_SUITE(WorkerSuite)
+using namespace utils;
 
-using namespace vasum::utils;
+BOOST_AUTO_TEST_SUITE(WorkerSuite)
 
 const int unsigned TIMEOUT = 1000;
 
