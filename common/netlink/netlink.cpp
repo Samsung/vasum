@@ -28,6 +28,7 @@
 #include "utils/exception.hpp"
 #include "utils/make-clean.hpp"
 #include "utils/environment.hpp"
+#include "base-exception.hpp"
 
 #include <logger/logger.hpp>
 #include <cassert>

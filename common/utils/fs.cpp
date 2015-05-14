@@ -45,8 +45,6 @@
 
 namespace fs = boost::filesystem;
 
-using namespace vasum;
-
 namespace utils {
 
 

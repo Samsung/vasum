@@ -34,7 +34,6 @@
 #include "ipc/epoll/glib-dispatcher.hpp"
 #include "ipc/epoll/thread-dispatcher.hpp"
 
-using namespace vasum;
 using namespace utils;
 using namespace ipc;
 using namespace ipc::epoll;

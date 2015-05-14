@@ -34,8 +34,6 @@
 #include <cstring>
 #include <cstdint>
 
-using namespace vasum;
-
 namespace utils {
 
 EventFD::EventFD()

@@ -356,4 +356,38 @@ The package provides libConfig development tools and libs.
 %{_includedir}/vasum-tools/config
 %{_libdir}/pkgconfig/libConfig.pc
 
+## libIpc Package #######################################################
+%package -n libIpc
+Summary:            IPC library
+Group:              Security/Other
+Requires:           libConfig
+Requires(post):     /sbin/ldconfig
+Requires(postun):   /sbin/ldconfig
 
+%description -n libIpc
+The package provides libIpc library.
+
+%post -n libIpc -p /sbin/ldconfig
+
+%postun -n libIpc -p /sbin/ldconfig
+
+%files -n libIpc
+%defattr(644,root,root,755)
+%{_libdir}/libIpc.so.0
+%attr(755,root,root) %{_libdir}/libIpc.so.%{version}
+
+%package -n libIpc-devel
+Summary:        Development IPC library
+Group:          Development/Libraries
+Requires:       libIpc = %{epoch}:%{version}-%{release}
+Requires:       pkgconfig(libLogger)
+Requires:       pkgconfig(libConfig)
+
+%description -n libIpc-devel
+The package provides libIpc development tools and libs.
+
+%files -n libIpc-devel
+%defattr(644,root,root,755)
+%{_libdir}/libIpc.so
+%{_includedir}/vasum-tools/ipc
+%{_libdir}/pkgconfig/libIpc.pc

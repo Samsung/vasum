@@ -44,7 +44,7 @@ SET_TARGET_PROPERTIES(${SERVER_CODENAME} PROPERTIES
 )
 
 TARGET_LINK_LIBRARIES(${SERVER_CODENAME} ${SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
-                      Logger Config SimpleDbus)
+                      Logger Config SimpleDbus Ipc)
 
 ## Subdirectories ##############################################################
 ADD_SUBDIRECTORY(configs)

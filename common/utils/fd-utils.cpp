@@ -39,8 +39,6 @@
 namespace fs = boost::filesystem;
 namespace chr = std::chrono;
 
-using namespace vasum;
-
 namespace utils {
 
 namespace {

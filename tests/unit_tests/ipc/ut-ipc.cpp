@@ -51,7 +51,6 @@
 #include <utility>
 #include <future>
 
-using namespace vasum;
 using namespace ipc;
 using namespace epoll;
 using namespace utils;

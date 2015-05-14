@@ -30,8 +30,6 @@
 #include <unistd.h>
 #include <stdexcept>
 
-using namespace vasum;
-
 namespace utils {
 
 

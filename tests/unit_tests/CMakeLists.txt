@@ -66,9 +66,9 @@ SET_TARGET_PROPERTIES(${SOCKET_TEST_CODENAME} PROPERTIES
 )
 
 TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
-                      Logger Config SimpleDbus)
+                      Logger Config SimpleDbus Ipc)
 TARGET_LINK_LIBRARIES(${SOCKET_TEST_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
-                      Logger Config SimpleDbus)
+                      Logger Config SimpleDbus Ipc)
 
 ## Subdirectories ##############################################################
 SET(VSM_TEST_CONFIG_INSTALL_DIR ${VSM_CONFIG_INSTALL_DIR}/tests)

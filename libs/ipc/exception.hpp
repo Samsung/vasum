@@ -26,16 +26,16 @@
 #ifndef COMMON_IPC_EXCEPTION_HPP
 #define COMMON_IPC_EXCEPTION_HPP
 
-#include "base-exception.hpp"
+#include <stdexcept>
 
 namespace ipc {
 
 /**
  * Base class for exceptions in IPC
  */
-struct IPCException: public vasum::VasumException {
+struct IPCException: public std::runtime_error {
     IPCException(const std::string& message)
-        : VasumException(message) {}
+        : std::runtime_error(message) {}
 };
 
 struct IPCParsingException: public IPCException {

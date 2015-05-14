@@ -587,7 +587,7 @@ void ZonesManager::handleNotifyActiveZoneCall(const std::string& caller,
             //XXX:get(iter).sendNotification(caller, application, message);
         }
         result->setVoid();
-    } catch (const VasumException&) {
+    } catch (const std::runtime_error&) {
         LOGE("Notification from " << caller << " hasn't been sent");
         result->setError(api::ERROR_INTERNAL, "Notification hasn't been sent");
     }
@@ -820,7 +820,7 @@ void ZonesManager::handleSetNetdevAttrsCall(const api::SetNetDevAttrsIn& data,
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << data.id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
-    } catch (const VasumException& ex) {
+    } catch (const std::runtime_error& ex) {
         LOGE("Can't set attributes: " << ex.what());
         result->setError(api::ERROR_INTERNAL, ex.what());
     }
@@ -842,7 +842,7 @@ void ZonesManager::handleGetNetdevAttrsCall(const api::GetNetDevAttrsIn& data,
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << data.first);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
-    } catch (const VasumException& ex) {
+    } catch (const std::runtime_error& ex) {
         LOGE("Can't set attributes: " << ex.what());
         result->setError(api::ERROR_INTERNAL, ex.what());
     }
@@ -860,7 +860,7 @@ void ZonesManager::handleGetNetdevListCall(const api::ZoneId& zoneId,
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zoneId.value);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
-    } catch (const VasumException& ex) {
+    } catch (const std::runtime_error& ex) {
         LOGE("Can't set attributes: " << ex.what());
         result->setError(api::ERROR_INTERNAL, ex.what());
     }
@@ -878,7 +878,7 @@ void ZonesManager::handleCreateNetdevVethCall(const api::CreateNetDevVethIn& dat
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << data.id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
-    } catch (const VasumException& ex) {
+    } catch (const std::runtime_error& ex) {
         LOGE("Can't create veth: " << ex.what());
         result->setError(api::ERROR_INTERNAL, ex.what());
     }
@@ -895,7 +895,7 @@ void ZonesManager::handleCreateNetdevMacvlanCall(const api::CreateNetDevMacvlanI
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << data.id);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
-    } catch (const VasumException& ex) {
+    } catch (const std::runtime_error& ex) {
         LOGE("Can't create macvlan: " << ex.what());
         result->setError(api::ERROR_INTERNAL, ex.what());
     }
@@ -913,7 +913,7 @@ void ZonesManager::handleCreateNetdevPhysCall(const api::CreateNetDevPhysIn& dat
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << data.first);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
-    } catch (const VasumException& ex) {
+    } catch (const std::runtime_error& ex) {
         LOGE("Can't create netdev: " << ex.what());
         result->setError(api::ERROR_INTERNAL, ex.what());
     }
@@ -931,7 +931,7 @@ void ZonesManager::handleDestroyNetdevCall(const api::DestroyNetDevIn& data,
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << data.first);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
-    } catch (const VasumException& ex) {
+    } catch (const std::runtime_error& ex) {
         LOGE("Can't create netdev: " << ex.what());
         result->setError(api::ERROR_INTERNAL, ex.what());
     }
@@ -948,7 +948,7 @@ void ZonesManager::handleDeleteNetdevIpAddressCall(const api::DeleteNetdevIpAddr
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << data.zone);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
-    } catch (const VasumException& ex) {
+    } catch (const std::runtime_error& ex) {
         LOGE("Can't delete address: " << ex.what());
         result->setError(api::ERROR_INTERNAL, ex.what());
     }
@@ -1022,7 +1022,7 @@ void ZonesManager::handleGetDeclarationsCall(const api::ZoneId& zoneId,
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << zoneId.value);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
-    } catch (const VasumException& ex) {
+    } catch (const std::runtime_error& ex) {
         LOGE(ex.what());
         result->setError(api::ERROR_INTERNAL, ex.what());
     }
@@ -1039,7 +1039,7 @@ void ZonesManager::handleRemoveDeclarationCall(const api::RemoveDeclarationIn& d
     } catch (const InvalidZoneIdException&) {
         LOGE("No zone with id=" << data.first);
         result->setError(api::ERROR_INVALID_ID, "No such zone id");
-    } catch (const VasumException& ex) {
+    } catch (const std::runtime_error& ex) {
         LOGE(ex.what());
         result->setError(api::ERROR_INTERNAL, ex.what());
     }
@@ -1179,7 +1179,7 @@ void ZonesManager::createZone(const std::string& id,
     try {
         LOGI("Generating config from " << zoneTemplatePath);
         generateNewConfig(id, zoneTemplatePath);
-    } catch (VasumException& e) {
+    } catch (std::runtime_error& e) {
         LOGE("Generate config failed: " << e.what());
         utils::launchAsRoot(std::bind(removeAllWrapper, zonePathStr));
         throw e;
@@ -1188,7 +1188,7 @@ void ZonesManager::createZone(const std::string& id,
     LOGT("Creating new zone");
     try {
         insertZone(id, zoneTemplatePath);
-    } catch (VasumException& e) {
+    } catch (std::runtime_error& e) {
         LOGE("Creating new zone failed: " << e.what());
         utils::launchAsRoot(std::bind(removeAllWrapper, zonePathStr));
         throw e;
@@ -1207,7 +1207,7 @@ void ZonesManager::handleCreateZoneCall(const api::CreateZoneIn& data,
         result->setVoid();
     } catch (const InvalidZoneIdException& e) {
         result->setError(api::ERROR_INVALID_ID, "Existing or invalid zone id");
-    } catch (const VasumException& e) {
+    } catch (const std::runtime_error& e) {
         result->setError(api::ERROR_INTERNAL, "Failed to create zone");
     }
 }
@@ -1222,7 +1222,7 @@ void ZonesManager::handleDestroyZoneCall(const api::ZoneId& zoneId,
         } catch (const InvalidZoneIdException&) {
             LOGE("Failed to destroy zone - no such zone id: " << zoneId.value);
             result->setError(api::ERROR_INVALID_ID, "No such zone id");
-        } catch (const VasumException& e) {
+        } catch (const std::runtime_error& e) {
             LOGE("Error during zone destruction: " << e.what());
             result->setError(api::ERROR_INTERNAL, "Failed to destroy zone");
             return;

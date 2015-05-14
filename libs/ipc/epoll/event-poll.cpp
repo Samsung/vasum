@@ -33,7 +33,6 @@
 #include <string.h>
 #include <assert.h>
 
-using namespace vasum;
 using namespace utils;
 
 namespace ipc {

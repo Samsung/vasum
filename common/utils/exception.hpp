@@ -26,8 +26,7 @@
 #ifndef COMMON_UTILS_EXCEPTION_HPP
 #define COMMON_UTILS_EXCEPTION_HPP
 
-#include "base-exception.hpp"
-
+#include <stdexcept>
 
 namespace utils {
 
@@ -35,9 +34,9 @@ namespace utils {
 /**
  * Base class for exceptions in utils
  */
-struct UtilsException: public vasum::VasumException {
+struct UtilsException: public std::runtime_error {
 
-    UtilsException(const std::string& error) : vasum::VasumException(error) {}
+    UtilsException(const std::string& error) : std::runtime_error(error) {}
 };
 
 /**
