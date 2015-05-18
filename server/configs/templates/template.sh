@@ -61,10 +61,9 @@ EOF
 # prepare pre start hook
 > ${path}/pre-start.sh
 cat <<EOF >> ${path}/pre-start.sh
-if [ -z "\$(/usr/sbin/brctl show | /bin/grep -P "${br_name}\t")" ]
+if [ -z "\$(/usr/sbin/ip show | /bin/grep -P "${br_name}\t")" ]
 then
-    /usr/sbin/brctl addbr ${br_name}
-    /usr/sbin/brctl setfd ${br_name} 0
+    /usr/sbin/ip link add name ${br_name} type bridge
     /sbin/ifconfig ${br_name} ${ipv4_gateway} netmask 255.255.255.0 up
 fi
 if [ -z "\$(/usr/sbin/iptables -t nat -S | /bin/grep MASQUERADE)" ]

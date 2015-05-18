@@ -27,7 +27,7 @@ BuildRequires:  pkgconfig(libsystemd-journal)
 BuildRequires:  pkgconfig(libsystemd-daemon)
 BuildRequires:  pkgconfig(sqlite3)
 Requires(post): libcap-tools
-Requires:       bridge-utils
+Requires:       iproute2
 Requires:       libjson >= 0.10
 
 %description
