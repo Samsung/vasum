@@ -125,7 +125,7 @@ public:
     template<typename SentDataType, typename ReceivedDataType>
     std::shared_ptr<ReceivedDataType> callSync(const MethodID methodID,
                                                const std::shared_ptr<SentDataType>& data,
-                                               unsigned int timeoutMS = 500);
+                                               unsigned int timeoutMS = 5000);
 
     /**
      * Asynchronous method call. The return callback will be called on

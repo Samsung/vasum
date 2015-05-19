@@ -50,7 +50,7 @@ public:
      * @param size size of the buffer
      * @param timeoutMS timeout in milliseconds
      */
-    void write(const void* bufferPtr, const size_t size, const unsigned int timeoutMS = 500);
+    void write(const void* bufferPtr, const size_t size, const unsigned int timeoutMS = 5000);
 
     /**
      * Reads a value of the given type.
@@ -59,7 +59,7 @@ public:
      * @param size size of the buffer
      * @param timeoutMS timeout in milliseconds
      */
-    void read(void* bufferPtr, const size_t size, const unsigned int timeoutMS = 500);
+    void read(void* bufferPtr, const size_t size, const unsigned int timeoutMS = 5000);
 
 private:
     int mFD;
