@@ -47,8 +47,7 @@ ADD_EXECUTABLE(${SOCKET_TEST_CODENAME} ${socket_test_SRCS} ${common_SRCS} ${clie
 ## Link libraries ##############################################################
 FIND_PACKAGE (Boost COMPONENTS unit_test_framework system filesystem regex)
 
-PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED lxc json gio-2.0 libsystemd-daemon
-                  libsystemd-journal libcap-ng)
+PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED lxc json gio-2.0 libcap-ng)
 INCLUDE_DIRECTORIES(${COMMON_FOLDER} ${SERVER_FOLDER} ${UNIT_TESTS_FOLDER} ${CLIENT_FOLDER}
                     ${LIBS_FOLDER} ${SOCKET_TEST_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${UT_SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})

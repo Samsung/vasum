@@ -23,8 +23,6 @@ BuildRequires:  libjson-devel >= 0.10
 BuildRequires:  libcap-ng-devel
 BuildRequires:  lxc-devel
 BuildRequires:  pkgconfig(glib-2.0)
-BuildRequires:  pkgconfig(libsystemd-journal)
-BuildRequires:  pkgconfig(libsystemd-daemon)
 BuildRequires:  pkgconfig(sqlite3)
 Requires(post): libcap-tools
 Requires:       iproute2
@@ -261,6 +259,7 @@ systemctl daemon-reload
 %package -n libLogger
 Summary:            Logger library
 Group:              Security/Other
+BuildRequires:      pkgconfig(libsystemd-journal)
 Requires(post):     /sbin/ldconfig
 Requires(postun):   /sbin/ldconfig
 
@@ -364,6 +363,7 @@ The package provides libConfig development tools and libs.
 %package -n libIpc
 Summary:            IPC library
 Group:              Security/Other
+BuildRequires:      pkgconfig(libsystemd-daemon)
 Requires:           libConfig
 Requires(post):     /sbin/ldconfig
 Requires(postun):   /sbin/ldconfig
