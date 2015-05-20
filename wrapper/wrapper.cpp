@@ -718,7 +718,7 @@ API const char *vsm_error_string(vsm_error_e e)
         return vsm_error_string_v0_34((struct vsm_context *)ctx);
     }
     else {
-        return vsm_error_string_v0_3_1(static_cast<vsm_error_e>((int)ctx));
+        return vsm_error_string_v0_3_1(e);
     }
 }
 
