@@ -241,6 +241,18 @@ VsmStatus Client::vsm_get_active_zone_id(VsmString* id) noexcept
     });
 }
 
+VsmStatus Client::vsm_get_zone_rootpath(const char* id, VsmString* rootpath) noexcept
+{
+    assert(id);
+    assert(rootpath);
+
+    return coverException([&] {
+        api::ZoneInfoOut info;
+        mHostClient.callGetZoneInfo({ id }, info);
+        *rootpath = ::strdup(info.rootPath.c_str());
+    });
+}
+
 VsmStatus Client::vsm_lookup_zone_by_pid(int pid, VsmString* id) noexcept
 {
     assert(id);

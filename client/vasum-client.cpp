@@ -133,6 +133,11 @@ API VsmStatus vsm_get_active_zone_id(VsmClient client, VsmString* id)
     return getClient(client).vsm_get_active_zone_id(id);
 }
 
+API VsmStatus vsm_get_zone_rootpath(VsmClient client, const char* id, VsmString* rootpath)
+{
+    return getClient(client).vsm_get_zone_rootpath(id, rootpath);
+}
+
 API VsmStatus vsm_lookup_zone_by_pid(VsmClient client, int pid, VsmString* id)
 {
     return getClient(client).vsm_lookup_zone_by_pid(pid, id);

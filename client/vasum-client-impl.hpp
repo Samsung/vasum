@@ -105,6 +105,11 @@ public:
     VsmStatus vsm_get_active_zone_id(VsmString* id) noexcept;
 
     /**
+     *  @see ::vsm_get_zone_rootpath
+     */
+    VsmStatus vsm_get_zone_rootpath(const char* id, VsmString* rootpath) noexcept;
+
+    /**
      *  @see ::vsm_lookup_zone_by_pid
      */
     VsmStatus vsm_lookup_zone_by_pid(int pid, VsmString* id) noexcept;

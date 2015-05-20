@@ -334,6 +334,17 @@ VsmStatus vsm_get_zone_ids(VsmClient client, VsmArrayString* array);
 VsmStatus vsm_get_active_zone_id(VsmClient client, VsmString* id);
 
 /**
+ * Get zone rootfs path.
+ *
+ * @param[in] client vasum-server's client
+ * @param[in] id zone name
+ * @param[out] rootpath zone rootfs path
+ * @return status of this function call
+ * @remark Use @p vsm_string_free() to free memory occupied by @p rootpath.
+ */
+VsmStatus vsm_get_zone_rootpath(VsmClient client, const char* id, VsmString* rootpath);
+
+/**
  * Get zone name of process with given pid.
  *
  * @param[in] client vasum-server's client
