@@ -39,8 +39,12 @@
 #include <sys/stat.h>
 #include <pthread.h>
 #include <dirent.h>
+#include <stdarg.h>
 #include <sys/socket.h>
 #include <asm/unistd.h>
+
+#include "logger/logger.hpp"
+#include "logger/logger-scope.hpp"
 
 #define UNUSED(x) ((void)(x))
 
@@ -48,158 +52,53 @@ extern "C" {
 
 // find_container_by_pid
 API char *find_container_by_pid(pid_t  /*pid*/) {
+    LOGS("");
     return NULL;
 }
 // get_domain_pid
 API pid_t get_domain_pid(const char * /*name*/, const char * /*target*/) {
+    LOGS("");
     return -1;
 }
 
-// mainloop_add_watch
-int mainloop_add_watch(struct mainloop * /*mainloop*/, int  /*fd*/, mainloop_event  /*event*/, mainloop_callback  /*callback*/, void * /*data*/) {
-    return 0;
-}
-// mainloop_cleanup
-int mainloop_cleanup(struct mainloop * /*mainloop*/) {
-    return 0;
-}
-// mainloop_create
-struct mainloop *mainloop_create(void) {
-    struct mainloop *mainloop = (struct mainloop *)malloc(sizeof(struct mainloop));
-    mainloop->epfd = -1; // epoll_create(2);
-    pthread_mutex_init(&mainloop->ml_mutex, NULL);
-    pthread_rwlock_init(&mainloop->lock, NULL);
-    adt_init_list(&mainloop->watches);
-    return mainloop;
-}
-// mainloop_dispatch
-int mainloop_dispatch(struct mainloop * /*mainloop*/, int  /*timeout*/) {
-    return 0;
-}
-// mainloop_remove_watch
-int mainloop_remove_watch(struct mainloop * /*mainloop*/, int  /*fd*/) {
-    return 0;
-}
-// mainloop_run
-int mainloop_run(struct mainloop * /*mainloop*/, int  /*timeout*/) {
-    return 0;
-}
-// mxe_alloc_endpoint
-struct mxe_endpoint *mxe_alloc_endpoint(struct mxe_engine * /*engine*/, int  /*fd*/, mainloop_callback  /*callback*/, int  /*type*/) {
-    return NULL;
-}
-// mxe_broadcast
-int mxe_broadcast(struct mxe_engine * /*engine*/, struct mxe_emple * /*emple*/, ...) {
-    return 0;
-}
-// mxe_create_client
-struct mxe_endpoint *mxe_create_client(struct mxe_engine *engine, const char * /*addr*/) {
-    struct mxe_endpoint *ep = (struct mxe_endpoint *)malloc(sizeof(struct mxe_endpoint));
-    ep->type = 1; //MXE_EPT_SLAVE
-    ep->fd = -1; //sock_connect(addr);
-    ep->engine = engine;
-    pthread_rwlock_init(&ep->queue_lock, NULL);
-    pthread_mutex_init(&ep->rd_mutex, NULL);
-    pthread_mutex_init(&ep->wr_mutex, NULL);
-    adt_init_list(&ep->queue);
-    adt_init_list(&ep->list);
-    return ep;
-}
-// mxe_create_server
-struct mxe_endpoint *mxe_create_server(struct mxe_engine * /*engine*/, const char * /*addr*/) {
-    return NULL;
-}
-// mxe_emple_factory
-struct mxe_emple *mxe_emple_factory(struct mxe_proxy * /*proxy*/) {
-    return NULL;
-}
-// mxe_finalize_engine
-int mxe_finalize_engine(struct mxe_engine * /*engine*/) {
-    return 0;
-}
-// mxe_free_endpoint
-int mxe_free_endpoint(struct mxe_endpoint * /*ep*/) {
-    return 0;
-}
-// mxe_invoke
-int mxe_invoke(struct mxe_endpoint * /*ep*/, struct mxe_emple * /*emple*/, ...) {
-    return 0;
-}
-// mxe_lookup_emple
-struct mxe_emple *mxe_lookup_emple(struct mxe_endpoint * /*ep*/, int  /*signature*/) {
-    return NULL;
-}
-// mxe_lookup_proxy
-struct mxe_proxy *mxe_lookup_proxy(struct mxe_engine * /*engine*/, int  /*id*/) {
-    return NULL;
-}
-// mxe_pop_integer
-int mxe_pop_integer(struct mxe_message * /*msg*/) {
-    return 0;
-}
-// mxe_pop_string
-char *mxe_pop_string(struct mxe_message * /*msg*/) {
-    return NULL;
-}
-// mxe_prepare_engine
-struct mxe_engine *mxe_prepare_engine(struct mainloop *mainloop, void *data) {
-    struct mxe_engine *engine = (struct mxe_engine *)malloc(sizeof(struct mxe_engine));
-    engine->data = data;
-    engine->mainloop = mainloop;
-    pthread_rwlock_init(&engine->endpoint_lock, NULL);
-    adt_init_list(&engine->endpoints);
-
-    return engine;
-}
-// mxe_push_integer
-int mxe_push_integer(struct mxe_message * /*msg*/, int  /*value*/) {
-    return 0;
-}
-// mxe_push_string
-int mxe_push_string(struct mxe_message * /*msg*/, const char * /*str*/) {
-    return 0;
-}
-// mxe_register_proxy
-int mxe_register_proxy(struct mxe_engine * /*engine*/, struct mxe_proxy * /*proxy*/) {
-    return 0;
-}
-// mxe_reply_message (intenal)
-int mxe_reply_message(struct mxe_endpoint * /*ep*/, struct mxe_message * /*origin*/, ...) {
-    return 0;
-}
-// mxe_reset_payload
-void mxe_reset_payload(struct mxe_message * /*msg*/) {
-}
-// mxe_wait_for_event
-int mxe_wait_for_event(struct mxe_endpoint * /*ep*/, struct mxe_emple * /*emple*/) {
-    return 0;
-}
-// sock_close_socket (intern)
-int sock_close_socket(int  /*fd*/) {
+// sock_close_socket
+API int sock_close_socket(int  /*fd*/) {
+    LOGS("");
     return 0;
 }
 // sock_connect
 API int sock_connect(const char * /*path*/) {
-    return 0;
+    LOGS("");
+    return -1;
 }
 // sock_create_socket
 API int sock_create_socket(const char * /*path*/, int  /*type*/, int  /*flags*/) {
-    return 0;
+    LOGS("");
+    return -1;
 }
 // sock_monitor_address
 API int sock_monitor_address(char * /*buffer*/, int  /*len*/, const char * /*lxcpath*/) {
+    LOGS("");
     return 0;
 }
 // sock_recv_fd (intern)
 API int sock_recv_fd(int  /*fd*/, int * /*recvfd*/, void * /*data*/, size_t  /*size*/) {
+    LOGS("");
     return 0;
 }
 // sock_send_fd
 API int sock_send_fd(int  /*fd*/, int  /*sendfd*/, void * /*data*/, size_t  /*size*/) {
+    LOGS("");
     return 0;
 }
 // vasum_log
-API void vasum_log(int  /*type*/, const char *  /*tag*/, const char *  /*fmt*/ , ...) {
+API void vasum_log(int type, const char *tag, const char *fmt, ...) {
+    va_list arg_ptr;
+    char buf[100];
+    va_start(arg_ptr, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, arg_ptr);
+    va_end(arg_ptr);
+    LOGS("type=" << type << " tag=" << tag << " msg=" << buf);
 }
 
 #define MAX_ERROR_MSG    0x1000
@@ -222,6 +121,7 @@ const char *const fso_type_strtab[] = {
 
 API const char *fso_type_to_string(vsm_fso_type_t fso)
 {
+    LOGS("");
     if (fso < 0 || fso > VSM_FSO_MAX_TYPE) {
         return NULL;
     }
@@ -231,6 +131,7 @@ API const char *fso_type_to_string(vsm_fso_type_t fso)
 
 API int wait_for_pid_status(pid_t pid)
 {
+    LOGS("");
     int status, ret;
 
  again:
@@ -239,8 +140,7 @@ API int wait_for_pid_status(pid_t pid)
         if (errno == EINTR) {
             goto again;
         } else {
-            ERROR("waitpid- pid : %d error : %s", pid,
-                  strerror(errno));
+            ERROR("waitpid pid : %d error : %s", pid, strerror(errno));
             return -1;
         }
     }
@@ -251,6 +151,7 @@ API int wait_for_pid_status(pid_t pid)
 
 API vsm_fso_type_t fso_string_to_type(char *str)
 {
+    LOGS("");
     int len;
     int i;
     for (i = 0; i <= VSM_FSO_MAX_TYPE; i++) {
@@ -264,6 +165,7 @@ API vsm_fso_type_t fso_string_to_type(char *str)
 
 API int mkdir_p(const char *dir, mode_t mode)
 {
+    LOGS("");
     const char *tmp = dir;
     const char *orig = dir;
     char *makeme;
@@ -286,6 +188,7 @@ API int mkdir_p(const char *dir, mode_t mode)
 
 API int lock_fd(int fd, int wait)
 {
+    LOGS("");
     int ret;
     struct flock f;
 
@@ -309,6 +212,7 @@ API int lock_fd(int fd, int wait)
 
 API int unlock_fd(int fd)
 {
+    LOGS("");
     struct flock f;
     f.l_type = F_UNLCK;
     f.l_whence = SEEK_SET;
@@ -319,11 +223,13 @@ API int unlock_fd(int fd)
 
 API int copy_smacklabel(const char * /*source*/, const char * /*dest*/)
 {
+    LOGS("");
     return 0;
 }
 
 API int remove_file(char *path)
 {
+    LOGS("");
     struct stat path_stat;
     DIR *dp;
     struct dirent *d;
@@ -376,6 +282,7 @@ API int remove_file(char *path)
 
 API int copy_file(const char *source, const char *dest, int /*flags*/)
 {
+    LOGS("");
     int ret;
     FILE *sfp, *dfp;
     size_t nread, nwritten, size = BUF_SIZE;
@@ -426,6 +333,7 @@ API int copy_file(const char *source, const char *dest, int /*flags*/)
 
 API int regex_compile(regex_t * r, const char *regex_text)
 {
+    LOGS("");
     int status = regcomp(r, regex_text, REG_EXTENDED | REG_NEWLINE);
 
     if (status != 0) {
@@ -442,6 +350,7 @@ API int regex_compile(regex_t * r, const char *regex_text)
 
 API int regex_match(regex_t * r, const char *to_match)
 {
+    LOGS("");
     const char *p = to_match;
     const int n_matches = 10;
     regmatch_t m[n_matches];
@@ -485,6 +394,7 @@ API int regex_match(regex_t * r, const char *to_match)
 
 API int get_peer_pid(int fd)
 {
+    LOGS("");
     struct ucred cred;
     socklen_t cr_len = sizeof(cred);
     if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &cred, &cr_len) < 0) {
@@ -495,23 +405,25 @@ API int get_peer_pid(int fd)
 
 API pid_t gettid(void)
 {
+    LOGS("");
     return syscall(__NR_gettid);
 }
 
 API int set_smacklabel_fd(int fd, const char *xattr_name, const char *label)
 {
+    LOGS("");
     size_t len;
     int ret;
 
-    if(fd < 0)
+    if (fd < 0)
         return -1;
 
     len = strnlen(label, SMACK_LABEL_LEN + 1);
     if (len > SMACK_LABEL_LEN)
         return -1;
 
-    ret = fsetxattr(fd, xattr_name, label, len+1, 0);
-    if(ret != 0) {
+    ret = fsetxattr(fd, xattr_name, label, len + 1, 0);
+    if (ret != 0) {
         ERROR("Set Smack lable error : %s", strerror(errno));
     }
     return ret;
@@ -519,52 +431,55 @@ API int set_smacklabel_fd(int fd, const char *xattr_name, const char *label)
 
 API int set_smacklabel(const char *path, const char *xattr_name, const char *label)
 {
+    LOGS("");
     size_t len;
     int ret;
 
-    if(path == NULL)
+    if (path == NULL)
         return -1;
 
     len = strnlen(label, SMACK_LABEL_LEN + 1);
     if (len > SMACK_LABEL_LEN)
         return -1;
 
-    ret = lsetxattr(path, xattr_name, label, len+1, 0);
-    if(ret != 0) {
+    ret = lsetxattr(path, xattr_name, label, len + 1, 0);
+    if (ret != 0) {
         ERROR("Set Smack lable error : %s", strerror(errno));
     }
     return ret;
 }
 API char *get_self_smacklabel(void)
 {
+    LOGS("");
     int ret;
     int fd;
     const char *attr_path = "/proc/self/attr/current";
-    char buffer[SMACK_LABEL_LEN+1];
+    char buffer[SMACK_LABEL_LEN + 1];
 
-    bzero(buffer, SMACK_LABEL_LEN+1);
+    bzero(buffer, SMACK_LABEL_LEN + 1);
 
     fd = open(attr_path, O_RDONLY);
-    if( fd < 0) {
+    if (fd < 0) {
         return NULL;
     }
 
-    ret = read(fd, buffer, SMACK_LABEL_LEN+1);
+    ret = read(fd, buffer, SMACK_LABEL_LEN + 1);
     close(fd);
     if (ret < 0) {
         return NULL;
     }
 
-    if( ret > SMACK_LABEL_LEN) {
+    if (ret > SMACK_LABEL_LEN) {
         //return NULL;
     }
-    buffer[SMACK_LABEL_LEN]=0;
+    buffer[SMACK_LABEL_LEN] = 0;
 
     return strdup(buffer);
 }
 
 API int get_self_cpuset(char *name, int buf_sz)
 {
+    LOGS("");
     int fd;
     int lxc_len, ret;
     char cpuset_path[] = "/proc/self/cpuset";
@@ -585,7 +500,7 @@ API int get_self_cpuset(char *name, int buf_sz)
     close(fd);
 
     lxc_len = sizeof("/lxc");
-    if( ret < lxc_len) {
+    if (ret < lxc_len) {
         name[0] = '/';
         name[1] = 0;
         return 1;
@@ -593,14 +508,14 @@ API int get_self_cpuset(char *name, int buf_sz)
         char *p;
         p = current_name + lxc_len;
 
-        while(*p != '\0') {
-            if(*p == '/') {
+        while (*p != '\0') {
+            if (*p == '/') {
                 *p = '\0';
                 break;
             }
             p++;
         }
-        snprintf(name, buf_sz, "%s", current_name+lxc_len);
+        snprintf(name, buf_sz, "%s", current_name + lxc_len);
     }
 
     return ret - lxc_len;
@@ -609,6 +524,7 @@ API int get_self_cpuset(char *name, int buf_sz)
 
 API char * get_pid_cpuset(int pid)
 {
+    LOGS("");
     int fd;
     int ret;
     char cpuset_path[PATH_MAX];
@@ -617,7 +533,7 @@ API char * get_pid_cpuset(int pid)
     snprintf(cpuset_path, PATH_MAX, "/proc/%d/cpuset", pid);
 
     ret = access(cpuset_path, F_OK | R_OK);
-    if( ret != 0 )
+    if (ret != 0)
         return NULL;
 
     fd = open(cpuset_path, O_RDONLY);
@@ -641,6 +557,7 @@ API char * get_pid_cpuset(int pid)
 
 API char * read_namespace_link(const char *ns, int pid)
 {
+    LOGS("");
     char ns_path[PATH_MAX];
     char buf[NAME_MAX];
     int ret;
@@ -648,11 +565,11 @@ API char * read_namespace_link(const char *ns, int pid)
     snprintf(ns_path, PATH_MAX, "/proc/%d/ns/%s", pid, ns);
 
     ret = access(ns_path, F_OK);
-    if(ret != 0)
+    if (ret != 0)
         return NULL;
 
     ret = readlink(ns_path, buf, NAME_MAX);
-    if( ret == -1 ) {
+    if (ret == -1) {
         ERROR("Failed to readlink ns file - [%s]", ns_path);
         return NULL;
     }
@@ -669,6 +586,7 @@ API char * read_namespace_link(const char *ns, int pid)
 API int dev_enumerate_nodes(const char *cname, dev_enumerator enumerator,
             void *data)
 {
+    LOGS("");
     int ret;
     FILE *fp;;
     char path[PATH_MAX], entry[64];
@@ -706,6 +624,7 @@ API int dev_enumerate_nodes(const char *cname, dev_enumerator enumerator,
 
 API int dev_terminal_enumerator(int type, int major, int minor, void *data)
 {
+    LOGS("");
     int *dev = (int*)data;
 
     *dev = minor;
@@ -720,6 +639,7 @@ API int dev_terminal_enumerator(int type, int major, int minor, void *data)
 // libs/namespace.c
 API pid_t get_init_pid(const char *name)
 {
+    LOGS("");
     char filename[PATH_MAX];
     FILE *fp;
     pid_t ret = -1;
@@ -746,6 +666,7 @@ API pid_t get_init_pid(const char *name)
 
 API pid_t get_zone_pid(const char *name, const char *target)
 {
+    LOGS("");
     char path[PATH_MAX];
     char cmd[PATH_MAX];
     int res = 0, len;
@@ -823,6 +744,7 @@ API pid_t get_zone_pid(const char *name, const char *target)
 
 API int open_ns(pid_t pid, const char *name)
 {
+    LOGS("");
     int fd, ret;
     char path[PATH_MAX];
 
@@ -846,6 +768,7 @@ API int open_ns(pid_t pid, const char *name)
 #include <linux/vt.h>
 static int is_console(int fd)
 {
+    LOGS("");
     char arg;
 
     return (isatty(fd) &&
@@ -873,6 +796,7 @@ static int open_console(const char *path)
 
 API int get_console_fd(const char *path)
 {
+    LOGS("");
     int fd;
 
     if (path) {
@@ -905,6 +829,7 @@ API int get_console_fd(const char *path)
 
 API int vt_switch_terminal(int id)
 {
+    LOGS("");
     int fd, ret = -1;
 
     fd = get_console_fd(NULL);
@@ -928,6 +853,7 @@ API int vt_switch_terminal(int id)
 
 API int vt_find_unused_terminal(void)
 {
+    LOGS("");
     int fd, nr = -1;
 
     fd = get_console_fd(NULL);
@@ -949,6 +875,7 @@ API int vt_find_unused_terminal(void)
 
 API int vt_query_active_terminal(void)
 {
+    LOGS("");
     int fd, ret = -1;
     struct vt_stat vtstat;
 
@@ -1189,6 +1116,7 @@ static int parse_statement(struct parser_context *ctx, int argc, char **argv,
 
 API int parse_stream_core(struct parser_context *ctx, char *s)
 {
+    LOGS("");
     struct unit_keyword_callback *kw;
     struct parser_state state;
     char *args[PARSER_MAXARGS];
@@ -1270,6 +1198,7 @@ static char *open_stream(const char *name, unsigned int *_sz)
 
 API int parse_stream(const char *name, struct unit_parser *parser)
 {
+    LOGS("");
     char *stream;
     struct parser_context *ctx;
 
@@ -1293,6 +1222,13 @@ API int parse_stream(const char *name, struct unit_parser *parser)
     free(ctx);
 
     return 0;
+}
+API struct vsm_netdev *alloc_netdev(struct vsm_zone * /*zone*/, vsm_netdev_type_t  /*type*/, const char * /*netdev_name*/) {
+    LOGS("");
+    return NULL;
+}
+API void enter_to_ns(pid_t  /*pid*/, char * /*name*/) {
+    LOGS("");
 }
 
 // dummy-ops
@@ -1350,7 +1286,7 @@ static vsm_zone_h dummy_get_foreground(vsm_context_h  ctx)
 
 static int dummy_iterate_zone(vsm_context_h  ctx, vsm_zone_iter_cb  callback, void *user_data)
 {
-    if( callback) {
+    if (callback) {
         callback(ctx->root_zone, user_data);
     }
     return VSM_ERROR_NONE;
@@ -1440,7 +1376,7 @@ static int dummy_attach_zone_wait(vsm_context_h  ctx, const char *zone_name,
                   vsm_attach_command_s * command,
                   vsm_attach_options_s * opts)
 {
-    pid_t pid=0;
+    pid_t pid = 0;
     int ret, status;
 
     ret = dummy_attach_zone(ctx, zone_name, command, opts, &pid);
@@ -1482,7 +1418,7 @@ static int dummy_is_equivalent_zone(vsm_context_h  /*ctx*/, pid_t  /*pid*/)
 
 static int dummy_get_host_pid(vsm_zone_h zone, pid_t pid)
 {
-    if(zone == zone->parent)
+    if (zone == zone->parent)
         return pid;
 
     return -VSM_ERROR_NO_OBJECT;
@@ -1517,7 +1453,7 @@ static int dummy_declare_link(vsm_context_h  /*ctx*/, const char *source,
 }
 
 struct vasum_ops dummy_ops;
-static int dummy_ops_init(){
+static int dummy_ops_init() {
     dummy_ops.create_zone = dummy_create_zone;
     dummy_ops.destroy_zone = dummy_destroy_zone;
     dummy_ops.start_zone = dummy_start_zone;
@@ -1541,5 +1477,6 @@ static int dummy_ops_init(){
     return 0;
 }
 int dummy_ops_init_i = dummy_ops_init();
+
 
 } //extern "C"

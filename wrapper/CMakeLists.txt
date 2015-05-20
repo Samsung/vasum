@@ -58,7 +58,7 @@ INCLUDE_DIRECTORIES(${LIBS_FOLDER})
 INCLUDE_DIRECTORIES(${SERVER_FOLDER})
 INCLUDE_DIRECTORIES(${CLIENT_FOLDER})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_DEPS_LIBRARIES} ${Boost_LIBRARIES}
-                      Config SimpleDbus)
+                      Config SimpleDbus Ipc)
 
 ## Generate the pc file ########################################################
 CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_BINARY_DIR}/${PC_FILE} @ONLY)

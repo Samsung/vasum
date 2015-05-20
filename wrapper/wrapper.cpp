@@ -57,10 +57,6 @@ static struct
     int glib_stop;
 } wrap;
 
-extern "C" {
-API void vsm_string_free(VsmString string);
-API void vsm_array_string_free(VsmArrayString astring);
-}
 
 #ifndef offsetof
 #define offsetof(type, memb) ((size_t)&((type *)0)->memb)
@@ -77,7 +73,6 @@ API void vsm_array_string_free(VsmArrayString astring);
 
 #define vsm_attach_command_t vsm_attach_command_s
 #define vsm_attach_options_t vsm_attach_options_s
-#define vsm_zone_state_cb vsm_zone_state_changed_cb
 
 void __attribute__ ((constructor)) wrapper_load(void);
 void __attribute__ ((destructor)) wrapper_unload(void);
@@ -108,9 +103,9 @@ static void callcheck()
 void init_wrapper()
 {
     if (wrap.done) return ;
-    memset(&wrap,0,sizeof(wrap));
+    memset(&wrap, 0, sizeof(wrap));
     wrap.done = 1;
-    LOGS("WRAP:");
+    LOGS("");
 }
 
 static struct vsm_zone* wrap_vsm_zone(WrappedContext *w, VsmZone zone, bool create = false)
@@ -129,6 +124,7 @@ static struct vsm_zone* wrap_vsm_zone(WrappedContext *w, VsmZone zone, bool crea
         zw.client = w->client;
         zw.zone = zone;
         zw.vz.name = zone->id;
+        zw.vz.id = 0;
         zw.vz.type = NULL;
         zw.vz.user_data = NULL;
         zw.vz.rootfs_path = zone->rootfs_path;
@@ -143,7 +139,7 @@ static struct vsm_zone* wrap_vsm_zone(WrappedContext *w, VsmZone zone, bool crea
 static int wrap_error(VsmStatus st, const Client *c)
 {
     if (st == VSMCLIENT_SUCCESS) LOGI("return success " << st);
-    else LOGE("return error " << st << "m=" << (c ? c->vsm_get_status_message() : "n/a"));
+    else LOGE("return error=" << st << ", msg=" << (c ? c->vsm_get_status_message() : "n/a"));
     switch (st) {
         case VSMCLIENT_SUCCESS: return VSM_ERROR_NONE;
         case VSMCLIENT_CUSTOM_ERROR: return -VSM_ERROR_GENERIC;
@@ -171,7 +167,7 @@ static void init_context_wrap(WrappedContext *w)
     //init root_zone
     ctx->root_zone = &w->hq_root;
     ctx->root_zone->name = (char*)"";
-    ctx->root_zone->id=0;
+    ctx->root_zone->id = 0;
     ctx->root_zone->rootfs_path = (char*)"/";
 
     ctx->root_zone->terminal = -1;
@@ -201,9 +197,13 @@ static void init_context_wrap(WrappedContext *w)
     //ctx->data = ep;
 }
 
+extern "C" {
+API void vsm_string_free(VsmString string);
+API void vsm_array_string_free(VsmArrayString astring);
+
 API vsm_context_h vsm_create_context(void)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
     WrappedContext *w = new WrappedContext();
     init_context_wrap(w);
@@ -214,7 +214,7 @@ API vsm_context_h vsm_create_context(void)
 
 API int vsm_cleanup_context(vsm_context_h ctx)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     if (w->client != NULL) {
@@ -225,6 +225,7 @@ API int vsm_cleanup_context(vsm_context_h ctx)
         zw.netdevs.clear();
     }
     w->zones.clear();
+    pthread_rwlock_destroy(&ctx->lock);
     delete w;
     return VSM_ERROR_NONE;
 }
@@ -260,7 +261,7 @@ API vsm_error_e vsm_last_error(struct vsm_context *ctx)
 
 API int vsm_get_poll_fd(struct vsm_context *ctx)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     UNUSED(w);
@@ -271,7 +272,7 @@ API int vsm_get_poll_fd(struct vsm_context *ctx)
 }
 API int vsm_enter_eventloop(struct vsm_context *ctx, int flags, int timeout)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
     UNUSED(flags);
     UNUSED(timeout);
@@ -285,7 +286,7 @@ API int vsm_enter_eventloop(struct vsm_context *ctx, int flags, int timeout)
 
 API int vsm_create_zone(struct vsm_context *ctx, const char *zone_name, const char *template_name, int flag)
 {
-    LOGS("WRAP:create_zone " << zone_name);
+    LOGS("create_zone " << zone_name);
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     UNUSED(flag);
@@ -300,7 +301,7 @@ API int vsm_create_zone(struct vsm_context *ctx, const char *zone_name, const ch
 
 API int vsm_destroy_zone(struct vsm_context *ctx, const char *zone_name, int force)
 {
-    LOGS("WRAP:zone=" << zone_name);
+    LOGS("zone=" << zone_name);
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     UNUSED(force);
@@ -316,7 +317,7 @@ API int vsm_destroy_zone(struct vsm_context *ctx, const char *zone_name, int for
 
 API int vsm_start_zone(struct vsm_context *ctx, const char *zone_name)
 {
-    LOGS("WRAP:zone=" << zone_name);
+    LOGS("zone=" << zone_name);
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     if (!w->client) return VSM_ERROR_GENERIC;
@@ -326,7 +327,7 @@ API int vsm_start_zone(struct vsm_context *ctx, const char *zone_name)
 
 API int vsm_shutdown_zone(struct vsm_context *ctx, const char *zone_name, int force)
 {
-    LOGS("WRAP:zone=" << zone_name);
+    LOGS("zone=" << zone_name);
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     UNUSED(force);
@@ -337,7 +338,7 @@ API int vsm_shutdown_zone(struct vsm_context *ctx, const char *zone_name, int fo
 
 API int vsm_lock_zone(struct vsm_context *ctx, const char *zone_name, int shutdown)
 {
-    LOGS("WRAP:zone=" << zone_name);
+    LOGS("zone=" << zone_name);
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     UNUSED(shutdown);
@@ -348,7 +349,7 @@ API int vsm_lock_zone(struct vsm_context *ctx, const char *zone_name, int shutdo
 
 API int vsm_unlock_zone(struct vsm_context *ctx, const char *zone_name)
 {
-    LOGS("WRAP:zone=" << zone_name);
+    LOGS("zone=" << zone_name);
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     if (!w->client) return VSM_ERROR_GENERIC;
@@ -358,7 +359,7 @@ API int vsm_unlock_zone(struct vsm_context *ctx, const char *zone_name)
 
 API int vsm_set_foreground(struct vsm_zone *zone)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
     WrappedZone *w = container_of(zone, WrappedZone, vz);
     if (!w->client) return VSM_ERROR_GENERIC;
@@ -388,12 +389,13 @@ API int vsm_attach_zone_wait(struct vsm_context *ctx,
 
 API int vsm_iterate_zone(struct vsm_context *ctx, void (*callback)(struct vsm_zone *zone, void *user_data), void *user_data)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     if (!w->client) return -VSM_ERROR_GENERIC;
     callback(ctx->root_zone, user_data);
     for (auto& z : w->zones) {
+        LOGI("iterate callback zone: " << z.zone->id);
         callback(&z.vz, user_data);
     }
     return 0;
@@ -401,7 +403,7 @@ API int vsm_iterate_zone(struct vsm_context *ctx, void (*callback)(struct vsm_zo
 
 API struct vsm_zone *vsm_lookup_zone_by_name(struct vsm_context *ctx, const char *path)
 {
-    LOGS("WRAP:name=" << path);
+    LOGS("name=" << path);
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     VsmZone zone;
@@ -415,16 +417,18 @@ API struct vsm_zone *vsm_lookup_zone_by_name(struct vsm_context *ctx, const char
 //supposed return ref to internal struct
 API struct vsm_zone *vsm_lookup_zone_by_pid(struct vsm_context *ctx, pid_t pid)
 {
-    LOGS("WRAP: pid=" << pid);
+    LOGS("pid=" << pid);
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     VsmZone zone;
     VsmString id;
+    VsmStatus st;
     if (!w->client) return NULL;
-    if (w->client->vsm_lookup_zone_by_pid(pid, &id) != VSMCLIENT_SUCCESS) {
-        LOGE("vsm_lookup_zone_by_pid(" << pid << ") error");
+    if ((st = w->client->vsm_lookup_zone_by_pid(pid, &id)) != VSMCLIENT_SUCCESS) {
+        wrap_error(st, w->client);
         return NULL;
     }
+    LOGI("found zone(pid=" << pid << ")='" << id << "'");
     if (::strcmp(id, "host") == 0) {
         return w->hq_ctx.root_zone;
     }
@@ -432,9 +436,9 @@ API struct vsm_zone *vsm_lookup_zone_by_pid(struct vsm_context *ctx, pid_t pid)
     return wrap_vsm_zone(w, zone);
 }
 
-API int vsm_add_state_changed_callback(struct vsm_context *ctx, vsm_zone_state_cb callback, void *user_data)
+API int vsm_add_state_changed_callback(struct vsm_context *ctx, vsm_zone_state_changed_cb callback, void *user_data)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     VsmSubscriptionId subscriptionId;
@@ -443,7 +447,7 @@ API int vsm_add_state_changed_callback(struct vsm_context *ctx, vsm_zone_state_c
     void {
         VsmZone zone;
         //TODO what are valid state, event
-        vsm_zone_state_t t=VSM_ZONE_STATE_RUNNING;
+        vsm_zone_state_t t = VSM_ZONE_STATE_RUNNING;
         UNUSED(dbusAddress);
         w->client->vsm_lookup_zone_by_id(id, &zone);
         callback(wrap_vsm_zone(w, zone), t, data);
@@ -454,7 +458,7 @@ API int vsm_add_state_changed_callback(struct vsm_context *ctx, vsm_zone_state_c
 
 API int vsm_del_state_changed_callback(struct vsm_context *ctx, int handle)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     VsmSubscriptionId subscriptionId = (VsmSubscriptionId)handle;
@@ -464,7 +468,7 @@ API int vsm_del_state_changed_callback(struct vsm_context *ctx, int handle)
 
 API int vsm_grant_device(struct vsm_zone *dom, const char *name, uint32_t flags)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
     WrappedZone *w = container_of(dom, WrappedZone, vz);
     const char *id = dom->name;
@@ -476,7 +480,7 @@ API int vsm_grant_device(struct vsm_zone *dom, const char *name, uint32_t flags)
 
 API int vsm_revoke_device(struct vsm_zone *dom, const char *name)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
     WrappedZone *w = container_of(dom, WrappedZone, vz);
     const char *id = dom->name;
@@ -486,7 +490,7 @@ API int vsm_revoke_device(struct vsm_zone *dom, const char *name)
 
 API struct vsm_netdev *vsm_create_netdev(struct vsm_zone *zone, vsm_netdev_type_t type, const char *target, const char *netdev)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
     UNUSED(zone);
     UNUSED(type);
@@ -521,26 +525,15 @@ API struct vsm_netdev *vsm_create_netdev(struct vsm_zone *zone, vsm_netdev_type_
     return &w->netdevs.back(); //pointer to struct on vector
 }
 
-API int vsm_destroy_netdev(struct vsm_zone *zone, struct vsm_netdev *netdev)
+API int vsm_destroy_netdev(vsm_netdev_h)
 {
-    LOGS("WRAP:");
-    callcheck();
-    WrappedZone *w = container_of(zone, WrappedZone, vz);
-
-    VsmStatus st = w->client->vsm_destroy_netdev(zone->name, netdev->name);
-    if (st == VSMCLIENT_SUCCESS) {
-        auto devbyname = [netdev](const vsm_netdev& v) {return ::strcmp(v.name, netdev->name) == 0;};
-        auto devlist = std::find_if(w->netdevs.begin(), w->netdevs.end(), devbyname);
-        if (devlist != w->netdevs.end()) {
-            w->netdevs.erase(devlist);
-        }
-    }
-    return wrap_error(st, w->client);
+    LOGS("");
+    return 0;
 }
 
 API int vsm_iterate_netdev(struct vsm_zone *zone, void (*callback)(struct vsm_netdev *, void *user_data), void *user_data)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
     WrappedZone *w = container_of(zone, WrappedZone, vz);
     for (auto nd : w->netdevs) {
@@ -551,7 +544,7 @@ API int vsm_iterate_netdev(struct vsm_zone *zone, void (*callback)(struct vsm_ne
 
 API struct vsm_netdev *vsm_lookup_netdev_by_name(struct vsm_zone *zone, const char *name)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
     WrappedZone *w = container_of(zone, WrappedZone, vz);
     VsmNetdev nd;
@@ -568,7 +561,7 @@ API struct vsm_netdev *vsm_lookup_netdev_by_name(struct vsm_zone *zone, const ch
 
 API int vsm_declare_file(struct vsm_context *ctx, vsm_fso_type_t ftype, const char *path, int flags, vsm_mode_t mode)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
 /*  Old implementation is following: (but implemented in server)
     args.oldpath = oldpath;
@@ -610,7 +603,7 @@ API int vsm_declare_file(struct vsm_context *ctx, vsm_fso_type_t ftype, const ch
 
 API int vsm_declare_link(struct vsm_context *ctx, const char *source, const char *target)
 {
-    LOGS("WRAP:src=" << source << ", dst=" << target);
+    LOGS("src=" << source << ", dst=" << target);
     callcheck();
 /*  Old implementation is following: (but implemented in server)
     args.oldpath = oldpath;
@@ -637,7 +630,7 @@ API int vsm_declare_mount(struct vsm_context *ctx,
                           unsigned long flags,
                           const void *data)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
 /*  Old implementation is following: (but implemented in server)
     args.oldpath = oldpath;
@@ -659,72 +652,53 @@ API int vsm_declare_mount(struct vsm_context *ctx,
     return VSM_ERROR_NONE;
 }
 
-API const char * vsm_get_zone_rootpath(vsm_zone_h  /*zone*/)
+API const char * vsm_get_zone_rootpath(vsm_zone_h  zone)
 {
-    LOGS("WRAP:");
-    return NULL;
+    LOGS("");
+    return zone == NULL ? NULL : zone->rootfs_path;
 }
-API const char * vsm_get_zone_name(vsm_zone_h  /*zone*/)
+API const char * vsm_get_zone_name(vsm_zone_h zone)
 {
-    LOGS("WRAP:");
-    return NULL;
+    LOGS("");
+    return zone == NULL ? NULL : zone->name;
 }
-API int vsm_is_host_zone(vsm_zone_h  /*zone*/)
+API int vsm_is_host_zone(vsm_zone_h zone)
 {
-    LOGS("WRAP:");
-    return VSM_ERROR_NONE;
+    LOGS("");
+    if (zone == NULL)
+        return -VSM_ERROR_INVALID;
+
+    return zone->parent == zone ? 1 : 0;
 }
 API vsm_zone_h vsm_join_zone(vsm_zone_h  /*zone*/)
 {
-    LOGS("WRAP:");
+    LOGS("");
     return NULL;
 }
-API int vsm_canonicalize_path(const char * /*input_path*/, char ** /*output_path*/)
+API int vsm_canonicalize_path(const char *input_path, char **output_path)
 {
-    LOGS("WRAP:");
-    return VSM_ERROR_NONE;
+    LOGS(""<<input_path);
+    *output_path = strdup(input_path);
+    int len = strlen(input_path);
+    return len;
 }
 
-static int is_valid_context(void * /*v*/)
-{
-    return 1;
-}
-static const char *vsm_error_string_v0_34(struct vsm_context *ctx)
-{
-    vsm_error_e error = ctx->error;
-    if (error < 0 || error > VSM_MAX_ERROR) {
-        return NULL;
-    }
-    return vsm_error_strtab[error];
-}
-static const char *vsm_error_string_v0_3_1(vsm_error_e error)
-{
-    if (error < 0 || error > VSM_MAX_ERROR) {
-        return NULL;
-    }
-    return vsm_error_strtab[error];
-}
-
-extern "C" {
-// Note: incomaptible API, try support both
+// Note: incomaptible API, support newer
 // API(v0.34) const char *vsm_error_string(struct vsm_context *ctx)
 // API(v0.3.1) const char *vsm_error_string(vsm_error_e error)
-API const char *vsm_error_string(vsm_error_e e)
+API const char *vsm_error_string(vsm_error_e error)
 {
-    LOGS("WRAP:");
+    LOGS("");
     callcheck();
-    struct vsm_context *ctx=(struct vsm_context *)e;
-    if (is_valid_context(ctx)) {
-        return vsm_error_string_v0_34((struct vsm_context *)ctx);
+    if (error < 0 || error > VSM_MAX_ERROR) {
+        return NULL;
     }
-    else {
-        return vsm_error_string_v0_3_1(e);
-    }
+    return vsm_error_strtab[error];
 }
 
 API struct vsm_zone *vsm_lookup_zone_by_terminal_id(struct vsm_context *ctx, int terminal)
 {
-    LOGS("WRAP:terminal=" << terminal);
+    LOGS("terminal=" << terminal);
     callcheck();
     WrappedContext *w = container_of(ctx, WrappedContext, hq_ctx);
     VsmZone zone;
@@ -752,4 +726,97 @@ API void vsm_string_free(VsmString string)
     free(string);
 }
 
+API int vsm_add_event_callback(vsm_context_h, vsm_zone_event_cb, void*) {
+    LOGS("");
+    return 0;
+}
+API int vsm_del_event_callback(vsm_context_h, int) {
+    LOGS("");
+    return 0;
+}
+API int vsm_add_state_callback(vsm_context_h , vsm_zone_state_cb , void *) {
+    LOGS("");
+    return 0;
+}
+API int vsm_del_state_callback(vsm_context_h , int ) {
+    LOGS("");
+    return 0;
+}
+API int vsm_down_netdev(vsm_netdev_h) {
+    LOGS("");
+    return 0;
+}
+API vsm_zone* vsm_get_foreground(vsm_context_h ctx) {
+    LOGS("");
+    //return ((struct vasum_ops *)(ctx->vsm_ops))->get_foreground(ctx);
+    return dummy_ops.get_foreground(ctx);
+}
+API int vsm_get_host_pid(vsm_zone_h, pid_t) {
+    LOGS("");
+    return 0;
+}
+API int vsm_get_ip_addr_netdev(vsm_netdev_h, vsm_netdev_addr_t, char*, int) {
+    LOGS("");
+    return 0;
+}
+API void* vsm_get_userdata(vsm_zone_h) {
+    LOGS("");
+    return NULL;
+}
+API int vsm_get_zone_id(vsm_zone_h zone) {
+    LOGS("");
+    if (zone == NULL)
+        return -VSM_ERROR_INVALID;
+    return zone->id;
+}
+API vsm_zone_state_t vsm_get_zone_state(vsm_zone_h zone) {
+    LOGS("");
+    if (zone == NULL)
+        return static_cast<vsm_zone_state_t>(-VSM_ERROR_INVALID);
+    return zone->state;
+}
+API int vsm_get_zone_terminal(vsm_zone_h) {
+    LOGS("");
+    return -VSM_ERROR_NOT_SUPPORTED;
+}
+API const char *vsm_get_zone_type(vsm_zone_h zone) {
+    LOGS("");
+    return zone == NULL ? NULL : zone->type;
+}
+API int vsm_is_equivalent_zone(vsm_context_h, pid_t) {
+    LOGS("");
+    return 0;
+}
+API int vsm_is_virtualized() {
+    LOGS("");
+    return 0; /* Running in Host */
+}
+// libs/network.c
+API int vsm_set_ip_addr_netdev(vsm_netdev_h, vsm_netdev_addr_t, const char*, int) {
+    LOGS("");
+    return 0;
+}
+API int vsm_up_netdev(vsm_netdev_h) {
+    LOGS("");
+    return 0;
+}
+// libs/zone.c
+API int vsm_set_userdata(vsm_zone_h, void*) {
+    LOGS("");
+    return 0;
+}
+API int vsm_state_change_watch_callback(struct vsm_context * /*ctx*/, char * /*name*/,
+                    int  /*state*/, int  /*event*/) {
+    LOGS("");
+    return 0;
+}
+// libs/vsm_signal.c
+API int vsm_signal_state_broadcast(struct mxe_engine * /*engine*/, const char * /*zone_name*/, int  /*state*/) {
+    LOGS("");
+    return 0;
+}
+API int vsm_signal_event_broadcast(struct mxe_engine * /*engine*/, const char * /*zone_name*/, int  /*event*/) {
+    LOGS("");
+    return 0;
+}
 } // extern "C"
