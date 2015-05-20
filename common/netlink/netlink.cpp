@@ -106,7 +106,7 @@ void Netlink::open(int netNsPid)
             LOGE("Can't open socket: " << getSystemErrorMessage());
         }
     } else {
-        mFd = utils::passNemaspacedFd(netNsPid, CLONE_NEWNET, fdFactory);
+        mFd = utils::passNamespacedFd(netNsPid, CLONE_NEWNET, fdFactory);
     }
     if (mFd == -1) {
         throw VasumException("Can't open netlink connection");

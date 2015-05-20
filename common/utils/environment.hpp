@@ -59,7 +59,7 @@ bool joinToNs(int nsPid, int ns);
 /**
  * Pass file descriptor from namespace of some process
  */
-int passNemaspacedFd(int nsPid, int ns, const std::function<int()>& fdFactory);
+int passNamespacedFd(int nsPid, int ns, const std::function<int()>& fdFactory);
 
 } // namespace utils
 

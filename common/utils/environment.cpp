@@ -218,7 +218,7 @@ bool joinToNs(int nsPid, int ns)
     return true;
 }
 
-int passNemaspacedFd(int nsPid, int ns, const std::function<int()>& fdFactory)
+int passNamespacedFd(int nsPid, int ns, const std::function<int()>& fdFactory)
 {
     int fds[2];
     int ret = socketpair(PF_LOCAL, SOCK_RAW, 0, fds);
