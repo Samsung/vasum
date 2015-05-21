@@ -180,6 +180,15 @@ void longEchoCallback(const PeerID,
     methodResult->set(returnData);
 }
 
+void shortEchoCallback(const PeerID,
+                       std::shared_ptr<RecvData>& data,
+                       MethodResult::Pointer methodResult)
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(SHORT_OPERATION_TIME));
+    auto returnData = std::make_shared<SendData>(data->intVal);
+    methodResult->set(returnData);
+}
+
 PeerID connect(Service& s, Client& c)
 {
     // Connects the Client to the Service and returns Clients PeerID
@@ -497,7 +506,7 @@ MULTI_FIXTURE_TEST_CASE(ReadTimeout, F, ThreadedFixture, GlibFixture)
 MULTI_FIXTURE_TEST_CASE(WriteTimeout, F, ThreadedFixture, GlibFixture)
 {
     Service s(F::getPoll(), SOCKET_PATH);
-    s.setMethodHandler<SendData, RecvData>(1, echoCallback);
+    s.setMethodHandler<SendData, RecvData>(1, shortEchoCallback);
     s.start();
 
     Client c(F::getPoll(), SOCKET_PATH);

@@ -30,6 +30,7 @@
 
 #include <boost/test/included/unit_test.hpp>
 
+#include "utils/signal.hpp"
 
 using namespace boost::unit_test;
 using namespace logger;
@@ -39,5 +40,6 @@ test_suite* init_unit_test_suite(int /*argc*/, char** /*argv*/)
     Logger::setLogLevel(LogLevel::TRACE);
     Logger::setLogBackend(new StderrBackend());
 
+    utils::signalBlock(SIGPIPE);
     return NULL;
 }

@@ -442,6 +442,12 @@ private:
     unsigned int mMaxNumberOfPeers;
 
     template<typename SentDataType, typename ReceivedDataType>
+    MessageID callAsyncInternal(const MethodID methodID,
+                                const PeerID peerID,
+                                const std::shared_ptr<SentDataType>& data,
+                                const typename ResultHandler<ReceivedDataType>::type& process);
+
+    template<typename SentDataType, typename ReceivedDataType>
     void setMethodHandlerInternal(const MethodID methodID,
                                   const typename MethodHandler<SentDataType, ReceivedDataType>::type& process);
 
@@ -597,6 +603,15 @@ MessageID Processor::callAsync(const MethodID methodID,
                                const typename ResultHandler<ReceivedDataType>::type& process)
 {
     Lock lock(mStateMutex);
+    return callAsyncInternal<SentDataType, ReceivedDataType>(methodID, peerID, data, process);
+}
+
+template<typename SentDataType, typename ReceivedDataType>
+MessageID Processor::callAsyncInternal(const MethodID methodID,
+                                       const PeerID peerID,
+                                       const std::shared_ptr<SentDataType>& data,
+                                       const typename ResultHandler<ReceivedDataType>::type& process)
+{
     auto request = MethodRequest::create<SentDataType, ReceivedDataType>(methodID, peerID, data, process);
     mRequestQueue.pushBack(Event::METHOD, request);
     return request->messageID;
@@ -618,17 +633,19 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
         cv.notify_all();
     };
 
-    MessageID messageID = callAsync<SentDataType, ReceivedDataType>(methodID,
-                                                                    peerID,
-                                                                    data,
-                                                                    process);
+    Lock lock(mStateMutex);
+    MessageID messageID = callAsyncInternal<SentDataType, ReceivedDataType>(methodID,
+                                                                            peerID,
+                                                                            data,
+                                                                            process);
 
     auto isResultInitialized = [&result]() {
         return result.isValid();
     };
 
-    Lock lock(mStateMutex);
     LOGT(mLogPrefix + "Waiting for the response...");
+    //In the case of too large sending time response can be received far after timeoutMS but
+    //before this thread wakes up and before predicate check (there will by no timeout exception)
     if (!cv.wait_for(lock, std::chrono::milliseconds(timeoutMS), isResultInitialized)) {
         LOGW(mLogPrefix + "Probably a timeout in callSync. Checking...");
 
