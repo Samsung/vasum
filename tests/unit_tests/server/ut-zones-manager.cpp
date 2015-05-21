@@ -73,6 +73,7 @@ const std::string CONFIG_DIR = VSM_TEST_CONFIG_INSTALL_DIR;
 const std::string TEST_CONFIG_PATH = CONFIG_DIR + "/test-daemon.conf";
 const std::string MISSING_CONFIG_PATH = CONFIG_DIR + "/missing-daemon.conf";
 const int EVENT_TIMEOUT = 5000;
+const int SIGNAL_PROPAGATE_TIME = 500; // ms
 //const int UNEXPECTED_EVENT_TIMEOUT = EVENT_TIMEOUT / 5;
 const std::string TEST_APP_NAME = "testapp";
 const std::string TEST_MESSAGE = "testmessage";
@@ -870,6 +871,7 @@ MULTI_FIXTURE_TEST_CASE(SwitchToDefault, F, ACCESSORS)
     cm.restoreAll();
 
     typename F::HostAccessory host;
+    std::this_thread::sleep_for(std::chrono::milliseconds(SIGNAL_PROPAGATE_TIME));
 
     auto isDefaultFocused = [&cm]() -> bool {
         return cm.getRunningForegroundZoneId() == "zone1";
@@ -892,6 +894,7 @@ MULTI_FIXTURE_TEST_CASE(AllowSwitchToDefault, F, ACCESSORS)
     cm.restoreAll();
 
     typename F::HostAccessory host;
+    std::this_thread::sleep_for(std::chrono::milliseconds(SIGNAL_PROPAGATE_TIME));
 
     auto isDefaultFocused = [&cm]() -> bool {
         return cm.getRunningForegroundZoneId() == "zone1";
