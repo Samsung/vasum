@@ -32,16 +32,18 @@
 #include <string.h>
 #include <regex.h>
 #include <limits.h>
+#include <dirent.h>
+#include <stdarg.h>
+#include <pthread.h>
+#include <inttypes.h> //PRIx64
 #include <sys/mount.h>
 #include <sys/xattr.h>
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <pthread.h>
-#include <dirent.h>
-#include <stdarg.h>
 #include <sys/socket.h>
 #include <asm/unistd.h>
+#include <linux/un.h>
 
 #include "logger/logger.hpp"
 #include "logger/logger-scope.hpp"
@@ -62,43 +64,227 @@ API pid_t get_domain_pid(const char * /*name*/, const char * /*target*/) {
 }
 
 // sock_close_socket
-API int sock_close_socket(int  /*fd*/) {
+API int sock_close_socket(int fd) {
     LOGS("");
+    struct sockaddr_un addr;
+    socklen_t addrlen = sizeof(addr);
+
+    if (!getsockname(fd, (struct sockaddr *)&addr, &addrlen) && addr.sun_path[0]) {
+        unlink(addr.sun_path);
+    }
+
+    close(fd);
+
     return 0;
 }
 // sock_connect
-API int sock_connect(const char * /*path*/) {
+API int sock_connect(const char *path) {
     LOGS("");
-    return -1;
+    size_t len;
+    int fd, idx = 0;
+    struct sockaddr_un addr;
+
+    fd = socket(PF_UNIX, SOCK_STREAM, 0);
+    if (fd < 0) {
+        return -1;
+    }
+
+    memset(&addr, 0, sizeof(addr));
+
+    addr.sun_family = AF_UNIX;
+
+    /* Is it abstract address */
+    if (path[0] == '\0') {
+        idx++;
+    }
+    LOGD("socket path=" << &path[idx]);
+    len = strlen(&path[idx]) + idx;
+    if (len >= sizeof(addr.sun_path)) {
+        close(fd);
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    strncpy(&addr.sun_path[idx], &path[idx], strlen(&path[idx]));
+    if (connect
+        (fd, (struct sockaddr *)&addr,
+         offsetof(struct sockaddr_un, sun_path) + len)) {
+        close(fd);
+        return -1;
+    }
+
+    return fd;
 }
+
 // sock_create_socket
-API int sock_create_socket(const char * /*path*/, int  /*type*/, int  /*flags*/) {
+API int sock_create_socket(const char *path, int type, int flags) {
     LOGS("");
-    return -1;
+    size_t len;
+    int fd, idx = 0;
+    struct sockaddr_un addr;
+
+    if (!path)
+        return -1;
+
+    if (flags & O_TRUNC)
+        unlink(path);
+
+    fd = socket(PF_UNIX, type, 0);
+    if (fd < 0) {
+        return -1;
+    }
+
+    memset(&addr, 0, sizeof(addr));
+
+    addr.sun_family = AF_UNIX;
+
+    /* Is it abstract address */
+    if (path[0] == '\0') {
+        idx++;
+    }
+    LOGD("socket path=" << &path[idx]);
+    len = strlen(&path[idx]) + idx;
+    if (len >= sizeof(addr.sun_path)) {
+        close(fd);
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    strncpy(&addr.sun_path[idx], &path[idx], strlen(&path[idx]));
+
+    if (bind (fd, (struct sockaddr *)&addr, offsetof(struct sockaddr_un, sun_path) + len)) {
+        close(fd);
+        return -1;
+    }
+
+    if (type == SOCK_STREAM && listen(fd, 100)) {
+        close(fd);
+        return -1;
+    }
+
+    return fd;
 }
+
+// "Fowler–Noll–Vo hash function" implementation (taken from old API source)
+#define FNV1A_64_INIT ((uint64_t)0xcbf29ce484222325ULL)
+static uint64_t hash_fnv_64a(void *buf, size_t len, uint64_t hval)
+{
+    unsigned char *bp;
+
+    for (bp = (unsigned char *)buf; bp < (unsigned char *)buf + len; bp++) {
+        hval ^= (uint64_t) * bp;
+        hval += (hval << 1) + (hval << 4) + (hval << 5) +
+            (hval << 7) + (hval << 8) + (hval << 40);
+    }
+
+    return hval;
+}
+
 // sock_monitor_address
-API int sock_monitor_address(char * /*buffer*/, int  /*len*/, const char * /*lxcpath*/) {
+API int sock_monitor_address(char *buffer, int len, const char *lxcpath) {
     LOGS("");
+    int ret;
+    uint64_t hash;
+    char *sockname;
+    char path[PATH_MAX];
+
+    memset(buffer, 0, len);
+    sockname = &buffer[1];
+
+    ret = snprintf(path, sizeof(path), "lxc/%s/monitor-sock", lxcpath);
+    if (ret < 0) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    hash = hash_fnv_64a(path, ret, FNV1A_64_INIT);
+    ret = snprintf(sockname, len, "lxc/%016" PRIx64 "/%s", hash, lxcpath);
+    if (ret < 0) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
     return 0;
 }
 // sock_recv_fd (intern)
-API int sock_recv_fd(int  /*fd*/, int * /*recvfd*/, void * /*data*/, size_t  /*size*/) {
+API int sock_recv_fd(int fd, int *recvfd, void *data, size_t size) {
     LOGS("");
-    return 0;
+    struct msghdr msg;
+    struct iovec iov;
+    struct cmsghdr *cmsg;
+    char cmsgbuf[CMSG_SPACE(sizeof(int))];
+    char buf[1];
+    int ret, *val;
+
+    memset(&msg, 0, sizeof(msg));
+    msg.msg_name = NULL;
+    msg.msg_namelen = 0;
+    msg.msg_control = cmsgbuf;
+    msg.msg_controllen = sizeof(cmsgbuf);
+
+    iov.iov_base = data ? data : buf;
+    iov.iov_len = data ? size : sizeof(buf);
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+
+    ret = recvmsg(fd, &msg, 0);
+    if (ret <= 0)
+        goto out;
+
+    cmsg = CMSG_FIRSTHDR(&msg);
+
+    *recvfd = -1;
+
+    if (cmsg && cmsg->cmsg_len == CMSG_LEN(sizeof(int)) &&
+        cmsg->cmsg_level == SOL_SOCKET && cmsg->cmsg_type == SCM_RIGHTS) {
+        val = (int *)CMSG_DATA(cmsg);
+        *recvfd = *val;
+    }
+ out:
+    return ret;
+
 }
 // sock_send_fd
-API int sock_send_fd(int  /*fd*/, int  /*sendfd*/, void * /*data*/, size_t  /*size*/) {
+API int sock_send_fd(int fd, int sendfd, void *data, size_t size) {
     LOGS("");
-    return 0;
+    struct msghdr msg;
+    struct iovec iov;
+    struct cmsghdr *cmsg;
+    char cmsgbuf[CMSG_SPACE(sizeof(int))];
+    char buf[1];
+    int *val;
+
+    memset(&msg, 0, sizeof(msg));
+    msg.msg_control = cmsgbuf;
+    msg.msg_controllen = sizeof(cmsgbuf);
+
+    cmsg = CMSG_FIRSTHDR(&msg);
+    cmsg->cmsg_len = CMSG_LEN(sizeof(int));
+    cmsg->cmsg_level = SOL_SOCKET;
+    cmsg->cmsg_type = SCM_RIGHTS;
+    val = (int *)(CMSG_DATA(cmsg));
+    *val = sendfd;
+
+    msg.msg_name = NULL;
+    msg.msg_namelen = 0;
+
+    iov.iov_base = data ? data : buf;
+    iov.iov_len = data ? size : sizeof(buf);
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+
+    return sendmsg(fd, &msg, MSG_NOSIGNAL);
 }
 // vasum_log
 API void vasum_log(int type, const char *tag, const char *fmt, ...) {
     va_list arg_ptr;
-    char buf[100];
+    char buf[255];
+    LOGS("type=" << type << " tag=" << tag);
     va_start(arg_ptr, fmt);
     vsnprintf(buf, sizeof(buf), fmt, arg_ptr);
     va_end(arg_ptr);
-    LOGS("type=" << type << " tag=" << tag << " msg=" << buf);
+    buf[sizeof(buf)-1]=0;
+    LOGD("msg=" << buf);
 }
 
 #define MAX_ERROR_MSG    0x1000

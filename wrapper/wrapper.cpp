@@ -668,6 +668,7 @@ API int vsm_is_host_zone(vsm_zone_h zone)
     if (zone == NULL)
         return -VSM_ERROR_INVALID;
 
+    LOGI("zone->parent == zone is " << (zone->parent == zone ? 1 : 0));
     return zone->parent == zone ? 1 : 0;
 }
 API vsm_zone_h vsm_join_zone(vsm_zone_h  /*zone*/)
@@ -683,9 +684,7 @@ API int vsm_canonicalize_path(const char *input_path, char **output_path)
     return len;
 }
 
-// Note: incomaptible API, support newer
-// API(v0.34) const char *vsm_error_string(struct vsm_context *ctx)
-// API(v0.3.1) const char *vsm_error_string(vsm_error_e error)
+// Note: support the newer API (incomaptible with older)
 API const char *vsm_error_string(vsm_error_e error)
 {
     LOGS("");

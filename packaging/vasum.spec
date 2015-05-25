@@ -26,6 +26,7 @@ BuildRequires:  pkgconfig(sqlite3)
 Requires(post): libcap-tools
 Requires:       iproute2
 Requires:       libjson >= 0.10
+Obsoletes:      vasum-daemon < 1:0
 
 %description
 This package provides a daemon used to manage zones - start, stop and switch
