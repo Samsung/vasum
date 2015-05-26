@@ -28,11 +28,12 @@
 
 #include "zone.hpp"
 #include "zones-manager-config.hpp"
-#include "host-ipc-connection.hpp"
+#include "api/messages.hpp"
 #include "input-monitor.hpp"
 #include "utils/worker.hpp"
 #include "api/method-result-builder.hpp"
 
+#include "host-ipc-connection.hpp"
 #ifdef DBUS_CONNECTION
 #include "host-dbus-connection.hpp"
 #include "proxy-call-policy.hpp"
@@ -43,7 +44,6 @@
 
 
 namespace vasum {
-
 
 class ZonesManager final {
 
@@ -115,62 +115,6 @@ public:
      */
     void setZonesDetachOnExit();
 
-private:
-    typedef std::recursive_mutex Mutex;
-    typedef std::unique_lock<Mutex> Lock;
-
-    utils::Worker::Pointer mWorker;
-    Mutex mMutex; // used to protect mZones
-    ZonesManagerConfig mConfig; //TODO make it const
-    ZonesManagerDynamicConfig mDynamicConfig;
-#ifdef DBUS_CONNECTION
-    HostDbusConnection mHostDbusConnection;
-#endif //DBUS_CONNECTION
-    HostIPCConnection mHostIPCConnection;
-    // to hold InputMonitor pointer to monitor if zone switching sequence is recognized
-    std::unique_ptr<InputMonitor> mSwitchingSequenceMonitor;
-    // like set but keep insertion order
-    // smart pointer is needed because Zone is not moveable (because of mutex)
-    typedef std::vector<std::unique_ptr<Zone>> Zones;
-    Zones mZones;
-    std::string mActiveZoneId;
-    bool mDetachOnExit;
-
-    Zones::iterator findZone(const std::string& id);
-    Zone& getZone(const std::string& id);
-    Zones::iterator getRunningForegroundZoneIterator();
-    Zones::iterator getNextToForegroundZoneIterator();
-    void focusInternal(Zones::iterator iter);
-
-    void saveDynamicConfig();
-    void updateDefaultId();
-    void refocus();
-    void switchingSequenceMonitorNotify();
-    void generateNewConfig(const std::string& id,
-                           const std::string& templatePath);
-    std::string getTemplatePathForExistingZone(const std::string& id);
-    int getVTForNewZone();
-    void insertZone(const std::string& zoneId, const std::string& templatePath);
-
-    // Zone's handlers---------------------------------------------------------
-    void handleNotifyActiveZoneCall(const std::string& caller,
-                                    const api::NotifActiveZoneIn& notif,
-                                    api::MethodResultBuilder::Pointer result);
-    void handleSwitchToDefaultCall(const std::string& caller);
-    void handleFileMoveCall(const std::string& srcZoneId,
-                            const api::FileMoveRequestIn& request,
-                            api::MethodResultBuilder::Pointer result);
-#ifdef DBUS_CONNECTION
-    std::unique_ptr<ProxyCallPolicy> mProxyCallPolicy;
-    void handleProxyCall(const std::string& caller,
-                         const std::string& target,
-                         const std::string& targetBusName,
-                         const std::string& targetObjectPath,
-                         const std::string& targetInterface,
-                         const std::string& targetMethod,
-                         GVariant* parameters,
-                         dbus::MethodResultBuilder::Pointer result);
-#endif //DBUS_CONNECTION
     // Handlers --------------------------------------------------------
     void handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result);
     void handleGetActiveZoneIdCall(api::MethodResultBuilder::Pointer result);
@@ -221,8 +165,61 @@ private:
     void handleRevokeDeviceCall(const api::RevokeDeviceIn& data,
                                 api::MethodResultBuilder::Pointer result);
 
-    template<typename Connection>
-    void setHandlers(Connection& connnection);
+    // Zone's handlers---------------------------------------------------------
+    void handleNotifyActiveZoneCall(const std::string& caller,
+                                    const api::NotifActiveZoneIn& notif,
+                                    api::MethodResultBuilder::Pointer result);
+    void handleSwitchToDefaultCall(const std::string& caller);
+    void handleFileMoveCall(const std::string& srcZoneId,
+                            const api::FileMoveRequestIn& request,
+                            api::MethodResultBuilder::Pointer result);
+
+private:
+    typedef std::recursive_mutex Mutex;
+    typedef std::unique_lock<Mutex> Lock;
+
+    utils::Worker::Pointer mWorker;
+    Mutex mMutex; // used to protect mZones
+    ZonesManagerConfig mConfig; //TODO make it const
+    ZonesManagerDynamicConfig mDynamicConfig;
+    HostIPCConnection mHostIPCConnection;
+    // to hold InputMonitor pointer to monitor if zone switching sequence is recognized
+    std::unique_ptr<InputMonitor> mSwitchingSequenceMonitor;
+    // like set but keep insertion order
+    // smart pointer is needed because Zone is not moveable (because of mutex)
+    typedef std::vector<std::unique_ptr<Zone>> Zones;
+    Zones mZones;
+    std::string mActiveZoneId;
+    bool mDetachOnExit;
+
+    Zones::iterator findZone(const std::string& id);
+    Zone& getZone(const std::string& id);
+    Zones::iterator getRunningForegroundZoneIterator();
+    Zones::iterator getNextToForegroundZoneIterator();
+    void focusInternal(Zones::iterator iter);
+
+    void saveDynamicConfig();
+    void updateDefaultId();
+    void refocus();
+    void switchingSequenceMonitorNotify();
+    void generateNewConfig(const std::string& id,
+                           const std::string& templatePath);
+    std::string getTemplatePathForExistingZone(const std::string& id);
+    int getVTForNewZone();
+    void insertZone(const std::string& zoneId, const std::string& templatePath);
+
+#ifdef DBUS_CONNECTION
+    HostDbusConnection mHostDbusConnection;
+    std::unique_ptr<ProxyCallPolicy> mProxyCallPolicy;
+    void handleProxyCall(const std::string& caller,
+                         const std::string& target,
+                         const std::string& targetBusName,
+                         const std::string& targetObjectPath,
+                         const std::string& targetInterface,
+                         const std::string& targetMethod,
+                         GVariant* parameters,
+                         dbus::MethodResultBuilder::Pointer result);
+#endif //DBUS_CONNECTION
 };
 
 

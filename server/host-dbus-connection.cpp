@@ -32,6 +32,7 @@
 
 #include "logger/logger.hpp"
 #include "config/manager.hpp"
+#include "zones-manager.hpp"
 
 namespace vasum {
 
@@ -41,13 +42,15 @@ namespace {
 // Can happen if glib loop is busy or not present.
 // TODO: this should be in host's configuration file
 const unsigned int NAME_ACQUIRED_TIMEOUT = 5 * 1000;
+const std::string EMPTY_CALLER = "";
 
 } // namespace
 
 
-HostDbusConnection::HostDbusConnection()
+HostDbusConnection::HostDbusConnection(ZonesManager* zonesManagerPtr)
     : mNameAcquired(false)
     , mNameLost(false)
+    , mZonesManagerPtr(zonesManagerPtr)
 {
     LOGT("Connecting to host system DBUS");
     mDbusConnection = dbus::DbusConnection::createSystem();
@@ -117,151 +120,6 @@ void HostDbusConnection::setProxyCallCallback(const ProxyCallCallback& callback)
     mProxyCallCallback = callback;
 }
 
-void HostDbusConnection::setGetZoneConnectionsCallback(const GetZoneConnectionsCallback& callback)
-{
-    mGetZoneConnectionsCallback = callback;
-}
-
-void HostDbusConnection::setGetZoneIdsCallback(const GetZoneIdsCallback& callback)
-{
-    mGetZoneIdsCallback = callback;
-}
-
-void HostDbusConnection::setGetActiveZoneIdCallback(const GetActiveZoneIdCallback& callback)
-{
-    mGetActiveZoneIdCallback = callback;
-}
-
-void HostDbusConnection::setGetZoneInfoCallback(const GetZoneInfoCallback& callback)
-{
-    mGetZoneInfoCallback = callback;
-}
-
-void HostDbusConnection::setSetNetdevAttrsCallback(const SetNetdevAttrsCallback& callback)
-{
-    mSetNetdevAttrsCallback = callback;
-}
-
-void HostDbusConnection::setGetNetdevAttrsCallback(const GetNetdevAttrsCallback& callback)
-{
-    mGetNetdevAttrsCallback = callback;
-}
-
-void HostDbusConnection::setGetNetdevListCallback(const GetNetdevListCallback& callback)
-{
-    mGetNetdevListCallback = callback;
-}
-
-void HostDbusConnection::setCreateNetdevVethCallback(const CreateNetdevVethCallback& callback)
-{
-    mCreateNetdevVethCallback = callback;
-}
-
-void HostDbusConnection::setCreateNetdevMacvlanCallback(const CreateNetdevMacvlanCallback& callback)
-{
-    mCreateNetdevMacvlanCallback = callback;
-}
-
-void HostDbusConnection::setCreateNetdevPhysCallback(const CreateNetdevPhysCallback& callback)
-{
-    mCreateNetdevPhysCallback = callback;
-}
-
-void HostDbusConnection::setDestroyNetdevCallback(const DestroyNetdevCallback& callback)
-{
-    mDestroyNetdevCallback = callback;
-}
-
-void HostDbusConnection::setDeleteNetdevIpAddressCallback(const DeleteNetdevIpAddressCallback& callback)
-{
-    mDeleteNetdevIpAddressCallback = callback;
-}
-
-void HostDbusConnection::setDeclareFileCallback(const DeclareFileCallback& callback)
-{
-    mDeclareFileCallback = callback;
-}
-
-void HostDbusConnection::setDeclareMountCallback(const DeclareMountCallback& callback)
-{
-    mDeclareMountCallback = callback;
-}
-
-void HostDbusConnection::setDeclareLinkCallback(const DeclareLinkCallback& callback)
-{
-    mDeclareLinkCallback = callback;
-}
-
-void HostDbusConnection::setGetDeclarationsCallback(const GetDeclarationsCallback& callback)
-{
-    mGetDeclarationsCallback = callback;
-}
-
-void HostDbusConnection::setRemoveDeclarationCallback(const RemoveDeclarationCallback& callback)
-{
-    mRemoveDeclarationCallback =  callback;
-}
-
-void HostDbusConnection::setSetActiveZoneCallback(const SetActiveZoneCallback& callback)
-{
-    mSetActiveZoneCallback = callback;
-}
-
-void HostDbusConnection::setCreateZoneCallback(const CreateZoneCallback& callback)
-{
-    mCreateZoneCallback = callback;
-}
-
-void HostDbusConnection::setDestroyZoneCallback(const DestroyZoneCallback& callback)
-{
-    mDestroyZoneCallback = callback;
-}
-
-void HostDbusConnection::setShutdownZoneCallback(const ShutdownZoneCallback& callback)
-{
-    mShutdownZoneCallback = callback;
-}
-
-void HostDbusConnection::setStartZoneCallback(const StartZoneCallback& callback)
-{
-    mStartZoneCallback = callback;
-}
-
-void HostDbusConnection::setLockZoneCallback(const LockZoneCallback& callback)
-{
-    mLockZoneCallback = callback;
-}
-
-void HostDbusConnection::setUnlockZoneCallback(const UnlockZoneCallback& callback)
-{
-    mUnlockZoneCallback = callback;
-}
-
-void HostDbusConnection::setGrantDeviceCallback(const GrantDeviceCallback& callback)
-{
-    mGrantDeviceCallback = callback;
-}
-
-void HostDbusConnection::setRevokeDeviceCallback(const RevokeDeviceCallback& callback)
-{
-    mRevokeDeviceCallback = callback;
-}
-
-void HostDbusConnection::setNotifyActiveZoneCallback(const NotifyActiveZoneCallback& callback)
-{
-    mNotifyActiveZoneCallback = callback;
-}
-
-void HostDbusConnection::setSwitchToDefaultCallback(const SwitchToDefaultCallback& callback)
-{
-    mSwitchToDefaultCallback = callback;
-}
-
-void HostDbusConnection::setFileMoveCallback(const FileMoveCallback& callback)
-{
-    mFileMoveCallback = callback;
-}
-
 void HostDbusConnection::onMessageCall(const std::string& objectPath,
                                    const std::string& interface,
                                    const std::string& methodName,
@@ -276,10 +134,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::ZoneId zoneId;
         config::loadFromGVariant(parameters, zoneId);
 
-        if (mSetActiveZoneCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mSetActiveZoneCallback(zoneId, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleSetActiveZoneCall(zoneId, rb);
         return;
     }
 
@@ -313,18 +169,14 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
     }
 
     if (methodName == api::dbus::METHOD_GET_ZONE_ID_LIST) {
-        if (mGetZoneIdsCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneIds>>(result);
-            mGetZoneIdsCallback(rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneIds>>(result);
+        mZonesManagerPtr->handleGetZoneIdsCall(rb);
         return;
     }
 
     if (methodName == api::dbus::METHOD_GET_ACTIVE_ZONE_ID) {
-        if (mGetActiveZoneIdCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneId>>(result);
-            mGetActiveZoneIdCallback(rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneId>>(result);
+        mZonesManagerPtr->handleGetActiveZoneIdCall(rb);
         return;
     }
 
@@ -332,10 +184,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::ZoneId zoneId;
         config::loadFromGVariant(parameters, zoneId);
 
-        if (mGetZoneInfoCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneInfoOut>>(result);
-            mGetZoneInfoCallback(zoneId, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneInfoOut>>(result);
+        mZonesManagerPtr->handleGetZoneInfoCall(zoneId, rb);
         return;
     }
 
@@ -343,10 +193,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::SetNetDevAttrsIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mSetNetdevAttrsCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mSetNetdevAttrsCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleSetNetdevAttrsCall(data, rb);
         return;
     }
 
@@ -354,10 +202,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::GetNetDevAttrsIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mGetNetdevAttrsCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::GetNetDevAttrs>>(result);
-            mGetNetdevAttrsCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::GetNetDevAttrs>>(result);
+        mZonesManagerPtr->handleGetNetdevAttrsCall(data, rb);
         return;
     }
 
@@ -365,10 +211,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
-        if (mGetNetdevListCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::NetDevList>>(result);
-            mGetNetdevListCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::NetDevList>>(result);
+        mZonesManagerPtr->handleGetNetdevListCall(data, rb);
         return;
     }
 
@@ -376,10 +220,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::CreateNetDevVethIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mCreateNetdevVethCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mCreateNetdevVethCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleCreateNetdevVethCall(data, rb);
         return;
     }
 
@@ -387,49 +229,44 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::CreateNetDevMacvlanIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mCreateNetdevMacvlanCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mCreateNetdevMacvlanCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleCreateNetdevMacvlanCall(data, rb);
+        return;
     }
 
     if (methodName == api::dbus::METHOD_CREATE_NETDEV_PHYS) {
         api::CreateNetDevPhysIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mCreateNetdevPhysCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mCreateNetdevPhysCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleCreateNetdevPhysCall(data, rb);
+        return;
     }
 
     if (methodName == api::dbus::METHOD_DESTROY_NETDEV) {
         api::DestroyNetDevIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mDestroyNetdevCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mDestroyNetdevCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleDestroyNetdevCall(data, rb);
+        return;
     }
 
     if (methodName == api::dbus::METHOD_DELETE_NETDEV_IP_ADDRESS) {
         api::DeleteNetdevIpAddressIn data;
         config::loadFromGVariant(parameters, data);
-        if (mDeleteNetdevIpAddressCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mDeleteNetdevIpAddressCallback(data, rb);
-        }
+
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleDeleteNetdevIpAddressCall(data, rb);
+        return;
     }
 
     if (methodName == api::dbus::METHOD_DECLARE_FILE) {
         api::DeclareFileIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mDeclareFileCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
-            mDeclareFileCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
+        mZonesManagerPtr->handleDeclareFileCall(data, rb);
         return;
     }
 
@@ -437,10 +274,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::DeclareMountIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mDeclareMountCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
-            mDeclareMountCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
+        mZonesManagerPtr->handleDeclareMountCall(data, rb);
         return;
     }
 
@@ -448,10 +283,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::DeclareLinkIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mDeclareLinkCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
-            mDeclareLinkCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
+        mZonesManagerPtr->handleDeclareLinkCall(data, rb);
         return;
     }
 
@@ -459,10 +292,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
-        if (mGetDeclarationsCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declarations>>(result);
-            mGetDeclarationsCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declarations>>(result);
+        mZonesManagerPtr->handleGetDeclarationsCall(data, rb);
         return;
     }
 
@@ -470,10 +301,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::RemoveDeclarationIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mRemoveDeclarationCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mRemoveDeclarationCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleRemoveDeclarationCall(data, rb);
         return;
     }
 
@@ -481,10 +310,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::CreateZoneIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mCreateZoneCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mCreateZoneCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleCreateZoneCall(data, rb);
         return;
     }
 
@@ -492,10 +319,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
-        if (mDestroyZoneCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mDestroyZoneCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleDestroyZoneCall(data, rb);
         return;
     }
 
@@ -503,30 +328,25 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
-        if (mShutdownZoneCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mShutdownZoneCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleShutdownZoneCall(data, rb);
+        return;
     }
 
     if (methodName == api::dbus::METHOD_START_ZONE) {
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
-        if (mStartZoneCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mStartZoneCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleStartZoneCall(data, rb);
     }
 
     if (methodName == api::dbus::METHOD_LOCK_ZONE) {
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
-        if (mLockZoneCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mLockZoneCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleLockZoneCall(data, rb);
         return;
     }
 
@@ -534,10 +354,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::ZoneId data;
         config::loadFromGVariant(parameters, data);
 
-        if (mUnlockZoneCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mUnlockZoneCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleUnlockZoneCall(data, rb);
         return;
     }
 
@@ -545,10 +363,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::GrantDeviceIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mGrantDeviceCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mGrantDeviceCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleGrantDeviceCall(data, rb);
         return;
     }
 
@@ -556,10 +372,8 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::RevokeDeviceIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mRevokeDeviceCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mRevokeDeviceCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleRevokeDeviceCall(data, rb);
         return;
     }
 
@@ -567,20 +381,18 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         api::NotifActiveZoneIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mNotifyActiveZoneCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-            mNotifyActiveZoneCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleNotifyActiveZoneCall(EMPTY_CALLER, data, rb);
+        return;
     }
 
     if (methodName == api::dbus::METHOD_FILE_MOVE_REQUEST) {
         api::FileMoveRequestIn data;
         config::loadFromGVariant(parameters, data);
 
-        if (mFileMoveCallback) {
-            auto rb = std::make_shared<api::DbusMethodResultBuilder<api::FileMoveRequestStatus>>(result);
-            mFileMoveCallback(data, rb);
-        }
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::FileMoveRequestStatus>>(result);
+        mZonesManagerPtr->handleFileMoveCall(EMPTY_CALLER, data, rb);
+        return;
     }
 }
 
@@ -595,9 +407,7 @@ void HostDbusConnection::onSignalCall(const std::string& /* senderBusName */,
     }
 
     if (signalName == api::dbus::SIGNAL_SWITCH_TO_DEFAULT) {
-        if (mSwitchToDefaultCallback) {
-            mSwitchToDefaultCallback();
-        }
+        mZonesManagerPtr->handleSwitchToDefaultCall(EMPTY_CALLER);
     }
 }
 

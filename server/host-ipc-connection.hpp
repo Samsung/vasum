@@ -33,6 +33,7 @@
 
 namespace vasum {
 
+class ZonesManager;
 
 class HostIPCConnection {
 public:
@@ -47,11 +48,15 @@ public:
         typedef typename IPCSignalWrapper<ArgIn>::type type;
     };
 
-    HostIPCConnection();
+    HostIPCConnection(ZonesManager* zm);
     ~HostIPCConnection();
 
-    void setGetZoneConnectionsCallback(const Method<api::Connections>::type& callback);
+    void signalZoneConnectionState(const api::ConnectionState& connectionState);
+    void sendNotification(const api::Notification& notification);
+
+private:
     void setGetZoneIdsCallback(const Method<api::ZoneIds>::type& callback);
+    void setGetZoneConnectionsCallback(const Method<api::Connections>::type& callback);
     void setGetActiveZoneIdCallback(const Method<api::ZoneId>::type& callback);
     void setGetZoneInfoCallback(const Method<const api::ZoneId, api::ZoneInfoOut>::type& callback);
     void setSetNetdevAttrsCallback(const Method<const api::SetNetDevAttrsIn>::type& callback);
@@ -80,12 +85,10 @@ public:
     void setSwitchToDefaultCallback(const Signal<const api::Void>::type& callback);
     void setFileMoveCallback(const Method<const api::FileMoveRequestIn,
                              api::FileMoveRequestStatus>::type& callback);
-    void signalZoneConnectionState(const api::ConnectionState& connectionState);
-    void sendNotification(const api::Notification& notification);
 
-private:
     ipc::epoll::ThreadDispatcher mDispatcher;
     std::unique_ptr<ipc::Service> mService;
+    ZonesManager* mZonesManagerPtr;
 };
 
 } // namespace vasum

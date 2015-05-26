@@ -24,14 +24,19 @@
 
 #include "config.hpp"
 
+#include <functional>
+
 #include "host-ipc-connection.hpp"
 #include "host-ipc-definitions.hpp"
 #include "exception.hpp"
 #include "logger/logger.hpp"
+#include "zones-manager.hpp"
+
 
 namespace vasum {
 
-HostIPCConnection::HostIPCConnection()
+HostIPCConnection::HostIPCConnection(ZonesManager* zonesManagerPtr)
+    : mZonesManagerPtr(zonesManagerPtr)
 {
     LOGT("Connecting to host IPC socket");
     mService.reset(new ipc::Service(mDispatcher.getPoll(), HOST_IPC_SOCKET));
@@ -39,6 +44,91 @@ HostIPCConnection::HostIPCConnection()
     LOGT("Starting IPC");
     mService->start();
     LOGD("Connected");
+
+    using namespace std::placeholders;
+    setGetZoneIdsCallback(std::bind(&ZonesManager::handleGetZoneIdsCall,
+                                    mZonesManagerPtr, _1));
+
+    setGetActiveZoneIdCallback(std::bind(&ZonesManager::handleGetActiveZoneIdCall,
+                                         mZonesManagerPtr, _1));
+
+    setGetZoneInfoCallback(std::bind(&ZonesManager::handleGetZoneInfoCall,
+                                     mZonesManagerPtr, _1, _2));
+
+    setSetNetdevAttrsCallback(std::bind(&ZonesManager::handleSetNetdevAttrsCall,
+                                        mZonesManagerPtr, _1, _2));
+
+    setGetNetdevAttrsCallback(std::bind(&ZonesManager::handleGetNetdevAttrsCall,
+                                        mZonesManagerPtr, _1, _2));
+
+    setGetNetdevListCallback(std::bind(&ZonesManager::handleGetNetdevListCall,
+                                       mZonesManagerPtr, _1, _2));
+
+    setCreateNetdevVethCallback(std::bind(&ZonesManager::handleCreateNetdevVethCall,
+                                          mZonesManagerPtr, _1, _2));
+
+    setCreateNetdevMacvlanCallback(std::bind(&ZonesManager::handleCreateNetdevMacvlanCall,
+                                             mZonesManagerPtr, _1, _2));
+
+    setCreateNetdevPhysCallback(std::bind(&ZonesManager::handleCreateNetdevPhysCall,
+                                          mZonesManagerPtr, _1, _2));
+
+    setDestroyNetdevCallback(std::bind(&ZonesManager::handleDestroyNetdevCall,
+                                       mZonesManagerPtr, _1, _2));
+
+    setDeleteNetdevIpAddressCallback(std::bind(&ZonesManager::handleDeleteNetdevIpAddressCall,
+                                               mZonesManagerPtr, _1, _2));
+
+    setDeclareFileCallback(std::bind(&ZonesManager::handleDeclareFileCall,
+                                     mZonesManagerPtr, _1, _2));
+
+    setDeclareMountCallback(std::bind(&ZonesManager::handleDeclareMountCall,
+                                      mZonesManagerPtr, _1, _2));
+
+    setDeclareLinkCallback(std::bind(&ZonesManager::handleDeclareLinkCall,
+                                     mZonesManagerPtr, _1, _2));
+
+    setGetDeclarationsCallback(std::bind(&ZonesManager::handleGetDeclarationsCall,
+                                         mZonesManagerPtr, _1, _2));
+
+    setRemoveDeclarationCallback(std::bind(&ZonesManager::handleRemoveDeclarationCall,
+                                           mZonesManagerPtr, _1, _2));
+
+    setSetActiveZoneCallback(std::bind(&ZonesManager::handleSetActiveZoneCall,
+                                       mZonesManagerPtr, _1, _2));
+
+    setCreateZoneCallback(std::bind(&ZonesManager::handleCreateZoneCall,
+                                    mZonesManagerPtr, _1, _2));
+
+    setDestroyZoneCallback(std::bind(&ZonesManager::handleDestroyZoneCall,
+                                     mZonesManagerPtr, _1, _2));
+
+    setShutdownZoneCallback(std::bind(&ZonesManager::handleShutdownZoneCall,
+                                      mZonesManagerPtr, _1, _2));
+
+    setStartZoneCallback(std::bind(&ZonesManager::handleStartZoneCall,
+                                   mZonesManagerPtr, _1, _2));
+
+    setLockZoneCallback(std::bind(&ZonesManager::handleLockZoneCall,
+                                  mZonesManagerPtr, _1, _2));
+
+    setUnlockZoneCallback(std::bind(&ZonesManager::handleUnlockZoneCall,
+                                    mZonesManagerPtr, _1, _2));
+
+    setGrantDeviceCallback(std::bind(&ZonesManager::handleGrantDeviceCall,
+                                     mZonesManagerPtr, _1, _2));
+
+    setRevokeDeviceCallback(std::bind(&ZonesManager::handleRevokeDeviceCall,
+                                      mZonesManagerPtr, _1, _2));
+
+    setNotifyActiveZoneCallback(std::bind(&ZonesManager::handleNotifyActiveZoneCall,
+                                          mZonesManagerPtr, "", _1, _2));
+
+    setSwitchToDefaultCallback(std::bind(&ZonesManager::handleSwitchToDefaultCall,
+                                         mZonesManagerPtr, ""));
+
+    setFileMoveCallback(std::bind(&ZonesManager::handleFileMoveCall,
+                                  mZonesManagerPtr, "", _1, _2));
 }
 
 HostIPCConnection::~HostIPCConnection()

@@ -30,6 +30,7 @@
 #include "utils/latch.hpp"
 #include "utils/scoped-dir.hpp"
 #include "zones-manager.hpp"
+#include "host-ipc-connection.hpp"
 #include "host-ipc-definitions.hpp"
 #include "logger/logger.hpp"
 
