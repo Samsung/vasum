@@ -20,8 +20,8 @@
 MESSAGE(STATUS "Installing configs for the Unit Tests to " ${VSM_TEST_CONFIG_INSTALL_DIR})
 
 FILE(GLOB ut_zone_CONF            *.conf)
-FILE(GLOB ut_zone_templates_CONF  templates/*.conf
-                                  templates/*.sh)
+FILE(GLOB ut_zone_templates_CONF  templates/*.conf)
+FILE(GLOB ut_lxc_templates_CONF   templates/*.sh)
 
 ## Generate ####################################################################
 CONFIGURE_FILE(test-daemon.conf.in
@@ -42,6 +42,9 @@ INSTALL(FILES        ${ut_zone_CONF}
 
 INSTALL(FILES        ${ut_zone_templates_CONF}
                      ${ut_zone_templates_CONF_GEN}
+        DESTINATION  ${VSM_TEST_TEMPLATES_INSTALL_DIR})
+
+INSTALL(PROGRAMS     ${ut_lxc_templates_CONF}
         DESTINATION  ${VSM_TEST_TEMPLATES_INSTALL_DIR})
 
 INSTALL(FILES        dbus/ut-dbus.conf
