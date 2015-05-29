@@ -70,7 +70,7 @@ INSTALL(FILES       ${CMAKE_BINARY_DIR}/${PC_FILE}
         DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
 
 INSTALL(TARGETS     ${PROJECT_NAME}
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        DESTINATION ${LIB_INSTALL_DIR}
         COMPONENT   RuntimeLibraries)
 
 INSTALL(FILES       vasum.h vasum_list.h

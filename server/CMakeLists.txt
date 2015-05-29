@@ -30,7 +30,7 @@ ADD_EXECUTABLE(${SERVER_CODENAME} ${project_SRCS} ${common_SRCS})
 
 ## Link libraries ##############################################################
 FIND_PACKAGE(Boost COMPONENTS program_options system filesystem regex)
-PKG_CHECK_MODULES(SERVER_DEPS REQUIRED lxc json gio-2.0)
+PKG_CHECK_MODULES(SERVER_DEPS REQUIRED lxc glib-2.0 gio-2.0)
 
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(${LIBS_FOLDER})

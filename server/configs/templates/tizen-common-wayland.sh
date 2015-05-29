@@ -122,6 +122,8 @@ ${path}/systemd/user
 /bin/ln -s /dev/null ${path}/systemd/system/systemd-udevd.service
 /bin/ln -s /dev/null ${path}/systemd/system/systemd-udevd-kernel.socket
 /bin/ln -s /dev/null ${path}/systemd/system/systemd-udevd-control.socket
+/bin/ln -s /dev/null ${path}/systemd/system/vasum.service
+/bin/ln -s /dev/null ${path}/systemd/system/vasum.socket
 /bin/ln -s /dev/null ${path}/systemd/system/vconf-setup.service
 /bin/ln -s /usr/lib/systemd/system/tlm.service ${path}/systemd/system/multi-user.target.wants/tlm.service
 /bin/ln -s /dev/null ${path}/systemd/user/media-server-user.service

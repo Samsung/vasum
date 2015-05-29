@@ -31,7 +31,7 @@ TEST_URL_INTERNET=["www.samsung.com", "www.google.com", "www.oracle.com"]
 
 #TODO read path from config (daemon.conf)
 # Path to test zone
-TEST_ZONE_PATH="/usr/share/.zones"
+TEST_ZONE_PATH="/usr/share/zones"
 
 # Device Ethernet device
 ETHERNET_DEVICE="usb0"

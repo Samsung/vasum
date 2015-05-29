@@ -3,7 +3,7 @@ Description=Vasum Socket tests mini-service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/vasum-socket-test
+ExecStart=${CMAKE_INSTALL_PREFIX}/bin/vasum-socket-test
 Sockets=vasum-socket-test.socket
 StartLimitInterval=0
 StartLimitBurst=0

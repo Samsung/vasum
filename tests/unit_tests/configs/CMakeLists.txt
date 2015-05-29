@@ -34,6 +34,9 @@ CONFIGURE_FILE(templates/console-ipc.conf.in
                ${CMAKE_BINARY_DIR}/templates/console-ipc.conf @ONLY)
 FILE(GLOB ut_zone_templates_CONF_GEN ${CMAKE_BINARY_DIR}/templates/*.conf)
 
+CONFIGURE_FILE(systemd/vasum-socket-test.service.in
+               ${CMAKE_BINARY_DIR}/systemd/vasum-socket-test.service)
+
 
 ## Install #####################################################################
 INSTALL(FILES        ${ut_zone_CONF}
@@ -58,7 +61,7 @@ INSTALL(FILES        utils/file.txt
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/utils)
 
 INSTALL(FILES        systemd/vasum-socket-test.socket
-                     systemd/vasum-socket-test.service
+                     ${CMAKE_BINARY_DIR}/systemd/vasum-socket-test.service
         DESTINATION  ${SYSTEMD_UNIT_DIR})
 
 INSTALL(FILES        dbus-1/system.d/org.tizen.vasum.tests.conf

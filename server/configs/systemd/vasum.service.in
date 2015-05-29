@@ -1,6 +1,5 @@
 [Unit]
 Description=Vasum Server
-ConditionVirtualization=no
 
 [Service]
 Type=simple

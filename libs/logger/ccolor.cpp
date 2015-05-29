@@ -34,7 +34,7 @@ std::string getConsoleEscapeSequence(Attributes attr, Color color)
     char command[10];
 
     // Command is the control command to the terminal
-    snprintf(command, sizeof(command), "%c[%d;%dm", 0x1B, attr, color);
+    snprintf(command, sizeof(command), "%c[%u;%um", 0x1B, (unsigned int)attr, (unsigned int)color);
     return std::string(command);
 }
 

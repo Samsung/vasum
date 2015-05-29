@@ -28,7 +28,12 @@
 
 #include "config/from-kvstore-visitor.hpp"
 #include "config/is-union.hpp"
+
+#ifdef JSON_C_VERSION_NEW
+#include <json-c/json.h>
+#else //JSON_C_VERSION_NEW
 #include <json/json.h>
+#endif //JSON_C_VERSION_NEW
 
 namespace config {
 

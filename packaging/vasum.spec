@@ -8,6 +8,8 @@
 %define disk_group disk
 # The group that has write access to /dev/tty* devices.
 %define tty_group tty
+# Default platform is Tizen, setup Fedora with --define 'platform_type FEDORA'
+%{!?platform_type:%define platform_type "TIZEN"}
 
 Name:           vasum
 Epoch:          1
@@ -19,13 +21,16 @@ Group:          Security/Other
 Summary:        Daemon for managing zones
 BuildRequires:  cmake
 BuildRequires:  boost-devel
-BuildRequires:  libjson-devel >= 0.10
-BuildRequires:  lxc-devel
 BuildRequires:  pkgconfig(glib-2.0)
-BuildRequires:  pkgconfig(sqlite3)
-Requires(post): libcap-tools
+BuildRequires:  lxc-devel
+Requires:       lxc
+%if %{platform_type} == "TIZEN"
 Requires:       iproute2
-Requires:       libjson >= 0.10
+Requires(post): libcap-tools
+%else
+Requires:       iproute
+Requires(post): libcap
+%endif
 Obsoletes:      vasum-daemon < 1:0
 
 %description
@@ -34,11 +39,12 @@ between them. A process from inside a zone can request a switch of context
 (display, input devices) to the other zone.
 
 %files
+%if %{platform_type} == "TIZEN"
 %manifest packaging/vasum.manifest
+%endif
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/vasum-server
 %dir /etc/vasum
-%dir /etc/vasum/zones
 %dir /etc/vasum/templates
 %config /etc/vasum/daemon.conf
 %attr(755,root,root) /etc/vasum/templates/*.sh
@@ -47,7 +53,7 @@ between them. A process from inside a zone can request a switch of context
 %{_unitdir}/vasum.socket
 %{_unitdir}/multi-user.target.wants/vasum.service
 %config /etc/dbus-1/system.d/org.tizen.vasum.host.conf
-%dir %{_datadir}/.zones
+%dir %{_datadir}/zones
 
 %prep
 %setup -q
@@ -77,7 +83,7 @@ make -k %{?jobs:-j%jobs}
 %make_install
 mkdir -p %{buildroot}/%{_unitdir}/multi-user.target.wants
 ln -s ../vasum.service %{buildroot}/%{_unitdir}/multi-user.target.wants/vasum.service
-mkdir -p %{buildroot}/%{_datadir}/.zones
+mkdir -p %{buildroot}/%{_datadir}/zones
 
 %clean
 rm -rf %{buildroot}
@@ -127,7 +133,9 @@ Library interface to the vasum daemon
 %postun -n vasum-client -p /sbin/ldconfig
 
 %files client
+%if %{platform_type} == "TIZEN"
 %manifest packaging/libvasum-client.manifest
+%endif
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libvasum-client.so.%{version}
 %{_libdir}/libvasum-client.so.0
@@ -146,7 +154,9 @@ Requires:         vasum-client = %{epoch}:%{version}-%{release}
 Development package including the header files for the client library
 
 %files devel
+%if %{platform_type} == "TIZEN"
 %manifest packaging/vasum.manifest
+%endif
 %defattr(644,root,root,755)
 %{_libdir}/libvasum-client.so
 %{_libdir}/libvasum.so
@@ -164,7 +174,9 @@ Group:            Security/Other
 Zones support installed inside every zone.
 
 %files zone-support
+%if %{platform_type} == "TIZEN"
 %manifest packaging/vasum-zone-support.manifest
+%endif
 %defattr(644,root,root,755)
 %config /etc/dbus-1/system.d/org.tizen.vasum.zone.conf
 
@@ -179,7 +191,9 @@ Requires:         vasum-zone-support = %{epoch}:%{version}-%{release}
 Daemon running inside every zone.
 
 %files zone-daemon
+%if %{platform_type} == "TIZEN"
 %manifest packaging/vasum-zone-daemon.manifest
+%endif
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/vasum-zone-daemon
 %config /etc/dbus-1/system.d/org.tizen.vasum.zone.daemon.conf
@@ -217,7 +231,9 @@ Group:            Development/Libraries
 Requires:         vasum = %{epoch}:%{version}-%{release}
 Requires:         vasum-client = %{epoch}:%{version}-%{release}
 Requires:         python
+%if %{platform_type} == "TIZEN"
 Requires:         python-xml
+%endif
 Requires:         boost-test
 
 %description tests
@@ -236,7 +252,9 @@ systemctl disable vasum-socket-test.socket
 systemctl daemon-reload
 
 %files tests
+%if %{platform_type} == "TIZEN"
 %manifest packaging/vasum-server-tests.manifest
+%endif
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/vasum-server-unit-tests
 %attr(755,root,root) %{_bindir}/vasum-socket-test
@@ -327,6 +345,14 @@ The package provides libSimpleDbus development tools and libs.
 %package -n libConfig
 Summary:            Config library
 Group:              Security/Other
+BuildRequires:      pkgconfig(sqlite3)
+%if %{platform_type} == "TIZEN"
+BuildRequires:      libjson-devel >= 0.10
+Requires:           libjson >= 0.10
+%else
+BuildRequires:      json-c-devel
+Requires:           json-c
+%endif
 Requires(post):     /sbin/ldconfig
 Requires(postun):   /sbin/ldconfig
 
@@ -348,7 +374,11 @@ Group:          Development/Libraries
 Requires:       libConfig = %{epoch}:%{version}-%{release}
 Requires:       boost-devel
 Requires:       pkgconfig(libLogger)
-Requires:       libjson-devel
+%if %{platform_type} == "TIZEN"
+Requires:       libjson-devel >= 0.10
+%else
+Requires:       json-c-devel
+%endif
 
 %description -n libConfig-devel
 The package provides libConfig development tools and libs.
