@@ -108,8 +108,8 @@ private:
     int mFD;
     mutable std::recursive_mutex  mCommunicationMutex;
 
-    static int createZoneSocket(const std::string& path);
-    static int getSystemdSocket(const std::string& path);
+    static int createSocketInternal(const std::string& path);
+    static int getSystemdSocketInternal(const std::string& path);
 };
 
 } // namespace ipc

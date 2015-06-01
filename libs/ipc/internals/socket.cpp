@@ -56,7 +56,7 @@ void setFdOptions(int fd)
     }
 }
 
-}
+} // namespace
 
 Socket::Socket(int socketFD)
     : mFD(socketFD)
@@ -112,7 +112,7 @@ void Socket::read(void* bufferPtr, const size_t size) const
     utils::read(mFD, bufferPtr, size);
 }
 
-int Socket::getSystemdSocket(const std::string& path)
+int Socket::getSystemdSocketInternal(const std::string& path)
 {
     int n = ::sd_listen_fds(-1 /*Block further calls to sd_listen_fds*/);
     if (n < 0) {
@@ -132,7 +132,7 @@ int Socket::getSystemdSocket(const std::string& path)
     return -1;
 }
 
-int Socket::createZoneSocket(const std::string& path)
+int Socket::createSocketInternal(const std::string& path)
 {
     // Isn't the path too long?
     if (path.size() >= sizeof(sockaddr_un::sun_path)) {
@@ -178,8 +178,8 @@ int Socket::createZoneSocket(const std::string& path)
 Socket Socket::createSocket(const std::string& path)
 {
     // Initialize a socket
-    int fd = getSystemdSocket(path);
-    fd = fd != -1 ? fd : createZoneSocket(path);
+    int fd = getSystemdSocketInternal(path);
+    fd = fd != -1 ? fd : createSocketInternal(path);
 
     return Socket(fd);
 }

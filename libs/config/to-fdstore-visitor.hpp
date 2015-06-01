@@ -27,6 +27,7 @@
 
 #include "config/is-visitable.hpp"
 #include "config/fdstore.hpp"
+#include "config/types.hpp"
 
 #include <string>
 
@@ -57,6 +58,11 @@ private:
     {
         writeInternal(value.size());
         mStore.write(value.c_str(), value.size());
+    }
+
+    void writeInternal(const config::FileDescriptor& fd)
+    {
+        mStore.sendFD(fd.value);
     }
 
     template<typename T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>

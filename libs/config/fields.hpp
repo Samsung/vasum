@@ -28,6 +28,8 @@
 #include <boost/preprocessor/variadic/to_list.hpp>
 #include <boost/preprocessor/list/for_each.hpp>
 
+#include "config/types.hpp"
+
 #if BOOST_PP_VARIADICS != 1
 #error variadic macros not supported
 #endif

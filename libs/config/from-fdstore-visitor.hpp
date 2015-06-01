@@ -27,6 +27,7 @@
 
 #include "config/is-visitable.hpp"
 #include "config/fdstore.hpp"
+#include "config/types.hpp"
 
 #include <string>
 
@@ -58,6 +59,11 @@ private:
         readInternal(size);
         value.resize(size);
         mStore.read(&value.front(), size);
+    }
+
+    void readInternal(config::FileDescriptor& fd)
+    {
+        fd = mStore.receiveFD();
     }
 
     template<typename T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>

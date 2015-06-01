@@ -44,17 +44,24 @@
 #include "config/fields.hpp"
 #include "logger/logger.hpp"
 
+#include <boost/filesystem.hpp>
+#include <fstream>
 #include <atomic>
 #include <string>
 #include <thread>
 #include <chrono>
 #include <utility>
 #include <future>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 using namespace ipc;
 using namespace epoll;
 using namespace utils;
 using namespace std::placeholders;
+namespace fs = boost::filesystem;
 
 // Timeout for sending one message
 const int TIMEOUT = 1000 /*ms*/;
@@ -67,6 +74,7 @@ const int LONG_OPERATION_TIME = 1000 + TIMEOUT;
 
 const std::string TEST_DIR = "/tmp/ut-ipc";
 const std::string SOCKET_PATH = TEST_DIR + "/test.socket";
+const std::string TEST_FILE = TEST_DIR + "/file.txt";
 
 struct FixtureBase {
     ScopedDir mTestPathGuard;
@@ -80,14 +88,18 @@ struct FixtureBase {
 struct ThreadedFixture : FixtureBase {
     ThreadDispatcher dispatcher;
 
-    EventPoll& getPoll() { return dispatcher.getPoll(); }
+    EventPoll& getPoll() {
+        return dispatcher.getPoll();
+    }
 };
 
 struct GlibFixture : FixtureBase {
     ScopedGlibLoop glibLoop;
     GlibDispatcher dispatcher;
 
-    EventPoll& getPoll() { return dispatcher.getPoll(); }
+    EventPoll& getPoll() {
+        return dispatcher.getPoll();
+    }
 };
 
 struct SendData {
@@ -107,6 +119,16 @@ struct RecvData {
     CONFIG_REGISTER
     (
         intVal
+    )
+};
+
+struct FDData {
+    config::FileDescriptor fd;
+    FDData(int fd = -1): fd(fd) {}
+
+    CONFIG_REGISTER
+    (
+        fd
     )
 };
 
@@ -708,6 +730,40 @@ MULTI_FIXTURE_TEST_CASE(MixOperations, F, ThreadedFixture, GlibFixture)
     c.signal<SendData>(2, data);
 
     BOOST_CHECK(l.wait(TIMEOUT));
+}
+
+MULTI_FIXTURE_TEST_CASE(FDSendReceive, F, ThreadedFixture, GlibFixture)
+{
+    const char DATA[] = "Content of the file";
+    {
+        // Fill the file
+        fs::remove(TEST_FILE);
+        std::ofstream file(TEST_FILE);
+        file << DATA;
+        file.close();
+    }
+
+    auto methodHandler = [&](const PeerID, std::shared_ptr<EmptyData>&, MethodResult::Pointer methodResult) {
+        int fd = ::open(TEST_FILE.c_str(), O_RDONLY);
+        auto returnData = std::make_shared<FDData>(fd);
+        methodResult->set(returnData);
+    };
+
+    Service s(F::getPoll(), SOCKET_PATH);
+    s.setMethodHandler<FDData, EmptyData>(1, methodHandler);
+
+    Client c(F::getPoll(), SOCKET_PATH);
+    connect(s, c);
+
+    std::shared_ptr<FDData> fdData;
+    std::shared_ptr<EmptyData> sentData(new EmptyData());
+    fdData = c.callSync<EmptyData, FDData>(1, sentData, TIMEOUT);
+
+    // Use the file descriptor
+    char buffer[sizeof(DATA)];
+    BOOST_REQUIRE(::read(fdData->fd.value, buffer, sizeof(buffer))>0);
+    BOOST_REQUIRE(strncmp(DATA, buffer, strlen(DATA))==0);
+    ::close(fdData->fd.value);
 }
 
 // MULTI_FIXTURE_TEST_CASE(ConnectionLimit, F, ThreadedFixture, GlibFixture)

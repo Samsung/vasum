@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <chrono>
 #include <poll.h>
+#include <sys/socket.h>
 
 namespace config {
 
@@ -102,24 +103,28 @@ FDStore::~FDStore()
 
 void FDStore::write(const void* bufferPtr, const size_t size, const unsigned int timeoutMS)
 {
-    std::chrono::high_resolution_clock::time_point deadline = std::chrono::high_resolution_clock::now() +
-                                                              std::chrono::milliseconds(timeoutMS);
+    std::chrono::high_resolution_clock::time_point deadline =
+        std::chrono::high_resolution_clock::now() +
+        std::chrono::milliseconds(timeoutMS);
 
     size_t nTotal = 0;
     for (;;) {
-        int n  = ::write(mFD,
-                         reinterpret_cast<const char*>(bufferPtr) + nTotal,
-                         size - nTotal);
-        if (n >= 0) {
+        ssize_t n  = ::write(mFD,
+                             reinterpret_cast<const char*>(bufferPtr) + nTotal,
+                             size - nTotal);
+        if (n < 0) {
+            // Handle errors
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+                // Neglected errors
+            } else {
+                throw ConfigException("Error during writing: " + getSystemErrorMessage());
+            }
+        } else {
             nTotal += n;
             if (nTotal == size) {
-                // All data is written, break loop
+                // All data is read, break loop
                 break;
             }
-        } else if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
-            // Neglected errors
-        } else {
-            throw ConfigException("Error during writing: " + getSystemErrorMessage());
         }
 
         waitForEvent(mFD, POLLOUT, deadline);
@@ -128,15 +133,23 @@ void FDStore::write(const void* bufferPtr, const size_t size, const unsigned int
 
 void FDStore::read(void* bufferPtr, const size_t size, const unsigned int timeoutMS)
 {
-    std::chrono::high_resolution_clock::time_point deadline = std::chrono::high_resolution_clock::now() +
-                                                              std::chrono::milliseconds(timeoutMS);
+    std::chrono::high_resolution_clock::time_point deadline =
+        std::chrono::high_resolution_clock::now() +
+        std::chrono::milliseconds(timeoutMS);
 
     size_t nTotal = 0;
     for (;;) {
-        int n  = ::read(mFD,
-                        reinterpret_cast<char*>(bufferPtr) + nTotal,
-                        size - nTotal);
-        if (n >= 0) {
+        ssize_t n  = ::read(mFD,
+                            reinterpret_cast<char*>(bufferPtr) + nTotal,
+                            size - nTotal);
+        if (n < 0) {
+            // Handle errors
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+                // Neglected errors
+            } else {
+                throw ConfigException("Error during reading: " + getSystemErrorMessage());
+            }
+        } else {
             nTotal += n;
             if (nTotal == size) {
                 // All data is read, break loop
@@ -145,13 +158,138 @@ void FDStore::read(void* bufferPtr, const size_t size, const unsigned int timeou
             if (n == 0) {
                 throw ConfigException("Peer disconnected");
             }
-        } else if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
-            // Neglected errors
-        } else {
-            throw ConfigException("Error during reading: " + getSystemErrorMessage());
         }
 
         waitForEvent(mFD, POLLIN, deadline);
     }
 }
+
+
+void FDStore::sendFD(int fd, const unsigned int timeoutMS)
+{
+    std::chrono::high_resolution_clock::time_point deadline =
+        std::chrono::high_resolution_clock::now() +
+        std::chrono::milliseconds(timeoutMS);
+
+    // Space for the file descriptor
+    union {
+        struct cmsghdr cmh;
+        char   control[CMSG_SPACE(sizeof(int))];
+    } controlUnion;
+
+    // Ensure at least 1 byte is transmited via the socket
+    struct iovec iov;
+    char buf = '!';
+    iov.iov_base = &buf;
+    iov.iov_len = sizeof(char);
+
+    // Fill the message to send:
+    // The socket has to be connected, so we don't need to specify the name
+    struct msghdr msgh;
+    ::memset(&msgh, 0, sizeof(msgh));
+
+    // Only iovec to transmit one element
+    msgh.msg_iov = &iov;
+    msgh.msg_iovlen = 1;
+
+    // Ancillary data buffer
+    msgh.msg_control = controlUnion.control;
+    msgh.msg_controllen = sizeof(controlUnion.control);
+
+    // Describe the data that we want to send
+    struct cmsghdr *cmhp;
+    cmhp = CMSG_FIRSTHDR(&msgh);
+    cmhp->cmsg_len = CMSG_LEN(sizeof(int));
+    cmhp->cmsg_level = SOL_SOCKET;
+    cmhp->cmsg_type = SCM_RIGHTS;
+    *(reinterpret_cast<int*>(CMSG_DATA(cmhp))) = fd;
+
+    // Send
+    for(;;) {
+        ssize_t ret = ::sendmsg(mFD, &msgh, MSG_NOSIGNAL);
+        if (ret < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+                // Neglected errors, retry
+            } else {
+                throw ConfigException("Error during sendmsg: " + getSystemErrorMessage());
+            }
+        } else if (ret == 0) {
+            // Retry the sending
+        } else {
+            // We send only 1 byte of data. No need to repeat
+            break;
+        }
+
+        waitForEvent(mFD, POLLOUT, deadline);
+    }
+}
+
+
+int FDStore::receiveFD(const unsigned int timeoutMS)
+{
+    std::chrono::high_resolution_clock::time_point deadline =
+        std::chrono::high_resolution_clock::now() +
+        std::chrono::milliseconds(timeoutMS);
+
+    // Space for the file descriptor
+    union {
+        struct cmsghdr cmh;
+        char   control[CMSG_SPACE(sizeof(int))];
+    } controlUnion;
+
+    // Describe the data that we want to recive
+    controlUnion.cmh.cmsg_len = CMSG_LEN(sizeof(int));
+    controlUnion.cmh.cmsg_level = SOL_SOCKET;
+    controlUnion.cmh.cmsg_type = SCM_RIGHTS;
+
+    // Setup the input buffer
+    // Ensure at least 1 byte is transmited via the socket
+    char buf;
+    struct iovec iov;
+    iov.iov_base = &buf;
+    iov.iov_len = sizeof(char);
+
+    // Set the ancillary data buffer
+    // The socket has to be connected, so we don't need to specify the name
+    struct msghdr msgh;
+    ::memset(&msgh, 0, sizeof(msgh));
+
+    msgh.msg_iov = &iov;
+    msgh.msg_iovlen = 1;
+
+    msgh.msg_control = controlUnion.control;
+    msgh.msg_controllen = sizeof(controlUnion.control);
+
+    // Receive
+    for(;;) {
+        ssize_t ret = ::recvmsg(mFD, &msgh, MSG_WAITALL);
+        if (ret < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+                // Neglected errors, retry
+            } else {
+                throw ConfigException("Error during recvmsg: " + getSystemErrorMessage());
+            }
+        } else if (ret == 0) {
+            throw ConfigException("Peer disconnected");
+        } else {
+            // We receive only 1 byte of data. No need to repeat
+            break;
+        }
+
+        waitForEvent(mFD, POLLIN, deadline);
+    }
+
+    struct cmsghdr *cmhp;
+    cmhp = CMSG_FIRSTHDR(&msgh);
+    if (cmhp == NULL || cmhp->cmsg_len != CMSG_LEN(sizeof(int))) {
+        throw ConfigException("Bad cmsg length");
+    } else if (cmhp->cmsg_level != SOL_SOCKET) {
+        throw ConfigException("cmsg_level != SOL_SOCKET");
+    } else if (cmhp->cmsg_type != SCM_RIGHTS) {
+        throw ConfigException("cmsg_type != SCM_RIGHTS");
+    }
+
+    return *(reinterpret_cast<int*>(CMSG_DATA(cmhp)));
+}
+
 } // namespace config

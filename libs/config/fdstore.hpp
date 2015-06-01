@@ -27,6 +27,10 @@
 
 #include <cstddef>
 
+namespace {
+const unsigned int maxTimeout = 5000;
+} // namespace
+
 namespace config {
 
 class FDStore {
@@ -50,7 +54,7 @@ public:
      * @param size size of the buffer
      * @param timeoutMS timeout in milliseconds
      */
-    void write(const void* bufferPtr, const size_t size, const unsigned int timeoutMS = 5000);
+    void write(const void* bufferPtr, const size_t size, const unsigned int timeoutMS = maxTimeout);
 
     /**
      * Reads a value of the given type.
@@ -59,7 +63,11 @@ public:
      * @param size size of the buffer
      * @param timeoutMS timeout in milliseconds
      */
-    void read(void* bufferPtr, const size_t size, const unsigned int timeoutMS = 5000);
+    void read(void* bufferPtr, const size_t size, const unsigned int timeoutMS = maxTimeout);
+
+    void sendFD(int fd, const unsigned int timeoutMS = maxTimeout);
+
+    int receiveFD(const unsigned int timeoutMS = maxTimeout);
 
 private:
     int mFD;
