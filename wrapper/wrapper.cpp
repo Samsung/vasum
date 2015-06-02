@@ -54,7 +54,6 @@ struct WrappedContext
 static struct
 {
     int done;
-    int glib_stop;
 } wrap;
 
 
@@ -90,8 +89,6 @@ void wrapper_load(void)
 
 void wrapper_unload(void)
 {
-    if (wrap.glib_stop) Client::vsm_stop_glib_loop();
-    wrap.glib_stop = 0;
     LOGI("wrapper_unload");
 }
 
@@ -153,8 +150,6 @@ static int wrap_error(VsmStatus st, const Client *c)
 
 static void init_context_wrap(WrappedContext *w)
 {
-    Client::vsm_start_glib_loop();
-    wrap.glib_stop = 1;
     w->client = new Client();
     VsmStatus st = w->client->createSystem();
     wrap_error(st, w->client);

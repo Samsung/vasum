@@ -336,15 +336,6 @@ public:
      */
     VsmStatus vsm_del_notification_callback(VsmSubscriptionId subscriptionId) noexcept;
 
-    /**
-     *  @see ::vsm_start_glib_loop
-     */
-    static VsmStatus vsm_start_glib_loop() noexcept;
-
-    /**
-     *  @see ::vsm_stop_glib_loop
-     */
-    static VsmStatus vsm_stop_glib_loop() noexcept;
 private:
     typedef vasum::client::HostIPCConnection HostConnection;
     struct Status {

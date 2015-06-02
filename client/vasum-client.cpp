@@ -45,17 +45,6 @@ Client& getClient(VsmClient client)
 
 } // namespace
 
-/* external */
-API VsmStatus vsm_start_glib_loop()
-{
-    return Client::vsm_start_glib_loop();
-}
-
-API VsmStatus vsm_stop_glib_loop()
-{
-    return Client::vsm_stop_glib_loop();
-}
-
 API VsmClient vsm_client_create()
 {
     Client* clientPtr = new(nothrow) Client();

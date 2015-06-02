@@ -127,18 +127,6 @@ bool readFirstLineOfFile(const string& path, string& ret)
 
 } //namespace
 
-VsmStatus Client::vsm_start_glib_loop() noexcept
-{
-    // TPDP: Remove vsm_start_glib_loop from API
-    return VSMCLIENT_SUCCESS;
-}
-
-VsmStatus Client::vsm_stop_glib_loop() noexcept
-{
-    // TPDP: Remove vsm_stop_glib_loop from API
-    return VSMCLIENT_SUCCESS;
-}
-
 Client::Status::Status()
     : mVsmStatus(VSMCLIENT_SUCCESS), mMsg()
 {

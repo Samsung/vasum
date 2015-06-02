@@ -34,12 +34,6 @@ int main(int argc, char** argv)
     VsmArrayString values = NULL;
     int ret = 0;
 
-    status = vsm_start_glib_loop(); // start glib loop (if not started any yet)
-    if (VSMCLIENT_SUCCESS != status) {
-        // error!
-        return 1;
-    }
-
     client = vsm_client_create(); // create client handle
     if (NULL == client) {
         // error!
@@ -69,7 +63,6 @@ int main(int argc, char** argv)
 finish:
     vsm_array_string_free(values); // free memory
     vsm_client_free(client); // destroy client handle
-    vsm_stop_glib_loop(); // stop the glib loop (use only with vsm_start_glib_loop)
     return ret;
 }
  @endcode
@@ -188,24 +181,6 @@ typedef enum {
 } VsmFileType;
 
 #ifndef __VASUM_WRAPPER_SOURCE__
-/**
- * Start glib loop.
- *
- * Do not call this function if an application creates a glib loop itself.
- * Otherwise, call it before any other function from this library.
- *
- * @return status of this function call
- */
-VsmStatus vsm_start_glib_loop();
-
-/**
- * Stop glib loop.
- *
- * Call only if vsm_start_glib_loop() was called.
- *
- * @return status of this function call
- */
-VsmStatus vsm_stop_glib_loop();
 
 /**
  * Create a new vasum-server's client.

@@ -58,11 +58,6 @@ void one_shot(const function<VsmStatus(VsmClient)>& fun)
     VsmStatus status;
     VsmClient client;
 
-    status = vsm_start_glib_loop();
-    if (VSMCLIENT_SUCCESS != status) {
-        throw runtime_error("Can't start glib loop");
-    }
-
     client = vsm_client_create();
     if (NULL == client) {
         msg = "Can't create client";
@@ -83,7 +78,6 @@ void one_shot(const function<VsmStatus(VsmClient)>& fun)
 
 finish:
     vsm_client_free(client);
-    vsm_stop_glib_loop();
     if (! msg.empty()) {
         throw runtime_error(msg);
     }
