@@ -36,6 +36,7 @@
 #include "utils/signal.hpp"
 #include "utils/exception.hpp"
 
+#include <iostream>
 #include <csignal>
 #include <cerrno>
 #include <string>
@@ -46,6 +47,13 @@
 #include <sys/stat.h>
 #include <boost/filesystem.hpp>
 #include <linux/capability.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/utsname.h>
+#include <lxc/lxccontainer.h>
+#include <lxc/version.h>
 
 
 #ifndef VASUM_USER
@@ -142,6 +150,73 @@ void Server::terminate()
     LOGI("Terminating server");
     gSignalLatch.set();
 }
+
+bool Server::checkEnvironment()
+{
+    // check kernel
+    struct utsname u;
+    int version, major, minor;
+    ::uname(&u);
+    version = major = minor = 0;
+    ::sscanf(u.release, "%d.%d.%d", &version, &major, &minor);
+    if (version < 2 || (version == 2 && major < 6) || (version == 2 && major == 6 && minor < 29)) {
+        // control-group functionality was merged into kernel version 2.6.24 in 2007 (wikipedia)
+        // namespace support begins from kernels 2.4.19(mnt), 2.6.19(ns,uts,ipc), 2.6.24(pid), 2.6.29(net)
+        // namespace for usr from kernel 3.8(usr) - not used by vasum
+        std::cout << "kernel is old ver=" << u.release << ", run vasum-check-env" << std::endl;
+        return false;
+    }
+    else
+        std::cout << "kernel " << u.release << " [OK]" << std::endl;
+
+    // check lxc (TODO check if running on broken ABI version)
+    if (::strcmp(lxc_get_version(), LXC_VERSION)!=0) {
+        // versions that matters:
+        // 1.1.0 added function ptr 'in-the-middle' destroy_with_snapshots, snapshot_destroy_all (breaks ABI)
+        // 1.1.2 added function ptr 'append' attach_interface,detach_interface,checkpoint,restore (safe for ABI)
+        std::cout << "LXC version not match, compiled for " << LXC_VERSION << ", installed " << lxc_get_version() << std::endl;
+        return false;
+    }
+    else
+        std::cout << "LXC version " << lxc_get_version() << " [OK]" << std::endl;
+
+    // check cgroups (and its subsystems?)
+    std::string cgroupCheck = "/sys/fs/cgroup";
+    int fd = ::open(cgroupCheck.c_str(), O_RDONLY);
+    if (fd == -1) {
+        std::cout << "no cgroups support (can't access " << cgroupCheck << "), run vasum-check-env" << std::endl;
+        return false;
+    }
+
+    bool err = false;
+    std::vector<std::string> cgroupSubsCheck = {"cpu", "cpuset", "memory"};
+    for (std::string f : cgroupSubsCheck)  {
+        if (::faccessat(fd, f.c_str(), R_OK|X_OK, 0) == -1) {
+            std::cout << "no cgroups support (can't access " << cgroupCheck << "/" << f << ")" << std::endl;
+            err=true;
+        }
+    }
+    ::close(fd);
+    if (err) {
+        std::cout << "cgroups problem, run vasum-check-env" << std::endl;
+        return false;
+    }
+    else
+        std::cout << "cgroups support " << " [OK]" << std::endl;
+
+    // check namespaces
+    std::string nsCheck = "/proc/self/ns";
+    if (::access(nsCheck.c_str(), R_OK|X_OK)  == -1) {
+        std::cout << "no namespace support (can't access " << nsCheck << "), run vasum-check-env" << std::endl;
+        return false;
+    }
+    else
+        std::cout << "namespaces support " << " [OK]" << std::endl;
+    ::close(fd);
+
+    return true;
+}
+
 
 bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
 {

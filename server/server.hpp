@@ -54,6 +54,11 @@ public:
      */
     void terminate();
 
+    /**
+     * Check server runtime environment
+    */
+    static bool checkEnvironment();
+
 private:
     std::string mConfigPath;
 

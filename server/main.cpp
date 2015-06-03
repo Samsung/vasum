@@ -69,6 +69,7 @@ int main(int argc, char* argv[])
         ("root,r", "Don't drop root privileges at startup")
         ("version,v", "show application version")
         ("log-level,l", po::value<std::string>()->default_value("DEBUG"), "set log level")
+        ("check,c", "check runtime environment and exit")
         ;
 
         po::variables_map vm;
@@ -100,6 +101,9 @@ int main(int argc, char* argv[])
         } else if (vm.count("version")) {
             std::cout << PROGRAM_NAME_AND_VERSION << std::endl;
             return 0;
+        } else if (vm.count("check")) {
+            std::cout << "Checking runtime environment..." << std::endl;
+            return Server::checkEnvironment() ? 0 : 1;
         }
 
         Logger::setLogLevel(vm["log-level"].as<std::string>());

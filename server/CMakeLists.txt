@@ -55,3 +55,5 @@ INSTALL(TARGETS ${SERVER_CODENAME} DESTINATION bin)
 
 ## Set capabilities on server executable #######################################
 INSTALL(CODE "EXECUTE_PROCESS(COMMAND setcap CAP_SYS_ADMIN,CAP_MAC_OVERRIDE,CAP_SYS_TTY_CONFIG+ei \$ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/bin/${SERVER_CODENAME})")
+
+INSTALL(PROGRAMS "scripts/vasum-check-env.sh" DESTINATION sbin RENAME vasum-check-env)
