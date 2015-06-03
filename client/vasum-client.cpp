@@ -45,6 +45,26 @@ Client& getClient(VsmClient client)
 
 } // namespace
 
+API VsmStatus vsm_get_poll_fd(VsmClient client, int* fd)
+{
+    return getClient(client).vsm_get_poll_fd(fd);
+}
+
+API VsmStatus vsm_enter_eventloop(VsmClient client, int flags, int timeout)
+{
+    return getClient(client).vsm_enter_eventloop(flags, timeout);
+}
+
+API VsmStatus vsm_set_dispatcher_type(VsmClient client, VsmDispacherType dispacher)
+{
+    return getClient(client).vsm_set_dispatcher_type(dispacher);
+}
+
+API VsmStatus vsm_get_dispatcher_type(VsmClient client, VsmDispacherType* dispacher)
+{
+    return getClient(client).vsm_get_dispatcher_type(dispacher);
+}
+
 API VsmClient vsm_client_create()
 {
     Client* clientPtr = new(nothrow) Client();
@@ -53,12 +73,17 @@ API VsmClient vsm_client_create()
 
 API VsmStatus vsm_connect(VsmClient client)
 {
-    return getClient(client).createSystem();
+    return getClient(client).connectSystem();
 }
 
 API VsmStatus vsm_connect_custom(VsmClient client, const char* address)
 {
-    return getClient(client).create(address);
+    return getClient(client).connect(address);
+}
+
+API VsmStatus vsm_disconnect(VsmClient client)
+{
+    return getClient(client).disconnect();
 }
 
 API void vsm_array_string_free(VsmArrayString astring)

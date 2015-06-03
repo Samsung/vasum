@@ -151,7 +151,7 @@ static int wrap_error(VsmStatus st, const Client *c)
 static void init_context_wrap(WrappedContext *w)
 {
     w->client = new Client();
-    VsmStatus st = w->client->createSystem();
+    VsmStatus st = w->client->connectSystem();
     wrap_error(st, w->client);
 
     memset(&w->hq_ctx, 0, sizeof(w->hq_ctx));

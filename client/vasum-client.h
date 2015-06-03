@@ -180,7 +180,126 @@ typedef enum {
     VSMFILE_REGULAR
 } VsmFileType;
 
+/**
+ * Event dispacher types.
+ *
+ * @par Example usage:
+ * @code
+#include <pthread.h>
+#include <assert.h>
+#include <stdio.h>
+#include <signal.h>
+#include <sys/epoll.h>
+#include <vasum-client.h>
+
+volatile static sig_atomic_t running;
+static int LOOP_INTERVAL = 1000; // ms
+
+void* main_loop(void* client)
+{
+    int fd = -1;
+    VsmStatus status = vsm_get_poll_fd(client, &fd);
+    assert(VSMCLIENT_SUCCESS == status);
+
+    while (running) {
+        struct epoll_event event;
+        int num = epoll_wait(fd, &event, 1, LOOP_INTERVAL);
+        if (num > 0) {
+            status = vsm_enter_eventloop(client, 0 , 0);
+            assert(VSMCLIENT_SUCCESS == status);
+        }
+    }
+    return NULL;
+}
+
+int main(int argc, char** argv)
+{
+    pthread_t loop;
+    VsmStatus status;
+    VsmClient client;
+    int ret = 0;
+
+    client = vsm_client_create();
+    assert(client);
+
+    status = vsm_set_dispatcher_type(client, VSMDISPATCHER_EXTERNAL);
+    assert(VSMCLIENT_SUCCESS == status);
+
+    status = vsm_connect(client);
+    assert(VSMCLIENT_SUCCESS == status);
+
+    // start event loop
+    running = 1;
+    ret = pthread_create(&loop, NULL, main_loop, client);
+    assert(ret == 0);
+
+    // make vsm_* calls on client
+    // ...
+
+    status = vsm_disconnect(client);
+    assert(VSMCLIENT_SUCCESS == status);
+
+    //stop event loop
+    running = 0;
+    ret = pthread_join(loop, NULL);
+    assert(ret == 0);
+
+    vsm_client_free(client); // destroy client handle
+    return ret;
+}
+ @endcode
+ */
+typedef enum {
+    VSMDISPATCHER_EXTERNAL,         /**< User must handle dispatching messages */
+    VSMDISPATCHER_INTERNAL          /**< Library will take care of dispatching messages */
+} VsmDispacherType;
+
 #ifndef __VASUM_WRAPPER_SOURCE__
+
+/**
+ * Get file descriptor associated with event dispatcher of zone client
+ *
+ * The function vsm_get_poll_fd() returns the file descriptor associated with the event dispatcher of vsm client.
+ * The file descriptor can be bound to another I/O multiplexing facilities like epoll, select, and poll.
+ *
+ * @param[in] client vsm client
+ * @param[out] fd epoll file descriptor
+ * @return status of this function call
+*/
+VsmStatus vsm_get_poll_fd(VsmClient client, int* fd);
+
+/**
+ * Wait for an I/O event on a vsm client
+ *
+ * vsm_enter_eventloop() waits for event on the vsm client
+ *
+ * The call waits for a maximum time of timout milliseconds. Specifying a timeout of -1 makes vsm_enter_eventloop() wait indefinitely,
+ * while specifying a timeout equal to zero makes vsm_enter_eventloop() to return immediately even if no events are available.
+ *
+ * @param[in] client vasum-server's client
+ * @param[in] flags Reserved
+ * @param[in] timeout Timeout time (milisecond), -1 is infinite
+ * @return status of this function call
+*/
+VsmStatus vsm_enter_eventloop(VsmClient client, int flags, int timeout);
+
+/**
+ * Set dispatching method
+ *
+ * @param[in] client vasum-server's client
+ * @param[in] dispacher dispatching method
+ * @return status of this function call
+ */
+VsmStatus vsm_set_dispatcher_type(VsmClient client, VsmDispacherType dispacher);
+
+/**
+ * Get dispatching method
+ *
+ * @param[in] client vasum-server's client
+ * @param[out] dispacher dispatching method
+ * @return status of this function call
+ */
+VsmStatus vsm_get_dispatcher_type(VsmClient client, VsmDispacherType* dispacher);
 
 /**
  * Create a new vasum-server's client.
@@ -228,6 +347,14 @@ VsmStatus vsm_connect(VsmClient client);
  * @return status of this function call
  */
 VsmStatus vsm_connect_custom(VsmClient client, const char* address);
+
+/**
+ * Disconnect client from vasum-server.
+ *
+ * @param[in] client vasum-server's client
+ * @return status of this function call
+ */
+VsmStatus vsm_disconnect(VsmClient client);
 
 /**
  * Release VsmArrayString.

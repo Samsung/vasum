@@ -29,6 +29,11 @@
 #include "vasum-client.h"
 #include "host-ipc-connection.hpp"
 
+#include <ipc/epoll/thread-dispatcher.hpp>
+#include <ipc/epoll/event-poll.hpp>
+
+#include <mutex>
+#include <memory>
 #include <functional>
 #include <linux/if_link.h>
 
@@ -63,21 +68,44 @@ public:
     ~Client() noexcept;
 
     /**
-     * Create client with system dbus address.
+     * Connect client with system ipc address.
      *
      * @return status of this function call
      */
-    VsmStatus createSystem() noexcept;
-
-    ipc::epoll::EventPoll& getEventPoll() noexcept;
+    VsmStatus connectSystem() noexcept;
 
     /**
-     * Create client.
+     * Connect client.
      *
-     * @param address Dbus socket address
+     * @param address ipc socket address
      * @return status of this function call
      */
-    VsmStatus create(const std::string& address) noexcept;
+    VsmStatus connect(const std::string& address) noexcept;
+
+    /**
+     * Disconnect client
+     */
+    VsmStatus disconnect() noexcept;
+
+    /**
+     *  @see ::vsm_get_poll_fd
+     */
+    VsmStatus vsm_get_poll_fd(int* fd) noexcept;
+
+    /**
+     *  @see ::vsm_enter_eventloop
+     */
+    VsmStatus vsm_enter_eventloop(int flags, int timeout) noexcept;
+
+    /**
+     *  @see ::vsm_set_dispatcher_type
+     */
+    VsmStatus vsm_set_dispatcher_type(VsmDispacherType dispacher) noexcept;
+
+    /**
+     *  @see ::vsm_get_dispatcher_type
+     */
+    VsmStatus vsm_get_dispatcher_type(VsmDispacherType* dispacher) noexcept;
 
     /**
      *  @see ::vsm_get_status_message
@@ -344,11 +372,15 @@ private:
         VsmStatus mVsmStatus;
         std::string mMsg;
     };
-
     Status mStatus;
 
+    mutable std::mutex mStatusMutex;
+    std::unique_ptr<ipc::epoll::ThreadDispatcher> mInternalDispatcher;
+    std::unique_ptr<ipc::epoll::EventPoll> mEventPoll;
     HostConnection mHostClient;
 
+    bool isInternalDispatcherEnabled() const;
+    ipc::epoll::EventPoll& getEventPoll() const;
     VsmStatus coverException(const std::function<void(void)>& worker) noexcept;
     VsmStatus vsm_netdev_get_ip_addr(const char* zone,
                                      const char* netdevId,

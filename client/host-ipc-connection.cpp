@@ -35,21 +35,22 @@ namespace {
     const int TIMEOUT_INFINITE = -1;
 } //namespace
 
-void HostIPCConnection::createSystem()
+void HostIPCConnection::connect(const std::string& address, ipc::epoll::EventPoll& eventPoll)
 {
-    mClient.reset(new ipc::Client(mDispatcher.getPoll(), HOST_IPC_SOCKET));
+    mClient.reset(new ipc::Client(eventPoll, address));
     mClient->start();
-}
-ipc::epoll::ThreadDispatcher& HostIPCConnection::getDispatcher()
-{
-    return mDispatcher;
 }
 
-void HostIPCConnection::create(const std::string& address)
+void HostIPCConnection::disconnect()
 {
-    mClient.reset(new ipc::Client(mDispatcher.getPoll(), address));
-    mClient->start();
+    mClient.reset();
 }
+
+bool HostIPCConnection::isConnected()
+{
+    return mClient && mClient->isStarted();
+}
+
 
 void HostIPCConnection::callGetZoneIds(api::ZoneIds& argOut)
 {

@@ -46,6 +46,8 @@
 #include <tuple>
 #include <utility>
 
+#include <sys/epoll.h>
+
 using namespace vasum;
 using namespace utils;
 
@@ -55,6 +57,7 @@ const std::string TEST_CONFIG_PATH =
     VSM_TEST_CONFIG_INSTALL_DIR "/test-daemon.conf";
 const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
 const std::string TEMPLATE_NAME = "console-ipc";
+const int EVENT_TIMEOUT = 500; // ms
 
 struct Fixture {
     utils::ScopedDir mZonesPathGuard;
@@ -83,6 +86,73 @@ struct Fixture {
     }
 };
 
+class SimpleEventLoop {
+public:
+    SimpleEventLoop(VsmClient client)
+        : mClient(client)
+        , mIsProcessing(true)
+        , mThread([this] { loop(); })
+    {
+    }
+    ~SimpleEventLoop()
+    {
+        mIsProcessing = false;
+        mThread.join();
+    }
+
+private:
+    VsmClient mClient;
+    std::atomic_bool mIsProcessing;
+    std::thread mThread;
+    void loop() {
+        while (mIsProcessing) {
+            vsm_enter_eventloop(mClient, 0, EVENT_TIMEOUT);
+        }
+    }
+};
+
+class AggragatedEventLoop {
+public:
+    AggragatedEventLoop()
+        : mIsProcessing(true)
+        , mThread([this] { loop(); })
+    {
+    }
+
+    ~AggragatedEventLoop()
+    {
+        mIsProcessing = false;
+        mThread.join();
+    }
+
+    VsmStatus addEventSource(VsmClient client) {
+        int fd = -1;
+        VsmStatus ret = vsm_get_poll_fd(client, &fd);
+        if (VSMCLIENT_SUCCESS != ret) {
+            return ret;
+        }
+        mEventPoll.addFD(fd, EPOLLIN | EPOLLHUP | EPOLLRDHUP, [client] (int, ipc::epoll::Events) {
+            vsm_enter_eventloop(client, 0, 0);
+        });
+        mFds.push_back(fd);
+        return VSMCLIENT_SUCCESS;
+    }
+private:
+    std::atomic_bool mIsProcessing;
+    std::thread mThread;
+    ipc::epoll::EventPoll mEventPoll;
+    std::vector<int> mFds;
+
+    void loop() {
+        while (mIsProcessing) {
+            mEventPoll.dispatchIteration(EVENT_TIMEOUT);
+        }
+        for (int fd : mFds) {
+            mEventPoll.removeFD(fd);
+        }
+    }
+};
+
 const std::set<std::string> EXPECTED_ZONES = { "zone1", "zone2", "zone3" };
 
 void convertArrayToSet(VsmArrayString values, std::set<std::string>& ret)
@@ -101,6 +171,18 @@ int getArrayStringLength(VsmArrayString astring, int max_len = -1)
         }
     }
     return i;
+}
+
+VsmStatus makeSimpleRequest(VsmClient client)
+{
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_connect(client));
+    //make a simple call
+    VsmString zone = NULL;
+    VsmStatus status = vsm_get_active_zone_id(client, &zone);
+    vsm_string_free(zone);
+    // disconnect but not destroy
+    vsm_disconnect(client);
+    return status;
 }
 
 } // namespace
@@ -424,6 +506,75 @@ BOOST_AUTO_TEST_CASE(ZoneGetNetdevs)
     BOOST_REQUIRE(netdevs != NULL);
     vsm_array_string_free(netdevs);
     vsm_client_free(client);
+}
+
+BOOST_AUTO_TEST_CASE(DefaultDispatcher)
+{
+    VsmClient client = vsm_client_create();
+
+    BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, makeSimpleRequest(client));
+
+    vsm_client_free(client);
+}
+
+BOOST_AUTO_TEST_CASE(SetDispatcher)
+{
+    VsmClient client = vsm_client_create();
+
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_set_dispatcher_type(client, VSMDISPATCHER_INTERNAL));
+    BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, makeSimpleRequest(client));
+
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_set_dispatcher_type(client, VSMDISPATCHER_EXTERNAL));
+    {
+        SimpleEventLoop loop(client);
+        BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, makeSimpleRequest(client));
+    }
+
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_set_dispatcher_type(client, VSMDISPATCHER_INTERNAL));
+    BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, makeSimpleRequest(client));
+
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_set_dispatcher_type(client, VSMDISPATCHER_EXTERNAL));
+    {
+        SimpleEventLoop loop(client);
+        BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, makeSimpleRequest(client));
+    }
+
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_set_dispatcher_type(client, VSMDISPATCHER_INTERNAL));
+    BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, makeSimpleRequest(client));
+
+    vsm_client_free(client);
+}
+
+BOOST_AUTO_TEST_CASE(GetPollFd)
+{
+    VsmClient client1 = vsm_client_create();
+    VsmClient client2 = vsm_client_create();
+
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_set_dispatcher_type(client1, VSMDISPATCHER_EXTERNAL));
+    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_set_dispatcher_type(client2, VSMDISPATCHER_EXTERNAL));
+    {
+        AggragatedEventLoop loop;
+        BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, loop.addEventSource(client1));
+        BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, loop.addEventSource(client2));
+
+        BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_connect(client1));
+        BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, vsm_connect(client2));
+
+        VsmString zone;
+        //make a simple call
+        zone = NULL;
+        BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, vsm_get_active_zone_id(client1, &zone));
+        vsm_string_free(zone);
+        zone = NULL;
+        BOOST_CHECK_EQUAL(VSMCLIENT_SUCCESS, vsm_get_active_zone_id(client2, &zone));
+        vsm_string_free(zone);
+
+        // disconnect but not destroy
+        vsm_disconnect(client1);
+        vsm_disconnect(client2);
+    }
+    vsm_client_free(client1);
+    vsm_client_free(client2);
 }
 
 //TODO: We need createBridge from vasum::netdev
