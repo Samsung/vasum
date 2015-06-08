@@ -71,6 +71,16 @@ void setMaxFDNumber(unsigned int limit);
  */
 unsigned int getFDNumber();
 
+/**
+ * Send Socket via Unix Domain socket
+ */
+bool fdSend(int socket, int fd, const unsigned int timeoutMS = 5000);
+
+/**
+ * Receive fd via Unix Domain socket
+ */
+int fdRecv(int socket, const unsigned int timeoutMS = 5000);
+
 } // namespace utils
 
 #endif // COMMON_UTILS_FD_HPP

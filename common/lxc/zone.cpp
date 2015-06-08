@@ -34,7 +34,9 @@
 #include "logger/logger.hpp"
 #include "lxc/zone.hpp"
 #include "lxc/exception.hpp"
+#include "utils/exception.hpp"
 #include "utils/execute.hpp"
+#include "utils/fd-utils.hpp"
 #ifdef USE_EXEC
 #include "utils/c-array.hpp"
 #endif
@@ -46,44 +48,57 @@
 #include <sys/wait.h>
 
 #include <map>
+#include <sys/socket.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 namespace vasum {
 namespace lxc {
 
 namespace {
 #define ITEM(X) {#X, LxcZone::State::X},
-    const std::map<std::string, LxcZone::State> STATE_MAP = {
-        ITEM(STOPPED)
-        ITEM(STARTING)
-        ITEM(RUNNING)
-        ITEM(STOPPING)
-        ITEM(ABORTING)
-        ITEM(FREEZING)
-        ITEM(FROZEN)
-        ITEM(THAWED)
-    };
+const std::map<std::string, LxcZone::State> STATE_MAP = {
+    ITEM(STOPPED)
+    ITEM(STARTING)
+    ITEM(RUNNING)
+    ITEM(STOPPING)
+    ITEM(ABORTING)
+    ITEM(FREEZING)
+    ITEM(FROZEN)
+    ITEM(THAWED)
+};
 #undef ITEM
+
+int execFunction(void* data) {
+    // Executed by C code, so catch all exceptions
+    try {
+        return (*static_cast<std::function<int()>*>(data))();
+    } catch(...) {
+        return -1; // Non-zero on failure
+    }
+    return 0; // Success
+}
+
 } // namespace
 
-std::string LxcZone::toString(State state)
-{
+std::string LxcZone::toString(State state) {
 #define CASE(X) case LxcZone::State::X: return #X;
     switch (state) {
-    CASE(STOPPED)
-    CASE(STARTING)
-    CASE(RUNNING)
-    CASE(STOPPING)
-    CASE(ABORTING)
-    CASE(FREEZING)
-    CASE(FROZEN)
-    CASE(THAWED)
+        CASE(STOPPED)
+        CASE(STARTING)
+        CASE(RUNNING)
+        CASE(STOPPING)
+        CASE(ABORTING)
+        CASE(FREEZING)
+        CASE(FROZEN)
+        CASE(THAWED)
     }
 #undef CASE
     throw LxcException("Invalid state");
 }
 
 LxcZone::LxcZone(const std::string& lxcPath, const std::string& zoneName)
-  : mLxcContainer(nullptr)
+    : mLxcContainer(nullptr)
 {
     mLxcContainer = lxc_container_new(zoneName.c_str(), lxcPath.c_str());
     if (!mLxcContainer) {
@@ -129,9 +144,9 @@ bool LxcZone::create(const std::string& templatePath, const char* const* argv)
 #ifdef USE_EXEC
     utils::CStringArrayBuilder args;
     args.add("lxc-create")
-        .add("-n").add(mLxcContainer->name)
-        .add("-t").add(templatePath.c_str())
-        .add("-P").add(mLxcContainer->config_path);
+    .add("-n").add(mLxcContainer->name)
+    .add("-t").add(templatePath.c_str())
+    .add("-P").add(mLxcContainer->config_path);
 
     if (*argv) {
         args.add("--");
@@ -179,9 +194,9 @@ bool LxcZone::start(const char* const* argv)
 
     utils::CStringArrayBuilder args;
     args.add("lxc-start")
-        .add("-d")
-        .add("-n").add(mLxcContainer->name)
-        .add("-P").add(mLxcContainer->config_path);
+    .add("-d")
+    .add("-n").add(mLxcContainer->name)
+    .add("-P").add(mLxcContainer->config_path);
 
     if (*argv) {
         args.add("--");
@@ -254,10 +269,10 @@ bool LxcZone::shutdown(int timeout)
     utils::CStringArrayBuilder args;
     std::string timeoutStr = std::to_string(timeout);
     args.add("lxc-stop")
-        .add("-n").add(mLxcContainer->name)
-        .add("-P").add(mLxcContainer->config_path)
-        .add("-t").add(timeoutStr.c_str())
-        .add("--nokill");
+    .add("-n").add(mLxcContainer->name)
+    .add("-P").add(mLxcContainer->config_path)
+    .add("-t").add(timeoutStr.c_str())
+    .add("--nokill");
 
     if (!utils::executeAndWait("/usr/bin/lxc-stop", args.c_array())) {
         LOGE("Could not gracefully shutdown zone " << getName() << " in " << timeout << "s");
@@ -320,22 +335,10 @@ pid_t LxcZone::getInitPid() const
 
 bool LxcZone::setRunLevel(int runLevel)
 {
-    auto callback = [](void* param) -> int {
-        utils::RunLevel level = *reinterpret_cast<utils::RunLevel*>(param);
-        return utils::setRunLevel(level) ? 0 : 1;
+    Call call = [runLevel]() -> int {
+        return utils::setRunLevel(static_cast<utils::RunLevel>(runLevel)) ? 0 : 1;
     };
-
-    lxc_attach_options_t options = LXC_ATTACH_OPTIONS_DEFAULT;
-    pid_t pid;
-    int ret = mLxcContainer->attach(mLxcContainer, callback, &runLevel, &options, &pid);
-    if (ret != 0) {
-        return false;
-    }
-    int status;
-    if (!utils::waitPid(pid, status)) {
-        return false;
-    }
-    return status == 0;
+    return runInZone(call);
 }
 
 void LxcZone::refresh()
@@ -347,6 +350,64 @@ void LxcZone::refresh()
     mLxcContainer = lxc_container_new(zoneName.c_str(), lxcPath.c_str());
 }
 
+bool LxcZone::runInZone(Call& call)
+{
+    lxc_attach_options_t options = LXC_ATTACH_OPTIONS_DEFAULT;
+    options.attach_flags = LXC_ATTACH_REMOUNT_PROC_SYS |
+                           LXC_ATTACH_DROP_CAPABILITIES |
+                           LXC_ATTACH_SET_PERSONALITY |
+                           LXC_ATTACH_LSM_EXEC |
+                           LXC_ATTACH_LSM_NOW |
+                           LXC_ATTACH_MOVE_TO_CGROUP;
+
+    pid_t pid;
+    int ret = mLxcContainer->attach(mLxcContainer,
+                                    execFunction,
+                                    &call,
+                                    &options,
+                                    &pid);
+    if (ret != 0) {
+        return false;
+    }
+    int status;
+    if (!utils::waitPid(pid, status)) {
+        return false;
+    }
+    return status == 0;
+}
+
+int LxcZone::createFile(const std::string& path, const std::int32_t mode, int *fdPtr)
+{
+    *fdPtr = -1;
+
+    int sockets[2];
+    if (::socketpair(AF_LOCAL, SOCK_STREAM, 0, sockets) < 0) {
+        LOGE("Can't create socket pair: " << utils::getSystemErrorMessage());
+        return false;
+    }
+
+    lxc::LxcZone::Call call = [&]()->int{
+        utils::close(sockets[1]);
+
+        int fd = ::open(path.c_str(), O_CREAT | O_EXCL, mode);
+        if (fd < 0) {
+            LOGE("Error during file creation: " << utils::getSystemErrorMessage());
+            utils::close(sockets[0]);
+            return -1;
+        }
+        utils::fdSend(sockets[0], fd);
+        utils::close(fd);
+        return 0;
+    };
+
+    runInZone(call);
+
+    utils::close(sockets[0]);
+    *fdPtr = utils::fdRecv(sockets[1]);
+    utils::close(sockets[1]);
+
+    return true;
+}
 
 } // namespace lxc
 } // namespace vasum

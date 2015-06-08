@@ -34,12 +34,15 @@
 #include <unistd.h>
 #include <poll.h>
 #include <sys/resource.h>
+#include <sys/socket.h>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
 namespace chr = std::chrono;
 
 namespace utils {
+
+// TODO: Add here various fixes from config::FDStore
 
 namespace {
 
@@ -111,7 +114,7 @@ void close(int fd)
 void write(int fd, const void* bufferPtr, const size_t size, int timeoutMS)
 {
     chr::high_resolution_clock::time_point deadline = chr::high_resolution_clock::now() +
-                                                      chr::milliseconds(timeoutMS);
+            chr::milliseconds(timeoutMS);
 
     size_t nTotal = 0;
     for (;;) {
@@ -140,7 +143,7 @@ void write(int fd, const void* bufferPtr, const size_t size, int timeoutMS)
 void read(int fd, void* bufferPtr, const size_t size, int timeoutMS)
 {
     chr::high_resolution_clock::time_point deadline = chr::high_resolution_clock::now() +
-                                                      chr::milliseconds(timeoutMS);
+            chr::milliseconds(timeoutMS);
 
     size_t nTotal = 0;
     for (;;) {
@@ -198,6 +201,135 @@ unsigned int getFDNumber()
     const std::string path = "/proc/self/fd/";
     return std::distance(fs::directory_iterator(path),
                          fs::directory_iterator());
+}
+
+int fdRecv(int socket, const unsigned int timeoutMS)
+{
+    std::chrono::high_resolution_clock::time_point deadline =
+        std::chrono::high_resolution_clock::now() +
+        std::chrono::milliseconds(timeoutMS);
+
+    // Space for the file descriptor
+    union {
+        struct cmsghdr cmh;
+        char   control[CMSG_SPACE(sizeof(int))];
+    } controlUnion;
+
+    // Describe the data that we want to recive
+    controlUnion.cmh.cmsg_len = CMSG_LEN(sizeof(int));
+    controlUnion.cmh.cmsg_level = SOL_SOCKET;
+    controlUnion.cmh.cmsg_type = SCM_RIGHTS;
+
+    // Setup the input buffer
+    // Ensure at least 1 byte is transmited via the socket
+    char buf;
+    struct iovec iov;
+    iov.iov_base = &buf;
+    iov.iov_len = sizeof(char);
+
+    // Set the ancillary data buffer
+    // The socket has to be connected, so we don't need to specify the name
+    struct msghdr msgh;
+    ::memset(&msgh, 0, sizeof(msgh));
+
+    msgh.msg_iov = &iov;
+    msgh.msg_iovlen = 1;
+
+    msgh.msg_control = controlUnion.control;
+    msgh.msg_controllen = sizeof(controlUnion.control);
+
+    // Receive
+    for(;;) {
+        ssize_t ret = ::recvmsg(socket, &msgh, MSG_WAITALL);
+        if (ret < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+                // Neglected errors, retry
+            } else {
+                throw UtilsException("Error during recvmsg: " + getSystemErrorMessage());
+            }
+        } else if (ret == 0) {
+            throw UtilsException("Peer disconnected");
+        } else {
+            // We receive only 1 byte of data. No need to repeat
+            break;
+        }
+
+        waitForEvent(socket, POLLIN, deadline);
+    }
+
+    struct cmsghdr *cmhp;
+    cmhp = CMSG_FIRSTHDR(&msgh);
+    if (cmhp == NULL || cmhp->cmsg_len != CMSG_LEN(sizeof(int))) {
+        throw UtilsException("Bad cmsg length");
+    } else if (cmhp->cmsg_level != SOL_SOCKET) {
+        throw UtilsException("cmsg_level != SOL_SOCKET");
+    } else if (cmhp->cmsg_type != SCM_RIGHTS) {
+        throw UtilsException("cmsg_type != SCM_RIGHTS");
+    }
+
+    return *(reinterpret_cast<int*>(CMSG_DATA(cmhp)));
+}
+
+bool fdSend(int socket, int fd, const unsigned int timeoutMS)
+{
+    std::chrono::high_resolution_clock::time_point deadline =
+        std::chrono::high_resolution_clock::now() +
+        std::chrono::milliseconds(timeoutMS);
+
+    // Space for the file descriptor
+    union {
+        struct cmsghdr cmh;
+        char   control[CMSG_SPACE(sizeof(int))];
+    } controlUnion;
+
+    // Ensure at least 1 byte is transmited via the socket
+    struct iovec iov;
+    char buf = '!';
+    iov.iov_base = &buf;
+    iov.iov_len = sizeof(char);
+
+    // Fill the message to send:
+    // The socket has to be connected, so we don't need to specify the name
+    struct msghdr msgh;
+    ::memset(&msgh, 0, sizeof(msgh));
+
+    // Only iovec to transmit one element
+    msgh.msg_iov = &iov;
+    msgh.msg_iovlen = 1;
+
+    // Ancillary data buffer
+    msgh.msg_control = controlUnion.control;
+    msgh.msg_controllen = sizeof(controlUnion.control);
+
+    // Describe the data that we want to send
+    struct cmsghdr *cmhp;
+    cmhp = CMSG_FIRSTHDR(&msgh);
+    cmhp->cmsg_len = CMSG_LEN(sizeof(int));
+    cmhp->cmsg_level = SOL_SOCKET;
+    cmhp->cmsg_type = SCM_RIGHTS;
+    *(reinterpret_cast<int*>(CMSG_DATA(cmhp))) = fd;
+
+    // Send
+    for(;;) {
+        ssize_t ret = ::sendmsg(socket, &msgh, MSG_NOSIGNAL);
+        if (ret < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+                // Neglected errors, retry
+            } else {
+                throw UtilsException("Error during sendmsg: " + getSystemErrorMessage());
+            }
+        } else if (ret == 0) {
+            // Retry the sending
+        } else {
+            // We send only 1 byte of data. No need to repeat
+            break;
+        }
+
+        waitForEvent(socket, POLLOUT, deadline);
+    }
+
+    // TODO: It shouldn't return
+    return true;
 }
 
 } // namespace utils

@@ -62,6 +62,7 @@ const std::string METHOD_UNLOCK_ZONE              = "UnlockZone";
 const std::string METHOD_GRANT_DEVICE             = "GrantDevice";
 const std::string METHOD_REVOKE_DEVICE            = "RevokeDevice";
 const std::string METHOD_PROXY_CALL               = "ProxyCall";
+const std::string METHOD_CREATE_FILE              = "CreateFile";
 
 const std::string METHOD_NOTIFY_ACTIVE_ZONE         = "NotifyActiveZone";
 const std::string METHOD_FILE_MOVE_REQUEST          = "FileMoveRequest";
@@ -176,6 +177,12 @@ const std::string DEFINITION =
     "    <method name='" + METHOD_CREATE_ZONE + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "      <arg type='s' name='templateName' direction='in'/>"
+    "    </method>"
+    "    <method name='" + METHOD_CREATE_FILE + "'>"
+    "      <arg type='s' name='id' direction='in'/>"
+    "      <arg type='s' name='path' direction='in'/>"
+    "      <arg type='i' name='mode' direction='in'/>"
+    "      <arg type='h' name='fileDescriptor' direction='out'/>"
     "    </method>"
     "    <method name='" + METHOD_DESTROY_ZONE + "'>"
     "      <arg type='s' name='id' direction='in'/>"

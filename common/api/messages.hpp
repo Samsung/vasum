@@ -198,8 +198,7 @@ struct DeclareMountIn {
     )
 };
 
-struct DeclareLinkIn
-{
+struct DeclareLinkIn {
     std::string source;
     std::string zone;
     std::string target;
@@ -212,8 +211,7 @@ struct DeclareLinkIn
     )
 };
 
-struct GrantDeviceIn
-{
+struct GrantDeviceIn {
     std::string id;
     std::string device;
     uint32_t flags;
@@ -226,8 +224,27 @@ struct GrantDeviceIn
     )
 };
 
-struct Notification
-{
+struct CreateFileIn {
+    std::string id;
+    std::string path;
+    int32_t mode;
+    CONFIG_REGISTER
+    (
+        id,
+        path,
+        mode
+    )
+};
+
+struct CreateFileOut {
+    config::FileDescriptor fd;
+    CONFIG_REGISTER
+    (
+        fd
+    )
+};
+
+struct Notification {
     std::string zone;
     std::string application;
     std::string message;

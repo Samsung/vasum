@@ -28,6 +28,7 @@
 #include "utils/execute.hpp"
 #include "utils/exception.hpp"
 #include "utils/make-clean.hpp"
+#include "utils/fd-utils.hpp"
 #include "base-exception.hpp"
 #include "logger/logger.hpp"
 
@@ -92,58 +93,6 @@ const std::map<int, std::string> NAMESPACES = {
     {CLONE_NEWPID, "pid"},
     {CLONE_NEWUSER, "user"},
     {CLONE_NEWUTS, "uts"}};
-
-int fdRecv(int socket)
-{
-    msghdr msg = make_clean<msghdr>();
-    iovec iov = make_clean<iovec>();
-    char cmsgBuff[CMSG_SPACE(sizeof(int))];
-
-    msg.msg_iov = &iov;
-    msg.msg_iovlen = 1;
-
-    msg.msg_control = cmsgBuff;
-    msg.msg_controllen = sizeof(cmsgBuff);
-
-    int ret = recvmsg(socket, &msg, MSG_CMSG_CLOEXEC);
-    if (ret != 0 || msg.msg_flags & (MSG_TRUNC | MSG_ERRQUEUE | MSG_OOB | MSG_CTRUNC | MSG_EOR)) {
-        LOGE("Can't receive fd: ret: " << ret << ", flags: " << msg.msg_flags);
-        return -1;
-    }
-
-    cmsghdr* cmsg = CMSG_FIRSTHDR(&msg);
-    assert(cmsg->cmsg_level == SOL_SOCKET);
-    assert(cmsg->cmsg_type == SCM_RIGHTS);
-    assert(CMSG_NXTHDR(&msg, cmsg) == NULL);
-    return *reinterpret_cast<int*>(CMSG_DATA(cmsg));
-}
-
-bool fdSend(int socket, int fd)
-{
-    msghdr msg = make_clean<msghdr>();
-    struct iovec iov = make_clean<iovec>();
-    struct cmsghdr *cmsg = NULL;
-    char cmsgBuff[CMSG_SPACE(sizeof(int))];
-
-    msg.msg_iov = &iov;
-    msg.msg_iovlen = 1;
-
-    msg.msg_control = cmsgBuff;
-    msg.msg_controllen = sizeof(cmsgBuff);
-
-    cmsg = CMSG_FIRSTHDR(&msg);
-    cmsg->cmsg_level = SOL_SOCKET;
-    cmsg->cmsg_type = SCM_RIGHTS;
-    cmsg->cmsg_len = CMSG_LEN(sizeof(int));
-    *reinterpret_cast<int*>(CMSG_DATA(cmsg)) = fd;
-
-    int ret = sendmsg(socket, &msg, 0);
-    if (ret < 0) {
-        LOGE("Can't send fd: ret: " << ret);
-        return false;
-    }
-    return true;
-}
 
 inline bool isValidCap(unsigned int cap)
 {

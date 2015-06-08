@@ -56,6 +56,7 @@ const ::ipc::MethodID METHOD_LOCK_ZONE                = 23;
 const ::ipc::MethodID METHOD_UNLOCK_ZONE              = 24;
 const ::ipc::MethodID METHOD_GRANT_DEVICE             = 25;
 const ::ipc::MethodID METHOD_REVOKE_DEVICE            = 26;
+const ::ipc::MethodID METHOD_CREATE_FILE              = 27;
 
 const ::ipc::MethodID METHOD_NOTIFY_ACTIVE_ZONE         = 100;
 const ::ipc::MethodID METHOD_FILE_MOVE_REQUEST          = 101;

@@ -30,6 +30,7 @@
 #include "lxc/exception.hpp"
 #include "utils/scoped-dir.hpp"
 
+#include <fcntl.h>
 #include <thread>
 #include <chrono>
 #include <boost/filesystem.hpp>
@@ -247,6 +248,41 @@ BOOST_AUTO_TEST_CASE(Repeat)
     BOOST_CHECK(lxc.destroy());
     BOOST_CHECK(!lxc.isDefined());
     BOOST_CHECK(!lxc.destroy()); // forbidden (why?)
+}
+
+BOOST_AUTO_TEST_CASE(CreateFile)
+{
+    // Create and start the container:
+    LxcZone lxc(ZONE_PATH, ZONE_NAME);
+    BOOST_REQUIRE(lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));
+    const char* argv[] = {
+        "/bin/sh",
+        "-c",
+        "trap exit SIGTERM; read",
+        NULL
+    };
+    BOOST_REQUIRE(lxc.start(argv));
+    BOOST_REQUIRE(lxc.getState() == LxcZone::State::RUNNING);
+    waitForInit();
+
+    // The test
+    int fd;
+    BOOST_REQUIRE(lxc.createFile("./112.txt", O_RDWR, &fd));
+    BOOST_REQUIRE(::fcntl(fd, F_GETFD) != -1);
+    BOOST_REQUIRE(::close(fd) != -1);
+
+    BOOST_REQUIRE(lxc.createFile("/2.txt", O_RDONLY, &fd));
+    BOOST_REQUIRE(::fcntl(fd, F_GETFD) != -1);
+    BOOST_REQUIRE(::close(fd) != -1);
+
+    BOOST_REQUIRE(lxc.createFile("/3.txt", O_WRONLY, &fd));
+    BOOST_REQUIRE(::fcntl(fd, F_GETFD) != -1);
+    BOOST_REQUIRE(::close(fd) != -1);
+
+    // Close
+    BOOST_REQUIRE(lxc.stop());
+    BOOST_REQUIRE(lxc.getState() == LxcZone::State::STOPPED);
+    BOOST_REQUIRE(lxc.destroy());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

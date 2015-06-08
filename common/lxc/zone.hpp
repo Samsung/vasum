@@ -26,6 +26,7 @@
 #define COMMON_LXC_ZONE_HPP
 
 #include <string>
+#include <functional>
 #include <sys/types.h>
 
 // fwd declaration of lxc internals
@@ -40,6 +41,8 @@ namespace lxc {
  */
 class LxcZone {
 public:
+    typedef std::function<int()> Call;
+
     enum class State {
         STOPPED,
         STARTING,
@@ -143,9 +146,27 @@ public:
      */
     pid_t getInitPid() const;
 
+    /**
+     * Attach to the Zone and run the call
+     *
+     * This call will fork, so ensure the call object will withstand this
+     *
+     * @param call function object to run
+     */
+    bool runInZone(Call& call);
+
+    /**
+     * Create a file inside the zone and return it's file descriptor
+     *
+     * @param path path in the container
+     * @param mode mode
+     *
+     * @return file descriptor of the file, opened in mode
+     */
+    int createFile(const std::string& path, const std::int32_t mode, int *fdPtr);
+
 private:
     lxc_container* mLxcContainer;
-
     bool setRunLevel(int runLevel);
     void refresh();
 };
