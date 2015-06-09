@@ -25,6 +25,8 @@ FILE(GLOB lxc_templates_CONF   templates/*.sh)
 ## Generate ####################################################################
 CONFIGURE_FILE(systemd/vasum.service.in
                ${CMAKE_BINARY_DIR}/systemd/vasum.service)
+CONFIGURE_FILE(systemd/vasum.socket.in
+               ${CMAKE_BINARY_DIR}/systemd/vasum.socket)
 
 
 ## Install #####################################################################
@@ -51,5 +53,5 @@ INSTALL(PROGRAMS    ${lxc_templates_CONF}
 
 INSTALL(FILES
         ${CMAKE_BINARY_DIR}/systemd/vasum.service
-        systemd/vasum.socket
+        ${CMAKE_BINARY_DIR}/systemd/vasum.socket
         DESTINATION ${SYSTEMD_UNIT_DIR})

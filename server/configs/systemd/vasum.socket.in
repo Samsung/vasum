@@ -1,5 +1,5 @@
 [Socket]
-ListenStream=/run/vasum.socket
+ListenStream=${VSM_SERVER_IPC_SOCKET_PATH}
 SocketMode=0755
 SmackLabelIPIn=*
 SmackLabelIPOut=@
