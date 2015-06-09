@@ -27,10 +27,10 @@
 #define VASUM_CLIENT_IMPL_HPP
 
 #include "vasum-client.h"
-#include "host-ipc-connection.hpp"
 
 #include <ipc/epoll/thread-dispatcher.hpp>
 #include <ipc/epoll/event-poll.hpp>
+#include <ipc/client.hpp>
 
 #include <mutex>
 #include <memory>
@@ -365,7 +365,6 @@ public:
     VsmStatus vsm_del_notification_callback(VsmSubscriptionId subscriptionId) noexcept;
 
 private:
-    typedef vasum::client::HostIPCConnection HostConnection;
     struct Status {
         Status();
         Status(VsmStatus status, const std::string& msg = "");
@@ -377,8 +376,9 @@ private:
     mutable std::mutex mStatusMutex;
     std::unique_ptr<ipc::epoll::ThreadDispatcher> mInternalDispatcher;
     std::unique_ptr<ipc::epoll::EventPoll> mEventPoll;
-    HostConnection mHostClient;
+    std::unique_ptr<ipc::Client> mClient;
 
+    bool isConnected() const;
     bool isInternalDispatcherEnabled() const;
     ipc::epoll::EventPoll& getEventPoll() const;
     VsmStatus coverException(const std::function<void(void)>& worker) noexcept;
