@@ -151,6 +151,9 @@ ZonesManager::ZonesManager(const std::string& configPath)
                              std::bind(&ZonesManager::switchingSequenceMonitorNotify,
                                        this)));
     }
+
+    // After everything's initialized start to respond to clients' requests
+    mHostIPCConnection.start();
 }
 
 ZonesManager::~ZonesManager()

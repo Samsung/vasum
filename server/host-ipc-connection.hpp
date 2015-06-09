@@ -51,6 +51,7 @@ public:
     HostIPCConnection(ZonesManager* zm);
     ~HostIPCConnection();
 
+    void start();
     void signalZoneConnectionState(const api::ConnectionState& connectionState);
     void sendNotification(const api::Notification& notification);
 

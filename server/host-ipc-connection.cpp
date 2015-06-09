@@ -41,10 +41,6 @@ HostIPCConnection::HostIPCConnection(ZonesManager* zonesManagerPtr)
     LOGT("Connecting to host IPC socket");
     mService.reset(new ipc::Service(mDispatcher.getPoll(), HOST_IPC_SOCKET));
 
-    LOGT("Starting IPC");
-    mService->start();
-    LOGD("Connected");
-
     using namespace std::placeholders;
     setGetZoneIdsCallback(std::bind(&ZonesManager::handleGetZoneIdsCall,
                                     mZonesManagerPtr, _1));
@@ -133,6 +129,13 @@ HostIPCConnection::HostIPCConnection(ZonesManager* zonesManagerPtr)
 
 HostIPCConnection::~HostIPCConnection()
 {
+}
+
+void HostIPCConnection::start()
+{
+    LOGT("Starting IPC");
+    mService->start();
+    LOGD("Connected");
 }
 
 void HostIPCConnection::setGetZoneIdsCallback(const Method<api::ZoneIds>::type& callback)
