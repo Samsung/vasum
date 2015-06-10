@@ -24,6 +24,7 @@
 
 #include "config.hpp"
 #include "utils/worker.hpp"
+#include "utils/latch.hpp"
 #include "utils/counting-map.hpp"
 #include "logger/logger.hpp"
 
@@ -66,13 +67,13 @@ public:
         return ++mLastGroupID;
     }
 
-    void addTask(const Worker::Task& task, GroupID groupID)
+    void addTask(const Worker::Task& task, GroupID groupID, Latch* latch)
     {
         assert(task);
 
         Lock lock(mMutex);
         LOGT("Adding task to subgroup " << groupID);
-        mTaskQueue.push_back(TaskInfo{task, groupID});
+        mTaskQueue.push_back(TaskInfo{task, groupID, latch});
         mGroupCounter.increment(groupID);
         mAddedCondition.notify_one();
         if (!mThread.joinable()) {
@@ -97,6 +98,7 @@ private:
     struct TaskInfo {
         Worker::Task task;
         GroupID groupID;
+        Latch *latch;
     };
 
     std::atomic<GroupID> mLastGroupID;
@@ -148,6 +150,8 @@ private:
         try {
             LOGT("Executing task from subgroup " << taskInfo.groupID);
             taskInfo.task();
+            if (taskInfo.latch)
+                taskInfo.latch->set();
         } catch (const std::exception& e) {
             LOGE("Unexpected exception while executing task: " << e.what());
         }
@@ -177,8 +181,15 @@ Worker::Pointer Worker::createSubWorker()
 
 void Worker::addTask(const Task& task)
 {
-    mWorkerQueue->addTask(task, mGroupID);
+    mWorkerQueue->addTask(task, mGroupID, NULL);
 }
 
+void Worker::addTaskAndWait(const Task& task)
+{
+    Latch latch;
+
+    mWorkerQueue->addTask(task, mGroupID, &latch);
+    latch.wait();
+}
 
 } // namespace utils

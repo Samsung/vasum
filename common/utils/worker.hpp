@@ -55,6 +55,7 @@ public:
      * Adds a task to the queue.
      */
     void addTask(const Task& task);
+    void addTaskAndWait(const Task& task);
 
 private:
     typedef unsigned int GroupID;
