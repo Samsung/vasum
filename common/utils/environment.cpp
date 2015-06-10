@@ -72,15 +72,6 @@ static inline int capset(cap_user_header_t header, const cap_user_data_t data)
 #error "capset syscall isn't available"
 #endif
 
-#ifdef __NR_capget
-static inline int capget(cap_user_header_t header, cap_user_data_t data)
-{
-    return syscall(__NR_capget, header, data);
-}
-#else
-#error "capget syscall isn't available"
-#endif
-
 using namespace utils;
 
 namespace {
