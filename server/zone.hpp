@@ -27,8 +27,10 @@
 #define SERVER_ZONE_HPP
 
 #include "zone-config.hpp"
-#include "zone-admin.hpp"
 #include "zone-provision.hpp"
+
+#include "lxc/zone.hpp"
+#include "netdev.hpp"
 
 #include <mutex>
 #include <string>
@@ -40,9 +42,16 @@
 namespace vasum {
 
 
+enum class SchedulerLevel {
+    FOREGROUND,
+    BACKGROUND
+};
+
 class Zone {
 
 public:
+    typedef netdev::Attrs NetdevAttrs;
+
     /**
      * Zone constructor
      * @param zoneId zone id
@@ -60,6 +69,7 @@ public:
          const std::string& baseRunMountPointPath);
     Zone(const Zone&) = delete;
     Zone& operator=(const Zone&) = delete;
+    ~Zone();
 
     typedef std::function<void(bool succeeded)> StartAsyncResultCallback;
 
@@ -74,8 +84,6 @@ public:
      * send to other zones using file move functionality
      */
     const std::vector<boost::regex>& getPermittedToRecv() const;
-
-    // ZoneAdmin API
 
     /**
      * Get the zone id
@@ -124,8 +132,6 @@ public:
 
     /**
      * Set if zone should be detached on exit.
-     *
-     * This sends detach flag to ZoneAdmin object.
      */
     void setDetachOnExit();
 
@@ -149,7 +155,10 @@ public:
     bool isStopped();
 
     /**
-     * Suspend zone.
+     * Suspends an active zone, the process is frozen
+     * without further access to CPU resources and I/O,
+     * but the memory used by the zone
+     * at the hypervisor level will stay allocated
      */
     void suspend();
 
@@ -235,12 +244,12 @@ public:
     /**
      * Set network device attributes
      */
-    void setNetdevAttrs(const std::string& netdev, const ZoneAdmin::NetdevAttrs& attrs);
+    void setNetdevAttrs(const std::string& netdev, const NetdevAttrs& attrs);
 
     /**
      * Get network device attributes
      */
-    ZoneAdmin::NetdevAttrs getNetdevAttrs(const std::string& netdev);
+    NetdevAttrs getNetdevAttrs(const std::string& netdev);
 
     /**
      * Get network device list
@@ -252,21 +261,36 @@ public:
      */
     void deleteNetdevIpAddress(const std::string& netdev, const std::string& ip);
 
+    /**
+     * Sets the zones scheduler CFS quota.
+     */
+    void setSchedulerLevel(SchedulerLevel sched);
+
+    /**
+     * @return Scheduler CFS quota,
+     * TODO: this function is only for UNIT TESTS
+     */
+    std::int64_t getSchedulerQuota();
+
 private:
     ZoneConfig mConfig;
     ZoneDynamicConfig mDynamicConfig;
     std::vector<boost::regex> mPermittedToSend;
     std::vector<boost::regex> mPermittedToRecv;
-    std::unique_ptr<ZoneAdmin> mAdmin;
     std::unique_ptr<ZoneProvision> mProvision;
     mutable std::recursive_mutex mReconnectMutex;
     std::string mRunMountPoint;
     std::string mRootPath;
     std::string mDbPath;
+    lxc::LxcZone mZone;
+    const std::string mId;
+    bool mDetachOnExit;
+    bool mDestroyOnExit;
 
     void onNameLostCallback();
     void saveDynamicConfig();
     void updateRequestedState(const std::string& state);
+    void setSchedulerParams(std::uint64_t cpuShares, std::uint64_t vcpuPeriod, std::int64_t vcpuQuota);
 };
 
 

@@ -27,7 +27,6 @@
 #include "common-definitions.hpp"
 #include "dynamic-config-scheme.hpp"
 #include "zones-manager.hpp"
-#include "zone-admin.hpp"
 #include "lxc/cgroup.hpp"
 #include "exception.hpp"
 

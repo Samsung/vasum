@@ -33,6 +33,7 @@
 #include "utils/exception.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/scoped-dir.hpp"
+#include "config/manager.hpp"
 #include "config/exception.hpp"
 #include "netdev.hpp"
 
@@ -54,8 +55,10 @@ namespace {
 
 const std::string TEMPLATES_DIR = VSM_TEST_TEMPLATES_INSTALL_DIR;
 const std::string TEST_CONFIG_PATH = TEMPLATES_DIR + "/default.conf";
+const std::string TEST_NO_SHUTDOWN_CONFIG_PATH = TEMPLATES_DIR + "/test-no-shutdown.conf";
 const std::string TEST_DBUS_CONFIG_PATH = TEMPLATES_DIR + "/console-dbus.conf";
 const std::string BUGGY_CONFIG_PATH = TEMPLATES_DIR + "/buggy-template.conf";
+const std::string BUGGY_INIT_CONFIG_PATH = TEMPLATES_DIR + "/buggy-init.conf";
 const std::string MISSING_CONFIG_PATH = TEMPLATES_DIR + "/missing-config.conf";
 const std::string ZONES_PATH = "/tmp/ut-zones";
 const std::string DB_PATH = ZONES_PATH + "/vasum.db";
@@ -144,6 +147,78 @@ BOOST_AUTO_TEST_CASE(StartStop)
     c->stop(true);
 }
 
+BOOST_AUTO_TEST_CASE(StartBuggyInit)
+{
+    auto c = create(BUGGY_INIT_CONFIG_PATH);
+    BOOST_REQUIRE_EXCEPTION(c->start(),
+                            ZoneOperationException,
+                            WhatEquals("Could not start zone"));
+}
+
+BOOST_AUTO_TEST_CASE(StopShutdown)
+{
+    auto c = create(TEST_CONFIG_PATH);
+
+    c->start();
+    ensureStarted();
+    BOOST_REQUIRE(c->isRunning());
+
+    c->stop(true);
+    BOOST_CHECK(!c->isRunning());
+    BOOST_CHECK(c->isStopped());
+}
+
+// This test needs to wait for a shutdown timer in stop() method. This takes 10s+.
+BOOST_AUTO_TEST_CASE(StopDestroy)
+{
+    auto c = create(TEST_NO_SHUTDOWN_CONFIG_PATH);
+
+    c->start();
+    ensureStarted();
+    BOOST_REQUIRE(c->isRunning());
+
+    c->stop(true);
+    BOOST_CHECK(!c->isRunning());
+    BOOST_CHECK(c->isStopped());
+}
+
+BOOST_AUTO_TEST_CASE(SuspendResume)
+{
+    auto c = create(TEST_NO_SHUTDOWN_CONFIG_PATH);
+
+    c->start();
+    ensureStarted();
+    BOOST_REQUIRE(c->isRunning());
+
+    c->suspend();
+    BOOST_CHECK(!c->isRunning());
+    BOOST_CHECK(!c->isStopped());
+    BOOST_CHECK(c->isPaused());
+
+    c->resume();
+    BOOST_CHECK(!c->isPaused());
+    BOOST_CHECK(!c->isStopped());
+    BOOST_CHECK(c->isRunning());
+}
+
+BOOST_AUTO_TEST_CASE(ForegroundBackgroundSchedulerLevel)
+{
+    auto c = create(TEST_CONFIG_PATH);
+    ZoneConfig refConfig;
+    config::loadFromJsonFile(TEST_CONFIG_PATH, refConfig);
+
+    BOOST_REQUIRE(refConfig.cpuQuotaForeground != refConfig.cpuQuotaBackground);
+
+    c->start();
+    ensureStarted();
+
+    c->setSchedulerLevel(SchedulerLevel::FOREGROUND);
+    BOOST_CHECK_EQUAL(c->getSchedulerQuota(), refConfig.cpuQuotaForeground);
+
+    c->setSchedulerLevel(SchedulerLevel::BACKGROUND);
+    BOOST_CHECK_EQUAL(c->getSchedulerQuota(), refConfig.cpuQuotaBackground);
+}
+
 BOOST_AUTO_TEST_CASE(DbusConnection)
 {
     mRunGuard.create("/tmp/ut-run"); // the same path as in zone template
@@ -214,7 +289,7 @@ BOOST_AUTO_TEST_CASE(GetNetdevAttrs)
     c->start();
     ensureStarted();
     c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME);
-    ZoneAdmin::NetdevAttrs attrs = c->getNetdevAttrs(ZONE_NETDEV);
+    Zone::NetdevAttrs attrs = c->getNetdevAttrs(ZONE_NETDEV);
     bool gotMtu = false;
     bool gotFlags = false;
     bool gotType = false;
@@ -246,12 +321,12 @@ BOOST_AUTO_TEST_CASE(SetNetdevAttrs)
     c->start();
     ensureStarted();
     c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME);
-    ZoneAdmin::NetdevAttrs attrsIn;
+    Zone::NetdevAttrs attrsIn;
     attrsIn.push_back(std::make_tuple("mtu", "500"));
     c->setNetdevAttrs(ZONE_NETDEV, attrsIn);
 
     bool gotMtu = false;
-    ZoneAdmin::NetdevAttrs attrsOut = c->getNetdevAttrs(ZONE_NETDEV);
+    Zone::NetdevAttrs attrsOut = c->getNetdevAttrs(ZONE_NETDEV);
     for (auto& attr : attrsOut) {
         if (std::get<0>(attr) == "mtu") {
             BOOST_CHECK(!gotMtu);
@@ -275,11 +350,11 @@ BOOST_AUTO_TEST_CASE(SetNetdevIpv4)
     c->start();
     ensureStarted();
     c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME);
-    ZoneAdmin::NetdevAttrs attrsIn;
+    Zone::NetdevAttrs attrsIn;
     attrsIn.push_back(std::make_tuple("ipv4", "ip:192.168.4.1,prefixlen:24"));
     c->setNetdevAttrs(ZONE_NETDEV, attrsIn);
 
-    ZoneAdmin::NetdevAttrs attrsOut = c->getNetdevAttrs(ZONE_NETDEV);
+    Zone::NetdevAttrs attrsOut = c->getNetdevAttrs(ZONE_NETDEV);
     int gotIp = 0;
     for (auto& attr : attrsOut) {
         if (std::get<0>(attr) == "ipv4") {
@@ -315,11 +390,11 @@ BOOST_AUTO_TEST_CASE(SetNetdevIpv6)
     c->start();
     ensureStarted();
     c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME);
-    ZoneAdmin::NetdevAttrs attrsIn;
+    Zone::NetdevAttrs attrsIn;
     attrsIn.push_back(std::make_tuple("ipv6", "ip:2001:db8::1,prefixlen:64"));
     c->setNetdevAttrs(ZONE_NETDEV, attrsIn);
 
-    ZoneAdmin::NetdevAttrs attrsOut = c->getNetdevAttrs(ZONE_NETDEV);
+    Zone::NetdevAttrs attrsOut = c->getNetdevAttrs(ZONE_NETDEV);
     int gotIp = 0;
     for (auto& attr : attrsOut) {
         if (std::get<0>(attr) == "ipv6") {
@@ -350,10 +425,10 @@ BOOST_AUTO_TEST_CASE(SetNetdevIpv6)
 
 BOOST_AUTO_TEST_CASE(DelNetdevIpAddress)
 {
-    auto contain = [](const ZoneAdmin::NetdevAttrs& container, const std::string& key) {
+    auto contain = [](const Zone::NetdevAttrs& container, const std::string& key) {
         return container.end() != find_if(container.begin(),
                                           container.end(),
-                                          [&](const ZoneAdmin::NetdevAttrs::value_type& value) {
+                                          [&](const Zone::NetdevAttrs::value_type& value) {
                                               return std::get<0>(value) == key;
                                           });
     };
@@ -363,7 +438,7 @@ BOOST_AUTO_TEST_CASE(DelNetdevIpAddress)
     c->start();
     ensureStarted();
     c->createNetdevVeth(ZONE_NETDEV, BRIDGE_NAME);
-    ZoneAdmin::NetdevAttrs attrs;
+    Zone::NetdevAttrs attrs;
     attrs.push_back(std::make_tuple("ipv6", "ip:2001:db8::1,prefixlen:64"));
     attrs.push_back(std::make_tuple("ipv4", "ip:192.168.4.1,prefixlen:24"));
     c->setNetdevAttrs(ZONE_NETDEV, attrs);
