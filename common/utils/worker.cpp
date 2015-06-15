@@ -150,11 +150,11 @@ private:
         try {
             LOGT("Executing task from subgroup " << taskInfo.groupID);
             taskInfo.task();
-            if (taskInfo.latch)
-                taskInfo.latch->set();
         } catch (const std::exception& e) {
             LOGE("Unexpected exception while executing task: " << e.what());
         }
+        if (taskInfo.latch)
+            taskInfo.latch->set();
     }
 };
 
