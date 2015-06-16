@@ -28,6 +28,7 @@ Requires:       lxc
 Requires:       iproute2
 Requires(post): libcap-tools
 %else
+Requires:       lxc-templates
 Requires:       iproute
 Requires(post): libcap
 %endif
