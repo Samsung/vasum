@@ -394,6 +394,15 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         mZonesManagerPtr->handleFileMoveCall(EMPTY_CALLER, data, rb);
         return;
     }
+
+    if (methodName == api::dbus::METHOD_CREATE_FILE) {
+        api::CreateFileIn data;
+        config::loadFromGVariant(parameters, data);
+
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::CreateFileOut>>(result);
+        mZonesManagerPtr->handleCreateFileCall(data, rb);
+        return;
+    }
 }
 
 void HostDbusConnection::onSignalCall(const std::string& /* senderBusName */,

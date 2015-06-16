@@ -125,6 +125,9 @@ HostIPCConnection::HostIPCConnection(ZonesManager* zonesManagerPtr)
 
     setFileMoveCallback(std::bind(&ZonesManager::handleFileMoveCall,
                                   mZonesManagerPtr, "", _1, _2));
+
+    setCreateFileCallback(std::bind(&ZonesManager::handleCreateFileCall,
+                                    mZonesManagerPtr, _1, _2));
 }
 
 HostIPCConnection::~HostIPCConnection()
@@ -363,6 +366,15 @@ void HostIPCConnection::setFileMoveCallback(const Method<const api::FileMoveRequ
     typedef IPCMethodWrapper<const api::FileMoveRequestIn, api::FileMoveRequestStatus> Method;
     mService->setMethodHandler<Method::out, Method::in>(
         api::ipc::METHOD_FILE_MOVE_REQUEST,
+        Method::getWrapper(callback));
+}
+
+void HostIPCConnection::setCreateFileCallback(const Method<const api::CreateFileIn,
+                                              api::CreateFileOut>::type& callback)
+{
+    typedef IPCMethodWrapper<const api::CreateFileIn, api::CreateFileOut> Method;
+    mService->setMethodHandler<Method::out, Method::in>(
+        api::ipc::METHOD_CREATE_FILE,
         Method::getWrapper(callback));
 }
 

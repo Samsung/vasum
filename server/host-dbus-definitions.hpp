@@ -181,6 +181,7 @@ const std::string DEFINITION =
     "    <method name='" + METHOD_CREATE_FILE + "'>"
     "      <arg type='s' name='id' direction='in'/>"
     "      <arg type='s' name='path' direction='in'/>"
+    "      <arg type='i' name='flags' direction='in'/>"
     "      <arg type='i' name='mode' direction='in'/>"
     "      <arg type='h' name='fileDescriptor' direction='out'/>"
     "    </method>"

@@ -625,6 +625,36 @@ void ZonesManager::handleFileMoveCall(const std::string& /*srcZoneId*/,
 
 #endif /* ZONE_CONNECTION */
 
+void ZonesManager::handleCreateFileCall(const api::CreateFileIn& request,
+                                        api::MethodResultBuilder::Pointer result)
+{
+    auto handler = [&, this] {
+        LOGI("CreateFile call");
+
+        Lock lock(mMutex);
+
+        auto srcIter = findZone(request.id);
+        if (srcIter == mZones.end()) {
+            LOGE("Zone '" << request.id << "' not found");
+            result->setError(api::ERROR_INVALID_ID, "Requested Zone was not found.");
+            return;
+        }
+        Zone& srcZone = get(srcIter);
+
+        auto retValue = std::make_shared<api::CreateFileOut>();
+        try {
+            retValue->fd = srcZone.createFile(request.path, request.flags, request.mode);
+        } catch(ZoneOperationException& e) {
+            result->setError(api::ERROR_CREATE_FILE_FAILED, "Unable to create file");
+            return;
+        }
+
+        result->set(retValue);
+    };
+
+    mWorker->addTaskAndWait(handler);
+}
+
 #ifdef DBUS_CONNECTION
 void ZonesManager::handleProxyCall(const std::string& caller,
                                    const std::string& target,

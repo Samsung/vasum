@@ -376,7 +376,10 @@ bool LxcZone::runInZone(Call& call)
     return status == 0;
 }
 
-int LxcZone::createFile(const std::string& path, const std::int32_t mode, int *fdPtr)
+bool LxcZone::createFile(const std::string& path,
+                         const std::int32_t flags,
+                         const std::int32_t mode,
+                         int *fdPtr)
 {
     *fdPtr = -1;
 
@@ -389,12 +392,13 @@ int LxcZone::createFile(const std::string& path, const std::int32_t mode, int *f
     lxc::LxcZone::Call call = [&]()->int{
         utils::close(sockets[1]);
 
-        int fd = ::open(path.c_str(), O_CREAT | O_EXCL, mode);
+        int fd = ::open(path.c_str(), O_CREAT | O_EXCL | flags, mode);
         if (fd < 0) {
             LOGE("Error during file creation: " << utils::getSystemErrorMessage());
             utils::close(sockets[0]);
             return -1;
         }
+        LOGT("Created file in zone with fd " << fd);
         utils::fdSend(sockets[0], fd);
         utils::close(fd);
         return 0;

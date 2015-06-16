@@ -36,12 +36,13 @@ namespace api {
  */
 //TODO: Errors should use exception handling mechanism
 ///@{
-const std::string ERROR_FORBIDDEN         = "org.tizen.vasum.Error.Forbidden";
-const std::string ERROR_FORWARDED         = "org.tizen.vasum.Error.Forwarded";
-const std::string ERROR_INVALID_ID        = "org.tizen.vasum.Error.InvalidId";
-const std::string ERROR_INVALID_STATE     = "org.tizen.vasum.Error.InvalidState";
-const std::string ERROR_INTERNAL          = "org.tizen.vasum.Error.Internal";
-const std::string ERROR_ZONE_NOT_RUNNING  = "org.tizen.vasum.Error.ZonesNotRunning";
+const std::string ERROR_FORBIDDEN          = "org.tizen.vasum.Error.Forbidden";
+const std::string ERROR_FORWARDED          = "org.tizen.vasum.Error.Forwarded";
+const std::string ERROR_INVALID_ID         = "org.tizen.vasum.Error.InvalidId";
+const std::string ERROR_INVALID_STATE      = "org.tizen.vasum.Error.InvalidState";
+const std::string ERROR_INTERNAL           = "org.tizen.vasum.Error.Internal";
+const std::string ERROR_ZONE_NOT_RUNNING   = "org.tizen.vasum.Error.ZonesNotRunning";
+const std::string ERROR_CREATE_FILE_FAILED = "org.tizen.vasum.Error.CreateFileFailed";
 ///@}
 
 } // namespace api

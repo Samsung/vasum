@@ -394,6 +394,15 @@ bool Zone::isSwitchToDefaultAfterTimeoutAllowed() const
     return mConfig.switchToDefaultAfterTimeout;
 }
 
+int Zone::createFile(const std::string& path, const std::int32_t flags, const std::int32_t mode)
+{
+    int fd = 0;
+    if (!mZone.createFile(path, flags, mode, &fd)) {
+        throw ZoneOperationException("Failed to create file.");
+    }
+    return fd;
+}
+
 std::string Zone::declareFile(const int32_t& type,
                               const std::string& path,
                               const int32_t& flags,

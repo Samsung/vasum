@@ -86,6 +86,7 @@ private:
     void setSwitchToDefaultCallback(const Signal<const api::Void>::type& callback);
     void setFileMoveCallback(const Method<const api::FileMoveRequestIn,
                              api::FileMoveRequestStatus>::type& callback);
+    void setCreateFileCallback(const Method<const api::CreateFileIn, api::CreateFileOut>::type& callback);
 
     ipc::epoll::ThreadDispatcher mDispatcher;
     std::unique_ptr<ipc::Service> mService;

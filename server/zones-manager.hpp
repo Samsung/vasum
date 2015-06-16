@@ -164,6 +164,8 @@ public:
                                api::MethodResultBuilder::Pointer result);
     void handleRevokeDeviceCall(const api::RevokeDeviceIn& data,
                                 api::MethodResultBuilder::Pointer result);
+    void handleCreateFileCall(const api::CreateFileIn& request,
+                              api::MethodResultBuilder::Pointer result);
 
     // Zone's handlers---------------------------------------------------------
     void handleNotifyActiveZoneCall(const std::string& caller,

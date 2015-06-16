@@ -58,6 +58,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <boost/filesystem.hpp>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 using namespace vasum;
 using namespace config;
@@ -74,6 +76,7 @@ const std::string TEST_CONFIG_PATH = CONFIG_DIR + "/test-daemon.conf";
 const std::string MISSING_CONFIG_PATH = CONFIG_DIR + "/missing-daemon.conf";
 const int EVENT_TIMEOUT = 5000;
 const int SIGNAL_PROPAGATE_TIME = 500; // ms
+const std::int32_t DEFAULT_FILE_MODE = 0666;
 //const int UNEXPECTED_EVENT_TIMEOUT = EVENT_TIMEOUT / 5;
 const std::string TEST_APP_NAME = "testapp";
 const std::string TEST_MESSAGE = "testmessage";
@@ -445,6 +448,24 @@ public:
                                                  "()");
     }
 
+    int callMethodCreateFile(const std::string& id,
+                             const std::string& path,
+                             const std::int32_t& flags,
+                             const std::int32_t& mode)
+    {
+        assert(isHost());
+        GVariant* parameters = g_variant_new("(ssii)", id.c_str(), path.c_str(), flags, mode);
+        GVariantPtr result = mClient->callMethod(api::dbus::BUS_NAME,
+                                                 api::dbus::OBJECT_PATH,
+                                                 api::dbus::INTERFACE,
+                                                 api::dbus::METHOD_CREATE_FILE,
+                                                 parameters,
+                                                 "(h)");
+        int fileFd = 0;
+        g_variant_get(result.get(), "(h)", &fileFd);
+        return fileFd;
+    }
+
 private:
     const int mId;
     DbusConnection::Pointer mClient;
@@ -597,6 +618,18 @@ public:
             std::make_shared<api::FileMoveRequestIn>(api::FileMoveRequestIn{dest, path}),
             EVENT_TIMEOUT*10);
         return result->value;
+    }
+
+    int callMethodCreateFile(const std::string& id,
+                             const std::string& path,
+                             const std::int32_t& flags,
+                             const std::int32_t& mode)
+    {
+        auto result = mClient.callSync<api::CreateFileIn, api::CreateFileOut>(
+            api::ipc::METHOD_CREATE_FILE,
+            std::make_shared<api::CreateFileIn>(api::CreateFileIn{id, path, flags, mode}),
+            EVENT_TIMEOUT*10);
+        return result->fd.value;
     }
 
 private:
@@ -1292,6 +1325,56 @@ MULTI_FIXTURE_TEST_CASE(LockUnlockZone, F, ACCESSORS)
     BOOST_REQUIRE_EXCEPTION(host.callMethodUnlockZone("zone1"),
                             std::exception, //TODO: exception should be more specific
                             WhatEquals("Zone is not paused"));
+}
+
+MULTI_FIXTURE_TEST_CASE(CreateFile, F, ACCESSORS)
+{
+    ZonesManager cm(TEST_CONFIG_PATH);
+    cm.createZone("zone1", SIMPLE_TEMPLATE);
+    cm.restoreAll();
+
+    typename F::HostAccessory host;
+    int returnedFd = host.callMethodCreateFile("zone1", "/123.txt", O_RDWR, DEFAULT_FILE_MODE);
+    BOOST_REQUIRE(::fcntl(returnedFd, F_GETFD) != -1);
+    BOOST_REQUIRE(::close(returnedFd) != -1);
+
+    returnedFd = host.callMethodCreateFile("zone1", "/56.txt", O_RDONLY, DEFAULT_FILE_MODE);
+    BOOST_REQUIRE(::fcntl(returnedFd, F_GETFD) != -1);
+    BOOST_REQUIRE(::close(returnedFd) != -1);
+
+    returnedFd = host.callMethodCreateFile("zone1", "/89.txt", O_WRONLY, DEFAULT_FILE_MODE);
+    BOOST_REQUIRE(::fcntl(returnedFd, F_GETFD) != -1);
+    BOOST_REQUIRE(::close(returnedFd) != -1);
+}
+
+MULTI_FIXTURE_TEST_CASE(CreateWriteReadFile, F, ACCESSORS)
+{
+    ZonesManager cm(TEST_CONFIG_PATH);
+    cm.createZone("zone1", SIMPLE_TEMPLATE);
+    cm.restoreAll();
+
+    typename F::HostAccessory host;
+
+    // create file, make sure returned fd is correct
+    int returnedFd = host.callMethodCreateFile("zone1", "/test123.txt", O_RDWR, DEFAULT_FILE_MODE);
+    BOOST_REQUIRE(::fcntl(returnedFd, F_GETFD) != -1);
+
+    // write sth
+    BOOST_REQUIRE_MESSAGE(::write(returnedFd, FILE_CONTENT.c_str(), FILE_CONTENT.size()) > 0,
+                          "Failed to write to fd " << returnedFd << ": " << ::strerror(errno));
+
+    // go back to the beginning
+    BOOST_REQUIRE(::lseek(returnedFd, 0, SEEK_SET) != -1);
+
+    // read it back, zero-terminate it and verify
+    std::unique_ptr<char[]> retStr(new char[FILE_CONTENT.size()+1]);
+    BOOST_REQUIRE_MESSAGE(::read(returnedFd, retStr.get(), FILE_CONTENT.size()) > 0,
+                          "Failed to read from file: " << ::strerror(errno));
+    retStr[FILE_CONTENT.size()] = 0;
+    BOOST_REQUIRE(FILE_CONTENT.compare(retStr.get()) == 0);
+
+    // close
+    BOOST_REQUIRE(::close(returnedFd) != -1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

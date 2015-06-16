@@ -158,12 +158,19 @@ public:
     /**
      * Create a file inside the zone and return it's file descriptor
      *
-     * @param path path in the container
-     * @param mode mode
+     * @param[in]  path  Path in container where file shall be created
+     * @param[in]  flags Flags used when creating file. Note that the method already provides
+     *                   O_CREAT and O_EXCL flags. User must provide the function with
+     *                   O_RDWR/O_RDONLY/O_WRONLY flag explicitly.
+     * @param[in]  mode  Permissions with which file is created
+     * @param[out] fdPtr Pointer to opened file descriptor.
      *
-     * @return file descriptor of the file, opened in mode
+     * @return True on success, false on failure.
      */
-    int createFile(const std::string& path, const std::int32_t mode, int *fdPtr);
+    bool createFile(const std::string& path,
+                    const std::int32_t flags,
+                    const std::int32_t mode,
+                    int *fdPtr);
 
 private:
     lxc_container* mLxcContainer;

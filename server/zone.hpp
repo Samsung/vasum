@@ -183,6 +183,17 @@ public:
     int getVT() const;
 
     /**
+     * Create file inside zone, return its fd
+     *
+     * @param path  Path where the file should be created
+     * @param flags Flags used when opening the file. See common/lxc/zone.hpp for more info.
+     * @param mode  Permissions with which file is created
+     *
+     * @return Created files fd
+     */
+    int createFile(const std::string& path, const std::int32_t flags, const std::int32_t mode);
+
+    /**
      * Declare file, directory or pipe that will be created while zone startup
      */
     std::string declareFile(const int32_t& type,

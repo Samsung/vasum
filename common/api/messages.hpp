@@ -227,11 +227,13 @@ struct GrantDeviceIn {
 struct CreateFileIn {
     std::string id;
     std::string path;
+    int32_t flags;
     int32_t mode;
     CONFIG_REGISTER
     (
         id,
         path,
+        flags,
         mode
     )
 };

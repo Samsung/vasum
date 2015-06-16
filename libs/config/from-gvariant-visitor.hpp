@@ -28,6 +28,7 @@
 #include "config/is-visitable.hpp"
 #include "config/exception.hpp"
 #include "config/is-union.hpp"
+#include "config/types.hpp"
 
 #include <string>
 #include <vector>
@@ -124,6 +125,12 @@ private:
     {
         checkType(object, G_VARIANT_TYPE_STRING);
         value = g_variant_get_string(object, NULL);
+    }
+
+    static void fromGVariant(GVariant* object, config::FileDescriptor& value)
+    {
+        checkType(object, G_VARIANT_TYPE_INT32);
+        value.value = g_variant_get_int32(object);
     }
 
     template<typename T>

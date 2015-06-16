@@ -44,6 +44,7 @@ const std::string ZONE_PATH = "/tmp/ut-zone/";
 const std::string ZONE_NAME = "ut-zone";
 const std::string ZONE_TEMPLATE = VSM_TEST_TEMPLATES_INSTALL_DIR "/minimal.sh";
 const char* TEMPLATE_ARGS[] = {NULL};
+const std::int32_t DEFAULT_FILE_MODE = 0666;
 
 struct Fixture {
     utils::ScopedDir mLxcDirGuard;
@@ -267,15 +268,15 @@ BOOST_AUTO_TEST_CASE(CreateFile)
 
     // The test
     int fd;
-    BOOST_REQUIRE(lxc.createFile("./112.txt", O_RDWR, &fd));
+    BOOST_REQUIRE(lxc.createFile("./112.txt", O_RDWR, DEFAULT_FILE_MODE, &fd));
     BOOST_REQUIRE(::fcntl(fd, F_GETFD) != -1);
     BOOST_REQUIRE(::close(fd) != -1);
 
-    BOOST_REQUIRE(lxc.createFile("/2.txt", O_RDONLY, &fd));
+    BOOST_REQUIRE(lxc.createFile("/2.txt", O_RDONLY, DEFAULT_FILE_MODE, &fd));
     BOOST_REQUIRE(::fcntl(fd, F_GETFD) != -1);
     BOOST_REQUIRE(::close(fd) != -1);
 
-    BOOST_REQUIRE(lxc.createFile("/3.txt", O_WRONLY, &fd));
+    BOOST_REQUIRE(lxc.createFile("/3.txt", O_WRONLY, DEFAULT_FILE_MODE, &fd));
     BOOST_REQUIRE(::fcntl(fd, F_GETFD) != -1);
     BOOST_REQUIRE(::close(fd) != -1);
 
