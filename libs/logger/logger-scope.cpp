@@ -43,14 +43,18 @@ LoggerScope::LoggerScope(const std::string& file,
         mMessage(message),
         mRootDir(rootDir)
 {
-    logger::Logger::logMessage(logger::LogLevel::TRACE, "Entering: " + mMessage, mFile,
-                               mLine, mFunc, mRootDir);
+    if (logger::Logger::getLogLevel() <= logger::LogLevel::TRACE) {
+        logger::Logger::logMessage(logger::LogLevel::TRACE, "Entering: " + mMessage,
+                                   mFile, mLine, mFunc, mRootDir);
+    }
 }
 
 LoggerScope::~LoggerScope()
 {
-    logger::Logger::logMessage(logger::LogLevel::TRACE, "Leaving:  " + mMessage, mFile,
-                               mLine, mFunc, mRootDir);
+    if (logger::Logger::getLogLevel() <= logger::LogLevel::TRACE) {
+        logger::Logger::logMessage(logger::LogLevel::TRACE, "Leaving:  " + mMessage,
+                                   mFile, mLine, mFunc, mRootDir);
+    }
 }
 
 } // namespace logger
