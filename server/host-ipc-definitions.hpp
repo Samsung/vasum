@@ -57,11 +57,13 @@ const ::ipc::MethodID METHOD_UNLOCK_ZONE              = 24;
 const ::ipc::MethodID METHOD_GRANT_DEVICE             = 25;
 const ::ipc::MethodID METHOD_REVOKE_DEVICE            = 26;
 const ::ipc::MethodID METHOD_CREATE_FILE              = 27;
+const ::ipc::MethodID METHOD_LOCK_QUEUE               = 28;
+const ::ipc::MethodID METHOD_UNLOCK_QUEUE             = 29;
+const ::ipc::MethodID METHOD_SWITCH_TO_DEFAULT        = 30;
 
 const ::ipc::MethodID METHOD_NOTIFY_ACTIVE_ZONE         = 100;
 const ::ipc::MethodID METHOD_FILE_MOVE_REQUEST          = 101;
 const ::ipc::MethodID SIGNAL_NOTIFICATION               = 102;
-const ::ipc::MethodID SIGNAL_SWITCH_TO_DEFAULT          = 103;
 
 const std::string FILE_MOVE_DESTINATION_NOT_FOUND   = "FILE_MOVE_DESTINATION_NOT_FOUND";
 const std::string FILE_MOVE_WRONG_DESTINATION       = "FILE_MOVE_WRONG_DESTINATION";

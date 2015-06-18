@@ -43,6 +43,7 @@ const std::string ERROR_INVALID_STATE      = "org.tizen.vasum.Error.InvalidState
 const std::string ERROR_INTERNAL           = "org.tizen.vasum.Error.Internal";
 const std::string ERROR_ZONE_NOT_RUNNING   = "org.tizen.vasum.Error.ZonesNotRunning";
 const std::string ERROR_CREATE_FILE_FAILED = "org.tizen.vasum.Error.CreateFileFailed";
+const std::string ERROR_QUEUE              = "org.tizen.vasum.Error.Queue";
 ///@}
 
 } // namespace api

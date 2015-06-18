@@ -97,6 +97,7 @@ private:
                        const std::string& methodName,
                        GVariant* parameters,
                        dbus::MethodResultBuilder::Pointer result);
+    void onClientVanished(const std::string& name);
     void onSignalCall(const std::string& senderBusName,
                       const std::string& objectPath,
                       const std::string& interface,

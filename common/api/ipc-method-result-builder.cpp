@@ -48,6 +48,11 @@ void IPCMethodResultBuilder::setError(const std::string& , const std::string& me
     mMethodResultPtr->setError(1, message);
 }
 
+std::string IPCMethodResultBuilder::getID() const
+{
+    return IPC_CONNECTION_PREFIX + std::to_string(mMethodResultPtr->getPeerID());
+}
+
 } // namespace result
 } // namespace vasum
 

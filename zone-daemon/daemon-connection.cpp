@@ -72,7 +72,8 @@ DaemonConnection::DaemonConnection(const NameLostCallback& nameLostCallback,
     mDbusConnection->registerObject(zone_daemon::api::OBJECT_PATH,
                                     zone_daemon::api::DEFINITION,
                                     std::bind(&DaemonConnection::onMessageCall,
-                                              this, _1, _2, _3, _4, _5));
+                                              this, _1, _2, _3, _4, _5),
+                                    nullptr);
     LOGD("Connected");
 }
 

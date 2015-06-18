@@ -39,9 +39,22 @@ HostIPCConnection::HostIPCConnection(ZonesManager* zonesManagerPtr)
     : mZonesManagerPtr(zonesManagerPtr)
 {
     LOGT("Connecting to host IPC socket");
-    mService.reset(new ipc::Service(mDispatcher.getPoll(), HOST_IPC_SOCKET));
+
+    ipc::PeerCallback removedCallback = [this](const ipc::PeerID peerID,
+                                               const ipc::FileDescriptor) {
+        std::string id = api::IPC_CONNECTION_PREFIX + std::to_string(peerID);
+        mZonesManagerPtr->disconnectedCallback(id);
+    };
+    mService.reset(new ipc::Service(mDispatcher.getPoll(), HOST_IPC_SOCKET,
+                                    nullptr, removedCallback));
 
     using namespace std::placeholders;
+    setLockQueueCallback(std::bind(&ZonesManager::handleLockQueueCall,
+                                   mZonesManagerPtr, _1));
+
+    setUnlockQueueCallback(std::bind(&ZonesManager::handleUnlockQueueCall,
+                                     mZonesManagerPtr, _1));
+
     setGetZoneIdsCallback(std::bind(&ZonesManager::handleGetZoneIdsCall,
                                     mZonesManagerPtr, _1));
 
@@ -121,7 +134,7 @@ HostIPCConnection::HostIPCConnection(ZonesManager* zonesManagerPtr)
                                           mZonesManagerPtr, "", _1, _2));
 
     setSwitchToDefaultCallback(std::bind(&ZonesManager::handleSwitchToDefaultCall,
-                                         mZonesManagerPtr, ""));
+                                         mZonesManagerPtr, "", _1));
 
     setFileMoveCallback(std::bind(&ZonesManager::handleFileMoveCall,
                                   mZonesManagerPtr, "", _1, _2));
@@ -141,13 +154,28 @@ void HostIPCConnection::start()
     LOGD("Connected");
 }
 
+void HostIPCConnection::setLockQueueCallback(const Method<api::Void>::type& callback)
+{
+    typedef IPCMethodWrapper<api::Void> Callback;
+    mService->setMethodHandler<Callback::out, Callback::in>(
+        api::ipc::METHOD_LOCK_QUEUE,
+        Callback::getWrapper(callback));
+}
+
+void HostIPCConnection::setUnlockQueueCallback(const Method<api::Void>::type& callback)
+{
+    typedef IPCMethodWrapper<api::Void> Callback;
+    mService->setMethodHandler<Callback::out, Callback::in>(
+        api::ipc::METHOD_UNLOCK_QUEUE,
+        Callback::getWrapper(callback));
+}
+
 void HostIPCConnection::setGetZoneIdsCallback(const Method<api::ZoneIds>::type& callback)
 {
     typedef IPCMethodWrapper<api::ZoneIds> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
         api::ipc::METHOD_GET_ZONE_ID_LIST,
         Callback::getWrapper(callback));
-
 }
 
 void HostIPCConnection::setGetActiveZoneIdCallback(const Method<api::ZoneId>::type& callback)
@@ -156,7 +184,6 @@ void HostIPCConnection::setGetActiveZoneIdCallback(const Method<api::ZoneId>::ty
     mService->setMethodHandler<Callback::out, Callback::in>(
         api::ipc::METHOD_GET_ACTIVE_ZONE_ID,
         Callback::getWrapper(callback));
-
 }
 
 void HostIPCConnection::setGetZoneInfoCallback(const Method<const api::ZoneId, api::ZoneInfoOut>::type& callback)
@@ -352,12 +379,12 @@ void HostIPCConnection::setNotifyActiveZoneCallback(
         Method::getWrapper(callback));
 }
 
-void HostIPCConnection::setSwitchToDefaultCallback(const Signal<const api::Void>::type& callback)
+void HostIPCConnection::setSwitchToDefaultCallback(const Method<api::Void>::type& callback)
 {
-    typedef IPCSignalWrapper<const api::Void> Signal;
-    mService->setSignalHandler<Signal::in>(
-        api::ipc::SIGNAL_SWITCH_TO_DEFAULT,
-        Signal::getWrapper(callback));
+    typedef IPCMethodWrapper<api::Void> Callback;
+    mService->setMethodHandler<Callback::out, Callback::in>(
+        api::ipc::METHOD_SWITCH_TO_DEFAULT,
+        Callback::getWrapper(callback));
 }
 
 void HostIPCConnection::setFileMoveCallback(const Method<const api::FileMoveRequestIn,

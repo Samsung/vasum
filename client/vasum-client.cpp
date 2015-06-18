@@ -45,6 +45,16 @@ Client& getClient(VsmClient client)
 
 } // namespace
 
+API VsmStatus vsm_lock_queue(VsmClient client)
+{
+    return getClient(client).vsm_lock_queue();
+}
+
+API VsmStatus vsm_unlock_queue(VsmClient client)
+{
+    return getClient(client).vsm_unlock_queue();
+}
+
 API VsmStatus vsm_get_poll_fd(VsmClient client, int* fd)
 {
     return getClient(client).vsm_get_poll_fd(fd);

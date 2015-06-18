@@ -265,13 +265,13 @@ BOOST_AUTO_TEST_CASE(RegisterObject)
     ScopedGlibLoop loop;
     DbusConnection::Pointer conn = DbusConnection::create(DBUS_ADDRESS);
     DbusConnection::MethodCallCallback callback;
-    BOOST_CHECK_THROW(conn->registerObject(TESTAPI_OBJECT_PATH, "<invalid", callback),
+    BOOST_CHECK_THROW(conn->registerObject(TESTAPI_OBJECT_PATH, "<invalid", callback, nullptr),
                       DbusInvalidArgumentException);
-    BOOST_CHECK_THROW(conn->registerObject(TESTAPI_OBJECT_PATH, "", callback),
+    BOOST_CHECK_THROW(conn->registerObject(TESTAPI_OBJECT_PATH, "", callback, nullptr),
                       DbusInvalidArgumentException);
-    BOOST_CHECK_THROW(conn->registerObject(TESTAPI_OBJECT_PATH, "<node></node>", callback),
+    BOOST_CHECK_THROW(conn->registerObject(TESTAPI_OBJECT_PATH, "<node></node>", callback, nullptr),
                       DbusInvalidArgumentException);
-    BOOST_CHECK_NO_THROW(conn->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, callback));
+    BOOST_CHECK_NO_THROW(conn->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, callback, nullptr));
 }
 
 BOOST_AUTO_TEST_CASE(IntrospectSystem)
@@ -298,7 +298,8 @@ BOOST_AUTO_TEST_CASE(Introspect)
     BOOST_REQUIRE(nameAcquired.wait(EVENT_TIMEOUT));
     conn1->registerObject(TESTAPI_OBJECT_PATH,
                           TESTAPI_DEFINITION,
-                          DbusConnection::MethodCallCallback());
+                          DbusConnection::MethodCallCallback(),
+                          nullptr);
     std::string xml = conn2->introspect(TESTAPI_BUS_NAME, TESTAPI_OBJECT_PATH);
     std::string iface = getInterfaceFromIntrospectionXML(xml, TESTAPI_INTERFACE);
     BOOST_REQUIRE(!iface.empty());
@@ -343,7 +344,7 @@ BOOST_AUTO_TEST_CASE(MethodCall)
             result->setError("org.tizen.vasum.Error.Test", "msg: " + std::to_string(arg));
         }
     };
-    conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler);
+    conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler, nullptr);
 
     GVariantPtr result1 = conn2->callMethod(TESTAPI_BUS_NAME,
                                             TESTAPI_OBJECT_PATH,
@@ -407,7 +408,7 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCall)
             result->setError("org.tizen.vasum.Error.Test", "msg: " + std::to_string(arg));
         }
     };
-    conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler);
+    conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler, nullptr);
 
     auto asyncResult1 = [&](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
         if (g_variant_is_of_type(asyncMethodCallResult.get(), G_VARIANT_TYPE_UNIT)) {
@@ -491,7 +492,7 @@ BOOST_AUTO_TEST_CASE(MethodAsyncCallAsyncHandler)
             handlerDone.set();
         }
     };
-    conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler);
+    conn1->registerObject(TESTAPI_OBJECT_PATH, TESTAPI_DEFINITION, handler, nullptr);
 
     auto asyncResult = [&](dbus::AsyncMethodCallResult& asyncMethodCallResult) {
         const gchar* ret = NULL;
@@ -528,7 +529,8 @@ BOOST_AUTO_TEST_CASE(MethodCallException)
     BOOST_REQUIRE(nameAcquired.wait(EVENT_TIMEOUT));
     conn1->registerObject(TESTAPI_OBJECT_PATH,
                           TESTAPI_DEFINITION,
-                          DbusConnection::MethodCallCallback());
+                          DbusConnection::MethodCallCallback(),
+                          nullptr);
     BOOST_CHECK_THROW(conn2->callMethod(TESTAPI_BUS_NAME,
                                         TESTAPI_OBJECT_PATH,
                                         TESTAPI_INTERFACE,

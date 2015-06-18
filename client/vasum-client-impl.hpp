@@ -123,6 +123,16 @@ public:
     VsmStatus vsm_get_zone_dbuses(VsmArrayString* keys, VsmArrayString* values) noexcept;
 
     /**
+     *  @see ::vsm_lock_queue
+     */
+    VsmStatus vsm_lock_queue() noexcept;
+
+    /**
+     *  @see ::vsm_unlock_queue
+     */
+    VsmStatus vsm_unlock_queue() noexcept;
+
+    /**
      *  @see ::vsm_get_zone_ids
      */
     VsmStatus vsm_get_zone_ids(VsmArrayString* array) noexcept;

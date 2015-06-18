@@ -65,6 +65,10 @@ public:
         g_dbus_method_invocation_return_dbus_error(mInvocation, name.c_str(), message.c_str());
         mResultSet = true;
     }
+    std::string getPeerName()
+    {
+        return std::string(g_dbus_method_invocation_get_sender(mInvocation));
+    }
 private:
     GDBusMethodInvocation* mInvocation;
     bool mResultSet;
@@ -146,16 +150,19 @@ DbusConnection::DbusConnection(const std::string& address)
 DbusConnection::~DbusConnection()
 {
     // Close connection in a glib thread (because of a bug in glib)
-    GDBusConnection* connection = mConnection;
-    guint nameId = mNameId;
-
-    auto closeConnection = [=]() {
-        if (nameId) {
-            g_bus_unown_name(nameId);
+    auto closeConnection = [this]() {
+        for (auto client : mWatchedClients) {
+            LOGT("Stopped watching the client: " << client.first);
+            g_bus_unwatch_name(client.second);
         }
-        g_object_unref(connection);
+
+        if (mNameId) {
+            g_bus_unown_name(mNameId);
+        }
+        g_object_unref(mConnection);
         LOGT("Connection deleted");
     };
+
     executeInGlibThread(closeConnection, mGuard);
 }
 
@@ -268,7 +275,8 @@ std::string DbusConnection::introspect(const std::string& busName, const std::st
 
 void DbusConnection::registerObject(const std::string& objectPath,
                                     const std::string& objectDefinitionXml,
-                                    const MethodCallCallback& callback)
+                                    const MethodCallCallback& methodCall,
+                                    const ClientVanishedCallback& clientVanished)
 {
     ScopedGError error;
     GDBusNodeInfo* nodeInfo = g_dbus_node_info_new_for_xml(objectDefinitionXml.c_str(), &error);
@@ -297,8 +305,10 @@ void DbusConnection::registerObject(const std::string& objectPath,
                                       objectPath.c_str(),
                                       interfaceInfo,
                                       &vtable,
-                                      createCallbackWrapper(callback, mGuard.spawn()),
-                                      &deleteCallbackWrapper<MethodCallCallback>,
+                                      createCallbackWrapper(
+                                          MethodCallbacks(methodCall, clientVanished, this),
+                                          mGuard.spawn()),
+                                      &deleteCallbackWrapper<MethodCallbacks>,
                                       &error);
     g_dbus_node_info_unref(nodeInfo);
     if (error) {
@@ -308,7 +318,7 @@ void DbusConnection::registerObject(const std::string& objectPath,
     }
 }
 
-void DbusConnection::onMethodCall(GDBusConnection*,
+void DbusConnection::onMethodCall(GDBusConnection* connection,
                                   const gchar*,
                                   const gchar* objectPath,
                                   const gchar* interface,
@@ -317,14 +327,54 @@ void DbusConnection::onMethodCall(GDBusConnection*,
                                   GDBusMethodInvocation* invocation,
                                   gpointer userData)
 {
-    const MethodCallCallback& callback = getCallbackFromPointer<MethodCallCallback>(userData);
+    const MethodCallbacks& callbacks = getCallbackFromPointer<MethodCallbacks>(userData);
 
     LOGD("MethodCall: " << objectPath << "; " << interface << "; " << method);
 
-    MethodResultBuilder::Pointer resultBuilder(new MethodResultBuilderImpl(invocation));
-    if (callback) {
-        callback(objectPath, interface, method, parameters, resultBuilder);
+    const gchar *sender = g_dbus_method_invocation_get_sender(invocation);
+    ClientsMap &watchedClients = callbacks.dbusConn->mWatchedClients;
+
+    if (watchedClients.find(sender) == watchedClients.end()) {
+        LOGT("Watching the client: " << sender);
+        guint id = g_bus_watch_name_on_connection(connection,
+                                                  sender,
+                                                  G_BUS_NAME_WATCHER_FLAGS_NONE,
+                                                  NULL,
+                                                  &DbusConnection::onClientVanish,
+                                                  createCallbackWrapper(
+                                                      VanishedCallbacks(callbacks.clientVanished,
+                                                                        watchedClients),
+                                                      callbacks.dbusConn->mGuard.spawn()),
+                                                  &deleteCallbackWrapper<VanishedCallbacks>);
+
+        watchedClients[sender] = id;
     }
+
+    MethodResultBuilder::Pointer resultBuilder(new MethodResultBuilderImpl(invocation));
+    if (callbacks.methodCall) {
+        callbacks.methodCall(objectPath, interface, method, parameters, resultBuilder);
+    }
+}
+
+void DbusConnection::onClientVanish(GDBusConnection*,
+                                    const gchar *name,
+                                    gpointer userData)
+{
+    const VanishedCallbacks& callbacks = getCallbackFromPointer<VanishedCallbacks>(userData);
+
+    LOGI("ClientVanished: " << name);
+
+    guint id = callbacks.watchedClients[name];
+    callbacks.watchedClients.erase(name);
+
+    if (callbacks.clientVanished) {
+        callbacks.clientVanished(name);
+    }
+
+    LOGT("Stopped watching the client: " << name);
+
+    // after this line we cannot use the *name pointer, this call frees it
+    g_bus_unwatch_name(id);
 }
 
 GVariantPtr DbusConnection::callMethod(const std::string& busName,

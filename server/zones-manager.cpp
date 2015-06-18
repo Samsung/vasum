@@ -116,6 +116,7 @@ ZonesManager::ZonesManager(const std::string& configPath)
     : mWorker(utils::Worker::create())
     , mHostIPCConnection(this)
     , mDetachOnExit(false)
+    , mExclusiveIDLock(INVALID_CONNECTION_ID)
 #ifdef DBUS_CONNECTION
     , mHostDbusConnection(this)
 #endif
@@ -248,6 +249,25 @@ void ZonesManager::insertZone(const std::string& zoneId, const std::string& zone
                 utils::createFilePath(mConfig.zonesPath, ENABLED_FILE_NAME), "")) {
             throw ZoneOperationException(ENABLED_FILE_NAME + ": cannot create.");
         }
+    }
+}
+
+void ZonesManager::tryAddTask(const utils::Worker::Task& task, api::MethodResultBuilder::Pointer result, bool wait)
+{
+    {
+        Lock lock(mExclusiveIDMutex);
+
+        if (mExclusiveIDLock != INVALID_CONNECTION_ID &&
+            mExclusiveIDLock != result->getID()) {
+            result->setError(api::ERROR_QUEUE, "Queue is locked by another client");
+            return;
+        }
+    }
+
+    if (wait) {
+        mWorker->addTaskAndWait(task);
+    } else {
+        mWorker->addTask(task);
     }
 }
 
@@ -465,7 +485,21 @@ void ZonesManager::setZonesDetachOnExit()
     }
 }
 
-void ZonesManager::handleSwitchToDefaultCall(const std::string& /*caller*/)
+void ZonesManager::disconnectedCallback(const std::string& id)
+{
+    LOGD("Client Disconnected: " << id);
+
+    {
+        Lock lock(mExclusiveIDMutex);
+
+        if (mExclusiveIDLock == id) {
+            mExclusiveIDLock = INVALID_CONNECTION_ID;
+        }
+    }
+}
+
+void ZonesManager::handleSwitchToDefaultCall(const std::string& /*caller*/,
+                                             api::MethodResultBuilder::Pointer result)
 {
     auto handler = [&, this] {
         // get config of currently set zone and switch if switchToDefaultAfterTimeout is true
@@ -482,9 +516,10 @@ void ZonesManager::handleSwitchToDefaultCall(const std::string& /*caller*/)
             LOGI("Switching to default zone " << mDynamicConfig.defaultId);
             focusInternal(defaultIter);
         }
+        result->setVoid();
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 #ifdef ZONE_CONNECTION
@@ -512,7 +547,7 @@ void ZonesManager::handleNotifyActiveZoneCall(const std::string& caller,
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleFileMoveCall(const std::string& srcZoneId,
@@ -606,7 +641,7 @@ void ZonesManager::handleFileMoveCall(const std::string& srcZoneId,
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 #else
 void ZonesManager::handleNotifyActiveZoneCall(const std::string& /* caller */,
@@ -652,7 +687,7 @@ void ZonesManager::handleCreateFileCall(const api::CreateFileIn& request,
         result->set(retValue);
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 #ifdef DBUS_CONNECTION
@@ -703,9 +738,52 @@ void ZonesManager::handleProxyCall(const std::string& caller,
                                            asyncResultCallback);
     };
 
+    // This call cannot be locked by lock/unlock queue
     mWorker->addTaskAndWait(handler);
 }
 #endif //DBUS_CONNECTION
+
+void ZonesManager::handleLockQueueCall(api::MethodResultBuilder::Pointer result)
+{
+    Lock lock(mExclusiveIDMutex);
+    std::string id = result->getID();
+
+    LOGI("Lock Queue: " << id);
+
+    if (mExclusiveIDLock == id) {
+        result->setError(api::ERROR_QUEUE, "Queue already locked");
+        return;
+    }
+
+    if (mExclusiveIDLock != INVALID_CONNECTION_ID) {
+        result->setError(api::ERROR_QUEUE, "Queue locked by another connection");
+        return;
+    }
+
+    mExclusiveIDLock = id;
+    result->setVoid();
+}
+
+void ZonesManager::handleUnlockQueueCall(api::MethodResultBuilder::Pointer result)
+{
+    Lock lock(mExclusiveIDMutex);
+    std::string id = result->getID();
+
+    LOGI("Unlock Queue: " << id);
+
+    if (mExclusiveIDLock == INVALID_CONNECTION_ID) {
+        result->setError(api::ERROR_QUEUE, "Queue not locked");
+        return;
+    }
+
+    if (mExclusiveIDLock != id) {
+        result->setError(api::ERROR_QUEUE, "Queue locked by another connection");
+        return;
+    }
+
+    mExclusiveIDLock = INVALID_CONNECTION_ID;
+    result->setVoid();
+}
 
 void ZonesManager::handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result)
 {
@@ -722,6 +800,7 @@ void ZonesManager::handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result
         result->set(zoneIds);
     };
 
+    // This call cannot be locked by lock/unlock queue
     mWorker->addTaskAndWait(handler);
 }
 
@@ -735,6 +814,7 @@ void ZonesManager::handleGetActiveZoneIdCall(api::MethodResultBuilder::Pointer r
         result->set(zoneId);
     };
 
+    // This call cannot be locked by lock/unlock queue
     mWorker->addTaskAndWait(handler);
 }
 
@@ -774,6 +854,7 @@ void ZonesManager::handleGetZoneInfoCall(const api::ZoneId& zoneId,
         result->set(zoneInfo);
     };
 
+    // This call cannot be locked by lock/unlock queue
     mWorker->addTaskAndWait(handler);
 }
 
@@ -803,7 +884,7 @@ void ZonesManager::handleSetNetdevAttrsCall(const api::SetNetDevAttrsIn& data,
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleGetNetdevAttrsCall(const api::GetNetDevAttrsIn& data,
@@ -830,7 +911,7 @@ void ZonesManager::handleGetNetdevAttrsCall(const api::GetNetDevAttrsIn& data,
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleGetNetdevListCall(const api::ZoneId& zoneId,
@@ -853,7 +934,7 @@ void ZonesManager::handleGetNetdevListCall(const api::ZoneId& zoneId,
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleCreateNetdevVethCall(const api::CreateNetDevVethIn& data,
@@ -876,7 +957,7 @@ void ZonesManager::handleCreateNetdevVethCall(const api::CreateNetDevVethIn& dat
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleCreateNetdevMacvlanCall(const api::CreateNetDevMacvlanIn& data,
@@ -898,7 +979,7 @@ void ZonesManager::handleCreateNetdevMacvlanCall(const api::CreateNetDevMacvlanI
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleCreateNetdevPhysCall(const api::CreateNetDevPhysIn& data,
@@ -921,7 +1002,7 @@ void ZonesManager::handleCreateNetdevPhysCall(const api::CreateNetDevPhysIn& dat
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleDestroyNetdevCall(const api::DestroyNetDevIn& data,
@@ -944,7 +1025,7 @@ void ZonesManager::handleDestroyNetdevCall(const api::DestroyNetDevIn& data,
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleDeleteNetdevIpAddressCall(const api::DeleteNetdevIpAddressIn& data,
@@ -966,7 +1047,7 @@ void ZonesManager::handleDeleteNetdevIpAddressCall(const api::DeleteNetdevIpAddr
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleDeclareFileCall(const api::DeclareFileIn& data,
@@ -989,7 +1070,7 @@ void ZonesManager::handleDeclareFileCall(const api::DeclareFileIn& data,
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleDeclareMountCall(const api::DeclareMountIn& data,
@@ -1012,7 +1093,7 @@ void ZonesManager::handleDeclareMountCall(const api::DeclareMountIn& data,
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleDeclareLinkCall(const api::DeclareLinkIn& data,
@@ -1035,7 +1116,7 @@ void ZonesManager::handleDeclareLinkCall(const api::DeclareLinkIn& data,
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleGetDeclarationsCall(const api::ZoneId& zoneId,
@@ -1058,7 +1139,7 @@ void ZonesManager::handleGetDeclarationsCall(const api::ZoneId& zoneId,
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleRemoveDeclarationCall(const api::RemoveDeclarationIn& data,
@@ -1080,7 +1161,7 @@ void ZonesManager::handleRemoveDeclarationCall(const api::RemoveDeclarationIn& d
         }
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleSetActiveZoneCall(const api::ZoneId& zoneId,
@@ -1109,7 +1190,7 @@ void ZonesManager::handleSetActiveZoneCall(const api::ZoneId& zoneId,
         result->setVoid();
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 
@@ -1255,7 +1336,7 @@ void ZonesManager::handleCreateZoneCall(const api::CreateZoneIn& data,
         }
     };
 
-    mWorker->addTaskAndWait(creator);
+    tryAddTask(creator, result, true);
 }
 
 void ZonesManager::handleDestroyZoneCall(const api::ZoneId& zoneId,
@@ -1276,7 +1357,7 @@ void ZonesManager::handleDestroyZoneCall(const api::ZoneId& zoneId,
         result->setVoid();
     };
 
-    mWorker->addTask(destroyer);
+    tryAddTask(destroyer, result, false);
 }
 
 void ZonesManager::handleShutdownZoneCall(const api::ZoneId& zoneId,
@@ -1305,7 +1386,7 @@ void ZonesManager::handleShutdownZoneCall(const api::ZoneId& zoneId,
         }
     };
 
-    mWorker->addTask(shutdown);
+    tryAddTask(shutdown, result, false);
 }
 
 void ZonesManager::handleStartZoneCall(const api::ZoneId& zoneId,
@@ -1332,7 +1413,7 @@ void ZonesManager::handleStartZoneCall(const api::ZoneId& zoneId,
             result->setError(api::ERROR_INTERNAL, "Failed to start zone");
         }
     };
-    mWorker->addTask(startAsync);
+    tryAddTask(startAsync, result, false);
 }
 
 void ZonesManager::handleLockZoneCall(const api::ZoneId& zoneId,
@@ -1371,7 +1452,7 @@ void ZonesManager::handleLockZoneCall(const api::ZoneId& zoneId,
         result->setVoid();
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleUnlockZoneCall(const api::ZoneId& zoneId,
@@ -1408,7 +1489,7 @@ void ZonesManager::handleUnlockZoneCall(const api::ZoneId& zoneId,
         result->setVoid();
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleGrantDeviceCall(const api::GrantDeviceIn& data,
@@ -1451,7 +1532,7 @@ void ZonesManager::handleGrantDeviceCall(const api::GrantDeviceIn& data,
         result->setVoid();
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 void ZonesManager::handleRevokeDeviceCall(const api::RevokeDeviceIn& data,
@@ -1492,7 +1573,7 @@ void ZonesManager::handleRevokeDeviceCall(const api::RevokeDeviceIn& data,
         result->setVoid();
     };
 
-    mWorker->addTaskAndWait(handler);
+    tryAddTask(handler, result, true);
 }
 
 } // namespace vasum

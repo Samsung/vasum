@@ -51,6 +51,7 @@ public:
 
     void setVoid();
     void setError(const int code, const std::string& message);
+    PeerID getPeerID();
 
 private:
     Processor& mProcessor;

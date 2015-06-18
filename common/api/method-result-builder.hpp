@@ -43,6 +43,7 @@ public:
     virtual ~MethodResultBuilder() {}
     virtual void setVoid() = 0;
     virtual void setError(const std::string& name, const std::string& message) = 0;
+    virtual std::string getID() const = 0;
 
     template<typename Data>
     void set(const std::shared_ptr<Data>& data)
@@ -52,7 +53,7 @@ public:
     }
 
 private:
-    virtual void setImpl(const std::shared_ptr<void>& data) =0;
+    virtual void setImpl(const std::shared_ptr<void>& data) = 0;
 
 };
 

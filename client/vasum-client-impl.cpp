@@ -308,6 +308,24 @@ VsmStatus Client::vsm_get_zone_dbuses(VsmArrayString* /*keys*/, VsmArrayString* 
     });
 }
 
+VsmStatus Client::vsm_lock_queue() noexcept
+{
+    return coverException([&] {
+        *mClient->callSync<api::Void, api::Void>(
+            vasum::api::ipc::METHOD_LOCK_QUEUE,
+            std::make_shared<api::Void>());
+    });
+}
+
+VsmStatus Client::vsm_unlock_queue() noexcept
+{
+    return coverException([&] {
+        *mClient->callSync<api::Void, api::Void>(
+            vasum::api::ipc::METHOD_UNLOCK_QUEUE,
+            std::make_shared<api::Void>());
+    });
+}
+
 VsmStatus Client::vsm_get_zone_ids(VsmArrayString* array) noexcept
 {
     return coverException([&] {

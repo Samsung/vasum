@@ -54,4 +54,9 @@ void MethodResult::setError(const int code, const std::string& message)
     mProcessor.sendError(mPeerID, mMessageID, code, message);
 }
 
+PeerID MethodResult::getPeerID()
+{
+    return mPeerID;
+}
+
 } // namespace ipc

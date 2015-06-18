@@ -70,7 +70,9 @@ HostDbusConnection::HostDbusConnection(ZonesManager* zonesManagerPtr)
     mDbusConnection->registerObject(api::dbus::OBJECT_PATH,
                                     api::dbus::DEFINITION,
                                     std::bind(&HostDbusConnection::onMessageCall,
-                                              this, _1, _2, _3, _4, _5));
+                                              this, _1, _2, _3, _4, _5),
+                                    std::bind(&HostDbusConnection::onClientVanished,
+                                              this, _1));
 
     mSubscriptionId = mDbusConnection->signalSubscribe(std::bind(&HostDbusConnection::onSignalCall,
                                                                  this, _1, _2, _3, _4, _5),
@@ -165,6 +167,18 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
                                args.get(),
                                result);
         }
+        return;
+    }
+
+    if (methodName == api::dbus::METHOD_LOCK_QUEUE) {
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleLockQueueCall(rb);
+        return;
+    }
+
+    if (methodName == api::dbus::METHOD_UNLOCK_QUEUE) {
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleUnlockQueueCall(rb);
         return;
     }
 
@@ -403,20 +417,28 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         mZonesManagerPtr->handleCreateFileCall(data, rb);
         return;
     }
+
+    if (methodName == api::dbus::METHOD_SWITCH_TO_DEFAULT) {
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleSwitchToDefaultCall(EMPTY_CALLER, rb);
+        return;
+    }
+}
+
+void HostDbusConnection::onClientVanished(const std::string& name)
+{
+    const std::string id = api::DBUS_CONNECTION_PREFIX + name;
+    mZonesManagerPtr->disconnectedCallback(id);
 }
 
 void HostDbusConnection::onSignalCall(const std::string& /* senderBusName */,
                                       const std::string& objectPath,
                                       const std::string& interface,
-                                      const std::string& signalName,
+                                      const std::string& /* signalName */,
                                       GVariant* /* parameters */)
 {
     if (objectPath != api::dbus::OBJECT_PATH || interface != api::dbus::INTERFACE) {
         return;
-    }
-
-    if (signalName == api::dbus::SIGNAL_SWITCH_TO_DEFAULT) {
-        mZonesManagerPtr->handleSwitchToDefaultCall(EMPTY_CALLER);
     }
 }
 

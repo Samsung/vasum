@@ -192,13 +192,14 @@ public:
         mClient->signalSubscribe(handler, api::dbus::BUS_NAME);
     }
 
-    void signalSwitchToDefault()
+    void callSwitchToDefault()
     {
-        // emit signal from dbus connection
-        mClient->emitSignal(api::dbus::OBJECT_PATH,
+        mClient->callMethod(api::dbus::BUS_NAME,
+                            api::dbus::OBJECT_PATH,
                             api::dbus::INTERFACE,
-                            api::dbus::SIGNAL_SWITCH_TO_DEFAULT,
-                            nullptr);
+                            api::dbus::METHOD_SWITCH_TO_DEFAULT,
+                            NULL,
+                            "()");
     }
 
     void callMethodNotify()
@@ -244,7 +245,7 @@ public:
                 }
             }
         };
-        mClient->registerObject(testapi::OBJECT_PATH, testapi::DEFINITION, handler);
+        mClient->registerObject(testapi::OBJECT_PATH, testapi::DEFINITION, handler, nullptr);
     }
 
     std::string testApiProxyCall(const std::string& target, const std::string& argument)
@@ -598,9 +599,11 @@ public:
                                                     callbackWrapper);
     }
 
-    void signalSwitchToDefault()
+    void callSwitchToDefault()
     {
-        mClient.signal<api::Void>(api::ipc::SIGNAL_SWITCH_TO_DEFAULT, std::make_shared<api::Void>());
+        mClient.callSync<api::Void, api::Void>(api::ipc::METHOD_SWITCH_TO_DEFAULT,
+                                               std::make_shared<api::Void>(),
+                                               EVENT_TIMEOUT*10); //Prevent from IPCTimeoutException see LockUnlockZone
     }
 
     void callMethodNotify()
@@ -912,7 +915,7 @@ MULTI_FIXTURE_TEST_CASE(SwitchToDefault, F, ACCESSORS)
 
     cm.focus("zone3");
 
-    host.signalSwitchToDefault();
+    host.callSwitchToDefault();
 
     // check if default zone has focus
     BOOST_CHECK(spinWaitFor(EVENT_TIMEOUT, isDefaultFocused));
@@ -936,7 +939,7 @@ MULTI_FIXTURE_TEST_CASE(AllowSwitchToDefault, F, ACCESSORS)
     // focus non-default zone with allowed switching
     cm.focus("zone3");
 
-    host.signalSwitchToDefault();
+    host.callSwitchToDefault();
 
     // check if default zone has focus
     BOOST_CHECK(spinWaitFor(EVENT_TIMEOUT, isDefaultFocused));
@@ -944,7 +947,7 @@ MULTI_FIXTURE_TEST_CASE(AllowSwitchToDefault, F, ACCESSORS)
     // focus non-default zone with disabled switching
     cm.focus("zone2");
 
-    host.signalSwitchToDefault();
+    host.callSwitchToDefault();
 
     // now default zone should not be focused
     // TODO uncomment this after adding an api to change 'switchToDefaultAfterTimeout'

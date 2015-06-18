@@ -36,6 +36,8 @@
 namespace vasum {
 namespace api {
 
+const std::string IPC_CONNECTION_PREFIX = "ipc://";
+
 class IPCMethodResultBuilder: public MethodResultBuilder {
 public:
     IPCMethodResultBuilder(const ipc::MethodResult::Pointer& methodResult);
@@ -45,6 +47,7 @@ private:
     void setImpl(const std::shared_ptr<void>& data) override;
     void setVoid() override;
     void setError(const std::string& name, const std::string& message) override;
+    std::string getID() const;
 
     ipc::MethodResult::Pointer mMethodResultPtr;
 };

@@ -39,6 +39,8 @@
 namespace vasum {
 namespace api {
 
+const std::string DBUS_CONNECTION_PREFIX = "dbus://";
+
 template<typename Data>
 class DbusMethodResultBuilder: public MethodResultBuilder {
 public:
@@ -49,6 +51,7 @@ private:
     void setImpl(const std::shared_ptr<void>& data) override;
     void setVoid() override;
     void setError(const std::string& name, const std::string& message) override;
+    std::string getID() const;
 
     ::dbus::MethodResultBuilder::Pointer mMethodResultBuilderPtr;
     std::function<GVariant*(std::shared_ptr<void>)> mSerialize;
@@ -80,6 +83,12 @@ template<typename Data>
 void DbusMethodResultBuilder<Data>::setError(const std::string& name, const std::string& message)
 {
     mMethodResultBuilderPtr->setError(name, message);
+}
+
+template<typename Data>
+std::string DbusMethodResultBuilder<Data>::getID() const
+{
+    return DBUS_CONNECTION_PREFIX + mMethodResultBuilderPtr->getPeerName();
 }
 
 } // namespace result

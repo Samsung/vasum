@@ -404,6 +404,22 @@ typedef void (*VsmZoneDbusStateCallback)(const char* zoneId,
                                              void* data);
 
 /**
+ * Lock the command queue exclusively.
+ *
+ * @param[in] client vasum-server's client
+ * @return status of this function call
+ */
+VsmStatus vsm_lock_queue(VsmClient client);
+
+/**
+ * Unlock the command queue.
+ *
+ * @param[in] client vasum-server's client
+ * @return status of this function call
+ */
+VsmStatus vsm_unlock_queue(VsmClient client);
+
+/**
  * Get dbus address of each zone.
  *
  * @param[in] client vasum-server's client

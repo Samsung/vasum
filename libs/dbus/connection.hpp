@@ -30,6 +30,7 @@
 #include <memory>
 #include <string>
 #include <functional>
+#include <map>
 #include <gio/gio.h>
 
 
@@ -49,6 +50,7 @@ public:
     virtual void set(GVariant* parameters) = 0;
     virtual void setVoid() = 0;
     virtual void setError(const std::string& name, const std::string& message) = 0;
+    virtual std::string getPeerName() = 0;
 };
 
 /**
@@ -79,6 +81,9 @@ public:
                                GVariant* parameters,
                                MethodResultBuilder::Pointer result
                               )> MethodCallCallback;
+
+    typedef std::function<void(const std::string& name
+                              )> ClientVanishedCallback;
 
     typedef std::function<void(const std::string& senderBusName,
                                const std::string& objectPath,
@@ -142,7 +147,8 @@ public:
      */
     void registerObject(const std::string& objectPath,
                         const std::string& objectDefinitionXml,
-                        const MethodCallCallback& callback);
+                        const MethodCallCallback& method,
+                        const ClientVanishedCallback& vanish);
 
     /**
      * Call a dbus method
@@ -181,9 +187,34 @@ private:
             : nameAcquired(acquired), nameLost(lost) {}
     };
 
-    utils::CallbackGuard mGuard;
+    typedef std::map<std::string, guint> ClientsMap;
+
+    struct MethodCallbacks {
+        MethodCallCallback methodCall;
+        ClientVanishedCallback clientVanished;
+        DbusConnection *dbusConn;
+
+        MethodCallbacks(const MethodCallCallback& method,
+                        const ClientVanishedCallback& vanish,
+                        DbusConnection *dbus)
+            : methodCall(method), clientVanished(vanish), dbusConn(dbus) {}
+    };
+
+    struct VanishedCallbacks {
+        ClientVanishedCallback clientVanished;
+        ClientsMap &watchedClients;
+
+        VanishedCallbacks(const ClientVanishedCallback& vanish, ClientsMap& clients)
+            : clientVanished(vanish), watchedClients(clients) {}
+    };
+
     GDBusConnection* mConnection;
     guint mNameId;
+    // It's only ever modified in the glib thread
+    ClientsMap mWatchedClients;
+    // Guard must be destroyed before objects it protects
+    // (e.g. all of the above, see the destructor)
+    utils::CallbackGuard mGuard;
 
     DbusConnection(const std::string& address);
 
@@ -207,6 +238,9 @@ private:
     static void onAsyncReady(GObject* source,
                              GAsyncResult* asyncResult,
                              gpointer userData);
+    static void onClientVanish(GDBusConnection* connection,
+                               const gchar *name,
+                               gpointer userData);
 };
 
 

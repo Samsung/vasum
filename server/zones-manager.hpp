@@ -45,6 +45,8 @@
 
 namespace vasum {
 
+const std::string INVALID_CONNECTION_ID = "invalid://";
+
 class ZonesManager final {
 
 public:
@@ -115,7 +117,14 @@ public:
      */
     void setZonesDetachOnExit();
 
+    /**
+     * Callback on a client (ipc/dbus) disconnect
+     */
+    void disconnectedCallback(const std::string& id);
+
     // Handlers --------------------------------------------------------
+    void handleLockQueueCall(api::MethodResultBuilder::Pointer result);
+    void handleUnlockQueueCall(api::MethodResultBuilder::Pointer result);
     void handleGetZoneIdsCall(api::MethodResultBuilder::Pointer result);
     void handleGetActiveZoneIdCall(api::MethodResultBuilder::Pointer result);
     void handleGetZoneInfoCall(const api::ZoneId& data,
@@ -171,7 +180,8 @@ public:
     void handleNotifyActiveZoneCall(const std::string& caller,
                                     const api::NotifActiveZoneIn& notif,
                                     api::MethodResultBuilder::Pointer result);
-    void handleSwitchToDefaultCall(const std::string& caller);
+    void handleSwitchToDefaultCall(const std::string& caller,
+                                   api::MethodResultBuilder::Pointer result);
     void handleFileMoveCall(const std::string& srcZoneId,
                             const api::FileMoveRequestIn& request,
                             api::MethodResultBuilder::Pointer result);
@@ -193,6 +203,8 @@ private:
     Zones mZones;
     std::string mActiveZoneId;
     bool mDetachOnExit;
+    std::string mExclusiveIDLock;
+    Mutex mExclusiveIDMutex; // used to protect mExclusiveIDLock
 
     Zones::iterator findZone(const std::string& id);
     Zone& getZone(const std::string& id);
@@ -209,6 +221,7 @@ private:
     std::string getTemplatePathForExistingZone(const std::string& id);
     int getVTForNewZone();
     void insertZone(const std::string& zoneId, const std::string& templatePath);
+    void tryAddTask(const utils::Worker::Task& task, api::MethodResultBuilder::Pointer result, bool wait);
 
 #ifdef DBUS_CONNECTION
     HostDbusConnection mHostDbusConnection;

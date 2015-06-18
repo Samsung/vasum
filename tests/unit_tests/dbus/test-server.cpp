@@ -50,7 +50,8 @@ DbusTestServer::DbusTestServer()
     using namespace std::placeholders;
     mConnection->registerObject(TESTAPI_OBJECT_PATH,
                                 TESTAPI_DEFINITION,
-                                std::bind(&DbusTestServer::onMessageCall, this, _1, _2, _3, _4, _5));
+                                std::bind(&DbusTestServer::onMessageCall, this, _1, _2, _3, _4, _5),
+                                nullptr);
 }
 
 bool DbusTestServer::waitForName()

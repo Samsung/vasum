@@ -63,11 +63,13 @@ const std::string METHOD_GRANT_DEVICE             = "GrantDevice";
 const std::string METHOD_REVOKE_DEVICE            = "RevokeDevice";
 const std::string METHOD_PROXY_CALL               = "ProxyCall";
 const std::string METHOD_CREATE_FILE              = "CreateFile";
+const std::string METHOD_LOCK_QUEUE               = "LockQueue";
+const std::string METHOD_UNLOCK_QUEUE             = "UnlockQueue";
+const std::string METHOD_SWITCH_TO_DEFAULT        = "SwitchToDefault";
 
 const std::string METHOD_NOTIFY_ACTIVE_ZONE         = "NotifyActiveZone";
 const std::string METHOD_FILE_MOVE_REQUEST          = "FileMoveRequest";
 const std::string SIGNAL_NOTIFICATION               = "Notification";
-const std::string SIGNAL_SWITCH_TO_DEFAULT          = "SwitchToDefault";
 
 const std::string FILE_MOVE_DESTINATION_NOT_FOUND   = "FILE_MOVE_DESTINATION_NOT_FOUND";
 const std::string FILE_MOVE_WRONG_DESTINATION       = "FILE_MOVE_WRONG_DESTINATION";
@@ -80,14 +82,9 @@ const std::string FILE_MOVE_SUCCEEDED               = "FILE_MOVE_SUCCEEDED";
 const std::string DEFINITION =
     "<node>"
     "  <interface name='" + INTERFACE + "'>"
-    "    <method name='" + METHOD_PROXY_CALL + "'>"
-    "      <arg type='s' name='target' direction='in'/>"
-    "      <arg type='s' name='busName' direction='in'/>"
-    "      <arg type='s' name='objectPath' direction='in'/>"
-    "      <arg type='s' name='interface' direction='in'/>"
-    "      <arg type='s' name='method' direction='in'/>"
-    "      <arg type='v' name='parameters' direction='in'/>"
-    "      <arg type='v' name='result' direction='out'/>"
+    "    <method name='" + METHOD_LOCK_QUEUE + "'>"
+    "    </method>"
+    "    <method name='" + METHOD_UNLOCK_QUEUE + "'>"
     "    </method>"
     "    <method name='" + METHOD_GET_ZONE_ID_LIST + "'>"
     "      <arg type='as' name='result' direction='out'/>"
@@ -227,12 +224,12 @@ const std::string DEFINITION =
     "      <arg type='v' name='parameters' direction='in'/>"
     "      <arg type='v' name='result' direction='out'/>"
     "    </method>"
+    "    <method name='" + METHOD_SWITCH_TO_DEFAULT + "'>"
+    "    </method>"
     "    <signal name='" + SIGNAL_NOTIFICATION + "'>"
     "      <arg type='s' name='zone'/>"
     "      <arg type='s' name='application'/>"
     "      <arg type='s' name='message'/>"
-    "    </signal>"
-    "    <signal name='" + SIGNAL_SWITCH_TO_DEFAULT + "'>"
     "    </signal>"
     "  </interface>"
     "</node>";
