@@ -163,7 +163,7 @@ bool Server::checkEnvironment()
         // control-group functionality was merged into kernel version 2.6.24 in 2007 (wikipedia)
         // namespace support begins from kernels 2.4.19(mnt), 2.6.19(ns,uts,ipc), 2.6.24(pid), 2.6.29(net)
         // namespace for usr from kernel 3.8(usr) - not used by vasum
-        std::cout << "kernel is old ver=" << u.release << ", run vasum-check-env" << std::endl;
+        std::cout << "kernel is old ver=" << u.release << ", run vasum-check-config" << std::endl;
         return false;
     }
     else
@@ -184,7 +184,7 @@ bool Server::checkEnvironment()
     std::string cgroupCheck = "/sys/fs/cgroup";
     int fd = ::open(cgroupCheck.c_str(), O_RDONLY);
     if (fd == -1) {
-        std::cout << "no cgroups support (can't access " << cgroupCheck << "), run vasum-check-env" << std::endl;
+        std::cout << "no cgroups support (can't access " << cgroupCheck << "), run vasum-check-config" << std::endl;
         return false;
     }
 
@@ -198,7 +198,7 @@ bool Server::checkEnvironment()
     }
     ::close(fd);
     if (err) {
-        std::cout << "cgroups problem, run vasum-check-env" << std::endl;
+        std::cout << "cgroups problem, run vasum-check-config" << std::endl;
         return false;
     }
     else
@@ -207,7 +207,7 @@ bool Server::checkEnvironment()
     // check namespaces
     std::string nsCheck = "/proc/self/ns";
     if (::access(nsCheck.c_str(), R_OK|X_OK)  == -1) {
-        std::cout << "no namespace support (can't access " << nsCheck << "), run vasum-check-env" << std::endl;
+        std::cout << "no namespace support (can't access " << nsCheck << "), run vasum-check-config" << std::endl;
         return false;
     }
     else

@@ -45,7 +45,7 @@ between them. A process from inside a zone can request a switch of context
 %endif
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/vasum-server
-%attr(755,root,root) %{_sbindir}/vasum-check-env
+%attr(755,root,root) %{_sbindir}/vasum-check-config
 %dir /etc/vasum
 %dir /etc/vasum/templates
 %config /etc/vasum/daemon.conf
