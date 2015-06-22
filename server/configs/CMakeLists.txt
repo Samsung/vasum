@@ -43,7 +43,7 @@ CONFIGURE_FILE(dbus-1/system.d/org.tizen.vasum.host.conf.in
 INSTALL(FILES       ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.vasum.host.conf
         DESTINATION ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)
 
-INSTALL(DIRECTORY   DESTINATION ${VSM_CONFIG_INSTALL_DIR}/zones) #TODO temporary solution
+INSTALL(DIRECTORY   DESTINATION ${DATA_DIR}/zones)
 
 INSTALL(FILES       ${zone_templates_CONF}
         DESTINATION ${VSM_CONFIG_INSTALL_DIR}/templates)

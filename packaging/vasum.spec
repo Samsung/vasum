@@ -86,6 +86,11 @@ make -k %{?jobs:-j%jobs}
 mkdir -p %{buildroot}/%{_unitdir}/multi-user.target.wants
 ln -s ../vasum.service %{buildroot}/%{_unitdir}/multi-user.target.wants/vasum.service
 mkdir -p %{buildroot}/%{_datadir}/zones
+%if %{platform_type} == "TIZEN"
+ln -s tizen.conf %{buildroot}/etc/vasum/templates/default.conf
+%else
+ln -s fedora.conf %{buildroot}/etc/vasum/templates/default.conf
+%endif
 
 %clean
 rm -rf %{buildroot}

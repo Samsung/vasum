@@ -1206,20 +1206,22 @@ void ZonesManager::generateNewConfig(const std::string& id,
                                                        ZONE_NAME_REGEX,
                                                        id);
 
-    // generate first free VT number
-    const int freeVT = getVTForNewZone();
-    LOGD("VT number: " << freeVT);
-    dynamicConfig.vt = freeVT;
+    if (dynamicConfig.vt >= 0 && !dynamicConfig.ipv4Gateway.empty() && !dynamicConfig.ipv4.empty()) {
+        // generate first free VT number
+        const int freeVT = getVTForNewZone();
+        LOGD("VT number: " << freeVT);
+        dynamicConfig.vt = freeVT;
 
-    // generate third IP octet for network config
-    std::string thirdOctetStr = std::to_string(ZONE_IP_BASE_THIRD_OCTET + freeVT);
-    LOGD("IP third octet: " << thirdOctetStr);
-    dynamicConfig.ipv4Gateway = boost::regex_replace(dynamicConfig.ipv4Gateway,
-                                                     ZONE_IP_THIRD_OCTET_REGEX,
-                                                     thirdOctetStr);
-    dynamicConfig.ipv4 = boost::regex_replace(dynamicConfig.ipv4,
-                                              ZONE_IP_THIRD_OCTET_REGEX,
-                                              thirdOctetStr);
+        // generate third IP octet for network config
+        std::string thirdOctetStr = std::to_string(ZONE_IP_BASE_THIRD_OCTET + freeVT);
+        LOGD("IP third octet: " << thirdOctetStr);
+        dynamicConfig.ipv4Gateway = boost::regex_replace(dynamicConfig.ipv4Gateway,
+                                                         ZONE_IP_THIRD_OCTET_REGEX,
+                                                         thirdOctetStr);
+        dynamicConfig.ipv4 = boost::regex_replace(dynamicConfig.ipv4,
+                                                  ZONE_IP_THIRD_OCTET_REGEX,
+                                                  thirdOctetStr);
+    }
 
     // save dynamic config
     config::saveToKVStore(mConfig.dbPath, dynamicConfig, dbPrefix);

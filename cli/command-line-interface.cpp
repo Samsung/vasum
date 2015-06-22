@@ -220,7 +220,7 @@ void create_zone(int pos, int argc, const char** argv)
         throw runtime_error("Not enough parameters");
     }
 
-    one_shot(bind(vsm_create_zone, _1, argv[pos + 1], nullptr));
+    one_shot(bind(vsm_create_zone, _1, argv[pos + 1], argv[pos + 2] ? argv[pos + 2] : nullptr));
 }
 
 void destroy_zone(int pos, int argc, const char** argv)

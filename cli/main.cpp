@@ -47,9 +47,10 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "create_zone", {
             create_zone,
-            "create_zone zone_id",
+            "create_zone zone_id [zone_tname]",
             "Create and add zone",
-            {{"zone_id", "id zone name"}}
+            {{"zone_id", "id zone name"},
+             {"[zone_tname]", "optional zone template name"}}
         }
     },
     {

@@ -23,6 +23,7 @@ do
 done
 
 br_name="virbr-${name}"
+broadcast="$(echo $ipv4|cut -d . -f -3).255"
 
 # XXX assume rootfs if mounted from iso
 
@@ -61,10 +62,11 @@ EOF
 # prepare pre start hook
 > ${path}/pre-start.sh
 cat <<EOF >> ${path}/pre-start.sh
-if [ -z "\$(/usr/sbin/ip link show | /bin/grep -P "${br_name}:")" ]
+if ! /usr/sbin/ip link show ${br_name} &>/dev/null
 then
     /usr/sbin/ip link add name ${br_name} type bridge
-    /sbin/ifconfig ${br_name} ${ipv4_gateway} netmask 255.255.255.0 up
+    /usr/sbin/ip link set ${br_name} up
+    /usr/sbin/ip addr add ${ipv4}/24 broadcast ${broadcast} dev ${br_name}
 fi
 if [ -z "\$(/usr/sbin/iptables -t nat -S | /bin/grep MASQUERADE)" ]
 then
