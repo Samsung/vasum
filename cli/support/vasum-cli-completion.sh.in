@@ -6,7 +6,7 @@ __@PROJECT_NAME@_cli() {
 
     COMPREPLY=()
     if [ "$COMP_CWORD" == "1" ]; then
-        COMPREPLY=($(compgen -W "$(@CLI_CODENAME@ | grep --color=never -e '^\S' | tail -n +3 | cut -f1 -d' ')" -- $cur))
+        COMPREPLY=($(compgen -W "$(@CLI_CODENAME@ --bash-completion)" -- $cur))
     elif [ "$COMP_CWORD" == "2" ]; then
         COMPREPLY=($(compgen -W "-h" -- $cur))
     fi

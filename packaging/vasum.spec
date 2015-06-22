@@ -23,6 +23,7 @@ BuildRequires:  cmake
 BuildRequires:  boost-devel
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  lxc-devel
+BuildRequires:  readline-devel
 Requires:       lxc
 %if %{platform_type} == "TIZEN"
 Requires:       iproute2

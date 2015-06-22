@@ -30,6 +30,11 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <sstream>
+#include <iterator>
+#include <iomanip>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 using namespace vasum::cli;
 
@@ -37,18 +42,38 @@ namespace {
 
 std::map<std::string, CommandLineInterface> commands = {
     {
+        "lock_queue", {
+            lock_queue,
+            "lock_queue",
+            "Exclusively lock the command queue",
+            MODE_INTERACTIVE,
+            {}
+        }
+    },
+    {
+        "unlock_queue", {
+            unlock_queue,
+            "unlock_queue",
+            "Unlock the queue",
+            MODE_INTERACTIVE,
+            {}
+        }
+    },
+    {
         "set_active_zone", {
             set_active_zone,
-            "set_active_zone zone_id",
+            "set_active_zone",
             "Set active (foreground) zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"}}
         }
     },
     {
         "create_zone", {
             create_zone,
-            "create_zone zone_id [zone_tname]",
+            "create_zone",
             "Create and add zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"[zone_tname]", "optional zone template name"}}
         }
@@ -56,40 +81,45 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "destroy_zone", {
             destroy_zone,
-            "destroy_zone zone_id",
+            "destroy_zone",
             "Destroy zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"}}
         }
     },
     {
         "shutdown_zone", {
             shutdown_zone,
-            "shutdown_zone zone_id",
+            "shutdown_zone",
             "Shutdown zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"}}
         }
     },
     {
         "start_zone", {
             start_zone,
-            "start_zone zone_id",
+            "start_zone",
             "Start zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"}}
         }
     },
     {
         "lock_zone", {
             lock_zone,
-            "lock_zone zone_id",
+            "lock_zone",
             "Lock zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"}}
         }
     },
     {
         "unlock_zone", {
             unlock_zone,
-            "unlock_zone zone_id",
+            "unlock_zone",
             "Unlock zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"}}
         }
     },
@@ -98,6 +128,7 @@ std::map<std::string, CommandLineInterface> commands = {
             get_zones_status,
             "get_zones_status",
             "Get list of zone with some useful informations (id, state, terminal, root path)",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {}
         }
     },
@@ -106,6 +137,7 @@ std::map<std::string, CommandLineInterface> commands = {
             get_zone_ids,
             "get_zone_ids",
             "Get all zone ids",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {}
         }
     },
@@ -114,22 +146,25 @@ std::map<std::string, CommandLineInterface> commands = {
             get_active_zone_id,
             "get_active_zone_id",
             "Get active (foreground) zone ids",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {}
         }
     },
     {
         "lookup_zone_by_id", {
             lookup_zone_by_id,
-            "lookup_zone_by_id zone_id",
+            "lookup_zone_by_id",
             "Prints informations about zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"}}
         }
     },
     {
         "grant_device", {
             grant_device,
-            "grant_device zone_id device_name",
+            "grant_device",
             "Grants access to the given device",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"device_name", " device name"}}
         }
@@ -137,8 +172,9 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "revoke_device", {
             revoke_device,
-            "revoke_device zone_id device_name",
+            "revoke_device",
             "Revokes access to the given device",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"device_name", " device name"}}
         }
@@ -146,8 +182,9 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "create_netdev_veth", {
             create_netdev_veth,
-            "create_netdev_veth zone_id zone_netdev_id host_netdev_id",
+            "create_netdev_veth",
             "Create netdev in zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"zone_netdev_id", "network device id"},
              {"host_netdev_id", "host bridge id"}}
@@ -156,8 +193,9 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "create_netdev_macvlan", {
             create_netdev_macvlan,
-            "create_netdev_macvlan zone_id zone_netdev_id host_netdev_id mode",
+            "create_netdev_macvlan",
             "Create netdev in zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"zone_netdev_id", "network device id"},
              {"host_netdev_id", "host bridge id"},
@@ -167,8 +205,9 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "create_netdev_phys", {
             create_netdev_phys,
-            "create_netdev_phys zone_id netdev_id",
+            "create_netdev_phys",
             "Create/move netdev to zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"netdev_id", "network device name"}}
         }
@@ -176,8 +215,9 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "lookup_netdev_by_name", {
             lookup_netdev_by_name,
-            "lookup_netdev_by_name zone_id netdev_id",
+            "lookup_netdev_by_name",
             "Get netdev flags",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"netdev_id", "network device name"}}
         }
@@ -185,8 +225,9 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "destroy_netdev", {
             destroy_netdev,
-            "destroy_netdev zone_id devId",
+            "destroy_netdev",
             "Destroy netdev in zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"netdev_id", "network device name"}}
         }
@@ -194,16 +235,18 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "zone_get_netdevs", {
             zone_get_netdevs,
-            "zone_get_netdevs zone_id",
+            "zone_get_netdevs",
             "List network devices in the zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"}}
         }
     },
     {
         "netdev_get_ipv4_addr", {
             netdev_get_ipv4_addr,
-            "netdev_get_ipv4_addr zone_id netdev_id",
+            "netdev_get_ipv4_addr",
             "Get ipv4 address",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"netdev_id", "network device name"}}
         }
@@ -211,8 +254,9 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "netdev_get_ipv6_addr", {
             netdev_get_ipv6_addr,
-            "netdev_get_ipv6_addr zone_id netdev_id",
+            "netdev_get_ipv6_addr",
             "Get ipv6 address",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"netdev_id", "network device name"}}
         }
@@ -220,8 +264,9 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "netdev_set_ipv4_addr", {
             netdev_set_ipv4_addr,
-            "netdev_set_ipv4_addr zone_id netdev_id address prefix_len",
+            "netdev_set_ipv4_addr",
             "Set ipv4 address",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"netdev_id", "network device name"},
              {"address", "ipv4 address"},
@@ -231,8 +276,9 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "netdev_set_ipv6_addr", {
             netdev_set_ipv6_addr,
-            "netdev_set_ipv6_addr zone_id netdev_id address prefix_len",
+            "netdev_set_ipv6_addr",
             "Set ipv6 address",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"netdev_id", "network device name"},
              {"address", "ipv6 address"},
@@ -242,8 +288,9 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "netdev_up", {
             netdev_up,
-            "netdev_up zone_id netdev_id",
+            "netdev_up",
             "Turn up a network device in the zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"netdev_id", "network device id"}}
         }
@@ -251,8 +298,9 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "netdev_down", {
             netdev_down,
-            "netdev_down zone_id netdev_id",
+            "netdev_down",
             "Turn down a network device in the zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"netdev_id", "network device id"}}
         }
@@ -260,50 +308,251 @@ std::map<std::string, CommandLineInterface> commands = {
     {
         "zone_get_netdevs", {
             zone_get_netdevs,
-            "zone_get_netdevs zone_id",
+            "zone_get_netdevs",
             "Turn down a network device in the zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
             {{"zone_id", "id zone name"},
              {"netdev_id", "network device id"}}
         }
     }
 };
 
-void printUsage(std::ostream& out, const std::string& name)
+// wrappers for CommandLineInterface
+
+void printUsage(std::ostream& out, const std::string& name, unsigned int mode)
 {
-    out << "Usage: " << name << " [command [-h|args]]\n\n"
-        << "command can be one of the following:\n";
+    std::string n;
+    if (!name.empty()) {
+        n = name + " ";
+    }
+
+    out << "Usage: " << n << "[<command>] [-h|<args>]\n\n";
+    if (mode == MODE_COMMAND_LINE) {
+        out << "Called without parameters enters interactive mode.\n\n";
+    }
+    out << "command can be one of the following:\n";
 
     for (const auto& command : commands) {
-        command.second.printUsage(out);
+        if (command.second.isAvailable(mode)) {
+            out << "   " << std::setw(30) << std::left << command.second.getName()
+                << command.second.getDescription() << "\n";
+        }
     }
+
+    out << "\nSee " << n << "command -h to read about a specific one.\n";
 }
 
-} // namespace
-
-int main(const int argc, const char** argv)
+int connect()
 {
-    if (argc < 2) {
-        printUsage(std::cout, argv[0]);
-        return EXIT_FAILURE;
-    }
-    if (commands.count(argv[1]) == 0) {
-        printUsage(std::cout, argv[0]);
+    try {
+        CommandLineInterface::connect();
+    } catch (const std::runtime_error& ex) {
+        std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;
     }
 
-    CommandLineInterface& command = commands[argv[1]];
-    auto it = std::find(argv, argv+argc, std::string("-h"));
-    if (it != argv + argc) {
+    return EXIT_SUCCESS;
+}
+
+int disconnect()
+{
+    try {
+        CommandLineInterface::disconnect();
+    } catch (const std::runtime_error& ex) {
+        std::cerr << ex.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+int executeCommand(const Args& argv, int mode)
+{
+    auto pair = commands.find(argv[0]);
+    if (pair == commands.end()) {
+        return EXIT_FAILURE;
+    }
+
+    CommandLineInterface& command = pair->second;
+    if (!command.isAvailable(mode)) {
+        return EXIT_FAILURE;
+    }
+
+    auto it = std::find(argv.begin(), argv.end(), std::string("-h"));
+    if (it != argv.end()) {
             command.printUsage(std::cout);
             return EXIT_SUCCESS;
     }
 
     try {
-        command.execute(1, argc, argv);
+        command.execute(argv);
     } catch (const std::runtime_error& ex) {
         std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;
     }
+
     return EXIT_SUCCESS;
 }
 
+// readline completion support
+
+char* object_generator(const char* text, int state)
+{
+    static std::vector<std::string> objs;
+    static size_t len = 0, index = 0;
+
+    if (state == 0) {
+        objs.clear();
+        len = ::strlen(text);
+        index = 0;
+
+        using namespace std::placeholders;
+        VsmArrayString ids = NULL;
+        try {
+            CommandLineInterface::executeCallback(bind(vsm_get_zone_ids, _1, &ids));
+        } catch (const std::runtime_error& ex) {
+            // Quietly ignore, nothing we can do anyway
+        }
+
+        if (ids != NULL) {
+            for (VsmString* id = ids; *id; ++id) {
+                if (::strncmp(text, *id, len) == 0) {
+                    objs.push_back(*id);
+                }
+            }
+
+            vsm_array_string_free(ids);
+        }
+    }
+
+    if (index < objs.size()) {
+        return ::strdup(objs[index++].c_str());
+    }
+
+    return NULL;
+}
+
+char* cmd_generator(const char* text, int state)
+{
+    static std::vector<std::string> cmds;
+    static size_t len = 0, index = 0;
+
+    if (state == 0) {
+        cmds.clear();
+        len = ::strlen(text);
+        index = 0;
+
+        for (const auto& command : commands) {
+            if (command.second.isAvailable(MODE_INTERACTIVE)) {
+                const std::string& cmd = command.second.getName();
+                if (::strncmp(text, cmd.c_str(), len) == 0) {
+                    cmds.push_back(cmd);
+                }
+            }
+        }
+    }
+
+    if (index < cmds.size()) {
+        return ::strdup(cmds[index++].c_str());
+    }
+
+    return NULL;
+}
+
+char** completion(const char* text, int start, int /*end*/)
+{
+    char **matches = NULL;
+
+    if (start == 0) {
+        matches = ::rl_completion_matches(text, &cmd_generator);
+    } else {
+        matches = ::rl_completion_matches(text, &object_generator);
+    }
+
+    return matches;
+}
+
+// handlers for the modes
+
+int interactiveMode()
+{
+    if (connect() != EXIT_SUCCESS)
+        return EXIT_FAILURE;
+
+    ::rl_attempted_completion_function = completion;
+
+    for (;;) {
+        char *line = ::readline(">>> ");
+
+        if (line == NULL) {
+            break;
+        }
+        if (line[0] == '\0') {
+            free(line);
+            continue;
+        }
+
+        std::istringstream iss(line);
+        Args argv{std::istream_iterator<std::string>{iss},
+                  std::istream_iterator<std::string>{}};
+
+        if (commands.count(argv[0]) == 0) {
+            printUsage(std::cout, "", MODE_INTERACTIVE);
+            free(line);
+            continue;
+        }
+
+        executeCommand(argv, MODE_INTERACTIVE);
+        ::add_history(line);
+        free(line);
+    }
+
+    disconnect();
+    return EXIT_SUCCESS;
+}
+
+int bashComplMode()
+{
+    for (const auto& command : commands) {
+        if (command.second.isAvailable(MODE_COMMAND_LINE)) {
+            std::cout << command.second.getName() << "\n";
+        }
+    }
+
+    return EXIT_SUCCESS;
+}
+
+int cliMode(const int argc, const char** argv)
+{
+    if (commands.count(argv[1]) == 0) {
+        printUsage(std::cout, argv[0], MODE_COMMAND_LINE);
+        return EXIT_FAILURE;
+    }
+
+    if (connect() != EXIT_SUCCESS) {
+        return EXIT_FAILURE;
+    }
+
+    // pass all the arguments excluding argv[0] - the executable name
+    Args commandArgs(argv+1, argv+argc);
+    int rc = executeCommand(commandArgs, MODE_COMMAND_LINE);
+
+    disconnect();
+    return rc;
+}
+
+} // namespace
+
+
+int main(const int argc, const char** argv)
+{
+    if (argc == 1) {
+        return interactiveMode();
+    }
+
+    if (std::string(argv[1]) == "--bash-completion") {
+        return bashComplMode();
+    }
+
+    return cliMode(argc, argv);
+}
