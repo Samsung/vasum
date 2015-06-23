@@ -25,6 +25,7 @@
 #include "config.hpp"
 #include "command-line-interface.hpp"
 #include "vasum-client.h"
+#include "utils/c-array.hpp"
 
 #include <map>
 #include <stdexcept>
@@ -39,6 +40,7 @@
 #include <cassert>
 #include <linux/if_link.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -301,6 +303,39 @@ void start_zone(const Args& argv)
     }
 
     CommandLineInterface::executeCallback(bind(vsm_start_zone, _1, argv[1].c_str()));
+}
+
+void console_zone(const Args& argv)
+{
+    using namespace std::placeholders;
+
+    if (argv.size() <= 1) {
+        throw runtime_error("Not enough parameters");
+    }
+
+    VsmZone zone;
+    CommandLineInterface::executeCallback(bind(vsm_lookup_zone_by_id, _1, argv[1].c_str(), &zone));
+
+    if (stringAsInStream(zone->state) != "RUNNING") {
+        vsm_zone_free(zone);
+        throw runtime_error("Zone is not running");
+    }
+
+    std::string zonesPath = zone->rootfs_path;
+    std::string zoneRootFs = argv[1] + "/rootfs";
+    zonesPath.erase(zonesPath.length()- zoneRootFs.length(), zoneRootFs.length());
+
+    vsm_zone_free(zone);
+
+    utils::CStringArrayBuilder args;
+    args.add("lxc-console")
+        .add("-t 0")
+        .add("-n").add(argv[1].c_str())
+        .add("-P").add(zonesPath.c_str());
+
+    if (!execv("/usr/bin/lxc-console", const_cast<char* const*>(args.c_array()))) {
+        throw runtime_error("Could not log into zone");
+    }
 }
 
 void lock_zone(const Args& argv)

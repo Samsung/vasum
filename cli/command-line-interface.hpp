@@ -196,6 +196,12 @@ void shutdown_zone(const Args& argv);
 void start_zone(const Args& argv);
 
 /**
+ * Parses command line arguments and call lxc-console
+ *
+ */
+void console_zone(const Args& argv);
+
+/**
  * Parses command line arguments and call vsm_lock_zone
  *
  * @see vsm_lock_zone

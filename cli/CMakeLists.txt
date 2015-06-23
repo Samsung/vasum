@@ -19,7 +19,9 @@
 
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the command line interface...")
-FILE(GLOB cli_SRCS *.cpp *.hpp)
+FILE(GLOB cli_SRCS *.cpp *.hpp
+                    ${COMMON_FOLDER}/utils/c-array.cpp
+                    ${COMMON_FOLDER}/utils/c-array.hpp)
 
 ## Setup target ################################################################
 SET(CLI_CODENAME "${PROJECT_NAME}-cli")

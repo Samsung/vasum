@@ -111,6 +111,15 @@ std::map<std::string, CommandLineInterface> commands = {
         }
     },
     {
+        "console_zone", {
+            console_zone,
+            "console_zone",
+            "Log into zone",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
+            {{"zone_id", "id zone name"}}
+        }
+    },
+    {
         "lock_zone", {
             lock_zone,
             "lock_zone",
