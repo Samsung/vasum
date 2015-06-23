@@ -212,8 +212,8 @@ private:
             json_object_put(visitor.mObject);
             visitor.mObject = nullptr;
         }
-        for (int i = 0; i < length; ++i) {
-            visitor.getValue(i, value[i]);
+        for (int idx = 0; idx < length; ++idx) {
+            visitor.getValue(idx, value[idx]);
         }
     }
 

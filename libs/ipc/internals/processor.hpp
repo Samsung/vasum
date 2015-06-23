@@ -466,7 +466,7 @@ private:
     bool onAddPeerRequest(AddPeerRequest& request);
     bool onRemovePeerRequest(RemovePeerRequest& request);
     bool onSendResultRequest(SendResultRequest& request);
-    bool onFinishRequest(FinishRequest& request);
+    bool onFinishRequest(FinishRequest& requestFinisher);
 
     bool onReturnValue(Peers::iterator& peerIt,
                        const MessageID messageID);

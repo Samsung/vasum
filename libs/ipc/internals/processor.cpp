@@ -647,7 +647,7 @@ bool Processor::onSendResultRequest(SendResultRequest& request)
     return false;
 }
 
-bool Processor::onFinishRequest(FinishRequest& request)
+bool Processor::onFinishRequest(FinishRequest& requestFinisher)
 {
     LOGS(mLogPrefix + "Processor onFinishRequest");
 
@@ -686,7 +686,7 @@ bool Processor::onFinishRequest(FinishRequest& request)
 
     mIsRunning = false;
 
-    request.conditionPtr->notify_all();
+    requestFinisher.conditionPtr->notify_all();
     return true;
 }
 

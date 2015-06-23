@@ -60,7 +60,7 @@ void checkJsonConfig(const TestConfig& cfg, const std::string& json)
     TestConfig cfg2;
     loadFromJsonString(json, cfg2);
     BOOST_CHECK_EQUAL(cfg2.intVal, cfg.intVal);
-    BOOST_CHECK_EQUAL(cfg.int64Val, cfg.int64Val);
+    BOOST_CHECK_EQUAL(cfg2.int64Val, cfg.int64Val);
     BOOST_CHECK_EQUAL(cfg2.boolVal, cfg.boolVal);
     BOOST_CHECK_EQUAL(cfg2.stringVal, cfg.stringVal);
     BOOST_CHECK_EQUAL(cfg2.intVector.size(), cfg.intVector.size());
