@@ -63,8 +63,8 @@ SET(CMAKE_C_FLAGS_DEBUG        "-g -O0 -ggdb")
 SET(CMAKE_CXX_FLAGS_DEBUG      "-g -std=${CXX_11_STD} -O0 -ggdb")
 SET(CMAKE_C_FLAGS_RELEASE      "-g -O2 -DNDEBUG")
 SET(CMAKE_CXX_FLAGS_RELEASE    "-g -std=${CXX_11_STD} -O2 -DNDEBUG")
-SET(CMAKE_C_FLAGS_CCOV         "-g -O2 --coverage")
-SET(CMAKE_CXX_FLAGS_CCOV       "-g -std=${CXX_11_STD} -O2 --coverage")
+SET(CMAKE_C_FLAGS_CCOV         "-g -O0 --coverage")
+SET(CMAKE_CXX_FLAGS_CCOV       "-g -std=${CXX_11_STD} -O0 --coverage")
 
 IF(DEFINED SANITIZE)
     # Enable sanitize build.

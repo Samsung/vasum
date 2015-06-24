@@ -63,7 +63,7 @@ between them. A process from inside a zone can request a switch of context
 %build
 %{!?build_type:%define build_type "RELEASE"}
 
-%if %{build_type} == "DEBUG" || %{build_type} == "PROFILING"
+%if %{build_type} == "DEBUG" || %{build_type} == "PROFILING" || %{build_type} == "CCOV"
     CFLAGS="$CFLAGS -Wp,-U_FORTIFY_SOURCE"
     CXXFLAGS="$CXXFLAGS -Wp,-U_FORTIFY_SOURCE"
 %endif
