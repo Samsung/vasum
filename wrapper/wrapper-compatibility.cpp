@@ -211,65 +211,67 @@ API int sock_recv_fd(int fd, int *recvfd, void *data, size_t size) {
     LOGS("");
     struct msghdr msg;
     struct iovec iov;
+    int ret;
+    union {
+        struct cmsghdr cm;
+        char control[CMSG_SPACE(sizeof(int))];
+    } control_un;
     struct cmsghdr *cmsg;
-    char cmsgbuf[CMSG_SPACE(sizeof(int))];
-    char buf[1];
-    int ret, *val;
+    char dummy=1;
 
     memset(&msg, 0, sizeof(msg));
     msg.msg_name = NULL;
     msg.msg_namelen = 0;
-    msg.msg_control = cmsgbuf;
-    msg.msg_controllen = sizeof(cmsgbuf);
 
-    iov.iov_base = data ? data : buf;
-    iov.iov_len = data ? size : sizeof(buf);
+    msg.msg_control = control_un.control;
+    msg.msg_controllen = sizeof(control_un.control);
+
+    iov.iov_base = data ? data : &dummy;
+    iov.iov_len = data ? size : sizeof(dummy);
     msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
 
     ret = recvmsg(fd, &msg, 0);
     if (ret <= 0)
-        goto out;
+        return ret;
 
     cmsg = CMSG_FIRSTHDR(&msg);
-
-    *recvfd = -1;
-
     if (cmsg && cmsg->cmsg_len == CMSG_LEN(sizeof(int)) &&
         cmsg->cmsg_level == SOL_SOCKET && cmsg->cmsg_type == SCM_RIGHTS) {
-        val = (int *)CMSG_DATA(cmsg);
-        *recvfd = *val;
+        *recvfd = *((int *)CMSG_DATA(cmsg));
     }
- out:
-    return ret;
+    else
+        *recvfd = -1;
 
+    return ret;
 }
 // sock_send_fd
 API int sock_send_fd(int fd, int sendfd, void *data, size_t size) {
     LOGS("");
     struct msghdr msg;
     struct iovec iov;
+    union {
+        struct cmsghdr cm;
+        char control[CMSG_SPACE(sizeof(int))];
+    } control_un;
     struct cmsghdr *cmsg;
-    char cmsgbuf[CMSG_SPACE(sizeof(int))];
-    char buf[1];
-    int *val;
+    char dummy=1;
 
     memset(&msg, 0, sizeof(msg));
-    msg.msg_control = cmsgbuf;
-    msg.msg_controllen = sizeof(cmsgbuf);
+    msg.msg_control = control_un.control;
+    msg.msg_controllen = sizeof(control_un.control);
 
     cmsg = CMSG_FIRSTHDR(&msg);
     cmsg->cmsg_len = CMSG_LEN(sizeof(int));
     cmsg->cmsg_level = SOL_SOCKET;
     cmsg->cmsg_type = SCM_RIGHTS;
-    val = (int *)(CMSG_DATA(cmsg));
-    *val = sendfd;
+    *((int *)CMSG_DATA(cmsg)) = sendfd;
 
     msg.msg_name = NULL;
     msg.msg_namelen = 0;
 
-    iov.iov_base = data ? data : buf;
-    iov.iov_len = data ? size : sizeof(buf);
+    iov.iov_base = data ? data : &dummy;
+    iov.iov_len = data ? size : sizeof(dummy);
     msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
 
