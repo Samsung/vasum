@@ -28,16 +28,15 @@
 //vsm_get_poll_fd, vsm_enter_eventloop can't be used at the same time.
 //TODO: Make vsm_get_status_message thread-safe version (vsm_get_status_message_r)
 
-#include <config.hpp>
+#include "config.hpp"
 #include "vasum-client-impl.hpp"
 #include "utils.hpp"
 #include "exception.hpp"
 #include "utils/exception.hpp"
 #include "logger/logger.hpp"
-
-#include <host-ipc-definitions.hpp>
-#include <ipc/client.hpp>
-#include <api/messages.hpp>
+#include "host-ipc-definitions.hpp"
+#include "ipc/client.hpp"
+#include "api/messages.hpp"
 
 #include <algorithm>
 #include <vector>

@@ -24,10 +24,8 @@
 
 #include "config.hpp"
 #include "ut.hpp"
-
 #include "ipc/internals/socket.hpp"
-
-#include <socket-test.hpp>
+#include "socket-test.hpp"
 
 using namespace ipc;
 

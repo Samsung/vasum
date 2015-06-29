@@ -27,10 +27,9 @@
 #define VASUM_CLIENT_IMPL_HPP
 
 #include "vasum-client.h"
-
-#include <ipc/epoll/thread-dispatcher.hpp>
-#include <ipc/epoll/event-poll.hpp>
-#include <ipc/client.hpp>
+#include "ipc/epoll/thread-dispatcher.hpp"
+#include "ipc/epoll/event-poll.hpp"
+#include "ipc/client.hpp"
 
 #include <mutex>
 #include <memory>

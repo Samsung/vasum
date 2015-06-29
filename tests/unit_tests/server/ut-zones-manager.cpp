@@ -25,7 +25,6 @@
 
 #include "config.hpp"
 #include "ut.hpp"
-
 #include "zones-manager.hpp"
 #ifdef DBUS_CONNECTION
 // TODO: Switch to real power-manager dbus defs when they will be implemented in power-manager
@@ -36,11 +35,10 @@
 #include "dbus/exception.hpp"
 #endif //DBUS_CONNECTION
 #include "host-ipc-definitions.hpp"
-#include <api/messages.hpp>
-#include <ipc/epoll/thread-dispatcher.hpp>
-#include <ipc/client.hpp>
+#include "api/messages.hpp"
+#include "ipc/epoll/thread-dispatcher.hpp"
+#include "ipc/client.hpp"
 #include "exception.hpp"
-
 #include "utils/glib-loop.hpp"
 #include "config/exception.hpp"
 #include "utils/latch.hpp"

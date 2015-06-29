@@ -40,11 +40,10 @@
 #ifdef USE_EXEC
 #include "utils/c-array.hpp"
 #endif
+#include "utils/initctl.hpp"
 
 #include <lxc/lxccontainer.h>
 #include <sys/stat.h>
-
-#include <utils/initctl.hpp>
 #include <sys/wait.h>
 
 #include <map>

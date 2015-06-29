@@ -23,9 +23,9 @@
  * @brief   Unit tests of the client utils
  */
 
-#include <config.hpp>
+#include "config.hpp"
 #include "ut.hpp"
-#include <utils.hpp>
+#include "utils.hpp"
 
 
 BOOST_AUTO_TEST_SUITE(ClientUtils)

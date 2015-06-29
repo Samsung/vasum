@@ -23,7 +23,7 @@
  * @brief   This file contains the public API for Vasum Client
  */
 
-#include <config.hpp>
+#include "config.hpp"
 #include "vasum-client.h"
 #include "vasum-client-impl.hpp"
 

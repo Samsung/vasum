@@ -22,15 +22,12 @@
  * @brief   Mini-service for IPC Socket mechanism tests
  */
 
-#include <config.hpp>
+#include "config.hpp"
 #include "socket-test.hpp"
-
-#include <config.hpp>
-#include <logger/logger.hpp>
-#include <logger/backend-journal.hpp>
-
-#include <ipc/internals/socket.hpp>
-#include <ipc/exception.hpp>
+#include "logger/logger.hpp"
+#include "logger/backend-journal.hpp"
+#include "ipc/internals/socket.hpp"
+#include "ipc/exception.hpp"
 
 #include <cstring>
 #include <memory>

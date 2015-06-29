@@ -23,10 +23,9 @@
  * @brief   Unit tests of the client C API
  */
 
-#include <config.hpp>
+#include "config.hpp"
 #include "ut.hpp"
-#include <vasum-client.h>
-
+#include "vasum-client.h"
 #include "utils/latch.hpp"
 #include "utils/scoped-dir.hpp"
 #include "zones-manager.hpp"

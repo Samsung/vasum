@@ -24,7 +24,7 @@
 
 #include "config.hpp"
 #include "command-line-interface.hpp"
-#include <vasum-client.h>
+#include "vasum-client.h"
 
 #include <map>
 #include <stdexcept>
