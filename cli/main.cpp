@@ -30,9 +30,13 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <istream>
 #include <sstream>
+#include <fstream>
 #include <iterator>
 #include <iomanip>
+#include <boost/algorithm/string/predicate.hpp>
+
 #include <readline/readline.h>
 #include <readline/history.h>
 
@@ -40,6 +44,7 @@ using namespace vasum::cli;
 
 namespace {
 
+static int interactiveMode = 0;
 std::map<std::string, CommandLineInterface> commands = {
     {
         "lock_queue", {
@@ -472,43 +477,62 @@ char** completion(const char* text, int start, int /*end*/)
     return matches;
 }
 
-// handlers for the modes
+static bool readline_from(const std::string& prompt, std::istream& stream, std::string& ln)
+{
+    if (interactiveMode) {
+        char *cmd = ::readline(prompt.c_str());
+        if (cmd == NULL) {
+            return false;
+        }
+        ln = cmd;
+        free(cmd);
+    } else {
+        std::getline(stream, ln);
+        if (!stream) return false;
+    }
 
-int interactiveMode()
+    if (interactiveMode && !ln.empty()) {
+        ::add_history(ln.c_str());
+    }
+
+    return true;
+}
+
+static int processStream(std::istream& stream)
 {
     if (connect() != EXIT_SUCCESS)
         return EXIT_FAILURE;
 
-    ::rl_attempted_completion_function = completion;
+    std::string ln;
+    while (readline_from(">>> ", stream, ln)) {
+        if (ln == "" || boost::starts_with(ln, "#")) //skip empty line or comment
+             continue;
 
-    for (;;) {
-        char *line = ::readline(">>> ");
-
-        if (line == NULL) {
-            break;
-        }
-        if (line[0] == '\0') {
-            free(line);
-            continue;
-        }
-
-        std::istringstream iss(line);
+        std::istringstream iss(ln);
         Args argv{std::istream_iterator<std::string>{iss},
                   std::istream_iterator<std::string>{}};
 
         if (commands.count(argv[0]) == 0) {
             printUsage(std::cout, "", MODE_INTERACTIVE);
-            free(line);
             continue;
         }
 
         executeCommand(argv, MODE_INTERACTIVE);
-        ::add_history(line);
-        free(line);
     }
 
     disconnect();
     return EXIT_SUCCESS;
+}
+
+static int processFile(const std::string& fn)
+{
+    std::ifstream stream(fn);
+    if (!stream.is_open()) {
+        std::cerr << "Can't open file " << fn << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    return processStream(stream);
 }
 
 int bashComplMode()
@@ -544,15 +568,34 @@ int cliMode(const int argc, const char** argv)
 } // namespace
 
 
-int main(const int argc, const char** argv)
+int main(const int argc, const char *argv[])
 {
-    if (argc == 1) {
-        return interactiveMode();
+    if (argc > 1) {
+        //process arguments
+        if (std::string(argv[1]) == "--bash-completion") {
+            return bashComplMode();
+        }
+
+        if (std::string(argv[1]) == "-f") {
+            if (argc < 3) {
+                std::cerr << "filename expected" << std::endl;
+                return EXIT_FAILURE;
+            }
+            return processFile(std::string(argv[2]));
+        }
+
+        if (commands.find(argv[1]) == commands.end()) {
+            if (processFile(std::string(argv[1])) == EXIT_SUCCESS) {
+                return EXIT_SUCCESS;
+            }
+        }
+
+        return cliMode(argc, argv);
     }
 
-    if (std::string(argv[1]) == "--bash-completion") {
-        return bashComplMode();
+    if (isatty(0) == 1) {
+        interactiveMode = 1;
+        ::rl_attempted_completion_function = completion;
     }
-
-    return cliMode(argc, argv);
+    return processStream(std::cin);
 }
