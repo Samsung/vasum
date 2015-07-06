@@ -31,6 +31,7 @@
 #include "zones-manager.hpp"
 #include "host-ipc-connection.hpp"
 #include "host-ipc-definitions.hpp"
+#include "ipc/epoll/thread-dispatcher.hpp"
 #include "logger/logger.hpp"
 
 #ifdef DBUS_CONNECTION
@@ -61,6 +62,7 @@ const int EVENT_TIMEOUT = 500; // ms
 struct Fixture {
     utils::ScopedDir mZonesPathGuard;
     utils::ScopedDir mRunGuard;
+    ipc::epoll::ThreadDispatcher mDispatcher;
 #ifdef DBUS_CONNECTION
     utils::ScopedGlibLoop mLoop;
 #endif //DBUS_CONNECTION
@@ -70,7 +72,7 @@ struct Fixture {
     Fixture()
         : mZonesPathGuard(ZONES_PATH)
         , mRunGuard("/tmp/ut-run")
-        , cm(new ZonesManager(TEST_CONFIG_PATH))
+        , cm(new ZonesManager(mDispatcher.getPoll(), TEST_CONFIG_PATH))
     {
         cm->createZone("zone1", TEMPLATE_NAME);
         cm->createZone("zone2", TEMPLATE_NAME);

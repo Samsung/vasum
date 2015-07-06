@@ -27,6 +27,7 @@
 #define SERVER_SERVER_HPP
 
 #include "utils/latch.hpp"
+#include "ipc/epoll/thread-dispatcher.hpp"
 
 #include <string>
 
@@ -61,6 +62,7 @@ public:
 
 private:
     std::string mConfigPath;
+    ipc::epoll::ThreadDispatcher mDispatcher;
 
     /**
      * Set needed caps, groups and drop root privileges.

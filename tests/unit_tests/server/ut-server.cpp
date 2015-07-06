@@ -54,6 +54,7 @@ const bool AS_ROOT = true;
 
 struct Fixture {
     utils::ScopedDir mZonesPathGuard;
+    ipc::epoll::ThreadDispatcher mDispatcher;
 
     Fixture()
         : mZonesPathGuard(ZONES_PATH)
@@ -65,7 +66,7 @@ struct Fixture {
     void prepare()
     {
         ScopedGlibLoop loop;
-        ZonesManager manager(TEST_CONFIG_PATH);
+        ZonesManager manager(mDispatcher.getPoll(), TEST_CONFIG_PATH);
         manager.createZone("zone1", TEMPLATE_NAME);
         manager.createZone("zone2", TEMPLATE_NAME);
         manager.restoreAll();

@@ -35,7 +35,7 @@
 
 namespace vasum {
 
-HostIPCConnection::HostIPCConnection(ZonesManager* zonesManagerPtr)
+HostIPCConnection::HostIPCConnection(ipc::epoll::EventPoll& eventPoll, ZonesManager* zonesManagerPtr)
     : mZonesManagerPtr(zonesManagerPtr)
 {
     LOGT("Connecting to host IPC socket");
@@ -45,7 +45,7 @@ HostIPCConnection::HostIPCConnection(ZonesManager* zonesManagerPtr)
         std::string id = api::IPC_CONNECTION_PREFIX + std::to_string(peerID);
         mZonesManagerPtr->disconnectedCallback(id);
     };
-    mService.reset(new ipc::Service(mDispatcher.getPoll(), HOST_IPC_SOCKET,
+    mService.reset(new ipc::Service(eventPoll, HOST_IPC_SOCKET,
                                     nullptr, removedCallback));
 
     using namespace std::placeholders;

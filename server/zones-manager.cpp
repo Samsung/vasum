@@ -112,9 +112,9 @@ bool zoneIsRunning(const std::unique_ptr<Zone>& zone) {
 } // namespace
 
 
-ZonesManager::ZonesManager(const std::string& configPath)
+ZonesManager::ZonesManager(ipc::epoll::EventPoll& eventPoll, const std::string& configPath)
     : mWorker(utils::Worker::create())
-    , mHostIPCConnection(this)
+    , mHostIPCConnection(eventPoll, this)
     , mDetachOnExit(false)
     , mExclusiveIDLock(INVALID_CONNECTION_ID)
 #ifdef DBUS_CONNECTION

@@ -27,7 +27,7 @@
 #define SERVER_HOST_IPC_CONNECTION_HPP
 
 #include "api/messages.hpp"
-#include "ipc/epoll/thread-dispatcher.hpp"
+#include "ipc/epoll/event-poll.hpp"
 #include "ipc/service.hpp"
 #include "ipc-callback-wrapper.hpp"
 
@@ -48,7 +48,7 @@ public:
         typedef typename IPCSignalWrapper<ArgIn>::type type;
     };
 
-    HostIPCConnection(ZonesManager* zm);
+    HostIPCConnection(ipc::epoll::EventPoll& eventPoll, ZonesManager* zm);
     ~HostIPCConnection();
 
     void start();
@@ -90,7 +90,6 @@ private:
                              api::FileMoveRequestStatus>::type& callback);
     void setCreateFileCallback(const Method<const api::CreateFileIn, api::CreateFileOut>::type& callback);
 
-    ipc::epoll::ThreadDispatcher mDispatcher;
     std::unique_ptr<ipc::Service> mService;
     ZonesManager* mZonesManagerPtr;
 };

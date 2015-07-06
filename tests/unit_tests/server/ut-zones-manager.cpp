@@ -655,7 +655,7 @@ bool spinWaitFor(int timeoutMs, Predicate pred)
 
 struct Fixture {
     ScopedGlibLoop mLoop;
-
+    ipc::epoll::ThreadDispatcher dispatcher;
     ScopedDir mZonesPathGuard;
     ScopedDir mRunGuard;
 
@@ -687,27 +687,27 @@ BOOST_FIXTURE_TEST_SUITE(ZonesManagerSuite, Fixture)
 BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 {
     std::unique_ptr<ZonesManager> cm;
-    cm.reset(new ZonesManager(TEST_CONFIG_PATH));
+    cm.reset(new ZonesManager(dispatcher.getPoll(), TEST_CONFIG_PATH));
     cm.reset();
 }
 
 BOOST_AUTO_TEST_CASE(MissingConfig)
 {
-    BOOST_REQUIRE_EXCEPTION(ZonesManager{MISSING_CONFIG_PATH},
+    BOOST_REQUIRE_EXCEPTION((ZonesManager(dispatcher.getPoll(), MISSING_CONFIG_PATH)),
                             ConfigException,
                             WhatEquals("Could not load " + MISSING_CONFIG_PATH));
 }
 
 BOOST_AUTO_TEST_CASE(Create)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
 }
 
 BOOST_AUTO_TEST_CASE(StartStop)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
 
@@ -720,7 +720,7 @@ BOOST_AUTO_TEST_CASE(StartStop)
 BOOST_AUTO_TEST_CASE(DetachOnExit)
 {
     {
-        ZonesManager cm(TEST_CONFIG_PATH);
+        ZonesManager cm(dispatcher.getPoll(), TEST_CONFIG_PATH);
         cm.createZone("zone1", SIMPLE_TEMPLATE);
         cm.createZone("zone2", SIMPLE_TEMPLATE);
         cm.restoreAll();
@@ -728,7 +728,7 @@ BOOST_AUTO_TEST_CASE(DetachOnExit)
         cm.setZonesDetachOnExit();
     }
     {
-        ZonesManager cm(TEST_CONFIG_PATH);
+        ZonesManager cm(dispatcher.getPoll(), TEST_CONFIG_PATH);
         cm.restoreAll();
         BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "zone1");
     }
@@ -736,7 +736,7 @@ BOOST_AUTO_TEST_CASE(DetachOnExit)
 
 BOOST_AUTO_TEST_CASE(Focus)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
@@ -754,7 +754,7 @@ BOOST_AUTO_TEST_CASE(Focus)
 #ifdef ZONE_CONNECTION
 BOOST_AUTO_TEST_CASE(NotifyActiveZone)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
@@ -810,7 +810,7 @@ BOOST_AUTO_TEST_CASE(NotifyActiveZone)
 
 BOOST_AUTO_TEST_CASE(MoveFile)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
@@ -898,7 +898,7 @@ BOOST_AUTO_TEST_CASE(MoveFile)
 
 MULTI_FIXTURE_TEST_CASE(SwitchToDefault, F, ACCESSORS)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
@@ -921,7 +921,7 @@ MULTI_FIXTURE_TEST_CASE(SwitchToDefault, F, ACCESSORS)
 
 MULTI_FIXTURE_TEST_CASE(AllowSwitchToDefault, F, ACCESSORS)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
@@ -955,7 +955,7 @@ MULTI_FIXTURE_TEST_CASE(AllowSwitchToDefault, F, ACCESSORS)
 #ifdef DBUS_CONNECTION
 MULTI_FIXTURE_TEST_CASE(ProxyCall, F, DbusFixture)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
@@ -1008,7 +1008,7 @@ const std::set<std::string> EXPECTED_CONNECTIONS_NONE = { "zone1", "zone2", "zon
 
 MULTI_FIXTURE_TEST_CASE(GetZoneIds, F, ACCESSORS)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
@@ -1025,7 +1025,7 @@ MULTI_FIXTURE_TEST_CASE(GetZoneIds, F, ACCESSORS)
 
 MULTI_FIXTURE_TEST_CASE(GetActiveZoneId, F, ACCESSORS)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
@@ -1048,7 +1048,7 @@ MULTI_FIXTURE_TEST_CASE(GetActiveZoneId, F, ACCESSORS)
 
 MULTI_FIXTURE_TEST_CASE(SetActiveZone, F, ACCESSORS)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
@@ -1081,7 +1081,7 @@ MULTI_FIXTURE_TEST_CASE(CreateDestroyZone, F, ACCESSORS)
     const std::string zone2 = "test2";
     const std::string zone3 = "test3";
 
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.restoreAll();
 
     BOOST_CHECK_EQUAL(cm.getRunningForegroundZoneId(), "");
@@ -1136,8 +1136,8 @@ MULTI_FIXTURE_TEST_CASE(CreateDestroyZonePersistence, F, ACCESSORS)
         callDone.set();
     };
 
-    auto getZoneIds = []() -> std::vector<std::string> {
-        ZonesManager cm(TEST_CONFIG_PATH);
+    auto getZoneIds = [this]() -> std::vector<std::string> {
+        ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
         cm.restoreAll();
 
         typename F::HostAccessory host;
@@ -1148,7 +1148,7 @@ MULTI_FIXTURE_TEST_CASE(CreateDestroyZonePersistence, F, ACCESSORS)
 
     // create zone
     {
-        ZonesManager cm(TEST_CONFIG_PATH);
+        ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
         typename F::HostAccessory host;
         host.callAsyncMethodCreateZone(zone, SIMPLE_TEMPLATE, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
@@ -1162,7 +1162,7 @@ MULTI_FIXTURE_TEST_CASE(CreateDestroyZonePersistence, F, ACCESSORS)
 
     // destroy zone
     {
-        ZonesManager cm(TEST_CONFIG_PATH);
+        ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
         typename F::HostAccessory host;
         host.callAsyncMethodDestroyZone(zone, resultCallback);
         BOOST_REQUIRE(callDone.wait(EVENT_TIMEOUT));
@@ -1186,7 +1186,7 @@ MULTI_FIXTURE_TEST_CASE(ZoneStatePersistence, F, ACCESSORS)
 
     // firts run
     {
-        ZonesManager cm(TEST_CONFIG_PATH);
+        ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
         typename F::HostAccessory host;
 
         // zone1 - created
@@ -1231,7 +1231,7 @@ MULTI_FIXTURE_TEST_CASE(ZoneStatePersistence, F, ACCESSORS)
 
     // second run
     {
-        ZonesManager cm(TEST_CONFIG_PATH);
+        ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
         cm.restoreAll();
 
         BOOST_CHECK(cm.isRunning(zone1)); // because the default json value
@@ -1247,7 +1247,7 @@ MULTI_FIXTURE_TEST_CASE(StartShutdownZone, F, ACCESSORS)
     const std::string zone1 = "zone1";
     const std::string zone2 = "zone2";
 
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone(zone1, SIMPLE_TEMPLATE);
     cm.createZone(zone2, SIMPLE_TEMPLATE);
 
@@ -1284,7 +1284,7 @@ MULTI_FIXTURE_TEST_CASE(StartShutdownZone, F, ACCESSORS)
 
 MULTI_FIXTURE_TEST_CASE(LockUnlockZone, F, ACCESSORS)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.createZone("zone2", SIMPLE_TEMPLATE);
     cm.createZone("zone3", SIMPLE_TEMPLATE);
@@ -1330,7 +1330,7 @@ MULTI_FIXTURE_TEST_CASE(LockUnlockZone, F, ACCESSORS)
 
 MULTI_FIXTURE_TEST_CASE(CreateFile, F, ACCESSORS)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.restoreAll();
 
@@ -1350,7 +1350,7 @@ MULTI_FIXTURE_TEST_CASE(CreateFile, F, ACCESSORS)
 
 MULTI_FIXTURE_TEST_CASE(CreateWriteReadFile, F, ACCESSORS)
 {
-    ZonesManager cm(TEST_CONFIG_PATH);
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
     cm.createZone("zone1", SIMPLE_TEMPLATE);
     cm.restoreAll();
 
