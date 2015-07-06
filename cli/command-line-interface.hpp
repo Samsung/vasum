@@ -66,9 +66,11 @@ public:
      *  Construct command
      *
      *  @param executorCallback Callback function that will do the job
-     *  @param usage Description of use
-     *  @param usageInfo Description of the command
+     *  @param name Command name
+     *  @param description Command Description
+     *  @param availability Command availability (bit field)
      *  @param argsSpec Description of arguments
+     *  @remark Possible bits for availability: MODE_COMMAND_LINE, MODE_INTERACTIVE
      */
     CommandLineInterface(const ExecutorCallback& executorCallback,
                          const std::string& name,
@@ -107,8 +109,6 @@ public:
 
     /**
      * Get the command description
-     *
-     * @param out Output stream
      */
     const std::string& getDescription() const;
 
@@ -131,8 +131,6 @@ public:
      *
      * It calls the callback passed in constructor
      *
-     * @param pos Points to element in argv where command was recognized (i.e. command name)
-     * @param argc Number of elements in argv
      * @param argv Command line arguments
      */
     void execute(const Args& argv);
