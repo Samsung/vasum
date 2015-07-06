@@ -70,18 +70,6 @@ struct ZoneConfig {
     std::int64_t cpuQuotaBackground;
 
     /**
-     * When you move a file out of the zone (by move request)
-     * its path must match at least one of the regexps in this vector.
-     */
-    std::vector<std::string> permittedToSend;
-
-    /**
-     * When you move a file to the zone (by move request)
-     * its path must match at least one of the regexps in this vector.
-     */
-    std::vector<std::string> permittedToRecv;
-
-    /**
      * Valid hard link prefixes.
      */
     std::vector<std::string> validLinkPrefixes;
@@ -102,8 +90,6 @@ struct ZoneConfig {
         switchToDefaultAfterTimeout, // TODO move to dynamic and add an API to change
         cpuQuotaForeground,
         cpuQuotaBackground,
-        permittedToSend, // TODO move to dynamic and add an API to change
-        permittedToRecv, // TODO move to dynamic and add an API to change
         validLinkPrefixes,
         shutdownTimeout
     )

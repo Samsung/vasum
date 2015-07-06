@@ -64,11 +64,6 @@ public:
     void setProxyCallCallback(const ProxyCallCallback& callback);
 
     /**
-     * Send notification signal to this zone
-     */
-    void sendNotification(const api::Notification& notify);
-
-    /**
      * Make a proxy call
      */
     void proxyCallAsync(const std::string& busName,

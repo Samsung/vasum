@@ -77,7 +77,6 @@ struct VectorOfStringPairs {
 
 typedef api::String ZoneId;
 typedef api::String Declaration;
-typedef api::String FileMoveRequestStatus;
 typedef api::StringPair GetNetDevAttrsIn;
 typedef api::StringPair CreateNetDevPhysIn;
 typedef api::StringPair RemoveDeclarationIn;
@@ -85,8 +84,6 @@ typedef api::StringPair CreateZoneIn;
 typedef api::StringPair RevokeDeviceIn;
 typedef api::StringPair DestroyNetDevIn;
 typedef api::StringPair ConnectionState;
-typedef api::StringPair NotifActiveZoneIn;
-typedef api::StringPair FileMoveRequestIn;
 typedef api::VectorOfStrings ZoneIds;
 typedef api::VectorOfStrings Declarations;
 typedef api::VectorOfStrings NetDevList;
@@ -243,19 +240,6 @@ struct CreateFileOut {
     CONFIG_REGISTER
     (
         fd
-    )
-};
-
-struct Notification {
-    std::string zone;
-    std::string application;
-    std::string message;
-
-    CONFIG_REGISTER
-    (
-        zone,
-        application,
-        message
     )
 };
 

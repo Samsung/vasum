@@ -61,17 +61,6 @@ const ::ipc::MethodID METHOD_LOCK_QUEUE               = 28;
 const ::ipc::MethodID METHOD_UNLOCK_QUEUE             = 29;
 const ::ipc::MethodID METHOD_SWITCH_TO_DEFAULT        = 30;
 
-const ::ipc::MethodID METHOD_NOTIFY_ACTIVE_ZONE         = 100;
-const ::ipc::MethodID METHOD_FILE_MOVE_REQUEST          = 101;
-const ::ipc::MethodID SIGNAL_NOTIFICATION               = 102;
-
-const std::string FILE_MOVE_DESTINATION_NOT_FOUND   = "FILE_MOVE_DESTINATION_NOT_FOUND";
-const std::string FILE_MOVE_WRONG_DESTINATION       = "FILE_MOVE_WRONG_DESTINATION";
-const std::string FILE_MOVE_NO_PERMISSIONS_SEND     = "FILE_MOVE_NO_PERMISSIONS_SEND";
-const std::string FILE_MOVE_NO_PERMISSIONS_RECEIVE  = "FILE_MOVE_NO_PERMISSIONS_RECEIVE";
-const std::string FILE_MOVE_FAILED                  = "FILE_MOVE_FAILED";
-const std::string FILE_MOVE_SUCCEEDED               = "FILE_MOVE_SUCCEEDED";
-
 } // namespace ipc
 } // namespace api
 } // namespace vasum

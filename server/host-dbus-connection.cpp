@@ -391,24 +391,6 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         return;
     }
 
-    if (methodName == api::dbus::METHOD_NOTIFY_ACTIVE_ZONE) {
-        api::NotifActiveZoneIn data;
-        config::loadFromGVariant(parameters, data);
-
-        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
-        mZonesManagerPtr->handleNotifyActiveZoneCall(EMPTY_CALLER, data, rb);
-        return;
-    }
-
-    if (methodName == api::dbus::METHOD_FILE_MOVE_REQUEST) {
-        api::FileMoveRequestIn data;
-        config::loadFromGVariant(parameters, data);
-
-        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::FileMoveRequestStatus>>(result);
-        mZonesManagerPtr->handleFileMoveCall(EMPTY_CALLER, data, rb);
-        return;
-    }
-
     if (methodName == api::dbus::METHOD_CREATE_FILE) {
         api::CreateFileIn data;
         config::loadFromGVariant(parameters, data);
@@ -456,18 +438,6 @@ void HostDbusConnection::proxyCallAsync(const std::string& busName,
                                      parameters,
                                      std::string(),
                                      callback);
-}
-
-void HostDbusConnection::sendNotification(const api::Notification& notify)
-{
-    GVariant* parameters = g_variant_new("(sss)",
-                                         notify.zone.c_str(),
-                                         notify.application.c_str(),
-                                         notify.message.c_str());
-    mDbusConnection->emitSignal(api::dbus::OBJECT_PATH,
-                                api::dbus::INTERFACE,
-                                api::dbus::SIGNAL_NOTIFICATION,
-                                parameters);
 }
 
 } // namespace vasum

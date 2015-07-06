@@ -130,14 +130,8 @@ HostIPCConnection::HostIPCConnection(ipc::epoll::EventPoll& eventPoll, ZonesMana
     setRevokeDeviceCallback(std::bind(&ZonesManager::handleRevokeDeviceCall,
                                       mZonesManagerPtr, _1, _2));
 
-    setNotifyActiveZoneCallback(std::bind(&ZonesManager::handleNotifyActiveZoneCall,
-                                          mZonesManagerPtr, "", _1, _2));
-
     setSwitchToDefaultCallback(std::bind(&ZonesManager::handleSwitchToDefaultCall,
                                          mZonesManagerPtr, "", _1));
-
-    setFileMoveCallback(std::bind(&ZonesManager::handleFileMoveCall,
-                                  mZonesManagerPtr, "", _1, _2));
 
     setCreateFileCallback(std::bind(&ZonesManager::handleCreateFileCall,
                                     mZonesManagerPtr, _1, _2));
@@ -370,30 +364,12 @@ void HostIPCConnection::setRevokeDeviceCallback(const Method<const api::RevokeDe
         Callback::getWrapper(callback));
 }
 
-void HostIPCConnection::setNotifyActiveZoneCallback(
-    const Method<const vasum::api::NotifActiveZoneIn>::type& callback)
-{
-    typedef IPCMethodWrapper<const api::NotifActiveZoneIn> Method;
-    mService->setMethodHandler<Method::out, Method::in>(
-        api::ipc::METHOD_NOTIFY_ACTIVE_ZONE,
-        Method::getWrapper(callback));
-}
-
 void HostIPCConnection::setSwitchToDefaultCallback(const Method<api::Void>::type& callback)
 {
     typedef IPCMethodWrapper<api::Void> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
         api::ipc::METHOD_SWITCH_TO_DEFAULT,
         Callback::getWrapper(callback));
-}
-
-void HostIPCConnection::setFileMoveCallback(const Method<const api::FileMoveRequestIn,
-                                            api::FileMoveRequestStatus>::type& callback)
-{
-    typedef IPCMethodWrapper<const api::FileMoveRequestIn, api::FileMoveRequestStatus> Method;
-    mService->setMethodHandler<Method::out, Method::in>(
-        api::ipc::METHOD_FILE_MOVE_REQUEST,
-        Method::getWrapper(callback));
 }
 
 void HostIPCConnection::setCreateFileCallback(const Method<const api::CreateFileIn,
@@ -403,12 +379,6 @@ void HostIPCConnection::setCreateFileCallback(const Method<const api::CreateFile
     mService->setMethodHandler<Method::out, Method::in>(
         api::ipc::METHOD_CREATE_FILE,
         Method::getWrapper(callback));
-}
-
-void HostIPCConnection::sendNotification(const api::Notification& notification)
-{
-    mService->signal(api::ipc::SIGNAL_NOTIFICATION,
-                     std::make_shared<api::Notification>(notification));
 }
 
 } // namespace vasum

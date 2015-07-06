@@ -53,7 +53,6 @@ public:
 
     void start();
     void signalZoneConnectionState(const api::ConnectionState& connectionState);
-    void sendNotification(const api::Notification& notification);
 
 private:
     void setLockQueueCallback(const Method<api::Void>::type& callback);
@@ -84,10 +83,7 @@ private:
     void setUnlockZoneCallback(const Method<const api::ZoneId>::type& callback);
     void setGrantDeviceCallback(const Method<const api::GrantDeviceIn>::type& callback);
     void setRevokeDeviceCallback(const Method<const api::RevokeDeviceIn>::type& callback);
-    void setNotifyActiveZoneCallback(const Method<const vasum::api::NotifActiveZoneIn>::type& callback);
     void setSwitchToDefaultCallback(const Method<api::Void>::type& callback);
-    void setFileMoveCallback(const Method<const api::FileMoveRequestIn,
-                             api::FileMoveRequestStatus>::type& callback);
     void setCreateFileCallback(const Method<const api::CreateFileIn, api::CreateFileOut>::type& callback);
 
     std::unique_ptr<ipc::Service> mService;

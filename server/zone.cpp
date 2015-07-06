@@ -78,13 +78,6 @@ Zone::Zone(const std::string& zoneId,
     config::loadFromKVStoreWithJsonFile(dbPath, zoneTemplatePath, mConfig, dbPrefix);
     config::loadFromKVStoreWithJsonFile(dbPath, zoneTemplatePath, mDynamicConfig, dbPrefix);
 
-    for (std::string r: mConfig.permittedToSend) {
-        mPermittedToSend.push_back(boost::regex(r));
-    }
-    for (std::string r: mConfig.permittedToRecv) {
-        mPermittedToRecv.push_back(boost::regex(r));
-    }
-
     if (!mDynamicConfig.runMountPoint.empty()) {
         mRunMountPoint = fs::absolute(mDynamicConfig.runMountPoint, baseRunMountPointPath).string();
     }
@@ -139,16 +132,6 @@ Zone::~Zone()
     }
 
     LOGD(mId << ": Zone object destroyed");
-}
-
-const std::vector<boost::regex>& Zone::getPermittedToSend() const
-{
-    return mPermittedToSend;
-}
-
-const std::vector<boost::regex>& Zone::getPermittedToRecv() const
-{
-    return mPermittedToRecv;
 }
 
 const std::string& Zone::getId() const

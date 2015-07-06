@@ -74,18 +74,6 @@ public:
     typedef std::function<void(bool succeeded)> StartAsyncResultCallback;
 
     /**
-     * Returns a vector of regexps defining files permitted to be
-     * send to other zones using file move functionality
-     */
-    const std::vector<boost::regex>& getPermittedToSend() const;
-
-    /**
-     * Returns a vector of regexps defining files permitted to be
-     * send to other zones using file move functionality
-     */
-    const std::vector<boost::regex>& getPermittedToRecv() const;
-
-    /**
      * Get the zone id
      */
     const std::string& getId() const;
@@ -286,8 +274,6 @@ public:
 private:
     ZoneConfig mConfig;
     ZoneDynamicConfig mDynamicConfig;
-    std::vector<boost::regex> mPermittedToSend;
-    std::vector<boost::regex> mPermittedToRecv;
     std::unique_ptr<ZoneProvision> mProvision;
     mutable std::recursive_mutex mReconnectMutex;
     std::string mRunMountPoint;

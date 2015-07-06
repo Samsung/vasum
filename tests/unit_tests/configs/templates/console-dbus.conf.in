@@ -12,7 +12,5 @@
     "shutdownTimeout" : 10,
     "runMountPoint" : "/tmp/ut-run/~NAME~",
     "provisions" : [],
-    "permittedToSend" : [ "/tmp/.*" ],
-    "permittedToRecv" : [ "/tmp/.*" ],
     "validLinkPrefixes" : []
 }

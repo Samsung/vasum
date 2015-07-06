@@ -882,36 +882,3 @@ VsmStatus Client::vsm_remove_declaration(const char* id, VsmString declaration) 
     });
 }
 
-VsmStatus Client::vsm_notify_active_zone(const char* /*application*/, const char* /*message*/) noexcept
-{
-    return coverException([&] {
-        //TODO: Implement vsm_notify_active_zone
-        throw OperationFailedException("Not implemented");
-    });
-}
-
-VsmStatus Client::vsm_file_move_request(const char* /*destZone*/, const char* /*path*/) noexcept
-{
-    return coverException([&] {
-        //TODO: Implement vsm_file_move_request
-        throw OperationFailedException("Not implemented");
-    });
-}
-
-VsmStatus Client::vsm_add_notification_callback(VsmNotificationFunction /*notificationCallback*/,
-                                           void* /*data*/,
-                                           VsmSubscriptionId* /*subscriptionId*/) noexcept
-{
-    return coverException([&] {
-        //TODO: Implement vsm_add_notification_callback
-        throw OperationFailedException("Not implemented");
-    });
-}
-
-VsmStatus Client::vsm_del_notification_callback(VsmSubscriptionId subscriptionId) noexcept
-{
-    return coverException([&] {
-        mClient->removeMethod(subscriptionId);
-    });
-}
-

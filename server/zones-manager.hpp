@@ -176,16 +176,8 @@ public:
                                 api::MethodResultBuilder::Pointer result);
     void handleCreateFileCall(const api::CreateFileIn& request,
                               api::MethodResultBuilder::Pointer result);
-
-    // Zone's handlers---------------------------------------------------------
-    void handleNotifyActiveZoneCall(const std::string& caller,
-                                    const api::NotifActiveZoneIn& notif,
-                                    api::MethodResultBuilder::Pointer result);
     void handleSwitchToDefaultCall(const std::string& caller,
                                    api::MethodResultBuilder::Pointer result);
-    void handleFileMoveCall(const std::string& srcZoneId,
-                            const api::FileMoveRequestIn& request,
-                            api::MethodResultBuilder::Pointer result);
 
 private:
     typedef std::recursive_mutex Mutex;

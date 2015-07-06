@@ -46,17 +46,6 @@
 typedef std::function<void (const char *zoneId, const char *dbusAddress, void *data)> VsmZoneDbusStateFunction;
 
 /**
- * Notification callback function signature.
- *
- * @param[in] zone source zone
- * @param[in] application sending application name
- * @param[in] message notification message
- * @param data custom user's data pointer passed to vsm_add_notification_callback()
- */
-typedef std::function<void(const char *zone, const char *application, const char *message, void *data)>
-    VsmNotificationFunction;
-
-/**
  * vasum's client definition.
  *
  * Client uses dbus API.
@@ -350,28 +339,6 @@ public:
      * @see ::vsm_remove_declaration
      */
     VsmStatus vsm_remove_declaration(const char* zone, VsmString declaration) noexcept;
-
-    /**
-     *  @see ::vsm_notify_active_zone
-     */
-    VsmStatus vsm_notify_active_zone(const char* application, const char* message) noexcept;
-
-    /**
-     *  @see ::vsm_file_move_request
-     */
-    VsmStatus vsm_file_move_request(const char* destZone, const char* path) noexcept;
-
-    /**
-     *  @see ::vsm_add_notification_callback
-     */
-    VsmStatus vsm_add_notification_callback(VsmNotificationFunction notificationCallback,
-                                            void* data,
-                                            VsmSubscriptionId* subscriptionId) noexcept;
-
-    /**
-     *  @see ::vsm_del_notification_callback
-     */
-    VsmStatus vsm_del_notification_callback(VsmSubscriptionId subscriptionId) noexcept;
 
 private:
     struct Status {

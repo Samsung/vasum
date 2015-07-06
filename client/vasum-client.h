@@ -895,75 +895,7 @@ VsmStatus vsm_remove_declaration(VsmClient client,
 /** @} Host API */
 
 
-/**
- * @name Zone API
- *
- * Functions using org.tizen.vasum.zone.manager D-Bus interface.
- *
- * @{
- */
-
-/**
- * Notification callback function signature.
- *
- * @param[in] zone source zone
- * @param[in] application sending application name
- * @param[in] message notification message
- * @param data custom user's data pointer passed to vsm_add_notification_callback()
- */
-typedef void (*VsmNotificationCallback)(const char* zone,
-                                        const char* application,
-                                        const char* message,
-                                        void* data);
-/**
- * Send message to active zone.
- *
- * @param[in] client vasum-server's client
- * @param[in] application application name
- * @param[in] message message
- * @return status of this function call
- */
-VsmStatus vsm_notify_active_zone(VsmClient client, const char* application, const char* message);
-
-/**
- * Move file between zones.
- *
- * @param[in] client vasum-server's client
- * @param[in] destZone destination zone id
- * @param[in] path path to moved file
- * @return status of this function call
- */
-VsmStatus vsm_file_move_request(VsmClient client, const char* destZone, const char* path);
-
-/**
- * Register notification callback function.
- *
- * @note The callback function will be invoked on a different thread.
- *
- * @param[in] client vasum-server's client
- * @param[in] notificationCallback callback function
- * @param[in] data some extra data that will be passed to callback function
- * @param[out] subscriptionId subscription identifier that can be used to unsubscribe signal,
- *                      pointer can be NULL.
- * @return status of this function call
- */
-VsmStatus vsm_add_notification_callback(VsmClient client,
-                                        VsmNotificationCallback notificationCallback,
-                                        void* data,
-                                        VsmSubscriptionId* subscriptionId);
-
-/**
- * Unregister notification callback function.
- *
- * @param[in] client vasum-server's client
- * @param[in] subscriptionId subscription identifier returned by vsm_add_notification_callback
- * @return status of this function call
- */
-VsmStatus vsm_del_notification_callback(VsmClient client, VsmSubscriptionId subscriptionId);
-
 #endif /* __VASUM_WRAPPER_SOURCE__ */
-
-/** @} Zone API */
 
 #ifdef __cplusplus
 }

@@ -390,29 +390,3 @@ API VsmStatus vsm_remove_declaration(VsmClient client,
     return getClient(client).vsm_remove_declaration(zone, declaration);
 }
 
-API VsmStatus vsm_notify_active_zone(VsmClient client,
-                                          const char* application,
-                                          const char* message)
-{
-    return getClient(client).vsm_notify_active_zone(application, message);
-}
-
-API VsmStatus vsm_file_move_request(VsmClient client, const char* destZone, const char* path)
-{
-    return getClient(client).vsm_file_move_request(destZone, path);
-}
-
-API VsmStatus vsm_add_notification_callback(VsmClient client,
-                                            VsmNotificationCallback notificationCallback,
-                                            void* data,
-                                            VsmSubscriptionId* subscriptionId)
-{
-    return getClient(client).vsm_add_notification_callback(notificationCallback, data, subscriptionId);
-}
-
-API VsmStatus vsm_del_notification_callback(VsmClient client,
-                                            VsmSubscriptionId subscriptionId)
-{
-    return getClient(client).vsm_del_notification_callback(subscriptionId);
-}
-
