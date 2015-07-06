@@ -47,7 +47,7 @@ private:
     void setImpl(const std::shared_ptr<void>& data) override;
     void setVoid() override;
     void setError(const std::string& name, const std::string& message) override;
-    std::string getID() const;
+    std::string getID() const override;
 
     ipc::MethodResult::Pointer mMethodResultPtr;
 };
