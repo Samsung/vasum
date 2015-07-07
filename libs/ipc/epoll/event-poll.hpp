@@ -49,7 +49,7 @@ public:
     void removeFD(const int fd);
 
     /**
-     * Dispatch at most one signalled FD
+     * Dispatch at most one signaled FD
      * @param timeoutMs how long should wait in case of no pending events
      *        (0 - return immediately, -1 - wait forever)
      * @return false on timeout

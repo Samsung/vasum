@@ -33,26 +33,83 @@
 
 namespace utils {
 
-void signalBlock(const int signalToBlock)
+namespace {
+
+void setSignalMask(int how, const ::sigset_t& set)
+{
+    int ret = ::pthread_sigmask(how, &set, nullptr /*&oldSet*/);
+    if(ret != 0) {
+        const std::string msg = getSystemErrorMessage(ret);
+        LOGE("Error in pthread_sigmask: " << msg);
+        throw UtilsException("Error in pthread_sigmask: " + msg);
+    }
+}
+
+void changeSignal(int how, const int sigNum) {
+    ::sigset_t set;
+    if(-1 == ::sigemptyset(&set)) {
+        const std::string msg = getSystemErrorMessage();
+        LOGE("Error in sigfillset: " << msg);
+        throw UtilsException("Error in sigfillset: " + msg);
+    }
+
+    if(-1 ==::sigaddset(&set, sigNum)) {
+        const std::string msg = getSystemErrorMessage();
+        LOGE("Error in sigdelset: " << msg);
+        throw UtilsException("Error in sigdelset: " + msg);
+    }
+
+    setSignalMask(how, set);
+}
+
+}// namespace
+
+::sigset_t getSignalMask()
 {
     ::sigset_t set;
-    if (-1 == ::sigemptyset(&set)) {
+    int ret = ::pthread_sigmask(0 /*ignored*/, nullptr /*get the oldset*/, &set);
+    if(ret != 0) {
+        const std::string msg = getSystemErrorMessage(ret);
+        LOGE("Error in pthread_sigmask: " << msg);
+        throw UtilsException("Error in pthread_sigmask: " + msg);
+    }
+    return set;
+}
+
+bool isSignalBlocked(const int sigNum)
+{
+    ::sigset_t set = getSignalMask();
+
+    int ret = ::sigismember(&set, sigNum);
+    if(-1 == ret) {
         const std::string msg = getSystemErrorMessage();
-        LOGE("Error in sigemptyset: " << msg);
-        throw UtilsException("Error in sigemptyset: " + msg);
+        LOGE("Error in sigismember: " << msg);
+        throw UtilsException("Error in sigismember: " + msg);
     }
 
-    if (-1 ==::sigaddset(&set, signalToBlock)) {
+    return ret == 1;
+}
+
+void signalBlock(const int sigNum)
+{
+    changeSignal(SIG_BLOCK, sigNum);
+}
+
+void signalBlockAll()
+{
+    ::sigset_t set;
+    if(-1 == ::sigfillset(&set)) {
         const std::string msg = getSystemErrorMessage();
-        LOGE("Error in sigaddset: " << msg);
-        throw UtilsException("Error in sigaddset: " + msg);
+        LOGE("Error in sigfillset: " << msg);
+        throw UtilsException("Error in sigfillset: " + msg);
     }
 
-    int ret = ::pthread_sigmask(SIG_BLOCK, &set, nullptr /*&oldSet*/);
-    if (ret != 0) {
-        LOGE("Error in pthread_sigmask: " << std::to_string(ret));
-        throw UtilsException("Error in pthread_sigmask: " + std::to_string(ret));
-    }
+    setSignalMask(SIG_BLOCK, set);
+}
+
+void signalUnblock(const int sigNum)
+{
+    changeSignal(SIG_UNBLOCK, sigNum);
 }
 
 } // namespace utils

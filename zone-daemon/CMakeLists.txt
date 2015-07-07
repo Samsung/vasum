@@ -43,7 +43,7 @@ SET_TARGET_PROPERTIES(${ZONE_DAEMON_CODENAME} PROPERTIES
 )
 
 TARGET_LINK_LIBRARIES(${ZONE_DAEMON_CODENAME} ${ZONE_DAEMON_DEPS_LIBRARIES}
-                      ${Boost_LIBRARIES} Logger SimpleDbus)
+                      ${Boost_LIBRARIES} Logger SimpleDbus Ipc)
 
 
 ## Install #####################################################################

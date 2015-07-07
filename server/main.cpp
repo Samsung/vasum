@@ -37,6 +37,7 @@
 #include "logger/backend-stderr.hpp"
 #include "logger/backend-journal.hpp"
 #include "utils/typeinfo.hpp"
+#include "utils/signal.hpp"
 
 #include <boost/program_options.hpp>
 #include <iostream>
@@ -121,6 +122,10 @@ int main(int argc, char* argv[])
     }
 
     try {
+        // Block all signals
+        // Server will unblock handled signals
+        utils::signalBlockAll();
+
         Server server(CONFIG_PATH);
         server.run(runAsRoot);
         server.reloadIfRequired(argv);

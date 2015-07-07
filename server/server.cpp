@@ -41,7 +41,6 @@
 #include <cerrno>
 #include <string>
 #include <cstring>
-#include <atomic>
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/stat.h>
@@ -78,31 +77,25 @@ using namespace utils;
 
 namespace vasum {
 
-
 Server::Server(const std::string& configPath)
-    : mConfigPath(configPath)
+    : mIsUpdate(false),
+      mConfigPath(configPath),
+      mSignalFD(mDispatcher.getPoll())
 {
-}
+    mSignalFD.setHandler(SIGINT, [this](int) {
+        mStopLatch.set();
+    });
 
+    mSignalFD.setHandler(SIGTERM, [this] (int) {
+        mStopLatch.set();
+    });
 
-namespace {
-
-std::atomic_bool gUpdateTriggered(false);
-utils::Latch gSignalLatch;
-
-void signalHandler(const int sig)
-{
-    LOGI("Got signal " << sig);
-
-    if (sig == SIGUSR1) {
+    mSignalFD.setHandler(SIGUSR1, [this] (int) {
         LOGD("Received SIGUSR1 - triggering update.");
-        gUpdateTriggered = true;
-    }
-
-    gSignalLatch.set();
+        mIsUpdate = true;
+        mStopLatch.set();
+    });
 }
-
-} // namespace
 
 void Server::run(bool asRoot)
 {
@@ -110,36 +103,29 @@ void Server::run(bool asRoot)
         throw ServerException("Environment setup failed");
     }
 
-    signal(SIGINT,  signalHandler);
-    signal(SIGTERM, signalHandler);
-    signal(SIGUSR1, signalHandler);
-    utils::signalBlock(SIGPIPE);
-
     LOGI("Starting daemon...");
     {
         utils::ScopedGlibLoop loop;
         ZonesManager manager(mDispatcher.getPoll(), mConfigPath);
 
         // Do not restore zones state at Vasum start
-        // manager.restoreAll();
         LOGI("Daemon started");
 
-        gSignalLatch.wait();
+        mStopLatch.wait();
 
         // Detach zones if we triggered an update
-        if (gUpdateTriggered) {
+        if (mIsUpdate) {
             manager.setZonesDetachOnExit();
         }
 
         LOGI("Stopping daemon...");
-        // manager.shutdownAll() will be called in destructor
     }
     LOGI("Daemon stopped");
 }
 
 void Server::reloadIfRequired(char* argv[])
 {
-    if (gUpdateTriggered) {
+    if (mIsUpdate) {
         execve(argv[0], argv, environ);
         LOGE("Failed to reload " << argv[0] << ": " << getSystemErrorMessage());
     }
@@ -148,7 +134,7 @@ void Server::reloadIfRequired(char* argv[])
 void Server::terminate()
 {
     LOGI("Terminating server");
-    gSignalLatch.set();
+    mStopLatch.set();
 }
 
 bool Server::checkEnvironment()
@@ -267,10 +253,11 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
     // directory or symlink
     // CAP_SETUID is needed to launch specific funtions as root (see environment.cpp)
     return (runAsRoot || utils::dropRoot(uid, gid, {CAP_SYS_ADMIN,
-                                                    CAP_MAC_OVERRIDE,
-                                                    CAP_SYS_TTY_CONFIG,
-                                                    CAP_CHOWN,
-                                                    CAP_SETUID}));
+                                         CAP_MAC_OVERRIDE,
+                                         CAP_SYS_TTY_CONFIG,
+                                         CAP_CHOWN,
+                                         CAP_SETUID
+                                                   }));
 }
 
 

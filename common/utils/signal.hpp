@@ -25,9 +25,15 @@
 #ifndef COMMON_UTILS_SIGNAL_HPP
 #define COMMON_UTILS_SIGNAL_HPP
 
+#include <csignal>
+
 namespace utils {
 
-void signalBlock(const int signalsToBlock);
+::sigset_t getSignalMask();
+bool isSignalBlocked(const int sigNum);
+void signalBlockAll();
+void signalBlock(const int sigNum);
+void signalUnblock(const int sigNum);
 
 } // namespace utils
 

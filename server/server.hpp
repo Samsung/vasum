@@ -27,8 +27,10 @@
 #define SERVER_SERVER_HPP
 
 #include "utils/latch.hpp"
+#include "utils/signalfd.hpp"
 #include "ipc/epoll/thread-dispatcher.hpp"
 
+#include <atomic>
 #include <string>
 
 
@@ -61,9 +63,11 @@ public:
     static bool checkEnvironment();
 
 private:
+    std::atomic_bool mIsUpdate;
     std::string mConfigPath;
+    utils::Latch mStopLatch;
     ipc::epoll::ThreadDispatcher mDispatcher;
-
+    utils::SignalFD mSignalFD;
     /**
      * Set needed caps, groups and drop root privileges.
      */
