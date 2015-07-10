@@ -331,9 +331,14 @@ void printUsage(std::ostream& out, const std::string& name, unsigned int mode)
         n = name + " ";
     }
 
-    out << "Usage: " << n << "[<command>] [-h|<args>]\n\n";
     if (mode == MODE_COMMAND_LINE) {
-        out << "Called without parameters enters interactive mode.\n\n";
+        out << "Usage: " << n << "[-h|-f <filename>|[<command> [-h|<args>]]\n"
+            << "Called without parameters enters interactive mode.\n"
+            << "Options:\n"
+            << "-h            print help\n"
+            << "-f <filename> read and execute commands from file\n\n";
+    } else {
+        out << "Usage: [-h|<command> [-h|<args>]]\n\n";
     }
     out << "command can be one of the following:\n";
 
@@ -385,8 +390,8 @@ int executeCommand(const Args& argv, int mode)
 
     auto it = std::find(argv.begin(), argv.end(), std::string("-h"));
     if (it != argv.end()) {
-            command.printUsage(std::cout);
-            return EXIT_SUCCESS;
+        command.printUsage(std::cout);
+        return EXIT_SUCCESS;
     }
 
     try {
@@ -488,7 +493,9 @@ static bool readline_from(const std::string& prompt, std::istream& stream, std::
         free(cmd);
     } else {
         std::getline(stream, ln);
-        if (!stream) return false;
+        if (!stream.good()) {
+            return false;
+        }
     }
 
     if (interactiveMode && !ln.empty()) {
@@ -500,13 +507,15 @@ static bool readline_from(const std::string& prompt, std::istream& stream, std::
 
 static int processStream(std::istream& stream)
 {
-    if (connect() != EXIT_SUCCESS)
+    if (connect() != EXIT_SUCCESS) {
         return EXIT_FAILURE;
+    }
 
     std::string ln;
     while (readline_from(">>> ", stream, ln)) {
-        if (ln == "" || boost::starts_with(ln, "#")) //skip empty line or comment
+        if (ln.empty() || ln[0] == '#') { //skip empty line or comment
              continue;
+        }
 
         std::istringstream iss(ln);
         Args argv{std::istream_iterator<std::string>{iss},
@@ -527,7 +536,8 @@ static int processStream(std::istream& stream)
 static int processFile(const std::string& fn)
 {
     std::ifstream stream(fn);
-    if (!stream.is_open()) {
+    if (!stream.good()) {
+        //TODO: Turn on exceptions on stream (and in the entire file)
         std::cerr << "Can't open file " << fn << std::endl;
         return EXIT_FAILURE;
     }
@@ -548,11 +558,18 @@ int bashComplMode()
 
 int cliMode(const int argc, const char** argv)
 {
-    if (commands.count(argv[1]) == 0) {
+    if (std::string(argv[1]) == "-h") {
+        printUsage(std::cout, argv[0], MODE_COMMAND_LINE);
+        return EXIT_SUCCESS;
+    }
+
+    if (commands.find(argv[1]) == commands.end()) {
         printUsage(std::cout, argv[0], MODE_COMMAND_LINE);
         return EXIT_FAILURE;
     }
 
+    //TODO: Connect when it is necessary
+    //f.e. vasum-cli <command> -h doesn't need connection
     if (connect() != EXIT_SUCCESS) {
         return EXIT_FAILURE;
     }
@@ -578,16 +595,10 @@ int main(const int argc, const char *argv[])
 
         if (std::string(argv[1]) == "-f") {
             if (argc < 3) {
-                std::cerr << "filename expected" << std::endl;
+                std::cerr << "Filename expected" << std::endl;
                 return EXIT_FAILURE;
             }
             return processFile(std::string(argv[2]));
-        }
-
-        if (commands.find(argv[1]) == commands.end()) {
-            if (processFile(std::string(argv[1])) == EXIT_SUCCESS) {
-                return EXIT_SUCCESS;
-            }
         }
 
         return cliMode(argc, argv);
