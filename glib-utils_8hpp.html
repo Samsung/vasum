@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>Vasum: Main Page</title>
+<title>Vasum: /home/lkostyra/eclipse_workspaces/code/vasum/common/utils/glib-utils.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -36,10 +36,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </script>
   <div id="navrow1" class="tabs">
     <ul class="tablist">
-      <li class="current"><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="files.html"><span>Files</span></a></li>
+      <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -58,7 +58,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
-</div><!-- top -->
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
+    </ul>
+  </div>
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,15 +78,51 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="dir_67fbb8727835b6b6c19722caba87d229.html">common</a></li><li class="navelem"><a class="el" href="dir_cf83f1559edf9fac4a3c31965cab204c.html">utils</a></li>  </ul>
+</div>
+</div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#typedef-members">Typedefs</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">Vasum Documentation</div>  </div>
+<div class="title">glib-utils.hpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p>Miscellaneous helpers for the Glib library.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="callback-guard_8hpp_source.html">utils/callback-guard.hpp</a>&quot;</code><br/>
+</div>
+<p><a href="glib-utils_8hpp_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespaceutils"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html">utils</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:a6bed4cb2ab11cff4b7053bd98c376807"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; void()&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a6bed4cb2ab11cff4b7053bd98c376807">utils::VoidCallback</a></td></tr>
+<tr class="separator:a6bed4cb2ab11cff4b7053bd98c376807"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:abd662eb3431c07908c67b4432754a1f1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#abd662eb3431c07908c67b4432754a1f1">utils::executeInGlibThread</a> (const VoidCallback &amp;callback, const CallbackGuard &amp;guard)</td></tr>
+<tr class="separator:abd662eb3431c07908c67b4432754a1f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Miscellaneous helpers for the Glib library. </p>
+<dl class="section author"><dt>Author</dt><dd>Piotr Bartosiewicz (<a href="#" onclick="location.href='mai'+'lto:'+'p.b'+'ar'+'tos'+'ie'+'wi@'+'pa'+'rtn'+'er'+'.sa'+'ms'+'ung'+'.c'+'om'; return false;">p.bar<span style="display: none;">.nosp@m.</span>tosi<span style="display: none;">.nosp@m.</span>ewi@p<span style="display: none;">.nosp@m.</span>artn<span style="display: none;">.nosp@m.</span>er.sa<span style="display: none;">.nosp@m.</span>msun<span style="display: none;">.nosp@m.</span>g.com</a>) </dd></dl>
+
+<p>Definition in file <a class="el" href="glib-utils_8hpp_source.html">glib-utils.hpp</a>.</p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Jul 13 2015 13:28:43 for Vasum by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 13 2015 13:28:42 for Vasum by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

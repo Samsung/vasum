@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>Vasum: Main Page</title>
+<title>Vasum: vasum::ZonesManagerDynamicConfig Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -36,9 +36,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </script>
   <div id="navrow1" class="tabs">
     <ul class="tablist">
-      <li class="current"><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
-      <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -58,7 +58,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
-</div><!-- top -->
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
+      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+    </ul>
+  </div>
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +80,70 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="namespacevasum.html">vasum</a></li><li class="navelem"><a class="el" href="structvasum_1_1ZonesManagerDynamicConfig.html">ZonesManagerDynamicConfig</a></li>  </ul>
+</div>
+</div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="structvasum_1_1ZonesManagerDynamicConfig-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">Vasum Documentation</div>  </div>
+<div class="title">vasum::ZonesManagerDynamicConfig Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="zones-manager-config_8hpp_source.html">zones-manager-config.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:addc761c0ee03491a8d39c02957a27dfa"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structvasum_1_1ZonesManagerDynamicConfig.html#addc761c0ee03491a8d39c02957a27dfa">zoneIds</a></td></tr>
+<tr class="separator:addc761c0ee03491a8d39c02957a27dfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a214c36d5c2021dab7be67706036c2a5a"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structvasum_1_1ZonesManagerDynamicConfig.html#a214c36d5c2021dab7be67706036c2a5a">defaultId</a></td></tr>
+<tr class="separator:a214c36d5c2021dab7be67706036c2a5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock">
+<p>Definition at line <a class="el" href="zones-manager-config_8hpp_source.html#l00095">95</a> of file <a class="el" href="zones-manager-config_8hpp_source.html">zones-manager-config.hpp</a>.</p>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a class="anchor" id="a214c36d5c2021dab7be67706036c2a5a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string vasum::ZonesManagerDynamicConfig::defaultId</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>An ID of default zone. </p>
+
+<p>Definition at line <a class="el" href="zones-manager-config_8hpp_source.html#l00105">105</a> of file <a class="el" href="zones-manager-config_8hpp_source.html">zones-manager-config.hpp</a>.</p>
+
+<p>Referenced by <a class="el" href="zones-manager_8cpp_source.html#l00489">vasum::ZonesManager::handleSwitchToDefaultCall()</a>, <a class="el" href="zones-manager_8cpp_source.html#l00344">vasum::ZonesManager::refocus()</a>, and <a class="el" href="zones-manager_8cpp_source.html#l00185">vasum::ZonesManager::updateDefaultId()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="addc761c0ee03491a8d39c02957a27dfa"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::string&gt; vasum::ZonesManagerDynamicConfig::zoneIds</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>A list of created zones. </p>
+
+<p>Definition at line <a class="el" href="zones-manager-config_8hpp_source.html#l00100">100</a> of file <a class="el" href="zones-manager-config_8hpp_source.html">zones-manager-config.hpp</a>.</p>
+
+<p>Referenced by <a class="el" href="zones-manager_8cpp_source.html#l01104">vasum::ZonesManager::createZone()</a>, <a class="el" href="zones-manager_8cpp_source.html#l00262">vasum::ZonesManager::destroyZone()</a>, and <a class="el" href="zones-manager_8cpp_source.html#l00103">vasum::ZonesManager::ZonesManager()</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
+<li>/home/lkostyra/eclipse_workspaces/code/vasum/server/<a class="el" href="zones-manager-config_8hpp_source.html">zones-manager-config.hpp</a></li>
+</ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
