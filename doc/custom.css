@@ -17,28 +17,17 @@ h1.groupheader {
     margin: 10px 2px;
 }
 
-h2.groupheader {
-    border-bottom: 1px solid #879ECB;
-    color: #354C7B;
-    font-size: 150%;
-    font-weight: normal;
-    margin-top: 1.75em;
-    padding-top: 8px;
-    padding-bottom: 4px;
-    width: 100%;
-}
-
 h3.groupheader {
     font-size: 100%;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    -webkit-transition: text-shadow 0.5s linear;
-    -moz-transition: text-shadow 0.5s linear;
-    -ms-transition: text-shadow 0.5s linear;
-    -o-transition: text-shadow 0.5s linear;
-    transition: text-shadow 0.5s linear;
-    margin-right: 15px;
+    -webkit-transition: none;
+    -moz-transition: none;
+    -ms-transition: none;
+    -o-transition: none;
+    transition: none;
+    margin-right: 0px;
 }
 
 h1.glow, h2.glow, h3.glow, h4.glow, h5.glow, h6.glow {
@@ -110,7 +99,7 @@ div.navtab {
 /* @group Link Styling */
 
 a {
-    color: #3D578C;
+    color: #2f5399;
     font-weight: normal;
     text-decoration: none;
 }
@@ -257,15 +246,18 @@ div.groupText {
 }
 
 body {
-    background-color: white;
+    background-color: #f1ead2;
     color: black;
     margin: 0;
 }
 
 div.contents {
-    margin-top: 10px;
-    margin-left: 12px;
-    margin-right: 8px;
+    background-color: white;
+    margin-top: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 960px;
+    padding: 12px;
 }
 
 td.indexkey {
@@ -377,25 +369,6 @@ blockquote {
 
 /* @end */
 
-/*
-.search {
-    color: #003399;
-    font-weight: bold;
-}
-
-form.search {
-    margin-bottom: 0px;
-    margin-top: 0px;
-}
-
-input.search {
-    font-size: 75%;
-    color: #000080;
-    font-weight: normal;
-    background-color: #e8eef2;
-}
-*/
-
 td.tiny {
     font-size: 75%;
 }
@@ -449,7 +422,6 @@ table.memberdecls {
 .mdescLeft, .mdescRight,
 .memItemLeft, .memItemRight,
 .memTemplItemLeft, .memTemplItemRight, .memTemplParams {
-    background-color: #F9FAFC;
     border: none;
     margin: 4px;
     padding: 1px 0 0 8px;
@@ -461,7 +433,6 @@ table.memberdecls {
 }
 
 .memSeparator {
-    border-bottom: 1px solid #DEE4F0;
     line-height: 1px;
     margin: 0px;
     padding: 0px;
@@ -476,7 +447,6 @@ table.memberdecls {
 }
 
 .memTemplParams {
-    color: #4665A2;
     white-space: nowrap;
     font-size: 80%;
 }
@@ -489,7 +459,6 @@ table.memberdecls {
 
 .memtemplate {
     font-size: 80%;
-    color: #4665A2;
     font-weight: normal;
     margin-left: 9px;
 }
@@ -511,17 +480,17 @@ table.memberdecls {
     padding: 0;
     margin-bottom: 10px;
     margin-right: 5px;
-    -webkit-transition: box-shadow 0.5s linear;
-    -moz-transition: box-shadow 0.5s linear;
-    -ms-transition: box-shadow 0.5s linear;
-    -o-transition: box-shadow 0.5s linear;
-    transition: box-shadow 0.5s linear;
+    -webkit-transition: none;
+    -moz-transition: none;
+    -ms-transition: none;
+    -o-transition: none;
+    transition: none;
     display: table !important;
     width: 100%;
 }
 
 .memitem.glow {
-    box-shadow: 0 0 15px cyan;
+    box-shadow: none;
 }
 
 .memname {
@@ -534,53 +503,20 @@ table.memberdecls {
 }
 
 .memproto, dl.reflist dt {
-    border-top: 1px solid #A8B8D9;
-    border-left: 1px solid #A8B8D9;
-    border-right: 1px solid #A8B8D9;
-    padding: 6px 0px 6px 0px;
-    color: #253555;
-    font-weight: bold;
-    text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.9);
-    background-image:url('nav_f.png');
-    background-repeat:repeat-x;
-    background-color: #E2E8F2;
-    /* opera specific markup */
-    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15);
-    border-top-right-radius: 4px;
-    border-top-left-radius: 4px;
-    /* firefox specific markup */
-    -moz-box-shadow: rgba(0, 0, 0, 0.15) 5px 5px 5px;
-    -moz-border-radius-topright: 4px;
-    -moz-border-radius-topleft: 4px;
-    /* webkit specific markup */
-    -webkit-box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15);
-    -webkit-border-top-right-radius: 4px;
-    -webkit-border-top-left-radius: 4px;
-
+    /* disable inherited shadows */
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
 }
 
 .memdoc, dl.reflist dd {
-    border-bottom: 1px solid #A8B8D9;
-    border-left: 1px solid #A8B8D9;
-    border-right: 1px solid #A8B8D9;
-    padding: 6px 10px 2px 10px;
-    background-color: #FBFCFD;
-    border-top-width: 0;
-    background-image:url('nav_g.png');
-    background-repeat:repeat-x;
-    background-color: #FFFFFF;
-    /* opera specific markup */
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15);
-    /* firefox specific markup */
-    -moz-border-radius-bottomleft: 4px;
-    -moz-border-radius-bottomright: 4px;
-    -moz-box-shadow: rgba(0, 0, 0, 0.15) 5px 5px 5px;
-    /* webkit specific markup */
-    -webkit-border-bottom-left-radius: 4px;
-    -webkit-border-bottom-right-radius: 4px;
-    -webkit-box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15);
+    /* disable inherited shadows */
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+
+    /* disable background shadow-like texture */
+    background-image: none;
 }
 
 dl.reflist dt {
@@ -769,16 +705,15 @@ table.doxtable th {
 }
 
 table.fieldtable {
-    /*width: 100%;*/
     margin-bottom: 10px;
     border: 1px solid #A8B8D9;
     border-spacing: 0px;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
     border-radius: 4px;
-    -moz-box-shadow: rgba(0, 0, 0, 0.15) 2px 2px 2px;
-    -webkit-box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.15);
-    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
 }
 
 .fieldtable td, .fieldtable th {
@@ -928,11 +863,14 @@ div.ingroups a
 
 div.header
 {
-    background-image:url('nav_h.png');
-    background-repeat:repeat-x;
-    background-color: #F9FAFC;
+    background-image: none;
     margin:  0px;
-    border-bottom: 1px solid #C4CFE5;
+    margin-left: auto;
+    margin-right: auto;
+    width: 960px;
+    padding-left: 12px;
+    padding-right: 12px;
+    border-bottom: none;
 }
 
 div.headertitle
@@ -1016,8 +954,10 @@ dl.section dd {
 #projectlogo
 {
     text-align: center;
-    vertical-align: bottom;
+    vertical-align: middle;
     border-collapse: separate;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 #projectlogo img
@@ -1027,7 +967,7 @@ dl.section dd {
 
 #projectname
 {
-    font: 300% Tahoma, Arial,sans-serif;
+    font: 0% Tahoma, Arial,sans-serif;
     margin: 0px;
     padding: 2px 0px;
 }
@@ -1048,10 +988,10 @@ dl.section dd {
 
 #titlearea
 {
+    background-color: white;
     padding: 0px;
     margin: 0px;
     width: 100%;
-    border-bottom: 1px solid #5373B4;
 }
 
 .image
@@ -1170,7 +1110,7 @@ div.toc li.level4 {
 }
 
 tr.heading h2 {
-    margin-top: 12px;
+    margin-top: 0px;
     margin-bottom: 4px;
 }
 
@@ -1343,6 +1283,14 @@ tr.heading h2 {
     border-width: 11px;
     top: 50%;
     margin-top: -11px;
+}
+
+#nav-tree {
+    background-image: none;
+}
+
+#side-nav {
+    width: 210px;
 }
 
 @media print

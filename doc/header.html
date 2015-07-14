@@ -21,34 +21,36 @@ $extrastylesheet
 
 <!--BEGIN TITLEAREA-->
 <div id="titlearea">
-<table cellspacing="0" cellpadding="0">
- <tbody>
- <tr style="height: 56px;">
-  <!--BEGIN PROJECT_LOGO-->
-  <td id="projectlogo"><img alt="Logo" src="$relpath^$projectlogo"/></td>
-  <!--END PROJECT_LOGO-->
-  <!--BEGIN PROJECT_NAME-->
-  <td style="padding-left: 0.5em;">
-   <div id="projectname">$projectname
-   <!--BEGIN PROJECT_NUMBER-->&#160;<span id="projectnumber">$projectnumber</span><!--END PROJECT_NUMBER-->
-   </div>
-   <!--BEGIN PROJECT_BRIEF--><div id="projectbrief">$projectbrief</div><!--END PROJECT_BRIEF-->
-  </td>
-  <!--END PROJECT_NAME-->
-  <!--BEGIN !PROJECT_NAME-->
-   <!--BEGIN PROJECT_BRIEF-->
-    <td style="padding-left: 0.5em;">
-    <div id="projectbrief">$projectbrief</div>
-    </td>
-   <!--END PROJECT_BRIEF-->
-  <!--END !PROJECT_NAME-->
-  <!--BEGIN DISABLE_INDEX-->
-   <!--BEGIN SEARCHENGINE-->
-   <td>$searchbox</td>
-   <!--END SEARCHENGINE-->
-  <!--END DISABLE_INDEX-->
- </tr>
- </tbody>
+<table style="table-layout:fixed">
+    <tbody>
+        <tr style="height: 56px;">
+            <!--BEGIN PROJECT_LOGO-->
+            <td id="projectlogo"><img alt="Logo" src="$relpath^$projectlogo"/></td>
+            <!--END PROJECT_LOGO-->
+
+            <!--BEGIN PROJECT_BRIEF-->
+            <td valign="bottom" style="padding:5px;">
+                <div id="projectbrief">$projectbrief</div>
+            </td>
+            <!--END PROJECT_BRIEF-->
+
+            <!--BEGIN CENTER LOGOS-->
+            <td align="center" width="100%" valign="center" style="padding:5px;padding-left:20px;padding-right:20px">
+                <a href="http://www.github.com/Samsung/vasum">
+                   <img src="GitHub-Logo-Cut.png" alt="Fork Vasum on GitHub" height=25px style="padding-right:20px">
+                </a>
+                <a href="http://wiki.tizen.org/wiki/Security:Vasum">
+                    <img src="Tizen-Logo-On-Light-RGB-Cut.png" alt="Official Vasum Wiki on Tizen.org" height=25px>
+                </a>
+            </td>
+            <!--END CENTER LOGOS-->
+
+            <!--BEGIN SEARCHENGINE-->
+            <td>$searchbox</td>
+            <!--END SEARCHENGINE-->
+            </td>
+        </tr>
+    </tbody>
 </table>
 </div>
 <!--END TITLEAREA-->
