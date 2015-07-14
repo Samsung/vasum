@@ -26,12 +26,16 @@
 #ifndef SERVER_SERVER_HPP
 #define SERVER_SERVER_HPP
 
+#include "zones-manager.hpp"
+
 #include "utils/latch.hpp"
 #include "utils/signalfd.hpp"
-#include "ipc/epoll/thread-dispatcher.hpp"
+#include "utils/glib-loop.hpp"
+#include "ipc/epoll/event-poll.hpp"
 
 #include <atomic>
 #include <string>
+#include <pthread.h>
 
 
 namespace vasum {
@@ -63,15 +67,22 @@ public:
     static bool checkEnvironment();
 
 private:
-    std::atomic_bool mIsUpdate;
+    bool mIsRunning;
+    bool mIsUpdate;
     std::string mConfigPath;
-    utils::Latch mStopLatch;
-    ipc::epoll::ThreadDispatcher mDispatcher;
+    utils::ScopedGlibLoop loop;
+    ipc::epoll::EventPoll mEventPoll;
     utils::SignalFD mSignalFD;
+    ZonesManager mZonesManager;
+    ::pthread_t mDispatchingThread;
+
     /**
      * Set needed caps, groups and drop root privileges.
      */
     static bool prepareEnvironment(const std::string& configPath, bool runAsRoot);
+
+    void handleUpdate();
+    void handleStop();
 
 };
 

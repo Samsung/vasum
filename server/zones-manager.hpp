@@ -55,6 +55,24 @@ public:
     ~ZonesManager();
 
     /**
+     * Request stopping the manager.
+     *
+     * @param wait does it block waiting for all internals to stop
+     */
+    void stop(bool wait);
+
+    /**
+     * Starts the manager
+     */
+    void start();
+
+    /**
+     * If ZoneManager is running it needs the external polling loop to operate.
+     * @return is manager still running
+     */
+    bool isRunning();
+
+    /**
      * Create new zone.
      *
      * @param zoneId id of new zone
@@ -183,11 +201,11 @@ private:
     typedef std::recursive_mutex Mutex;
     typedef std::unique_lock<Mutex> Lock;
 
+    bool mIsRunning;
     utils::Worker::Pointer mWorker;
     Mutex mMutex; // used to protect mZones
     ZonesManagerConfig mConfig; //TODO make it const
     ZonesManagerDynamicConfig mDynamicConfig;
-    HostIPCConnection mHostIPCConnection;
     // to hold InputMonitor pointer to monitor if zone switching sequence is recognized
     std::unique_ptr<InputMonitor> mSwitchingSequenceMonitor;
     // like set but keep insertion order
@@ -216,6 +234,7 @@ private:
     void insertZone(const std::string& zoneId, const std::string& templatePath);
     void tryAddTask(const utils::Worker::Task& task, api::MethodResultBuilder::Pointer result, bool wait);
 
+    HostIPCConnection mHostIPCConnection;
 #ifdef DBUS_CONNECTION
     HostDbusConnection mHostDbusConnection;
     std::unique_ptr<ProxyCallPolicy> mProxyCallPolicy;

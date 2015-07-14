@@ -69,13 +69,13 @@ bool Client::isStarted()
     return mProcessor.isStarted();
 }
 
-void Client::stop()
+void Client::stop(bool wait)
 {
     if (!mProcessor.isStarted()) {
         return;
     }
     LOGS("Client stop");
-    mProcessor.stop();
+    mProcessor.stop(wait);
 }
 
 void Client::handle(const FileDescriptor fd, const epoll::Events pollEvents)

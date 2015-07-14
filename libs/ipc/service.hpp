@@ -70,8 +70,10 @@ public:
 
     /**
      * Stops all working threads
+     *
+     * @param wait does it block waiting for all internals to stop
      */
-    void stop();
+    void stop(bool wait = true);
 
     /**
     * Set the callback called for each new connection to a peer

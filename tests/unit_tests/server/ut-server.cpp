@@ -33,6 +33,7 @@
 #include "utils/glib-loop.hpp"
 #include "utils/scoped-dir.hpp"
 #include "logger/logger.hpp"
+#include "ipc/epoll/thread-dispatcher.hpp"
 
 #include <string>
 #include <future>
@@ -54,7 +55,6 @@ const bool AS_ROOT = true;
 
 struct Fixture {
     utils::ScopedDir mZonesPathGuard;
-    ipc::epoll::ThreadDispatcher mDispatcher;
 
     Fixture()
         : mZonesPathGuard(ZONES_PATH)
@@ -66,10 +66,13 @@ struct Fixture {
     void prepare()
     {
         ScopedGlibLoop loop;
+        ipc::epoll::ThreadDispatcher mDispatcher;
         ZonesManager manager(mDispatcher.getPoll(), TEST_CONFIG_PATH);
+        manager.start();
         manager.createZone("zone1", TEMPLATE_NAME);
         manager.createZone("zone2", TEMPLATE_NAME);
         manager.restoreAll();
+        manager.stop(true);
     }
 };
 } // namespace
@@ -106,12 +109,13 @@ BOOST_AUTO_TEST_CASE(TerminateRun)
 BOOST_AUTO_TEST_CASE(RunTerminate)
 {
     Server s(TEST_CONFIG_PATH);
-    std::future<void> runFuture = std::async(std::launch::async, [&] {s.run(AS_ROOT);});
+    std::future<void> runFuture = std::async(std::launch::async, [&] {
+        // give a chance to run
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        s.terminate();
+    });
 
-    // give a chance to run a thread
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
-    s.terminate();
+    s.run(AS_ROOT);
     runFuture.wait();
 
     // a potential exception from std::async thread will be delegated to this thread

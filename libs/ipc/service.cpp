@@ -72,13 +72,13 @@ bool Service::isStarted()
     return mProcessor.isStarted();
 }
 
-void Service::stop()
+void Service::stop(bool wait)
 {
     if (!mProcessor.isStarted()) {
         return;
     }
     LOGS("Service stop");
-    mProcessor.stop();
+    mProcessor.stop(wait);
 }
 
 void Service::handle(const FileDescriptor fd, const epoll::Events pollEvents)

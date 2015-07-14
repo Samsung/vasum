@@ -25,12 +25,10 @@
 #include "config.hpp"
 
 #include "server.hpp"
-#include "zones-manager.hpp"
 #include "exception.hpp"
 
 #include "config/manager.hpp"
 #include "logger/logger.hpp"
-#include "utils/glib-loop.hpp"
 #include "utils/environment.hpp"
 #include "utils/fs.hpp"
 #include "utils/signal.hpp"
@@ -40,6 +38,7 @@
 #include <csignal>
 #include <cerrno>
 #include <string>
+#include <functional>
 #include <cstring>
 #include <unistd.h>
 #include <pwd.h>
@@ -78,23 +77,32 @@ using namespace utils;
 namespace vasum {
 
 Server::Server(const std::string& configPath)
-    : mIsUpdate(false),
+    : mIsRunning(true),
+      mIsUpdate(false),
       mConfigPath(configPath),
-      mSignalFD(mDispatcher.getPoll())
+      mSignalFD(mEventPoll),
+      mZonesManager(mEventPoll, mConfigPath),
+      mDispatchingThread(::pthread_self())
 {
-    mSignalFD.setHandlerAndBlock(SIGUSR1, [this] (int) {
-        LOGD("Received SIGUSR1 - triggering update.");
-        mIsUpdate = true;
-        mStopLatch.set();
-    });
+    mSignalFD.setHandlerAndBlock(SIGUSR1, std::bind(&Server::handleUpdate, this));
+    mSignalFD.setHandlerAndBlock(SIGINT, std::bind(&Server::handleStop, this));
+    mSignalFD.setHandler(SIGTERM, std::bind(&Server::handleStop, this));
+}
 
-    mSignalFD.setHandlerAndBlock(SIGINT, [this](int) {
-        mStopLatch.set();
-    });
+void Server::handleUpdate()
+{
+    LOGD("Received SIGUSR1 - triggering update.");
+    mZonesManager.setZonesDetachOnExit();
+    mZonesManager.stop(false);
+    mIsUpdate = true;
+    mIsRunning = false;
+}
 
-    mSignalFD.setHandler(SIGTERM, [this] (int) {
-        mStopLatch.set();
-    });
+void Server::handleStop()
+{
+    LOGD("Stopping Server");
+    mZonesManager.stop(false);
+    mIsRunning = false;
 }
 
 void Server::run(bool asRoot)
@@ -103,30 +111,17 @@ void Server::run(bool asRoot)
         throw ServerException("Environment setup failed");
     }
 
-    LOGI("Starting daemon...");
-    {
-        utils::ScopedGlibLoop loop;
-        ZonesManager manager(mDispatcher.getPoll(), mConfigPath);
+    mZonesManager.start();
 
-        // Do not restore zones state at Vasum start
-        LOGI("Daemon started");
-
-        mStopLatch.wait();
-
-        // Detach zones if we triggered an update
-        if (mIsUpdate) {
-            manager.setZonesDetachOnExit();
-        }
-
-        LOGI("Stopping daemon...");
+    while(mIsRunning || mZonesManager.isRunning()) {
+        mEventPoll.dispatchIteration(-1);
     }
-    LOGI("Daemon stopped");
 }
 
 void Server::reloadIfRequired(char* argv[])
 {
     if (mIsUpdate) {
-        execve(argv[0], argv, environ);
+        ::execve(argv[0], argv, environ);
         LOGE("Failed to reload " << argv[0] << ": " << getSystemErrorMessage());
     }
 }
@@ -134,7 +129,12 @@ void Server::reloadIfRequired(char* argv[])
 void Server::terminate()
 {
     LOGI("Terminating server");
-    mStopLatch.set();
+    int ret = ::pthread_kill(mDispatchingThread, SIGINT);
+    if(ret != 0) {
+        const std::string msg = utils::getSystemErrorMessage(ret);
+        LOGE("Error during Server termination: " << msg);
+        throw ServerException("Error during Server termination: " + msg);
+    }
 }
 
 bool Server::checkEnvironment()

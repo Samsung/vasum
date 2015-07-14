@@ -148,6 +148,17 @@ void HostIPCConnection::start()
     LOGD("Connected");
 }
 
+void HostIPCConnection::stop(bool wait)
+{
+    LOGT("Stopping IPC");
+    mService->stop(wait);
+}
+
+bool HostIPCConnection::isRunning()
+{
+    return mService->isStarted();
+}
+
 void HostIPCConnection::setLockQueueCallback(const Method<api::Void>::type& callback)
 {
     typedef IPCMethodWrapper<api::Void> Callback;

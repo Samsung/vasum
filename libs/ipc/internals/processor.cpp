@@ -78,7 +78,7 @@ Processor::~Processor()
 {
     LOGS(mLogPrefix + "Processor Destructor");
     try {
-        stop();
+        stop(false);
     } catch (std::exception& e) {
         LOGE(mLogPrefix + "Error in Processor's destructor: " << e.what());
     }
@@ -117,7 +117,7 @@ void Processor::start()
     }
 }
 
-void Processor::stop()
+void Processor::stop(bool wait)
 {
     LOGS(mLogPrefix + "Processor stop");
 
@@ -129,14 +129,16 @@ void Processor::stop()
             mRequestQueue.pushBack(Event::FINISH, request);
         }
 
-        LOGD(mLogPrefix + "Waiting for the Processor to stop");
+        if(wait){
+            LOGD(mLogPrefix + "Waiting for the Processor to stop");
 
-        // Wait till the FINISH request is served
-        Lock lock(mStateMutex);
-        conditionPtr->wait(lock, [this]() {
-            return !mIsRunning;
-        });
-        assert(mPeerInfo.empty());
+            // Wait till the FINISH request is served
+            Lock lock(mStateMutex);
+            conditionPtr->wait(lock, [this]() {
+                return !mIsRunning;
+            });
+            assert(mPeerInfo.empty());
+        }
     }
 }
 
@@ -200,7 +202,7 @@ PeerID Processor::addPeer(const std::shared_ptr<Socket>& socketPtr)
     mRequestQueue.pushBack(Event::ADD_PEER, requestPtr);
 
     LOGI(mLogPrefix + "Add Peer Request. Id: " << requestPtr->peerID
-            << ", fd: " << socketPtr->getFD());
+         << ", fd: " << socketPtr->getFD());
 
     return requestPtr->peerID;
 }
@@ -690,8 +692,8 @@ bool Processor::onFinishRequest(FinishRequest& requestFinisher)
 
     mEventPoll.removeFD(mRequestQueue.getFD());
     mIsRunning = false;
-    requestFinisher.conditionPtr->notify_all();
 
+    requestFinisher.conditionPtr->notify_all();
     return true;
 }
 

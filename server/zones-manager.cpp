@@ -101,10 +101,11 @@ bool zoneIsRunning(const std::unique_ptr<Zone>& zone) {
 
 
 ZonesManager::ZonesManager(ipc::epoll::EventPoll& eventPoll, const std::string& configPath)
-    : mWorker(utils::Worker::create())
-    , mHostIPCConnection(eventPoll, this)
+    : mIsRunning(true)
+    , mWorker(utils::Worker::create())
     , mDetachOnExit(false)
     , mExclusiveIDLock(INVALID_CONNECTION_ID)
+    , mHostIPCConnection(eventPoll, this)
 #ifdef DBUS_CONNECTION
     , mHostDbusConnection(this)
 #endif
@@ -116,12 +117,27 @@ ZonesManager::ZonesManager(ipc::epoll::EventPoll& eventPoll, const std::string& 
                                         configPath,
                                         mDynamicConfig,
                                         getVasumDbPrefix());
+}
+
+ZonesManager::~ZonesManager()
+{
+    LOGD("Destroying ZonesManager object...");
+    stop(true);
+}
+
+void ZonesManager::start()
+{
+    Lock lock(mMutex);
+
+    LOGD("Starting ZonesManager");
+
+    mIsRunning = true;
 
 #ifdef DBUS_CONNECTION
     using namespace std::placeholders;
     mProxyCallPolicy.reset(new ProxyCallPolicy(mConfig.proxyCallRules));
-    mHostDbusConnection.setProxyCallCallback(bind(&ZonesManager::handleProxyCall,
-                                                  this, HOST_ID, _1, _2, _3, _4, _5, _6, _7));
+    mHostDbusConnection.setProxyCallCallback(std::bind(&ZonesManager::handleProxyCall,
+                                                       this, HOST_ID, _1, _2, _3, _4, _5, _6, _7));
 #endif //DBUS_CONNECTION
 
     for (const auto& zoneId : mDynamicConfig.zoneIds) {
@@ -144,9 +160,14 @@ ZonesManager::ZonesManager(ipc::epoll::EventPoll& eventPoll, const std::string& 
     mHostIPCConnection.start();
 }
 
-ZonesManager::~ZonesManager()
+void ZonesManager::stop(bool wait)
 {
-    LOGD("Destroying ZonesManager object...");
+    Lock lock(mMutex);
+    LOGD("Stopping ZonesManager");
+
+    if(!mIsRunning) {
+        return;
+    }
 
     if (!mDetachOnExit) {
         try {
@@ -155,10 +176,17 @@ ZonesManager::~ZonesManager()
             LOGE("Failed to shutdown all of the zones");
         }
     }
+
     // wait for all tasks to complete
     mWorker.reset();
+    mHostIPCConnection.stop(wait);
+    mIsRunning = false;
+}
 
-    LOGD("ZonesManager object destroyed");
+bool ZonesManager::isRunning()
+{
+    Lock lock(mMutex);
+    return mIsRunning ||  mHostIPCConnection.isRunning();
 }
 
 ZonesManager::Zones::iterator ZonesManager::findZone(const std::string& id)

@@ -145,8 +145,10 @@ public:
     /**
      * Stops the processing thread.
      * No incoming data will be handled after.
+     *
+     * @param wait does it block waiting for all internals to stop
      */
-    void stop();
+    void stop(bool wait);
 
     /**
      * Set the callback called for each new connection to a peer
@@ -470,7 +472,7 @@ private:
     bool onAddPeerRequest(AddPeerRequest& request);
     bool onRemovePeerRequest(RemovePeerRequest& request);
     bool onSendResultRequest(SendResultRequest& request);
-    bool onFinishRequest(FinishRequest& requestFinisher);
+    bool onFinishRequest(FinishRequest& request);
 
     bool onReturnValue(Peers::iterator& peerIt,
                        const MessageID messageID);

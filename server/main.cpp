@@ -129,9 +129,11 @@ int main(int argc, char* argv[])
         // TODO: SIGTERM used by lxc, get rid of this
         utils::signalIgnore({SIGTERM});
 
+        LOGI("Starting daemon...");
         Server server(CONFIG_PATH);
         server.run(runAsRoot);
         server.reloadIfRequired(argv);
+        LOGI("Daemon stopped");
 
     } catch (std::exception& e) {
         LOGE("Unexpected: " << utils::getTypeName(e) << ": " << e.what());

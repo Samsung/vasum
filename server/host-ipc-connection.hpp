@@ -52,7 +52,9 @@ public:
     ~HostIPCConnection();
 
     void start();
+    void stop(bool wait);
     void signalZoneConnectionState(const api::ConnectionState& connectionState);
+    bool isRunning();
 
 private:
     void setLockQueueCallback(const Method<api::Void>::type& callback);

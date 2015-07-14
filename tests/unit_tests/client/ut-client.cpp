@@ -74,6 +74,7 @@ struct Fixture {
         , mRunGuard("/tmp/ut-run")
         , cm(new ZonesManager(mDispatcher.getPoll(), TEST_CONFIG_PATH))
     {
+        cm->start();
         cm->createZone("zone1", TEMPLATE_NAME);
         cm->createZone("zone2", TEMPLATE_NAME);
         cm->createZone("zone3", TEMPLATE_NAME);
