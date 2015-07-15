@@ -149,22 +149,16 @@ enum macvlan_mode macvlanFromString(const std::string& mode) {
 
 void CommandLineInterface::connect()
 {
-    string msg;
     VsmStatus status;
 
     CommandLineInterface::client = vsm_client_create();
     if (NULL == CommandLineInterface::client) {
-        msg = "Can't create client";
-        goto finish;
+        throw runtime_error("Can't create client");
     }
 
     status = vsm_connect(client);
     if (VSMCLIENT_SUCCESS != status) {
-        msg = vsm_get_status_message(CommandLineInterface::client);
-    }
-
-finish:
-    if (!msg.empty()) {
+        string msg = vsm_get_status_message(CommandLineInterface::client);
         vsm_client_free(CommandLineInterface::client);
         CommandLineInterface::client = NULL;
         throw runtime_error(msg);
@@ -184,25 +178,21 @@ void CommandLineInterface::disconnect()
     vsm_client_free(CommandLineInterface::client);
     CommandLineInterface::client = NULL;
 
-    if (!msg.empty()) {
+    if (VSMCLIENT_SUCCESS != status) {
         throw runtime_error(msg);
     }
 }
 
 void CommandLineInterface::executeCallback(const function<VsmStatus(VsmClient)>& fun)
 {
-    string msg;
     VsmStatus status;
 
     status = fun(CommandLineInterface::client);
     if (VSMCLIENT_SUCCESS != status) {
-        msg = vsm_get_status_message(CommandLineInterface::client);
-    }
-
-    if (!msg.empty()) {
-        throw runtime_error(msg);
+        throw runtime_error(vsm_get_status_message(CommandLineInterface::client));
     }
 }
+
 const std::string& CommandLineInterface::getName() const
 {
     return mName;
