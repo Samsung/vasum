@@ -82,17 +82,17 @@ Server::Server(const std::string& configPath)
       mConfigPath(configPath),
       mSignalFD(mDispatcher.getPoll())
 {
-    mSignalFD.setHandler(SIGINT, [this](int) {
+    mSignalFD.setHandlerAndBlock(SIGUSR1, [this] (int) {
+        LOGD("Received SIGUSR1 - triggering update.");
+        mIsUpdate = true;
+        mStopLatch.set();
+    });
+
+    mSignalFD.setHandlerAndBlock(SIGINT, [this](int) {
         mStopLatch.set();
     });
 
     mSignalFD.setHandler(SIGTERM, [this] (int) {
-        mStopLatch.set();
-    });
-
-    mSignalFD.setHandler(SIGUSR1, [this] (int) {
-        LOGD("Received SIGUSR1 - triggering update.");
-        mIsUpdate = true;
         mStopLatch.set();
     });
 }

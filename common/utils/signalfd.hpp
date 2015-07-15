@@ -54,12 +54,22 @@ public:
     SignalFD& operator=(const SignalFD&) = delete;
 
     /**
-     * Add a callback for a specified signal
+     * Add a callback for a specified signal.
+     * Doesn't block the signal.
      *
      * @param sigNum number of the signal
      * @param callback handler callback
      */
     void setHandler(const int sigNum, const Callback&& callback);
+
+    /**
+     * Add a callback for a specified signal
+     * Blocks the asynchronous signal handling.
+     *
+     * @param sigNum number of the signal
+     * @param callback handler callback
+     */
+    void setHandlerAndBlock(const int sigNum, const Callback&& callback);
 
     /**
      * @return signal file descriptor

@@ -95,7 +95,7 @@ void signalBlock(const int sigNum)
     changeSignal(SIG_BLOCK, sigNum);
 }
 
-void signalBlockAll()
+void signalBlockAllExcept(const std::initializer_list<int>& signals)
 {
     ::sigset_t set;
     if(-1 == ::sigfillset(&set)) {
@@ -104,12 +104,33 @@ void signalBlockAll()
         throw UtilsException("Error in sigfillset: " + msg);
     }
 
+    for(const int s: signals) {
+        if(-1 == ::sigaddset(&set, s)) {
+            const std::string msg = getSystemErrorMessage();
+            LOGE("Error in sigaddset: " << msg);
+            throw UtilsException("Error in sigaddset: " + msg);
+        }
+    }
     setSignalMask(SIG_BLOCK, set);
 }
 
 void signalUnblock(const int sigNum)
 {
     changeSignal(SIG_UNBLOCK, sigNum);
+}
+
+void signalIgnore(const std::initializer_list<int>& signals)
+{
+    struct ::sigaction act;
+    act.sa_handler = SIG_IGN;
+
+    for(const int s: signals) {
+        if(-1 == ::sigaction(s, &act, nullptr)) {
+            const std::string msg = getSystemErrorMessage();
+            LOGE("Error in sigaction: " << msg);
+            throw UtilsException("Error in sigaction: " + msg);
+        }
+    }
 }
 
 } // namespace utils

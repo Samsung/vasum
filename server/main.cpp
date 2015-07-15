@@ -124,7 +124,10 @@ int main(int argc, char* argv[])
     try {
         // Block all signals
         // Server will unblock handled signals
-        utils::signalBlockAll();
+        utils::signalBlockAllExcept({SIGTERM});
+
+        // TODO: SIGTERM used by lxc, get rid of this
+        utils::signalIgnore({SIGTERM});
 
         Server server(CONFIG_PATH);
         server.run(runAsRoot);

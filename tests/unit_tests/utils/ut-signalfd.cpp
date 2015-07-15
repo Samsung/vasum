@@ -38,26 +38,27 @@ using namespace utils;
 
 namespace {
 
-volatile sig_atomic_t gAsyncSignal = 0;
+volatile sig_atomic_t gAsyncSignal;
 
 struct Fixture {
     Fixture()
     {
+        gAsyncSignal = 0;
         ::signal(SIGINT, &Fixture::signalHandler);
     }
     ~Fixture()
     {
         ::signal(SIGINT, SIG_DFL);
+        gAsyncSignal = 0;
     }
 
     static void signalHandler(int s)
     {
-        // Signal should never propagate to this handler
         gAsyncSignal = s;
     }
 
-    static bool isSignalHandled() {
-        return gAsyncSignal == 0;
+    static bool isAsyncHandlerCalled() {
+        return gAsyncSignal != 0;
     }
 };
 
@@ -78,12 +79,12 @@ BOOST_AUTO_TEST_CASE(BlockingSignalHandler)
 {
     ipc::epoll::EventPoll poll;
     SignalFD s(poll);
-    s.setHandler(SIGUSR1, [](const int) {});
-    s.setHandler(SIGINT, [](const int) {});
+    s.setHandlerAndBlock(SIGUSR1, [](const int) {});
+    s.setHandlerAndBlock(SIGINT, [](const int) {});
 
     ::raise(SIGINT);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT));
-    BOOST_REQUIRE(isSignalHandled());
+    BOOST_REQUIRE(!isAsyncHandlerCalled());
 }
 
 BOOST_AUTO_TEST_CASE(SignalHandler)
@@ -99,7 +100,7 @@ BOOST_AUTO_TEST_CASE(SignalHandler)
     ::raise(SIGINT);
     poll.dispatchIteration(TIMEOUT);
     BOOST_REQUIRE(isSignalCalled);
-    BOOST_REQUIRE(isSignalHandled());
+    BOOST_REQUIRE(!isAsyncHandlerCalled());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

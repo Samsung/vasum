@@ -25,15 +25,17 @@
 #ifndef COMMON_UTILS_SIGNAL_HPP
 #define COMMON_UTILS_SIGNAL_HPP
 
+#include <initializer_list>
 #include <csignal>
 
 namespace utils {
 
 ::sigset_t getSignalMask();
 bool isSignalBlocked(const int sigNum);
-void signalBlockAll();
+void signalBlockAllExcept(const std::initializer_list<int>& signals);
 void signalBlock(const int sigNum);
 void signalUnblock(const int sigNum);
+void signalIgnore(const std::initializer_list<int>& signals);
 
 } // namespace utils
 

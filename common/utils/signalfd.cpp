@@ -62,6 +62,22 @@ void SignalFD::setHandler(const int sigNum, const Callback&& callback)
 {
     Lock lock(mMutex);
 
+    ::sigset_t set = getSignalMask();
+
+    int error = ::signalfd(mFD, &set, SFD_CLOEXEC);
+    if (error != mFD) {
+        const std::string msg = getSystemErrorMessage();
+        LOGE("Error in signalfd: " << msg);
+        throw UtilsException("Error in signalfd: " + msg);
+    }
+
+    mCallbacks.insert({sigNum, callback});
+}
+
+void SignalFD::setHandlerAndBlock(const int sigNum, const Callback&& callback)
+{
+    Lock lock(mMutex);
+
     bool isBlocked = isSignalBlocked(sigNum);
 
     ::sigset_t set = getSignalMask();
