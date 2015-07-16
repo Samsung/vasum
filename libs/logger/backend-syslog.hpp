@@ -1,7 +1,7 @@
 /*
- *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Pawel Broda <p.broda@partner.samsung.com>
+ *  Contact: Roman Kubiak (r.kubiak@samsung.com)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,32 +18,26 @@
 
 /**
  * @file
- * @author  Pawel Broda (p.broda@partner.samsung.com)
- * @brief   Stderr backend for logger
+ * @author  Roman Kubiak (r.kubiak@samsung.com)
+ * @brief   Syslog backend for logger
  */
 
-#ifndef COMMON_LOGGER_BACKEND_STDERR_HPP
-#define COMMON_LOGGER_BACKEND_STDERR_HPP
+#ifndef COMMON_LOGGER_BACKEND_SYSLOG_HPP
+#define COMMON_LOGGER_BACKEND_SYSLOG_HPP
 
 #include "logger/backend.hpp"
 
 namespace logger {
 
-/**
- * Stderr logging backend
- */
-class StderrBackend : public LogBackend {
+class SyslogBackend : public LogBackend {
 public:
-    StderrBackend(const bool useColours = true) : mUseColours(useColours) {}
     void log(LogLevel logLevel,
              const std::string& file,
              const unsigned int& line,
              const std::string& func,
              const std::string& message) override;
-private:
-    bool mUseColours;
 };
 
 } // namespace logger
 
-#endif // COMMON_LOGGER_BACKEND_STDERR_HPP
+#endif // COMMON_LOGGER_BACKEND_SYSLOG_HPP

@@ -49,11 +49,11 @@ void StderrBackend::log(LogLevel logLevel,
     for (const auto& messageLine : tokens) {
         if (!messageLine.empty()) {
             fprintf(stderr,
-                    "%s%s%s%s\n",
-                    logColor.c_str(),
+                    "%s%s %s%s\n",
+                    mUseColours ? logColor.c_str() : "",
                     header.c_str(),
                     messageLine.c_str(),
-                    defaultColor.c_str());
+                    mUseColours ? defaultColor.c_str() : "");
         }
     }
 }

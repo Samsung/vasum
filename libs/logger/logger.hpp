@@ -26,6 +26,8 @@
 #define COMMON_LOGGER_LOGGER_HPP
 
 #include "logger/level.hpp"
+#include "logger/backend-file.hpp"
+#include "logger/backend-stderr.hpp"
 
 #include <sstream>
 #include <string>

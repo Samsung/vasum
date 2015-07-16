@@ -1,7 +1,7 @@
 /*
- *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Dariusz Michaluk <d.michaluk@samsung.com>
+ *  Contact: Roman Kubiak (r.kubiak@samsung.com)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,21 +18,21 @@
 
 /**
  * @file
- * @author  Dariusz Michaluk (d.michaluk@samsung.com)
- * @brief   Systemd journal backend for logger
+ * @author  Roman Kubiak (r.kubiak@samsung.com)
+ * @brief   Syslog backend for logger
  */
-#ifdef HAVE_SYSTEMD_JOURNAL
+
 #include "logger/config.hpp"
-#include "logger/backend-journal.hpp"
+#include "logger/formatter.hpp"
+#include "logger/backend-syslog.hpp"
 
-#define SD_JOURNAL_SUPPRESS_LOCATION
-#include <systemd/sd-journal.h>
-
+#include <syslog.h>
+#include <sstream>
 namespace logger {
 
 namespace {
 
-inline int toJournalPriority(LogLevel logLevel)
+inline int toSyslogPriority(LogLevel logLevel)
 {
     switch (logLevel) {
     case LogLevel::ERROR:
@@ -54,19 +54,13 @@ inline int toJournalPriority(LogLevel logLevel)
 
 } // namespace
 
-void SystemdJournalBackend::log(LogLevel logLevel,
-                                const std::string& file,
-                                const unsigned int& line,
-                                const std::string& func,
-                                const std::string& message)
+void SyslogBackend::log(LogLevel logLevel,
+                        const std::string& file,
+                        const unsigned int& line,
+                        const std::string& func,
+                        const std::string& message)
 {
-    sd_journal_send("PRIORITY=%d", toJournalPriority(logLevel),
-                    "CODE_FILE=%s", file.c_str(),
-                    "CODE_LINE=%d", line,
-                    "CODE_FUNC=%s", func.c_str(),
-                    "MESSAGE=%s", message.c_str(),
-                    NULL);
+    ::syslog(toSyslogPriority(logLevel), "%s %s", LogFormatter::getHeader(logLevel, file, line, func).c_str(), message.c_str());
 }
 
 } // namespace logger
-#endif // HAVE_SYSTEMD_JOURNAL
