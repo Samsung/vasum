@@ -22,6 +22,7 @@
  * @brief   Example dbus api client
  */
 
+#ifdef DBUS_CONNECTION
 #include "config.hpp"
 
 #include "dbus/test-client.hpp"
@@ -101,3 +102,4 @@ void DbusTestClient::throwException(int arg)
 
 
 } // namespace vasum
+#endif //DBUS_CONNECTION

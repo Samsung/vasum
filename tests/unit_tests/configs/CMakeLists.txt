@@ -28,15 +28,18 @@ CONFIGURE_FILE(test-daemon.conf.in
               ${CMAKE_BINARY_DIR}/test-daemon.conf @ONLY)
 FILE(GLOB ut_zone_CONF_GEN ${CMAKE_BINARY_DIR}/*.conf)
 
+IF(NOT WITHOUT_DBUS)
 CONFIGURE_FILE(templates/console-dbus.conf.in
                ${CMAKE_BINARY_DIR}/templates/console-dbus.conf @ONLY)
+ENDIF(NOT WITHOUT_DBUS)
 CONFIGURE_FILE(templates/console-ipc.conf.in
                ${CMAKE_BINARY_DIR}/templates/console-ipc.conf @ONLY)
 FILE(GLOB ut_zone_templates_CONF_GEN ${CMAKE_BINARY_DIR}/templates/*.conf)
 
+IF(NOT WITHOUT_SYSTEMD)
 CONFIGURE_FILE(systemd/vasum-socket-test.service.in
                ${CMAKE_BINARY_DIR}/systemd/vasum-socket-test.service)
-
+ENDIF(NOT WITHOUT_SYSTEMD)
 
 ## Install #####################################################################
 INSTALL(FILES        ${ut_zone_CONF}
@@ -50,9 +53,11 @@ INSTALL(FILES        ${ut_zone_templates_CONF}
 INSTALL(PROGRAMS     ${ut_lxc_templates_CONF}
         DESTINATION  ${VSM_TEST_TEMPLATES_INSTALL_DIR})
 
+IF(NOT WITHOUT_DBUS)
 INSTALL(FILES        dbus/ut-dbus.conf
                      dbus/ut-dbus-system.conf
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/dbus)
+ENDIF(NOT WITHOUT_DBUS)
 
 INSTALL(FILES        provision/test-provision.conf
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/provision)
@@ -60,10 +65,14 @@ INSTALL(FILES        provision/test-provision.conf
 INSTALL(FILES        utils/file.txt
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/utils)
 
+
+IF(NOT WITHOUT_SYSTEMD)
 INSTALL(FILES        systemd/vasum-socket-test.socket
                      ${CMAKE_BINARY_DIR}/systemd/vasum-socket-test.service
         DESTINATION  ${SYSTEMD_UNIT_DIR})
+ENDIF(NOT WITHOUT_SYSTEMD)
 
+IF(NOT WITHOUT_DBUS)
 INSTALL(FILES        dbus-1/system.d/org.tizen.vasum.tests.conf
         DESTINATION  ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)
-
+ENDIF(NOT WITHOUT_DBUS)

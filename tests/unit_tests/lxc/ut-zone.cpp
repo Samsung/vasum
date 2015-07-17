@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(StartShutdown)
     LxcZone lxc(ZONE_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
     const char* argv[] = {
-        "/bin/sh",
+        "/bin/bash",
         "-c",
         "trap exit SIGTERM; read",
         NULL
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(StartStop)
     LxcZone lxc(ZONE_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
     const char* argv[] = {
-        "/bin/sh",
+        "/bin/bash",
         NULL
     };
     BOOST_CHECK(lxc.start(argv));
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(StartHasStopped)
     LxcZone lxc(ZONE_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
     const char* argv[] = {
-        "/bin/sh",
+        "/bin/bash",
         "-c",
         "echo",
         NULL
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(FreezeUnfreeze)
     LxcZone lxc(ZONE_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));
     const char* argv[] = {
-        "/bin/sh",
+        "/bin/bash",
         "-c",
         "trap exit SIGTERM; read",
         NULL
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(FreezeStop)
     LxcZone lxc(ZONE_PATH, ZONE_NAME);
     BOOST_CHECK(lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));
     const char* argv[] = {
-        "/bin/sh",
+        "/bin/bash",
         "-c",
         "trap exit SIGTERM; read",
         NULL
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(Repeat)
     BOOST_CHECK(lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));
     BOOST_CHECK(!lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));// forbidden
     const char* argv[] = {
-        "/bin/sh",
+        "/bin/bash",
         "-c",
         "trap exit SIGTERM; read",
         NULL
@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(CreateFile)
     LxcZone lxc(ZONE_PATH, ZONE_NAME);
     BOOST_REQUIRE(lxc.create(ZONE_TEMPLATE, TEMPLATE_ARGS));
     const char* argv[] = {
-        "/bin/sh",
+        "/bin/bash",
         "-c",
         "trap exit SIGTERM; read",
         NULL

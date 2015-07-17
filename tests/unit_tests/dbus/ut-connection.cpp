@@ -22,6 +22,7 @@
  * @brief   Dbus connection unit tests
  */
 
+#ifdef DBUS_CONNECTION
 #include "config.hpp"
 #include "ut.hpp"
 #include "dbus/test-server.hpp"
@@ -52,7 +53,7 @@ using namespace dbus;
 
 namespace {
 
-const char* DBUS_DAEMON_PROC = "/usr/bin/dbus-daemon";
+const char* DBUS_DAEMON_PROC = "/bin/dbus-daemon";
 const char* const DBUS_DAEMON_ARGS[] = {
     DBUS_DAEMON_PROC,
     "--config-file=" VSM_TEST_CONFIG_INSTALL_DIR "/dbus/ut-dbus.conf",
@@ -642,3 +643,4 @@ BOOST_AUTO_TEST_CASE(DbusApiConnectionLostDelayedCallbackSet)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+#endif //DBUS_CONNECTION

@@ -22,6 +22,7 @@
  * @brief   Implementation of a class for communication with server
  */
 
+#ifdef DBUS_CONNECTION
 #include "config.hpp"
 
 #include "host-dbus-connection.hpp"
@@ -447,3 +448,4 @@ void HostDbusConnection::proxyCallAsync(const std::string& busName,
 }
 
 } // namespace vasum
+#endif //DBUS_CONNECTION

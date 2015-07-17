@@ -10,6 +10,10 @@
 %define tty_group tty
 # Default platform is Tizen, setup Fedora with --define 'platform_type FEDORA'
 %{!?platform_type:%define platform_type "TIZEN"}
+# Default build with dbus
+%{!?without_dbus:%define without_dbus 0}
+# Default build with systemd
+%{!?without_systemd:%define without_systemd 0}
 
 Name:           vasum
 Epoch:          1
@@ -24,11 +28,18 @@ BuildRequires:  boost-devel
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  lxc-devel
 BuildRequires:  readline-devel
+BuildRequires:  pkgconfig(sqlite3)
 Requires:       lxc
+%if !%{without_systemd}
+BuildRequires:  pkgconfig(libsystemd-daemon)
+BuildRequires:  pkgconfig(libsystemd-journal)
+%endif
 %if %{platform_type} == "TIZEN"
+BuildRequires:  libjson-devel >= 0.10
 Requires:       iproute2
 Requires(post): libcap-tools
 %else
+BuildRequires:  json-c-devel
 Requires:       lxc-templates
 Requires:       iproute
 Requires(post): libcap
@@ -52,10 +63,14 @@ between them. A process from inside a zone can request a switch of context
 %config /etc/vasum/daemon.conf
 %attr(755,root,root) /etc/vasum/templates/*.sh
 %config /etc/vasum/templates/*.conf
+%if !%{without_systemd}
 %{_unitdir}/vasum.service
 %{_unitdir}/vasum.socket
 %{_unitdir}/multi-user.target.wants/vasum.service
+%endif
+%if !%{without_dbus}
 %config /etc/dbus-1/system.d/org.tizen.vasum.host.conf
+%endif
 %dir %{_datadir}/zones
 
 %prep
@@ -79,13 +94,16 @@ between them. A process from inside a zone can request a switch of context
          -DINPUT_EVENT_GROUP=%{input_event_group} \
          -DDISK_GROUP=%{disk_group} \
          -DTTY_GROUP=%{tty_group} \
-         -DWITHOUT_DBUS=%{?without_dbus}
+         -DWITHOUT_DBUS=%{?without_dbus} \
+         -DWITHOUT_SYSTEMD=%{?without_systemd}
 make -k %{?jobs:-j%jobs}
 
 %install
 %make_install
+%if !%{without_systemd}
 mkdir -p %{buildroot}/%{_unitdir}/multi-user.target.wants
 ln -s ../vasum.service %{buildroot}/%{_unitdir}/multi-user.target.wants/vasum.service
+%endif
 mkdir -p %{buildroot}/%{_datadir}/zones
 %if %{platform_type} == "TIZEN"
 ln -s tizen.conf %{buildroot}/etc/vasum/templates/default.conf
@@ -97,20 +115,26 @@ ln -s fedora.conf %{buildroot}/etc/vasum/templates/default.conf
 rm -rf %{buildroot}
 
 %post
+%if !%{without_systemd}
 # Refresh systemd services list after installation
 if [ $1 == 1 ]; then
     systemctl daemon-reload || :
 fi
+%endif
+
 # set needed caps on the binary to allow restart without loosing them
 setcap CAP_SYS_ADMIN,CAP_MAC_OVERRIDE,CAP_SYS_TTY_CONFIG+ei %{_bindir}/vasum-server
 
 %preun
+%if !%{without_systemd}
 # Stop the service before uninstall
 if [ $1 == 0 ]; then
      systemctl stop vasum.service || :
 fi
+%endif
 
 %postun
+%if !%{without_systemd}
 # Refresh systemd services list after uninstall/upgrade
 systemctl daemon-reload || :
 if [ $1 -ge 1 ]; then
@@ -123,6 +147,7 @@ if [ $1 -ge 1 ]; then
 else
     echo "Vasum removed. Reboot is required for the changes to take effect..."
 fi
+%endif
 
 ## Client Package ##############################################################
 %package client
@@ -172,7 +197,7 @@ Development package including the header files for the client library
 %{_libdir}/pkgconfig/vasum-client.pc
 %{_libdir}/pkgconfig/vasum.pc
 
-
+%if !%{without_dbus}
 ## Zone Support Package ###################################################
 %package zone-support
 Summary:          Vasum Support
@@ -205,7 +230,7 @@ Daemon running inside every zone.
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/vasum-zone-daemon
 %config /etc/dbus-1/system.d/org.tizen.vasum.zone.daemon.conf
-
+%endif
 
 ## Command Line Interface ######################################################
 %package cli
@@ -248,16 +273,22 @@ Requires:         boost-test
 Unit tests for both: server and client and integration tests.
 
 %post tests
-systemctl daemon-reload
-systemctl enable vasum-socket-test.socket
-systemctl start vasum-socket-test.socket
+%if !%{without_systemd}
+systemctl daemon-reload || :
+systemctl enable vasum-socket-test.socket || :
+systemctl start vasum-socket-test.socket || :
+%endif
 
 %preun tests
-systemctl stop vasum-socket-test.socket
-systemctl disable vasum-socket-test.socket
+%if !%{without_systemd}
+systemctl stop vasum-socket-test.socket || :
+systemctl disable vasum-socket-test.socket || :
+%endif
 
 %postun tests
-systemctl daemon-reload
+%if !%{without_systemd}
+systemctl daemon-reload || :
+%endif
 
 %files tests
 %if %{platform_type} == "TIZEN"
@@ -265,27 +296,32 @@ systemctl daemon-reload
 %endif
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/vasum-server-unit-tests
+%if !%{without_systemd}
 %attr(755,root,root) %{_bindir}/vasum-socket-test
+%endif
 %attr(755,root,root) %{script_dir}/vsm_all_tests.py
 %attr(755,root,root) %{script_dir}/vsm_int_tests.py
 %attr(755,root,root) %{script_dir}/vsm_launch_test.py
 %{script_dir}/vsm_test_parser.py
 %config /etc/vasum/tests/*.conf
+%if !%{without_dbus}
 %config /etc/vasum/tests/dbus/*.conf
+%config /etc/dbus-1/system.d/org.tizen.vasum.tests.conf
+%endif
 %config /etc/vasum/tests/provision/*.conf
 %config /etc/vasum/tests/templates/*.conf
 %attr(755,root,root) /etc/vasum/tests/templates/*.sh
 %config /etc/vasum/tests/utils/*.txt
 %{python_sitelib}/vsm_integration_tests
-%config /etc/dbus-1/system.d/org.tizen.vasum.tests.conf
+%if !%{without_systemd}
 %{_unitdir}/vasum-socket-test.socket
 %{_unitdir}/vasum-socket-test.service
+%endif
 
 ## libLogger Package ###########################################################
 %package -n libLogger
 Summary:            Logger library
 Group:              Security/Other
-BuildRequires:      pkgconfig(libsystemd-journal)
 Requires(post):     /sbin/ldconfig
 Requires(postun):   /sbin/ldconfig
 
@@ -315,6 +351,7 @@ The package provides libLogger development tools and libs.
 %{_includedir}/vasum-tools/logger
 %{_libdir}/pkgconfig/libLogger.pc
 
+%if !%{without_dbus}
 ## libSimpleDbus Package #######################################################
 %package -n libSimpleDbus
 Summary:            Simple dbus library
@@ -348,17 +385,15 @@ The package provides libSimpleDbus development tools and libs.
 %{_libdir}/libSimpleDbus.so
 %{_includedir}/vasum-tools/dbus
 %{_libdir}/pkgconfig/libSimpleDbus.pc
+%endif
 
 ## libConfig Package ##########################################################
 %package -n libConfig
 Summary:            Config library
 Group:              Security/Other
-BuildRequires:      pkgconfig(sqlite3)
 %if %{platform_type} == "TIZEN"
-BuildRequires:      libjson-devel >= 0.10
 Requires:           libjson >= 0.10
 %else
-BuildRequires:      json-c-devel
 Requires:           json-c
 %endif
 Requires(post):     /sbin/ldconfig
@@ -401,7 +436,6 @@ The package provides libConfig development tools and libs.
 %package -n libIpc
 Summary:            IPC library
 Group:              Security/Other
-BuildRequires:      pkgconfig(libsystemd-daemon)
 Requires:           libConfig
 Requires(post):     /sbin/ldconfig
 Requires(postun):   /sbin/ldconfig

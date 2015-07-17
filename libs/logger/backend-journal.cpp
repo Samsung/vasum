@@ -21,7 +21,8 @@
  * @author  Dariusz Michaluk (d.michaluk@samsung.com)
  * @brief   Systemd journal backend for logger
  */
-#ifdef HAVE_SYSTEMD_JOURNAL
+
+#ifdef HAVE_SYSTEMD
 #include "logger/config.hpp"
 #include "logger/backend-journal.hpp"
 
@@ -69,4 +70,4 @@ void SystemdJournalBackend::log(LogLevel logLevel,
 }
 
 } // namespace logger
-#endif // HAVE_SYSTEMD_JOURNAL
+#endif // HAVE_SYSTEMD

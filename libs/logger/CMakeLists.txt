@@ -36,15 +36,13 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 )
 
 ## Link libraries ##############################################################
-PKG_CHECK_MODULES(LOGGER_DEPS libsystemd-journal QUIET)
+IF(NOT WITHOUT_SYSTEMD)
+PKG_CHECK_MODULES(LOGGER_DEPS REQUIRED libsystemd-journal)
+ENDIF(NOT WITHOUT_SYSTEMD)
+
 INCLUDE_DIRECTORIES(${LIBS_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${LOGGER_DEPS_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} ${LOGGER_DEPS_LIBRARIES})
-
-## Add constants ###############################################################
-if(LOGGER_DEPS_FOUND)
-    ADD_DEFINITIONS(-DHAVE_SYSTEMD_JOURNAL=${LOGGER_DEPS_FOUND})
-endif()
 
 ## Generate the pc file ########################################################
 CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_CURRENT_BINARY_DIR}/${PC_FILE} @ONLY)

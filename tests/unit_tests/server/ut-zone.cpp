@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE(ForegroundBackgroundSchedulerLevel)
     c->setSchedulerLevel(SchedulerLevel::BACKGROUND);
     BOOST_CHECK_EQUAL(c->getSchedulerQuota(), refConfig.cpuQuotaBackground);
 }
-
+#ifdef DBUS_CONNECTION
 BOOST_AUTO_TEST_CASE(DbusConnection)
 {
     mRunGuard.create("/tmp/ut-run"); // the same path as in zone template
@@ -230,6 +230,7 @@ BOOST_AUTO_TEST_CASE(DbusConnection)
 }
 
 // TODO: DbusReconnection
+#endif //DBUS_CONNECTION
 
 BOOST_AUTO_TEST_CASE(ListNetdev)
 {

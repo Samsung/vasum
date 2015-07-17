@@ -22,6 +22,7 @@
  * @brief   Example dbus api server
  */
 
+#ifdef DBUS_CONNECTION
 #include "config.hpp"
 
 #include "dbus/test-server.hpp"
@@ -149,3 +150,4 @@ void DbusTestServer::onMessageCall(const std::string& objectPath,
 
 
 } // namespace vasum
+#endif //DBUS_CONNECTION

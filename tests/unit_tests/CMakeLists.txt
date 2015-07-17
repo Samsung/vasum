@@ -34,15 +34,17 @@ LIST(REMOVE_ITEM project_SRCS ${socket_test_SRCS})
 
 ## Setup target ################################################################
 SET(UT_SERVER_CODENAME "${PROJECT_NAME}-server-unit-tests")
-SET(SOCKET_TEST_CODENAME "${PROJECT_NAME}-socket-test")
 ADD_EXECUTABLE(${UT_SERVER_CODENAME} ${project_SRCS} ${common_SRCS} ${server_SRCS} ${client_SRCS})
 
 ## A fake target to test vasum-client C API
 ADD_EXECUTABLE("vasum-client-c-api-compile-test" client/client-c-api-compile-test.c)
 
+IF(NOT WITHOUT_SYSTEMD)
+SET(SOCKET_TEST_CODENAME "${PROJECT_NAME}-socket-test")
+
 ## A stub mini-service to test socket functionality
 ADD_EXECUTABLE(${SOCKET_TEST_CODENAME} ${socket_test_SRCS} ${common_SRCS} ${client_SRCS})
-
+ENDIF(NOT WITHOUT_SYSTEMD)
 
 ## Link libraries ##############################################################
 FIND_PACKAGE (Boost COMPONENTS unit_test_framework system filesystem regex)
@@ -50,7 +52,7 @@ FIND_PACKAGE (Boost COMPONENTS unit_test_framework system filesystem regex)
 PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED lxc gio-2.0)
 INCLUDE_DIRECTORIES(${COMMON_FOLDER} ${SERVER_FOLDER} ${UNIT_TESTS_FOLDER} ${CLIENT_FOLDER}
                     ${LIBS_FOLDER} ${SOCKET_TEST_FOLDER})
-INCLUDE_DIRECTORIES(SYSTEM ${UT_SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(SYSTEM ${UT_SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${JSON_C_INCLUDE_DIRS})
 
 SET_TARGET_PROPERTIES(${UT_SERVER_CODENAME} PROPERTIES
     COMPILE_FLAGS "-pthread"
@@ -58,16 +60,26 @@ SET_TARGET_PROPERTIES(${UT_SERVER_CODENAME} PROPERTIES
     LINK_FLAGS "-pthread"
 )
 
+TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
+                      Logger Config Ipc)
+IF(NOT WITHOUT_DBUS)
+TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} SimpleDbus)
+ENDIF(NOT WITHOUT_DBUS)
+
+IF(NOT WITHOUT_SYSTEMD)
 SET_TARGET_PROPERTIES(${SOCKET_TEST_CODENAME} PROPERTIES
     COMPILE_FLAGS "-pthread"
     COMPILE_DEFINITIONS HOST_IPC_SOCKET="${VSM_UNIT_TESTS_IPC_SOCKET_PATH}"
     LINK_FLAGS "-pthread"
 )
 
-TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
-                      Logger Config SimpleDbus Ipc)
 TARGET_LINK_LIBRARIES(${SOCKET_TEST_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
-                      Logger Config SimpleDbus Ipc)
+                      Logger Config Ipc)
+IF(NOT WITHOUT_DBUS)
+TARGET_LINK_LIBRARIES(${SOCKET_TEST_CODENAME} SimpleDbus)
+ENDIF(NOT WITHOUT_DBUS)
+
+ENDIF(NOT WITHOUT_SYSTEMD)
 
 ## Subdirectories ##############################################################
 SET(VSM_TEST_CONFIG_INSTALL_DIR ${VSM_CONFIG_INSTALL_DIR}/tests)
@@ -79,4 +91,8 @@ ADD_SUBDIRECTORY(configs)
 
 ## Install #####################################################################
 INSTALL(TARGETS ${UT_SERVER_CODENAME} DESTINATION bin)
+
+IF(NOT WITHOUT_SYSTEMD)
 INSTALL(TARGETS ${SOCKET_TEST_CODENAME} DESTINATION bin)
+ENDIF(NOT WITHOUT_SYSTEMD)
+

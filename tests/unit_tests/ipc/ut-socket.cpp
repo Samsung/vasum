@@ -22,6 +22,7 @@
  * @brief   Socket IPC module tests
  */
 
+#ifdef HAVE_SYSTEMD
 #include "config.hpp"
 #include "ut.hpp"
 #include "ipc/internals/socket.hpp"
@@ -47,3 +48,4 @@ BOOST_AUTO_TEST_CASE(SystemdSocket)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+#endif // HAVE_SYSTEMD

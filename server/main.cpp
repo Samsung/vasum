@@ -36,6 +36,7 @@
 #include "logger/logger.hpp"
 #include "logger/backend-stderr.hpp"
 #include "logger/backend-journal.hpp"
+#include "logger/backend-syslog.hpp"
 #include "utils/typeinfo.hpp"
 #include "utils/signal.hpp"
 
@@ -110,8 +111,10 @@ int main(int argc, char* argv[])
         Logger::setLogLevel(vm["log-level"].as<std::string>());
 #ifdef LOG_TO_CONSOLE
         Logger::setLogBackend(new StderrBackend());
-#else
+#elif HAVE_SYSTEMD
         Logger::setLogBackend(new SystemdJournalBackend());
+#else
+        Logger::setLogBackend(new SyslogBackend());
 #endif
 
         runAsRoot = vm.count("root") > 0;

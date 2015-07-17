@@ -23,25 +23,29 @@ FILE(GLOB zone_templates_CONF  templates/*.conf)
 FILE(GLOB lxc_templates_CONF   templates/*.sh)
 
 ## Generate ####################################################################
+IF(NOT WITHOUT_SYSTEMD)
 CONFIGURE_FILE(systemd/vasum.service.in
                ${CMAKE_BINARY_DIR}/systemd/vasum.service)
 CONFIGURE_FILE(systemd/vasum.socket.in
                ${CMAKE_BINARY_DIR}/systemd/vasum.socket)
+ENDIF(NOT WITHOUT_SYSTEMD)
 
-
-## Install #####################################################################
 CONFIGURE_FILE(daemon.conf.in
                ${CMAKE_BINARY_DIR}/daemon.conf)
 
+IF(NOT WITHOUT_DBUS)
+CONFIGURE_FILE(dbus-1/system.d/org.tizen.vasum.host.conf.in
+               ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.vasum.host.conf)
+ENDIF(NOT WITHOUT_DBUS)
+
+## Install #####################################################################
 INSTALL(FILES       ${CMAKE_BINARY_DIR}/daemon.conf
         DESTINATION ${VSM_CONFIG_INSTALL_DIR})
 
-# preprocess d-bus configs
-CONFIGURE_FILE(dbus-1/system.d/org.tizen.vasum.host.conf.in
-               ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.vasum.host.conf)
-
+IF(NOT WITHOUT_DBUS)
 INSTALL(FILES       ${CMAKE_BINARY_DIR}/dbus-1/system.d/org.tizen.vasum.host.conf
         DESTINATION ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)
+ENDIF(NOT WITHOUT_DBUS)
 
 INSTALL(DIRECTORY   DESTINATION ${DATA_DIR}/zones)
 
@@ -51,7 +55,10 @@ INSTALL(FILES       ${zone_templates_CONF}
 INSTALL(PROGRAMS    ${lxc_templates_CONF}
         DESTINATION ${VSM_CONFIG_INSTALL_DIR}/templates)
 
+IF(NOT WITHOUT_SYSTEMD)
 INSTALL(FILES
         ${CMAKE_BINARY_DIR}/systemd/vasum.service
         ${CMAKE_BINARY_DIR}/systemd/vasum.socket
         DESTINATION ${SYSTEMD_UNIT_DIR})
+ENDIF(NOT WITHOUT_SYSTEMD)
+

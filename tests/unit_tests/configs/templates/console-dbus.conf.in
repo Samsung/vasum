@@ -1,6 +1,6 @@
 {
     "zoneTemplate" : "minimal.sh",
-    "initWithArgs" : ["/bin/sh", "-c", "trap exit SIGTERM; /usr/bin/dbus-daemon --config-file=@VSM_TEST_CONFIG_INSTALL_DIR@/dbus/ut-dbus-system.conf --fork; read"],
+    "initWithArgs" : ["/bin/bash", "-c", "trap exit SIGTERM; /bin/dbus-daemon --config-file=@VSM_TEST_CONFIG_INSTALL_DIR@/dbus/ut-dbus-system.conf --fork; read"],
     "requestedState" : "running",
     "ipv4Gateway" : "",
     "ipv4" : "",

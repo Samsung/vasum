@@ -30,7 +30,9 @@
 #include "utils/exception.hpp"
 #include "logger/logger.hpp"
 
+#ifdef HAVE_SYSTEMD
 #include <systemd/sd-daemon.h>
+#endif // HAVE_SYSTEMD
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/un.h>
@@ -112,6 +114,7 @@ void Socket::read(void* bufferPtr, const size_t size) const
     utils::read(mFD, bufferPtr, size);
 }
 
+#ifdef HAVE_SYSTEMD
 int Socket::getSystemdSocketInternal(const std::string& path)
 {
     int n = ::sd_listen_fds(-1 /*Block further calls to sd_listen_fds*/);
@@ -131,6 +134,7 @@ int Socket::getSystemdSocketInternal(const std::string& path)
     LOGW("No usable sockets were passed by systemd.");
     return -1;
 }
+#endif // HAVE_SYSTEMD
 
 int Socket::createSocketInternal(const std::string& path)
 {
@@ -178,7 +182,10 @@ int Socket::createSocketInternal(const std::string& path)
 Socket Socket::createSocket(const std::string& path)
 {
     // Initialize a socket
-    int fd = getSystemdSocketInternal(path);
+    int fd = -1;
+#ifdef HAVE_SYSTEMD
+    fd = getSystemdSocketInternal(path);
+#endif // HAVE_SYSTEMD
     fd = fd != -1 ? fd : createSocketInternal(path);
 
     return Socket(fd);

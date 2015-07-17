@@ -28,12 +28,7 @@
 #include "config/is-visitable.hpp"
 #include "config/exception.hpp"
 
-#ifdef JSON_C_VERSION_NEW
-#include <json-c/json.h>
-#else //JSON_C_VERSION_NEW
-#include <json/json.h>
-#endif //JSON_C_VERSION_NEW
-
+#include <json.h>
 #include <string>
 #include <vector>
 
@@ -113,11 +108,11 @@ private:
 
     static json_object* toJsonObject(double value)
     {
-#ifdef JSON_C_VERSION_NEW
+#if JSON_C_MINOR_VERSION >= 12
         return json_object_new_double_s(value, std::to_string(value).c_str());
-#else //JSON_C_VERSION_NEW
+#else
         return json_object_new_double(value);
-#endif //JSON_C_VERSION_NEW
+#endif
     }
 
     static json_object* toJsonObject(const std::string& value)
