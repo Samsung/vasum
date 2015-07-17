@@ -135,6 +135,9 @@ HostIPCConnection::HostIPCConnection(ipc::epoll::EventPoll& eventPoll, ZonesMana
 
     setCreateFileCallback(std::bind(&ZonesManager::handleCreateFileCall,
                                     mZonesManagerPtr, _1, _2));
+
+    setCleanUpZonesRootCallback(std::bind(&ZonesManager::handleCleanUpZonesRootCall,
+                                          mZonesManagerPtr, _1));
 }
 
 HostIPCConnection::~HostIPCConnection()
@@ -390,6 +393,14 @@ void HostIPCConnection::setCreateFileCallback(const Method<const api::CreateFile
     mService->setMethodHandler<Method::out, Method::in>(
         api::ipc::METHOD_CREATE_FILE,
         Method::getWrapper(callback));
+}
+
+void HostIPCConnection::setCleanUpZonesRootCallback(const Method<api::Void>::type& callback)
+{
+    typedef IPCMethodWrapper<api::Void> Callback;
+    mService->setMethodHandler<Callback::out, Callback::in>(
+        api::ipc::METHOD_CLEAN_UP_ZONES_ROOT,
+        Callback::getWrapper(callback));
 }
 
 } // namespace vasum

@@ -196,6 +196,7 @@ public:
                               api::MethodResultBuilder::Pointer result);
     void handleSwitchToDefaultCall(const std::string& caller,
                                    api::MethodResultBuilder::Pointer result);
+    void handleCleanUpZonesRootCall(api::MethodResultBuilder::Pointer result);
 
 private:
     typedef std::recursive_mutex Mutex;

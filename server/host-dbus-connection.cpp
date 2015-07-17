@@ -405,6 +405,12 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
         mZonesManagerPtr->handleSwitchToDefaultCall(EMPTY_CALLER, rb);
         return;
     }
+
+    if (methodName == api::dbus::METHOD_CLEAN_UP_ZONES_ROOT) {
+        auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
+        mZonesManagerPtr->handleCleanUpZonesRootCall(rb);
+        return;
+    }
 }
 
 void HostDbusConnection::onClientVanished(const std::string& name)

@@ -45,6 +45,8 @@
 #include <cassert>
 #include <string>
 #include <climits>
+#include <cctype>
+#include <set>
 
 
 namespace vasum {
@@ -60,6 +62,11 @@ const boost::regex ZONE_NAME_REGEX("~NAME~");
 const boost::regex ZONE_IP_THIRD_OCTET_REGEX("~IP~");
 
 const unsigned int ZONE_IP_BASE_THIRD_OCTET = 100;
+
+const std::vector<std::string> prohibitedZonesNames{
+    ENABLED_FILE_NAME,
+    "lxc-monitord.log"
+};
 
 template<typename T>
 void remove(std::vector<T>& v, const T& item)
@@ -97,6 +104,55 @@ bool zoneIsRunning(const std::unique_ptr<Zone>& zone) {
     return zone->isRunning();
 }
 
+bool isalnum(const std::string& str)
+{
+    for (const auto& c : str) {
+        if (!std::isalnum(c)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void cleanUpUnknownsFromRoot(const boost::filesystem::path& zonesPath,
+                             const std::vector<std::string>& zoneIds,
+                             bool dryRun)
+{
+    namespace fs =  boost::filesystem;
+    const auto end = fs::directory_iterator();
+
+    std::set<std::string> knowns(zoneIds.begin(), zoneIds.end());
+    knowns.insert(prohibitedZonesNames.begin(), prohibitedZonesNames.end());
+
+    // Remove all directories that start with '.'
+    for (auto zoneDir = fs::directory_iterator(zonesPath); zoneDir != end; ++zoneDir) {
+        if (zoneDir->path().filename().string()[0] ==  '.') {
+            if (!dryRun) {
+                fs::remove_all(zoneDir->path());
+                LOGI("Remove directory entry: " << *zoneDir);
+            } else {
+                LOGI("Remove directory entry (dry run): " << *zoneDir);
+            }
+        }
+    }
+
+    for (auto zoneDir = fs::directory_iterator(zonesPath); zoneDir != end; ++zoneDir) {
+        const auto zoneIt = knowns.find(zoneDir->path().filename().string());
+        if (zoneIt == knowns.end()) {
+            if (!dryRun) {
+                const std::string filename = '.' + zoneDir->path().filename().string();
+                fs::path newName = zoneDir->path().parent_path() / filename;
+
+                fs::rename(zoneDir->path(), newName);
+                fs::remove_all(newName);
+                LOGI("Remove directory entry: " << *zoneDir);
+            } else {
+                LOGI("Remove directory entry (dry run): " << *zoneDir);
+            }
+        }
+    }
+}
+
 } // namespace
 
 
@@ -132,6 +188,8 @@ void ZonesManager::start()
     LOGD("Starting ZonesManager");
 
     mIsRunning = true;
+
+    cleanUpUnknownsFromRoot(mConfig.zonesPath, mDynamicConfig.zoneIds, !mConfig.cleanUpZonesPath);
 
 #ifdef DBUS_CONNECTION
     using namespace std::placeholders;
@@ -1132,9 +1190,14 @@ int ZonesManager::getVTForNewZone()
 void ZonesManager::createZone(const std::string& id,
                               const std::string& templateName)
 {
-    if (id.empty()) { // TODO validate id (no spaces, slashes etc)
+    if (id.empty() || !isalnum(id)) {
         LOGE("Failed to add zone - invalid name.");
         throw InvalidZoneIdException("Invalid name");
+    }
+
+    if (find(prohibitedZonesNames.begin(), prohibitedZonesNames.end(), id) != prohibitedZonesNames.end()) {
+        LOGE("Cannot create " << id << " zone - name is not allowed!");
+        throw InvalidZoneIdException("Zone name is not allowed");
     }
 
     LOGI("Creating zone " << id);
@@ -1149,6 +1212,12 @@ void ZonesManager::createZone(const std::string& id,
     if (findZone(id) != mZones.end()) {
         LOGE("Cannot create " << id << " zone - already exists!");
         throw InvalidZoneIdException("Already exists");
+    }
+
+    if (fs::exists(fs::path(mConfig.zonesPath) / id)) {
+        LOGE("Cannot create " << id << " zone - file system already exists!");
+        throw InvalidZoneIdException("Zone file system already exists but there is no configuration for it. "
+                                     "Check cleanUpZonesPath in daemon.conf");
     }
 
     const std::string zonePathStr = utils::createFilePath(mConfig.zonesPath, id, "/");
@@ -1210,9 +1279,9 @@ void ZonesManager::handleCreateZoneCall(const api::CreateZoneIn& data,
             createZone(data.first, data.second);
             result->setVoid();
         } catch (const InvalidZoneIdException& e) {
-            result->setError(api::ERROR_INVALID_ID, "Existing or invalid zone id");
-        } catch (const std::runtime_error& e) {
-            result->setError(api::ERROR_INTERNAL, "Failed to create zone");
+            result->setError(api::ERROR_INVALID_ID, e.what());
+        } catch (const std::exception& e) {
+            result->setError(api::ERROR_INTERNAL, e.what());
         }
     };
 
@@ -1450,6 +1519,26 @@ void ZonesManager::handleRevokeDeviceCall(const api::RevokeDeviceIn& data,
             return;
         }
 
+        result->setVoid();
+    };
+
+    tryAddTask(handler, result, true);
+}
+
+void ZonesManager::handleCleanUpZonesRootCall(api::MethodResultBuilder::Pointer result)
+{
+    auto handler = [&, this] {
+        LOGI("CleanUpZonesRoot call");
+        try {
+            std::vector<std::string> zonesIds;
+            Lock lock(mMutex);
+            for (const auto& zone : mZones) {
+                zonesIds.push_back(zone->getId());
+            }
+            cleanUpUnknownsFromRoot(mConfig.zonesPath, zonesIds, false);
+        } catch (const std::exception& e) {
+            result->setError(api::ERROR_INTERNAL, e.what());
+        }
         result->setVoid();
     };
 

@@ -882,3 +882,12 @@ VsmStatus Client::vsm_remove_declaration(const char* id, VsmString declaration) 
     });
 }
 
+VsmStatus Client::vsm_clean_up_zones_root() noexcept
+{
+    return coverException([&] {
+        mClient->callSync<api::Void, api::Void>(
+            api::ipc::METHOD_CLEAN_UP_ZONES_ROOT,
+            std::make_shared<api::Void>());
+    });
+}
+

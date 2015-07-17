@@ -894,6 +894,13 @@ VsmStatus vsm_remove_declaration(VsmClient client,
                                  const char* zone,
                                  VsmString declaration);
 
+/**
+ * Clean up zones root directory
+ *
+ * Removes all unknown zones root directory entry
+ * @return status of this function call
+ */
+VsmStatus vsm_clean_up_zones_root(VsmClient client);
 
 /** @} Host API */
 

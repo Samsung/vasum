@@ -87,6 +87,7 @@ private:
     void setRevokeDeviceCallback(const Method<const api::RevokeDeviceIn>::type& callback);
     void setSwitchToDefaultCallback(const Method<api::Void>::type& callback);
     void setCreateFileCallback(const Method<const api::CreateFileIn, api::CreateFileOut>::type& callback);
+    void setCleanUpZonesRootCallback(const Method<api::Void>::type& callback);
 
     std::unique_ptr<ipc::Service> mService;
     ZonesManager* mZonesManagerPtr;

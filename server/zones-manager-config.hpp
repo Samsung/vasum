@@ -49,6 +49,11 @@ struct ZonesManagerConfig {
     std::string zonesPath;
 
     /**
+     * If set then all files not related with existing containers will be removed
+     */
+    bool cleanUpZonesPath;
+
+    /**
      * A path where the zones image reside. Empty path means that zones image won't be
      * copied to zonesPath when creating new zone.
      */
@@ -83,6 +88,7 @@ struct ZonesManagerConfig {
     (
         dbPath,
         zonesPath,
+        cleanUpZonesPath,
         zoneImagePath,
         zoneTemplateDir,
         availableVTs,

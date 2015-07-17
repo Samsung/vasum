@@ -340,6 +340,11 @@ public:
      */
     VsmStatus vsm_remove_declaration(const char* zone, VsmString declaration) noexcept;
 
+    /**
+     * @see ::vsm_clean_up_zones_root
+     */
+    VsmStatus vsm_clean_up_zones_root() noexcept;
+
 private:
     struct Status {
         Status();

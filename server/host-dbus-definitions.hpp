@@ -66,6 +66,7 @@ const std::string METHOD_CREATE_FILE              = "CreateFile";
 const std::string METHOD_LOCK_QUEUE               = "LockQueue";
 const std::string METHOD_UNLOCK_QUEUE             = "UnlockQueue";
 const std::string METHOD_SWITCH_TO_DEFAULT        = "SwitchToDefault";
+const std::string METHOD_CLEAN_UP_ZONES_ROOT      = "CleanUpZonesRoot";
 
 const std::string DEFINITION =
     "<node>"
@@ -204,6 +205,8 @@ const std::string DEFINITION =
     "      <arg type='v' name='result' direction='out'/>"
     "    </method>"
     "    <method name='" + METHOD_SWITCH_TO_DEFAULT + "'>"
+    "    </method>"
+    "    <method name='" + METHOD_CLEAN_UP_ZONES_ROOT + "'>"
     "    </method>"
     "  </interface>"
     "</node>";

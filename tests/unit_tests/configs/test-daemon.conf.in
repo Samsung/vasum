@@ -2,6 +2,7 @@
     "dbPath" : "/tmp/ut-zones/vasum.db",
     "zoneIds" : [],
     "zonesPath" : "/tmp/ut-zones",
+    "cleanUpZonesPath" : false,
     "zoneImagePath" : "",
     "zoneTemplateDir" : "@VSM_TEST_CONFIG_INSTALL_DIR@/templates/",
     "runMountPointPrefix" : "",

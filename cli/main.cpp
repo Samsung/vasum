@@ -328,6 +328,15 @@ std::map<std::string, CommandLineInterface> commands = {
             {{"zone_id", "id zone name"},
              {"netdev_id", "network device id"}}
         }
+    },
+    {
+        "clean_up_zones_root", {
+            clean_up_zones_root,
+            "clean_up_zones_root",
+            "Clean up zones root directory",
+            MODE_COMMAND_LINE | MODE_INTERACTIVE,
+            {}
+        }
     }
 };
 

@@ -649,5 +649,12 @@ void netdev_down(const Args& argv)
                   argv[2].c_str()));
 }
 
+void clean_up_zones_root(const Args& /* argv */)
+{
+    using namespace std::placeholders;
+
+    CommandLineInterface::executeCallback(bind(vsm_clean_up_zones_root, _1));
+}
+
 } // namespace cli
 } // namespace vasum

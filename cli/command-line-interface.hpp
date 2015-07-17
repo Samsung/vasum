@@ -340,6 +340,13 @@ void netdev_up(const Args& argv);
  */
 void netdev_down(const Args& argv);
 
+/**
+ * Parses command line arguments and call vsm_clean_up_zones_root
+ *
+ * @see vsm_clean_up_zones_root
+ */
+void clean_up_zones_root(const Args& argv);
+
 } // namespace cli
 } // namespace vasum
 

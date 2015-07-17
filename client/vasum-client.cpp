@@ -390,3 +390,8 @@ API VsmStatus vsm_remove_declaration(VsmClient client,
     return getClient(client).vsm_remove_declaration(zone, declaration);
 }
 
+API VsmStatus vsm_clean_up_zones_root(VsmClient client)
+{
+    return getClient(client).vsm_clean_up_zones_root();
+}
+

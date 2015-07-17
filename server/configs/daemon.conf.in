@@ -2,6 +2,7 @@
     "dbPath" : "/etc/vasum/vasum.db",
     "zoneIds" : [],
     "zonesPath" : "${DATA_DIR}/zones",
+    "cleanUpZonesPath" : false,
     "zoneImagePath" : "",
     "zoneTemplateDir" : "/etc/vasum/templates/",
     "runMountPointPrefix" : "/var/run/zones",

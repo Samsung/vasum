@@ -60,6 +60,7 @@ const ::ipc::MethodID METHOD_CREATE_FILE              = 27;
 const ::ipc::MethodID METHOD_LOCK_QUEUE               = 28;
 const ::ipc::MethodID METHOD_UNLOCK_QUEUE             = 29;
 const ::ipc::MethodID METHOD_SWITCH_TO_DEFAULT        = 30;
+const ::ipc::MethodID METHOD_CLEAN_UP_ZONES_ROOT      = 31;
 
 } // namespace ipc
 } // namespace api
