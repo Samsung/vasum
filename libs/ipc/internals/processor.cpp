@@ -53,11 +53,13 @@ const MethodID Processor::RETURN_METHOD_ID = std::numeric_limits<MethodID>::max(
 const MethodID Processor::REGISTER_SIGNAL_METHOD_ID = std::numeric_limits<MethodID>::max() - 1;
 const MethodID Processor::ERROR_METHOD_ID = std::numeric_limits<MethodID>::max() - 2;
 
-Processor::Processor(const std::string& logName,
+Processor::Processor(epoll::EventPoll& eventPoll,
+                     const std::string& logName,
                      const PeerCallback& newPeerCallback,
                      const PeerCallback& removedPeerCallback,
                      const unsigned int maxNumberOfPeers)
-    : mLogPrefix(logName),
+    : mEventPoll(eventPoll),
+      mLogPrefix(logName),
       mIsRunning(false),
       mNewPeerCallback(newPeerCallback),
       mRemovedPeerCallback(removedPeerCallback),
@@ -110,6 +112,8 @@ void Processor::start()
     if (!mIsRunning) {
         LOGI(mLogPrefix + "Processor start");
         mIsRunning = true;
+
+        mEventPoll.addFD(mRequestQueue.getFD(), EPOLLIN, std::bind(&Processor::handleEvent, this));
     }
 }
 
@@ -684,9 +688,10 @@ bool Processor::onFinishRequest(FinishRequest& requestFinisher)
                            std::make_exception_ptr(IPCClosingException()));
     }
 
+    mEventPoll.removeFD(mRequestQueue.getFD());
     mIsRunning = false;
-
     requestFinisher.conditionPtr->notify_all();
+
     return true;
 }
 

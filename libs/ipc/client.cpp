@@ -32,7 +32,7 @@ namespace ipc {
 
 Client::Client(epoll::EventPoll& eventPoll, const std::string& socketPath)
     : mEventPoll(eventPoll),
-      mProcessor("[CLIENT]  "),
+      mProcessor(eventPoll, "[CLIENT]  "),
       mSocketPath(socketPath)
 {
     LOGS("Client Constructor");
@@ -56,11 +56,7 @@ void Client::start()
         return;
     }
     LOGS("Client start");
-    // Initialize the connection with the server
-    auto handleEvent = [&](int, epoll::Events) {
-        mProcessor.handleEvent();
-    };
-    mEventPoll.addFD(mProcessor.getEventFD(), EPOLLIN, handleEvent);
+
     mProcessor.start();
 
     LOGD("Connecting to " + mSocketPath);
@@ -80,8 +76,6 @@ void Client::stop()
     }
     LOGS("Client stop");
     mProcessor.stop();
-
-    mEventPoll.removeFD(mProcessor.getEventFD());
 }
 
 void Client::handle(const FileDescriptor fd, const epoll::Events pollEvents)

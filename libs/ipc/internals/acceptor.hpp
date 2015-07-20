@@ -28,6 +28,7 @@
 #include "config.hpp"
 
 #include "ipc/internals/socket.hpp"
+#include "ipc/epoll/event-poll.hpp"
 #include "ipc/types.hpp"
 
 #include <string>
@@ -45,30 +46,28 @@ public:
     /**
      * Class for accepting new connections.
      *
+     * @param eventPoll dispatcher
      * @param socketPath path to the socket
      * @param newConnectionCallback called on new connections
      */
-    Acceptor(const std::string& socketPath,
+    Acceptor(epoll::EventPoll& eventPoll,
+             const std::string& socketPath,
              const NewConnectionCallback& newConnectionCallback);
     ~Acceptor();
 
     Acceptor(const Acceptor& acceptor) = delete;
     Acceptor& operator=(const Acceptor&) = delete;
 
+private:
+    epoll::EventPoll& mEventPoll;
+    NewConnectionCallback mNewConnectionCallback;
+    Socket mSocket;
+
     /**
      * Handle one incoming connection.
      * Used with external polling
      */
     void handleConnection();
-
-    /**
-     * @return file descriptor for the connection socket
-     */
-    FileDescriptor getConnectionFD();
-
-private:
-    NewConnectionCallback mNewConnectionCallback;
-    Socket mSocket;
 };
 
 } // namespace ipc

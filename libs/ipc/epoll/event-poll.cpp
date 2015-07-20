@@ -69,11 +69,12 @@ void EventPoll::addFD(const int fd, const Events events, Callback&& callback)
     std::lock_guard<Mutex> lock(mMutex);
 
     if (mCallbacks.find(fd) != mCallbacks.end()) {
-        LOGW("Already added fd: " << fd);
+        LOGE("Already added fd: " << fd);
         throw UtilsException("FD already added");
     }
 
     if (!addFDInternal(fd, events)) {
+        LOGE("Could not add fd");
         throw UtilsException("Could not add fd");
     }
 
@@ -85,6 +86,7 @@ void EventPoll::modifyFD(const int fd, const Events events)
 {
     // No need to lock and check mCallbacks map
     if (!modifyFDInternal(fd, events)) {
+        LOGE("Could not modify fd: " << fd);
         throw UtilsException("Could not modify fd");
     }
 }

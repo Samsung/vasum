@@ -34,6 +34,7 @@
 #include "ipc/internals/remove-peer-request.hpp"
 #include "ipc/internals/send-result-request.hpp"
 #include "ipc/internals/finish-request.hpp"
+#include "ipc/epoll/event-poll.hpp"
 #include "ipc/exception.hpp"
 #include "ipc/method-result.hpp"
 #include "ipc/types.hpp"
@@ -119,7 +120,8 @@ public:
      * @param newPeerCallback called when a new peer arrives
      * @param removedPeerCallback called when the Processor stops listening for this peer
      */
-    Processor(const std::string& logName = "",
+    Processor(epoll::EventPoll& eventPoll,
+              const std::string& logName = "",
               const PeerCallback& newPeerCallback = nullptr,
               const PeerCallback& removedPeerCallback = nullptr,
               const unsigned int maxNumberOfPeers = DEFAULT_MAX_NUMBER_OF_PEERS);
@@ -416,6 +418,8 @@ private:
         PeerID peerID;
         std::shared_ptr<Socket> socketPtr;
     };
+
+    epoll::EventPoll& mEventPoll;
 
     typedef std::vector<PeerInfo> Peers;
 

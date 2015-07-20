@@ -27,29 +27,31 @@
 #include "ipc/internals/acceptor.hpp"
 #include "logger/logger.hpp"
 
+#include <functional>
+
 namespace ipc {
 
-Acceptor::Acceptor(const std::string& socketPath, const NewConnectionCallback& newConnectionCallback)
-    : mNewConnectionCallback(newConnectionCallback),
+Acceptor::Acceptor(epoll::EventPoll& eventPoll,
+                   const std::string& socketPath,
+                   const NewConnectionCallback& newConnectionCallback)
+    : mEventPoll(eventPoll),
+      mNewConnectionCallback(newConnectionCallback),
       mSocket(Socket::createSocket(socketPath))
 {
     LOGT("Creating Acceptor for socket " << socketPath);
+    mEventPoll.addFD(mSocket.getFD(), EPOLLIN, std::bind(&Acceptor::handleConnection, this));
 }
 
 Acceptor::~Acceptor()
 {
     LOGT("Destroyed Acceptor");
+    mEventPoll.removeFD(mSocket.getFD());
 }
 
 void Acceptor::handleConnection()
 {
     std::shared_ptr<Socket> tmpSocket = mSocket.accept();
     mNewConnectionCallback(tmpSocket);
-}
-
-FileDescriptor Acceptor::getConnectionFD()
-{
-    return mSocket.getFD();
 }
 
 } // namespace ipc

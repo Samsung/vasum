@@ -37,8 +37,8 @@ Service::Service(epoll::EventPoll& eventPoll,
                  const PeerCallback& addPeerCallback,
                  const PeerCallback& removePeerCallback)
     : mEventPoll(eventPoll),
-      mProcessor("[SERVICE] "),
-      mAcceptor(socketPath, std::bind(&Processor::addPeer, &mProcessor, _1))
+      mProcessor(eventPoll, "[SERVICE] "),
+      mAcceptor(eventPoll, socketPath, std::bind(&Processor::addPeer, &mProcessor, _1))
 
 {
     LOGS("Service Constructor");
@@ -62,15 +62,9 @@ void Service::start()
         return;
     }
     LOGS("Service start");
-    auto handleConnection = [&](int, epoll::Events) {
-        mAcceptor.handleConnection();
-    };
-    auto handleProcessorEvent = [&](int, epoll::Events) {
-        mProcessor.handleEvent();
-    };
-    mEventPoll.addFD(mProcessor.getEventFD(), EPOLLIN, handleProcessorEvent);
+
     mProcessor.start();
-    mEventPoll.addFD(mAcceptor.getConnectionFD(), EPOLLIN, handleConnection);
+
 }
 
 bool Service::isStarted()
@@ -84,9 +78,7 @@ void Service::stop()
         return;
     }
     LOGS("Service stop");
-    mEventPoll.removeFD(mAcceptor.getConnectionFD());
     mProcessor.stop();
-    mEventPoll.removeFD(mProcessor.getEventFD());
 }
 
 void Service::handle(const FileDescriptor fd, const epoll::Events pollEvents)
@@ -95,7 +87,7 @@ void Service::handle(const FileDescriptor fd, const epoll::Events pollEvents)
     LOGS("Service handle");
 
     if (!isStarted()) {
-        LOGW("Service stopped");
+        LOGW("Service stopped, but got event: " << pollEvents << " on fd: " << fd);
         return;
     }
 
