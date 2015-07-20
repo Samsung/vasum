@@ -17,7 +17,7 @@
  */
 
 /**
- * @file    fake-power-manager-dbus-definitions.h
+ * @file
  * @author  Lukasz Kostyra (l.kostyra@samsung.com)
  * @brief   Declaration of fake dbus definitions from power-manager. Made only to test API in
  *          ZoneConnection.

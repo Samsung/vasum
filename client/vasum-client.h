@@ -743,8 +743,8 @@ VsmStatus vsm_netdev_down(VsmClient client,
  *
  * @param[in] client vasum-server's client
  * @param[in] zone zone name
- * @param[in] zoneDev in host network device id
- * @param[in] hostDev in zone network device id
+ * @param[in] zoneDev  Device ID in Zone network
+ * @param[in] hostDev  Device ID in Host network
  * @return status of this function call
  */
 VsmStatus vsm_create_netdev_veth(VsmClient client,
@@ -752,13 +752,16 @@ VsmStatus vsm_create_netdev_veth(VsmClient client,
                                  const char* zoneDev,
                                  const char* hostDev);
 /**
- * Create macvlab in zone
+ * Create macvlan in zone
  *
- * @param[in] client vasum-server's client
- * @param[in] zone zone name
- * @param[in] zoneDev in host network device id
- * @param[in] hostDev in zone network device id
+ * @param[in] client   vasum-server's client
+ * @param[in] zone     Zone name
+ * @param[in] zoneDev  Device ID in Zone network
+ * @param[in] hostDev  Device ID in Host network
+ * @param[in] mode     Mode with which macvlan will be created.
  * @return status of this function call
+ *
+ * @see macvlan_mode
  */
 VsmStatus vsm_create_netdev_macvlan(VsmClient client,
                                     const char* zone,
@@ -866,7 +869,7 @@ VsmStatus vsm_declare_link(VsmClient client,
  * Get all declarations
  *
  * Gets all declarations of resourcies
- * (@see ::vsm_declare_link, @see ::vsm_declare_mount, @see ::vsm_declare_linki)
+ * (@see ::vsm_declare_link, @see ::vsm_declare_mount, @see ::vsm_declare_file)
  *
  * @param[in] client vasum-server's client
  * @param[in] zone zone id

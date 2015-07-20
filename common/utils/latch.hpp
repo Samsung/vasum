@@ -61,14 +61,14 @@ public:
     bool wait(const unsigned int timeoutMs);
 
     /**
-     * Waits for @ref n occurrences of event.
+     * Waits for @n occurrences of event.
      *
-     * @param n  number of occurrences to wait for
+     * @param n number of occurrences to wait for
      */
     void waitForN(const unsigned int n);
 
     /**
-     * Waits for @ref n occurrences of event with timeout.
+     * Waits for @n occurrences of event with timeout.
      *
      * @param n          number of occurrences to wait for
      * @param timeoutMs  timeout in ms to wait for
