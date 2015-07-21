@@ -13,6 +13,7 @@ var searchData=
   ['_7enetlink',['~Netlink',['../classvasum_1_1netlink_1_1Netlink.html#a05269d67c6767ac07b722e7933bc0441',1,'vasum::netlink::Netlink']]],
   ['_7escopedgerror',['~ScopedGError',['../classutils_1_1ScopedGError.html#af5451c9bbfd2cec01bd17ee200f294bf',1,'utils::ScopedGError']]],
   ['_7escopedglibloop',['~ScopedGlibLoop',['../classutils_1_1ScopedGlibLoop.html#a4b96beebabf97f10e00c6c15e15f8f34',1,'utils::ScopedGlibLoop']]],
+  ['_7esignalfd',['~SignalFD',['../classutils_1_1SignalFD.html#ad433122b89ba023fb54f174f24c68c06',1,'utils::SignalFD']]],
   ['_7eworker',['~Worker',['../classutils_1_1Worker.html#a53d9cba352236d96d3333e051ea873f7',1,'utils::Worker']]],
   ['_7eworkerqueue',['~WorkerQueue',['../classutils_1_1Worker_1_1WorkerQueue.html#a6d022b744143af835f59490fc3e62366',1,'utils::Worker::WorkerQueue']]],
   ['_7ezone',['~Zone',['../classvasum_1_1Zone.html#a43c257c62ec92e84dca348e19583b2cb',1,'vasum::Zone']]],
