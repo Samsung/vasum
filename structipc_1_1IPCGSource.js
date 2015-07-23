@@ -1,0 +1,27 @@
+var structipc_1_1IPCGSource =
+[
+    [ "HandlerCallback", "structipc_1_1IPCGSource.html#a4b5b54014d018eef0a58fd47673d7c5b", null ],
+    [ "Lock", "structipc_1_1IPCGSource.html#a6594579b939fddc38082e0771edc7c57", null ],
+    [ "Pointer", "structipc_1_1IPCGSource.html#a2e50da75ca02dcab287b59345cd21943", null ],
+    [ "~IPCGSource", "structipc_1_1IPCGSource.html#a290cb6307bc210ef77f25be0f5a94d42", null ],
+    [ "IPCGSource", "structipc_1_1IPCGSource.html#ad2366a82e4de7626dd3d717e95861267", null ],
+    [ "IPCGSource", "structipc_1_1IPCGSource.html#ae9e9dcf59577b640132de94eeb7c7b5b", null ],
+    [ "IPCGSource", "structipc_1_1IPCGSource.html#ab79947bd398a61f7494476291a57d2dd", null ],
+    [ "addFD", "structipc_1_1IPCGSource.html#a9df3371fa57619d8d53fe287539bdcc7", null ],
+    [ "attach", "structipc_1_1IPCGSource.html#a9ba6be3b47a9fd0a6487f15c3eaedc51", null ],
+    [ "callHandler", "structipc_1_1IPCGSource.html#ab652a9255317862c89e8af90de98d21a", null ],
+    [ "check", "structipc_1_1IPCGSource.html#a76ef5ab7662c89e7a716d2ba2ebeaece", null ],
+    [ "create", "structipc_1_1IPCGSource.html#ac46b76d1428824cfb3e0ee0a81d37393", null ],
+    [ "detach", "structipc_1_1IPCGSource.html#ac6488a70a8931e16a3e3961967790e33", null ],
+    [ "dispatch", "structipc_1_1IPCGSource.html#aa8ce084519ba13deaae36a211b1d17a4", null ],
+    [ "finalize", "structipc_1_1IPCGSource.html#a485151a3394b2da8a49ca3f607cc1ee5", null ],
+    [ "onHandlerCall", "structipc_1_1IPCGSource.html#afcb0d23721a3211a0b943d08c7825baa", null ],
+    [ "operator=", "structipc_1_1IPCGSource.html#a8a0dc17ea3407a81104107de8e9418a3", null ],
+    [ "prepare", "structipc_1_1IPCGSource.html#af8d644f6852066279da3cda954991297", null ],
+    [ "removeFD", "structipc_1_1IPCGSource.html#a0562b0ac7c183dc9aecb73bf52ddecb2", null ],
+    [ "mGPollFDs", "structipc_1_1IPCGSource.html#a9156546a4bac470d605a10a873dc0b3a", null ],
+    [ "mGSource", "structipc_1_1IPCGSource.html#ace78cab64f73cdf83cc27d2b1ee8fe8d", null ],
+    [ "mGuard", "structipc_1_1IPCGSource.html#aba3b55a8a2b5c5ef5256e5a35e68942a", null ],
+    [ "mHandlerCallback", "structipc_1_1IPCGSource.html#a094fac61c1a18fd497ab9fb66ab5c96e", null ],
+    [ "mStateMutex", "structipc_1_1IPCGSource.html#aea3f68e1dcf8081c4377261470ac84da", null ]
+];

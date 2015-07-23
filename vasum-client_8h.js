@@ -8,7 +8,7 @@ var vasum_client_8h =
     [ "VsmString", "vasum-client_8h.html#addea567ca350531284673971ef910dc0", null ],
     [ "VsmSubscriptionId", "vasum-client_8h.html#a6f1459c94bec9480adeff0659d6cc915", null ],
     [ "VsmZone", "vasum-client_8h.html#a8e3f33c8b44c0c74fcc839e399a96468", null ],
-    [ "VsmZoneDbusStateCallback", "vasum-client_8h.html#a3f258d2a16d217f223776b54285f3c55", null ],
+    [ "VsmZoneDbusStateCallback", "vasum-client_8h.html#a61741c7bf588888db5003c2d32570ace", null ],
     [ "VsmDispacherType", "vasum-client_8h.html#a30c3e5afe864fdbd66bb218872453c01", [
       [ "VSMDISPATCHER_EXTERNAL", "vasum-client_8h.html#a30c3e5afe864fdbd66bb218872453c01aa71d4e04611b468ae8774e3d259819f2", null ],
       [ "VSMDISPATCHER_INTERNAL", "vasum-client_8h.html#a30c3e5afe864fdbd66bb218872453c01a7a059ba472acf60a855e4711985f9e60", null ]

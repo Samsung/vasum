@@ -1,10 +1,100 @@
 var hierarchy =
 [
+    [ "any", null, [
+      [ "DisbaleMoveAnyWrapper", "classDisbaleMoveAnyWrapper.html", null ]
+    ] ],
     [ "Client", "classClient.html", null ],
     [ "Client::Status", "structClient_1_1Status.html", null ],
+    [ "config::check_union< X >::checker__< T, const,, >", "structconfig_1_1check__union_1_1checker____.html", null ],
+    [ "config::FDStore", "classconfig_1_1FDStore.html", null ],
+    [ "config::FileDescriptor", "structconfig_1_1FileDescriptor.html", null ],
+    [ "config::FromFDStoreVisitor", "classconfig_1_1FromFDStoreVisitor.html", null ],
+    [ "config::FromGVariantVisitor", "classconfig_1_1FromGVariantVisitor.html", null ],
+    [ "config::FromJsonVisitor", "classconfig_1_1FromJsonVisitor.html", null ],
+    [ "config::FromKVJsonVisitor", "classconfig_1_1FromKVJsonVisitor.html", null ],
+    [ "config::FromKVStoreVisitor", "classconfig_1_1FromKVStoreVisitor.html", null ],
+    [ "config::has_member_impl< T, F >", "structconfig_1_1has__member__impl.html", null ],
+    [ "config::isVisitableHelper__< T >", "structconfig_1_1isVisitableHelper____.html", null ],
+    [ "config::isVisitableHelper__< T >::Visitor", "structconfig_1_1isVisitableHelper_____1_1Visitor.html", null ],
+    [ "config::KVStore", "classconfig_1_1KVStore.html", null ],
+    [ "config::KVStore::Transaction", "classconfig_1_1KVStore_1_1Transaction.html", null ],
+    [ "config::sqlite3::Connection", "structconfig_1_1sqlite3_1_1Connection.html", null ],
+    [ "config::sqlite3::Statement", "structconfig_1_1sqlite3_1_1Statement.html", null ],
+    [ "config::ToFDStoreVisitor", "classconfig_1_1ToFDStoreVisitor.html", null ],
+    [ "config::ToGVariantVisitor", "classconfig_1_1ToGVariantVisitor.html", null ],
+    [ "config::ToJsonVisitor", "classconfig_1_1ToJsonVisitor.html", null ],
+    [ "config::ToKVStoreVisitor", "classconfig_1_1ToKVStoreVisitor.html", null ],
     [ "utils::CountingMap< GroupID >", "classutils_1_1CountingMap.html", null ],
+    [ "dbus::AsyncMethodCallResult", "classdbus_1_1AsyncMethodCallResult.html", null ],
+    [ "dbus::DbusConnection", "classdbus_1_1DbusConnection.html", null ],
+    [ "dbus::DbusConnection::MethodCallbacks", "structdbus_1_1DbusConnection_1_1MethodCallbacks.html", null ],
+    [ "dbus::DbusConnection::NameCallbacks", "structdbus_1_1DbusConnection_1_1NameCallbacks.html", null ],
+    [ "dbus::DbusConnection::VanishedCallbacks", "structdbus_1_1DbusConnection_1_1VanishedCallbacks.html", null ],
+    [ "dbus::MethodResultBuilder", "classdbus_1_1MethodResultBuilder.html", null ],
+    [ "ipc::Acceptor", "classipc_1_1Acceptor.html", null ],
+    [ "ipc::AddPeerRequest", "classipc_1_1AddPeerRequest.html", null ],
+    [ "ipc::Client", "classipc_1_1Client.html", null ],
+    [ "ipc::epoll::EventPoll", "classipc_1_1epoll_1_1EventPoll.html", null ],
+    [ "ipc::epoll::GlibDispatcher", "classipc_1_1epoll_1_1GlibDispatcher.html", null ],
+    [ "ipc::epoll::ThreadDispatcher", "classipc_1_1epoll_1_1ThreadDispatcher.html", null ],
+    [ "ipc::EventQueue< MessageType >", "classipc_1_1EventQueue.html", null ],
+    [ "ipc::FinishRequest", "classipc_1_1FinishRequest.html", null ],
+    [ "ipc::IPCGSource", "structipc_1_1IPCGSource.html", null ],
+    [ "ipc::MethodHandler< SentDataType, ReceivedDataType >", "structipc_1_1MethodHandler.html", null ],
+    [ "ipc::MethodRequest", "classipc_1_1MethodRequest.html", null ],
+    [ "ipc::MethodResult", "classipc_1_1MethodResult.html", null ],
+    [ "ipc::Processor", "classipc_1_1Processor.html", null ],
+    [ "ipc::Processor::EmptyData", "structipc_1_1Processor_1_1EmptyData.html", null ],
+    [ "ipc::Processor::ErrorProtocolMessage", "structipc_1_1Processor_1_1ErrorProtocolMessage.html", null ],
+    [ "ipc::Processor::MethodHandlers", "structipc_1_1Processor_1_1MethodHandlers.html", null ],
+    [ "ipc::Processor::PeerInfo", "structipc_1_1Processor_1_1PeerInfo.html", null ],
+    [ "ipc::Processor::RegisterSignalsProtocolMessage", "structipc_1_1Processor_1_1RegisterSignalsProtocolMessage.html", null ],
+    [ "ipc::Processor::ReturnCallbacks", "structipc_1_1Processor_1_1ReturnCallbacks.html", null ],
+    [ "ipc::Processor::SignalHandlers", "structipc_1_1Processor_1_1SignalHandlers.html", null ],
+    [ "ipc::RemovePeerRequest", "classipc_1_1RemovePeerRequest.html", null ],
+    [ "ipc::RequestQueue< RequestIdType >", "classipc_1_1RequestQueue.html", null ],
+    [ "ipc::RequestQueue< RequestIdType >::Request", "structipc_1_1RequestQueue_1_1Request.html", null ],
+    [ "ipc::Result< Data >", "classipc_1_1Result.html", null ],
+    [ "ipc::ResultBuilder", "classipc_1_1ResultBuilder.html", null ],
+    [ "ipc::ResultHandler< Data >", "structipc_1_1ResultHandler.html", null ],
+    [ "ipc::SendResultRequest", "classipc_1_1SendResultRequest.html", null ],
+    [ "ipc::Service", "classipc_1_1Service.html", null ],
+    [ "ipc::SignalHandler< ReceivedDataType >", "structipc_1_1SignalHandler.html", null ],
+    [ "ipc::SignalRequest", "classipc_1_1SignalRequest.html", null ],
+    [ "ipc::Socket", "classipc_1_1Socket.html", null ],
+    [ "logger::LogBackend", "classlogger_1_1LogBackend.html", [
+      [ "logger::FileBackend", "classlogger_1_1FileBackend.html", null ],
+      [ "logger::NullLogger", "classlogger_1_1NullLogger.html", null ],
+      [ "logger::StderrBackend", "classlogger_1_1StderrBackend.html", null ],
+      [ "logger::SyslogBackend", "classlogger_1_1SyslogBackend.html", null ],
+      [ "logger::SystemdJournalBackend", "classlogger_1_1SystemdJournalBackend.html", null ]
+    ] ],
+    [ "logger::LogFormatter", "classlogger_1_1LogFormatter.html", null ],
+    [ "logger::Logger", "classlogger_1_1Logger.html", null ],
+    [ "logger::LoggerScope", "classlogger_1_1LoggerScope.html", null ],
+    [ "logger::SStreamWrapper", "classlogger_1_1SStreamWrapper.html", null ],
+    [ "ipc::MethodHandler< void, void >", "structipc_1_1MethodHandler.html", null ],
+    [ "ipc::RequestQueue< Event >", "classipc_1_1RequestQueue.html", null ],
+    [ "ipc::SignalHandler< void >", "structipc_1_1SignalHandler.html", null ],
     [ "std::exception", null, [
       [ "std::runtime_error", null, [
+        [ "config::ConfigException", "structconfig_1_1ConfigException.html", null ],
+        [ "dbus::DbusException", "structdbus_1_1DbusException.html", [
+          [ "dbus::DbusCustomException", "structdbus_1_1DbusCustomException.html", null ],
+          [ "dbus::DbusInvalidArgumentException", "structdbus_1_1DbusInvalidArgumentException.html", null ],
+          [ "dbus::DbusIOException", "structdbus_1_1DbusIOException.html", null ],
+          [ "dbus::DbusOperationException", "structdbus_1_1DbusOperationException.html", null ]
+        ] ],
+        [ "ipc::IPCException", "structipc_1_1IPCException.html", [
+          [ "ipc::IPCClosingException", "structipc_1_1IPCClosingException.html", null ],
+          [ "ipc::IPCNaughtyPeerException", "structipc_1_1IPCNaughtyPeerException.html", null ],
+          [ "ipc::IPCParsingException", "structipc_1_1IPCParsingException.html", null ],
+          [ "ipc::IPCPeerDisconnectedException", "structipc_1_1IPCPeerDisconnectedException.html", null ],
+          [ "ipc::IPCRemovedPeerException", "structipc_1_1IPCRemovedPeerException.html", null ],
+          [ "ipc::IPCSerializationException", "structipc_1_1IPCSerializationException.html", null ],
+          [ "ipc::IPCTimeoutException", "structipc_1_1IPCTimeoutException.html", null ],
+          [ "ipc::IPCUserException", "structipc_1_1IPCUserException.html", null ]
+        ] ],
         [ "utils::UtilsException", "structutils_1_1UtilsException.html", null ],
         [ "vasum::VasumException", "structvasum_1_1VasumException.html", [
           [ "vasum::ClientException", "structvasum_1_1ClientException.html", [
@@ -22,6 +112,16 @@ var hierarchy =
             [ "vasum::ZoneOperationException", "structvasum_1_1ZoneOperationException.html", null ]
           ] ]
         ] ]
+      ] ]
+    ] ],
+    [ "integral_constant", null, [
+      [ "config::has_member< T, F >", "structconfig_1_1has__member.html", null ],
+      [ "config::isVisitable< T >", "structconfig_1_1isVisitable.html", null ],
+      [ "config::has_member< T, check_union< T > >", "structconfig_1_1has__member.html", [
+        [ "config::isUnion< T >", "structconfig_1_1isUnion.html", null ]
+      ] ],
+      [ "config::isVisitable< X >", "structconfig_1_1isVisitable.html", [
+        [ "config::check_union< X >", "structconfig_1_1check__union.html", null ]
       ] ]
     ] ],
     [ "utils::CallbackGuard", "classutils_1_1CallbackGuard.html", null ],

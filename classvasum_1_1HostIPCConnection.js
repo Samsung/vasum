@@ -4,6 +4,7 @@ var classvasum_1_1HostIPCConnection =
     [ "Signal", "classvasum_1_1HostIPCConnection_1_1Signal.html", "classvasum_1_1HostIPCConnection_1_1Signal" ],
     [ "HostIPCConnection", "classvasum_1_1HostIPCConnection.html#a68aeead1d8812fd23317d090377cb90d", null ],
     [ "~HostIPCConnection", "classvasum_1_1HostIPCConnection.html#a1fb70182e53f7c3825f92d012cf01ea8", null ],
+    [ "isRunning", "classvasum_1_1HostIPCConnection.html#abeaa050371bac8fefdb1ea8faa84f500", null ],
     [ "setCreateFileCallback", "classvasum_1_1HostIPCConnection.html#acfe8b771e2dcbcd28d1104739288d1b6", null ],
     [ "setCreateNetdevMacvlanCallback", "classvasum_1_1HostIPCConnection.html#a394d090873188a0949564dcdd120bdf6", null ],
     [ "setCreateNetdevPhysCallback", "classvasum_1_1HostIPCConnection.html#aeb9685a6614647777925f028d327cb05", null ],
@@ -36,6 +37,7 @@ var classvasum_1_1HostIPCConnection =
     [ "setUnlockZoneCallback", "classvasum_1_1HostIPCConnection.html#a3c8721b54c234b1b89ac55f26bd6c670", null ],
     [ "signalZoneConnectionState", "classvasum_1_1HostIPCConnection.html#acb0409814d8ec05ce5ae50c3d1bffa81", null ],
     [ "start", "classvasum_1_1HostIPCConnection.html#a1fd856cf4404c4bda19afcbbdface25a", null ],
+    [ "stop", "classvasum_1_1HostIPCConnection.html#ab2d804d2e60178b3d574ae24679a8ac4", null ],
     [ "mService", "classvasum_1_1HostIPCConnection.html#a0560abef69857164795c450c9a2245e1", null ],
     [ "mZonesManagerPtr", "classvasum_1_1HostIPCConnection.html#a795788c1d711f6e44f89812f41aca84e", null ]
 ];
