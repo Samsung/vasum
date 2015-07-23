@@ -18,9 +18,43 @@
 
 /**
  * @file
- * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Logger
+ * @author   Jan Olszak (j.olszak@samsung.com)
+ * @defgroup libLogger libLogger
+ * @brief C++ library for handling logging.
+ *
+ * There are few backends implemented and it's possible to create your own by inheriting after the @ref logger::LogBackend interface.
+ *
+ * Example usage:
+ * @code
+ * using namespace logger;
+ *
+ * // Set minimal logging level
+ * Logger::setLogLevel("TRACE");
+ *
+ *
+ * // Set one of the possible backends:
+ * Logger::setLogBackend(new NullLogger());
+ * Logger::setLogBackend(new SystemdJournalBackend());
+ * Logger::setLogBackend(new FileBackend("/tmp/logs.txt"));
+ * Logger::setLogBackend(new SyslogBackend());
+ * Logger::setLogBackend(new StderrBackend());
+ *
+ *
+ * // All logs should be visible:
+ * LOGE("Error");
+ * LOGW("Warning");
+ * LOGI("Information");
+ * LOGD("Debug");
+ * LOGT("Trace");
+ * LOGH("Helper");
+ *
+ * {
+ *     LOGS("Scope");
+ * }
+ *
+ * @endcode
  */
+
 
 #ifndef COMMON_LOGGER_LOGGER_HPP
 #define COMMON_LOGGER_LOGGER_HPP
@@ -57,6 +91,8 @@ public:
 
 } // namespace logger
 
+/*@{*/
+/// @brief Generic logging macro
 #define LOG(SEVERITY, MESSAGE)                                             \
     do {                                                                   \
         if (logger::Logger::getLogLevel() <= logger::LogLevel::SEVERITY) { \
@@ -71,11 +107,24 @@ public:
         }                                                                  \
     } while (0)
 
+
+/// Logging errors
 #define LOGE(MESSAGE) LOG(ERROR, MESSAGE)
+
+/// Logging warnings
 #define LOGW(MESSAGE) LOG(WARN, MESSAGE)
+
+/// Logging information
 #define LOGI(MESSAGE) LOG(INFO, MESSAGE)
+
+/// Logging debug information
 #define LOGD(MESSAGE) LOG(DEBUG, MESSAGE)
+
+/// Logging helper information (for debugging purposes)
 #define LOGH(MESSAGE) LOG(HELP, MESSAGE)
+
+/// Logging tracing information
 #define LOGT(MESSAGE) LOG(TRACE, MESSAGE)
 
 #endif // COMMON_LOGGER_LOGGER_HPP
+/*@}*/

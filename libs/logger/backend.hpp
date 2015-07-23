@@ -32,7 +32,8 @@
 namespace logger {
 
 /**
- * Abstract class for logger
+ * @brief Abstract class for logger backends
+ * @ingroup libLogger
  */
 class LogBackend {
 public:

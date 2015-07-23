@@ -29,13 +29,17 @@
 
 namespace logger {
 
+/**
+ * @brief Available log levels
+ * @ingroup libLogger
+ */
 enum class LogLevel {
-    TRACE,
-    DEBUG,
-    INFO,
-    WARN,
-    ERROR,
-    HELP
+    TRACE, ///< Most detailed log level
+    DEBUG, ///< Debug logs
+    INFO,  ///< Information
+    WARN,  ///< Warnings
+    ERROR, ///< Errors
+    HELP   ///< Helper logs
 };
 
 /**

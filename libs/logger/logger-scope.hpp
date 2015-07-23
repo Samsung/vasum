@@ -70,7 +70,10 @@ private:
 
 } // namespace logger
 
-// macro to automatically create LoggerScope object
+/**
+ * @brief Automatically create LoggerScope object which logs at the construction and destruction
+ * @ingroup libLogger
+ */
 #define LOGS(MSG)   logger::LoggerScope logScopeObj(__FILE__, __LINE__, __func__,    \
                                                     logger::SStreamWrapper() << MSG, \
                                                     PROJECT_SOURCE_DIR)
