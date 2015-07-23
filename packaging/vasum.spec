@@ -433,3 +433,36 @@ The package provides libIpc development tools and libs.
 %{_libdir}/libIpc.so
 %{_includedir}/vasum-tools/ipc
 %{_libdir}/pkgconfig/libIpc.pc
+
+## liblxcpp Package ###########################################################
+%package -n liblxcpp
+Summary:            lxcpp library
+Group:              Security/Other
+Requires(post):     /sbin/ldconfig
+Requires(postun):   /sbin/ldconfig
+
+%description -n liblxcpp
+The package provides liblxcpp library.
+
+%post -n liblxcpp -p /sbin/ldconfig
+
+%postun -n liblxcpp -p /sbin/ldconfig
+
+%files -n liblxcpp
+%defattr(644,root,root,755)
+%{_libdir}/liblxcpp.so.0
+%attr(755,root,root) %{_libdir}/liblxcpp.so.%{version}
+
+%package -n liblxcpp-devel
+Summary:        Development lxcpp library
+Group:          Development/Libraries
+Requires:       liblxcpp = %{epoch}:%{version}-%{release}
+
+%description -n liblxcpp-devel
+The package provides liblxcpp development tools and libs.
+
+%files -n liblxcpp-devel
+%defattr(644,root,root,755)
+%{_libdir}/liblxcpp.so
+%{_includedir}/lxcpp
+%{_libdir}/pkgconfig/liblxcpp.pc
