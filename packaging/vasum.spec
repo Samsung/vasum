@@ -243,7 +243,7 @@ Command Line Interface for vasum.
 
 %files cli
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/vasum-cli
+%attr(755,root,root) %{_bindir}/vsm
 
 %package cli-completion
 Summary:          Vasum Command Line Interface bash completion
@@ -255,7 +255,7 @@ Requires:         vasum-cli = %{epoch}:%{version}-%{release}
 Command Line Interface bash completion for vasum.
 
 %files cli-completion
-%attr(755,root,root) %{_sysconfdir}/bash_completion.d/vasum-cli-completion.sh
+%attr(755,root,root) %{_sysconfdir}/bash_completion.d/vsm-completion.sh
 
 ## Test Package ################################################################
 %package tests

@@ -488,35 +488,42 @@ Attrs getAttrs(const pid_t nsPid, const std::string& netdev)
     infoPeer.ifi_change = 0xFFFFFFFF;
     nlm.put(infoPeer)
         .put(IFLA_IFNAME, netdev);
-    NetlinkResponse response = send(nlm, nsPid);
-    if (!response.hasMessage()) {
-        throw VasumException("Can't get interface information");
-    }
-    response.fetch(infoPeer);
-
     Attrs attrs;
-    while (response.hasAttribute()) {
-        uint32_t mtu, link;
-        int attrType = response.getAttributeType();
-        switch (attrType) {
-            case IFLA_MTU:
-                response.fetch(IFLA_MTU, mtu);
-                attrs.push_back(make_tuple("mtu", std::to_string(mtu)));
-                break;
-            case IFLA_LINK:
-                response.fetch(IFLA_LINK, link);
-                attrs.push_back(make_tuple("link", std::to_string(link)));
-                break;
-            default:
-                response.skipAttribute();
-                break;
+    try {
+        NetlinkResponse response = send(nlm, nsPid);
+        if (!response.hasMessage()) {
+            throw VasumException("Can't get interface information");
         }
+        response.fetch(infoPeer);
+
+        while (response.hasAttribute()) {
+            uint32_t mtu, link;
+            int attrType = response.getAttributeType();
+            switch (attrType) {
+                case IFLA_MTU:
+                    response.fetch(IFLA_MTU, mtu);
+                    attrs.push_back(make_tuple("mtu", std::to_string(mtu)));
+                    break;
+                case IFLA_LINK:
+                    response.fetch(IFLA_LINK, link);
+                    attrs.push_back(make_tuple("link", std::to_string(link)));
+                    break;
+                default:
+                    response.skipAttribute();
+                    break;
+            }
+        }
+    } catch (const std::exception& ex) {
+        LOGE(ex.what());
+        throw VasumException(netdev + ": " + ex.what());
     }
+
     attrs.push_back(make_tuple("flags", std::to_string(infoPeer.ifi_flags)));
     attrs.push_back(make_tuple("type", std::to_string(infoPeer.ifi_type)));
     for (const auto& address : getIpAddresses(nsPid, AF_INET, infoPeer.ifi_index)) {
         attrs.push_back(make_tuple("ipv4", joinAddresses(address)));
     }
+
     for (const auto& address : getIpAddresses(nsPid, AF_INET6, infoPeer.ifi_index)) {
         attrs.push_back(make_tuple("ipv6", joinAddresses(address)));
     }

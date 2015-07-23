@@ -36,11 +36,12 @@
 #include <iomanip>
 #include <algorithm>
 #include <vector>
-#include <fcntl.h>
 #include <cassert>
+#include <fcntl.h>
 #include <linux/if_link.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <string.h>
 
 using namespace std;
 
@@ -70,15 +71,6 @@ std::string zoneStateToString(const VsmZoneState& state)
     }
 
     return name;
-}
-
-std::string zoneToString(const VsmZone& zone)
-{
-    std::string out = std::string("Name: ") + vsm_zone_get_id(zone)
-        + std::string("\nTerminal: ") + std::to_string(vsm_zone_get_terminal(zone))
-        + std::string("\nState: ") + zoneStateToString(vsm_zone_get_state(zone))
-        + std::string("\nRoot: ") + vsm_zone_get_rootfs(zone);
-    return out;
 }
 
 std::string netdevTypeToString(const VsmNetdevType& netdevType)
@@ -139,14 +131,61 @@ enum macvlan_mode macvlanFromString(const std::string& mode) {
     throw runtime_error("Unsupported macvlan mode");
 }
 
+void buildZoneList(std::vector<std::string>& list)
+{
+    using namespace std::placeholders;
+    VsmArrayString ids;
+
+    CommandLineInterface::executeCallback(bind(vsm_get_zone_ids, _1, &ids));
+    for (VsmString* id = ids; *id; ++id) {
+        list.push_back(*id);
+    }
+    vsm_array_string_free(ids);
+}
+
 } // namespace
+
+const std::vector<std::string> CommandLineInterface::buildCompletionList(const Args& a) const
+{
+    std::vector<std::string> v;
+
+    if (a.size() > mArgsSpec.size() + 1) {
+        return v;
+    }
+
+    ArgSpec as = mArgsSpec[a.size() - 2];
+    string::size_type s = 0U;
+    string::size_type e = s;
+    while (e != string::npos) {
+        e = as.format.find('|', s);
+        std::string ss = as.format.substr(s, e - s);
+        s = e + 1;
+
+        if (ss == "{ZONE}") {
+            buildZoneList(v);
+        }
+        else if (ss == "{NETDEV}") {
+            //TODO: get list of available interfaces
+            v.push_back("lo");
+            v.push_back("eth0");
+        }
+        else if (ss.length() > 0) {
+            v.push_back(ss);
+        }
+    }
+
+    return v;
+}
 
 void CommandLineInterface::connect()
 {
     VsmStatus status;
+    if (CommandLineInterface::client != nullptr) {
+        return;
+    }
 
     CommandLineInterface::client = vsm_client_create();
-    if (NULL == CommandLineInterface::client) {
+    if (CommandLineInterface::client == nullptr) {
         throw runtime_error("Can't create client");
     }
 
@@ -154,7 +193,7 @@ void CommandLineInterface::connect()
     if (VSMCLIENT_SUCCESS != status) {
         string msg = vsm_get_status_message(CommandLineInterface::client);
         vsm_client_free(CommandLineInterface::client);
-        CommandLineInterface::client = NULL;
+        CommandLineInterface::client = nullptr;
         throw runtime_error(msg);
     }
 }
@@ -164,13 +203,17 @@ void CommandLineInterface::disconnect()
     string msg;
     VsmStatus status;
 
+    if (CommandLineInterface::client == nullptr) {
+        return ;
+    }
+
     status = vsm_disconnect(CommandLineInterface::client);
     if (VSMCLIENT_SUCCESS != status) {
         msg = vsm_get_status_message(CommandLineInterface::client);
     }
 
     vsm_client_free(CommandLineInterface::client);
-    CommandLineInterface::client = NULL;
+    CommandLineInterface::client = nullptr;
 
     if (VSMCLIENT_SUCCESS != status) {
         throw runtime_error(msg);
@@ -179,9 +222,9 @@ void CommandLineInterface::disconnect()
 
 void CommandLineInterface::executeCallback(const function<VsmStatus(VsmClient)>& fun)
 {
-    VsmStatus status;
+    CommandLineInterface::connect();
 
-    status = fun(CommandLineInterface::client);
+    VsmStatus status = fun(CommandLineInterface::client);
     if (VSMCLIENT_SUCCESS != status) {
         throw runtime_error(vsm_get_status_message(CommandLineInterface::client));
     }
@@ -201,7 +244,7 @@ void CommandLineInterface::printUsage(std::ostream& out) const
 {
     out << mName;
     for (const auto& args : mArgsSpec) {
-        out << " " << args.first;
+        out << " " << args.name;
     }
 
     out << "\n\n"
@@ -211,7 +254,7 @@ void CommandLineInterface::printUsage(std::ostream& out) const
     if (!mArgsSpec.empty()) {
         out << "\n\tOptions\n";
         for (const auto& args : mArgsSpec) {
-            out << "\t\t" << args.first << " -- " << args.second << "\n";
+            out << "\t\t" << args.name << " -- " << args.description << "\n";
         }
     }
     out << "\n";
@@ -222,7 +265,7 @@ bool CommandLineInterface::isAvailable(unsigned int mode) const
     return (mAvailability & mode) == mode;
 }
 
-void CommandLineInterface::execute(const Args& argv)
+void CommandLineInterface::execute(const Args& argv) const
 {
     mExecutorCallback(argv);
 }
@@ -242,7 +285,7 @@ void set_active_zone(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 1) {
+    if (argv.size() < 2) {
         throw runtime_error("Not enough parameters");
     }
 
@@ -253,7 +296,7 @@ void create_zone(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 1) {
+    if (argv.size() < 2) {
         throw runtime_error("Not enough parameters");
     }
 
@@ -268,7 +311,7 @@ void destroy_zone(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 1) {
+    if (argv.size() < 2) {
         throw runtime_error("Not enough parameters");
     }
 
@@ -279,7 +322,7 @@ void shutdown_zone(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 1) {
+    if (argv.size() < 2) {
         throw runtime_error("Not enough parameters");
     }
 
@@ -290,7 +333,7 @@ void start_zone(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 1) {
+    if (argv.size() < 2) {
         throw runtime_error("Not enough parameters");
     }
 
@@ -301,7 +344,7 @@ void console_zone(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 1) {
+    if (argv.size() < 2) {
         throw runtime_error("Not enough parameters");
     }
 
@@ -310,7 +353,7 @@ void console_zone(const Args& argv)
 
     if (zoneStateToString(vsm_zone_get_state(zone)) != "RUNNING") {
         vsm_zone_free(zone);
-        throw runtime_error("Zone is not running");
+        throw runtime_error("Zone '" + argv[1] + "' is not running");
     }
 
     std::string zonesPath = vsm_zone_get_rootfs(zone);
@@ -334,7 +377,7 @@ void lock_zone(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 1) {
+    if (argv.size() < 2) {
         throw runtime_error("Not enough parameters");
     }
 
@@ -345,14 +388,14 @@ void unlock_zone(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 1) {
+    if (argv.size() < 2) {
         throw runtime_error("Not enough parameters");
     }
 
     CommandLineInterface::executeCallback(bind(vsm_unlock_zone, _1, argv[1].c_str()));
 }
 
-void get_zones_status(const Args& /* argv */)
+void get_zones_status(const Args& argv)
 {
     using namespace std::placeholders;
 
@@ -360,14 +403,24 @@ void get_zones_status(const Args& /* argv */)
     VsmString activeId;
     Table table;
 
-    CommandLineInterface::executeCallback(bind(vsm_get_zone_ids, _1, &ids));
+    if (argv.size() < 2) {
+        CommandLineInterface::executeCallback(bind(vsm_get_zone_ids, _1, &ids));
+    }
+    else {
+        ids = reinterpret_cast<char**>(calloc(argv.size(), sizeof(char*)));
+        for (unsigned i = 1; i<argv.size(); ++i) {
+            ids[i - 1] = ::strdup(argv[i].c_str());
+        }
+    }
+
+
     CommandLineInterface::executeCallback(bind(vsm_get_active_zone_id, _1, &activeId));
     table.push_back({"Active", "Id", "State", "Terminal", "Root"});
     for (VsmString* id = ids; *id; ++id) {
         VsmZone zone;
         CommandLineInterface::executeCallback(bind(vsm_lookup_zone_by_id, _1, *id, &zone));
         assert(string(vsm_zone_get_id(zone)) == string(*id));
-        table.push_back({string(vsm_zone_get_id(zone)) == string(activeId) ? "*" : "",
+        table.push_back({string(vsm_zone_get_id(zone)) == string(activeId) ? "YES" : "NO",
                          vsm_zone_get_id(zone),
                          zoneStateToString(vsm_zone_get_state(zone)),
                          to_string(vsm_zone_get_terminal(zone)),
@@ -394,7 +447,7 @@ void get_zone_ids(const Args& /*argv*/)
     vsm_array_string_free(ids);
 }
 
-void get_active_zone_id(const Args& /*argv*/)
+void get_active_zone(const Args& /*argv*/)
 {
     using namespace std::placeholders;
 
@@ -404,24 +457,11 @@ void get_active_zone_id(const Args& /*argv*/)
     vsm_string_free(id);
 }
 
-void lookup_zone_by_id(const Args& argv)
-{
-    using namespace std::placeholders;
-    if (argv.size() <= 1) {
-        throw runtime_error("Not enough parameters");
-    }
-
-    VsmZone zone;
-    CommandLineInterface::executeCallback(bind(vsm_lookup_zone_by_id, _1, argv[1].c_str(), &zone));
-    cout << zoneToString(zone) << endl;
-    vsm_zone_free(zone);
-}
-
 void grant_device(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 2) {
+    if (argv.size() < 3) {
         throw runtime_error("Not enough parameters");
     }
 
@@ -433,78 +473,61 @@ void revoke_device(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 2) {
+    if (argv.size() < 3) {
         throw runtime_error("Not enough parameters");
     }
 
     CommandLineInterface::executeCallback(bind(vsm_revoke_device, _1, argv[1].c_str(), argv[2].c_str()));
 }
 
-void create_netdev_veth(const Args& argv)
+void create_netdev(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 3) {
+    if (argv.size() < 2) {
         throw runtime_error("Not enough parameters");
     }
-    CommandLineInterface::executeCallback(bind(vsm_create_netdev_veth,
+
+    std::string nettype = argv[2];
+    if (nettype == "phys") {
+        if (argv.size() < 4) {
+            throw runtime_error("Not enough parameters");
+        }
+        CommandLineInterface::executeCallback(bind(vsm_create_netdev_phys,
                   _1,
                   argv[1].c_str(),
-                  argv[2].c_str(),
                   argv[3].c_str()));
-}
-
-void create_netdev_macvlan(const Args& argv)
-{
-    using namespace std::placeholders;
-
-    if (argv.size() <= 4) {
-        throw runtime_error("Not enough parameters");
     }
-    CommandLineInterface::executeCallback(bind(vsm_create_netdev_macvlan,
+    else if (nettype == "veth") {
+        if (argv.size() < 5) {
+            throw runtime_error("Not enough parameters");
+        }
+        CommandLineInterface::executeCallback(bind(vsm_create_netdev_veth,
                   _1,
                   argv[1].c_str(),
-                  argv[2].c_str(),
                   argv[3].c_str(),
-                  macvlanFromString(argv[4].c_str())));
-}
-
-void create_netdev_phys(const Args& argv)
-{
-    using namespace std::placeholders;
-
-    if (argv.size() <= 2) {
-        throw runtime_error("Not enough parameters");
+                  argv[4].c_str()));
     }
-    CommandLineInterface::executeCallback(bind(vsm_create_netdev_phys,
+    else if (nettype == "macvlan") {
+        if (argv.size() < 6) {
+            throw runtime_error("Not enough parameters");
+        }
+        CommandLineInterface::executeCallback(bind(vsm_create_netdev_macvlan,
                   _1,
                   argv[1].c_str(),
-                  argv[2].c_str()));
-}
-
-void lookup_netdev_by_name(const Args& argv)
-{
-    using namespace std::placeholders;
-
-    if (argv.size() <= 2) {
-        throw runtime_error("Not enough parameters");
+                  argv[3].c_str(),
+                  argv[4].c_str(),
+                  macvlanFromString(argv[5].c_str())));
     }
-    VsmNetdev netdev = NULL;
-    CommandLineInterface::executeCallback(bind(vsm_lookup_netdev_by_name,
-                  _1,
-                  argv[1].c_str(),
-                  argv[2].c_str(),
-                  &netdev));
-    cout << netdevToString(netdev) << endl;
-    vsm_netdev_free(netdev);
-
+    else
+        throw runtime_error("Wrong nettype option " + nettype);
 }
 
 void destroy_netdev(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 2) {
+    if (argv.size() < 3) {
         throw runtime_error("Not enough parameters");
     }
     CommandLineInterface::executeCallback(bind(vsm_destroy_netdev,
@@ -513,113 +536,134 @@ void destroy_netdev(const Args& argv)
                   argv[2].c_str()));
 }
 
-void zone_get_netdevs(const Args& argv)
+void netdev_list(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 1) {
+    if (argv.size() < 2) {
         throw runtime_error("Not enough parameters");
     }
-    VsmArrayString ids;
-    CommandLineInterface::executeCallback(bind(vsm_zone_get_netdevs,
+    if (argv.size() < 3) {
+        VsmArrayString ids;
+        CommandLineInterface::executeCallback(bind(vsm_zone_get_netdevs,
                   _1,
                   argv[1].c_str(),
                   &ids));
-    string delim;
-    for (VsmString* id = ids; *id; ++id) {
-        cout << delim << *id;
-        delim = ", ";
+        string delim;
+        for (VsmString* id = ids; *id; ++id) {
+            cout << delim << *id;
+            delim = ", ";
+        }
+        if (delim.empty()) {
+            cout << "There is no network device in zone";
+        }
+        cout << endl;
+        vsm_array_string_free(ids);
     }
-    if (delim.empty()) {
-        cout << "There is no network device in zone";
-    }
-    cout << endl;
-    vsm_array_string_free(ids);
-}
-
-void netdev_get_ipv4_addr(const Args& argv)
-{
-    using namespace std::placeholders;
-
-    if (argv.size() <= 2) {
-        throw runtime_error("Not enough parameters");
-    }
-    in_addr addr;
-    CommandLineInterface::executeCallback(bind(vsm_netdev_get_ipv4_addr,
+    else {
+        VsmNetdev netdev = NULL;
+        in_addr ipv4;
+        in6_addr ipv6;
+        char buf[INET_ADDRSTRLEN|INET6_ADDRSTRLEN];
+        CommandLineInterface::executeCallback(bind(vsm_lookup_netdev_by_name,
                   _1,
                   argv[1].c_str(),
                   argv[2].c_str(),
-                  &addr));
-    char buf[INET_ADDRSTRLEN];
-    if (inet_ntop(AF_INET, &addr, buf, INET_ADDRSTRLEN) == NULL) {
-        throw runtime_error("Server gave the wrong address format");
-    }
-    cout << buf << endl;
-}
+                  &netdev));
+        cout << netdevToString(netdev) << endl;
+        vsm_netdev_free(netdev);
 
-void netdev_get_ipv6_addr(const Args& argv)
-{
-    using namespace std::placeholders;
-
-    if (argv.size() <= 2) {
-        throw runtime_error("Not enough parameters");
-    }
-    in6_addr addr;
-    CommandLineInterface::executeCallback(bind(vsm_netdev_get_ipv6_addr,
+        CommandLineInterface::executeCallback(bind(vsm_netdev_get_ipv4_addr,
                   _1,
                   argv[1].c_str(),
                   argv[2].c_str(),
-                  &addr));
-    char buf[INET6_ADDRSTRLEN];
-    if (inet_ntop(AF_INET6, &addr, buf, INET6_ADDRSTRLEN) == NULL) {
-        throw runtime_error("Server gave the wrong address format");
+                  &ipv4));
+        if (inet_ntop(AF_INET, &ipv4, buf, INET_ADDRSTRLEN) == NULL) {
+            throw runtime_error("Wrong address received");
+        }
+        cout << buf << endl;
+
+        CommandLineInterface::executeCallback(bind(vsm_netdev_get_ipv6_addr,
+                  _1,
+                  argv[1].c_str(),
+                  argv[2].c_str(),
+                  &ipv6));
+        if (inet_ntop(AF_INET6, &ipv6, buf, INET6_ADDRSTRLEN) == NULL) {
+            throw runtime_error("Wrong address received");
+        }
+        cout << buf << endl;
     }
-    cout << buf << endl;
 }
 
-void netdev_set_ipv4_addr(const Args& argv)
+void netdev_add_ip_addr(const Args& argv)
 {
     using namespace std::placeholders;
-
-    if (argv.size() <= 4) {
+    if (argv.size() < 5) {
         throw runtime_error("Not enough parameters");
     }
-    in_addr addr;
-    if (inet_pton(AF_INET, argv[3].c_str(), &addr) != 1) {
-        throw runtime_error("Wrong address format");
-    };
-    CommandLineInterface::executeCallback(bind(vsm_netdev_set_ipv4_addr,
+    if (argv[3].find(':') == std::string::npos) {
+        in_addr addr;
+        if (inet_pton(AF_INET, argv[3].c_str(), &addr) != 1) {
+            throw runtime_error("Wrong address format");
+        };
+        CommandLineInterface::executeCallback(bind(vsm_netdev_set_ipv4_addr,
                   _1,
                   argv[1].c_str(),
                   argv[2].c_str(),
                   &addr,
                   stoi(argv[4].c_str())));
-}
-
-void netdev_set_ipv6_addr(const Args& argv)
-{
-    using namespace std::placeholders;
-
-    if (argv.size() <= 4) {
-        throw runtime_error("Not enough parameters");
     }
-    in6_addr addr;
-    if (inet_pton(AF_INET6, argv[3].c_str(), &addr) != 1) {
-        throw runtime_error("Wrong address format");
-    };
-    CommandLineInterface::executeCallback(bind(vsm_netdev_set_ipv6_addr,
+    else {
+        in6_addr addr;
+        if (inet_pton(AF_INET6, argv[3].c_str(), &addr) != 1) {
+            throw runtime_error("Wrong address format");
+        };
+        CommandLineInterface::executeCallback(bind(vsm_netdev_set_ipv6_addr,
                   _1,
                   argv[1].c_str(),
                   argv[2].c_str(),
                   &addr,
                   stoi(argv[4].c_str())));
+    }
+}
+
+void netdev_del_ip_addr(const Args& argv)
+{
+    using namespace std::placeholders;
+    if (argv.size() < 5) {
+        throw runtime_error("Not enough parameters");
+    }
+    if (argv[3].find(':') == std::string::npos) {
+        in_addr addr;
+        if (inet_pton(AF_INET, argv[3].c_str(), &addr) != 1) {
+            throw runtime_error("Wrong address format");
+        };
+        CommandLineInterface::executeCallback(bind(vsm_netdev_del_ipv4_addr,
+                  _1,
+                  argv[1].c_str(),
+                  argv[2].c_str(),
+                  &addr,
+                  stoi(argv[4].c_str())));
+    }
+    else {
+        in6_addr addr;
+        if (inet_pton(AF_INET6, argv[3].c_str(), &addr) != 1) {
+            throw runtime_error("Wrong address format");
+        };
+        CommandLineInterface::executeCallback(bind(vsm_netdev_del_ipv6_addr,
+                  _1,
+                  argv[1].c_str(),
+                  argv[2].c_str(),
+                  &addr,
+                  stoi(argv[4].c_str())));
+    }
 }
 
 void netdev_up(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 2) {
+    if (argv.size() < 3) {
         throw runtime_error("Not enough parameters");
     }
     CommandLineInterface::executeCallback(bind(vsm_netdev_up,
@@ -632,7 +676,7 @@ void netdev_down(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() <= 2) {
+    if (argv.size() < 3) {
         throw runtime_error("Not enough parameters");
     }
     CommandLineInterface::executeCallback(bind(vsm_netdev_down,

@@ -24,7 +24,7 @@ FILE(GLOB cli_SRCS *.cpp *.hpp
                     ${COMMON_FOLDER}/utils/c-array.hpp)
 
 ## Setup target ################################################################
-SET(CLI_CODENAME "${PROJECT_NAME}-cli")
+SET(CLI_CODENAME "vsm")
 ADD_EXECUTABLE(${CLI_CODENAME} ${cli_SRCS})
 
 ## Readline detection ##########################################################
@@ -52,11 +52,11 @@ INCLUDE_DIRECTORIES(${CLIENT_FOLDER})
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 TARGET_LINK_LIBRARIES(${CLI_CODENAME} ${PROJECT_NAME}-client ${LIB_DEPS_LIBRARIES} Ipc)
 
-CONFIGURE_FILE(support/vasum-cli-completion.sh.in
-               ${CMAKE_BINARY_DIR}/vasum-cli-completion.sh
+CONFIGURE_FILE(support/vsm-completion.sh.in
+               ${CMAKE_BINARY_DIR}/vsm-completion.sh
                @ONLY)
 
 ## Install #####################################################################
 INSTALL(TARGETS ${CLI_CODENAME} DESTINATION bin)
-INSTALL(FILES   ${CMAKE_BINARY_DIR}/vasum-cli-completion.sh
+INSTALL(FILES   ${CMAKE_BINARY_DIR}/vsm-completion.sh
         DESTINATION ${SYSCONF_INSTALL_DIR}/bash_completion.d)

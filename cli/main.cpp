@@ -45,305 +45,195 @@ using namespace vasum::cli;
 namespace {
 
 static int interactiveMode = 0;
-std::map<std::string, CommandLineInterface> commands = {
+std::vector<CommandLineInterface> commands = {
     {
-        "lock_queue", {
-            lock_queue,
-            "lock_queue",
-            "Exclusively lock the command queue",
-            MODE_INTERACTIVE,
-            {}
-        }
+        create_zone,
+        "create",
+        "Create and add zone",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", ""},
+         {"[zone_tname]", "optional zone template name", ""}}
     },
     {
-        "unlock_queue", {
-            unlock_queue,
-            "unlock_queue",
-            "Unlock the queue",
-            MODE_INTERACTIVE,
-            {}
-        }
+        destroy_zone,
+        "destroy",
+        "Destroy zone",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"}}
     },
     {
-        "set_active_zone", {
-            set_active_zone,
-            "set_active_zone",
-            "Set active (foreground) zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"}}
-        }
+        start_zone,
+        "start",
+        "Start zone",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"}}
     },
     {
-        "create_zone", {
-            create_zone,
-            "create_zone",
-            "Create and add zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"[zone_tname]", "optional zone template name"}}
-        }
+        console_zone,
+        "console",
+        "Attach to zone text console",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"}}
     },
     {
-        "destroy_zone", {
-            destroy_zone,
-            "destroy_zone",
-            "Destroy zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"}}
-        }
+        shutdown_zone,
+        "shutdown",
+        "Shutdown zone",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"}}
     },
     {
-        "shutdown_zone", {
-            shutdown_zone,
-            "shutdown_zone",
-            "Shutdown zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"}}
-        }
+        lock_zone,
+        "suspend",
+        "Suspend (lock) zone",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"}}
     },
     {
-        "start_zone", {
-            start_zone,
-            "start_zone",
-            "Start zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"}}
-        }
+        unlock_zone,
+        "resume",
+        "Resume (unlock) zone",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"}}
     },
     {
-        "console_zone", {
-            console_zone,
-            "console_zone",
-            "Log into zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"}}
-        }
+        set_active_zone,
+        "set-active",
+        "Set active (foreground) zone",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"}}
     },
     {
-        "lock_zone", {
-            lock_zone,
-            "lock_zone",
-            "Lock zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"}}
-        }
+        get_active_zone,
+        "get-active",
+        "Get active (foreground) zone",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {}
     },
     {
-        "unlock_zone", {
-            unlock_zone,
-            "unlock_zone",
-            "Unlock zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"}}
-        }
+        get_zone_ids,
+        "list",
+        "Get available zone ids",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {}
     },
     {
-        "get_zones_status", {
-            get_zones_status,
-            "get_zones_status",
-            "Get list of zone with some useful informations (id, state, terminal, root path)",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {}
-        }
+        get_zones_status,
+        "status",
+        "List status for one or all zones (id, state, terminal, root path)",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"[zone_id]", "zone name", "{ZONE}"}}
     },
     {
-        "get_zone_ids", {
-            get_zone_ids,
-            "get_zone_ids",
-            "Get all zone ids",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {}
-        }
+        clean_up_zones_root,
+        "clean",
+        "Clean up zones root directory",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {}
     },
     {
-        "get_active_zone_id", {
-            get_active_zone_id,
-            "get_active_zone_id",
-            "Get active (foreground) zone ids",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {}
-        }
+        grant_device,
+        "device-grant",
+        "Grants access to the given device",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"},
+         {"device", "device name", ""}}
     },
     {
-        "lookup_zone_by_id", {
-            lookup_zone_by_id,
-            "lookup_zone_by_id",
-            "Prints informations about zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"}}
-        }
+        revoke_device,
+        "device-revoke",
+        "Revokes access to the given device",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"},
+         {"device", "device name", ""}}
     },
     {
-        "grant_device", {
-            grant_device,
-            "grant_device",
-            "Grants access to the given device",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"device_name", " device name"}}
-        }
+        create_netdev,
+        "net-create",
+        "Create network interface in zone",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {
+         {"zone_id", "zone name", "{ZONE}"},
+         {"netdevtype", "interface  type", "macvlan|phys|veth"},
+         {"zone_netdev", "interface name (eth0)", "eth0|eth1"},
+         {"host_netdev", "bridge name (virbr0)", "virbr0|virbr1"},
+         {"mode", "macvlan mode (private, vepa, bridge, passthru)", "private|vepa|bridge|passthru"}}
     },
     {
-        "revoke_device", {
-            revoke_device,
-            "revoke_device",
-            "Revokes access to the given device",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"device_name", " device name"}}
-        }
+        destroy_netdev,
+        "net-destroy",
+        "Destroy netdev in zone",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"},
+         {"netdev", "interface name (eth0)", "{NETDEV}"}}
     },
     {
-        "create_netdev_veth", {
-            create_netdev_veth,
-            "create_netdev_veth",
-            "Create netdev in zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"zone_netdev_id", "network device id"},
-             {"host_netdev_id", "host bridge id"}}
-        }
+        netdev_list,
+        "net-list",
+        "List network devices in the zone",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"},
+         {"[netdev]", "interface name (eth0)", "{NETDEV}"}}
     },
     {
-        "create_netdev_macvlan", {
-            create_netdev_macvlan,
-            "create_netdev_macvlan",
-            "Create netdev in zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"zone_netdev_id", "network device id"},
-             {"host_netdev_id", "host bridge id"},
-             {"mode", "macvlan mode (private, vepa, bridge, passthru)"}}
-        }
+        netdev_up,
+        "net-up",
+        "Setup a network device in the zone up",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"},
+         {"netdev", "interface name (eth0)", "{NETDEV}"}}
     },
     {
-        "create_netdev_phys", {
-            create_netdev_phys,
-            "create_netdev_phys",
-            "Create/move netdev to zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"netdev_id", "network device name"}}
-        }
+        netdev_down,
+        "net-down",
+        "Setup a network device in the zone down",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"},
+         {"netdev", "interface name (eth0)", "{NETDEV}"}}
     },
     {
-        "lookup_netdev_by_name", {
-            lookup_netdev_by_name,
-            "lookup_netdev_by_name",
-            "Get netdev flags",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"netdev_id", "network device name"}}
-        }
+        netdev_add_ip_addr,
+        "net-ip-add",
+        "Add ip/mask address to network interface",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"},
+         {"netdev", "interface name (eth0)", "{NETDEV}"},
+         {"ip", "address IPv4 or IPv6", ""},
+         {"prefix", "mask length in bits", "24"}}
     },
     {
-        "destroy_netdev", {
-            destroy_netdev,
-            "destroy_netdev",
-            "Destroy netdev in zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"netdev_id", "network device name"}}
-        }
+        netdev_del_ip_addr,
+        "net-ip-del",
+        "Del ip/mask address from network interface",
+        MODE_COMMAND_LINE | MODE_INTERACTIVE,
+        {{"zone_id", "zone name", "{ZONE}"},
+         {"netdev", "interface name (eth0)", "{NETDEV}"},
+         {"ip", "address IPv4 or IPv6", ""},
+         {"prefix", "mask length in bits", "24"}}
     },
     {
-        "zone_get_netdevs", {
-            zone_get_netdevs,
-            "zone_get_netdevs",
-            "List network devices in the zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"}}
-        }
+        lock_queue,
+        "qlock",
+        "Exclusively lock the command queue",
+        MODE_INTERACTIVE,
+        {}
     },
     {
-        "netdev_get_ipv4_addr", {
-            netdev_get_ipv4_addr,
-            "netdev_get_ipv4_addr",
-            "Get ipv4 address",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"netdev_id", "network device name"}}
-        }
+        unlock_queue,
+        "qunlock",
+        "Unlock the queue",
+        MODE_INTERACTIVE,
+        {}
     },
-    {
-        "netdev_get_ipv6_addr", {
-            netdev_get_ipv6_addr,
-            "netdev_get_ipv6_addr",
-            "Get ipv6 address",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"netdev_id", "network device name"}}
-        }
-    },
-    {
-        "netdev_set_ipv4_addr", {
-            netdev_set_ipv4_addr,
-            "netdev_set_ipv4_addr",
-            "Set ipv4 address",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"netdev_id", "network device name"},
-             {"address", "ipv4 address"},
-             {"prefix_len", "bit length of prefix"}}
-        }
-    },
-    {
-        "netdev_set_ipv6_addr", {
-            netdev_set_ipv6_addr,
-            "netdev_set_ipv6_addr",
-            "Set ipv6 address",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"netdev_id", "network device name"},
-             {"address", "ipv6 address"},
-             {"prefix_len", "bit length of prefix"}}
-        }
-    },
-    {
-        "netdev_up", {
-            netdev_up,
-            "netdev_up",
-            "Turn up a network device in the zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"netdev_id", "network device id"}}
-        }
-    },
-    {
-        "netdev_down", {
-            netdev_down,
-            "netdev_down",
-            "Turn down a network device in the zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"netdev_id", "network device id"}}
-        }
-    },
-    {
-        "zone_get_netdevs", {
-            zone_get_netdevs,
-            "zone_get_netdevs",
-            "Turn down a network device in the zone",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {{"zone_id", "id zone name"},
-             {"netdev_id", "network device id"}}
-        }
-    },
-    {
-        "clean_up_zones_root", {
-            clean_up_zones_root,
-            "clean_up_zones_root",
-            "Clean up zones root directory",
-            MODE_COMMAND_LINE | MODE_INTERACTIVE,
-            {}
-        }
-    }
 };
+
+std::map<std::string,const CommandLineInterface> commandMap;
 
 // wrappers for CommandLineInterface
 
 void printUsage(std::ostream& out, const std::string& name, unsigned int mode)
 {
+    const std::vector<std::string> addLineBefore = {"device-grant", "net-create", "qlock"};
     std::string n;
     if (!name.empty()) {
         n = name + " ";
@@ -361,9 +251,12 @@ void printUsage(std::ostream& out, const std::string& name, unsigned int mode)
     out << "command can be one of the following:\n";
 
     for (const auto& command : commands) {
-        if (command.second.isAvailable(mode)) {
-            out << "   " << std::setw(30) << std::left << command.second.getName()
-                << command.second.getDescription() << "\n";
+        if (command.isAvailable(mode)) {
+            if (std::find(addLineBefore.begin(), addLineBefore.end(), command.getName()) != addLineBefore.end()) {
+                out << std::endl;
+            }
+            out << "   " << std::setw(25) << std::left << command.getName()
+                << command.getDescription() << std::endl;
         }
     }
 
@@ -396,13 +289,14 @@ int disconnect()
 
 int executeCommand(const Args& argv, int mode)
 {
-    auto pair = commands.find(argv[0]);
-    if (pair == commands.end()) {
+    auto pair = commandMap.find(argv[0]);
+    if (pair == commandMap.end()) {
         return EXIT_FAILURE;
     }
 
-    CommandLineInterface& command = pair->second;
+    const CommandLineInterface& command = pair->second;
     if (!command.isAvailable(mode)) {
+        std::cerr << "Command not available in this mode" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -423,81 +317,43 @@ int executeCommand(const Args& argv, int mode)
 }
 
 // readline completion support
-
-char* object_generator(const char* text, int state)
+const std::vector<std::string> buildComplList(const Args& argv);
+char *completion_generator(const char* text, int state)
 {
-    static std::vector<std::string> objs;
-    static size_t len = 0, index = 0;
-
+    static std::vector<std::string> list;
+    static unsigned index = 0;
     if (state == 0) {
-        objs.clear();
-        len = ::strlen(text);
+        list.clear();
         index = 0;
 
-        using namespace std::placeholders;
-        VsmArrayString ids = NULL;
-        try {
-            CommandLineInterface::executeCallback(bind(vsm_get_zone_ids, _1, &ids));
-        } catch (const std::runtime_error& ex) {
-            // Quietly ignore, nothing we can do anyway
+        char *ln = rl_line_buffer;
+        std::istringstream iss(ln);
+        Args argv{std::istream_iterator<std::string>{iss},
+                  std::istream_iterator<std::string>{}};
+
+        size_t len = strlen(text);
+        if (len == 0 && argv.size() > 0) {
+            argv.push_back("");
         }
 
-        if (ids != NULL) {
-            for (VsmString* id = ids; *id; ++id) {
-                if (::strncmp(text, *id, len) == 0) {
-                    objs.push_back(*id);
-                }
+        const std::vector<std::string>& l = buildComplList(argv);
+        for (const auto &i : l) {
+            if (strncmp(text, i.c_str(), len) == 0) {
+                list.push_back(i);
             }
-
-            vsm_array_string_free(ids);
         }
     }
-
-    if (index < objs.size()) {
-        return ::strdup(objs[index++].c_str());
+    if (index < list.size()) {
+        return ::strdup(list[index++].c_str());
     }
 
     return NULL;
 }
 
-char* cmd_generator(const char* text, int state)
+char** completion(const char* text, int /*start*/, int /*end*/)
 {
-    static std::vector<std::string> cmds;
-    static size_t len = 0, index = 0;
-
-    if (state == 0) {
-        cmds.clear();
-        len = ::strlen(text);
-        index = 0;
-
-        for (const auto& command : commands) {
-            if (command.second.isAvailable(MODE_INTERACTIVE)) {
-                const std::string& cmd = command.second.getName();
-                if (::strncmp(text, cmd.c_str(), len) == 0) {
-                    cmds.push_back(cmd);
-                }
-            }
-        }
-    }
-
-    if (index < cmds.size()) {
-        return ::strdup(cmds[index++].c_str());
-    }
-
-    return NULL;
-}
-
-char** completion(const char* text, int start, int /*end*/)
-{
-    char **matches = NULL;
-
-    if (start == 0) {
-        matches = ::rl_completion_matches(text, &cmd_generator);
-    } else {
-        matches = ::rl_completion_matches(text, &object_generator);
-    }
-
-    return matches;
+    ::rl_attempted_completion_over = 1; //disable default completion
+    return ::rl_completion_matches(text, &completion_generator);
 }
 
 static bool readline_from(const std::string& prompt, std::istream& stream, std::string& ln)
@@ -529,6 +385,7 @@ static int processStream(std::istream& stream)
         return EXIT_FAILURE;
     }
 
+    int rc = EXIT_FAILURE;
     std::string ln;
     while (readline_from(">>> ", stream, ln)) {
         if (ln.empty() || ln[0] == '#') { //skip empty line or comment
@@ -539,16 +396,18 @@ static int processStream(std::istream& stream)
         Args argv{std::istream_iterator<std::string>{iss},
                   std::istream_iterator<std::string>{}};
 
-        if (commands.count(argv[0]) == 0) {
+        if (commandMap.count(argv[0]) == 0) {
             printUsage(std::cout, "", MODE_INTERACTIVE);
             continue;
         }
 
-        executeCommand(argv, MODE_INTERACTIVE);
+        rc = executeCommand(argv, MODE_INTERACTIVE);
+        if (rc == EXIT_FAILURE && !interactiveMode) {
+            break;
+        }
     }
 
-    disconnect();
-    return EXIT_SUCCESS;
+    return rc;
 }
 
 static int processFile(const std::string& fn)
@@ -563,15 +422,43 @@ static int processFile(const std::string& fn)
     return processStream(stream);
 }
 
-int bashComplMode()
+void printList(const std::vector<std::string>& list)
 {
-    for (const auto& command : commands) {
-        if (command.second.isAvailable(MODE_COMMAND_LINE)) {
-            std::cout << command.second.getName() << "\n";
+    for (const auto& i : list) {
+        std::cout << i << std::endl;
+    }
+}
+
+const std::vector<std::string> buildComplList(const Args& argv)
+{
+    if (argv.size() < 2) {
+        std::vector<std::string> list;
+        for (const auto& command : commands) {
+            if (command.isAvailable(MODE_COMMAND_LINE)) {
+                list.push_back(command.getName());
+            }
         }
+        return list;
+    } else {
+        std::string cmd = argv[0];
+        if (commandMap.find(cmd) != commandMap.end()) {
+            return commandMap[cmd].buildCompletionList(argv);
+        }
+        return std::vector<std::string>();
+    }
+}
+
+int bashComplMode(int argc, const char *argv[])
+{
+    int rc = EXIT_FAILURE;
+    try {
+        Args args(argv, argv + argc);
+        printList(buildComplList(args));
+        rc = EXIT_SUCCESS;
+    } catch (const std::runtime_error& ex) {
     }
 
-    return EXIT_SUCCESS;
+    return rc;
 }
 
 int cliMode(const int argc, const char** argv)
@@ -581,22 +468,15 @@ int cliMode(const int argc, const char** argv)
         return EXIT_SUCCESS;
     }
 
-    if (commands.find(argv[1]) == commands.end()) {
+    if (commandMap.find(argv[1]) == commandMap.end()) {
         printUsage(std::cout, argv[0], MODE_COMMAND_LINE);
         return EXIT_FAILURE;
     }
 
-    //TODO: Connect when it is necessary
-    //f.e. vasum-cli <command> -h doesn't need connection
-    if (connect() != EXIT_SUCCESS) {
-        return EXIT_FAILURE;
-    }
-
     // pass all the arguments excluding argv[0] - the executable name
-    Args commandArgs(argv+1, argv+argc);
+    Args commandArgs(argv + 1, argv + argc);
     int rc = executeCommand(commandArgs, MODE_COMMAND_LINE);
 
-    disconnect();
     return rc;
 }
 
@@ -605,26 +485,38 @@ int cliMode(const int argc, const char** argv)
 
 int main(const int argc, const char *argv[])
 {
+    for (const auto& command : commands) {
+        commandMap.insert(std::pair<std::string,const CommandLineInterface>(command.getName(),command));
+    }
+
+    int rc = EXIT_FAILURE;
     if (argc > 1) {
+
         //process arguments
         if (std::string(argv[1]) == "--bash-completion") {
-            return bashComplMode();
-        }
-
-        if (std::string(argv[1]) == "-f") {
+            rc = bashComplMode(argc - 2, argv + 2);
+        } else if (std::string(argv[1]) == "-f") {
             if (argc < 3) {
                 std::cerr << "Filename expected" << std::endl;
-                return EXIT_FAILURE;
+                rc = EXIT_FAILURE;
             }
-            return processFile(std::string(argv[2]));
+            else {
+                rc = processFile(std::string(argv[2]));
+            }
+        } else {
+            rc = cliMode(argc, argv);
         }
 
-        return cliMode(argc, argv);
+    } else {
+
+        if (isatty(0) == 1) {
+            interactiveMode = 1;
+            ::rl_attempted_completion_function = completion;
+        }
+
+        rc = processStream(std::cin);
     }
 
-    if (isatty(0) == 1) {
-        interactiveMode = 1;
-        ::rl_attempted_completion_function = completion;
-    }
-    return processStream(std::cin);
+    disconnect();
+    return rc;
 }

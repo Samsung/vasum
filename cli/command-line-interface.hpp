@@ -40,6 +40,12 @@ namespace cli {
 
 typedef std::vector<std::string> Args;
 
+struct ArgSpec {
+    std::string name;
+    std::string description;
+    std::string format;
+};
+
 /**
  * Class that implements command pattern.
  */
@@ -54,7 +60,7 @@ public:
     /**
      * @see CommandLineInterface::CommandLineInterface
      */
-    typedef std::vector<std::pair<std::string, std::string>> ArgsSpec;
+    typedef std::vector<ArgSpec> ArgsSpec;
 
     /**
      * Dummy constructor (for stl usage)
@@ -133,8 +139,9 @@ public:
      *
      * @param argv Command line arguments
      */
-    void execute(const Args& argv);
+    void execute(const Args& argv) const;
 
+    const std::vector<std::string> buildCompletionList(const Args& argv) const;
 
 private:
     static VsmClient client;
@@ -233,14 +240,7 @@ void get_zone_ids(const Args& argv);
  *
  * @see vsm_get_active_zone_id
  */
-void get_active_zone_id(const Args& argv);
-
-/**
- * Parses command line arguments and call vsm_lookup_zone_by_id
- *
- * @see vsm_lookup_zone_by_id
- */
-void lookup_zone_by_id(const Args& argv);
+void get_active_zone(const Args& argv);
 
 /**
  * Parses command line arguments and call vsm_grant_device
@@ -257,32 +257,11 @@ void grant_device(const Args& argv);
 void revoke_device(const Args& argv);
 
 /**
- * Parses command line arguments and call vsm_create_netdev_veth
+ * Parses command line arguments and call vsm_create_netdev_*
  *
- * @see vsm_create_netdev_veth
+ * @see vsm_create_netdev_veth,vsm_create_netdev_macvlan,vsm_create_netdev_phys
  */
-void create_netdev_veth(const Args& argv);
-
-/**
- * Parses command line arguments and call vsm_create_netdev_macvlan
- *
- * @see vsm_create_netdev_macvlan
- */
-void create_netdev_macvlan(const Args& argv);
-
-/**
- * Parses command line arguments and call vsm_create_netdev_phys
- *
- * @see vsm_create_netdev_phys
- */
-void create_netdev_phys(const Args& argv);
-
-/**
- * Parses command line arguments and call vsm_lookup_netdev_by_name
- *
- * @see vsm_lookup_netdev_by_name
- */
-void lookup_netdev_by_name(const Args& argv);
+void create_netdev(const Args& argv);
 
 /**
  * Parses command line arguments and call vsm_destroy_netdev
@@ -292,39 +271,27 @@ void lookup_netdev_by_name(const Args& argv);
 void destroy_netdev(const Args& argv);
 
 /**
- * Parses command line arguments and prints result of vsm_zone_get_netdevs
+ * Parses command line arguments and prints result of vsm_zone_get_netdevs,
+ *  vsm_lookup_netdev_by_name, vsm_netdev_get_ipv4_addr, vsm_netdev_get_ipv6_addr
  *
- * @see vsm_zone_get_netdevs
+ * @see vsm_zone_get_netdevs, vsm_lookup_netdev_by_name,
+ * @see vsm_netdev_get_ipv4_addr, vsm_netdev_get_ipv6_addr
  */
-void zone_get_netdevs(const Args& argv);
+void netdev_list(const Args& argv);
 
 /**
- * Parses command line arguments and prints result of vsm_netdev_get_ipv4_addr
+ * Parses command line arguments and call vsm_netdev_set_ipv4_addr, vsm_netdev_set_ipv6_addr
  *
- * @see vsm_netdev_get_ipv4_addr
+ * @see vsm_netdev_set_ipv4_addr, vsm_netdev_set_ipv6_addr
  */
-void netdev_get_ipv4_addr(const Args& argv);
+void netdev_add_ip_addr(const Args& argv);
 
 /**
- * Parses command line arguments and and prints result of vsm_netdev_get_ipv6_addr
+ * Parses command line arguments and call vsm_netdev_del_ipv4_addr, vsm_netdev_del_ipv6_addr
  *
- * @see vsm_netdev_get_ipv6_addr
+ * @see vsm_netdev_del_ipv4_addr, vsm_netdev_del_ipv6_addr
  */
-void netdev_get_ipv6_addr(const Args& argv);
-
-/**
- * Parses command line arguments and call vsm_netdev_set_ipv4_addr
- *
- * @see vsm_netdev_set_ipv4_addr
- */
-void netdev_set_ipv4_addr(const Args& argv);
-
-/**
- * Parses command line arguments and call vsm_netdev_set_ipv6_addr
- *
- * @see vsm_netdev_set_ipv6_addr
- */
-void netdev_set_ipv6_addr(const Args& argv);
+void netdev_del_ip_addr(const Args& argv);
 
 /**
  * Parses command line arguments and call vsm_netdev_up

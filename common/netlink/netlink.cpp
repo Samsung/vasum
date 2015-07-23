@@ -109,7 +109,7 @@ void Netlink::open(int netNsPid)
         mFd = utils::passNamespacedFd(netNsPid, CLONE_NEWNET, fdFactory);
     }
     if (mFd == -1) {
-        throw VasumException("Can't open netlink connection");
+        throw VasumException("Can't open netlink connection (zone not running)");
     }
 
     sockaddr_nl local = utils::make_clean<sockaddr_nl>();
@@ -178,13 +178,13 @@ std::unique_ptr<std::vector<char>> Netlink::rcv(unsigned int nlmsgSeq)
                 // It is NACK/ACK message
                 nlmsgerr *err = reinterpret_cast<nlmsgerr*>(NLMSG_DATA(answer));
                 if (answer->nlmsg_seq != nlmsgSeq) {
-                    throw VasumException("Sending failed: answer message was mismatched");
+                    throw VasumException("Receive failed: answer message was mismatched");
                 }
                 if (err->error) {
-                    throw VasumException("Sending failed: " + getSystemErrorMessage(-err->error));
+                    throw VasumException("Receive failed: " + getSystemErrorMessage(-err->error));
                 }
             } else if (answer->nlmsg_type == NLMSG_OVERRUN) {
-                throw VasumException("Sending failed: data lost");
+                throw VasumException("Receive failed: data lost");
             }
         }
         if (lastOk == NULL) {
