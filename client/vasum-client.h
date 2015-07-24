@@ -19,13 +19,23 @@
 
 /**
  * @file
- * @author  Mateusz Malicki (m.malicki2@samsung.com)
- * @brief   This file contains the public API for Vasum Client
+ * @author   Mateusz Malicki (m.malicki2@samsung.com)
+ * @brief    This file contains the public API for Vasum Client
+ * @defgroup libvasum-client libvasum-client
+ * @brief    C library for interfacing Vasum
  *
- * @par Example usage:
+ * All functionalities that are possible using the Vasum's Command Line Interface can also be done with libvasum-client's calls.
+ *
+ * @par Simple usage:
+ * Basic usage:
+ * - Create VsmClient with vsm_client_create(). It'll be needed for all communication with Vasum.
+ * - Establish the connection with the daemon using vsm_connect()
+ * - Do what you need to do with the zones
+ * - Free the client with vsm_client_free()
+ *
  * @code
 #include <stdio.h>
-#include "client/vasum-client.h"
+#include <vasum-client.h>
 
 int main(int argc, char** argv)
 {
@@ -34,14 +44,16 @@ int main(int argc, char** argv)
     VsmArrayString values = NULL;
     int ret = 0;
 
-    client = vsm_client_create(); // create client handle
+    // Create client handle
+    client = vsm_client_create();
     if (NULL == client) {
         // error!
         ret = 1;
         goto finish;
     }
 
-    status = vsm_connect(client); // connect to dbus
+    // Connect to Vasum
+    status = vsm_connect(client);
     if (VSMCLIENT_SUCCESS != status) {
         // error!
         ret = 1;
@@ -66,8 +78,82 @@ finish:
     return ret;
 }
  @endcode
- */
 
+ * @par Polling loop
+ *
+ * By default libVasum will create a separate thread for his communication with Vasum. Most of the time it'll sleep so it shouldn't be a concern.
+ * It's also possible to connect to an existing polling loop. To do this you'll need to:
+ * - Get the poll file descriptor with vsm_get_poll_fd()
+ * - Use epoll/poll/select to wait for events on the file descriptor
+ * - Call vsm_enter_eventloop() every time there's an event
+ *
+ * For example:
+ * @code
+#include <pthread.h>
+#include <assert.h>
+#include <stdio.h>
+#include <signal.h>
+#include <sys/epoll.h>
+#include <vasum-client.h>
+
+volatile static sig_atomic_t running;
+static int LOOP_INTERVAL = 1000; // ms
+
+void* main_loop(void* client)
+{
+    int fd = -1;
+    VsmStatus status = vsm_get_poll_fd(client, &fd);
+    assert(VSMCLIENT_SUCCESS == status);
+
+    while (running) {
+        struct epoll_event event;
+        int num = epoll_wait(fd, &event, 1, LOOP_INTERVAL);
+        if (num > 0) {
+            status = vsm_enter_eventloop(client, 0 , 0);
+            assert(VSMCLIENT_SUCCESS == status);
+        }
+    }
+    return NULL;
+}
+
+int main(int argc, char** argv)
+{
+    pthread_t loop;
+    VsmStatus status;
+    VsmClient client;
+    int ret = 0;
+
+    client = vsm_client_create();
+    assert(client);
+
+    status = vsm_set_dispatcher_type(client, VSMDISPATCHER_EXTERNAL);
+    assert(VSMCLIENT_SUCCESS == status);
+
+    status = vsm_connect(client);
+    assert(VSMCLIENT_SUCCESS == status);
+
+    // start event loop
+    running = 1;
+    ret = pthread_create(&loop, NULL, main_loop, client);
+    assert(ret == 0);
+
+    // make vsm_* calls on client
+    // ...
+
+    status = vsm_disconnect(client);
+    assert(VSMCLIENT_SUCCESS == status);
+
+    //stop event loop
+    running = 0;
+    ret = pthread_join(loop, NULL);
+    assert(ret == 0);
+
+    vsm_client_free(client); // destroy client handle
+    return ret;
+}
+ @endcode
+ */
+/*@{*/
 #ifndef VASUM_CLIENT_H
 #define VASUM_CLIENT_H
 
@@ -82,34 +168,34 @@ extern "C"
 #endif
 
 /**
- * vasum-server's client pointer.
+ * vasum-server's opaque client pointer.
  */
 typedef void* VsmClient;
 
 /**
  * NULL-terminated string type.
  *
- * @sa vsm_array_string_free
+ * @sa vsm_string_free
  */
 typedef char* VsmString;
 
 /**
  * NULL-terminated array of strings type.
  *
- * @sa vsm_string_free
+ * @sa vsm_array_string_free
  */
 typedef VsmString* VsmArrayString;
 
 /**
- * Completion status of communication function.
+ * Completion status of libvasum-client's functions
  */
 typedef enum {
-    VSMCLIENT_CUSTOM_ERROR,     /**< User specified error */
-    VSMCLIENT_IO_ERROR,         /**< Input/Output error */
-    VSMCLIENT_OPERATION_FAILED, /**< Operation failed */
-    VSMCLIENT_INVALID_ARGUMENT, /**< Invalid argument */
-    VSMCLIENT_OTHER_ERROR,      /**< Other error */
-    VSMCLIENT_SUCCESS           /**< Success */
+    VSMCLIENT_CUSTOM_ERROR,     ///< User specified error
+    VSMCLIENT_IO_ERROR,         ///< Input/Output error
+    VSMCLIENT_OPERATION_FAILED, ///< Operation failed
+    VSMCLIENT_INVALID_ARGUMENT, ///< Invalid argument
+    VSMCLIENT_OTHER_ERROR,      ///< Other error
+    VSMCLIENT_SUCCESS           ///< Success
 } VsmStatus;
 
 /**
@@ -182,72 +268,6 @@ typedef enum {
 
 /**
  * Event dispacher types.
- *
- * @par Example usage:
- * @code
-#include <pthread.h>
-#include <assert.h>
-#include <stdio.h>
-#include <signal.h>
-#include <sys/epoll.h>
-#include <vasum-client.h>
-
-volatile static sig_atomic_t running;
-static int LOOP_INTERVAL = 1000; // ms
-
-void* main_loop(void* client)
-{
-    int fd = -1;
-    VsmStatus status = vsm_get_poll_fd(client, &fd);
-    assert(VSMCLIENT_SUCCESS == status);
-
-    while (running) {
-        struct epoll_event event;
-        int num = epoll_wait(fd, &event, 1, LOOP_INTERVAL);
-        if (num > 0) {
-            status = vsm_enter_eventloop(client, 0 , 0);
-            assert(VSMCLIENT_SUCCESS == status);
-        }
-    }
-    return NULL;
-}
-
-int main(int argc, char** argv)
-{
-    pthread_t loop;
-    VsmStatus status;
-    VsmClient client;
-    int ret = 0;
-
-    client = vsm_client_create();
-    assert(client);
-
-    status = vsm_set_dispatcher_type(client, VSMDISPATCHER_EXTERNAL);
-    assert(VSMCLIENT_SUCCESS == status);
-
-    status = vsm_connect(client);
-    assert(VSMCLIENT_SUCCESS == status);
-
-    // start event loop
-    running = 1;
-    ret = pthread_create(&loop, NULL, main_loop, client);
-    assert(ret == 0);
-
-    // make vsm_* calls on client
-    // ...
-
-    status = vsm_disconnect(client);
-    assert(VSMCLIENT_SUCCESS == status);
-
-    //stop event loop
-    running = 0;
-    ret = pthread_join(loop, NULL);
-    assert(ret == 0);
-
-    vsm_client_free(client); // destroy client handle
-    return ret;
-}
- @endcode
  */
 typedef enum {
     VSMDISPATCHER_EXTERNAL,         /**< User must handle dispatching messages */
@@ -383,14 +403,6 @@ void vsm_zone_free(VsmZone zone);
  * @param netdev VsmNetdev
  */
 void vsm_netdev_free(VsmNetdev netdev);
-
-/**
- * @name Host API
- *
- * Functions using org.tizen.vasum.host.manager D-Bus interface.
- *
- * @{
- */
 
 /**
  * Zone's D-Bus state change callback function signature.
@@ -894,17 +906,6 @@ VsmStatus vsm_remove_declaration(VsmClient client,
                                  const char* zone,
                                  VsmString declaration);
 
-/**
- * Clean up zones root directory
- *
- * Removes all unknown zones root directory entry
- * @return status of this function call
- */
-VsmStatus vsm_clean_up_zones_root(VsmClient client);
-
-/** @} Host API */
-
-
 #endif /* __VASUM_WRAPPER_SOURCE__ */
 
 #ifdef __cplusplus
@@ -912,3 +913,4 @@ VsmStatus vsm_clean_up_zones_root(VsmClient client);
 #endif
 
 #endif /* VASUM_CLIENT_H */
+/*@}*/

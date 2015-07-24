@@ -92,7 +92,7 @@ public:
 } // namespace logger
 
 /*@{*/
-/// @brief Generic logging macro
+/// Generic logging macro
 #define LOG(SEVERITY, MESSAGE)                                             \
     do {                                                                   \
         if (logger::Logger::getLogLevel() <= logger::LogLevel::SEVERITY) { \
