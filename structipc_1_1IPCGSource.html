@@ -113,6 +113,9 @@ $(document).ready(function(){initNavTree('structipc_1_1IPCGSource.html','');});
 </div><!--header-->
 <div class="contents">
 
+<p>Class for connecting to the glib's loop.  
+ <a href="structipc_1_1IPCGSource.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="ipc-gsource_8hpp_source.html">ipc-gsource.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
@@ -133,21 +136,28 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8a0dc17ea3407a81104107de8e9418a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structipc_1_1IPCGSource.html">IPCGSource</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structipc_1_1IPCGSource.html#a8a0dc17ea3407a81104107de8e9418a3">operator=</a> (const <a class="el" href="structipc_1_1IPCGSource.html">IPCGSource</a> &amp;)=delete</td></tr>
 <tr class="separator:a8a0dc17ea3407a81104107de8e9418a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9df3371fa57619d8d53fe287539bdcc7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structipc_1_1IPCGSource.html#a9df3371fa57619d8d53fe287539bdcc7">addFD</a> (const <a class="el" href="namespaceipc.html#a878a66ab3745f8ab7f157fb81e4c3c5d">FileDescriptor</a> peerFD)</td></tr>
+<tr class="memdesc:a9df3371fa57619d8d53fe287539bdcc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">New file descriptor to listen on.  <a href="#a9df3371fa57619d8d53fe287539bdcc7">More...</a><br /></td></tr>
 <tr class="separator:a9df3371fa57619d8d53fe287539bdcc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0562b0ac7c183dc9aecb73bf52ddecb2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structipc_1_1IPCGSource.html#a0562b0ac7c183dc9aecb73bf52ddecb2">removeFD</a> (const <a class="el" href="namespaceipc.html#a878a66ab3745f8ab7f157fb81e4c3c5d">FileDescriptor</a> peerFD)</td></tr>
+<tr class="memdesc:a0562b0ac7c183dc9aecb73bf52ddecb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes the file descriptor from the GSource.  <a href="#a0562b0ac7c183dc9aecb73bf52ddecb2">More...</a><br /></td></tr>
 <tr class="separator:a0562b0ac7c183dc9aecb73bf52ddecb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9ba6be3b47a9fd0a6487f15c3eaedc51"><td class="memItemLeft" align="right" valign="top">guint&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structipc_1_1IPCGSource.html#a9ba6be3b47a9fd0a6487f15c3eaedc51">attach</a> (GMainContext *context=nullptr)</td></tr>
+<tr class="memdesc:a9ba6be3b47a9fd0a6487f15c3eaedc51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attach to the glib's GMainContext.  <a href="#a9ba6be3b47a9fd0a6487f15c3eaedc51">More...</a><br /></td></tr>
 <tr class="separator:a9ba6be3b47a9fd0a6487f15c3eaedc51"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac6488a70a8931e16a3e3961967790e33"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structipc_1_1IPCGSource.html#ac6488a70a8931e16a3e3961967790e33">detach</a> ()</td></tr>
+<tr class="memdesc:ac6488a70a8931e16a3e3961967790e33"><td class="mdescLeft">&#160;</td><td class="mdescRight">After this method quits handlerCallback will not be called.  <a href="#ac6488a70a8931e16a3e3961967790e33">More...</a><br /></td></tr>
 <tr class="separator:ac6488a70a8931e16a3e3961967790e33"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab652a9255317862c89e8af90de98d21a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structipc_1_1IPCGSource.html#ab652a9255317862c89e8af90de98d21a">callHandler</a> ()</td></tr>
+<tr class="memdesc:ab652a9255317862c89e8af90de98d21a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Locks the internal state mutex and calls the handler callback for each fd.  <a href="#ab652a9255317862c89e8af90de98d21a">More...</a><br /></td></tr>
 <tr class="separator:ab652a9255317862c89e8af90de98d21a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:ac46b76d1428824cfb3e0ee0a81d37393"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structipc_1_1IPCGSource.html#a2e50da75ca02dcab287b59345cd21943">Pointer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structipc_1_1IPCGSource.html#ac46b76d1428824cfb3e0ee0a81d37393">create</a> (const <a class="el" href="structipc_1_1IPCGSource.html#a4b5b54014d018eef0a58fd47673d7c5b">HandlerCallback</a> &amp;handlerCallback)</td></tr>
+<tr class="memdesc:ac46b76d1428824cfb3e0ee0a81d37393"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates the <a class="el" href="structipc_1_1IPCGSource.html" title="Class for connecting to the glib&#39;s loop. ">IPCGSource</a> class in the memory allocated by glib.  <a href="#ac46b76d1428824cfb3e0ee0a81d37393">More...</a><br /></td></tr>
 <tr class="separator:ac46b76d1428824cfb3e0ee0a81d37393"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afcb0d23721a3211a0b943d08c7825baa"><td class="memItemLeft" align="right" valign="top">static gboolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structipc_1_1IPCGSource.html#afcb0d23721a3211a0b943d08c7825baa">onHandlerCall</a> (gpointer userData)</td></tr>
+<tr class="memdesc:afcb0d23721a3211a0b943d08c7825baa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback for the dispatch function.  <a href="#afcb0d23721a3211a0b943d08c7825baa">More...</a><br /></td></tr>
 <tr class="separator:afcb0d23721a3211a0b943d08c7825baa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-types"></a>
@@ -163,12 +173,16 @@ Private Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-methods"></a>
 Static Private Member Functions</h2></td></tr>
 <tr class="memitem:af8d644f6852066279da3cda954991297"><td class="memItemLeft" align="right" valign="top">static gboolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structipc_1_1IPCGSource.html#af8d644f6852066279da3cda954991297">prepare</a> (GSource *source, gint *timeout)</td></tr>
+<tr class="memdesc:af8d644f6852066279da3cda954991297"><td class="mdescLeft">&#160;</td><td class="mdescRight">GSourceFuncs' callback.  <a href="#af8d644f6852066279da3cda954991297">More...</a><br /></td></tr>
 <tr class="separator:af8d644f6852066279da3cda954991297"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a76ef5ab7662c89e7a716d2ba2ebeaece"><td class="memItemLeft" align="right" valign="top">static gboolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structipc_1_1IPCGSource.html#a76ef5ab7662c89e7a716d2ba2ebeaece">check</a> (GSource *source)</td></tr>
+<tr class="memdesc:a76ef5ab7662c89e7a716d2ba2ebeaece"><td class="mdescLeft">&#160;</td><td class="mdescRight">GSourceFuncs' callback.  <a href="#a76ef5ab7662c89e7a716d2ba2ebeaece">More...</a><br /></td></tr>
 <tr class="separator:a76ef5ab7662c89e7a716d2ba2ebeaece"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa8ce084519ba13deaae36a211b1d17a4"><td class="memItemLeft" align="right" valign="top">static gboolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structipc_1_1IPCGSource.html#aa8ce084519ba13deaae36a211b1d17a4">dispatch</a> (GSource *source, GSourceFunc callbacks, gpointer userData)</td></tr>
+<tr class="memdesc:aa8ce084519ba13deaae36a211b1d17a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">GSourceFuncs' callback.  <a href="#aa8ce084519ba13deaae36a211b1d17a4">More...</a><br /></td></tr>
 <tr class="separator:aa8ce084519ba13deaae36a211b1d17a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a485151a3394b2da8a49ca3f607cc1ee5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structipc_1_1IPCGSource.html#a485151a3394b2da8a49ca3f607cc1ee5">finalize</a> (GSource *source)</td></tr>
+<tr class="memdesc:a485151a3394b2da8a49ca3f607cc1ee5"><td class="mdescLeft">&#160;</td><td class="mdescRight">GSourceFuncs' callback.  <a href="#a485151a3394b2da8a49ca3f607cc1ee5">More...</a><br /></td></tr>
 <tr class="separator:a485151a3394b2da8a49ca3f607cc1ee5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
@@ -185,10 +199,11 @@ Private Attributes</h2></td></tr>
 <tr class="separator:aea3f68e1dcf8081c4377261470ac84da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Class for connecting to the glib's loop. Creates a dedicated GSource.</p>
+<div class="textblock"><p>Class for connecting to the glib's loop. </p>
+<p>Creates a dedicated GSource.</p>
 <p>It's supposed to be constructed ONLY with the static create method and destructed in a glib callback.</p>
 <p>TODO:</p><ul>
-<li>waiting till the managed object (<a class="el" href="classipc_1_1Client.html">Client</a> or <a class="el" href="classipc_1_1Service.html">Service</a>) is destroyed before <a class="el" href="structipc_1_1IPCGSource.html">IPCGSource</a> stops operating. For now programmer has to ensure this. </li>
+<li>waiting till the managed object (<a class="el" href="classipc_1_1Client.html" title="This class wraps communication via UX sockets for client applications. ">Client</a> or <a class="el" href="classipc_1_1Service.html" title="This class wraps communication via UX sockets. ">Service</a>) is destroyed before <a class="el" href="structipc_1_1IPCGSource.html" title="Class for connecting to the glib&#39;s loop. ">IPCGSource</a> stops operating. For now programmer has to ensure this. </li>
 </ul>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a class="anchor" id="a4b5b54014d018eef0a58fd47673d7c5b"></a>
@@ -336,7 +351,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>New file descriptor to listen on.</p>
+
+<p>New file descriptor to listen on. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">peerFD</td><td>file descriptor </td></tr>
@@ -359,7 +375,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Attach to the glib's GMainContext</p>
+
+<p>Attach to the glib's GMainContext. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">context</td><td>where to connect </td></tr>
@@ -382,7 +399,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Locks the internal state mutex and calls the handler callback for each fd </p>
+
+<p>Locks the internal state mutex and calls the handler callback for each fd. </p>
 
 </div>
 </div>
@@ -407,7 +425,8 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>GSourceFuncs' callback </p>
+
+<p>GSourceFuncs' callback. </p>
 
 </div>
 </div>
@@ -432,14 +451,16 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Creates the <a class="el" href="structipc_1_1IPCGSource.html">IPCGSource</a> class in the memory allocated by glib. Calls <a class="el" href="structipc_1_1IPCGSource.html">IPCGSource</a>'s constructor</p>
+
+<p>Creates the <a class="el" href="structipc_1_1IPCGSource.html" title="Class for connecting to the glib&#39;s loop. ">IPCGSource</a> class in the memory allocated by glib. </p>
+<p>Calls <a class="el" href="structipc_1_1IPCGSource.html" title="Class for connecting to the glib&#39;s loop. ">IPCGSource</a>'s constructor</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">handlerCallback</td><td>event handling callback</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>pointer to the <a class="el" href="structipc_1_1IPCGSource.html">IPCGSource</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>pointer to the <a class="el" href="structipc_1_1IPCGSource.html" title="Class for connecting to the glib&#39;s loop. ">IPCGSource</a> </dd></dl>
 
 </div>
 </div>
@@ -455,7 +476,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>After this method quits handlerCallback will not be called </p>
+
+<p>After this method quits handlerCallback will not be called. </p>
 
 </div>
 </div>
@@ -496,7 +518,8 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>GSourceFuncs' callback </p>
+
+<p>GSourceFuncs' callback. </p>
 
 </div>
 </div>
@@ -521,7 +544,8 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>GSourceFuncs' callback </p>
+
+<p>GSourceFuncs' callback. </p>
 
 </div>
 </div>
@@ -546,7 +570,8 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Callback for the dispatch function </p>
+
+<p>Callback for the dispatch function. </p>
 
 </div>
 </div>
@@ -605,7 +630,8 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>GSourceFuncs' callback </p>
+
+<p>GSourceFuncs' callback. </p>
 
 </div>
 </div>
@@ -622,7 +648,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Removes the file descriptor from the GSource</p>
+
+<p>Removes the file descriptor from the GSource. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">peerFD</td><td>file descriptor </td></tr>
@@ -744,7 +771,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceipc.html">ipc</a></li><li class="navelem"><a class="el" href="structipc_1_1IPCGSource.html">IPCGSource</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -108,6 +108,9 @@ $(document).ready(function(){initNavTree('classutils_1_1Latch.html','');});
 </div><!--header-->
 <div class="contents">
 
+<p>A synchronization aid that allows one thread to wait until an operation being performed in other thread completes.  
+ <a href="classutils_1_1Latch.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="latch_8hpp_source.html">latch.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -115,16 +118,24 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad24cdd4bc12f52b7168a0383d8be090f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Latch.html#ad24cdd4bc12f52b7168a0383d8be090f">Latch</a> ()</td></tr>
 <tr class="separator:ad24cdd4bc12f52b7168a0383d8be090f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9decd895df56d0880ccbd9c0a4111e38"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Latch.html#a9decd895df56d0880ccbd9c0a4111e38">set</a> ()</td></tr>
+<tr class="memdesc:a9decd895df56d0880ccbd9c0a4111e38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets an event occurred.  <a href="#a9decd895df56d0880ccbd9c0a4111e38">More...</a><br /></td></tr>
 <tr class="separator:a9decd895df56d0880ccbd9c0a4111e38"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee9bf68cdac62e6db733bc3a1fc7dca3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Latch.html#aee9bf68cdac62e6db733bc3a1fc7dca3">wait</a> ()</td></tr>
+<tr class="memdesc:aee9bf68cdac62e6db733bc3a1fc7dca3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Waits for a single occurrence of event.  <a href="#aee9bf68cdac62e6db733bc3a1fc7dca3">More...</a><br /></td></tr>
 <tr class="separator:aee9bf68cdac62e6db733bc3a1fc7dca3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ec2a516a0c4a10de485b4cea11fb0dc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Latch.html#a3ec2a516a0c4a10de485b4cea11fb0dc">wait</a> (const unsigned int timeoutMs)</td></tr>
+<tr class="memdesc:a3ec2a516a0c4a10de485b4cea11fb0dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Waits for a single occurrence of event with timeout.  <a href="#a3ec2a516a0c4a10de485b4cea11fb0dc">More...</a><br /></td></tr>
 <tr class="separator:a3ec2a516a0c4a10de485b4cea11fb0dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a308ba46dd0619a02564f1f997068bd8e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Latch.html#a308ba46dd0619a02564f1f997068bd8e">waitForN</a> (const unsigned int n)</td></tr>
+<tr class="memdesc:a308ba46dd0619a02564f1f997068bd8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Waits for <br />
+ occurrences of event.  <a href="#a308ba46dd0619a02564f1f997068bd8e">More...</a><br /></td></tr>
 <tr class="separator:a308ba46dd0619a02564f1f997068bd8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a93ac69fb68d9aa483cda9a8efa99ea68"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Latch.html#a93ac69fb68d9aa483cda9a8efa99ea68">waitForN</a> (const unsigned int n, const unsigned int timeoutMs)</td></tr>
+<tr class="memdesc:a93ac69fb68d9aa483cda9a8efa99ea68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Waits for <br />
+ occurrences of event with timeout.  <a href="#a93ac69fb68d9aa483cda9a8efa99ea68">More...</a><br /></td></tr>
 <tr class="separator:a93ac69fb68d9aa483cda9a8efa99ea68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e6135f9599b492bff73c3eadad939b2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Latch.html#a6e6135f9599b492bff73c3eadad939b2">empty</a> ()</td></tr>
+<tr class="memdesc:a6e6135f9599b492bff73c3eadad939b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if there are no pending events.  <a href="#a6e6135f9599b492bff73c3eadad939b2">More...</a><br /></td></tr>
 <tr class="separator:a6e6135f9599b492bff73c3eadad939b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
@@ -137,7 +148,8 @@ Private Attributes</h2></td></tr>
 <tr class="separator:abcd81d7ee81045880eba05b0e5afb5f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A synchronization aid that allows one thread to wait until an operation being performed in other thread completes. It has a similar function as std::promise&lt;void&gt; but allows multiple calls to set. </p>
+<div class="textblock"><p>A synchronization aid that allows one thread to wait until an operation being performed in other thread completes. </p>
+<p>It has a similar function as std::promise&lt;void&gt; but allows multiple calls to set. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="ad24cdd4bc12f52b7168a0383d8be090f"></a>
 <div class="memitem">
@@ -167,6 +179,7 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
 <p>Check if there are no pending events. </p>
 
 </div>
@@ -183,6 +196,7 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
 <p>Sets an event occurred. </p>
 
 </div>
@@ -199,6 +213,7 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
 <p>Waits for a single occurrence of event. </p>
 
 </div>
@@ -216,7 +231,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Waits for a single occurrence of event with timeout.</p>
+
+<p>Waits for a single occurrence of event with timeout. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">timeoutMs</td><td>timeout in ms to wait for </td></tr>
@@ -240,8 +256,9 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
 <p>Waits for <br />
- occurrences of event.</p>
+ occurrences of event. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">n</td><td>number of occurrences to wait for </td></tr>
@@ -274,8 +291,9 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
 <p>Waits for <br />
- occurrences of event with timeout.</p>
+ occurrences of event with timeout. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">n</td><td>number of occurrences to wait for </td></tr>
@@ -359,7 +377,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceutils.html">utils</a></li><li class="navelem"><a class="el" href="classutils_1_1Latch.html">Latch</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

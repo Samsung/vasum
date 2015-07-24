@@ -19,6 +19,7 @@ var classvasum_1_1ZonesManager =
     [ "getTemplatePathForExistingZone", "classvasum_1_1ZonesManager.html#a23ebc8b2b8bcf5c4c89ba264f5298711", null ],
     [ "getVTForNewZone", "classvasum_1_1ZonesManager.html#a19113943e6bc1e1fed84c0930523fa51", null ],
     [ "getZone", "classvasum_1_1ZonesManager.html#ab6d6bdc2bad34e37a80621cf447ad6fa", null ],
+    [ "handleCleanUpZonesRootCall", "classvasum_1_1ZonesManager.html#a2819857eaae897db03aea9fb89c349b1", null ],
     [ "handleCreateFileCall", "classvasum_1_1ZonesManager.html#ac7757473cf3327cd223732bb09499020", null ],
     [ "handleCreateNetdevMacvlanCall", "classvasum_1_1ZonesManager.html#a9ade557476a6ed494112bbdcb0fedc1d", null ],
     [ "handleCreateNetdevPhysCall", "classvasum_1_1ZonesManager.html#a5d01e7800300342abeb7226908d101ac", null ],

@@ -11,6 +11,7 @@ var classClient =
     [ "isConnected", "classClient.html#ab18eca3a64aef5d80210c02d5edc228d", null ],
     [ "isInternalDispatcherEnabled", "classClient.html#a5a9e6c17945b4a77d10cefcd669ee3f9", null ],
     [ "vsm_add_state_callback", "classClient.html#ac768f9539969fea7b7d559ff7714e7af", null ],
+    [ "vsm_clean_up_zones_root", "classClient.html#a03ff4b051fd90b5f4e44f9529e57f007", null ],
     [ "vsm_create_netdev_macvlan", "classClient.html#a812f235eaa48e1dfb132fa97fe734adb", null ],
     [ "vsm_create_netdev_phys", "classClient.html#ae80deadc1cbec9f6048fae0e5191d7c7", null ],
     [ "vsm_create_netdev_veth", "classClient.html#abd4b5aa86f7d1aa65f99c7e0b119dc1f", null ],

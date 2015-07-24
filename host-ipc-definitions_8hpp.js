@@ -1,5 +1,6 @@
 var host_ipc_definitions_8hpp =
 [
+    [ "METHOD_CLEAN_UP_ZONES_ROOT", "host-ipc-definitions_8hpp.html#ab41ed34580b27a3cc6dd673d06cd826e", null ],
     [ "METHOD_CREATE_FILE", "host-ipc-definitions_8hpp.html#aa040bb9ed9c751442968418ab737b2f3", null ],
     [ "METHOD_CREATE_NETDEV_MACVLAN", "host-ipc-definitions_8hpp.html#ab309f276ed4f0822f65a9527f8e0b389", null ],
     [ "METHOD_CREATE_NETDEV_PHYS", "host-ipc-definitions_8hpp.html#afd96609c173beb9080d014e24baf4914", null ],

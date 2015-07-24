@@ -109,6 +109,9 @@ $(document).ready(function(){initNavTree('classipc_1_1EventQueue.html','');});
 </div><!--header-->
 <div class="contents">
 
+<p>This class implements a simple FIFO queue of events.  
+ <a href="classipc_1_1EventQueue.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="event-queue_8hpp_source.html">event-queue.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -124,8 +127,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9f60154b24766a643c9b037b6cfc0103"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1EventQueue.html#a9f60154b24766a643c9b037b6cfc0103">getFD</a> () const </td></tr>
 <tr class="separator:a9f60154b24766a643c9b037b6cfc0103"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c3495871f77ef4e61bb1513693c0c3d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1EventQueue.html#a5c3495871f77ef4e61bb1513693c0c3d">send</a> (const MessageType &amp;message)</td></tr>
+<tr class="memdesc:a5c3495871f77ef4e61bb1513693c0c3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send an event.  <a href="#a5c3495871f77ef4e61bb1513693c0c3d">More...</a><br /></td></tr>
 <tr class="separator:a5c3495871f77ef4e61bb1513693c0c3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af83559584685bb42c422225819de7020"><td class="memItemLeft" align="right" valign="top">MessageType&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1EventQueue.html#af83559584685bb42c422225819de7020">receive</a> ()</td></tr>
+<tr class="memdesc:af83559584685bb42c422225819de7020"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receives the event.  <a href="#af83559584685bb42c422225819de7020">More...</a><br /></td></tr>
 <tr class="separator:af83559584685bb42c422225819de7020"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a554baab300dcd2ad4d99ad5d922156e8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1EventQueue.html#a554baab300dcd2ad4d99ad5d922156e8">isEmpty</a> ()</td></tr>
 <tr class="separator:a554baab300dcd2ad4d99ad5d922156e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,7 +153,8 @@ Private Attributes</h2></td></tr>
 <div class="textblock"><h3>template&lt;typename MessageType&gt;<br />
 class ipc::EventQueue&lt; MessageType &gt;</h3>
 
-<p>This class implements a simple FIFO queue of events. One can listen for the event with select/poll/epoll.</p>
+<p>This class implements a simple FIFO queue of events. </p>
+<p>One can listen for the event with select/poll/epoll.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">MessageType</td><td>type to pass as event's value </td></tr>
@@ -332,7 +338,9 @@ template&lt;typename MessageType &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Receives the event. Blocks if there is no event.</p>
+
+<p>Receives the event. </p>
+<p>Blocks if there is no event.</p>
 <dl class="section return"><dt>Returns</dt><dd>event's value </dd></dl>
 
 </div>
@@ -352,7 +360,8 @@ template&lt;typename MessageType &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Send an event</p>
+
+<p>Send an event. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">message</td><td>mesage to send </td></tr>
@@ -439,7 +448,7 @@ template&lt;typename MessageType &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceipc.html">ipc</a></li><li class="navelem"><a class="el" href="classipc_1_1EventQueue.html">EventQueue</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

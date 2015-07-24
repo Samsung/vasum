@@ -109,11 +109,15 @@ $(document).ready(function(){initNavTree('classvasum_1_1ZoneProvision.html','');
 </div><!--header-->
 <div class="contents">
 
+<p>Class is responsible for prepare filesystem for zone It allows to create directories, files, mount points and copying files from host.  
+ <a href="classvasum_1_1ZoneProvision.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="zone-provision_8hpp_source.html">zone-provision.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a6fe543b47fbd4a474cefee284146950f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1ZoneProvision.html#a6fe543b47fbd4a474cefee284146950f">ZoneProvision</a> (const std::string &amp;rootPath, const std::string &amp;configPath, const std::string &amp;dbPath, const std::string &amp;dbPrefix, const std::vector&lt; std::string &gt; &amp;validLinkPrefixes)</td></tr>
+<tr class="memdesc:a6fe543b47fbd4a474cefee284146950f"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classvasum_1_1ZoneProvision.html" title="Class is responsible for prepare filesystem for zone It allows to create directories, files, mount points and copying files from host. ">ZoneProvision</a> constructor.  <a href="#a6fe543b47fbd4a474cefee284146950f">More...</a><br /></td></tr>
 <tr class="separator:a6fe543b47fbd4a474cefee284146950f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf0b73d27f4c780d8e1f8129c7a7b47b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1ZoneProvision.html#aaf0b73d27f4c780d8e1f8129c7a7b47b">~ZoneProvision</a> ()</td></tr>
 <tr class="separator:aaf0b73d27f4c780d8e1f8129c7a7b47b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -124,18 +128,23 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a034039f870454962037e22231431b205"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1ZoneProvision.html#a034039f870454962037e22231431b205">ZoneProvision</a> (<a class="el" href="classvasum_1_1ZoneProvision.html">ZoneProvision</a> &amp;&amp;)=default</td></tr>
 <tr class="separator:a034039f870454962037e22231431b205"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af1f90b635f9f2e439604eb0290eca494"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1ZoneProvision.html#af1f90b635f9f2e439604eb0290eca494">declareFile</a> (const int32_t &amp;type, const std::string &amp;path, const int32_t &amp;flags, const int32_t &amp;mode)</td></tr>
+<tr class="memdesc:af1f90b635f9f2e439604eb0290eca494"><td class="mdescLeft">&#160;</td><td class="mdescRight">Declare file, directory or pipe that will be created while zone startup.  <a href="#af1f90b635f9f2e439604eb0290eca494">More...</a><br /></td></tr>
 <tr class="separator:af1f90b635f9f2e439604eb0290eca494"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92801a96ee2f623561b53a54029feb53"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1ZoneProvision.html#a92801a96ee2f623561b53a54029feb53">declareMount</a> (const std::string &amp;source, const std::string &amp;target, const std::string &amp;type, const int64_t &amp;flags, const std::string &amp;<a class="el" href="initctl_8cpp.html#abbacd5f95515b76e7df78ef953e29cae">data</a>)</td></tr>
+<tr class="memdesc:a92801a96ee2f623561b53a54029feb53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Declare mount that will be created while zone startup.  <a href="#a92801a96ee2f623561b53a54029feb53">More...</a><br /></td></tr>
 <tr class="separator:a92801a96ee2f623561b53a54029feb53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a14f5770d4697b5f04669700e11458e93"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1ZoneProvision.html#a14f5770d4697b5f04669700e11458e93">declareLink</a> (const std::string &amp;source, const std::string &amp;target)</td></tr>
+<tr class="memdesc:a14f5770d4697b5f04669700e11458e93"><td class="mdescLeft">&#160;</td><td class="mdescRight">Declare link that will be created while zone startup.  <a href="#a14f5770d4697b5f04669700e11458e93">More...</a><br /></td></tr>
 <tr class="separator:a14f5770d4697b5f04669700e11458e93"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8c0a2fc8c2e9b964e5a460c80dd42332"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1ZoneProvision.html#a8c0a2fc8c2e9b964e5a460c80dd42332">start</a> () noexcept</td></tr>
 <tr class="separator:a8c0a2fc8c2e9b964e5a460c80dd42332"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb2013da48ee4502f181c82f3eeb6b5a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1ZoneProvision.html#afb2013da48ee4502f181c82f3eeb6b5a">stop</a> () noexcept</td></tr>
 <tr class="separator:afb2013da48ee4502f181c82f3eeb6b5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ad2c922bc7eb44662d937fcab2310e5"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1ZoneProvision.html#a0ad2c922bc7eb44662d937fcab2310e5">list</a> () const </td></tr>
+<tr class="memdesc:a0ad2c922bc7eb44662d937fcab2310e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">List all provisioned resources.  <a href="#a0ad2c922bc7eb44662d937fcab2310e5">More...</a><br /></td></tr>
 <tr class="separator:a0ad2c922bc7eb44662d937fcab2310e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83a28347e9a5af3577cde06484e6169d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1ZoneProvision.html#a83a28347e9a5af3577cde06484e6169d">remove</a> (const std::string &amp;item)</td></tr>
+<tr class="memdesc:a83a28347e9a5af3577cde06484e6169d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove resource.  <a href="#a83a28347e9a5af3577cde06484e6169d">More...</a><br /></td></tr>
 <tr class="separator:a83a28347e9a5af3577cde06484e6169d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
@@ -177,7 +186,7 @@ Private Attributes</h2></td></tr>
 <tr class="separator:aba16ddd31bf922efacb3e2ee786e676d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Class is responsible for prepare filesystem for zone It allows to create directories, files, mount points and copying files from host </p>
+<div class="textblock"><p>Class is responsible for prepare filesystem for zone It allows to create directories, files, mount points and copying files from host. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a6fe543b47fbd4a474cefee284146950f"></a>
 <div class="memitem">
@@ -220,7 +229,9 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p><a class="el" href="classvasum_1_1ZoneProvision.html">ZoneProvision</a> constructor </p><dl class="params"><dt>Parameters</dt><dd>
+
+<p><a class="el" href="classvasum_1_1ZoneProvision.html" title="Class is responsible for prepare filesystem for zone It allows to create directories, files, mount points and copying files from host. ">ZoneProvision</a> constructor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">rootPath</td><td>zone root path </td></tr>
     <tr><td class="paramname">configPath</td><td>path to config with defaults </td></tr>
@@ -332,7 +343,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Declare file, directory or pipe that will be created while zone startup </p>
+
+<p>Declare file, directory or pipe that will be created while zone startup. </p>
 
 </div>
 </div>
@@ -359,7 +371,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Declare link that will be created while zone startup </p>
+
+<p>Declare link that will be created while zone startup. </p>
 
 </div>
 </div>
@@ -404,7 +417,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Declare mount that will be created while zone startup </p>
+
+<p>Declare mount that will be created while zone startup. </p>
 
 </div>
 </div>
@@ -588,7 +602,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>List all provisioned resources </p>
+
+<p>List all provisioned resources. </p>
 
 </div>
 </div>
@@ -653,10 +668,11 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Remove resource</p>
+
+<p>Remove resource. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">item</td><td>resource to be removed (as in <a class="el" href="classvasum_1_1ZoneProvision.html#a0ad2c922bc7eb44662d937fcab2310e5">list()</a>) </td></tr>
+    <tr><td class="paramname">item</td><td>resource to be removed (as in <a class="el" href="classvasum_1_1ZoneProvision.html#a0ad2c922bc7eb44662d937fcab2310e5" title="List all provisioned resources. ">list()</a>) </td></tr>
   </table>
   </dd>
 </dl>
@@ -888,7 +904,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacevasum.html">vasum</a></li><li class="navelem"><a class="el" href="classvasum_1_1ZoneProvision.html">ZoneProvision</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

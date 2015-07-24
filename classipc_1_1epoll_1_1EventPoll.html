@@ -133,6 +133,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a64939203c54269dff418f215d920a861"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#a64939203c54269dff418f215d920a861">removeFD</a> (const int fd)</td></tr>
 <tr class="separator:a64939203c54269dff418f215d920a861"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c795b47f082d4b28e162ab3ff9e4e67"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#a3c795b47f082d4b28e162ab3ff9e4e67">dispatchIteration</a> (const int timeoutMs)</td></tr>
+<tr class="memdesc:a3c795b47f082d4b28e162ab3ff9e4e67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispatch at most one signaled FD.  <a href="#a3c795b47f082d4b28e162ab3ff9e4e67">More...</a><br /></td></tr>
 <tr class="separator:a3c795b47f082d4b28e162ab3ff9e4e67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-types"></a>
@@ -302,7 +303,9 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Dispatch at most one signaled FD </p><dl class="params"><dt>Parameters</dt><dd>
+
+<p>Dispatch at most one signaled FD. </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">timeoutMs</td><td>how long should wait in case of no pending events (0 - return immediately, -1 - wait forever) </td></tr>
   </table>
@@ -499,7 +502,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceipc.html">ipc</a></li><li class="navelem"><a class="el" href="namespaceipc_1_1epoll.html">epoll</a></li><li class="navelem"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html">EventPoll</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

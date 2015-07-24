@@ -111,6 +111,9 @@ $(document).ready(function(){initNavTree('classutils_1_1SignalFD.html','');});
 </div><!--header-->
 <div class="contents">
 
+<p><a class="el" href="classutils_1_1SignalFD.html" title="SignalFD takes control over handling signals sent to the thread. ">SignalFD</a> takes control over handling signals sent to the thread.  
+ <a href="classutils_1_1SignalFD.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="signalfd_8hpp_source.html">signalfd.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
@@ -129,8 +132,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab4c9eb11426cb60943c5680592d57565"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classutils_1_1SignalFD.html">SignalFD</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1SignalFD.html#ab4c9eb11426cb60943c5680592d57565">operator=</a> (const <a class="el" href="classutils_1_1SignalFD.html">SignalFD</a> &amp;)=delete</td></tr>
 <tr class="separator:ab4c9eb11426cb60943c5680592d57565"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2676451392a5d0370f8593421ff33c37"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1SignalFD.html#a2676451392a5d0370f8593421ff33c37">setHandler</a> (const int sigNum, const <a class="el" href="classutils_1_1SignalFD.html#a4fd2a295955ab15fb7189218f60fd8ba">Callback</a> &amp;&amp;callback)</td></tr>
+<tr class="memdesc:a2676451392a5d0370f8593421ff33c37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a callback for a specified signal.  <a href="#a2676451392a5d0370f8593421ff33c37">More...</a><br /></td></tr>
 <tr class="separator:a2676451392a5d0370f8593421ff33c37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3826367e412c4e108ea9baa0ad799e4a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1SignalFD.html#a3826367e412c4e108ea9baa0ad799e4a">setHandlerAndBlock</a> (const int sigNum, const <a class="el" href="classutils_1_1SignalFD.html#a4fd2a295955ab15fb7189218f60fd8ba">Callback</a> &amp;&amp;callback)</td></tr>
+<tr class="memdesc:a3826367e412c4e108ea9baa0ad799e4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a callback for a specified signal Blocks the asynchronous signal handling.  <a href="#a3826367e412c4e108ea9baa0ad799e4a">More...</a><br /></td></tr>
 <tr class="separator:a3826367e412c4e108ea9baa0ad799e4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a511936a8664fcd478fcd97c3ca48ae22"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1SignalFD.html#a511936a8664fcd478fcd97c3ca48ae22">getFD</a> () const </td></tr>
 <tr class="separator:a511936a8664fcd478fcd97c3ca48ae22"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -157,7 +162,7 @@ Private Attributes</h2></td></tr>
 <tr class="separator:a768d7ebba2268cd427f482844584fdda"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="classutils_1_1SignalFD.html">SignalFD</a> takes control over handling signals sent to the thread.</p>
+<div class="textblock"><p><a class="el" href="classutils_1_1SignalFD.html" title="SignalFD takes control over handling signals sent to the thread. ">SignalFD</a> takes control over handling signals sent to the thread. </p>
 <p>It should be the only place where signal masks are modified. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a class="anchor" id="a4fd2a295955ab15fb7189218f60fd8ba"></a>
@@ -335,7 +340,9 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Add a callback for a specified signal. Doesn't block the signal.</p>
+
+<p>Add a callback for a specified signal. </p>
+<p>Doesn't block the signal.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">sigNum</td><td>number of the signal </td></tr>
@@ -369,7 +376,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Add a callback for a specified signal Blocks the asynchronous signal handling.</p>
+
+<p>Add a callback for a specified signal Blocks the asynchronous signal handling. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">sigNum</td><td>number of the signal </td></tr>
@@ -472,7 +480,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceutils.html">utils</a></li><li class="navelem"><a class="el" href="classutils_1_1SignalFD.html">SignalFD</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -109,6 +109,9 @@ $(document).ready(function(){initNavTree('classipc_1_1Client.html','');});
 </div><!--header-->
 <div class="contents">
 
+<p>This class wraps communication via UX sockets for client applications.  
+ <a href="classipc_1_1Client.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="client_8hpp_source.html">client.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -122,31 +125,41 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2d2c18fba5e92aad93895d6988494631"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classipc_1_1Client.html">Client</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Client.html#a2d2c18fba5e92aad93895d6988494631">operator=</a> (const <a class="el" href="classipc_1_1Client.html">Client</a> &amp;)=delete</td></tr>
 <tr class="separator:a2d2c18fba5e92aad93895d6988494631"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a742373e08a80d993d2651b6fff76f5b9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Client.html#a742373e08a80d993d2651b6fff76f5b9">start</a> ()</td></tr>
+<tr class="memdesc:a742373e08a80d993d2651b6fff76f5b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Starts processing.  <a href="#a742373e08a80d993d2651b6fff76f5b9">More...</a><br /></td></tr>
 <tr class="separator:a742373e08a80d993d2651b6fff76f5b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aedf367aafaf0247b2a35fafa232dd644"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Client.html#aedf367aafaf0247b2a35fafa232dd644">isStarted</a> ()</td></tr>
 <tr class="separator:aedf367aafaf0247b2a35fafa232dd644"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab82b00175172daa928646eaeed415253"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Client.html#ab82b00175172daa928646eaeed415253">stop</a> (bool wait=true)</td></tr>
+<tr class="memdesc:ab82b00175172daa928646eaeed415253"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stops processing.  <a href="#ab82b00175172daa928646eaeed415253">More...</a><br /></td></tr>
 <tr class="separator:ab82b00175172daa928646eaeed415253"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a2234447578ac4fc30f45513ddfdc30"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Client.html#a8a2234447578ac4fc30f45513ddfdc30">setNewPeerCallback</a> (const <a class="el" href="namespaceipc.html#a10f0847e0310ada6fda2f1b870302d58">PeerCallback</a> &amp;newPeerCallback)</td></tr>
+<tr class="memdesc:a8a2234447578ac4fc30f45513ddfdc30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback called for each new connection to a peer.  <a href="#a8a2234447578ac4fc30f45513ddfdc30">More...</a><br /></td></tr>
 <tr class="separator:a8a2234447578ac4fc30f45513ddfdc30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed3b752fb97eac0c4fd51582272daadd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Client.html#aed3b752fb97eac0c4fd51582272daadd">setRemovedPeerCallback</a> (const <a class="el" href="namespaceipc.html#a10f0847e0310ada6fda2f1b870302d58">PeerCallback</a> &amp;removedPeerCallback)</td></tr>
+<tr class="memdesc:aed3b752fb97eac0c4fd51582272daadd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback called when connection to a peer is lost.  <a href="#aed3b752fb97eac0c4fd51582272daadd">More...</a><br /></td></tr>
 <tr class="separator:aed3b752fb97eac0c4fd51582272daadd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeaf2bcd1aee9380f012624afe2d981d7"><td class="memTemplParams" colspan="2">template&lt;typename SentDataType , typename ReceivedDataType &gt; </td></tr>
 <tr class="memitem:aeaf2bcd1aee9380f012624afe2d981d7"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classipc_1_1Client.html#aeaf2bcd1aee9380f012624afe2d981d7">setMethodHandler</a> (const <a class="el" href="namespaceipc.html#a22413f959280b4756d52ddaa0d59912e">MethodID</a> methodID, const typename <a class="el" href="structipc_1_1MethodHandler.html">MethodHandler</a>&lt; SentDataType, ReceivedDataType &gt;::type &amp;method)</td></tr>
+<tr class="memdesc:aeaf2bcd1aee9380f012624afe2d981d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the callback connected to the method id.  <a href="#aeaf2bcd1aee9380f012624afe2d981d7">More...</a><br /></td></tr>
 <tr class="separator:aeaf2bcd1aee9380f012624afe2d981d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc3a3fa5c72d513b5cd0b4fefe23bb35"><td class="memTemplParams" colspan="2">template&lt;typename ReceivedDataType &gt; </td></tr>
 <tr class="memitem:acc3a3fa5c72d513b5cd0b4fefe23bb35"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classipc_1_1Client.html#acc3a3fa5c72d513b5cd0b4fefe23bb35">setSignalHandler</a> (const <a class="el" href="namespaceipc.html#a22413f959280b4756d52ddaa0d59912e">MethodID</a> methodID, const typename <a class="el" href="structipc_1_1SignalHandler.html">SignalHandler</a>&lt; ReceivedDataType &gt;::type &amp;<a class="el" href="classipc_1_1Client.html#a5ecb8fb89385af81686eb5388ef6fdb0">signal</a>)</td></tr>
+<tr class="memdesc:acc3a3fa5c72d513b5cd0b4fefe23bb35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the callback connected to the method id.  <a href="#acc3a3fa5c72d513b5cd0b4fefe23bb35">More...</a><br /></td></tr>
 <tr class="separator:acc3a3fa5c72d513b5cd0b4fefe23bb35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba2cfd4a491d80676a5b11422f3b4443"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Client.html#aba2cfd4a491d80676a5b11422f3b4443">removeMethod</a> (const <a class="el" href="namespaceipc.html#a22413f959280b4756d52ddaa0d59912e">MethodID</a> methodID)</td></tr>
+<tr class="memdesc:aba2cfd4a491d80676a5b11422f3b4443"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes the callback.  <a href="#aba2cfd4a491d80676a5b11422f3b4443">More...</a><br /></td></tr>
 <tr class="separator:aba2cfd4a491d80676a5b11422f3b4443"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad4f446e82318bc3eeb098bdd48304bba"><td class="memTemplParams" colspan="2">template&lt;typename SentDataType , typename ReceivedDataType &gt; </td></tr>
 <tr class="memitem:ad4f446e82318bc3eeb098bdd48304bba"><td class="memTemplItemLeft" align="right" valign="top">std::shared_ptr&lt; ReceivedDataType &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classipc_1_1Client.html#ad4f446e82318bc3eeb098bdd48304bba">callSync</a> (const <a class="el" href="namespaceipc.html#a22413f959280b4756d52ddaa0d59912e">MethodID</a> methodID, const std::shared_ptr&lt; SentDataType &gt; &amp;<a class="el" href="initctl_8cpp.html#abbacd5f95515b76e7df78ef953e29cae">data</a>, unsigned int timeoutMS=5000)</td></tr>
+<tr class="memdesc:ad4f446e82318bc3eeb098bdd48304bba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Synchronous method call.  <a href="#ad4f446e82318bc3eeb098bdd48304bba">More...</a><br /></td></tr>
 <tr class="separator:ad4f446e82318bc3eeb098bdd48304bba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2e40ccde13303f4e1237990b3211984"><td class="memTemplParams" colspan="2">template&lt;typename SentDataType , typename ReceivedDataType &gt; </td></tr>
 <tr class="memitem:ac2e40ccde13303f4e1237990b3211984"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classipc_1_1Client.html#ac2e40ccde13303f4e1237990b3211984">callAsync</a> (const <a class="el" href="namespaceipc.html#a22413f959280b4756d52ddaa0d59912e">MethodID</a> methodID, const std::shared_ptr&lt; SentDataType &gt; &amp;<a class="el" href="initctl_8cpp.html#abbacd5f95515b76e7df78ef953e29cae">data</a>, const typename <a class="el" href="structipc_1_1ResultHandler.html">ResultHandler</a>&lt; ReceivedDataType &gt;::type &amp;resultCallback)</td></tr>
+<tr class="memdesc:ac2e40ccde13303f4e1237990b3211984"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronous method call.  <a href="#ac2e40ccde13303f4e1237990b3211984">More...</a><br /></td></tr>
 <tr class="separator:ac2e40ccde13303f4e1237990b3211984"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ecb8fb89385af81686eb5388ef6fdb0"><td class="memTemplParams" colspan="2">template&lt;typename SentDataType &gt; </td></tr>
 <tr class="memitem:a5ecb8fb89385af81686eb5388ef6fdb0"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classipc_1_1Client.html#a5ecb8fb89385af81686eb5388ef6fdb0">signal</a> (const <a class="el" href="namespaceipc.html#a22413f959280b4756d52ddaa0d59912e">MethodID</a> methodID, const std::shared_ptr&lt; SentDataType &gt; &amp;<a class="el" href="initctl_8cpp.html#abbacd5f95515b76e7df78ef953e29cae">data</a>)</td></tr>
+<tr class="memdesc:a5ecb8fb89385af81686eb5388ef6fdb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a signal to the peer.  <a href="#a5ecb8fb89385af81686eb5388ef6fdb0">More...</a><br /></td></tr>
 <tr class="separator:a5ecb8fb89385af81686eb5388ef6fdb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
@@ -166,8 +179,9 @@ Private Attributes</h2></td></tr>
 <tr class="separator:adf78d758c6d12308445b935b84743c09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>This class wraps communication via UX sockets for client applications. It uses serialization mechanism from Config.</p>
-<p>For message format </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classipc_1_1Processor.html">ipc::Processor</a> </dd></dl>
+<div class="textblock"><p>This class wraps communication via UX sockets for client applications. </p>
+<p>It uses serialization mechanism from Config.</p>
+<p>For message format </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classipc_1_1Processor.html" title="This class wraps communication via UX sockets. ">ipc::Processor</a> </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="ab0a8cecdf2bf82d3a409dc71142576cc"></a>
 <div class="memitem">
@@ -273,7 +287,9 @@ template&lt;typename SentDataType , typename ReceivedDataType &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Asynchronous method call. The return callback will be called on return data arrival. It will be run in the PROCESSOR thread.</p>
+
+<p>Asynchronous method call. </p>
+<p>The return callback will be called on return data arrival. It will be run in the PROCESSOR thread.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">methodID</td><td>API dependent id of the method </td></tr>
@@ -316,7 +332,8 @@ template&lt;typename SentDataType , typename ReceivedDataType &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Synchronous method call.</p>
+
+<p>Synchronous method call. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">methodID</td><td>API dependent id of the method </td></tr>
@@ -416,7 +433,8 @@ template&lt;typename SentDataType , typename ReceivedDataType &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Removes the callback</p>
+
+<p>Removes the callback. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">methodID</td><td>API dependent id of the method </td></tr>
@@ -451,7 +469,9 @@ template&lt;typename SentDataType , typename ReceivedDataType &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Saves the callback connected to the method id. When a message with the given method id is received the data will be parsed and passed to this callback.</p>
+
+<p>Saves the callback connected to the method id. </p>
+<p>When a message with the given method id is received the data will be parsed and passed to this callback.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">methodID</td><td>API dependent id of the method </td></tr>
@@ -475,7 +495,8 @@ template&lt;typename SentDataType , typename ReceivedDataType &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Set the callback called for each new connection to a peer</p>
+
+<p>Set the callback called for each new connection to a peer. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">newPeerCallback</td><td>the callback </td></tr>
@@ -498,7 +519,8 @@ template&lt;typename SentDataType , typename ReceivedDataType &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Set the callback called when connection to a peer is lost</p>
+
+<p>Set the callback called when connection to a peer is lost. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">removedPeerCallback</td><td>the callback </td></tr>
@@ -533,7 +555,9 @@ template&lt;typename ReceivedDataType &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Saves the callback connected to the method id. When a message with the given method id is received the data will be parsed and passed to this callback.</p>
+
+<p>Saves the callback connected to the method id. </p>
+<p>When a message with the given method id is received the data will be parsed and passed to this callback.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">methodID</td><td>API dependent id of the method </td></tr>
@@ -575,7 +599,9 @@ template&lt;typename SentDataType &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Send a signal to the peer. There is no return value from the peer Sends any data only if a peer registered this a signal</p>
+
+<p>Send a signal to the peer. </p>
+<p>There is no return value from the peer Sends any data only if a peer registered this a signal</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">methodID</td><td>API dependent id of the method </td></tr>
@@ -604,7 +630,8 @@ template&lt;typename SentDataType &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Starts processing </p>
+
+<p>Starts processing. </p>
 
 </div>
 </div>
@@ -621,7 +648,8 @@ template&lt;typename SentDataType &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Stops processing</p>
+
+<p>Stops processing. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">wait</td><td>does it block waiting for all internals to stop </td></tr>
@@ -723,7 +751,7 @@ template&lt;typename SentDataType &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceipc.html">ipc</a></li><li class="navelem"><a class="el" href="classipc_1_1Client.html">Client</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,6 +1,7 @@
 var structvasum_1_1ZonesManagerConfig =
 [
     [ "availableVTs", "structvasum_1_1ZonesManagerConfig.html#af149b873d99b735c31ec8d2bbd28579d", null ],
+    [ "cleanUpZonesPath", "structvasum_1_1ZonesManagerConfig.html#a7d364f61ad3a13556ce23c8200af08d9", null ],
     [ "dbPath", "structvasum_1_1ZonesManagerConfig.html#a668e80a4f55daa4d2281f027bc714a4d", null ],
     [ "inputConfig", "structvasum_1_1ZonesManagerConfig.html#ad4806d7debd9b3d3390ab82a39ee54c7", null ],
     [ "proxyCallRules", "structvasum_1_1ZonesManagerConfig.html#ae203f9d0884341da82109d727f3c90c9", null ],

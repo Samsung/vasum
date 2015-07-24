@@ -1,6 +1,7 @@
 var searchData=
 [
   ['handle',['handle',['../classipc_1_1Client.html#a8974c08e69b053954c1e1736c7323cfe',1,'ipc::Client::handle()'],['../classipc_1_1Service.html#aba5cc776a836404569060e1613c2828b',1,'ipc::Service::handle()']]],
+  ['handlecleanupzonesrootcall',['handleCleanUpZonesRootCall',['../classvasum_1_1ZonesManager.html#a2819857eaae897db03aea9fb89c349b1',1,'vasum::ZonesManager']]],
   ['handleconnection',['handleConnection',['../classipc_1_1Acceptor.html#a97ba95d0980277496958b7204caa9dfd',1,'ipc::Acceptor']]],
   ['handlecreatefilecall',['handleCreateFileCall',['../classvasum_1_1ZonesManager.html#ac7757473cf3327cd223732bb09499020',1,'vasum::ZonesManager']]],
   ['handlecreatenetdevmacvlancall',['handleCreateNetdevMacvlanCall',['../classvasum_1_1ZonesManager.html#a9ade557476a6ed494112bbdcb0fedc1d',1,'vasum::ZonesManager']]],

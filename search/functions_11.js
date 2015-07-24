@@ -25,6 +25,7 @@ var searchData=
   ['set_5factive_5fzone',['set_active_zone',['../namespacevasum_1_1cli.html#a6a450908948ecad0e5ffe5e02da512a9',1,'vasum::cli']]],
   ['setattrs',['setAttrs',['../namespacevasum_1_1netdev.html#a7e1e84f1fecf9b3acf759bd8de0eeaf9',1,'vasum::netdev']]],
   ['setcgroup',['setCgroup',['../namespacevasum_1_1lxc.html#a9761c83177ba66ba494c7d164f88f5b5',1,'vasum::lxc']]],
+  ['setcleanupzonesrootcallback',['setCleanUpZonesRootCallback',['../classvasum_1_1HostIPCConnection.html#a67342036ca59a1d8dea4774e8ea5aed5',1,'vasum::HostIPCConnection']]],
   ['setcreatefilecallback',['setCreateFileCallback',['../classvasum_1_1HostIPCConnection.html#acfe8b771e2dcbcd28d1104739288d1b6',1,'vasum::HostIPCConnection']]],
   ['setcreatenetdevmacvlancallback',['setCreateNetdevMacvlanCallback',['../classvasum_1_1HostIPCConnection.html#a394d090873188a0949564dcdd120bdf6',1,'vasum::HostIPCConnection']]],
   ['setcreatenetdevphyscallback',['setCreateNetdevPhysCallback',['../classvasum_1_1HostIPCConnection.html#aeb9685a6614647777925f028d327cb05',1,'vasum::HostIPCConnection']]],

@@ -1,5 +1,6 @@
 var command_line_interface_8cpp =
 [
+    [ "clean_up_zones_root", "command-line-interface_8cpp.html#a142a9a30988edc29ac1efe5ce0b8ad44", null ],
     [ "console_zone", "command-line-interface_8cpp.html#a1261287be1ef9c710dcf31d5370ece1c", null ],
     [ "create_netdev_macvlan", "command-line-interface_8cpp.html#a3b8add8208a3a57a3a98bc7ba24e1042", null ],
     [ "create_netdev_phys", "command-line-interface_8cpp.html#a1fd6a1fb99eb72e41ba767bc9119b30d", null ],
@@ -7,11 +8,11 @@ var command_line_interface_8cpp =
     [ "create_zone", "command-line-interface_8cpp.html#a55a167d5b256674ef2992d214b19cc69", null ],
     [ "destroy_netdev", "command-line-interface_8cpp.html#a84e7c7f7ebcad2c1af40055364a04015", null ],
     [ "destroy_zone", "command-line-interface_8cpp.html#a18a97cc73e88d2756286d667c6782d80", null ],
-    [ "get_active_zone_id", "command-line-interface_8cpp.html#ae47eb903321a4f03ac7b3d964cc868cb", null ],
-    [ "get_zone_ids", "command-line-interface_8cpp.html#a3444ca19737948daefb84e7d22fe178a", null ],
-    [ "get_zones_status", "command-line-interface_8cpp.html#a9f19d2b9786e752fe59beff17240bfc5", null ],
+    [ "get_active_zone_id", "command-line-interface_8cpp.html#a332f2d0782083918357ae642d5cd1c41", null ],
+    [ "get_zone_ids", "command-line-interface_8cpp.html#a20e5871d4e2842d684cbeb73720d3f9d", null ],
+    [ "get_zones_status", "command-line-interface_8cpp.html#a448903d52a3a7f97b6f68e5fb1c58a1d", null ],
     [ "grant_device", "command-line-interface_8cpp.html#ad2988a858a6e68dffafedc6b0f90726f", null ],
-    [ "lock_queue", "command-line-interface_8cpp.html#af2fbe4b3e4e13714d1d1196062887861", null ],
+    [ "lock_queue", "command-line-interface_8cpp.html#a09aa33d25db49b3debffbf0dc4112083", null ],
     [ "lock_zone", "command-line-interface_8cpp.html#a778e202f0eb5d068572020e2cd0cb3eb", null ],
     [ "lookup_netdev_by_name", "command-line-interface_8cpp.html#a05e602cb9fd1bcdea690fca91559f85e", null ],
     [ "lookup_zone_by_id", "command-line-interface_8cpp.html#ab39002612f23b5817626a1c71ca5d4e9", null ],
@@ -25,7 +26,7 @@ var command_line_interface_8cpp =
     [ "set_active_zone", "command-line-interface_8cpp.html#a6a450908948ecad0e5ffe5e02da512a9", null ],
     [ "shutdown_zone", "command-line-interface_8cpp.html#a5818e275943b8ea5f61447309035a21b", null ],
     [ "start_zone", "command-line-interface_8cpp.html#a6fb0d4e53416ed672d81492d7e6837d7", null ],
-    [ "unlock_queue", "command-line-interface_8cpp.html#a997743f2d1762a44e1038d424cf5ad5f", null ],
+    [ "unlock_queue", "command-line-interface_8cpp.html#a6a354c9fca8e970d771cb333054bd6f5", null ],
     [ "unlock_zone", "command-line-interface_8cpp.html#a9bfab60da6208e936be889acfe7b3e38", null ],
     [ "zone_get_netdevs", "command-line-interface_8cpp.html#a9309ac0136f3d4016e1e8ea323118ffc", null ]
 ];

@@ -2,7 +2,7 @@ var netdev_8cpp =
 [
     [ "BRIDGE_FLAGS_MASTER", "netdev_8cpp.html#a2b23b5a872ab49f960290136163d648d", null ],
     [ "IFLA_BRIDGE_FLAGS", "netdev_8cpp.html#a2a19203aee9efb39e59bbab567ed82c6", null ],
-    [ "createBridge", "netdev_8cpp.html#a064f610e7e46589678587d331faeac00", null ],
+    [ "createBridge", "netdev_8cpp.html#a1e835fee6f101224591df4c1ff1ef8ae", null ],
     [ "createMacvlan", "netdev_8cpp.html#ab2475d5d8e8a3de1e869188a67e140da", null ],
     [ "createVeth", "netdev_8cpp.html#ac50499b68930a508bce484f5f5d3107b", null ],
     [ "deleteIpAddress", "netdev_8cpp.html#af7935e41c57a39e59ec4ed7525938987", null ],

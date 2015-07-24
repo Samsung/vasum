@@ -108,6 +108,9 @@ $(document).ready(function(){initNavTree('classvasum_1_1netlink_1_1Netlink.html'
 </div><!--header-->
 <div class="contents">
 
+<p><a class="el" href="classvasum_1_1netlink_1_1Netlink.html" title="Netlink class is responsible for communicating with kernel through netlink interface. ">Netlink</a> class is responsible for communicating with kernel through netlink interface.  
+ <a href="classvasum_1_1netlink_1_1Netlink.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="netlink_8hpp_source.html">netlink.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -121,12 +124,16 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a15932bac45bb988cf7f77e857db3ba7d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1netlink_1_1Netlink.html">Netlink</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1Netlink.html#a15932bac45bb988cf7f77e857db3ba7d">operator=</a> (const <a class="el" href="classvasum_1_1netlink_1_1Netlink.html">Netlink</a> &amp;other)=delete</td></tr>
 <tr class="separator:a15932bac45bb988cf7f77e857db3ba7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad18faac087767cfa6be3cb79200ac877"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1Netlink.html#ad18faac087767cfa6be3cb79200ac877">open</a> (int netNsPid=0)</td></tr>
+<tr class="memdesc:ad18faac087767cfa6be3cb79200ac877"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open connnection.  <a href="#ad18faac087767cfa6be3cb79200ac877">More...</a><br /></td></tr>
 <tr class="separator:ad18faac087767cfa6be3cb79200ac877"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42e31b68a19db75448162947a44fbb77"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1Netlink.html#a42e31b68a19db75448162947a44fbb77">close</a> ()</td></tr>
+<tr class="memdesc:a42e31b68a19db75448162947a44fbb77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close connection.  <a href="#a42e31b68a19db75448162947a44fbb77">More...</a><br /></td></tr>
 <tr class="separator:a42e31b68a19db75448162947a44fbb77"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac04a7c62915619d426a5851aedf5bb6d"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1Netlink.html#ac04a7c62915619d426a5851aedf5bb6d">send</a> (const void *nlmsg)</td></tr>
+<tr class="memdesc:ac04a7c62915619d426a5851aedf5bb6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send message.  <a href="#ac04a7c62915619d426a5851aedf5bb6d">More...</a><br /></td></tr>
 <tr class="separator:ac04a7c62915619d426a5851aedf5bb6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae98cb697df35b629ef016237c465e544"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; std::vector&lt; char &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1Netlink.html#ae98cb697df35b629ef016237c465e544">rcv</a> (unsigned int nlmsgSeq)</td></tr>
+<tr class="memdesc:ae98cb697df35b629ef016237c465e544"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receive message.  <a href="#ae98cb697df35b629ef016237c465e544">More...</a><br /></td></tr>
 <tr class="separator:ae98cb697df35b629ef016237c465e544"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
@@ -135,7 +142,7 @@ Private Attributes</h2></td></tr>
 <tr class="separator:aaccd9d37f5d04e9d15049aa1c1b03810"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="classvasum_1_1netlink_1_1Netlink.html">Netlink</a> class is responsible for communicating with kernel through netlink interface </p>
+<div class="textblock"><p><a class="el" href="classvasum_1_1netlink_1_1Netlink.html" title="Netlink class is responsible for communicating with kernel through netlink interface. ">Netlink</a> class is responsible for communicating with kernel through netlink interface. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a223289e9a32e6e5f7d59fc30a512bae0"></a>
 <div class="memitem">
@@ -204,7 +211,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Close connection </p>
+
+<p>Close connection. </p>
 
 </div>
 </div>
@@ -221,7 +229,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Open connnection</p>
+
+<p>Open connnection. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">netNsPid</td><td>pid which defines net namespace </td></tr>
@@ -268,7 +277,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Receive message</p>
+
+<p>Receive message. </p>
 <p>It is not thread safe and even you shouldn't call this function on different instances at the same time</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -293,7 +303,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Send message</p>
+
+<p>Send message. </p>
 <p>It is not thread safe and even you shouldn't call this function on different instances at the same time</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -337,7 +348,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacevasum.html">vasum</a></li><li class="navelem"><a class="el" href="namespacevasum_1_1netlink.html">netlink</a></li><li class="navelem"><a class="el" href="classvasum_1_1netlink_1_1Netlink.html">Netlink</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

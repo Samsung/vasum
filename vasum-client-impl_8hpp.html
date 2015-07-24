@@ -123,6 +123,7 @@ $(document).ready(function(){initNavTree('vasum-client-impl_8hpp.html','');});
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classClient.html">Client</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">vasum's client definition.  <a href="classClient.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structClient_1_1Status.html">Client::Status</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -130,6 +131,7 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr class="memitem:ac04ddae9093381eb8704d3d93ccbad04"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; void(const char *zoneId, const char *dbusAddress, void *<a class="el" href="initctl_8cpp.html#abbacd5f95515b76e7df78ef953e29cae">data</a>)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="vasum-client-impl_8hpp.html#ac04ddae9093381eb8704d3d93ccbad04">VsmZoneDbusStateFunction</a></td></tr>
+<tr class="memdesc:ac04ddae9093381eb8704d3d93ccbad04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Zone's D-Bus state change callback function signature.  <a href="#ac04ddae9093381eb8704d3d93ccbad04">More...</a><br /></td></tr>
 <tr class="separator:ac04ddae9093381eb8704d3d93ccbad04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -145,12 +147,13 @@ Typedefs</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Zone's D-Bus state change callback function signature.</p>
+
+<p>Zone's D-Bus state change callback function signature. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">zoneId</td><td>affected zone id </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dbusAddress</td><td>new D-Bus address </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">data</td><td>custom user's data pointer passed to <a class="el" href="vasum-client_8cpp.html#a8c5cd6aaf0dc35e1b8bab68e38e4290b">vsm_add_state_callback()</a> function </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">data</td><td>custom user's data pointer passed to <a class="el" href="group__libvasum-client.html#ga699fd1cb29b910ecc83b3ef0cf63adf8" title="Register dbus state change callback function. ">vsm_add_state_callback()</a> function </td></tr>
   </table>
   </dd>
 </dl>
@@ -164,7 +167,7 @@ Typedefs</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_315f437731ac8aa552155ee72563b5d3.html">client</a></li><li class="navelem"><a class="el" href="vasum-client-impl_8hpp.html">vasum-client-impl.hpp</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:35 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

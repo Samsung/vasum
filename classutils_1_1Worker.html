@@ -113,6 +113,9 @@ $(document).ready(function(){initNavTree('classutils_1_1Worker.html','');});
 </div><!--header-->
 <div class="contents">
 
+<p>A queue with tasks executed in a dedicated thread.  
+ <a href="classutils_1_1Worker.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="worker_8hpp_source.html">worker.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
@@ -132,8 +135,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a53d9cba352236d96d3333e051ea873f7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Worker.html#a53d9cba352236d96d3333e051ea873f7">~Worker</a> ()</td></tr>
 <tr class="separator:a53d9cba352236d96d3333e051ea873f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6382b7b1622e9339adb9e6d696fab2e2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classutils_1_1Worker.html#ab83ae00f527e3c46fbfdb508f1ca0f6c">Pointer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Worker.html#a6382b7b1622e9339adb9e6d696fab2e2">createSubWorker</a> ()</td></tr>
+<tr class="memdesc:a6382b7b1622e9339adb9e6d696fab2e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a worker that share a thread with its parent.  <a href="#a6382b7b1622e9339adb9e6d696fab2e2">More...</a><br /></td></tr>
 <tr class="separator:a6382b7b1622e9339adb9e6d696fab2e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac002c75bb2d04285f92a2cb709f9cf6f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Worker.html#ac002c75bb2d04285f92a2cb709f9cf6f">addTask</a> (const <a class="el" href="classutils_1_1Worker.html#a13450c60a3f6c200636f7c7f195e790c">Task</a> &amp;task)</td></tr>
+<tr class="memdesc:ac002c75bb2d04285f92a2cb709f9cf6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a task to the queue.  <a href="#ac002c75bb2d04285f92a2cb709f9cf6f">More...</a><br /></td></tr>
 <tr class="separator:ac002c75bb2d04285f92a2cb709f9cf6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b429f6b8e580f99170abafa8e9700de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Worker.html#a9b429f6b8e580f99170abafa8e9700de">addTaskAndWait</a> (const <a class="el" href="classutils_1_1Worker.html#a13450c60a3f6c200636f7c7f195e790c">Task</a> &amp;task)</td></tr>
 <tr class="separator:a9b429f6b8e580f99170abafa8e9700de"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -141,6 +146,7 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a9ec21c6b7e469a2d664b0516c087d43b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classutils_1_1Worker.html#ab83ae00f527e3c46fbfdb508f1ca0f6c">Pointer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Worker.html#a9ec21c6b7e469a2d664b0516c087d43b">create</a> ()</td></tr>
+<tr class="memdesc:a9ec21c6b7e469a2d664b0516c087d43b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a worker with its own thread.  <a href="#a9ec21c6b7e469a2d664b0516c087d43b">More...</a><br /></td></tr>
 <tr class="separator:a9ec21c6b7e469a2d664b0516c087d43b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-types"></a>
@@ -161,7 +167,8 @@ Private Attributes</h2></td></tr>
 <tr class="separator:a47b0ed74b595e47d4fc20c6d46ce7d38"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A queue with tasks executed in a dedicated thread. Current implementation creates a thread on the first use. </p>
+<div class="textblock"><p>A queue with tasks executed in a dedicated thread. </p>
+<p>Current implementation creates a thread on the first use. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a class="anchor" id="ae91fb251c1d6fc1a8ce2ff97ea36b721"></a>
 <div class="memitem">
@@ -261,6 +268,7 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
 <p>Adds a task to the queue. </p>
 
 </div>
@@ -301,7 +309,8 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Creates a worker with its own thread </p>
+
+<p>Creates a worker with its own thread. </p>
 
 </div>
 </div>
@@ -317,7 +326,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Creates a worker that share a thread with its parent </p>
+
+<p>Creates a worker that share a thread with its parent. </p>
 
 </div>
 </div>
@@ -373,7 +383,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceutils.html">utils</a></li><li class="navelem"><a class="el" href="classutils_1_1Worker.html">Worker</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

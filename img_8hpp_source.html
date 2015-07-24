@@ -128,7 +128,7 @@ $(document).ready(function(){initNavTree('img_8hpp_source.html','');});
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keywordtype">bool</span> <a class="code" href="namespaceutils.html#aa20fa9e5b8336d31728f164ce72b15c7">getFreeLoopDevice</a>(std::string&amp; ret);</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keywordtype">bool</span> <a class="code" href="namespaceutils.html#abdee3c2b3cacf5d01ac2cc0f0455d8c0">mountImage</a>(<span class="keyword">const</span> std::string&amp; image, <span class="keyword">const</span> std::string&amp; loopdev, <span class="keyword">const</span> std::string&amp; path);</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keywordtype">bool</span> <a class="code" href="namespaceutils.html#a01f6332597e9550d7f477c89095d7e62">mountImage</a>(<span class="keyword">const</span> std::string&amp; image, <span class="keyword">const</span> std::string&amp; loopdev, <span class="keyword">const</span> std::string&amp; path);</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="keywordtype">bool</span> <a class="code" href="namespaceutils.html#a98e951d81cd527b2cba95c01bdaeef9f">umountImage</a>(<span class="keyword">const</span> std::string&amp; path, <span class="keyword">const</span> std::string&amp; loopdev);</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;</div>
@@ -137,11 +137,11 @@ $(document).ready(function(){initNavTree('img_8hpp_source.html','');});
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;} <span class="comment">// namespace utils</span></div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="preprocessor">#endif // COMMON_UTILS_IMG_HPP</span></div>
-<div class="ttc" id="namespaceutils_html_a98e951d81cd527b2cba95c01bdaeef9f"><div class="ttname"><a href="namespaceutils.html#a98e951d81cd527b2cba95c01bdaeef9f">utils::umountImage</a></div><div class="ttdeci">bool umountImage(const std::string &amp;path, const std::string &amp;loopdev)</div><div class="ttdef"><b>Definition:</b> img.cpp:150</div></div>
-<div class="ttc" id="namespaceutils_html_abdee3c2b3cacf5d01ac2cc0f0455d8c0"><div class="ttname"><a href="namespaceutils.html#abdee3c2b3cacf5d01ac2cc0f0455d8c0">utils::mountImage</a></div><div class="ttdeci">bool mountImage(const std::string &amp;image, const std::string &amp;path, const std::string &amp;loopdev)</div><div class="ttdef"><b>Definition:</b> img.cpp:142</div></div>
-<div class="ttc" id="namespaceutils_html_aa20fa9e5b8336d31728f164ce72b15c7"><div class="ttname"><a href="namespaceutils.html#aa20fa9e5b8336d31728f164ce72b15c7">utils::getFreeLoopDevice</a></div><div class="ttdeci">bool getFreeLoopDevice(std::string &amp;ret)</div><div class="ttdef"><b>Definition:</b> img.cpp:118</div></div>
+<div class="ttc" id="namespaceutils_html_a98e951d81cd527b2cba95c01bdaeef9f"><div class="ttname"><a href="namespaceutils.html#a98e951d81cd527b2cba95c01bdaeef9f">utils::umountImage</a></div><div class="ttdeci">bool umountImage(const std::string &amp;path, const std::string &amp;loopdev)</div><div class="ttdoc">Umounts previously mounted image. </div><div class="ttdef"><b>Definition:</b> img.cpp:150</div></div>
+<div class="ttc" id="namespaceutils_html_a01f6332597e9550d7f477c89095d7e62"><div class="ttname"><a href="namespaceutils.html#a01f6332597e9550d7f477c89095d7e62">utils::mountImage</a></div><div class="ttdeci">bool mountImage(const std::string &amp;image, const std::string &amp;path, const std::string &amp;loopdev)</div><div class="ttdoc">Mount an ext4 image from file on a given path by using a loop device. </div><div class="ttdef"><b>Definition:</b> img.cpp:142</div></div>
+<div class="ttc" id="namespaceutils_html_aa20fa9e5b8336d31728f164ce72b15c7"><div class="ttname"><a href="namespaceutils.html#aa20fa9e5b8336d31728f164ce72b15c7">utils::getFreeLoopDevice</a></div><div class="ttdeci">bool getFreeLoopDevice(std::string &amp;ret)</div><div class="ttdoc">Returns string with first free loop device. </div><div class="ttdef"><b>Definition:</b> img.cpp:118</div></div>
 <div class="ttc" id="namespaceutils_html"><div class="ttname"><a href="namespaceutils.html">utils</a></div><div class="ttdef"><b>Definition:</b> c-array.hpp:30</div></div>
-<div class="ttc" id="namespaceutils_html_a4af17c405825641c17f3dcc0247e98c7"><div class="ttname"><a href="namespaceutils.html#a4af17c405825641c17f3dcc0247e98c7">utils::copyImageContents</a></div><div class="ttdeci">bool copyImageContents(const std::string &amp;img, const std::string &amp;dst)</div><div class="ttdef"><b>Definition:</b> img.cpp:174</div></div>
+<div class="ttc" id="namespaceutils_html_a4af17c405825641c17f3dcc0247e98c7"><div class="ttname"><a href="namespaceutils.html#a4af17c405825641c17f3dcc0247e98c7">utils::copyImageContents</a></div><div class="ttdeci">bool copyImageContents(const std::string &amp;img, const std::string &amp;dst)</div><div class="ttdoc">Mounts an image and copies its contents to dst directory. </div><div class="ttdef"><b>Definition:</b> img.cpp:174</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.6-->
@@ -149,7 +149,7 @@ $(document).ready(function(){initNavTree('img_8hpp_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_353a0b29ed1fe2c048306a7c13ef1174.html">common</a></li><li class="navelem"><a class="el" href="dir_5a86b6375f493b00e26a836fc97d2a7e.html">utils</a></li><li class="navelem"><a class="el" href="img_8hpp.html">img.hpp</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:35 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

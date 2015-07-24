@@ -110,6 +110,9 @@ $(document).ready(function(){initNavTree('classipc_1_1Acceptor.html','');});
 </div><!--header-->
 <div class="contents">
 
+<p>Accepts new connections and passes the new socket to a callback.  
+ <a href="classipc_1_1Acceptor.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="acceptor_8hpp_source.html">acceptor.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
@@ -120,6 +123,7 @@ Public Types</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a8b7e7ffae3ca058813ee3bbd25895b30"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Acceptor.html#a8b7e7ffae3ca058813ee3bbd25895b30">Acceptor</a> (<a class="el" href="classipc_1_1epoll_1_1EventPoll.html">epoll::EventPoll</a> &amp;eventPoll, const std::string &amp;socketPath, const <a class="el" href="classipc_1_1Acceptor.html#ad1e379832f73ce7363e25b3d61a48d0a">NewConnectionCallback</a> &amp;newConnectionCallback)</td></tr>
+<tr class="memdesc:a8b7e7ffae3ca058813ee3bbd25895b30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Class for accepting new connections.  <a href="#a8b7e7ffae3ca058813ee3bbd25895b30">More...</a><br /></td></tr>
 <tr class="separator:a8b7e7ffae3ca058813ee3bbd25895b30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa762478e8b902a9b1b707a798d1f1e06"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Acceptor.html#aa762478e8b902a9b1b707a798d1f1e06">~Acceptor</a> ()</td></tr>
 <tr class="separator:aa762478e8b902a9b1b707a798d1f1e06"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -131,6 +135,7 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
 <tr class="memitem:a97ba95d0980277496958b7204caa9dfd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Acceptor.html#a97ba95d0980277496958b7204caa9dfd">handleConnection</a> ()</td></tr>
+<tr class="memdesc:a97ba95d0980277496958b7204caa9dfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle one incoming connection.  <a href="#a97ba95d0980277496958b7204caa9dfd">More...</a><br /></td></tr>
 <tr class="separator:a97ba95d0980277496958b7204caa9dfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
@@ -187,7 +192,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Class for accepting new connections.</p>
+
+<p>Class for accepting new connections. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">eventPoll</td><td>dispatcher </td></tr>
@@ -259,7 +265,9 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Handle one incoming connection. Used with external polling </p>
+
+<p>Handle one incoming connection. </p>
+<p>Used with external polling </p>
 
 </div>
 </div>
@@ -359,7 +367,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceipc.html">ipc</a></li><li class="navelem"><a class="el" href="classipc_1_1Acceptor.html">Acceptor</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

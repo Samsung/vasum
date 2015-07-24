@@ -3,6 +3,7 @@ var host_dbus_definitions_8hpp =
     [ "BUS_NAME", "host-dbus-definitions_8hpp.html#a1eb165cb374641db9480f4e24e1e4693", null ],
     [ "DEFINITION", "host-dbus-definitions_8hpp.html#acbe1d1b60dd80569df7427a677e2b442", null ],
     [ "INTERFACE", "host-dbus-definitions_8hpp.html#af85b02e710e9b2611b4b88d94a2e945f", null ],
+    [ "METHOD_CLEAN_UP_ZONES_ROOT", "host-dbus-definitions_8hpp.html#a357ae852eb5a111dd5105cc0a9f506c9", null ],
     [ "METHOD_CREATE_FILE", "host-dbus-definitions_8hpp.html#a0857080bb6bb80ae8b24c4f56775d0d3", null ],
     [ "METHOD_CREATE_NETDEV_MACVLAN", "host-dbus-definitions_8hpp.html#a3d1ef930958f56a9a8a525665a30c865", null ],
     [ "METHOD_CREATE_NETDEV_PHYS", "host-dbus-definitions_8hpp.html#a9a5355d4e907c3962ed48ea4805a9d36", null ],

@@ -124,14 +124,19 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a19dceed6cfdcb7ac45ab4c0dd581cdb7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a19dceed6cfdcb7ac45ab4c0dd581cdb7">utils::setSuppGroups</a> (const std::vector&lt; std::string &gt; &amp;groups)</td></tr>
+<tr class="memdesc:a19dceed6cfdcb7ac45ab4c0dd581cdb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set supplementary groups to the current process.  <a href="namespaceutils.html#a19dceed6cfdcb7ac45ab4c0dd581cdb7">More...</a><br /></td></tr>
 <tr class="separator:a19dceed6cfdcb7ac45ab4c0dd581cdb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f9fe7c38ee9414a390f295dc82ce7b2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a8f9fe7c38ee9414a390f295dc82ce7b2">utils::dropRoot</a> (uid_t uid, gid_t gid, const std::vector&lt; unsigned int &gt; &amp;caps)</td></tr>
+<tr class="memdesc:a8f9fe7c38ee9414a390f295dc82ce7b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set effective and permitted capabilities on the current process and drop root privileges.  <a href="namespaceutils.html#a8f9fe7c38ee9414a390f295dc82ce7b2">More...</a><br /></td></tr>
 <tr class="separator:a8f9fe7c38ee9414a390f295dc82ce7b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a527f84e78cb65835b9e6414bdacad9ad"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a527f84e78cb65835b9e6414bdacad9ad">utils::launchAsRoot</a> (const std::function&lt; bool()&gt; &amp;func)</td></tr>
+<tr class="memdesc:a527f84e78cb65835b9e6414bdacad9ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Launch func as root user.  <a href="namespaceutils.html#a527f84e78cb65835b9e6414bdacad9ad">More...</a><br /></td></tr>
 <tr class="separator:a527f84e78cb65835b9e6414bdacad9ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adfba699ce3ca8f148344879f80230326"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#adfba699ce3ca8f148344879f80230326">utils::joinToNs</a> (int nsPid, int ns)</td></tr>
+<tr class="memdesc:adfba699ce3ca8f148344879f80230326"><td class="mdescLeft">&#160;</td><td class="mdescRight">Join to namespace.  <a href="namespaceutils.html#adfba699ce3ca8f148344879f80230326">More...</a><br /></td></tr>
 <tr class="separator:adfba699ce3ca8f148344879f80230326"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fd8c5e7b86467a449a08b642dcfc87f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a4fd8c5e7b86467a449a08b642dcfc87f">utils::passNamespacedFd</a> (int nsPid, int ns, const std::function&lt; int()&gt; &amp;fdFactory)</td></tr>
+<tr class="memdesc:a4fd8c5e7b86467a449a08b642dcfc87f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pass file descriptor from namespace of some process.  <a href="namespaceutils.html#a4fd8c5e7b86467a449a08b642dcfc87f">More...</a><br /></td></tr>
 <tr class="separator:a4fd8c5e7b86467a449a08b642dcfc87f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -144,7 +149,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_353a0b29ed1fe2c048306a7c13ef1174.html">common</a></li><li class="navelem"><a class="el" href="dir_5a86b6375f493b00e26a836fc97d2a7e.html">utils</a></li><li class="navelem"><a class="el" href="environment_8hpp.html">environment.hpp</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:35 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

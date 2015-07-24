@@ -110,18 +110,25 @@ $(document).ready(function(){initNavTree('classvasum_1_1netlink_1_1NetlinkMessag
 </div><!--header-->
 <div class="contents">
 
+<p><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html" title="NetlinkMessage is used to creatie a netlink messages. ">NetlinkMessage</a> is used to creatie a netlink messages.  
+ <a href="classvasum_1_1netlink_1_1NetlinkMessage.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="netlink-message_8hpp_source.html">netlink-message.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a5dda52c9e513147120e33e12f5c07e73"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html#a5dda52c9e513147120e33e12f5c07e73">NetlinkMessage</a> (std::uint16_t type, std::uint16_t flags)</td></tr>
+<tr class="memdesc:a5dda52c9e513147120e33e12f5c07e73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create netlink message.  <a href="#a5dda52c9e513147120e33e12f5c07e73">More...</a><br /></td></tr>
 <tr class="separator:a5dda52c9e513147120e33e12f5c07e73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abfa2883de73087b9f0e0e0d5c5c17bf5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html">NetlinkMessage</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html#abfa2883de73087b9f0e0e0d5c5c17bf5">beginNested</a> (int ifla)</td></tr>
+<tr class="memdesc:abfa2883de73087b9f0e0e0d5c5c17bf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add nested atribute type.  <a href="#abfa2883de73087b9f0e0e0d5c5c17bf5">More...</a><br /></td></tr>
 <tr class="separator:abfa2883de73087b9f0e0e0d5c5c17bf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92ed74a613165bc91ec91a8b5c38c1c8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html">NetlinkMessage</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html#a92ed74a613165bc91ec91a8b5c38c1c8">endNested</a> ()</td></tr>
+<tr class="memdesc:a92ed74a613165bc91ec91a8b5c38c1c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">End nested atribute.  <a href="#a92ed74a613165bc91ec91a8b5c38c1c8">More...</a><br /></td></tr>
 <tr class="separator:a92ed74a613165bc91ec91a8b5c38c1c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a232bf806ec553bbece99db7724cbe20e"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:a232bf806ec553bbece99db7724cbe20e"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html">NetlinkMessage</a> &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html#a232bf806ec553bbece99db7724cbe20e">put</a> (const T &amp;value)</td></tr>
+<tr class="memdesc:a232bf806ec553bbece99db7724cbe20e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add raw data.  <a href="#a232bf806ec553bbece99db7724cbe20e">More...</a><br /></td></tr>
 <tr class="separator:a232bf806ec553bbece99db7724cbe20e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader"></div></td></tr>
 <tr class="memitem:a52abca25537601a5b8a59bd25ccceddb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html">NetlinkMessage</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html#a52abca25537601a5b8a59bd25ccceddb">put</a> (int ifla, const std::string &amp;value)</td></tr>
@@ -153,10 +160,11 @@ Private Attributes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
 Friends</h2></td></tr>
 <tr class="memitem:ab95d4055d1b891e8cf69134e211b7129"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html">NetlinkResponse</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html#ab95d4055d1b891e8cf69134e211b7129">send</a> (const <a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html">NetlinkMessage</a> &amp;msg, int pid)</td></tr>
+<tr class="memdesc:ab95d4055d1b891e8cf69134e211b7129"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send netlink message.  <a href="#ab95d4055d1b891e8cf69134e211b7129">More...</a><br /></td></tr>
 <tr class="separator:ab95d4055d1b891e8cf69134e211b7129"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html">NetlinkMessage</a> is used to creatie a netlink messages </p>
+<div class="textblock"><p><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html" title="NetlinkMessage is used to creatie a netlink messages. ">NetlinkMessage</a> is used to creatie a netlink messages. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a5dda52c9e513147120e33e12f5c07e73"></a>
 <div class="memitem">
@@ -181,7 +189,8 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Create netlink message</p>
+
+<p>Create netlink message. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">type</td><td>rtnetlink message type (see man 7 rtnetlink) </td></tr>
@@ -206,7 +215,8 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Add nested atribute type</p>
+
+<p>Add nested atribute type. </p>
 <p>All future attributes will be nested in this attribute (till call to endNested)</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -229,7 +239,8 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>End nested atribute </p>
+
+<p>End nested atribute. </p>
 
 </div>
 </div>
@@ -348,7 +359,8 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Add raw data</p>
+
+<p>Add raw data. </p>
 <p>Add raw data to end of netlink message </p>
 
 </div>
@@ -483,10 +495,11 @@ template&lt;class T &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Send netlink message</p>
+
+<p>Send netlink message. </p>
 <p>It is not thread safe </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">msg</td><td><a class="el" href="classvasum_1_1netlink_1_1Netlink.html">Netlink</a> message </td></tr>
+    <tr><td class="paramname">msg</td><td><a class="el" href="classvasum_1_1netlink_1_1Netlink.html" title="Netlink class is responsible for communicating with kernel through netlink interface. ">Netlink</a> message </td></tr>
     <tr><td class="paramname">pid</td><td>Process id which describes network namespace </td></tr>
   </table>
   </dd>
@@ -546,7 +559,7 @@ template&lt;class T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacevasum.html">vasum</a></li><li class="navelem"><a class="el" href="namespacevasum_1_1netlink.html">netlink</a></li><li class="navelem"><a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html">NetlinkMessage</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

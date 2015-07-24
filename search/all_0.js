@@ -1,13 +1,13 @@
 var searchData=
 [
-  ['aborting',['ABORTING',['../classvasum_1_1lxc_1_1LxcZone.html#ac4a9095a1c911a4f407742fa99ab92c5a0f7fb3ad9bfa0a293be603d57f9fa02c',1,'vasum::lxc::LxcZone::ABORTING()'],['../vasum-client_8h.html#a4d72b35260ea38a35e22e748230b726da0f28a2185bb616ebd5aa015e5b0d874e',1,'ABORTING():&#160;vasum-client.h']]],
+  ['aborting',['ABORTING',['../classvasum_1_1lxc_1_1LxcZone.html#ac4a9095a1c911a4f407742fa99ab92c5a0f7fb3ad9bfa0a293be603d57f9fa02c',1,'vasum::lxc::LxcZone::ABORTING()'],['../group__libvasum-client.html#gga4d72b35260ea38a35e22e748230b726da0f28a2185bb616ebd5aa015e5b0d874e',1,'ABORTING():&#160;vasum-client.h']]],
   ['accept',['accept',['../classipc_1_1Socket.html#a38b2074ec293880cac34fdc220296257',1,'ipc::Socket']]],
   ['acceptor',['Acceptor',['../classipc_1_1Acceptor.html#a8b7e7ffae3ca058813ee3bbd25895b30',1,'ipc::Acceptor::Acceptor(epoll::EventPoll &amp;eventPoll, const std::string &amp;socketPath, const NewConnectionCallback &amp;newConnectionCallback)'],['../classipc_1_1Acceptor.html#a151a081dee9b1193a0d99c22feec5f76',1,'ipc::Acceptor::Acceptor(const Acceptor &amp;acceptor)=delete']]],
   ['acceptor',['Acceptor',['../classipc_1_1Acceptor.html',1,'ipc']]],
   ['acceptor_2ecpp',['acceptor.cpp',['../acceptor_8cpp.html',1,'']]],
   ['acceptor_2ehpp',['acceptor.hpp',['../acceptor_8hpp.html',1,'']]],
   ['activatevt',['activateVT',['../classvasum_1_1Zone.html#a1fe9692c57375494ce9a8f9a9db3a6c6',1,'vasum::Zone::activateVT()'],['../namespaceutils.html#a50c196afc11d41a453e3f5d2a899b0de',1,'utils::activateVT()']]],
-  ['activating',['ACTIVATING',['../vasum-client_8h.html#a4d72b35260ea38a35e22e748230b726dae70ec81a9c58566a3bcd9e232d6c84ea',1,'vasum-client.h']]],
+  ['activating',['ACTIVATING',['../group__libvasum-client.html#gga4d72b35260ea38a35e22e748230b726dae70ec81a9c58566a3bcd9e232d6c84ea',1,'vasum-client.h']]],
   ['add',['add',['../classutils_1_1CArrayBuilder.html#a6b7d7c23162aa4606aa121a6a88c9a82',1,'utils::CArrayBuilder::add()'],['../classconfig_1_1ToGVariantVisitor.html#a4019885df36e65243e4f0005b8010a12',1,'config::ToGVariantVisitor::add()']]],
   ['add_2dpeer_2drequest_2ehpp',['add-peer-request.hpp',['../add-peer-request_8hpp.html',1,'']]],
   ['add_5fpeer',['ADD_PEER',['../classipc_1_1Processor.html#af1a6569899a0aef5aaccceb81a143c8fa721ebce91fcca76df6efb761b4dab70d',1,'ipc::Processor']]],

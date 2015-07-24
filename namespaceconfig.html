@@ -120,10 +120,12 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structconfig_1_1check__union.html">check_union</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structconfig_1_1ConfigException.html">ConfigException</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base class for exceptions in configuration.  <a href="structconfig_1_1ConfigException.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1FDStore.html">FDStore</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structconfig_1_1FileDescriptor.html">FileDescriptor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whenever possible, this type will be serialized using Linux file descriptor passing.  <a href="structconfig_1_1FileDescriptor.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromFDStoreVisitor.html">FromFDStoreVisitor</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -142,6 +144,7 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structconfig_1_1isUnion.html">isUnion</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structconfig_1_1isVisitable.html">isVisitable</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper for compile-time checking against existance of template method 'accept'.  <a href="structconfig_1_1isVisitable.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structconfig_1_1isVisitableHelper____.html">isVisitableHelper__</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -160,45 +163,59 @@ Classes</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:ad884dcb9fb7142ffe5b78c5bd6382d94"><td class="memTemplParams" colspan="2">template&lt;char delim = '.', typename Arg1 , typename... Args&gt; </td></tr>
 <tr class="memitem:ad884dcb9fb7142ffe5b78c5bd6382d94"><td class="memTemplItemLeft" align="right" valign="top">std::string&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#ad884dcb9fb7142ffe5b78c5bd6382d94">key</a> (const Arg1 &amp;a1, const Args &amp;...args)</td></tr>
+<tr class="memdesc:ad884dcb9fb7142ffe5b78c5bd6382d94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concatenates all parameters into one std::string.  <a href="#ad884dcb9fb7142ffe5b78c5bd6382d94">More...</a><br /></td></tr>
 <tr class="separator:ad884dcb9fb7142ffe5b78c5bd6382d94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae7cfe6c7dbaa0f668936bc8391f999c5"><td class="memTemplParams" colspan="2">template&lt;char delim = '.'&gt; </td></tr>
 <tr class="memitem:ae7cfe6c7dbaa0f668936bc8391f999c5"><td class="memTemplItemLeft" align="right" valign="top">std::string&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#ae7cfe6c7dbaa0f668936bc8391f999c5">key</a> ()</td></tr>
+<tr class="memdesc:ae7cfe6c7dbaa0f668936bc8391f999c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function added for key function completeness.  <a href="#ae7cfe6c7dbaa0f668936bc8391f999c5">More...</a><br /></td></tr>
 <tr class="separator:ae7cfe6c7dbaa0f668936bc8391f999c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70a9793da93c2892ad49c9a48a9f14d4"><td class="memTemplParams" colspan="2">template&lt;class Config &gt; </td></tr>
 <tr class="memitem:a70a9793da93c2892ad49c9a48a9f14d4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#a70a9793da93c2892ad49c9a48a9f14d4">loadFromGVariant</a> (GVariant *gvariant, Config &amp;config)</td></tr>
+<tr class="memdesc:a70a9793da93c2892ad49c9a48a9f14d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills the configuration with data stored in the GVariant.  <a href="#a70a9793da93c2892ad49c9a48a9f14d4">More...</a><br /></td></tr>
 <tr class="separator:a70a9793da93c2892ad49c9a48a9f14d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3ebf522a01dc5f7ae899543878cde94"><td class="memTemplParams" colspan="2">template&lt;class Config &gt; </td></tr>
 <tr class="memitem:ad3ebf522a01dc5f7ae899543878cde94"><td class="memTemplItemLeft" align="right" valign="top">GVariant *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#ad3ebf522a01dc5f7ae899543878cde94">saveToGVariant</a> (const Config &amp;config)</td></tr>
+<tr class="memdesc:ad3ebf522a01dc5f7ae899543878cde94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the config in a GVariant.  <a href="#ad3ebf522a01dc5f7ae899543878cde94">More...</a><br /></td></tr>
 <tr class="separator:ad3ebf522a01dc5f7ae899543878cde94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2fe8e3b494046182ec3f754b5aa92578"><td class="memTemplParams" colspan="2">template&lt;class Config &gt; </td></tr>
 <tr class="memitem:a2fe8e3b494046182ec3f754b5aa92578"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#a2fe8e3b494046182ec3f754b5aa92578">loadFromJsonString</a> (const std::string &amp;jsonString, Config &amp;config)</td></tr>
+<tr class="memdesc:a2fe8e3b494046182ec3f754b5aa92578"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills the configuration with data stored in the json string.  <a href="#a2fe8e3b494046182ec3f754b5aa92578">More...</a><br /></td></tr>
 <tr class="separator:a2fe8e3b494046182ec3f754b5aa92578"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a294823239340ae4741b693f411bf400a"><td class="memTemplParams" colspan="2">template&lt;class Config &gt; </td></tr>
 <tr class="memitem:a294823239340ae4741b693f411bf400a"><td class="memTemplItemLeft" align="right" valign="top">std::string&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#a294823239340ae4741b693f411bf400a">saveToJsonString</a> (const Config &amp;config)</td></tr>
+<tr class="memdesc:a294823239340ae4741b693f411bf400a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a string representation of the configuration in json format.  <a href="#a294823239340ae4741b693f411bf400a">More...</a><br /></td></tr>
 <tr class="separator:a294823239340ae4741b693f411bf400a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4a248990598922aac6a1d67602620760"><td class="memTemplParams" colspan="2">template&lt;class Config &gt; </td></tr>
 <tr class="memitem:a4a248990598922aac6a1d67602620760"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#a4a248990598922aac6a1d67602620760">loadFromJsonFile</a> (const std::string &amp;filename, Config &amp;config)</td></tr>
+<tr class="memdesc:a4a248990598922aac6a1d67602620760"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the config from a json file.  <a href="#a4a248990598922aac6a1d67602620760">More...</a><br /></td></tr>
 <tr class="separator:a4a248990598922aac6a1d67602620760"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a986b1f4af55ea9d7d4b41cb9345cb4dc"><td class="memTemplParams" colspan="2">template&lt;class Config &gt; </td></tr>
 <tr class="memitem:a986b1f4af55ea9d7d4b41cb9345cb4dc"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#a986b1f4af55ea9d7d4b41cb9345cb4dc">saveToJsonFile</a> (const std::string &amp;filename, const Config &amp;config)</td></tr>
+<tr class="memdesc:a986b1f4af55ea9d7d4b41cb9345cb4dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the config in a json file.  <a href="#a986b1f4af55ea9d7d4b41cb9345cb4dc">More...</a><br /></td></tr>
 <tr class="separator:a986b1f4af55ea9d7d4b41cb9345cb4dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab163d12ca1a350e980638cd36e61c7f"><td class="memTemplParams" colspan="2">template&lt;class Config &gt; </td></tr>
 <tr class="memitem:aab163d12ca1a350e980638cd36e61c7f"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#aab163d12ca1a350e980638cd36e61c7f">loadFromKVStore</a> (const std::string &amp;filename, Config &amp;config, const std::string &amp;configName)</td></tr>
+<tr class="memdesc:aab163d12ca1a350e980638cd36e61c7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a visitable configuration from <a class="el" href="classconfig_1_1KVStore.html">KVStore</a>.  <a href="#aab163d12ca1a350e980638cd36e61c7f">More...</a><br /></td></tr>
 <tr class="separator:aab163d12ca1a350e980638cd36e61c7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa893dcdfd223d14a2c72d0cbfaa4e4b3"><td class="memTemplParams" colspan="2">template&lt;class Config &gt; </td></tr>
 <tr class="memitem:aa893dcdfd223d14a2c72d0cbfaa4e4b3"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#aa893dcdfd223d14a2c72d0cbfaa4e4b3">saveToKVStore</a> (const std::string &amp;filename, const Config &amp;config, const std::string &amp;configName)</td></tr>
+<tr class="memdesc:aa893dcdfd223d14a2c72d0cbfaa4e4b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the config to a <a class="el" href="classconfig_1_1KVStore.html">KVStore</a>.  <a href="#aa893dcdfd223d14a2c72d0cbfaa4e4b3">More...</a><br /></td></tr>
 <tr class="separator:aa893dcdfd223d14a2c72d0cbfaa4e4b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8cb11a5be8c60acd7c06da175878d49c"><td class="memTemplParams" colspan="2">template&lt;class Config &gt; </td></tr>
 <tr class="memitem:a8cb11a5be8c60acd7c06da175878d49c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#a8cb11a5be8c60acd7c06da175878d49c">loadFromKVStoreWithJson</a> (const std::string &amp;kvfile, const std::string &amp;json, Config &amp;config, const std::string &amp;kvConfigName)</td></tr>
+<tr class="memdesc:a8cb11a5be8c60acd7c06da175878d49c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load the config from <a class="el" href="classconfig_1_1KVStore.html">KVStore</a> with defaults given in json.  <a href="#a8cb11a5be8c60acd7c06da175878d49c">More...</a><br /></td></tr>
 <tr class="separator:a8cb11a5be8c60acd7c06da175878d49c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a393dffbf6ea85dd0bec6edd48a8bf503"><td class="memTemplParams" colspan="2">template&lt;class Config &gt; </td></tr>
 <tr class="memitem:a393dffbf6ea85dd0bec6edd48a8bf503"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#a393dffbf6ea85dd0bec6edd48a8bf503">loadFromKVStoreWithJsonFile</a> (const std::string &amp;kvfile, const std::string &amp;jsonfile, Config &amp;config, const std::string &amp;kvConfigName)</td></tr>
+<tr class="memdesc:a393dffbf6ea85dd0bec6edd48a8bf503"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load the config from <a class="el" href="classconfig_1_1KVStore.html">KVStore</a> with defaults given in json file.  <a href="#a393dffbf6ea85dd0bec6edd48a8bf503">More...</a><br /></td></tr>
 <tr class="separator:a393dffbf6ea85dd0bec6edd48a8bf503"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6a294175d40d721419a0561d7420e62"><td class="memTemplParams" colspan="2">template&lt;class Config &gt; </td></tr>
 <tr class="memitem:af6a294175d40d721419a0561d7420e62"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#af6a294175d40d721419a0561d7420e62">loadFromFD</a> (const int fd, Config &amp;config)</td></tr>
+<tr class="memdesc:af6a294175d40d721419a0561d7420e62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load binary data from a file/socket/pipe represented by the fd.  <a href="#af6a294175d40d721419a0561d7420e62">More...</a><br /></td></tr>
 <tr class="separator:af6a294175d40d721419a0561d7420e62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad9ea3b4b64ae90a04b0a29e2e0f1bea3"><td class="memTemplParams" colspan="2">template&lt;class Config &gt; </td></tr>
 <tr class="memitem:ad9ea3b4b64ae90a04b0a29e2e0f1bea3"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceconfig.html#ad9ea3b4b64ae90a04b0a29e2e0f1bea3">saveToFD</a> (const int fd, const Config &amp;config)</td></tr>
+<tr class="memdesc:ad9ea3b4b64ae90a04b0a29e2e0f1bea3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save binary data to a file/socket/pipe represented by the fd.  <a href="#ad9ea3b4b64ae90a04b0a29e2e0f1bea3">More...</a><br /></td></tr>
 <tr class="separator:ad9ea3b4b64ae90a04b0a29e2e0f1bea3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
@@ -227,7 +244,9 @@ template&lt;char delim = '.', typename Arg1 , typename... Args&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Concatenates all parameters into one std::string. Uses '.' to connect the terms. </p><dl class="params"><dt>Parameters</dt><dd>
+
+<p>Concatenates all parameters into one std::string. </p>
+<p>Uses '.' to connect the terms. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">args</td><td>components of the string </td></tr>
   </table>
@@ -258,7 +277,8 @@ template&lt;char delim = '.'&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Function added for key function completeness.</p>
+
+<p>Function added for key function completeness. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">delim</td><td>= '.' parameter not used, added for consistency </td></tr>
@@ -294,7 +314,8 @@ template&lt;class Config &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Load binary data from a file/socket/pipe represented by the fd</p>
+
+<p>Load binary data from a file/socket/pipe represented by the fd. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">fd</td><td>file descriptor </td></tr>
@@ -330,7 +351,8 @@ template&lt;class Config &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Fills the configuration with data stored in the GVariant</p>
+
+<p>Fills the configuration with data stored in the GVariant. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">gvariant</td><td>configuration in GVariant type </td></tr>
@@ -366,7 +388,8 @@ template&lt;class Config &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Loads the config from a json file</p>
+
+<p>Loads the config from a json file. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">filename</td><td>path to the file </td></tr>
@@ -402,7 +425,8 @@ template&lt;class Config &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Fills the configuration with data stored in the json string</p>
+
+<p>Fills the configuration with data stored in the json string. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">jsonString</td><td>configuration in a json format </td></tr>
@@ -444,7 +468,8 @@ template&lt;class Config &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Loads a visitable configuration from <a class="el" href="classconfig_1_1KVStore.html">KVStore</a>.</p>
+
+<p>Loads a visitable configuration from <a class="el" href="classconfig_1_1KVStore.html">KVStore</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">filename</td><td>path to the <a class="el" href="classconfig_1_1KVStore.html">KVStore</a> db </td></tr>
@@ -493,7 +518,8 @@ template&lt;class Config &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Load the config from <a class="el" href="classconfig_1_1KVStore.html">KVStore</a> with defaults given in json</p>
+
+<p>Load the config from <a class="el" href="classconfig_1_1KVStore.html">KVStore</a> with defaults given in json. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">kvfile</td><td>path to the <a class="el" href="classconfig_1_1KVStore.html">KVStore</a> db </td></tr>
@@ -543,7 +569,8 @@ template&lt;class Config &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Load the config from <a class="el" href="classconfig_1_1KVStore.html">KVStore</a> with defaults given in json file</p>
+
+<p>Load the config from <a class="el" href="classconfig_1_1KVStore.html">KVStore</a> with defaults given in json file. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">kvfile</td><td>path to the <a class="el" href="classconfig_1_1KVStore.html">KVStore</a> db </td></tr>
@@ -581,7 +608,8 @@ template&lt;class Config &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Save binary data to a file/socket/pipe represented by the fd</p>
+
+<p>Save binary data to a file/socket/pipe represented by the fd. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">fd</td><td>file descriptor </td></tr>
@@ -607,7 +635,8 @@ template&lt;class Config &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Saves the config in a GVariant</p>
+
+<p>Saves the config in a GVariant. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">config</td><td>visitable structure to convert </td></tr>
@@ -642,7 +671,8 @@ template&lt;class Config &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Saves the config in a json file</p>
+
+<p>Saves the config in a json file. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">filename</td><td>path to the file </td></tr>
@@ -668,7 +698,8 @@ template&lt;class Config &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Creates a string representation of the configuration in json format</p>
+
+<p>Creates a string representation of the configuration in json format. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">config</td><td>visitable structure to convert </td></tr>
@@ -709,7 +740,8 @@ template&lt;class Config &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Saves the config to a <a class="el" href="classconfig_1_1KVStore.html">KVStore</a>.</p>
+
+<p>Saves the config to a <a class="el" href="classconfig_1_1KVStore.html">KVStore</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">filename</td><td>path to the <a class="el" href="classconfig_1_1KVStore.html">KVStore</a> db </td></tr>
@@ -728,7 +760,7 @@ template&lt;class Config &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceconfig.html">config</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:35 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

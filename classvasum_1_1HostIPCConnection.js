@@ -5,6 +5,7 @@ var classvasum_1_1HostIPCConnection =
     [ "HostIPCConnection", "classvasum_1_1HostIPCConnection.html#a68aeead1d8812fd23317d090377cb90d", null ],
     [ "~HostIPCConnection", "classvasum_1_1HostIPCConnection.html#a1fb70182e53f7c3825f92d012cf01ea8", null ],
     [ "isRunning", "classvasum_1_1HostIPCConnection.html#abeaa050371bac8fefdb1ea8faa84f500", null ],
+    [ "setCleanUpZonesRootCallback", "classvasum_1_1HostIPCConnection.html#a67342036ca59a1d8dea4774e8ea5aed5", null ],
     [ "setCreateFileCallback", "classvasum_1_1HostIPCConnection.html#acfe8b771e2dcbcd28d1104739288d1b6", null ],
     [ "setCreateNetdevMacvlanCallback", "classvasum_1_1HostIPCConnection.html#a394d090873188a0949564dcdd120bdf6", null ],
     [ "setCreateNetdevPhysCallback", "classvasum_1_1HostIPCConnection.html#aeb9685a6614647777925f028d327cb05", null ],

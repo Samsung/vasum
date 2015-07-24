@@ -124,13 +124,15 @@ Functions</h2></td></tr>
 <tr class="separator:a63f14e3ae100b3c96aedc0699e998075"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a15568e6430b2f0c1bd14b6ce75da54"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacevasum_1_1netdev.html#a9a15568e6430b2f0c1bd14b6ce75da54">destroyNetdev</a> (const string &amp;netdev, const pid_t pid)</td></tr>
 <tr class="separator:a9a15568e6430b2f0c1bd14b6ce75da54"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a064f610e7e46589678587d331faeac00"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacevasum_1_1netdev.html#a064f610e7e46589678587d331faeac00">createBridge</a> (const string &amp;netdev)</td></tr>
-<tr class="separator:a064f610e7e46589678587d331faeac00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e835fee6f101224591df4c1ff1ef8ae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacevasum_1_1netdev.html#a1e835fee6f101224591df4c1ff1ef8ae">createBridge</a> (const std::string &amp;netdev)</td></tr>
+<tr class="memdesc:a1e835fee6f101224591df4c1ff1ef8ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create bridge.  <a href="#a1e835fee6f101224591df4c1ff1ef8ae">More...</a><br /></td></tr>
+<tr class="separator:a1e835fee6f101224591df4c1ff1ef8ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a32a6c296f4d2476bf1837ed5bc0142"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacevasum_1_1netdev.html#a8cc612a8e4590e386fdf7b4322c451c4">Attrs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacevasum_1_1netdev.html#a3a32a6c296f4d2476bf1837ed5bc0142">getAttrs</a> (const pid_t nsPid, const std::string &amp;netdev)</td></tr>
 <tr class="separator:a3a32a6c296f4d2476bf1837ed5bc0142"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7e1e84f1fecf9b3acf759bd8de0eeaf9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacevasum_1_1netdev.html#a7e1e84f1fecf9b3acf759bd8de0eeaf9">setAttrs</a> (const pid_t nsPid, const std::string &amp;netdev, const <a class="el" href="namespacevasum_1_1netdev.html#a8cc612a8e4590e386fdf7b4322c451c4">Attrs</a> &amp;attrs)</td></tr>
 <tr class="separator:a7e1e84f1fecf9b3acf759bd8de0eeaf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7935e41c57a39e59ec4ed7525938987"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacevasum_1_1netdev.html#af7935e41c57a39e59ec4ed7525938987">deleteIpAddress</a> (const pid_t nsPid, const std::string &amp;netdev, const std::string &amp;ip)</td></tr>
+<tr class="memdesc:af7935e41c57a39e59ec4ed7525938987"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove ipv4/ipv6 address from interface.  <a href="#af7935e41c57a39e59ec4ed7525938987">More...</a><br /></td></tr>
 <tr class="separator:af7935e41c57a39e59ec4ed7525938987"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Typedef Documentation</h2>
@@ -147,7 +149,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="a064f610e7e46589678587d331faeac00"></a>
+<a class="anchor" id="a1e835fee6f101224591df4c1ff1ef8ae"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -160,7 +162,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Create bridge</p>
+
+<p>Create bridge. </p>
 <p>Bridge are in BRIDGE_MODE_VEB (loopback) mode and it is software bridge (BRIDGE_FLAGS_MASTER)</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -270,7 +273,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Remove ipv4/ipv6 address from interface </p>
+
+<p>Remove ipv4/ipv6 address from interface. </p>
 
 </div>
 </div>
@@ -407,7 +411,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacevasum.html">vasum</a></li><li class="navelem"><a class="el" href="namespacevasum_1_1netdev.html">netdev</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -158,15 +158,15 @@ $(document).ready(function(){initNavTree('latch_8hpp_source.html','');});
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;</div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="preprocessor">#endif // COMMON_UTILS_LATCH_HPP</span></div>
 <div class="ttc" id="classutils_1_1Latch_html_aa11045e8cdda4633b067dfddcfceaebc"><div class="ttname"><a href="classutils_1_1Latch.html#aa11045e8cdda4633b067dfddcfceaebc">utils::Latch::mCondition</a></div><div class="ttdeci">std::condition_variable mCondition</div><div class="ttdef"><b>Definition:</b> latch.hpp:85</div></div>
-<div class="ttc" id="classutils_1_1Latch_html"><div class="ttname"><a href="classutils_1_1Latch.html">utils::Latch</a></div><div class="ttdef"><b>Definition:</b> latch.hpp:41</div></div>
-<div class="ttc" id="classutils_1_1Latch_html_a9decd895df56d0880ccbd9c0a4111e38"><div class="ttname"><a href="classutils_1_1Latch.html#a9decd895df56d0880ccbd9c0a4111e38">utils::Latch::set</a></div><div class="ttdeci">void set()</div><div class="ttdef"><b>Definition:</b> latch.cpp:39</div></div>
-<div class="ttc" id="classutils_1_1Latch_html_a6e6135f9599b492bff73c3eadad939b2"><div class="ttname"><a href="classutils_1_1Latch.html#a6e6135f9599b492bff73c3eadad939b2">utils::Latch::empty</a></div><div class="ttdeci">bool empty()</div><div class="ttdef"><b>Definition:</b> latch.cpp:75</div></div>
+<div class="ttc" id="classutils_1_1Latch_html"><div class="ttname"><a href="classutils_1_1Latch.html">utils::Latch</a></div><div class="ttdoc">A synchronization aid that allows one thread to wait until an operation being performed in other thre...</div><div class="ttdef"><b>Definition:</b> latch.hpp:41</div></div>
+<div class="ttc" id="classutils_1_1Latch_html_a9decd895df56d0880ccbd9c0a4111e38"><div class="ttname"><a href="classutils_1_1Latch.html#a9decd895df56d0880ccbd9c0a4111e38">utils::Latch::set</a></div><div class="ttdeci">void set()</div><div class="ttdoc">Sets an event occurred. </div><div class="ttdef"><b>Definition:</b> latch.cpp:39</div></div>
+<div class="ttc" id="classutils_1_1Latch_html_a6e6135f9599b492bff73c3eadad939b2"><div class="ttname"><a href="classutils_1_1Latch.html#a6e6135f9599b492bff73c3eadad939b2">utils::Latch::empty</a></div><div class="ttdeci">bool empty()</div><div class="ttdoc">Check if there are no pending events. </div><div class="ttdef"><b>Definition:</b> latch.cpp:75</div></div>
 <div class="ttc" id="classutils_1_1Latch_html_ad24cdd4bc12f52b7168a0383d8be090f"><div class="ttname"><a href="classutils_1_1Latch.html#ad24cdd4bc12f52b7168a0383d8be090f">utils::Latch::Latch</a></div><div class="ttdeci">Latch()</div><div class="ttdef"><b>Definition:</b> latch.cpp:34</div></div>
 <div class="ttc" id="classutils_1_1Latch_html_a0fcc9e6376d4dc14208550caa638b8b1"><div class="ttname"><a href="classutils_1_1Latch.html#a0fcc9e6376d4dc14208550caa638b8b1">utils::Latch::mMutex</a></div><div class="ttdeci">std::mutex mMutex</div><div class="ttdef"><b>Definition:</b> latch.hpp:84</div></div>
 <div class="ttc" id="classutils_1_1Latch_html_abcd81d7ee81045880eba05b0e5afb5f5"><div class="ttname"><a href="classutils_1_1Latch.html#abcd81d7ee81045880eba05b0e5afb5f5">utils::Latch::mCount</a></div><div class="ttdeci">unsigned int mCount</div><div class="ttdef"><b>Definition:</b> latch.hpp:86</div></div>
 <div class="ttc" id="namespaceutils_html"><div class="ttname"><a href="namespaceutils.html">utils</a></div><div class="ttdef"><b>Definition:</b> c-array.hpp:30</div></div>
-<div class="ttc" id="classutils_1_1Latch_html_aee9bf68cdac62e6db733bc3a1fc7dca3"><div class="ttname"><a href="classutils_1_1Latch.html#aee9bf68cdac62e6db733bc3a1fc7dca3">utils::Latch::wait</a></div><div class="ttdeci">void wait()</div><div class="ttdef"><b>Definition:</b> latch.cpp:46</div></div>
-<div class="ttc" id="classutils_1_1Latch_html_a308ba46dd0619a02564f1f997068bd8e"><div class="ttname"><a href="classutils_1_1Latch.html#a308ba46dd0619a02564f1f997068bd8e">utils::Latch::waitForN</a></div><div class="ttdeci">void waitForN(const unsigned int n)</div><div class="ttdef"><b>Definition:</b> latch.cpp:56</div></div>
+<div class="ttc" id="classutils_1_1Latch_html_aee9bf68cdac62e6db733bc3a1fc7dca3"><div class="ttname"><a href="classutils_1_1Latch.html#aee9bf68cdac62e6db733bc3a1fc7dca3">utils::Latch::wait</a></div><div class="ttdeci">void wait()</div><div class="ttdoc">Waits for a single occurrence of event. </div><div class="ttdef"><b>Definition:</b> latch.cpp:46</div></div>
+<div class="ttc" id="classutils_1_1Latch_html_a308ba46dd0619a02564f1f997068bd8e"><div class="ttname"><a href="classutils_1_1Latch.html#a308ba46dd0619a02564f1f997068bd8e">utils::Latch::waitForN</a></div><div class="ttdeci">void waitForN(const unsigned int n)</div><div class="ttdoc">Waits for   occurrences of event. </div><div class="ttdef"><b>Definition:</b> latch.cpp:56</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.6-->
@@ -174,7 +174,7 @@ $(document).ready(function(){initNavTree('latch_8hpp_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_353a0b29ed1fe2c048306a7c13ef1174.html">common</a></li><li class="navelem"><a class="el" href="dir_5a86b6375f493b00e26a836fc97d2a7e.html">utils</a></li><li class="navelem"><a class="el" href="latch_8hpp.html">latch.hpp</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:35 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

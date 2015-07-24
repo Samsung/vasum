@@ -114,6 +114,9 @@ $(document).ready(function(){initNavTree('classdbus_1_1DbusConnection.html','');
 </div><!--header-->
 <div class="contents">
 
+<p>Dbus connection.  
+ <a href="classdbus_1_1DbusConnection.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="dbus_2connection_8hpp_source.html">connection.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
@@ -147,27 +150,37 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7fc770551e1bf7a6388b4dbe63219206"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classdbus_1_1DbusConnection.html#a7fc770551e1bf7a6388b4dbe63219206">~DbusConnection</a> ()</td></tr>
 <tr class="separator:a7fc770551e1bf7a6388b4dbe63219206"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a929ee08780aced2ebdfac40111fdd7ca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classdbus_1_1DbusConnection.html#a929ee08780aced2ebdfac40111fdd7ca">setName</a> (const std::string &amp;name, const <a class="el" href="classdbus_1_1DbusConnection.html#a5d3439eea9325d6a674f9ada7abed3dc">VoidCallback</a> &amp;<a class="el" href="classdbus_1_1DbusConnection.html#ab6468e0992d22513dc88876724f5770e">onNameAcquired</a>, const <a class="el" href="classdbus_1_1DbusConnection.html#a5d3439eea9325d6a674f9ada7abed3dc">VoidCallback</a> &amp;<a class="el" href="classdbus_1_1DbusConnection.html#ad8560d9bdcac68babfd60880d3aeed68">onNameLost</a>)</td></tr>
+<tr class="memdesc:a929ee08780aced2ebdfac40111fdd7ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets a name to the dbus connection.  <a href="#a929ee08780aced2ebdfac40111fdd7ca">More...</a><br /></td></tr>
 <tr class="separator:a929ee08780aced2ebdfac40111fdd7ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a020d3fad528955216dec19c660357316"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classdbus_1_1DbusConnection.html#a020d3fad528955216dec19c660357316">emitSignal</a> (const std::string &amp;objectPath, const std::string &amp;interface, const std::string &amp;name, GVariant *parameters)</td></tr>
+<tr class="memdesc:a020d3fad528955216dec19c660357316"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emits dbus signal.  <a href="#a020d3fad528955216dec19c660357316">More...</a><br /></td></tr>
 <tr class="separator:a020d3fad528955216dec19c660357316"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43218e1f1c78cbfdc8359902c5d454a6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classdbus_1_1DbusConnection.html#a4c8a22d402182ad79a6c01099f79d81e">SubscriptionId</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classdbus_1_1DbusConnection.html#a43218e1f1c78cbfdc8359902c5d454a6">signalSubscribe</a> (const <a class="el" href="classdbus_1_1DbusConnection.html#a0c69420f844a7ae1fad51e63dd90cb3f">SignalCallback</a> &amp;callback, const std::string &amp;senderBusName=&quot;&quot;, const std::string &amp;interface=&quot;&quot;, const std::string &amp;objectPath=&quot;&quot;, const std::string &amp;member=&quot;&quot;)</td></tr>
+<tr class="memdesc:a43218e1f1c78cbfdc8359902c5d454a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscribes to a signal.  <a href="#a43218e1f1c78cbfdc8359902c5d454a6">More...</a><br /></td></tr>
 <tr class="separator:a43218e1f1c78cbfdc8359902c5d454a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab0c83bf3668cba3697d4465731b61480"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classdbus_1_1DbusConnection.html#ab0c83bf3668cba3697d4465731b61480">signalUnsubscribe</a> (<a class="el" href="classdbus_1_1DbusConnection.html#a4c8a22d402182ad79a6c01099f79d81e">SubscriptionId</a> subscriptionId)</td></tr>
+<tr class="memdesc:ab0c83bf3668cba3697d4465731b61480"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unsubscribes from a signal.  <a href="#ab0c83bf3668cba3697d4465731b61480">More...</a><br /></td></tr>
 <tr class="separator:ab0c83bf3668cba3697d4465731b61480"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6dbb91826b2b58b206bf91560276fe84"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classdbus_1_1DbusConnection.html#a6dbb91826b2b58b206bf91560276fe84">registerObject</a> (const std::string &amp;objectPath, const std::string &amp;objectDefinitionXml, const <a class="el" href="classdbus_1_1DbusConnection.html#ab9935dc9d406eda0f3bc7718aff5e4ce">MethodCallCallback</a> &amp;method, const <a class="el" href="classdbus_1_1DbusConnection.html#acc36f7a7f2f758839d137f5cdc37027a">ClientVanishedCallback</a> &amp;vanish)</td></tr>
+<tr class="memdesc:a6dbb91826b2b58b206bf91560276fe84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers an object with given definition.  <a href="#a6dbb91826b2b58b206bf91560276fe84">More...</a><br /></td></tr>
 <tr class="separator:a6dbb91826b2b58b206bf91560276fe84"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81d7a6b1c283df0bb6bcdb3c0c070cd1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacedbus.html#a0c39f9b2ebc5e99230db7c28bdf99608">GVariantPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classdbus_1_1DbusConnection.html#a81d7a6b1c283df0bb6bcdb3c0c070cd1">callMethod</a> (const std::string &amp;busName, const std::string &amp;objectPath, const std::string &amp;interface, const std::string &amp;method, GVariant *parameters, const std::string &amp;replyType, int timeoutMs=-1)</td></tr>
+<tr class="memdesc:a81d7a6b1c283df0bb6bcdb3c0c070cd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call a dbus method.  <a href="#a81d7a6b1c283df0bb6bcdb3c0c070cd1">More...</a><br /></td></tr>
 <tr class="separator:a81d7a6b1c283df0bb6bcdb3c0c070cd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a927522ada98de359431757053aac6930"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classdbus_1_1DbusConnection.html#a927522ada98de359431757053aac6930">callMethodAsync</a> (const std::string &amp;busName, const std::string &amp;objectPath, const std::string &amp;interface, const std::string &amp;method, GVariant *parameters, const std::string &amp;replyType, const <a class="el" href="classdbus_1_1DbusConnection.html#a03119f2524370bafa0434d3797841873">AsyncMethodCallCallback</a> &amp;callback, int timeoutMs=-1)</td></tr>
+<tr class="memdesc:a927522ada98de359431757053aac6930"><td class="mdescLeft">&#160;</td><td class="mdescRight">Async call a dbus method.  <a href="#a927522ada98de359431757053aac6930">More...</a><br /></td></tr>
 <tr class="separator:a927522ada98de359431757053aac6930"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad5b3060384f317225ed9d3f7e2df2c60"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classdbus_1_1DbusConnection.html#ad5b3060384f317225ed9d3f7e2df2c60">introspect</a> (const std::string &amp;busName, const std::string &amp;objectPath)</td></tr>
+<tr class="memdesc:ad5b3060384f317225ed9d3f7e2df2c60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns an xml with meta description of specified dbus object.  <a href="#ad5b3060384f317225ed9d3f7e2df2c60">More...</a><br /></td></tr>
 <tr class="separator:ad5b3060384f317225ed9d3f7e2df2c60"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a82cb9716148693d69b385b3d49b0b06a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classdbus_1_1DbusConnection.html#ae43c6430a18176a32607eb4b11ad1323">Pointer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classdbus_1_1DbusConnection.html#a82cb9716148693d69b385b3d49b0b06a">create</a> (const std::string &amp;address)</td></tr>
+<tr class="memdesc:a82cb9716148693d69b385b3d49b0b06a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a connection to the dbus with given address.  <a href="#a82cb9716148693d69b385b3d49b0b06a">More...</a><br /></td></tr>
 <tr class="separator:a82cb9716148693d69b385b3d49b0b06a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac60b60ac60acbba45d19e0a5d5e98aa1"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classdbus_1_1DbusConnection.html#ae43c6430a18176a32607eb4b11ad1323">Pointer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classdbus_1_1DbusConnection.html#ac60b60ac60acbba45d19e0a5d5e98aa1">createSystem</a> ()</td></tr>
+<tr class="memdesc:ac60b60ac60acbba45d19e0a5d5e98aa1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a connection to the system dbus.  <a href="#ac60b60ac60acbba45d19e0a5d5e98aa1">More...</a><br /></td></tr>
 <tr class="separator:ac60b60ac60acbba45d19e0a5d5e98aa1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-types"></a>
@@ -207,7 +220,8 @@ Private Attributes</h2></td></tr>
 <tr class="separator:a6c61d61f3ed787d5f93fad8cb5d25dd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Dbus connection. Provides a functionality that allows to call dbus methods, register dbus interfaces, etc.</p>
+<div class="textblock"><p>Dbus connection. </p>
+<p>Provides a functionality that allows to call dbus methods, register dbus interfaces, etc.</p>
 <p>TODO divide to interface and implementation header </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a class="anchor" id="a03119f2524370bafa0434d3797841873"></a>
@@ -408,7 +422,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Call a dbus method </p>
+
+<p>Call a dbus method. </p>
 
 </div>
 </div>
@@ -471,7 +486,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Async call a dbus method </p>
+
+<p>Async call a dbus method. </p>
 
 </div>
 </div>
@@ -496,6 +512,7 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
 <p>Creates a connection to the dbus with given address. </p>
 
 </div>
@@ -520,6 +537,7 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
 <p>Creates a connection to the system dbus. </p>
 
 </div>
@@ -559,6 +577,7 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
 <p>Emits dbus signal. </p>
 
 </div>
@@ -586,6 +605,7 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
 <p>Returns an xml with meta description of specified dbus object. </p>
 
 </div>
@@ -919,7 +939,9 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Registers an object with given definition. Api calls will be handled by given callback. </p>
+
+<p>Registers an object with given definition. </p>
+<p>Api calls will be handled by given callback. </p>
 
 </div>
 </div>
@@ -952,7 +974,9 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Sets a name to the dbus connection. It allows other client to call methods using this name. </p>
+
+<p>Sets a name to the dbus connection. </p>
+<p>It allows other client to call methods using this name. </p>
 
 </div>
 </div>
@@ -997,7 +1021,9 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Subscribes to a signal. Empty sender means subscribe to all signals Returns a subscription identifier that can be used to unsubscribe signal </p>
+
+<p>Subscribes to a signal. </p>
+<p>Empty sender means subscribe to all signals Returns a subscription identifier that can be used to unsubscribe signal </p>
 
 </div>
 </div>
@@ -1014,6 +1040,7 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
 <p>Unsubscribes from a signal. </p>
 
 </div>
@@ -1110,7 +1137,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacedbus.html">dbus</a></li><li class="navelem"><a class="el" href="classdbus_1_1DbusConnection.html">DbusConnection</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

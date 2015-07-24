@@ -1,6 +1,7 @@
 var searchData=
 [
   ['caller',['caller',['../structvasum_1_1ProxyCallRule.html#a85f2e012b37d836695d9f2e52c64deb4',1,'vasum::ProxyCallRule']]],
+  ['cleanupzonespath',['cleanUpZonesPath',['../structvasum_1_1ZonesManagerConfig.html#a7d364f61ad3a13556ce23c8200af08d9',1,'vasum::ZonesManagerConfig']]],
   ['client',['client',['../classvasum_1_1cli_1_1CommandLineInterface.html#ab0e131599992d4af5059a39cd3739513',1,'vasum::cli::CommandLineInterface']]],
   ['clientvanished',['clientVanished',['../structdbus_1_1DbusConnection_1_1MethodCallbacks.html#a2e791a52a0c4f495902b9c5e8c8ff7e3',1,'dbus::DbusConnection::MethodCallbacks::clientVanished()'],['../structdbus_1_1DbusConnection_1_1VanishedCallbacks.html#aa455415d7d426fc0de79bef435c621ae',1,'dbus::DbusConnection::VanishedCallbacks::clientVanished()']]],
   ['cmd',['cmd',['../initctl_8cpp.html#a85092d82ab6ea85dad51ba78cbda36a0',1,'initctl.cpp']]],

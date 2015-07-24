@@ -1,5 +1,6 @@
 var NAVTREEINDEX2 =
 {
+"classipc_1_1Processor.html#ab87168622be97d7cec47559dc7a2feb1":[3,0,2,19,19],
 "classipc_1_1Processor.html#ab8c1f98cc01ca45b0c1f057ef48f7b37":[3,0,2,19,62],
 "classipc_1_1Processor.html#ab945cab3416a89ee1cc1db0349ea9607":[3,0,2,19,25],
 "classipc_1_1Processor.html#aba61fade0f12ffdd0ed867b5cc1df6f9":[3,0,2,19,49],
@@ -154,9 +155,9 @@ var NAVTREEINDEX2 =
 "classlogger_1_1FileBackend.html#a2f9445eda198ee8597adc72ba9703132":[3,0,3,0,1],
 "classlogger_1_1FileBackend.html#a529490082f8b15b2613ee8348feace19":[3,0,3,0,0],
 "classlogger_1_1FileBackend.html#a73712951814cc33399b1c682f95e5f29":[3,0,3,0,2],
-"classlogger_1_1LogBackend.html":[1,0,0],
-"classlogger_1_1LogBackend.html#a18662bf04806b11dcecde83c1aa7c9cb":[1,0,0,1],
-"classlogger_1_1LogBackend.html#a21fd60abd0c4d6e84dbe881c015c8c1b":[1,0,0,0],
+"classlogger_1_1LogBackend.html":[1,1,0],
+"classlogger_1_1LogBackend.html#a18662bf04806b11dcecde83c1aa7c9cb":[1,1,0,1],
+"classlogger_1_1LogBackend.html#a21fd60abd0c4d6e84dbe881c015c8c1b":[1,1,0,0],
 "classlogger_1_1LogFormatter.html":[3,0,3,2],
 "classlogger_1_1LogFormatter.html#a36502b61090dbb4a379394aeca52a019":[3,0,3,2,2],
 "classlogger_1_1LogFormatter.html#a8469548a1276fa4c2422255e27d40709":[3,0,3,2,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX2 =
 "classutils_1_1Glib.html#ab8b13317251a69efe901300a2c5ff6b6":[3,0,4,5,1],
 "classutils_1_1Latch.html":[3,0,4,6],
 "classutils_1_1Latch.html#a0fcc9e6376d4dc14208550caa638b8b1":[3,0,4,6,9],
-"classutils_1_1Latch.html#a308ba46dd0619a02564f1f997068bd8e":[3,0,4,6,5],
-"classutils_1_1Latch.html#a3ec2a516a0c4a10de485b4cea11fb0dc":[3,0,4,6,4]
+"classutils_1_1Latch.html#a308ba46dd0619a02564f1f997068bd8e":[3,0,4,6,5]
 };

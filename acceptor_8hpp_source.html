@@ -158,21 +158,21 @@ $(document).ready(function(){initNavTree('acceptor_8hpp_source.html','');});
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;} <span class="comment">// namespace ipc</span></div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor">#endif // COMMON_IPC_INTERNALS_ACCEPTOR_HPP</span></div>
-<div class="ttc" id="classipc_1_1Acceptor_html"><div class="ttname"><a href="classipc_1_1Acceptor.html">ipc::Acceptor</a></div><div class="ttdef"><b>Definition:</b> acceptor.hpp:41</div></div>
+<div class="ttc" id="classipc_1_1Acceptor_html"><div class="ttname"><a href="classipc_1_1Acceptor.html">ipc::Acceptor</a></div><div class="ttdoc">Accepts new connections and passes the new socket to a callback. </div><div class="ttdef"><b>Definition:</b> acceptor.hpp:41</div></div>
 <div class="ttc" id="event-poll_8hpp_html"><div class="ttname"><a href="event-poll_8hpp.html">event-poll.hpp</a></div><div class="ttdoc">C++ epoll wrapper. </div></div>
 <div class="ttc" id="classipc_1_1Acceptor_html_a40985c7d257971dc91a14ed0218763a5"><div class="ttname"><a href="classipc_1_1Acceptor.html#a40985c7d257971dc91a14ed0218763a5">ipc::Acceptor::mEventPoll</a></div><div class="ttdeci">epoll::EventPoll &amp; mEventPoll</div><div class="ttdef"><b>Definition:</b> acceptor.hpp:62</div></div>
 <div class="ttc" id="ipc_2types_8hpp_html"><div class="ttname"><a href="ipc_2types_8hpp.html">types.hpp</a></div><div class="ttdoc">Types definitions. </div></div>
 <div class="ttc" id="classipc_1_1Acceptor_html_aa762478e8b902a9b1b707a798d1f1e06"><div class="ttname"><a href="classipc_1_1Acceptor.html#aa762478e8b902a9b1b707a798d1f1e06">ipc::Acceptor::~Acceptor</a></div><div class="ttdeci">~Acceptor()</div><div class="ttdef"><b>Definition:</b> acceptor.cpp:45</div></div>
 <div class="ttc" id="classipc_1_1epoll_1_1EventPoll_html"><div class="ttname"><a href="classipc_1_1epoll_1_1EventPoll.html">ipc::epoll::EventPoll</a></div><div class="ttdef"><b>Definition:</b> event-poll.hpp:38</div></div>
-<div class="ttc" id="classipc_1_1Socket_html"><div class="ttname"><a href="classipc_1_1Socket.html">ipc::Socket</a></div><div class="ttdef"><b>Definition:</b> socket.hpp:39</div></div>
+<div class="ttc" id="classipc_1_1Socket_html"><div class="ttname"><a href="classipc_1_1Socket.html">ipc::Socket</a></div><div class="ttdoc">This class wraps all operations possible to do with a socket. </div><div class="ttdef"><b>Definition:</b> socket.hpp:39</div></div>
 <div class="ttc" id="socket_8hpp_html"><div class="ttname"><a href="socket_8hpp.html">socket.hpp</a></div><div class="ttdoc">Linux socket wrapper. </div></div>
 <div class="ttc" id="classipc_1_1Acceptor_html_a5bff2bca654f69d9891616a3451cda9e"><div class="ttname"><a href="classipc_1_1Acceptor.html#a5bff2bca654f69d9891616a3451cda9e">ipc::Acceptor::mNewConnectionCallback</a></div><div class="ttdeci">NewConnectionCallback mNewConnectionCallback</div><div class="ttdef"><b>Definition:</b> acceptor.hpp:63</div></div>
 <div class="ttc" id="namespaceipc_html"><div class="ttname"><a href="namespaceipc.html">ipc</a></div><div class="ttdef"><b>Definition:</b> client.cpp:31</div></div>
 <div class="ttc" id="classipc_1_1Acceptor_html_a55b706db9e6ea4e5b0d8e0b3e1f5665e"><div class="ttname"><a href="classipc_1_1Acceptor.html#a55b706db9e6ea4e5b0d8e0b3e1f5665e">ipc::Acceptor::operator=</a></div><div class="ttdeci">Acceptor &amp; operator=(const Acceptor &amp;)=delete</div></div>
-<div class="ttc" id="classipc_1_1Acceptor_html_a97ba95d0980277496958b7204caa9dfd"><div class="ttname"><a href="classipc_1_1Acceptor.html#a97ba95d0980277496958b7204caa9dfd">ipc::Acceptor::handleConnection</a></div><div class="ttdeci">void handleConnection()</div><div class="ttdef"><b>Definition:</b> acceptor.cpp:51</div></div>
+<div class="ttc" id="classipc_1_1Acceptor_html_a97ba95d0980277496958b7204caa9dfd"><div class="ttname"><a href="classipc_1_1Acceptor.html#a97ba95d0980277496958b7204caa9dfd">ipc::Acceptor::handleConnection</a></div><div class="ttdeci">void handleConnection()</div><div class="ttdoc">Handle one incoming connection. </div><div class="ttdef"><b>Definition:</b> acceptor.cpp:51</div></div>
 <div class="ttc" id="classipc_1_1Acceptor_html_ad1e379832f73ce7363e25b3d61a48d0a"><div class="ttname"><a href="classipc_1_1Acceptor.html#ad1e379832f73ce7363e25b3d61a48d0a">ipc::Acceptor::NewConnectionCallback</a></div><div class="ttdeci">std::function&lt; void(std::shared_ptr&lt; Socket &gt; &amp;socketPtr)&gt; NewConnectionCallback</div><div class="ttdef"><b>Definition:</b> acceptor.hpp:44</div></div>
 <div class="ttc" id="classipc_1_1Acceptor_html_a5073f954be303672fa76f48327835f55"><div class="ttname"><a href="classipc_1_1Acceptor.html#a5073f954be303672fa76f48327835f55">ipc::Acceptor::mSocket</a></div><div class="ttdeci">Socket mSocket</div><div class="ttdef"><b>Definition:</b> acceptor.hpp:64</div></div>
-<div class="ttc" id="classipc_1_1Acceptor_html_a8b7e7ffae3ca058813ee3bbd25895b30"><div class="ttname"><a href="classipc_1_1Acceptor.html#a8b7e7ffae3ca058813ee3bbd25895b30">ipc::Acceptor::Acceptor</a></div><div class="ttdeci">Acceptor(epoll::EventPoll &amp;eventPoll, const std::string &amp;socketPath, const NewConnectionCallback &amp;newConnectionCallback)</div><div class="ttdef"><b>Definition:</b> acceptor.cpp:34</div></div>
+<div class="ttc" id="classipc_1_1Acceptor_html_a8b7e7ffae3ca058813ee3bbd25895b30"><div class="ttname"><a href="classipc_1_1Acceptor.html#a8b7e7ffae3ca058813ee3bbd25895b30">ipc::Acceptor::Acceptor</a></div><div class="ttdeci">Acceptor(epoll::EventPoll &amp;eventPoll, const std::string &amp;socketPath, const NewConnectionCallback &amp;newConnectionCallback)</div><div class="ttdoc">Class for accepting new connections. </div><div class="ttdef"><b>Definition:</b> acceptor.cpp:34</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.6-->
@@ -180,7 +180,7 @@ $(document).ready(function(){initNavTree('acceptor_8hpp_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_258da5588bb15182dfffe9dae1cb498a.html">libs</a></li><li class="navelem"><a class="el" href="dir_122b1cf7a6eb989f6018ca461f59466d.html">ipc</a></li><li class="navelem"><a class="el" href="dir_a88385fca1c94b6e76c875aef52b67c1.html">internals</a></li><li class="navelem"><a class="el" href="acceptor_8hpp.html">acceptor.hpp</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:35 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

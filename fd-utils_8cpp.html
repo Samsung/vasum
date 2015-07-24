@@ -130,21 +130,27 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a592f45119eb5c0f8bf2aa6b495acb217"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a592f45119eb5c0f8bf2aa6b495acb217">utils::close</a> (int fd)</td></tr>
+<tr class="memdesc:a592f45119eb5c0f8bf2aa6b495acb217"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close the file descriptor.  <a href="namespaceutils.html#a592f45119eb5c0f8bf2aa6b495acb217">More...</a><br /></td></tr>
 <tr class="separator:a592f45119eb5c0f8bf2aa6b495acb217"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87952fa7fdeda1eac04517be1c1be851"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a87952fa7fdeda1eac04517be1c1be851">utils::write</a> (int fd, const void *bufferPtr, const size_t size, int timeoutMS)</td></tr>
-<tr class="separator:a87952fa7fdeda1eac04517be1c1be851"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad9036b3f65ce5b2ae1468e150e8ba231"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#ad9036b3f65ce5b2ae1468e150e8ba231">utils::read</a> (int fd, void *bufferPtr, const size_t size, int timeoutMS)</td></tr>
-<tr class="separator:ad9036b3f65ce5b2ae1468e150e8ba231"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad60b22dc1db0623f51f90aa3fd04d9da"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#ad60b22dc1db0623f51f90aa3fd04d9da">utils::write</a> (int fd, const void *bufferPtr, const size_t size, int timeoutMS=5000)</td></tr>
+<tr class="memdesc:ad60b22dc1db0623f51f90aa3fd04d9da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write to a file descriptor, throw on error.  <a href="namespaceutils.html#ad60b22dc1db0623f51f90aa3fd04d9da">More...</a><br /></td></tr>
+<tr class="separator:ad60b22dc1db0623f51f90aa3fd04d9da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89095c37dd559f83ea36172dc2a5ad3b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a89095c37dd559f83ea36172dc2a5ad3b">utils::read</a> (int fd, void *bufferPtr, const size_t size, int timeoutMS=5000)</td></tr>
+<tr class="memdesc:a89095c37dd559f83ea36172dc2a5ad3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read from a file descriptor, throw on error.  <a href="namespaceutils.html#a89095c37dd559f83ea36172dc2a5ad3b">More...</a><br /></td></tr>
+<tr class="separator:a89095c37dd559f83ea36172dc2a5ad3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae98bb9e79c8f5c202bc00ecfe523b519"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#ae98bb9e79c8f5c202bc00ecfe523b519">utils::getMaxFDNumber</a> ()</td></tr>
 <tr class="separator:ae98bb9e79c8f5c202bc00ecfe523b519"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af42f00ec5c1bd181691e45abd848b6a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#af42f00ec5c1bd181691e45abd848b6a4">utils::setMaxFDNumber</a> (unsigned int limit)</td></tr>
+<tr class="memdesc:af42f00ec5c1bd181691e45abd848b6a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the software and hardware limit of file descriptors for this process.  <a href="namespaceutils.html#af42f00ec5c1bd181691e45abd848b6a4">More...</a><br /></td></tr>
 <tr class="separator:af42f00ec5c1bd181691e45abd848b6a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89bd01fd17a7c38224c096b2d5ef6f63"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a89bd01fd17a7c38224c096b2d5ef6f63">utils::getFDNumber</a> ()</td></tr>
 <tr class="separator:a89bd01fd17a7c38224c096b2d5ef6f63"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a65b1dc941d16dbaa794d5645ca2cf4e5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a65b1dc941d16dbaa794d5645ca2cf4e5">utils::fdRecv</a> (int socket, const unsigned int timeoutMS)</td></tr>
-<tr class="separator:a65b1dc941d16dbaa794d5645ca2cf4e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac9a93b133cadde86597bc8331d356d49"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#ac9a93b133cadde86597bc8331d356d49">utils::fdSend</a> (int socket, int fd, const unsigned int timeoutMS)</td></tr>
-<tr class="separator:ac9a93b133cadde86597bc8331d356d49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa048f028e890c2702b9bb3f08f5dfc1b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#aa048f028e890c2702b9bb3f08f5dfc1b">utils::fdRecv</a> (int socket, const unsigned int timeoutMS=5000)</td></tr>
+<tr class="memdesc:aa048f028e890c2702b9bb3f08f5dfc1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receive fd via Unix Domain socket.  <a href="namespaceutils.html#aa048f028e890c2702b9bb3f08f5dfc1b">More...</a><br /></td></tr>
+<tr class="separator:aa048f028e890c2702b9bb3f08f5dfc1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd35d7440e5e53ffcfcb90f737dcff5e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#afd35d7440e5e53ffcfcb90f737dcff5e">utils::fdSend</a> (int socket, int fd, const unsigned int timeoutMS=5000)</td></tr>
+<tr class="memdesc:afd35d7440e5e53ffcfcb90f737dcff5e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send Socket via Unix Domain socket.  <a href="namespaceutils.html#afd35d7440e5e53ffcfcb90f737dcff5e">More...</a><br /></td></tr>
+<tr class="separator:afd35d7440e5e53ffcfcb90f737dcff5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>File descriptor utility functions. </p>
@@ -156,7 +162,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_353a0b29ed1fe2c048306a7c13ef1174.html">common</a></li><li class="navelem"><a class="el" href="dir_5a86b6375f493b00e26a836fc97d2a7e.html">utils</a></li><li class="navelem"><a class="el" href="fd-utils_8cpp.html">fd-utils.cpp</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:35 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

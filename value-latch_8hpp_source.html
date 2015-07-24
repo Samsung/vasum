@@ -200,11 +200,11 @@ $(document).ready(function(){initNavTree('value-latch_8hpp_source.html','');});
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
 <div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;<span class="preprocessor">#endif // COMMON_UTILS_VALUE_LATCH_H</span></div>
 <div class="ttc" id="classutils_1_1ValueLatch_html_add8830eb35b76ba057161691897257e7"><div class="ttname"><a href="classutils_1_1ValueLatch.html#add8830eb35b76ba057161691897257e7">utils::ValueLatch::mValue</a></div><div class="ttdeci">std::unique_ptr&lt; T &gt; mValue</div><div class="ttdef"><b>Definition:</b> value-latch.hpp:72</div></div>
-<div class="ttc" id="structutils_1_1UtilsException_html"><div class="ttname"><a href="structutils_1_1UtilsException.html">utils::UtilsException</a></div><div class="ttdef"><b>Definition:</b> exception.hpp:37</div></div>
-<div class="ttc" id="classutils_1_1ValueLatch_html_a9e5231a03919fae507e0a4932ce303bb"><div class="ttname"><a href="classutils_1_1ValueLatch.html#a9e5231a03919fae507e0a4932ce303bb">utils::ValueLatch::get</a></div><div class="ttdeci">T get()</div><div class="ttdef"><b>Definition:</b> value-latch.hpp:98</div></div>
+<div class="ttc" id="structutils_1_1UtilsException_html"><div class="ttname"><a href="structutils_1_1UtilsException.html">utils::UtilsException</a></div><div class="ttdoc">Base class for exceptions in utils. </div><div class="ttdef"><b>Definition:</b> exception.hpp:37</div></div>
+<div class="ttc" id="classutils_1_1ValueLatch_html_a9e5231a03919fae507e0a4932ce303bb"><div class="ttname"><a href="classutils_1_1ValueLatch.html#a9e5231a03919fae507e0a4932ce303bb">utils::ValueLatch::get</a></div><div class="ttdeci">T get()</div><div class="ttdoc">Waits until set() is called, then set value is moved to caller. </div><div class="ttdef"><b>Definition:</b> value-latch.hpp:98</div></div>
 <div class="ttc" id="classutils_1_1ValueLatch_html_ad034ecec1af78bad9200a7f4c675dfbd"><div class="ttname"><a href="classutils_1_1ValueLatch.html#ad034ecec1af78bad9200a7f4c675dfbd">utils::ValueLatch::mCondition</a></div><div class="ttdeci">std::condition_variable mCondition</div><div class="ttdef"><b>Definition:</b> value-latch.hpp:71</div></div>
 <div class="ttc" id="common_2utils_2exception_8hpp_html"><div class="ttname"><a href="common_2utils_2exception_8hpp.html">exception.hpp</a></div><div class="ttdoc">Exceptions for the server. </div></div>
-<div class="ttc" id="classutils_1_1ValueLatch_html_a641f92b8c09a5696a0401ddb2a24cb99"><div class="ttname"><a href="classutils_1_1ValueLatch.html#a641f92b8c09a5696a0401ddb2a24cb99">utils::ValueLatch::set</a></div><div class="ttdeci">void set(const T &amp;value)</div><div class="ttdef"><b>Definition:</b> value-latch.hpp:76</div></div>
+<div class="ttc" id="classutils_1_1ValueLatch_html_a641f92b8c09a5696a0401ddb2a24cb99"><div class="ttname"><a href="classutils_1_1ValueLatch.html#a641f92b8c09a5696a0401ddb2a24cb99">utils::ValueLatch::set</a></div><div class="ttdeci">void set(const T &amp;value)</div><div class="ttdoc">Assigns value to kept variable and sets Latch. </div><div class="ttdef"><b>Definition:</b> value-latch.hpp:76</div></div>
 <div class="ttc" id="classutils_1_1ValueLatch_html"><div class="ttname"><a href="classutils_1_1ValueLatch.html">utils::ValueLatch</a></div><div class="ttdef"><b>Definition:</b> value-latch.hpp:37</div></div>
 <div class="ttc" id="namespaceutils_html"><div class="ttname"><a href="namespaceutils.html">utils</a></div><div class="ttdef"><b>Definition:</b> c-array.hpp:30</div></div>
 <div class="ttc" id="classutils_1_1ValueLatch_html_a204ee7672c45fa011619ac011d10a7d9"><div class="ttname"><a href="classutils_1_1ValueLatch.html#a204ee7672c45fa011619ac011d10a7d9">utils::ValueLatch::mMutex</a></div><div class="ttdeci">std::mutex mMutex</div><div class="ttdef"><b>Definition:</b> value-latch.hpp:70</div></div>
@@ -215,7 +215,7 @@ $(document).ready(function(){initNavTree('value-latch_8hpp_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_353a0b29ed1fe2c048306a7c13ef1174.html">common</a></li><li class="navelem"><a class="el" href="dir_5a86b6375f493b00e26a836fc97d2a7e.html">utils</a></li><li class="navelem"><a class="el" href="value-latch_8hpp.html">value-latch.hpp</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:35 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

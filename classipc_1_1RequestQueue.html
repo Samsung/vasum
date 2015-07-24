@@ -110,6 +110,9 @@ $(document).ready(function(){initNavTree('classipc_1_1RequestQueue.html','');});
 </div><!--header-->
 <div class="contents">
 
+<p>Class for managing a queue of Requests carrying any data.  
+ <a href="classipc_1_1RequestQueue.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="request-queue_8hpp_source.html">request-queue.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
@@ -130,13 +133,16 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a80b4b315b269e48568d49fa6b09eb2da"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1RequestQueue.html#a80b4b315b269e48568d49fa6b09eb2da">isEmpty</a> ()</td></tr>
 <tr class="separator:a80b4b315b269e48568d49fa6b09eb2da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a118ba1cab4768b8f4dbea5f71d210aee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1RequestQueue.html#a118ba1cab4768b8f4dbea5f71d210aee">pushBack</a> (const RequestIdType requestID, const std::shared_ptr&lt; void &gt; &amp;<a class="el" href="initctl_8cpp.html#abbacd5f95515b76e7df78ef953e29cae">data</a>=nullptr)</td></tr>
+<tr class="memdesc:a118ba1cab4768b8f4dbea5f71d210aee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push data to back of the queue.  <a href="#a118ba1cab4768b8f4dbea5f71d210aee">More...</a><br /></td></tr>
 <tr class="separator:a118ba1cab4768b8f4dbea5f71d210aee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1ce4364a96e28427ac278126a7c7ba35"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1RequestQueue.html#a1ce4364a96e28427ac278126a7c7ba35">pushFront</a> (const RequestIdType requestID, const std::shared_ptr&lt; void &gt; &amp;<a class="el" href="initctl_8cpp.html#abbacd5f95515b76e7df78ef953e29cae">data</a>=nullptr)</td></tr>
+<tr class="memdesc:a1ce4364a96e28427ac278126a7c7ba35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push data to back of the queue.  <a href="#a1ce4364a96e28427ac278126a7c7ba35">More...</a><br /></td></tr>
 <tr class="separator:a1ce4364a96e28427ac278126a7c7ba35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af325aa417e7ecd11ad85a23c87934972"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structipc_1_1RequestQueue_1_1Request.html">Request</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1RequestQueue.html#af325aa417e7ecd11ad85a23c87934972">pop</a> ()</td></tr>
 <tr class="separator:af325aa417e7ecd11ad85a23c87934972"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a703fa6d56613ed29f295c9077e97ed4e"><td class="memTemplParams" colspan="2">template&lt;typename Predicate &gt; </td></tr>
 <tr class="memitem:a703fa6d56613ed29f295c9077e97ed4e"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classipc_1_1RequestQueue.html#a703fa6d56613ed29f295c9077e97ed4e">removeIf</a> (Predicate predicate)</td></tr>
+<tr class="memdesc:a703fa6d56613ed29f295c9077e97ed4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove elements from the queue when the predicate returns true.  <a href="#a703fa6d56613ed29f295c9077e97ed4e">More...</a><br /></td></tr>
 <tr class="separator:a703fa6d56613ed29f295c9077e97ed4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-types"></a>
@@ -157,7 +163,7 @@ Private Attributes</h2></td></tr>
 <div class="textblock"><h3>template&lt;typename RequestIdType&gt;<br />
 class ipc::RequestQueue&lt; RequestIdType &gt;</h3>
 
-<p>Class for managing a queue of Requests carrying any data </p>
+<p>Class for managing a queue of Requests carrying any data. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a class="anchor" id="a347a0579c0b5e24551ae89888826228a"></a>
 <div class="memitem">
@@ -339,7 +345,8 @@ template&lt;typename RequestIdType&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Push data to back of the queue</p>
+
+<p>Push data to back of the queue. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">requestID</td><td>request type </td></tr>
@@ -375,7 +382,8 @@ template&lt;typename RequestIdType&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Push data to back of the queue</p>
+
+<p>Push data to back of the queue. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">requestID</td><td>request type </td></tr>
@@ -403,7 +411,8 @@ template&lt;typename Predicate &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Remove elements from the queue when the predicate returns true</p>
+
+<p>Remove elements from the queue when the predicate returns true. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">predicate</td><td>condition </td></tr>
@@ -491,7 +500,7 @@ template&lt;typename RequestIdType&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceipc.html">ipc</a></li><li class="navelem"><a class="el" href="classipc_1_1RequestQueue.html">RequestQueue</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

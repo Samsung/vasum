@@ -111,6 +111,9 @@ $(document).ready(function(){initNavTree('classipc_1_1Socket.html','');});
 </div><!--header-->
 <div class="contents">
 
+<p>This class wraps all operations possible to do with a socket.  
+ <a href="classipc_1_1Socket.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="socket_8hpp_source.html">socket.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
@@ -121,6 +124,7 @@ Public Types</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a5450539d0083326c965365a344686ed4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Socket.html#a5450539d0083326c965365a344686ed4">Socket</a> (int socketFD=-1)</td></tr>
+<tr class="memdesc:a5450539d0083326c965365a344686ed4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a5450539d0083326c965365a344686ed4">More...</a><br /></td></tr>
 <tr class="separator:a5450539d0083326c965365a344686ed4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a74962d73339a39cd83ad6f5de47003a3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Socket.html#a74962d73339a39cd83ad6f5de47003a3">Socket</a> (<a class="el" href="classipc_1_1Socket.html">Socket</a> &amp;&amp;socket) noexcept</td></tr>
 <tr class="separator:a74962d73339a39cd83ad6f5de47003a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -135,10 +139,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6e377daa4aac6ef3f634b40f2d78d1b5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Socket.html#a6e377daa4aac6ef3f634b40f2d78d1b5">getFD</a> () const </td></tr>
 <tr class="separator:a6e377daa4aac6ef3f634b40f2d78d1b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac620ec1db96da0c99065c4a13d22f113"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Socket.html#ac620ec1db96da0c99065c4a13d22f113">write</a> (const void *bufferPtr, const size_t size) const </td></tr>
+<tr class="memdesc:ac620ec1db96da0c99065c4a13d22f113"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data using the file descriptor.  <a href="#ac620ec1db96da0c99065c4a13d22f113">More...</a><br /></td></tr>
 <tr class="separator:ac620ec1db96da0c99065c4a13d22f113"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a19eb08bd7f04ee9d46b7c7066b9d71c8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Socket.html#a19eb08bd7f04ee9d46b7c7066b9d71c8">read</a> (void *bufferPtr, const size_t size) const </td></tr>
+<tr class="memdesc:a19eb08bd7f04ee9d46b7c7066b9d71c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a value of the given type.  <a href="#a19eb08bd7f04ee9d46b7c7066b9d71c8">More...</a><br /></td></tr>
 <tr class="separator:a19eb08bd7f04ee9d46b7c7066b9d71c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a38b2074ec293880cac34fdc220296257"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classipc_1_1Socket.html">Socket</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Socket.html#a38b2074ec293880cac34fdc220296257">accept</a> ()</td></tr>
+<tr class="memdesc:a38b2074ec293880cac34fdc220296257"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts connection.  <a href="#a38b2074ec293880cac34fdc220296257">More...</a><br /></td></tr>
 <tr class="separator:a38b2074ec293880cac34fdc220296257"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa369266bf3c06bdf81fa31198d020c0d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classipc_1_1Socket.html#ad8337a1ede76691849a10c871d0bf15d">Socket::Guard</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Socket.html#aa369266bf3c06bdf81fa31198d020c0d">getGuard</a> () const </td></tr>
 <tr class="separator:aa369266bf3c06bdf81fa31198d020c0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -146,8 +153,10 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:ae5878256f134f9649369d15609260873"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classipc_1_1Socket.html">Socket</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Socket.html#ae5878256f134f9649369d15609260873">createSocket</a> (const std::string &amp;path)</td></tr>
+<tr class="memdesc:ae5878256f134f9649369d15609260873"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepares socket for accepting connections.  <a href="#ae5878256f134f9649369d15609260873">More...</a><br /></td></tr>
 <tr class="separator:ae5878256f134f9649369d15609260873"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:addeb408f61e5743026ee569832518269"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classipc_1_1Socket.html">Socket</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Socket.html#addeb408f61e5743026ee569832518269">connectSocket</a> (const std::string &amp;path)</td></tr>
+<tr class="memdesc:addeb408f61e5743026ee569832518269"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connects to a socket.  <a href="#addeb408f61e5743026ee569832518269">More...</a><br /></td></tr>
 <tr class="separator:addeb408f61e5743026ee569832518269"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-methods"></a>
@@ -165,7 +174,7 @@ Private Attributes</h2></td></tr>
 <tr class="separator:afb5f1fa30c32ba73affbcc2bcd12d948"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>This class wraps all operations possible to do with a socket.</p>
+<div class="textblock"><p>This class wraps all operations possible to do with a socket. </p>
 <p>It has operations both for client and server application. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a class="anchor" id="ad8337a1ede76691849a10c871d0bf15d"></a>
@@ -202,7 +211,9 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Default constructor. If socketFD is passed then it's passed by the <a class="el" href="classipc_1_1Socket.html">Socket</a></p>
+
+<p>Default constructor. </p>
+<p>If socketFD is passed then it's passed by the <a class="el" href="classipc_1_1Socket.html" title="This class wraps all operations possible to do with a socket. ">Socket</a></p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">socketFD</td><td>socket obtained outside the class. </td></tr>
@@ -296,7 +307,9 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Accepts connection. Used by a server application. Blocking, called by a server. </p>
+
+<p>Accepts connection. </p>
+<p>Used by a server application. Blocking, called by a server. </p>
 
 </div>
 </div>
@@ -321,7 +334,9 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Connects to a socket. Called as a client.</p>
+
+<p>Connects to a socket. </p>
+<p>Called as a client.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">path</td><td>path to the socket </td></tr>
@@ -353,7 +368,9 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Prepares socket for accepting connections. Called by a server.</p>
+
+<p>Prepares socket for accepting connections. </p>
+<p>Called by a server.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">path</td><td>path to the socket </td></tr>
@@ -514,7 +531,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Reads a value of the given type.</p>
+
+<p>Reads a value of the given type. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">bufferPtr</td><td>buffer with the data </td></tr>
@@ -548,7 +566,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Write data using the file descriptor</p>
+
+<p>Write data using the file descriptor. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">bufferPtr</td><td>buffer with the data </td></tr>
@@ -611,7 +630,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceipc.html">ipc</a></li><li class="navelem"><a class="el" href="classipc_1_1Socket.html">Socket</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

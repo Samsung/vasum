@@ -116,6 +116,7 @@ $(document).ready(function(){initNavTree('classconfig_1_1KVStore.html','');});
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1KVStore_1_1Transaction.html">Transaction</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A guard struct for thread synchronization and transaction management.  <a href="classconfig_1_1KVStore_1_1Transaction.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -129,20 +130,25 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0b3049a5247cc92bf700b28f5a75b87f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classconfig_1_1KVStore.html">KVStore</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1KVStore.html#a0b3049a5247cc92bf700b28f5a75b87f">operator=</a> (const <a class="el" href="classconfig_1_1KVStore.html">KVStore</a> &amp;)=delete</td></tr>
 <tr class="separator:a0b3049a5247cc92bf700b28f5a75b87f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4eaaff9d538f6ff39797b6b41710460c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1KVStore.html#a4eaaff9d538f6ff39797b6b41710460c">clear</a> ()</td></tr>
+<tr class="memdesc:a4eaaff9d538f6ff39797b6b41710460c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears all the stored data.  <a href="#a4eaaff9d538f6ff39797b6b41710460c">More...</a><br /></td></tr>
 <tr class="separator:a4eaaff9d538f6ff39797b6b41710460c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3bc6b9ae3939eb502b11f82468535cf7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1KVStore.html#a3bc6b9ae3939eb502b11f82468535cf7">isEmpty</a> ()</td></tr>
 <tr class="separator:a3bc6b9ae3939eb502b11f82468535cf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26948d7f5e50003b6e54519c8a33714f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1KVStore.html#a26948d7f5e50003b6e54519c8a33714f">exists</a> (const std::string &amp;<a class="el" href="namespaceconfig.html#ad884dcb9fb7142ffe5b78c5bd6382d94">key</a>)</td></tr>
 <tr class="separator:a26948d7f5e50003b6e54519c8a33714f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89ad728417df20fe6e35b2bf112ee3dc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1KVStore.html#a89ad728417df20fe6e35b2bf112ee3dc">remove</a> (const std::string &amp;<a class="el" href="namespaceconfig.html#ad884dcb9fb7142ffe5b78c5bd6382d94">key</a>)</td></tr>
+<tr class="memdesc:a89ad728417df20fe6e35b2bf112ee3dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes values corresponding to the passed key.  <a href="#a89ad728417df20fe6e35b2bf112ee3dc">More...</a><br /></td></tr>
 <tr class="separator:a89ad728417df20fe6e35b2bf112ee3dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2196b098f0ce638ef499f785055345c8"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a2196b098f0ce638ef499f785055345c8"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1KVStore.html#a2196b098f0ce638ef499f785055345c8">set</a> (const std::string &amp;<a class="el" href="namespaceconfig.html#ad884dcb9fb7142ffe5b78c5bd6382d94">key</a>, const T &amp;value)</td></tr>
+<tr class="memdesc:a2196b098f0ce638ef499f785055345c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores a single value corresponding to the passed key.  <a href="#a2196b098f0ce638ef499f785055345c8">More...</a><br /></td></tr>
 <tr class="separator:a2196b098f0ce638ef499f785055345c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea37a99145b2cecfc2ddca91ddf8d9df"><td class="memTemplParams" colspan="2">template&lt;typename T  = std::string&gt; </td></tr>
 <tr class="memitem:aea37a99145b2cecfc2ddca91ddf8d9df"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1KVStore.html#aea37a99145b2cecfc2ddca91ddf8d9df">get</a> (const std::string &amp;<a class="el" href="namespaceconfig.html#ad884dcb9fb7142ffe5b78c5bd6382d94">key</a>)</td></tr>
+<tr class="memdesc:aea37a99145b2cecfc2ddca91ddf8d9df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the value corresponding to the key.  <a href="#aea37a99145b2cecfc2ddca91ddf8d9df">More...</a><br /></td></tr>
 <tr class="separator:aea37a99145b2cecfc2ddca91ddf8d9df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc40ba22d4b59e967a3a605dc6305f12"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1KVStore.html#acc40ba22d4b59e967a3a605dc6305f12">getKeys</a> ()</td></tr>
+<tr class="memdesc:acc40ba22d4b59e967a3a605dc6305f12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns all stored keys.  <a href="#acc40ba22d4b59e967a3a605dc6305f12">More...</a><br /></td></tr>
 <tr class="separator:acc40ba22d4b59e967a3a605dc6305f12"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-types"></a>
@@ -312,7 +318,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Clears all the stored data </p>
+
+<p>Clears all the stored data. </p>
 
 </div>
 </div>
@@ -385,7 +392,9 @@ template&lt;typename T  = std::string&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Gets the value corresponding to the key. Uses stringstreams to parse.</p>
+
+<p>Gets the value corresponding to the key. </p>
+<p>Uses stringstreams to parse.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">key</td><td>string key of the value </td></tr>
@@ -554,6 +563,7 @@ template&lt;typename T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
 <p>Returns all stored keys. </p>
 
 </div>
@@ -634,7 +644,9 @@ template&lt;typename T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Removes values corresponding to the passed key. Many values may correspond to one key, so many values may need to be deleted</p>
+
+<p>Removes values corresponding to the passed key. </p>
+<p>Many values may correspond to one key, so many values may need to be deleted</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">key</td><td>string regexp of the stored values </td></tr>
@@ -677,7 +689,8 @@ template&lt;typename T &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Stores a single value corresponding to the passed key</p>
+
+<p>Stores a single value corresponding to the passed key. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">key</td><td>string key of the value </td></tr>
@@ -1137,7 +1150,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceconfig.html">config</a></li><li class="navelem"><a class="el" href="classconfig_1_1KVStore.html">KVStore</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

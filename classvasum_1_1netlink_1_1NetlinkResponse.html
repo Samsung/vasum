@@ -110,36 +110,51 @@ $(document).ready(function(){initNavTree('classvasum_1_1netlink_1_1NetlinkRespon
 </div><!--header-->
 <div class="contents">
 
+<p><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html" title="NetlinkResponse is used to read netlink messages. ">NetlinkResponse</a> is used to read netlink messages.  
+ <a href="classvasum_1_1netlink_1_1NetlinkResponse.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="netlink-message_8hpp_source.html">netlink-message.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a5d7d53bbac6e2ba7ea0dc4108a727033"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#a5d7d53bbac6e2ba7ea0dc4108a727033">hasMessage</a> () const </td></tr>
+<tr class="memdesc:a5d7d53bbac6e2ba7ea0dc4108a727033"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if theres is next message in netlink response.  <a href="#a5d7d53bbac6e2ba7ea0dc4108a727033">More...</a><br /></td></tr>
 <tr class="separator:a5d7d53bbac6e2ba7ea0dc4108a727033"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acbd981fe999bb0f9ef8f8fa7cc4ca88e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#acbd981fe999bb0f9ef8f8fa7cc4ca88e">fetchNextMessage</a> ()</td></tr>
+<tr class="memdesc:acbd981fe999bb0f9ef8f8fa7cc4ca88e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch next message.  <a href="#acbd981fe999bb0f9ef8f8fa7cc4ca88e">More...</a><br /></td></tr>
 <tr class="separator:acbd981fe999bb0f9ef8f8fa7cc4ca88e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2535dd9889041855035d1c7dbfde6528"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#a2535dd9889041855035d1c7dbfde6528">getMessageType</a> () const </td></tr>
+<tr class="memdesc:a2535dd9889041855035d1c7dbfde6528"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get message type.  <a href="#a2535dd9889041855035d1c7dbfde6528">More...</a><br /></td></tr>
 <tr class="separator:a2535dd9889041855035d1c7dbfde6528"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a701122865199b72608d3a639a6f3fa97"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#a701122865199b72608d3a639a6f3fa97">hasAttribute</a> () const </td></tr>
+<tr class="memdesc:a701122865199b72608d3a639a6f3fa97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if there is any attribute in message.  <a href="#a701122865199b72608d3a639a6f3fa97">More...</a><br /></td></tr>
 <tr class="separator:a701122865199b72608d3a639a6f3fa97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8cfd53ba844b57c3c404640ac986627a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#a8cfd53ba844b57c3c404640ac986627a">isNestedAttribute</a> () const </td></tr>
+<tr class="memdesc:a8cfd53ba844b57c3c404640ac986627a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if current attribute is nested.  <a href="#a8cfd53ba844b57c3c404640ac986627a">More...</a><br /></td></tr>
 <tr class="separator:a8cfd53ba844b57c3c404640ac986627a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3f6cdf095f9c80159494244b06e061a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#ac3f6cdf095f9c80159494244b06e061a">skipAttribute</a> ()</td></tr>
+<tr class="memdesc:ac3f6cdf095f9c80159494244b06e061a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Skip attribute.  <a href="#ac3f6cdf095f9c80159494244b06e061a">More...</a><br /></td></tr>
 <tr class="separator:ac3f6cdf095f9c80159494244b06e061a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2eaa21957f7b9e8a79ec64990df48e8d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html">NetlinkResponse</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#a2eaa21957f7b9e8a79ec64990df48e8d">openNested</a> (int ifla)</td></tr>
+<tr class="memdesc:a2eaa21957f7b9e8a79ec64990df48e8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start reading nested attribute.  <a href="#a2eaa21957f7b9e8a79ec64990df48e8d">More...</a><br /></td></tr>
 <tr class="separator:a2eaa21957f7b9e8a79ec64990df48e8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac5844fc3355bac2a2677c9bed443ed9a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html">NetlinkResponse</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#ac5844fc3355bac2a2677c9bed443ed9a">closeNested</a> ()</td></tr>
+<tr class="memdesc:ac5844fc3355bac2a2677c9bed443ed9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">End reading nested attribute.  <a href="#ac5844fc3355bac2a2677c9bed443ed9a">More...</a><br /></td></tr>
 <tr class="separator:ac5844fc3355bac2a2677c9bed443ed9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5be7d41f161bae4cc584fc11b728b17"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#aa5be7d41f161bae4cc584fc11b728b17">getAttributeType</a> () const </td></tr>
+<tr class="memdesc:aa5be7d41f161bae4cc584fc11b728b17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get attributie type.  <a href="#aa5be7d41f161bae4cc584fc11b728b17">More...</a><br /></td></tr>
 <tr class="separator:aa5be7d41f161bae4cc584fc11b728b17"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52bdcd6ff54f7b245fdf8356c0fca9e7"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:a52bdcd6ff54f7b245fdf8356c0fca9e7"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html">NetlinkResponse</a> &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#a52bdcd6ff54f7b245fdf8356c0fca9e7">fetch</a> (T &amp;value)</td></tr>
+<tr class="memdesc:a52bdcd6ff54f7b245fdf8356c0fca9e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch data of type T.  <a href="#a52bdcd6ff54f7b245fdf8356c0fca9e7">More...</a><br /></td></tr>
 <tr class="separator:a52bdcd6ff54f7b245fdf8356c0fca9e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e62baea8683fca7790aaf724224028d"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:a6e62baea8683fca7790aaf724224028d"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html">NetlinkResponse</a> &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#a6e62baea8683fca7790aaf724224028d">skip</a> ()</td></tr>
+<tr class="memdesc:a6e62baea8683fca7790aaf724224028d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Skip data of type T.  <a href="#a6e62baea8683fca7790aaf724224028d">More...</a><br /></td></tr>
 <tr class="separator:a6e62baea8683fca7790aaf724224028d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader"></div></td></tr>
 <tr class="memitem:ad42fb92fa42ff980d67194aec1d8e0b6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html">NetlinkResponse</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#ad42fb92fa42ff980d67194aec1d8e0b6">fetch</a> (int ifla, std::string &amp;value, int maxSize=-1)</td></tr>
+<tr class="memdesc:ad42fb92fa42ff980d67194aec1d8e0b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch attribute.  <a href="#ad42fb92fa42ff980d67194aec1d8e0b6">More...</a><br /></td></tr>
 <tr class="separator:ad42fb92fa42ff980d67194aec1d8e0b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab09c2c3140d7bfd85af442bb02321846"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:ab09c2c3140d7bfd85af442bb02321846"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html">NetlinkResponse</a> &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#ab09c2c3140d7bfd85af442bb02321846">fetch</a> (int ifla, T &amp;value)</td></tr>
@@ -178,10 +193,11 @@ Private Attributes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
 Friends</h2></td></tr>
 <tr class="memitem:ab95d4055d1b891e8cf69134e211b7129"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html">NetlinkResponse</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html#ab95d4055d1b891e8cf69134e211b7129">send</a> (const <a class="el" href="classvasum_1_1netlink_1_1NetlinkMessage.html">NetlinkMessage</a> &amp;msg, int pid)</td></tr>
+<tr class="memdesc:ab95d4055d1b891e8cf69134e211b7129"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send netlink message.  <a href="#ab95d4055d1b891e8cf69134e211b7129">More...</a><br /></td></tr>
 <tr class="separator:ab95d4055d1b891e8cf69134e211b7129"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html">NetlinkResponse</a> is used to read netlink messages </p>
+<div class="textblock"><p><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html" title="NetlinkResponse is used to read netlink messages. ">NetlinkResponse</a> is used to read netlink messages. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="aaaf887b802609c2b2224c4bcdd681a0b"></a>
 <div class="memitem">
@@ -220,7 +236,8 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>End reading nested attribute </p>
+
+<p>End reading nested attribute. </p>
 
 </div>
 </div>
@@ -253,7 +270,8 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Fetch attribute </p>
+
+<p>Fetch attribute. </p>
 
 </div>
 </div>
@@ -300,7 +318,8 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Fetch data of type T </p>
+
+<p>Fetch data of type T. </p>
 
 </div>
 </div>
@@ -390,7 +409,8 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Fetch next message </p>
+
+<p>Fetch next message. </p>
 
 </div>
 </div>
@@ -464,7 +484,8 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get attributie type </p>
+
+<p>Get attributie type. </p>
 
 </div>
 </div>
@@ -503,7 +524,8 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get message type </p>
+
+<p>Get message type. </p>
 
 </div>
 </div>
@@ -519,7 +541,8 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Check if there is any attribute in message </p>
+
+<p>Check if there is any attribute in message. </p>
 
 </div>
 </div>
@@ -535,7 +558,8 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Check if theres is next message in netlink response </p>
+
+<p>Check if theres is next message in netlink response. </p>
 
 </div>
 </div>
@@ -551,7 +575,8 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Check if current attribute is nested </p>
+
+<p>Check if current attribute is nested. </p>
 
 </div>
 </div>
@@ -568,7 +593,8 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Start reading nested attribute </p>
+
+<p>Start reading nested attribute. </p>
 
 </div>
 </div>
@@ -633,7 +659,8 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Skip data of type T </p>
+
+<p>Skip data of type T. </p>
 
 </div>
 </div>
@@ -649,7 +676,8 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Skip attribute </p>
+
+<p>Skip attribute. </p>
 
 </div>
 </div>
@@ -685,10 +713,11 @@ template&lt;class T &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Send netlink message</p>
+
+<p>Send netlink message. </p>
 <p>It is not thread safe </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">msg</td><td><a class="el" href="classvasum_1_1netlink_1_1Netlink.html">Netlink</a> message </td></tr>
+    <tr><td class="paramname">msg</td><td><a class="el" href="classvasum_1_1netlink_1_1Netlink.html" title="Netlink class is responsible for communicating with kernel through netlink interface. ">Netlink</a> message </td></tr>
     <tr><td class="paramname">pid</td><td>Process id which describes network namespace </td></tr>
   </table>
   </dd>
@@ -788,7 +817,7 @@ template&lt;class T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacevasum.html">vasum</a></li><li class="navelem"><a class="el" href="namespacevasum_1_1netlink.html">netlink</a></li><li class="navelem"><a class="el" href="classvasum_1_1netlink_1_1NetlinkResponse.html">NetlinkResponse</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

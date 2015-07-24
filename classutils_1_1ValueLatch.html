@@ -113,12 +113,16 @@ $(document).ready(function(){initNavTree('classutils_1_1ValueLatch.html','');});
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a641f92b8c09a5696a0401ddb2a24cb99"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1ValueLatch.html#a641f92b8c09a5696a0401ddb2a24cb99">set</a> (const T &amp;value)</td></tr>
+<tr class="memdesc:a641f92b8c09a5696a0401ddb2a24cb99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assigns value to kept variable and sets <a class="el" href="classutils_1_1Latch.html" title="A synchronization aid that allows one thread to wait until an operation being performed in other thre...">Latch</a>.  <a href="#a641f92b8c09a5696a0401ddb2a24cb99">More...</a><br /></td></tr>
 <tr class="separator:a641f92b8c09a5696a0401ddb2a24cb99"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a24d1cac3314a7382607aeff13a0f7a9a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1ValueLatch.html#a24d1cac3314a7382607aeff13a0f7a9a">set</a> (T &amp;&amp;value)</td></tr>
+<tr class="memdesc:a24d1cac3314a7382607aeff13a0f7a9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assigns value to kept variable and sets <a class="el" href="classutils_1_1Latch.html" title="A synchronization aid that allows one thread to wait until an operation being performed in other thre...">Latch</a>.  <a href="#a24d1cac3314a7382607aeff13a0f7a9a">More...</a><br /></td></tr>
 <tr class="separator:a24d1cac3314a7382607aeff13a0f7a9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e5231a03919fae507e0a4932ce303bb"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1ValueLatch.html#a9e5231a03919fae507e0a4932ce303bb">get</a> ()</td></tr>
+<tr class="memdesc:a9e5231a03919fae507e0a4932ce303bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Waits until <a class="el" href="classutils_1_1ValueLatch.html#a641f92b8c09a5696a0401ddb2a24cb99" title="Assigns value to kept variable and sets Latch. ">set()</a> is called, then set value is moved to caller.  <a href="#a9e5231a03919fae507e0a4932ce303bb">More...</a><br /></td></tr>
 <tr class="separator:a9e5231a03919fae507e0a4932ce303bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4421a2c5f5c80a49c35ac2f9e6ceae0c"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1ValueLatch.html#a4421a2c5f5c80a49c35ac2f9e6ceae0c">get</a> (const unsigned int timeoutMs)</td></tr>
+<tr class="memdesc:a4421a2c5f5c80a49c35ac2f9e6ceae0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Waits until <a class="el" href="classutils_1_1ValueLatch.html#a641f92b8c09a5696a0401ddb2a24cb99" title="Assigns value to kept variable and sets Latch. ">set()</a> is called, or until timeout occurs.  <a href="#a4421a2c5f5c80a49c35ac2f9e6ceae0c">More...</a><br /></td></tr>
 <tr class="separator:a4421a2c5f5c80a49c35ac2f9e6ceae0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
@@ -145,8 +149,9 @@ template&lt;typename T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Waits until <a class="el" href="classutils_1_1ValueLatch.html#a641f92b8c09a5696a0401ddb2a24cb99">set()</a> is called, then set value is moved to caller.</p>
-<dl class="section return"><dt>Returns</dt><dd>Value provided by <a class="el" href="classutils_1_1ValueLatch.html#a641f92b8c09a5696a0401ddb2a24cb99">set()</a>. </dd></dl>
+
+<p>Waits until <a class="el" href="classutils_1_1ValueLatch.html#a641f92b8c09a5696a0401ddb2a24cb99" title="Assigns value to kept variable and sets Latch. ">set()</a> is called, then set value is moved to caller. </p>
+<dl class="section return"><dt>Returns</dt><dd>Value provided by <a class="el" href="classutils_1_1ValueLatch.html#a641f92b8c09a5696a0401ddb2a24cb99" title="Assigns value to kept variable and sets Latch. ">set()</a>. </dd></dl>
 
 </div>
 </div>
@@ -165,14 +170,16 @@ template&lt;typename T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Waits until <a class="el" href="classutils_1_1ValueLatch.html#a641f92b8c09a5696a0401ddb2a24cb99">set()</a> is called, or until timeout occurs. Then, set value is moved to caller.</p>
+
+<p>Waits until <a class="el" href="classutils_1_1ValueLatch.html#a641f92b8c09a5696a0401ddb2a24cb99" title="Assigns value to kept variable and sets Latch. ">set()</a> is called, or until timeout occurs. </p>
+<p>Then, set value is moved to caller.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">timeoutMs</td><td>Maximum time to wait for value to be set.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Value provided by <a class="el" href="classutils_1_1ValueLatch.html#a641f92b8c09a5696a0401ddb2a24cb99">set()</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Value provided by <a class="el" href="classutils_1_1ValueLatch.html#a641f92b8c09a5696a0401ddb2a24cb99" title="Assigns value to kept variable and sets Latch. ">set()</a>. </dd></dl>
 
 </div>
 </div>
@@ -191,7 +198,8 @@ template&lt;typename T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Assigns value to kept variable and sets <a class="el" href="classutils_1_1Latch.html">Latch</a>.</p>
+
+<p>Assigns value to kept variable and sets <a class="el" href="classutils_1_1Latch.html" title="A synchronization aid that allows one thread to wait until an operation being performed in other thre...">Latch</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">value</td><td>Value to set. </td></tr>
@@ -216,7 +224,8 @@ template&lt;typename T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Assigns value to kept variable and sets <a class="el" href="classutils_1_1Latch.html">Latch</a>.</p>
+
+<p>Assigns value to kept variable and sets <a class="el" href="classutils_1_1Latch.html" title="A synchronization aid that allows one thread to wait until an operation being performed in other thre...">Latch</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">value</td><td>Value to set. </td></tr>
@@ -303,7 +312,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceutils.html">utils</a></li><li class="navelem"><a class="el" href="classutils_1_1ValueLatch.html">ValueLatch</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

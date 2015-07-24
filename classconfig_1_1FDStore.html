@@ -113,14 +113,17 @@ $(document).ready(function(){initNavTree('classconfig_1_1FDStore.html','');});
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af981d027372da0664f672b06bf34e61d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1FDStore.html#af981d027372da0664f672b06bf34e61d">FDStore</a> (int fd=-1)</td></tr>
+<tr class="memdesc:af981d027372da0664f672b06bf34e61d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#af981d027372da0664f672b06bf34e61d">More...</a><br /></td></tr>
 <tr class="separator:af981d027372da0664f672b06bf34e61d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c53627b4fe5d08a64e0f6b9f8ea6202"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1FDStore.html#a1c53627b4fe5d08a64e0f6b9f8ea6202">FDStore</a> (const <a class="el" href="classconfig_1_1FDStore.html">FDStore</a> &amp;store)</td></tr>
 <tr class="separator:a1c53627b4fe5d08a64e0f6b9f8ea6202"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a78b7ba724c4a6467a76065a500f55672"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1FDStore.html#a78b7ba724c4a6467a76065a500f55672">~FDStore</a> ()</td></tr>
 <tr class="separator:a78b7ba724c4a6467a76065a500f55672"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad4de55be3031fe0a4d1830f9bb0aa55"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1FDStore.html#aad4de55be3031fe0a4d1830f9bb0aa55">write</a> (const void *bufferPtr, const size_t size, const unsigned int timeoutMS=maxTimeout)</td></tr>
+<tr class="memdesc:aad4de55be3031fe0a4d1830f9bb0aa55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data using the file descriptor.  <a href="#aad4de55be3031fe0a4d1830f9bb0aa55">More...</a><br /></td></tr>
 <tr class="separator:aad4de55be3031fe0a4d1830f9bb0aa55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aacedaf6c1f346574bfd03ea150fc163a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1FDStore.html#aacedaf6c1f346574bfd03ea150fc163a">read</a> (void *bufferPtr, const size_t size, const unsigned int timeoutMS=maxTimeout)</td></tr>
+<tr class="memdesc:aacedaf6c1f346574bfd03ea150fc163a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a value of the given type.  <a href="#aacedaf6c1f346574bfd03ea150fc163a">More...</a><br /></td></tr>
 <tr class="separator:aacedaf6c1f346574bfd03ea150fc163a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba437bde3a5f76da06d0c7796724e92e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1FDStore.html#aba437bde3a5f76da06d0c7796724e92e">sendFD</a> (int fd, const unsigned int timeoutMS=maxTimeout)</td></tr>
 <tr class="separator:aba437bde3a5f76da06d0c7796724e92e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -146,7 +149,9 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Constructor. One can pass any kind of file descriptor. Serialization is NOT written for network purposes, rather local communication.</p>
+
+<p>Constructor. </p>
+<p>One can pass any kind of file descriptor. Serialization is NOT written for network purposes, rather local communication.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">fd</td><td>file descriptor </td></tr>
@@ -217,7 +222,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Reads a value of the given type.</p>
+
+<p>Reads a value of the given type. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">bufferPtr</td><td>buffer with the data </td></tr>
@@ -300,7 +306,8 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Write data using the file descriptor</p>
+
+<p>Write data using the file descriptor. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">bufferPtr</td><td>buffer with the data </td></tr>
@@ -344,7 +351,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceconfig.html">config</a></li><li class="navelem"><a class="el" href="classconfig_1_1FDStore.html">FDStore</a></li>
-    <li class="footer">Generated on Thu Jul 23 2015 18:31:36 for Vasum by
+    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>
