@@ -190,12 +190,12 @@ typedef VsmString* VsmArrayString;
  * Completion status of libvasum-client's functions
  */
 typedef enum {
-    VSMCLIENT_CUSTOM_ERROR,     ///< User specified error
-    VSMCLIENT_IO_ERROR,         ///< Input/Output error
-    VSMCLIENT_OPERATION_FAILED, ///< Operation failed
-    VSMCLIENT_INVALID_ARGUMENT, ///< Invalid argument
-    VSMCLIENT_OTHER_ERROR,      ///< Other error
-    VSMCLIENT_SUCCESS           ///< Success
+    VSMCLIENT_CUSTOM_ERROR,     /**< User specified error */
+    VSMCLIENT_IO_ERROR,         /**< Input/Output error */
+    VSMCLIENT_OPERATION_FAILED, /**< Operation failed */
+    VSMCLIENT_INVALID_ARGUMENT, /**< Invalid argument */
+    VSMCLIENT_OTHER_ERROR,      /**< Other error */
+    VSMCLIENT_SUCCESS           /**< Success */
 } VsmStatus;
 
 /**
