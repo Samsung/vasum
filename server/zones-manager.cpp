@@ -173,6 +173,11 @@ ZonesManager::ZonesManager(ipc::epoll::EventPoll& eventPoll, const std::string& 
                                         configPath,
                                         mDynamicConfig,
                                         getVasumDbPrefix());
+
+    if (mConfig.inputConfig.enabled) {
+        LOGI("Registering input monitor [" << mConfig.inputConfig.device.c_str() << "]");
+        mSwitchingSequenceMonitor.reset(new InputMonitor(eventPoll, mConfig.inputConfig, this));
+    }
 }
 
 ZonesManager::~ZonesManager()
@@ -207,11 +212,8 @@ void ZonesManager::start()
     LOGD("ZonesManager object instantiated");
 
     if (mConfig.inputConfig.enabled) {
-        LOGI("Registering input monitor [" << mConfig.inputConfig.device.c_str() << "]");
-        mSwitchingSequenceMonitor.reset(
-            new InputMonitor(mConfig.inputConfig,
-                             std::bind(&ZonesManager::switchingSequenceMonitorNotify,
-                                       this)));
+        LOGI("Starting input monitor ");
+        mSwitchingSequenceMonitor->start();
     }
 
     // After everything's initialized start to respond to clients' requests
@@ -238,6 +240,10 @@ void ZonesManager::stop(bool wait)
     // wait for all tasks to complete
     mWorker.reset();
     mHostIPCConnection.stop(wait);
+    if (mConfig.inputConfig.enabled) {
+        LOGI("Stopping input monitor ");
+        mSwitchingSequenceMonitor->stop();
+    }
     mIsRunning = false;
 }
 

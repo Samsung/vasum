@@ -29,10 +29,12 @@
 #include "input-monitor.hpp"
 #include "input-monitor-config.hpp"
 #include "exception.hpp"
+#include "zones-manager.hpp"
 
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
 #include "utils/scoped-dir.hpp"
+#include "ipc/epoll/thread-dispatcher.hpp"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -43,7 +45,6 @@
 #include <chrono>
 #include <memory>
 #include <string>
-
 
 using namespace vasum;
 using namespace utils;
@@ -58,16 +59,24 @@ const int EVENT_CODE = 139;
 const int EVENT_BUTTON_RELEASED = 0;
 const int EVENT_BUTTON_PRESSED = 1;
 
-const int SINGLE_EVENT_TIMEOUT = 1000;
+const int EVENT_TIMEOUT = 1000;
+
+const std::string CONFIG_DIR = VSM_TEST_CONFIG_INSTALL_DIR;
+const std::string TEST_CONFIG_PATH = CONFIG_DIR + "/test-daemon.conf";
+const std::string SIMPLE_TEMPLATE = "console-ipc";
+const std::string ZONES_PATH = "/tmp/ut-zones"; // the same as in daemon.conf
 
 struct Fixture {
     utils::ScopedGlibLoop mLoop;
     ScopedDir mTestPathGuard;
+    ScopedDir mZonesPathGuard;
     InputConfig inputConfig;
     struct input_event ie;
+    ipc::epoll::ThreadDispatcher dispatcher;
 
     Fixture()
         : mTestPathGuard(TEST_DIR)
+        , mZonesPathGuard(ZONES_PATH)
     {
         inputConfig.numberOfEvents = 2;
         inputConfig.device = TEST_INPUT_DEVICE;
@@ -84,46 +93,65 @@ struct Fixture {
 
         BOOST_CHECK(::mkfifo(TEST_INPUT_DEVICE.c_str(), S_IWUSR | S_IRUSR) >= 0);
     }
+
+    ipc::epoll::EventPoll& getPoll() {
+        return dispatcher.getPoll();
+    }
 };
+
+template<class Predicate>
+bool spinWaitFor(int timeoutMs, Predicate pred)
+{
+    auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
+    while (!pred()) {
+        if (std::chrono::steady_clock::now() >= until) {
+            return false;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    return true;
+}
+
 } // namespace
 
 BOOST_FIXTURE_TEST_SUITE(InputMonitorSuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(ConfigOK)
 {
-    InputMonitor inputMonitor(inputConfig, InputMonitor::NotifyCallback());
+    ZonesManager cm(getPoll(), TEST_CONFIG_PATH);
+    InputMonitor inputMonitor(getPoll(), inputConfig, &cm);
 }
 
 BOOST_AUTO_TEST_CASE(ConfigTimeWindowMsTooHigh)
 {
+    ZonesManager cm(getPoll(), TEST_CONFIG_PATH);
     inputConfig.timeWindowMs = 50000;
 
-    BOOST_REQUIRE_EXCEPTION(InputMonitor inputMonitor(inputConfig, InputMonitor::NotifyCallback()),
+    BOOST_REQUIRE_EXCEPTION(InputMonitor inputMonitor(getPoll(), inputConfig, &cm),
                             InputMonitorException,
                             WhatEquals("Time window exceeds maximum"));
 }
 
 BOOST_AUTO_TEST_CASE(ConfigDeviceFilePathNotExisting)
 {
+    ZonesManager cm(getPoll(), TEST_CONFIG_PATH);
     inputConfig.device = TEST_INPUT_DEVICE + "notExisting";
 
-    BOOST_REQUIRE_EXCEPTION(InputMonitor inputMonitor(inputConfig, InputMonitor::NotifyCallback()),
+    BOOST_REQUIRE_EXCEPTION(InputMonitor inputMonitor(getPoll(), inputConfig, &cm),
                             InputMonitorException,
                             WhatEquals("Cannot find a device"));
 }
 
 namespace {
 
-void sendNEvents(Fixture& f, unsigned int noOfEventsToSend)
+void sendEvent(Fixture& f, ZonesManager& cm)
 {
-    Latch eventLatch;
-
-    InputMonitor inputMonitor(f.inputConfig, [&] {eventLatch.set();});
-
+    InputMonitor inputMonitor(f.getPoll(), f.inputConfig, &cm);
+    inputMonitor.start();
     int fd = ::open(TEST_INPUT_DEVICE.c_str(), O_WRONLY);
     BOOST_REQUIRE(fd >= 0);
 
-    for (unsigned int i = 0; i < noOfEventsToSend * f.inputConfig.numberOfEvents; ++i) {
+    for (int i = 0; i < f.inputConfig.numberOfEvents; ++i) {
         // button pressed event
         f.ie.value = EVENT_BUTTON_PRESSED;
         f.ie.time.tv_usec += 5;
@@ -140,36 +168,52 @@ void sendNEvents(Fixture& f, unsigned int noOfEventsToSend)
     }
 
     BOOST_CHECK(::close(fd) >= 0);
-    BOOST_CHECK(eventLatch.waitForN(noOfEventsToSend, SINGLE_EVENT_TIMEOUT * noOfEventsToSend));
-
-    // Check if no more events are waiting
-    BOOST_CHECK(!eventLatch.wait(10));
 }
 
 } // namespace
 
-BOOST_AUTO_TEST_CASE(EventOneAtATime)
+BOOST_AUTO_TEST_CASE(SingleEvent)
 {
-    sendNEvents(*this, 1);
+    ZonesManager cm(getPoll(), TEST_CONFIG_PATH);
+    cm.start();
+    cm.createZone("zone1", SIMPLE_TEMPLATE);
+    cm.createZone("zone2", SIMPLE_TEMPLATE);
+    cm.createZone("zone3", SIMPLE_TEMPLATE);
+    cm.restoreAll();
+    sendEvent(*this, cm);
+    BOOST_CHECK(spinWaitFor(EVENT_TIMEOUT, [&] {
+            return cm.getRunningForegroundZoneId() == "zone2";
+    }));
 }
 
-BOOST_AUTO_TEST_CASE(EventTenAtATime)
+BOOST_AUTO_TEST_CASE(MultipleEvent)
 {
-    sendNEvents(*this, 10);
+    ZonesManager cm(getPoll(), TEST_CONFIG_PATH);
+    cm.start();
+    cm.createZone("zone1", SIMPLE_TEMPLATE);
+    cm.createZone("zone2", SIMPLE_TEMPLATE);
+    cm.createZone("zone3", SIMPLE_TEMPLATE);
+    cm.restoreAll();
+    for (int i = 1; i < 10; ++i) {
+        sendEvent(*this, cm);
+        std::string zoneId = "zone" + std::to_string(i % 3 + 1);
+        BOOST_CHECK(spinWaitFor(EVENT_TIMEOUT, [&] {
+            return cm.getRunningForegroundZoneId() == zoneId;
+        }));
+    }
 }
 
 namespace {
 
-void sendNEventsWithPauses(Fixture& f, unsigned int noOfEventsToSend)
+void sendEventWithPauses(Fixture& f, ZonesManager& cm)
 {
-    Latch eventLatch;
-
-    InputMonitor inputMonitor(f.inputConfig, [&] {eventLatch.set();});
+    InputMonitor inputMonitor(f.getPoll(), f.inputConfig, &cm);
+    inputMonitor.start();
 
     int fd = ::open(TEST_INPUT_DEVICE.c_str(), O_WRONLY);
     BOOST_REQUIRE(fd >= 0);
 
-    for (unsigned int i = 0; i < noOfEventsToSend * f.inputConfig.numberOfEvents; ++i) {
+    for (int i = 0; i < f.inputConfig.numberOfEvents; ++i) {
         // Send first two bytes of the button pressed event
         f.ie.value = EVENT_BUTTON_PRESSED;
         f.ie.time.tv_usec += 5;
@@ -191,22 +235,39 @@ void sendNEventsWithPauses(Fixture& f, unsigned int noOfEventsToSend)
         BOOST_CHECK(ret > 0);
     }
     BOOST_CHECK(::close(fd) >= 0);
-    BOOST_CHECK(eventLatch.waitForN(noOfEventsToSend, SINGLE_EVENT_TIMEOUT * noOfEventsToSend));
-
-    // Check if no more events are waiting
-    BOOST_CHECK(!eventLatch.wait(10));
 }
 
 } // namespace
 
-BOOST_AUTO_TEST_CASE(EventOneAtATimeWithPauses)
+BOOST_AUTO_TEST_CASE(SingleEventWithPauses)
 {
-    sendNEventsWithPauses(*this, 1);
+    ZonesManager cm(getPoll(), TEST_CONFIG_PATH);
+    cm.start();
+    cm.createZone("zone1", SIMPLE_TEMPLATE);
+    cm.createZone("zone2", SIMPLE_TEMPLATE);
+    cm.createZone("zone3", SIMPLE_TEMPLATE);
+    cm.restoreAll();
+    sendEventWithPauses(*this, cm);
+    BOOST_CHECK(spinWaitFor(EVENT_TIMEOUT, [&] {
+            return cm.getRunningForegroundZoneId() == "zone2";
+    }));
 }
 
-BOOST_AUTO_TEST_CASE(EventTenAtATimeWithPauses)
+BOOST_AUTO_TEST_CASE(MultipleEventWithPauses)
 {
-    sendNEventsWithPauses(*this, 10);
+    ZonesManager cm(getPoll(), TEST_CONFIG_PATH);
+    cm.start();
+    cm.createZone("zone1", SIMPLE_TEMPLATE);
+    cm.createZone("zone2", SIMPLE_TEMPLATE);
+    cm.createZone("zone3", SIMPLE_TEMPLATE);
+    cm.restoreAll();
+    for (int i = 1; i < 10; ++i) {
+        sendEventWithPauses(*this, cm);
+        std::string zoneId = "zone" + std::to_string(i % 3 + 1);
+        BOOST_CHECK(spinWaitFor(EVENT_TIMEOUT, [&] {
+            return cm.getRunningForegroundZoneId() == zoneId;
+        }));
+    }
 }
 
 

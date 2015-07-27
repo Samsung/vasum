@@ -26,19 +26,17 @@
 
 #include "input-monitor-config.hpp"
 #include "input-monitor.hpp"
+#include "zones-manager.hpp"
 #include "exception.hpp"
 
 #include "logger/logger.hpp"
 #include "utils/exception.hpp"
 #include "utils/fs.hpp"
-#include "utils/callback-wrapper.hpp"
-#include "utils/scoped-gerror.hpp"
+#include "utils/fd-utils.hpp"
 
 #include <cassert>
 #include <cstring>
 #include <fcntl.h>
-#include <functional>
-#include <glib.h>
 #include <linux/input.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -64,10 +62,13 @@ const std::string DEVICE_DIR = "/dev/input/";
 } // namespace
 
 
-InputMonitor::InputMonitor(const InputConfig& inputConfig,
-                           const NotifyCallback& notifyCallback)
-    : mConfig(inputConfig),
-      mNotifyCallback(notifyCallback)
+InputMonitor::InputMonitor(ipc::epoll::EventPoll& eventPoll,
+                           const InputConfig& inputConfig,
+                           ZonesManager* zonesManager)
+    : mConfig(inputConfig)
+    , mZonesManager(zonesManager)
+    , mFd(-1)
+    , mEventPoll(eventPoll)
 {
     if (mConfig.timeWindowMs > MAX_TIME_WINDOW_SEC * 1000L) {
         LOGE("Time window exceeds maximum: " << MAX_TIME_WINDOW_SEC);
@@ -79,37 +80,39 @@ InputMonitor::InputMonitor(const InputConfig& inputConfig,
         throw InputMonitorException("Number of events exceeds maximum");
     }
 
-    std::string devicePath = getDevicePath();
+    mDevicePath = getDevicePath();
 
     LOGT("Input monitor configuration: \n"
          << "\tenabled: " << mConfig.enabled << "\n"
          << "\tdevice: " << mConfig.device << "\n"
-         << "\tpath: " << devicePath << "\n"
+         << "\tpath: " << mDevicePath << "\n"
          << "\ttype: " << EV_KEY << "\n"
          << "\tcode: " << mConfig.code << "\n"
          << "\tvalue: " << KEY_PRESSED << "\n"
          << "\tnumberOfEvents: " << mConfig.numberOfEvents << "\n"
          << "\ttimeWindowMs: " << mConfig.timeWindowMs);
-
-    createGIOChannel(devicePath);
 }
 
 InputMonitor::~InputMonitor()
 {
+    std::unique_lock<std::mutex> mMutex;
     LOGD("Destroying InputMonitor");
-    ScopedGError error;
-    g_io_channel_unref(mChannelPtr);
-    if (g_io_channel_shutdown(mChannelPtr, FALSE, &error)
-            != G_IO_STATUS_NORMAL) {
-        LOGE("Error during shutting down GIOChannel: " << error->message);
-    }
+    stop();
+}
 
-    if (!g_source_remove(mSourceId)) {
-        LOGE("Error during removing the source");
-    }
+void InputMonitor::start()
+{
+    std::unique_lock<Mutex> mMutex;
+    setHandler(mDevicePath);
+}
+
+void InputMonitor::stop()
+{
+    leaveDevice();
 }
 
 namespace {
+
 bool isDeviceWithName(const boost::regex& deviceNameRegex,
                       const fs::directory_entry& directoryEntry)
 {
@@ -119,7 +122,7 @@ bool isDeviceWithName(const boost::regex& deviceNameRegex,
         return false;
     }
 
-    int fd = open(path.c_str(), O_RDONLY);
+    int fd = ::open(path.c_str(), O_RDONLY);
     if (fd < 0) {
         LOGD("Failed to open " << path);
         return false;
@@ -128,13 +131,13 @@ bool isDeviceWithName(const boost::regex& deviceNameRegex,
     char name[DEVICE_NAME_LENGTH];
     if (ioctl(fd, EVIOCGNAME(sizeof(name)), name) < 0) {
         LOGD("Failed to get the device name of: " << path);
-        if (close(fd) < 0) {
+        if (::close(fd) < 0) {
             LOGE("Error during closing file " << path);
         }
         return false;
     }
 
-    if (close(fd) < 0) {
+    if (::close(fd) < 0) {
         LOGE("Error during closing file " << path);
     }
 
@@ -146,6 +149,7 @@ bool isDeviceWithName(const boost::regex& deviceNameRegex,
 
     return false;
 }
+
 } // namespace
 
 std::string InputMonitor::getDevicePath() const
@@ -174,80 +178,47 @@ std::string InputMonitor::getDevicePath() const
     return it->path().string();
 }
 
-
-
-void InputMonitor::createGIOChannel(const std::string& devicePath)
+void InputMonitor::setHandler(const std::string& devicePath)
 {
+    using namespace std::placeholders;
+
     // We need NONBLOCK for FIFOs in the tests
-    int fd = open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
-    if (fd < 0) {
+    mFd = ::open(devicePath.c_str(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+    if (mFd < 0) {
         LOGE("Cannot create input monitor channel. Device file: " <<
              devicePath << " doesn't exist");
         throw InputMonitorException("Device does not exist");
     }
-
-    mChannelPtr = g_io_channel_unix_new(fd);
-
-    // Read binary data
-    if (g_io_channel_set_encoding(mChannelPtr,
-                                  NULL,
-                                  NULL) != G_IO_STATUS_NORMAL) {
-        LOGE("Cannot set encoding for input monitor channel ");
-        throw InputMonitorException("Cannot set encoding");
-    }
-
-    using namespace std::placeholders;
-    ReadDeviceCallback callback = std::bind(&InputMonitor::readDevice, this, _1);
-    // Add the callback
-    mSourceId = g_io_add_watch_full(mChannelPtr,
-                                    G_PRIORITY_DEFAULT,
-                                    G_IO_IN,
-                                    readDeviceCallback,
-                                    utils::createCallbackWrapper(callback, mGuard.spawn()),
-                                    &utils::deleteCallbackWrapper<ReadDeviceCallback>);
-    if (!mSourceId) {
-        LOGE("Cannot add watch on device input file");
-        throw InputMonitorException("Cannot add watch");
-    }
+    mEventPoll.addFD(mFd, EPOLLIN, std::bind(&InputMonitor::handleInternal, this, _1, _2));
 }
 
-gboolean InputMonitor::readDeviceCallback(GIOChannel* gio,
-        GIOCondition /*condition*/,
-        gpointer data)
-{
-    const ReadDeviceCallback& callback = utils::getCallbackFromPointer<ReadDeviceCallback>(data);
-    callback(gio);
-    return TRUE;
-}
-
-void InputMonitor::readDevice(GIOChannel* gio)
+void InputMonitor::handleInternal(int /* fd */, ipc::epoll::Events events)
 {
     struct input_event ie;
-    gsize nBytesReadTotal = 0;
-    gsize nBytesRequested = sizeof(struct input_event);
-    ScopedGError error;
-
-    do {
-        gsize nBytesRead = 0;
-        GIOStatus readStatus = g_io_channel_read_chars(gio,
-                               &reinterpret_cast<gchar*>(&ie)[nBytesReadTotal],
-                               nBytesRequested,
-                               &nBytesRead,
-                               &error);
-
-        if (readStatus == G_IO_STATUS_ERROR) {
-            LOGE("Read from input monitor channel failed: " << error->message);
+    try {
+        if (events == EPOLLHUP) {
+            stop();
             return;
         }
-
-        nBytesRequested -= nBytesRead;
-        nBytesReadTotal += nBytesRead;
-    } while (nBytesRequested > 0);
-
-
+        utils::read(mFd, &ie, sizeof(struct input_event));
+    } catch (const std::exception& ex) {
+        LOGE("Read from input monitor channel failed: " << ex.what());
+        return;
+    }
     if (isExpectedEventSequence(ie)) {
         LOGI("Input monitor detected pattern.");
-        mNotifyCallback();
+        if (mZonesManager->isRunning()) {
+            mZonesManager->switchingSequenceMonitorNotify();
+        }
+    }
+}
+
+void InputMonitor::leaveDevice()
+{
+    if (mFd != -1) {
+        mEventPoll.removeFD(mFd);
+        utils::close(mFd);
+        mFd = -1;
     }
 }
 

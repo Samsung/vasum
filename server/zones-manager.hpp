@@ -198,6 +198,8 @@ public:
                                    api::MethodResultBuilder::Pointer result);
     void handleCleanUpZonesRootCall(api::MethodResultBuilder::Pointer result);
 
+    void switchingSequenceMonitorNotify();
+
 private:
     typedef std::recursive_mutex Mutex;
     typedef std::unique_lock<Mutex> Lock;
@@ -227,7 +229,6 @@ private:
     void saveDynamicConfig();
     void updateDefaultId();
     void refocus();
-    void switchingSequenceMonitorNotify();
     void generateNewConfig(const std::string& id,
                            const std::string& templatePath);
     std::string getTemplatePathForExistingZone(const std::string& id);

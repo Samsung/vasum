@@ -26,45 +26,45 @@
 #define SERVER_INPUT_MONITOR_HPP
 
 #include "input-monitor-config.hpp"
-#include "utils/callback-guard.hpp"
+#include "ipc/epoll/event-poll.hpp"
 
 #include <linux/input.h>
 #include <sys/time.h>
-#include <glib.h>
 
-#include <functional>
 #include <string>
 #include <list>
+#include <mutex>
 
 
 namespace vasum {
 
+class ZonesManager;
+
 class InputMonitor {
 public:
-    typedef std::function<void()> NotifyCallback;
-
-    InputMonitor(const InputConfig& inputConfig,
-                 const NotifyCallback& notifyCallback);
+    InputMonitor(ipc::epoll::EventPoll& eventPoll,
+                 const InputConfig& inputConfig,
+                 ZonesManager* zonesManager);
     ~InputMonitor();
 
+    void start();
+    void stop();
 private:
-    typedef std::function<void(GIOChannel* gio)> ReadDeviceCallback;
+    typedef std::mutex Mutex;
 
     InputConfig mConfig;
-    NotifyCallback mNotifyCallback;
-
+    ZonesManager* mZonesManager;
+    int mFd;
+    ipc::epoll::EventPoll& mEventPoll;
     std::list<struct timeval> mEventTimes;
-    GIOChannel* mChannelPtr;
+    std::string mDevicePath;
+    Mutex mMutex;
 
     std::string getDevicePath() const;
-    void createGIOChannel(const std::string& devicePath);
-
-    // Internal callback to be registered at glib g_io_add_watch()
-    static gboolean readDeviceCallback(GIOChannel*, GIOCondition, gpointer);
+    void setHandler(const std::string& devicePath);
+    void handleInternal(int fd, ipc::epoll::Events events);
+    void leaveDevice();
     bool isExpectedEventSequence(const struct input_event&);
-    void readDevice(GIOChannel*);
-    utils::CallbackGuard mGuard;
-    guint mSourceId;
 };
 
 } // namespace vasum
