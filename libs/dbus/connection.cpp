@@ -181,7 +181,7 @@ void DbusConnection::setName(const std::string& name,
                                            &deleteCallbackWrapper<NameCallbacks>);
 }
 
-void DbusConnection::onNameAcquired(GDBusConnection*, const gchar* name, gpointer userData)
+void DbusConnection::onNameAcquired(GDBusConnection*, __attribute__((unused)) const gchar* name, gpointer userData)
 {
     LOGD("Name acquired " << name);
     const NameCallbacks& callbacks = getCallbackFromPointer<NameCallbacks>(userData);
@@ -190,7 +190,7 @@ void DbusConnection::onNameAcquired(GDBusConnection*, const gchar* name, gpointe
     }
 }
 
-void DbusConnection::onNameLost(GDBusConnection*, const gchar* name, gpointer userData)
+void DbusConnection::onNameLost(GDBusConnection*, __attribute__((unused)) const gchar* name, gpointer userData)
 {
     LOGD("Name lost " << name);
     const NameCallbacks& callbacks = getCallbackFromPointer<NameCallbacks>(userData);

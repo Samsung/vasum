@@ -278,7 +278,9 @@ API int sock_send_fd(int fd, int sendfd, void *data, size_t size) {
     return sendmsg(fd, &msg, MSG_NOSIGNAL);
 }
 // vasum_log
-API void vasum_log(int type, const char *tag, const char *fmt, ...) {
+API void vasum_log(__attribute__((unused)) int type,
+                   __attribute__((unused)) const char *tag,
+                   const char *fmt, ...) {
     va_list arg_ptr;
     char buf[255];
     LOGS("type=" << type << " tag=" << tag);

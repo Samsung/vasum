@@ -23,11 +23,6 @@
  * @brief   Main file for the Vasum Daemon
  */
 
-// Always log to console in DEBUG mode
-#if !defined(LOG_TO_CONSOLE) && !defined(NDEBUG)
-#define LOG_TO_CONSOLE
-#endif
-
 #include "config.hpp"
 
 #include "exception.hpp"
@@ -99,7 +94,7 @@ int main(int argc, char* argv[])
         }
 
         Logger::setLogLevel(vm["log-level"].as<std::string>());
-#ifdef LOG_TO_CONSOLE
+#if !defined(NDEBUG)
         Logger::setLogBackend(new StderrBackend());
 #elif HAVE_SYSTEMD
         Logger::setLogBackend(new SystemdJournalBackend());

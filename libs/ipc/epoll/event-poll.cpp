@@ -51,7 +51,7 @@ EventPoll::~EventPoll()
 {
     if (!mCallbacks.empty()) {
         LOGW("Not removed callbacks: " << mCallbacks.size());
-        for (const auto& item : mCallbacks) {
+        for (__attribute__((unused)) const auto& item : mCallbacks) {
             LOGT("Not removed fd: " << item.first);
         }
         assert(0 && "Not removed callbacks left");

@@ -74,8 +74,12 @@ private:
  * @brief Automatically create LoggerScope object which logs at the construction and destruction
  * @ingroup libLogger
  */
+#if !defined(NDEBUG)
 #define LOGS(MSG)   logger::LoggerScope logScopeObj(__FILE__, __LINE__, __func__,    \
                                                     logger::SStreamWrapper() << MSG, \
                                                     PROJECT_SOURCE_DIR)
+#else
+#define LOGS(MSG) do {} while (0)
+#endif
 
 #endif // COMMON_LOGGER_LOGGER_SCOPE_HPP

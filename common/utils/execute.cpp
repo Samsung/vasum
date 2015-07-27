@@ -35,7 +35,7 @@ namespace utils {
 
 namespace {
 
-std::ostream& operator<< (std::ostream& out, const char* const* argv)
+__attribute__((unused)) std::ostream& operator<< (std::ostream& out, const char* const* argv)
 {
     if (*argv) {
         argv++; //skip

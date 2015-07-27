@@ -117,6 +117,7 @@ public:
 /// Logging information
 #define LOGI(MESSAGE) LOG(INFO, MESSAGE)
 
+#if !defined(NDEBUG)
 /// Logging debug information
 #define LOGD(MESSAGE) LOG(DEBUG, MESSAGE)
 
@@ -125,6 +126,12 @@ public:
 
 /// Logging tracing information
 #define LOGT(MESSAGE) LOG(TRACE, MESSAGE)
+#else
+#define LOGD(MESSAGE) do {} while (0)
+#define LOGH(MESSAGE) do {} while (0)
+#define LOGT(MESSAGE) do {} while (0)
+#endif
 
 #endif // COMMON_LOGGER_LOGGER_HPP
+
 /*@}*/

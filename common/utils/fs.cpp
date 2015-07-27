@@ -201,10 +201,13 @@ bool isMountPoint(const std::string& path, bool& result)
 {
     std::string parentPath = dirName(path);
     bool newResult;
-    bool ret = hasSameMountPoint(path, parentPath, newResult);
+    if (!hasSameMountPoint(path, parentPath, newResult)) {
+        LOGE("Failed to check the files' mount points");
+        return false;
+    }
 
     result = !newResult;
-    return ret;
+    return true;
 }
 
 bool hasSameMountPoint(const std::string& path1, const std::string& path2, bool& result)

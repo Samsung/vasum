@@ -176,6 +176,7 @@ BOOST_AUTO_TEST_CASE(LogsLevelInfo)
     BOOST_CHECK(tf.logContains("[TRACE]") == false);
 }
 
+#if !defined(NDEBUG)
 BOOST_AUTO_TEST_CASE(LogsLevelDebug)
 {
     TestLog tf(LogLevel::DEBUG);
@@ -199,6 +200,7 @@ BOOST_AUTO_TEST_CASE(LogsLevelTrace)
     BOOST_CHECK(tf.logContains("[DEBUG]") == true);
     BOOST_CHECK(tf.logContains("[TRACE]") == true);
 }
+#endif
 
 BOOST_AUTO_TEST_CASE(LoggerScope)
 {

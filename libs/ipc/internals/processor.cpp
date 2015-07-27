@@ -389,8 +389,8 @@ bool Processor::onReturnValue(Peers::iterator& peerIt,
 }
 
 bool Processor::onRemoteSignal(Peers::iterator& peerIt,
-                               const MethodID methodID,
-                               const MessageID messageID,
+                               __attribute__((unused)) const MethodID methodID,
+                               __attribute__((unused)) const MessageID messageID,
                                std::shared_ptr<SignalHandlers> signalCallbacks)
 {
     LOGS(mLogPrefix + "Processor onRemoteSignal; methodID: " << methodID << " messageID: " << messageID);
