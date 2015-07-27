@@ -221,19 +221,9 @@ typedef enum {
 } VsmZoneState;
 
 /**
- * Zone information structure
- */
-typedef struct {
-    char* id;
-    int terminal;
-    VsmZoneState state;
-    char *rootfs_path;
-} VsmZoneStructure;
-
-/**
  * Zone information
  */
-typedef VsmZoneStructure* VsmZone;
+typedef void* VsmZone;
 
 /**
  * Netowrk device type
@@ -245,17 +235,9 @@ typedef enum {
 } VsmNetdevType;
 
 /**
- * Network device information structure
- */
-typedef struct {
-    char* name;
-    VsmNetdevType type;
-} VsmNetdevStructure;
-
-/**
  * Network device information
  */
-typedef VsmNetdevStructure* VsmNetdev;
+typedef void* VsmNetdev;
 
 /**
  * File type
@@ -391,11 +373,59 @@ void vsm_array_string_free(VsmArrayString astring);
 void vsm_string_free(VsmString string);
 
 /**
+ * Get zone id (offline)
+ *
+ * @param zone VsmZone
+ * @return zone id
+ */
+VsmString vsm_zone_get_id(VsmZone zone);
+
+/**
+ * Get zone terminal (offline)
+ *
+ * @param zone VsmZone
+ * @return zone terminal
+ */
+int vsm_zone_get_terminal(VsmZone zone);
+
+/**
+ * Get zone state (offline)
+ *
+ * @param zone VsmZone
+ * @return zone state
+ */
+VsmZoneState vsm_zone_get_state(VsmZone zone);
+
+/**
+ * Get zone rootfs path (offline)
+ *
+ * @param zone VsmZone
+ * @return zone rootfs path
+ */
+VsmString vsm_zone_get_rootfs(VsmZone zone);
+
+/**
  * Release VsmZone
  *
  * @param zone VsmZone
  */
 void vsm_zone_free(VsmZone zone);
+
+/**
+ * Get netdev name (offline)
+ *
+ * @param netdev VsmNetdev
+ * @return netdev name
+ */
+VsmString vsm_netdev_get_name(VsmNetdev netdev);
+
+/**
+ * Get netdev type (offline)
+ *
+ * @param netdev VsmNetdev
+ * @return netdev type
+ */
+VsmNetdevType vsm_netdev_get_type(VsmNetdev netdev);
 
 /**
  * Release VsmNetdev
@@ -462,17 +492,6 @@ VsmStatus vsm_get_zone_ids(VsmClient client, VsmArrayString* array);
  * @remark Use @p vsm_string_free() to free memory occupied by @p id.
  */
 VsmStatus vsm_get_active_zone_id(VsmClient client, VsmString* id);
-
-/**
- * Get zone rootfs path.
- *
- * @param[in] client vasum-server's client
- * @param[in] id zone name
- * @param[out] rootpath zone rootfs path
- * @return status of this function call
- * @remark Use @p vsm_string_free() to free memory occupied by @p rootpath.
- */
-VsmStatus vsm_get_zone_rootpath(VsmClient client, const char* id, VsmString* rootpath);
 
 /**
  * Get zone name of process with given pid.

@@ -252,23 +252,6 @@ BOOST_AUTO_TEST_CASE(GetActiveZoneId)
     vsm_client_free(client);
 }
 
-BOOST_AUTO_TEST_CASE(GetZoneRootPath)
-{
-    const std::string zoneId = "zone1";
-
-    VsmClient client = vsm_client_create();
-    VsmStatus status = vsm_connect(client);
-    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-    VsmString rootpath;
-    status = vsm_get_zone_rootpath(client, zoneId.c_str(), &rootpath);
-    BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
-
-    BOOST_CHECK_EQUAL(rootpath, "/tmp/ut-zones/" + zoneId + "/rootfs");
-
-    vsm_string_free(rootpath);
-    vsm_client_free(client);
-}
-
 BOOST_AUTO_TEST_CASE(LookupZoneById)
 {
     const std::string activeZoneId = "zone1";
@@ -280,10 +263,10 @@ BOOST_AUTO_TEST_CASE(LookupZoneById)
     status = vsm_lookup_zone_by_id(client, activeZoneId.c_str(), &info);
     BOOST_REQUIRE_EQUAL(VSMCLIENT_SUCCESS, status);
 
-    BOOST_CHECK_EQUAL(info->id, activeZoneId);
-    BOOST_CHECK_EQUAL(info->state, RUNNING);
-    BOOST_CHECK_EQUAL(info->terminal, -1);
-    BOOST_CHECK_EQUAL(info->rootfs_path, "/tmp/ut-zones/" + activeZoneId + "/rootfs");
+    BOOST_CHECK_EQUAL(vsm_zone_get_id(info), activeZoneId);
+    BOOST_CHECK_EQUAL(vsm_zone_get_state(info), RUNNING);
+    BOOST_CHECK_EQUAL(vsm_zone_get_terminal(info), -1);
+    BOOST_CHECK_EQUAL(vsm_zone_get_rootfs(info), "/tmp/ut-zones/" + activeZoneId + "/rootfs");
 
     vsm_zone_free(info);
     vsm_client_free(client);

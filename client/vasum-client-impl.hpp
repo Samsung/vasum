@@ -46,6 +46,24 @@
 typedef std::function<void (const char *zoneId, const char *dbusAddress, void *data)> VsmZoneDbusStateFunction;
 
 /**
+ * Zone information structure
+ */
+typedef struct ZoneStructure {
+    char *id;
+    int terminal;
+    VsmZoneState state;
+    char *rootfs_path;
+} *Zone;
+
+/**
+ * Network device information structure
+ */
+typedef struct NetdevStructure {
+    char *name;
+    VsmNetdevType type;
+} *Netdev;
+
+/**
  * vasum's client definition.
  *
  * Client uses dbus API.
@@ -131,11 +149,6 @@ public:
     VsmStatus vsm_get_active_zone_id(VsmString* id) noexcept;
 
     /**
-     *  @see ::vsm_get_zone_rootpath
-     */
-    VsmStatus vsm_get_zone_rootpath(const char* id, VsmString* rootpath) noexcept;
-
-    /**
      *  @see ::vsm_lookup_zone_by_pid
      */
     VsmStatus vsm_lookup_zone_by_pid(int pid, VsmString* id) noexcept;
@@ -143,7 +156,7 @@ public:
     /**
      * @see ::vsm_lookup_zone_by_id
      */
-    VsmStatus vsm_lookup_zone_by_id(const char* id, VsmZone* zone) noexcept;
+    VsmStatus vsm_lookup_zone_by_id(const char* id, Zone* zone) noexcept;
 
     /**
      * @see ::vsm_lookup_zone_by_terminal_id
@@ -295,7 +308,7 @@ public:
      */
     VsmStatus vsm_lookup_netdev_by_name(const char* zone,
                                         const char* netdevId,
-                                        VsmNetdev* netdev) noexcept;
+                                        Netdev* netdev) noexcept;
 
     /**
      *  @see ::vsm_destroy_netdev

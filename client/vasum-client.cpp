@@ -112,17 +112,55 @@ API void vsm_string_free(VsmString string)
     free(string);
 }
 
+API VsmString vsm_zone_get_id(VsmZone zone)
+{
+    Zone z = static_cast<Zone>(zone);
+    return z->id;
+}
+
+API int vsm_zone_get_terminal(VsmZone zone)
+{
+    Zone z = static_cast<Zone>(zone);
+    return z->terminal;
+}
+
+API VsmZoneState vsm_zone_get_state(VsmZone zone)
+{
+    Zone z = static_cast<Zone>(zone);
+    return z->state;
+}
+
+API VsmString vsm_zone_get_rootfs(VsmZone zone)
+{
+    Zone z = static_cast<Zone>(zone);
+    return z->rootfs_path;
+}
+
 API void vsm_zone_free(VsmZone zone)
 {
-    free(zone->rootfs_path);
-    free(zone->id);
-    free(zone);
+    Zone z = static_cast<Zone>(zone);
+    free(z->rootfs_path);
+    free(z->id);
+    free(z);
+}
+
+API VsmString vsm_netdev_get_name(VsmNetdev netdev)
+{
+    Netdev n = static_cast<Netdev>(netdev);
+    return n->name;
+}
+
+API VsmNetdevType vsm_netdev_get_type(VsmNetdev netdev)
+{
+    Netdev n = static_cast<Netdev>(netdev);
+    return n->type;
 }
 
 API void vsm_netdev_free(VsmNetdev netdev)
 {
-    free(netdev->name);
-    free(netdev);
+    Netdev n = static_cast<Netdev>(netdev);
+    free(n->name);
+    free(n);
 }
 
 API void vsm_client_free(VsmClient client)
@@ -157,11 +195,6 @@ API VsmStatus vsm_get_active_zone_id(VsmClient client, VsmString* id)
     return getClient(client).vsm_get_active_zone_id(id);
 }
 
-API VsmStatus vsm_get_zone_rootpath(VsmClient client, const char* id, VsmString* rootpath)
-{
-    return getClient(client).vsm_get_zone_rootpath(id, rootpath);
-}
-
 API VsmStatus vsm_lookup_zone_by_pid(VsmClient client, int pid, VsmString* id)
 {
     return getClient(client).vsm_lookup_zone_by_pid(pid, id);
@@ -169,7 +202,8 @@ API VsmStatus vsm_lookup_zone_by_pid(VsmClient client, int pid, VsmString* id)
 
 API VsmStatus vsm_lookup_zone_by_id(VsmClient client, const char* id, VsmZone* zone)
 {
-    return getClient(client).vsm_lookup_zone_by_id(id, zone);
+    Zone* z = reinterpret_cast<Zone*>(zone);
+    return getClient(client).vsm_lookup_zone_by_id(id, z);
 }
 
 API VsmStatus vsm_lookup_zone_by_terminal_id(VsmClient client, int terminal, VsmString* id)
@@ -338,7 +372,8 @@ API VsmStatus vsm_lookup_netdev_by_name(VsmClient client,
                                         const char* netdevId,
                                         VsmNetdev* netdev)
 {
-    return getClient(client).vsm_lookup_netdev_by_name(zone, netdevId, netdev);
+    Netdev* n = reinterpret_cast<Netdev*>(netdev);
+    return getClient(client).vsm_lookup_netdev_by_name(zone, netdevId, n);
 }
 
 API VsmStatus vsm_destroy_netdev(VsmClient client, const char* zone, const char* devId)

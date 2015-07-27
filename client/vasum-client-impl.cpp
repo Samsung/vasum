@@ -93,9 +93,9 @@ void convert(const api::VectorOfStrings& in, VsmArrayString& out)
     }
 }
 
-void convert(const api::ZoneInfoOut& info, VsmZone& zone)
+void convert(const api::ZoneInfoOut& info, Zone& zone)
 {
-    VsmZone vsmZone = reinterpret_cast<VsmZone>(malloc(sizeof(*vsmZone)));
+    Zone vsmZone = static_cast<Zone>(malloc(sizeof(*vsmZone)));
     vsmZone->id = ::strdup(info.id.c_str());
     vsmZone->terminal = info.vt;
     vsmZone->state = getZoneState(info.state.c_str());
@@ -349,19 +349,6 @@ VsmStatus Client::vsm_get_active_zone_id(VsmString* id) noexcept
     });
 }
 
-VsmStatus Client::vsm_get_zone_rootpath(const char* id, VsmString* rootpath) noexcept
-{
-    return coverException([&] {
-        IS_SET(id);
-        IS_SET(rootpath);
-
-        api::ZoneInfoOut info = *mClient->callSync<api::ZoneId, api::ZoneInfoOut>(
-            api::ipc::METHOD_GET_ZONE_INFO,
-            std::make_shared<api::ZoneId>(api::ZoneId{ id }));
-        *rootpath = ::strdup(info.rootPath.c_str());
-    });
-}
-
 VsmStatus Client::vsm_lookup_zone_by_pid(int pid, VsmString* id) noexcept
 {
     return coverException([&] {
@@ -383,7 +370,7 @@ VsmStatus Client::vsm_lookup_zone_by_pid(int pid, VsmString* id) noexcept
     });
 }
 
-VsmStatus Client::vsm_lookup_zone_by_id(const char* id, VsmZone* zone) noexcept
+VsmStatus Client::vsm_lookup_zone_by_id(const char* id, Zone* zone) noexcept
 {
     return coverException([&] {
         IS_SET(id);
@@ -742,7 +729,7 @@ VsmStatus Client::vsm_create_netdev_phys(const char* id, const char* devId) noex
 
 VsmStatus Client::vsm_lookup_netdev_by_name(const char* id,
                                        const char* netdevId,
-                                       VsmNetdev* netdev) noexcept
+                                       Netdev* netdev) noexcept
 {
     using namespace boost::algorithm;
 
@@ -772,7 +759,7 @@ VsmStatus Client::vsm_lookup_netdev_by_name(const char* id,
                 throw InvalidResponseException("Unknown netdev type: " + it->second);
         }
 
-        *netdev = reinterpret_cast<VsmNetdev>(malloc(sizeof(**netdev)));
+        *netdev = static_cast<Netdev>(malloc(sizeof(**netdev)));
         (*netdev)->name = ::strdup(id);
         (*netdev)->type = type;
     });

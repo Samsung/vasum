@@ -51,17 +51,9 @@ VsmClient CommandLineInterface::client = NULL;
 
 namespace {
 
-template<typename T>
-string stringAsInStream(const T& value)
+std::string zoneStateToString(const VsmZoneState& state)
 {
-    std::ostringstream stream;
-    stream << value;
-    return stream.str();
-}
-
-ostream& operator<<(ostream& out, const VsmZoneState& state)
-{
-    const char* name;
+    std::string name;
     switch (state) {
         case STOPPED: name = "STOPPED"; break;
         case STARTING: name = "STARTING"; break;
@@ -77,33 +69,33 @@ ostream& operator<<(ostream& out, const VsmZoneState& state)
         default: name = "MAX_STATE (ERROR)";
     }
 
-    out << name;
+    return name;
+}
+
+std::string zoneToString(const VsmZone& zone)
+{
+    std::string out = std::string("Name: ") + vsm_zone_get_id(zone)
+        + std::string("\nTerminal: ") + std::to_string(vsm_zone_get_terminal(zone))
+        + std::string("\nState: ") + zoneStateToString(vsm_zone_get_state(zone))
+        + std::string("\nRoot: ") + vsm_zone_get_rootfs(zone);
     return out;
 }
 
-ostream& operator<<(ostream& out, const VsmZone& zone)
+std::string netdevTypeToString(const VsmNetdevType& netdevType)
 {
-    out << "Name: " << zone->id
-        << "\nTerminal: " << zone->terminal
-        << "\nState: " << zone->state
-        << "\nRoot: " << zone->rootfs_path;
-    return out;
-}
-
-ostream& operator<<(ostream& out, const VsmNetdevType& netdevType)
-{
+    std::string type;
     switch (netdevType) {
-        case VSMNETDEV_VETH: out << "VETH"; break;
-        case VSMNETDEV_PHYS: out << "PHYS"; break;
-        case VSMNETDEV_MACVLAN: out << "MACVLAN"; break;
+        case VSMNETDEV_VETH: type = "VETH"; break;
+        case VSMNETDEV_PHYS: type = "PHYS"; break;
+        case VSMNETDEV_MACVLAN: type = "MACVLAN"; break;
     }
-    return out;
+    return type;
 }
 
-ostream& operator<<(ostream& out, const VsmNetdev& netdev)
+std::string netdevToString(const VsmNetdev& netdev)
 {
-    out << "Name: " << netdev->name
-        << "\nType: " << netdev->type;
+    std::string out = std::string("Name: ") + vsm_netdev_get_name(netdev)
+        + std::string("\nType: ") + netdevTypeToString(vsm_netdev_get_type(netdev));
     return out;
 }
 
@@ -316,12 +308,12 @@ void console_zone(const Args& argv)
     VsmZone zone;
     CommandLineInterface::executeCallback(bind(vsm_lookup_zone_by_id, _1, argv[1].c_str(), &zone));
 
-    if (stringAsInStream(zone->state) != "RUNNING") {
+    if (zoneStateToString(vsm_zone_get_state(zone)) != "RUNNING") {
         vsm_zone_free(zone);
         throw runtime_error("Zone is not running");
     }
 
-    std::string zonesPath = zone->rootfs_path;
+    std::string zonesPath = vsm_zone_get_rootfs(zone);
     std::string zoneRootFs = argv[1] + "/rootfs";
     zonesPath.erase(zonesPath.length()- zoneRootFs.length(), zoneRootFs.length());
 
@@ -374,12 +366,12 @@ void get_zones_status(const Args& /* argv */)
     for (VsmString* id = ids; *id; ++id) {
         VsmZone zone;
         CommandLineInterface::executeCallback(bind(vsm_lookup_zone_by_id, _1, *id, &zone));
-        assert(string(zone->id) == string(*id));
-        table.push_back({string(zone->id) == string(activeId) ? "*" : "",
-                         zone->id,
-                         stringAsInStream(zone->state),
-                         to_string(zone->terminal),
-                         zone->rootfs_path});
+        assert(string(vsm_zone_get_id(zone)) == string(*id));
+        table.push_back({string(vsm_zone_get_id(zone)) == string(activeId) ? "*" : "",
+                         vsm_zone_get_id(zone),
+                         zoneStateToString(vsm_zone_get_state(zone)),
+                         to_string(vsm_zone_get_terminal(zone)),
+                         vsm_zone_get_rootfs(zone)});
         vsm_zone_free(zone);
     }
     vsm_string_free(activeId);
@@ -421,7 +413,7 @@ void lookup_zone_by_id(const Args& argv)
 
     VsmZone zone;
     CommandLineInterface::executeCallback(bind(vsm_lookup_zone_by_id, _1, argv[1].c_str(), &zone));
-    cout << zone << endl;
+    cout << zoneToString(zone) << endl;
     vsm_zone_free(zone);
 }
 
@@ -497,14 +489,14 @@ void lookup_netdev_by_name(const Args& argv)
     if (argv.size() <= 2) {
         throw runtime_error("Not enough parameters");
     }
-    VsmNetdev vsmNetdev = NULL;
+    VsmNetdev netdev = NULL;
     CommandLineInterface::executeCallback(bind(vsm_lookup_netdev_by_name,
                   _1,
                   argv[1].c_str(),
                   argv[2].c_str(),
-                  &vsmNetdev));
-    cout << vsmNetdev << endl;
-    vsm_netdev_free(vsmNetdev);
+                  &netdev));
+    cout << netdevToString(netdev) << endl;
+    vsm_netdev_free(netdev);
 
 }
 
