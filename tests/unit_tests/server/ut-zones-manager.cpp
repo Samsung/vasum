@@ -415,6 +415,28 @@ public:
         return fileFd;
     }
 
+    void callMethodLockQueue()
+    {
+        assert(isHost());
+        GVariantPtr result = mClient->callMethod(api::dbus::BUS_NAME,
+                                                 api::dbus::OBJECT_PATH,
+                                                 api::dbus::INTERFACE,
+                                                 api::dbus::METHOD_LOCK_QUEUE,
+                                                 nullptr,
+                                                 "()");
+    }
+
+    void callMethodUnlockQueue()
+    {
+        assert(isHost());
+        GVariantPtr result = mClient->callMethod(api::dbus::BUS_NAME,
+                                                 api::dbus::OBJECT_PATH,
+                                                 api::dbus::INTERFACE,
+                                                 api::dbus::METHOD_UNLOCK_QUEUE,
+                                                 nullptr,
+                                                 "()");
+    }
+
 private:
     const int mId;
     DbusConnection::Pointer mClient;
@@ -554,6 +576,22 @@ public:
             std::make_shared<api::CreateFileIn>(api::CreateFileIn{id, path, flags, mode}),
             EVENT_TIMEOUT*10);
         return result->fd.value;
+    }
+
+    void callMethodLockQueue()
+    {
+        auto result = mClient.callSync<api::Void, api::Void>(
+            api::ipc::METHOD_LOCK_QUEUE,
+            nullptr,
+            EVENT_TIMEOUT*10);
+    }
+
+    void callMethodUnlockQueue()
+    {
+        auto result = mClient.callSync<api::Void, api::Void>(
+            api::ipc::METHOD_UNLOCK_QUEUE,
+            nullptr,
+            EVENT_TIMEOUT*10);
     }
 
 private:
@@ -1176,5 +1214,207 @@ MULTI_FIXTURE_TEST_CASE(CreateWriteReadFile, F, ACCESSORS)
     // close
     BOOST_REQUIRE(::close(returnedFd) != -1);
 }
+
+MULTI_FIXTURE_TEST_CASE(BasicLockUnlockQueue, F, ACCESSORS)
+{
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
+    cm.start();
+    cm.createZone("test1", SIMPLE_TEMPLATE);
+    cm.createZone("test2", SIMPLE_TEMPLATE);
+    cm.restoreAll();
+
+    // two clients
+    typename F::HostAccessory host;
+    typename F::HostAccessory hostLocker;
+
+    // set up active zone as test1 to have something to compare to
+    host.callMethodSetActiveZone("test1");
+
+    // lock queue to host 1
+    hostLocker.callMethodLockQueue();
+
+    // try setting different active zone, should result in error
+    BOOST_REQUIRE_THROW(host.callMethodSetActiveZone("test2"), std::runtime_error);
+    BOOST_CHECK_EQUAL(host.callMethodGetActiveZoneId(), "test1");
+
+    // unlock
+    hostLocker.callMethodUnlockQueue();
+
+    // now switch should work
+    host.callMethodSetActiveZone("test2");
+    BOOST_CHECK_EQUAL(host.callMethodGetActiveZoneId(), "test2");
+}
+
+MULTI_FIXTURE_TEST_CASE(LockAndDisconnectQueue, F, ACCESSORS)
+{
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
+    cm.start();
+    cm.createZone("test1", SIMPLE_TEMPLATE);
+    cm.createZone("test2", SIMPLE_TEMPLATE);
+    cm.restoreAll();
+
+    // two clients
+    typename F::HostAccessory host;
+
+    {
+        typename F::HostAccessory hostLocker;
+
+        // set up active zone as test1 to have something to compare to
+        host.callMethodSetActiveZone("test1");
+
+        // lock queue to host 1
+        hostLocker.callMethodLockQueue();
+
+        // try setting different active zone, should result in error
+        BOOST_REQUIRE_THROW(host.callMethodSetActiveZone("test2"), std::runtime_error);
+        BOOST_CHECK_EQUAL(host.callMethodGetActiveZoneId(), "test1");
+
+        // leaving scope simulates disconnect
+    }
+
+    // now switch should work
+    host.callMethodSetActiveZone("test2");
+    BOOST_CHECK_EQUAL(host.callMethodGetActiveZoneId(), "test2");
+}
+
+MULTI_FIXTURE_TEST_CASE(DoubleLockQueue, F, ACCESSORS)
+{
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
+    cm.start();
+
+    typename F::HostAccessory host;
+
+    // first lock - should succeed
+    host.callMethodLockQueue();
+
+    // second lock - should fail
+    BOOST_REQUIRE_THROW(host.callMethodLockQueue(), std::runtime_error);
+}
+
+MULTI_FIXTURE_TEST_CASE(DoubleUnlockQueue, F, ACCESSORS)
+{
+    ZonesManager cm(F::dispatcher.getPoll(), TEST_CONFIG_PATH);
+    cm.start();
+
+    typename F::HostAccessory host;
+
+    // we are already unlocked - should return an error
+    BOOST_REQUIRE_THROW(host.callMethodUnlockQueue(), std::runtime_error);
+}
+
+#ifdef DBUS_CONNECTION
+// test cases similar to BasicLockUnlockQueue, however with cross-fixture calls
+BOOST_AUTO_TEST_CASE(IPCLockFromDbusQueue)
+{
+    ZonesManager cm(dispatcher.getPoll(), TEST_CONFIG_PATH);
+    cm.start();
+    cm.createZone("test1", SIMPLE_TEMPLATE);
+    cm.createZone("test2", SIMPLE_TEMPLATE);
+    cm.restoreAll();
+
+    IPCFixture::HostAccessory hostIPC;
+    DbusFixture::HostAccessory hostDbus;
+
+    // we should be unlocked, Dbus should be able to call something
+    hostDbus.callMethodSetActiveZone("test1");
+
+    // lock the queue with IPC host
+    hostIPC.callMethodLockQueue();
+
+    // now Dbus should be unable to do calls
+    BOOST_REQUIRE_THROW(hostDbus.callMethodSetActiveZone("test2"), std::runtime_error);
+    BOOST_CHECK_EQUAL(hostDbus.callMethodGetActiveZoneId(), "test1");
+
+    // unlock
+    hostIPC.callMethodUnlockQueue();
+
+    // should be able to call now
+    hostDbus.callMethodSetActiveZone("test2");
+    BOOST_CHECK_EQUAL(hostDbus.callMethodGetActiveZoneId(), "test2");
+}
+
+BOOST_AUTO_TEST_CASE(DbusLockFromIPCQueue)
+{
+    ZonesManager cm(dispatcher.getPoll(), TEST_CONFIG_PATH);
+    cm.start();
+    cm.createZone("test1", SIMPLE_TEMPLATE);
+    cm.createZone("test2", SIMPLE_TEMPLATE);
+    cm.restoreAll();
+
+    IPCFixture::HostAccessory hostIPC;
+    DbusFixture::HostAccessory hostDbus;
+
+    // Same approach as in IPCLockFromDbusQueue, however with flipped host types
+    hostIPC.callMethodSetActiveZone("test1");
+
+    hostDbus.callMethodLockQueue();
+
+    BOOST_REQUIRE_THROW(hostIPC.callMethodSetActiveZone("test2"), std::runtime_error);
+    BOOST_CHECK_EQUAL(hostIPC.callMethodGetActiveZoneId(), "test1");
+
+    hostDbus.callMethodUnlockQueue();
+
+    hostIPC.callMethodSetActiveZone("test2");
+    BOOST_CHECK_EQUAL(hostIPC.callMethodGetActiveZoneId(), "test2");
+}
+
+// simulate disconnect cross-fixture
+BOOST_AUTO_TEST_CASE(IPCLockFromDbusAndDisconnectQueue)
+{
+    ZonesManager cm(dispatcher.getPoll(), TEST_CONFIG_PATH);
+    cm.start();
+    cm.createZone("test1", SIMPLE_TEMPLATE);
+    cm.createZone("test2", SIMPLE_TEMPLATE);
+    cm.restoreAll();
+
+    DbusFixture::HostAccessory hostDbus;
+
+    {
+        IPCFixture::HostAccessory hostIPC;
+
+        // we should be unlocked, Dbus should be able to call something
+        hostDbus.callMethodSetActiveZone("test1");
+
+        // lock the queue with IPC host
+        hostIPC.callMethodLockQueue();
+
+        // now Dbus should be unable to do calls
+        BOOST_REQUIRE_THROW(hostDbus.callMethodSetActiveZone("test2"), std::runtime_error);
+        BOOST_CHECK_EQUAL(hostDbus.callMethodGetActiveZoneId(), "test1");
+
+        // leaving scope should simulate disconnect
+    }
+
+    // should be able to call now
+    hostDbus.callMethodSetActiveZone("test2");
+    BOOST_CHECK_EQUAL(hostDbus.callMethodGetActiveZoneId(), "test2");
+}
+
+BOOST_AUTO_TEST_CASE(DbusLockFromIPCAndDisconnectQueue)
+{
+    ZonesManager cm(dispatcher.getPoll(), TEST_CONFIG_PATH);
+    cm.start();
+    cm.createZone("test1", SIMPLE_TEMPLATE);
+    cm.createZone("test2", SIMPLE_TEMPLATE);
+    cm.restoreAll();
+
+    IPCFixture::HostAccessory hostIPC;
+
+    {
+        DbusFixture::HostAccessory hostDbus;
+
+        // Same approach as in IPCLockFromDbusAndDisconnectQueue, however with flipped host types
+        hostIPC.callMethodSetActiveZone("test1");
+
+        hostDbus.callMethodLockQueue();
+
+        BOOST_REQUIRE_THROW(hostIPC.callMethodSetActiveZone("test2"), std::runtime_error);
+        BOOST_CHECK_EQUAL(hostIPC.callMethodGetActiveZoneId(), "test1");
+    }
+
+    hostIPC.callMethodSetActiveZone("test2");
+    BOOST_CHECK_EQUAL(hostIPC.callMethodGetActiveZoneId(), "test2");
+}
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
