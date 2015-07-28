@@ -30,7 +30,7 @@ namespace lxcpp {
 
 class Container {
 public:
-    virtual ~Container();
+    virtual ~Container() {};
 
     virtual std::string getName() = 0;
     virtual void setName(const std::string& name) = 0;

@@ -17,19 +17,19 @@
 
 /**
  * @file
- * @author  Mateusz Malicki (m.malicki2@samsung.com)
- * @brief   lxcpp container factory
+ * @author  Jan Olszak (j.olszak@samsung.com)
+ * @brief   process handling routines
  */
 
-#ifndef LXCPP_LXCPP_HPP
-#define LXCPP_LXCPP_HPP
+#ifndef LXCPP_PROCESS_HPP
+#define LXCPP_PROCESS_HPP
 
-#include "lxcpp/container.hpp"
+#include <sys/types.h>
 
 namespace lxcpp {
 
-Container* createContainer();
+pid_t clone(int (*function)(void *), int flags, void *args);
 
 } // namespace lxcpp
 
-#endif // LXCPP_LXCPP_HPP
+#endif // LXCPP_PROCESS_HPP

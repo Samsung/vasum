@@ -21,8 +21,8 @@
  * @brief   ContainerImpl definition
  */
 
-#include <lxcpp/container-impl.hpp>
-#include <lxcpp/exception.hpp>
+#include "lxcpp/container-impl.hpp"
+#include "lxcpp/exception.hpp"
 
 namespace lxcpp {
 
@@ -36,62 +36,62 @@ ContainerImpl::~ContainerImpl()
 
 std::string ContainerImpl::getName()
 {
-    throw NotImplemented();
+    throw NotImplementedException();
 }
 
 void ContainerImpl::setName(const std::string& /* name */)
 {
-    throw NotImplemented();
+    throw NotImplementedException();
 }
 
 void ContainerImpl::start()
 {
-    throw NotImplemented();
+    throw NotImplementedException();
 }
 
 void ContainerImpl::stop()
 {
-    throw NotImplemented();
+    throw NotImplementedException();
 }
 
 void ContainerImpl::freeze()
 {
-    throw NotImplemented();
+    throw NotImplementedException();
 }
 
 void ContainerImpl::unfreeze()
 {
-    throw NotImplemented();
+    throw NotImplementedException();
 }
 
 void ContainerImpl::reboot()
 {
-    throw NotImplemented();
+    throw NotImplementedException();
 }
 
 int ContainerImpl::getInitPid()
 {
-    throw NotImplemented();
+    throw NotImplementedException();
 }
 
 void ContainerImpl::create()
 {
-    throw NotImplemented();
+    throw NotImplementedException();
 }
 
 void ContainerImpl::destroy()
 {
-    throw NotImplemented();
+    throw NotImplementedException();
 }
 
 void ContainerImpl::setRootPath(const std::string& /* path */)
 {
-    throw NotImplemented();
+    throw NotImplementedException();
 }
 
-std::string getRootPath()
+std::string ContainerImpl::getRootPath()
 {
-    throw NotImplemented();
+    throw NotImplementedException();
 }
 
 } // namespace lxcpp

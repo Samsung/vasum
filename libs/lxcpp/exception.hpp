@@ -28,18 +28,23 @@
 
 namespace lxcpp {
 
-class ContainerException : std::runtime_error
-{
-public:
-    ContainerException(const std::string& what) : std::runtime_error(what) {}
+/**
+ * Base class for exceptions in lxcpp
+ */
+struct Exception: public std::runtime_error {
+    Exception(const std::string& message)
+        : std::runtime_error(message) {}
 };
 
-class NotImplemented : ContainerException
-{
-public:
-    NotImplemented() : ContainerException(std::string()) {}
+struct NotImplementedException: public Exception {
+    NotImplementedException(const std::string& message = "Functionality not yet implemented")
+        : Exception(message) {}
 };
 
+struct ProcessSetupException: public Exception {
+    ProcessSetupException(const std::string& message = "Error during setting up a process")
+        : Exception(message) {}
+};
 } // namespace lxcpp
 
 #endif // LXCPP_EXCEPTION_HPP

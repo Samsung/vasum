@@ -17,19 +17,36 @@
 
 /**
  * @file
- * @author  Mateusz Malicki (m.malicki2@samsung.com)
- * @brief   lxcpp container factory
+ * @author  Jan Olszak (j.olszak@samsung.com)
+ * @brief   process handling routines
  */
 
-#ifndef LXCPP_LXCPP_HPP
-#define LXCPP_LXCPP_HPP
+#include "lxcpp/process.hpp"
+#include "lxcpp/exception.hpp"
+#include "logger/logger.hpp"
 
-#include "lxcpp/container.hpp"
+#include <alloca.h>
+#include <sched.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 namespace lxcpp {
 
-Container* createContainer();
+pid_t clone(int (*function)(void *), int flags, void *args) {
+    // Won't fail, well known resource name
+    size_t stackSize = ::sysconf(_SC_PAGESIZE);
+
+    // PAGESIZE is enough, it'll exec after this
+    char *stack = static_cast<char*>(::alloca(stackSize));
+
+    pid_t ret;
+    ret = ::clone(function, stack  + stackSize, flags | SIGCHLD, args);
+    if (ret < 0) {
+        LOGE("clone() failed");
+        throw ProcessSetupException("clone() failed");
+    }
+
+    return ret;
+}
 
 } // namespace lxcpp
-
-#endif // LXCPP_LXCPP_HPP

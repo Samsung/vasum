@@ -21,7 +21,7 @@
  * @brief   lxcpp container factory definition
  */
 
-#include <lxcpp/container-impl.hpp>
+#include "lxcpp/container-impl.hpp"
 
 namespace lxcpp {
 

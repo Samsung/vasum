@@ -24,7 +24,7 @@
 #ifndef LXCPP_CONTAINER_IMPL_HPP
 #define LXCPP_CONTAINER_IMPL_HPP
 
-#include <lxcpp/container.hpp>
+#include "lxcpp/container.hpp"
 
 namespace lxcpp {
 
