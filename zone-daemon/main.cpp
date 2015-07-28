@@ -33,6 +33,7 @@
 #include "logger/backend-journal.hpp"
 #include "logger/backend-syslog.hpp"
 #include "utils/typeinfo.hpp"
+#include "utils/daemon.hpp"
 
 #include <boost/program_options.hpp>
 #include <iostream>
@@ -58,8 +59,9 @@ int main(int argc, char* argv[])
 
         desc.add_options()
         ("help,h", "print this help")
-        ("version,v", "show application version")
+        ("daemon,d", "Run server as daemon")
         ("log-level,l", po::value<std::string>()->default_value("DEBUG"), "set log level")
+        ("version,v", "show application version")
         ;
 
         po::variables_map vm;
@@ -91,6 +93,13 @@ int main(int argc, char* argv[])
         } else if (vm.count("version")) {
             std::cout << PROGRAM_NAME_AND_VERSION << std::endl;
             return 0;
+        }
+
+        bool runAsDaemon = vm.count("daemon") > 0;
+
+        if (runAsDaemon && !utils::daemonize()) {
+            std::cerr << "Failed to daemonize" << std::endl;
+            return 1;
         }
 
         Logger::setLogLevel(vm["log-level"].as<std::string>());
