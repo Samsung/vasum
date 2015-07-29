@@ -33,7 +33,7 @@ namespace logger {
  * @brief Available log levels
  * @ingroup libLogger
  */
-enum class LogLevel {
+enum class LogLevel : int {
     TRACE, ///< Most detailed log level
     DEBUG, ///< Debug logs
     INFO,  ///< Information

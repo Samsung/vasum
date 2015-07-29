@@ -487,6 +487,7 @@ The package provides liblxcpp library.
 %files -n liblxcpp
 %defattr(644,root,root,755)
 %{_libdir}/liblxcpp.so.0
+%attr(755,root,root) %{_libexecdir}/lxcpp-guard
 %attr(755,root,root) %{_libdir}/liblxcpp.so.%{version}
 
 %package -n liblxcpp-devel

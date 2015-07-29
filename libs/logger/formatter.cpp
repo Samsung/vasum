@@ -26,6 +26,7 @@
 #include "logger/formatter.hpp"
 #include "utils/ccolor.hpp"
 
+#include <unistd.h>
 #include <sys/time.h>
 #include <cassert>
 #include <sstream>
@@ -39,7 +40,7 @@ namespace {
 
 const int TIME_COLUMN_LENGTH = 12;
 const int SEVERITY_COLUMN_LENGTH = 8;
-const int THREAD_COLUMN_LENGTH = 3;
+const int PROCESS_COLUMN_LENGTH = 8;
 const int FILE_COLUMN_LENGTH = 60;
 
 std::atomic<unsigned int> gNextThreadId(1);
@@ -122,7 +123,7 @@ std::string LogFormatter::getHeader(LogLevel logLevel,
     std::ostringstream logLine;
     logLine << getCurrentTime() << ' '
             << std::left << std::setw(SEVERITY_COLUMN_LENGTH) << '[' + toString(logLevel) + ']'
-            << std::right << std::setw(THREAD_COLUMN_LENGTH) << getCurrentThread() << ": "
+            << std::right << std::setw(PROCESS_COLUMN_LENGTH) << ::getpid() << "/" << getCurrentThread() << ": "
             << std::left << std::setw(FILE_COLUMN_LENGTH)
             << file + ':' + std::to_string(line) + ' ' + func + ':';
     return logLine.str();

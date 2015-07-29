@@ -61,9 +61,14 @@
 #define COMMON_LOGGER_LOGGER_HPP
 
 #include "logger/level.hpp"
+#include "logger/backend-null.hpp"
+#ifdef HAVE_SYSTEMD
+#include "logger/backend-journal.hpp"
+#endif
 #include "logger/backend-file.hpp"
-#include "logger/backend-stderr.hpp"
 #include "logger/backend-persistent-file.hpp"
+#include "logger/backend-syslog.hpp"
+#include "logger/backend-stderr.hpp"
 
 #include <sstream>
 #include <string>
@@ -73,6 +78,27 @@
 #endif
 
 namespace logger {
+
+enum class LogType : int {
+    LOG_NULL,
+    LOG_JOURNALD,
+    LOG_FILE,
+    LOG_PERSISTENT_FILE,
+    LOG_SYSLOG,
+    LOG_STDERR
+};
+
+/**
+ * A helper function to easily and completely setup a new logger
+ *
+ * @param type      logger type to be set up
+ * @param level     maximum log level that will be logged
+ * @param arg       an argument used by some loggers, specific to them
+ *                  (e.g. file name for file loggers)
+ */
+void setupLogger(const LogType type,
+                 const LogLevel level,
+                 const std::string &arg = "");
 
 class LogBackend;
 

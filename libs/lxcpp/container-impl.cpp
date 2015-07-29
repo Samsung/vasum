@@ -28,6 +28,7 @@
 #include "lxcpp/namespace.hpp"
 #include "lxcpp/capability.hpp"
 #include "lxcpp/commands/attach.hpp"
+#include "lxcpp/commands/start.hpp"
 
 #include "logger/logger.hpp"
 #include "utils/exception.hpp"
@@ -120,9 +121,18 @@ pid_t ContainerImpl::getInitPid() const
     return mConfig.mInitPid;
 }
 
+void ContainerImpl::setLogger(const logger::LogType type,
+                              const logger::LogLevel level,
+                              const std::string &arg)
+{
+    mConfig.mLogger.set(type, level, arg);
+}
+
 void ContainerImpl::start()
 {
-    throw NotImplementedException();
+    // TODO: check config consistency and completeness somehow
+    Start start(mConfig);
+    start.execute();
 }
 
 void ContainerImpl::stop()

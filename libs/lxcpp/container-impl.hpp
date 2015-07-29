@@ -25,36 +25,14 @@
 #define LXCPP_CONTAINER_IMPL_HPP
 
 #include <sys/types.h>
-#include <config/config.hpp>
-#include <config/fields.hpp>
 #include <memory>
 
+#include "lxcpp/container-config.hpp"
 #include "lxcpp/container.hpp"
 #include "lxcpp/namespace.hpp"
 #include "lxcpp/network.hpp"
 
-#include "utils/channel.hpp"
-
 namespace lxcpp {
-
-struct ContainerConfig {
-    std::string mName;
-    std::string mRootPath;
-    pid_t mGuardPid;
-    pid_t mInitPid;
-    std::vector<std::string> mInit;
-
-    ContainerConfig() : mGuardPid(-1), mInitPid(-1) {}
-
-    CONFIG_REGISTER
-    (
-        mName,
-        mRootPath,
-        mGuardPid,
-        mInitPid,
-        mInit
-    )
-};
 
 
 class ContainerImpl : public virtual Container {
@@ -72,6 +50,10 @@ public:
 
     const std::vector<std::string>& getInit();
     void setInit(const std::vector<std::string> &init);
+
+    void setLogger(const logger::LogType type,
+                   const logger::LogLevel level,
+                   const std::string &arg);
 
     const std::vector<Namespace>& getNamespaces() const;
 

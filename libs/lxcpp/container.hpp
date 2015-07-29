@@ -25,6 +25,7 @@
 #define LXCPP_CONTAINER_HPP
 
 #include "lxcpp/network-config.hpp"
+#include "lxcpp/logger-config.hpp"
 #include <sys/types.h>
 
 #include <string>
@@ -59,6 +60,10 @@ public:
 
     virtual const std::vector<std::string>& getInit() = 0;
     virtual void setInit(const std::vector<std::string> &init) = 0;
+
+    virtual void setLogger(const logger::LogType type,
+                           const logger::LogLevel level,
+                           const std::string &arg) = 0;
 
     // Execution actions
     virtual void start() = 0;

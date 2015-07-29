@@ -66,6 +66,11 @@ struct CapabilitySetupException: public Exception {
         : Exception(message) {}
 };
 
+struct UtilityException: public Exception {
+    explicit UtilityException(const std::string& message = "Error during an utility operation")
+        : Exception(message) {}
+};
+
 struct BadArgument: public Exception {
     explicit BadArgument(const std::string& message = "Bad argument passed")
         : Exception(message) {}

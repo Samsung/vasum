@@ -27,6 +27,8 @@
 
 #include "logger/logger.hpp"
 
+#include <fcntl.h>
+#include <unistd.h>
 #include <sys/socket.h>
 
 namespace {
@@ -36,15 +38,27 @@ const int RIGHT = 1;
 
 namespace utils {
 
-Channel::Channel()
+Channel::Channel(const bool closeOnExec)
     : mSocketIndex(-1)
 {
-    if (::socketpair(AF_LOCAL, SOCK_STREAM | SOCK_CLOEXEC, 0, mSockets) < 0) {
+    int flags = SOCK_STREAM;
+    if (closeOnExec) {
+        flags |= SOCK_CLOEXEC;
+    };
+
+    if (::socketpair(AF_LOCAL, flags, 0, mSockets.data()) < 0) {
         const std::string msg = "socketpair() failed: " +
                                 utils::getSystemErrorMessage();
         LOGE(msg);
         throw UtilsException(msg);
     }
+}
+
+Channel::Channel(const int fd)
+    : mSocketIndex(LEFT),
+      mSockets{{fd, -1}}
+{
+    assert(fd >= 0);
 }
 
 Channel::~Channel()
@@ -53,17 +67,23 @@ Channel::~Channel()
     closeSocket(RIGHT);
 }
 
+/*
+ * This function has to be safe in regard to signal(7)
+ */
 void Channel::setLeft()
 {
     mSocketIndex = LEFT;
-    utils::close(mSockets[RIGHT]);
+    ::close(mSockets[RIGHT]);
     mSockets[RIGHT] = -1;
 }
 
+/*
+ * This function has to be safe in regard to signal(7)
+ */
 void Channel::setRight()
 {
     mSocketIndex = RIGHT;
-    utils::close(mSockets[LEFT]);
+    ::close(mSockets[LEFT]);
     mSockets[LEFT] = -1;
 }
 
@@ -71,6 +91,33 @@ void Channel::shutdown()
 {
     assert(mSocketIndex != -1 && "Channel's end isn't set");
     closeSocket(mSocketIndex);
+}
+
+int Channel::getFD()
+{
+    assert(mSocketIndex != -1 && "Channel's end isn't set");
+    return mSockets[mSocketIndex];
+}
+
+int Channel::getLeftFD()
+{
+    return mSockets[LEFT];
+}
+
+int Channel::getRightFD()
+{
+    return mSockets[RIGHT];
+}
+
+void Channel::setCloseOnExec(const bool closeOnExec)
+{
+    const int fd = getFD();
+
+    if (closeOnExec) {
+        ::fcntl(fd, F_SETFD, ::fcntl(fd, F_GETFD) | FD_CLOEXEC);
+    } else {
+        ::fcntl(fd, F_SETFD, ::fcntl(fd, F_GETFD) & ~FD_CLOEXEC);
+    }
 }
 
 void Channel::closeSocket(int socketIndex)

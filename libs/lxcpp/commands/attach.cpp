@@ -167,6 +167,8 @@ void Attach::execute()
         parent(intermChannel, interPid);
         intermChannel.shutdown();
     } else {
+        // TODO: only safe functions mentioned in signal(7) should be used below.
+        // This is not the case now, needs fixing.
         intermChannel.setRight();
         interm(intermChannel, call);
         intermChannel.shutdown();

@@ -40,6 +40,44 @@ std::mutex gLogMutex;
 
 } // namespace
 
+void setupLogger(const LogType type,
+                 const LogLevel level,
+                 const std::string &arg)
+{
+    if (type == LogType::LOG_FILE || type == LogType::LOG_PERSISTENT_FILE) {
+        if (arg.empty()) {
+            throw std::runtime_error("Path needs to be specified in the agument");
+        }
+    }
+
+    switch(type) {
+    case LogType::LOG_NULL:
+        Logger::setLogBackend(new NullLogger());
+        break;
+#ifdef HAVE_SYSTEMD
+    case LogType::LOG_JOURNALD:
+        Logger::setLogBackend(new SystemdJournalBackend());
+        break;
+#endif
+    case LogType::LOG_FILE:
+        Logger::setLogBackend(new FileBackend(arg));
+        break;
+    case LogType::LOG_PERSISTENT_FILE:
+        Logger::setLogBackend(new PersistentFileBackend(arg));
+        break;
+    case LogType::LOG_SYSLOG:
+        Logger::setLogBackend(new SyslogBackend());
+        break;
+    case LogType::LOG_STDERR:
+        Logger::setLogBackend(new StderrBackend());
+        break;
+    default:
+        throw std::runtime_error("Bad logger type passed");
+    }
+
+    Logger::setLogLevel(level);
+}
+
 void Logger::logMessage(LogLevel logLevel,
                         const std::string& message,
                         const std::string& file,

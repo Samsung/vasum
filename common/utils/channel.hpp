@@ -26,6 +26,8 @@
 #define COMMON_UTILS_CHANNEL_HPP
 
 #include "utils/fd-utils.hpp"
+
+#include <array>
 #include <cassert>
 
 namespace utils {
@@ -35,7 +37,8 @@ namespace utils {
  */
 class Channel {
 public:
-    Channel();
+    explicit Channel(const bool closeOnExec = true);
+    explicit Channel(const int fd);
     ~Channel();
 
     Channel(const Channel&) = delete;
@@ -72,12 +75,32 @@ public:
     template<typename Data>
     Data read();
 
+    /**
+     * Get an active file descriptor
+     */
+    int getFD();
+
+    /**
+     * Gen the left file descriptor
+     */
+    int getLeftFD();
+
+    /**
+     * Gen the right file descriptor
+     */
+    int getRightFD();
+
+    /**
+     * Sets close on exec on an active fd to either true or false
+     */
+    void setCloseOnExec(const bool closeOnExec);
+
 private:
 
     void closeSocket(int socketIndex);
 
     int mSocketIndex;
-    int mSockets[2];
+    std::array<int, 2> mSockets;
 };
 
 template<typename Data>

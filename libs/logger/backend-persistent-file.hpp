@@ -27,7 +27,9 @@
 
 #include "logger/backend.hpp"
 
+#include <fcntl.h>
 #include <fstream>
+#include <ext/stdio_filebuf.h>
 
 namespace logger {
 
@@ -35,7 +37,12 @@ class PersistentFileBackend : public LogBackend {
 public:
     PersistentFileBackend(const std::string& filePath) :
         mfilePath(filePath),
-        mOut(mfilePath, std::ios::app) {}
+        mOut(mfilePath, std::ios::app)
+    {
+        using filebufType = __gnu_cxx::stdio_filebuf<std::ofstream::char_type>;
+        const int fd = static_cast<filebufType*>(mOut.rdbuf())->fd();
+        ::fcntl(fd, F_SETFD, ::fcntl(fd, F_GETFD) | FD_CLOEXEC);
+    }
 
     void log(LogLevel logLevel,
              const std::string& file,
