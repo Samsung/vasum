@@ -120,6 +120,7 @@ bool waitPid(pid_t pid, int& status)
 {
     while (waitpid(pid, &status, 0) == -1) {
         if (errno != EINTR) {
+            LOGE("waitpid() failed: " << getSystemErrorMessage());
             return false;
         }
     }

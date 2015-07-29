@@ -21,23 +21,36 @@
  * @brief   process handling routines
  */
 
-#ifndef LXCPP_PROCESS_HPP
-#define LXCPP_PROCESS_HPP
+#ifndef LXCPP_NAMESPACE_HPP
+#define LXCPP_NAMESPACE_HPP
 
-#include "lxcpp/namespace.hpp"
-
-#include <sys/types.h>
+#include <sched.h>
+#include <string>
 #include <vector>
 
 namespace lxcpp {
 
-pid_t clone(int (*function)(void *),
-            void *args,
-            const std::vector<Namespace>& namespaces,
-            const int additionalFlags = 0);
+enum class Namespace : int {
+    USER = CLONE_NEWUSER,
+    MNT = CLONE_NEWNS,
+    PID = CLONE_NEWPID,
+    UTS = CLONE_NEWUTS,
+    IPC = CLONE_NEWIPC,
+    NET = CLONE_NEWNET
+};
 
-void setns(const std::vector<Namespace>& namespaces);
+Namespace operator |(const Namespace a, const Namespace b);
+
+std::string toString(const Namespace ns);
+
+std::string getNsPath(const pid_t pid);
+
+std::string getPath(const pid_t pid, const Namespace ns);
+
+int toFlag(const Namespace ns);
+
+int toFlag(const std::vector<Namespace>& namespaces);
 
 } // namespace lxcpp
 
-#endif // LXCPP_PROCESS_HPP
+#endif // LXCPP_NAMESPACE_HPP

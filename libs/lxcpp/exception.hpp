@@ -45,6 +45,12 @@ struct ProcessSetupException: public Exception {
     ProcessSetupException(const std::string& message = "Error during setting up a process")
         : Exception(message) {}
 };
+
+struct BadArgument: public Exception {
+    BadArgument(const std::string& message = "Bad argument passed")
+        : Exception(message) {}
+};
+
 } // namespace lxcpp
 
 #endif // LXCPP_EXCEPTION_HPP

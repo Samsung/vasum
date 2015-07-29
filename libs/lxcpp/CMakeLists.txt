@@ -37,6 +37,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 
 ## Link libraries ##############################################################
 INCLUDE_DIRECTORIES(${LIBS_FOLDER})
+INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} Logger)
 
 ## Generate the pc file ########################################################
