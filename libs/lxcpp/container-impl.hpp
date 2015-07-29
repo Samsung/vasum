@@ -24,6 +24,11 @@
 #ifndef LXCPP_CONTAINER_IMPL_HPP
 #define LXCPP_CONTAINER_IMPL_HPP
 
+#include <sys/types.h>
+#include <config/config.hpp>
+#include <config/fields.hpp>
+#include <memory>
+
 #include "lxcpp/container.hpp"
 #include "lxcpp/namespace.hpp"
 #include "lxcpp/network.hpp"
@@ -32,28 +37,50 @@
 
 namespace lxcpp {
 
+struct ContainerConfig {
+    std::string mName;
+    std::string mRootPath;
+    pid_t mGuardPid;
+    pid_t mInitPid;
+    std::vector<std::string> mInit;
+
+    ContainerConfig() : mGuardPid(-1), mInitPid(-1) {}
+
+    CONFIG_REGISTER
+    (
+        mName,
+        mRootPath,
+        mGuardPid,
+        mInitPid,
+        mInit
+    )
+};
+
+
 class ContainerImpl : public virtual Container {
 public:
-    ContainerImpl();
+    ContainerImpl(const std::string &name, const std::string &path);
+    ContainerImpl(pid_t guardPid);
     ~ContainerImpl();
 
-    std::string getName();
-    void setName(const std::string& name);
+    // Configuration
+    const std::string& getName() const;
+    const std::string& getRootPath() const;
 
-    //Execution actions
+    pid_t getGuardPid() const;
+    pid_t getInitPid() const;
+
+    const std::vector<std::string>& getInit();
+    void setInit(const std::vector<std::string> &init);
+
+    const std::vector<Namespace>& getNamespaces() const;
+
+    // Execution actions
     void start();
     void stop();
     void freeze();
     void unfreeze();
     void reboot();
-    pid_t getInitPid() const;
-    const std::vector<Namespace>& getNamespaces() const;
-
-    //Filesystem actions
-    void create();
-    void destroy();
-    void setRootPath(const std::string& path);
-    std::string getRootPath();
 
     // Other
     void attach(Container::AttachCall& attachCall,
@@ -80,7 +107,9 @@ public:
     void delAddr(const std::string& ifname, const InetAddr& addr);
 
 private:
-    pid_t mInitPid;
+    ContainerConfig mConfig;
+
+    // TODO: convert to ContainerConfig struct
     std::vector<Namespace> mNamespaces;
     std::vector<NetworkInterfaceConfig> mInterfaceConfig;
 };

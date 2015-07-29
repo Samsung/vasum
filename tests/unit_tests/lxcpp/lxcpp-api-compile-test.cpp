@@ -27,6 +27,7 @@ using namespace lxcpp;
 
 int main(int /*argc*/, const char * /*argv*/ [])
 {
-    Container* c = createContainer();
+    Container* c = createContainer("Name", "/");
+
     delete c;
 }

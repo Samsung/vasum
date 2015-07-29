@@ -42,7 +42,7 @@ struct NotImplementedException: public Exception {
 };
 
 struct ProcessSetupException: public Exception {
-    ProcessSetupException(const std::string& message = "Error during setting up a process")
+    ProcessSetupException(const std::string& message = "Error while setting up a process")
         : Exception(message) {}
 };
 
@@ -78,6 +78,11 @@ struct NoSuchValue: public Exception {
 
 struct NetworkException : public Exception {
     NetworkException (const std::string& message = "Error during setting up a network")
+        : Exception(message) {}
+};
+
+struct ConfigureException: public Exception {
+    ConfigureException(const std::string& message = "Error while configuring a container")
         : Exception(message) {}
 };
 

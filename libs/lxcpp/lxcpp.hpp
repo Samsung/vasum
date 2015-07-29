@@ -28,7 +28,7 @@
 
 namespace lxcpp {
 
-Container* createContainer();
+Container* createContainer(const std::string &name, const std::string &path);
 
 } // namespace lxcpp
 

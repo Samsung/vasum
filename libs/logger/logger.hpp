@@ -36,6 +36,7 @@
  * Logger::setLogBackend(new NullLogger());
  * Logger::setLogBackend(new SystemdJournalBackend());
  * Logger::setLogBackend(new FileBackend("/tmp/logs.txt"));
+ * Logger::setLogBackend(new PersistentFileBackend("/tmp/logs.txt"));
  * Logger::setLogBackend(new SyslogBackend());
  * Logger::setLogBackend(new StderrBackend());
  *
@@ -62,6 +63,7 @@
 #include "logger/level.hpp"
 #include "logger/backend-file.hpp"
 #include "logger/backend-stderr.hpp"
+#include "logger/backend-persistent-file.hpp"
 
 #include <sstream>
 #include <string>

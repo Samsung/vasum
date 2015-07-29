@@ -29,29 +29,95 @@
 #include "lxcpp/capability.hpp"
 #include "lxcpp/commands/attach.hpp"
 
+#include "logger/logger.hpp"
 #include "utils/exception.hpp"
 
 #include <unistd.h>
 #include <sys/mount.h>
+#include <sys/wait.h>
+#include <mutex>
+#include <algorithm>
+
 
 namespace lxcpp {
 
-ContainerImpl::ContainerImpl()
+ContainerImpl::ContainerImpl(const std::string &name, const std::string &path)
 {
+    if (name.empty()) {
+        const std::string msg = "Name cannot be empty";
+        LOGE(msg);
+        throw ConfigureException(msg);
+    }
+
+    if (path.empty()) {
+        const std::string msg = "Path cannot be empty";
+        LOGE(msg);
+        throw ConfigureException(msg);
+    }
+
+    if(::access(path.c_str(), X_OK) < 0) {
+        const std::string msg = "Path must point to a traversable directory";
+        LOGE(msg);
+        throw ConfigureException(msg);
+    }
+
+    mConfig.mName = name;
+    mConfig.mRootPath = path;
+}
+
+// TODO: the aim of this constructor is to create a new ContainerImpl based on an already
+// running container. It should talk to its guard and receive its current config.
+ContainerImpl::ContainerImpl(pid_t /*guardPid*/)
+{
+    throw NotImplementedException();
 }
 
 ContainerImpl::~ContainerImpl()
 {
 }
 
-std::string ContainerImpl::getName()
+const std::string& ContainerImpl::getName() const
 {
-    throw NotImplementedException();
+    return mConfig.mName;
 }
 
-void ContainerImpl::setName(const std::string& /* name */)
+const std::string& ContainerImpl::getRootPath() const
 {
-    throw NotImplementedException();
+    return mConfig.mRootPath;
+}
+
+const std::vector<std::string>& ContainerImpl::getInit()
+{
+    return mConfig.mInit;
+}
+
+void ContainerImpl::setInit(const std::vector<std::string> &init)
+{
+    if (init.empty() || init[0].empty()) {
+        const std::string msg = "Init path cannot be empty";
+        LOGE(msg);
+        throw ConfigureException(msg);
+    }
+
+    std::string path = mConfig.mRootPath + "/" + init[0];
+
+    if (::access(path.c_str(), X_OK) < 0) {
+        const std::string msg = "Init path must point to an executable file";
+        LOGE(msg);
+        throw ConfigureException(msg);
+    }
+
+    mConfig.mInit = init;
+}
+
+pid_t ContainerImpl::getGuardPid() const
+{
+    return mConfig.mGuardPid;
+}
+
+pid_t ContainerImpl::getInitPid() const
+{
+    return mConfig.mInitPid;
 }
 
 void ContainerImpl::start()
@@ -79,31 +145,6 @@ void ContainerImpl::reboot()
     throw NotImplementedException();
 }
 
-pid_t ContainerImpl::getInitPid() const
-{
-    return mInitPid;
-}
-
-void ContainerImpl::create()
-{
-    throw NotImplementedException();
-}
-
-void ContainerImpl::destroy()
-{
-    throw NotImplementedException();
-}
-
-void ContainerImpl::setRootPath(const std::string& /* path */)
-{
-    throw NotImplementedException();
-}
-
-std::string ContainerImpl::getRootPath()
-{
-    throw NotImplementedException();
-}
-
 void ContainerImpl::attach(Container::AttachCall& call,
                            const std::string& cwdInContainer)
 {
@@ -124,7 +165,6 @@ const std::vector<Namespace>& ContainerImpl::getNamespaces() const
 {
     return mNamespaces;
 }
-
 
 void ContainerImpl::addInterfaceConfig(const std::string& hostif,
                                        const std::string& zoneif,

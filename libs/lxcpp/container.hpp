@@ -50,22 +50,22 @@ public:
 
     virtual ~Container() {};
 
-    virtual std::string getName() = 0;
-    virtual void setName(const std::string& name) = 0;
+    // Configuration
+    virtual const std::string& getName() const = 0;
+    virtual const std::string& getRootPath() const = 0;
 
-    //Execution actions
+    virtual pid_t getGuardPid() const = 0;
+    virtual pid_t getInitPid() const = 0;
+
+    virtual const std::vector<std::string>& getInit() = 0;
+    virtual void setInit(const std::vector<std::string> &init) = 0;
+
+    // Execution actions
     virtual void start() = 0;
     virtual void stop() = 0;
     virtual void freeze() = 0;
     virtual void unfreeze() = 0;
     virtual void reboot() = 0;
-    virtual pid_t getInitPid() const = 0;
-
-    //Filesystem actions
-    virtual void create() = 0;
-    virtual void destroy() = 0;
-    virtual void setRootPath(const std::string& path) = 0;
-    virtual std::string getRootPath() = 0;
 
     // Other
     virtual void attach(AttachCall& attachCall,

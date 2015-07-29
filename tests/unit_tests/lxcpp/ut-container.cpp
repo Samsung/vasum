@@ -44,7 +44,7 @@ using namespace lxcpp;
 
 BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 {
-    auto c = createContainer();
+    auto c = createContainer("FirstTestContainer", "/");
     delete c;
 }
 
