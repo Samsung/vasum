@@ -562,8 +562,6 @@ void netdev_list(const Args& argv)
     }
     else {
         VsmNetdev netdev = NULL;
-        in_addr ipv4;
-        in6_addr ipv6;
         char buf[INET_ADDRSTRLEN|INET6_ADDRSTRLEN];
         CommandLineInterface::executeCallback(bind(vsm_lookup_netdev_by_name,
                   _1,
@@ -573,25 +571,21 @@ void netdev_list(const Args& argv)
         cout << netdevToString(netdev) << endl;
         vsm_netdev_free(netdev);
 
-        CommandLineInterface::executeCallback(bind(vsm_netdev_get_ipv4_addr,
+        VsmAddrList addrs = NULL;
+        CommandLineInterface::executeCallback(bind(vsm_netdev_get_ip_addr,
                   _1,
                   argv[1].c_str(),
                   argv[2].c_str(),
-                  &ipv4));
-        if (inet_ntop(AF_INET, &ipv4, buf, INET_ADDRSTRLEN) == NULL) {
-            throw runtime_error("Wrong address received");
+                  &addrs));
+        unsigned listsize = vsm_addrlist_size(addrs);
+        for (unsigned i=0; i < listsize; ++i) {
+            int type=vsm_addrlist_get_type(addrs, i);
+            if (inet_ntop(type, vsm_addrlist_get_addr(addrs, i), buf, INET6_ADDRSTRLEN) == NULL) {
+                throw runtime_error("Wrong address received ["+std::to_string(i)+"] type="+std::to_string(type));
+            }
+            cout << buf << "/" << vsm_addrlist_get_prefix(addrs, i) << endl;
         }
-        cout << buf << endl;
-
-        CommandLineInterface::executeCallback(bind(vsm_netdev_get_ipv6_addr,
-                  _1,
-                  argv[1].c_str(),
-                  argv[2].c_str(),
-                  &ipv6));
-        if (inet_ntop(AF_INET6, &ipv6, buf, INET6_ADDRSTRLEN) == NULL) {
-            throw runtime_error("Wrong address received");
-        }
-        cout << buf << endl;
+        vsm_addrlist_free(addrs);
     }
 }
 
@@ -606,7 +600,7 @@ void netdev_add_ip_addr(const Args& argv)
         if (inet_pton(AF_INET, argv[3].c_str(), &addr) != 1) {
             throw runtime_error("Wrong address format");
         };
-        CommandLineInterface::executeCallback(bind(vsm_netdev_set_ipv4_addr,
+        CommandLineInterface::executeCallback(bind(vsm_netdev_add_ipv4_addr,
                   _1,
                   argv[1].c_str(),
                   argv[2].c_str(),
@@ -618,7 +612,7 @@ void netdev_add_ip_addr(const Args& argv)
         if (inet_pton(AF_INET6, argv[3].c_str(), &addr) != 1) {
             throw runtime_error("Wrong address format");
         };
-        CommandLineInterface::executeCallback(bind(vsm_netdev_set_ipv6_addr,
+        CommandLineInterface::executeCallback(bind(vsm_netdev_add_ipv6_addr,
                   _1,
                   argv[1].c_str(),
                   argv[2].c_str(),

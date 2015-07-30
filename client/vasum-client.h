@@ -186,6 +186,7 @@ typedef char* VsmString;
  */
 typedef VsmString* VsmArrayString;
 
+typedef void *VsmAddrList;
 /**
  * Completion status of libvasum-client's functions
  */
@@ -652,6 +653,29 @@ VsmStatus vsm_revoke_device(VsmClient client, const char* zone, const char* devi
  */
 VsmStatus vsm_zone_get_netdevs(VsmClient client, const char* zone, VsmArrayString* netdevIds);
 
+
+/**
+ * Get ipv4 address for given netdevId
+ *
+ * @param[in] client vasum-server's client
+ * @param[in] zone zone name
+ * @param[in] netdevId netdev id
+ * @param[out] addrs ip address array
+ * @return status of this function call
+ * @remark Use vsm_netdev_addr_free() to free memory occupied by address array.
+ */
+VsmStatus vsm_netdev_get_ip_addr(VsmClient client,
+                                 const char* zone,
+                                 const char* netdevId,
+                                 VsmAddrList *addrs);
+
+/**
+ * Release VsmAddrList
+ *
+ * @param addrs VsmAddrList
+ */
+void vsm_addrlist_free(VsmAddrList addrs);
+
 /**
  * Get ipv4 address for given netdevId
  *
@@ -681,7 +705,7 @@ VsmStatus vsm_netdev_get_ipv6_addr(VsmClient client,
                                    struct in6_addr *addr);
 
 /**
- * Set ipv4 address for given netdevId
+ * Add ipv4 address for given netdevId
  *
  * @param[in] client vasum-server's client
  * @param[in] zone zone name
@@ -690,14 +714,14 @@ VsmStatus vsm_netdev_get_ipv6_addr(VsmClient client,
  * @param[in] prefix bit-length of the network prefix
  * @return status of this function call
  */
-VsmStatus vsm_netdev_set_ipv4_addr(VsmClient client,
+VsmStatus vsm_netdev_add_ipv4_addr(VsmClient client,
                                    const char* zone,
                                    const char* netdevId,
                                    struct in_addr *addr,
                                    int prefix);
 
 /**
- * Set ipv6 address for given netdevId
+ * Add ipv6 address for given netdevId
  *
  * @param[in] client vasum-server's client
  * @param[in] zone zone name
@@ -706,7 +730,7 @@ VsmStatus vsm_netdev_set_ipv4_addr(VsmClient client,
  * @param[in] prefix bit-length of the network prefix
  * @return status of this function call
  */
-VsmStatus vsm_netdev_set_ipv6_addr(VsmClient client,
+VsmStatus vsm_netdev_add_ipv6_addr(VsmClient client,
                                    const char* zone,
                                    const char* netdevId,
                                    struct in6_addr *addr,
@@ -932,6 +956,35 @@ VsmStatus vsm_remove_declaration(VsmClient client,
  * @return status of this function call
  */
 VsmStatus vsm_clean_up_zones_root(VsmClient client);
+
+/**
+ * Retrieve array size
+ *
+ * @return array size
+ */
+unsigned int vsm_addrlist_size(VsmAddrList addrs);
+
+/**
+ * Get address type for i'th entry
+ *
+ * @return network type (AF_INET or AF_INET6)
+ */
+int vsm_addrlist_get_type(VsmAddrList addrs, unsigned int i);
+
+/**
+ * Get pointer to in_addr property for i'th entry
+ * see inet_ntop man pages
+ *
+ * @return poiner of in_addr
+ */
+const void *vsm_addrlist_get_addr(VsmAddrList addrs, unsigned int i);
+
+/**
+ * Get address prefix for i'th entry
+ *
+ * @return adress prefix (mask bits count)
+ */
+unsigned int vsm_addrlist_get_prefix(VsmAddrList addrs, unsigned int i);
 
 #endif /* __VASUM_WRAPPER_SOURCE__ */
 

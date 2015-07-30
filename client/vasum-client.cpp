@@ -279,6 +279,21 @@ API VsmStatus vsm_zone_get_netdevs(VsmClient client,
     return getClient(client).vsm_zone_get_netdevs(zone, netdevIds);
 }
 
+API VsmStatus vsm_netdev_get_ip_addr(VsmClient client,
+                                 const char* zone,
+                                 const char* netdevId,
+                                 VsmAddrList *addrs)
+{
+    std::vector<InetAddr> addrlist;
+    VsmStatus status = getClient(client).vsm_netdev_get_ip_addr(zone, netdevId, addrlist);
+    int n = addrlist.size();
+    InetAddr *a = (InetAddr *)malloc((n+1)*sizeof(InetAddr));
+    std::copy(addrlist.begin(), addrlist.end(), a);
+    a[n].type=-1;
+    *addrs = a;
+    return status;
+}
+
 API VsmStatus vsm_netdev_get_ipv4_addr(VsmClient client,
                                        const char* zone,
                                        const char* netdevId,
@@ -295,22 +310,22 @@ API VsmStatus vsm_netdev_get_ipv6_addr(VsmClient client,
     return getClient(client).vsm_netdev_get_ipv6_addr(zone, netdevId, addr);
 }
 
-API VsmStatus vsm_netdev_set_ipv4_addr(VsmClient client,
+API VsmStatus vsm_netdev_add_ipv4_addr(VsmClient client,
                                        const char* zone,
                                        const char* netdevId,
                                        struct in_addr *addr,
                                        int prefix)
 {
-    return getClient(client).vsm_netdev_set_ipv4_addr(zone, netdevId, addr, prefix);
+    return getClient(client).vsm_netdev_add_ipv4_addr(zone, netdevId, addr, prefix);
 }
 
-API VsmStatus vsm_netdev_set_ipv6_addr(VsmClient client,
+API VsmStatus vsm_netdev_add_ipv6_addr(VsmClient client,
                                        const char* zone,
                                        const char* netdevId,
                                        struct in6_addr *addr,
                                        int prefix)
 {
-    return getClient(client).vsm_netdev_set_ipv6_addr(zone, netdevId, addr, prefix);
+    return getClient(client).vsm_netdev_add_ipv6_addr(zone, netdevId, addr, prefix);
 }
 
 API VsmStatus vsm_netdev_del_ipv4_addr(VsmClient client,
@@ -430,3 +445,29 @@ API VsmStatus vsm_clean_up_zones_root(VsmClient client)
     return getClient(client).vsm_clean_up_zones_root();
 }
 
+API unsigned int vsm_addrlist_size(VsmAddrList addrs)
+{
+    InetAddr *a = static_cast<InetAddr*>(addrs);
+    unsigned int i;
+    for (i = 0; a[i].type >= 0; ++i) ;
+    return i;
+}
+
+API int vsm_addrlist_get_type(VsmAddrList addrs, unsigned int i)
+{
+    return static_cast<InetAddr*>(addrs)[i].type;
+}
+
+API const void *vsm_addrlist_get_addr(VsmAddrList addrs, unsigned int i)
+{
+    return &static_cast<InetAddr*>(addrs)[i].addr;
+}
+
+API unsigned int vsm_addrlist_get_prefix(VsmAddrList addrs, unsigned int i)
+{
+    return static_cast<InetAddr*>(addrs)[i].prefix;
+}
+
+API void vsm_addrlist_free(VsmAddrList addrs) {
+    free(addrs);
+}

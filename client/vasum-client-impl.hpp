@@ -64,6 +64,19 @@ typedef struct NetdevStructure {
 } *Netdev;
 
 /**
+ * Network interface information structure
+ */
+typedef struct {
+    int type;
+    int prefix;
+    union {
+        struct in_addr ipv4;
+        struct in6_addr ipv6;
+    } addr;
+} InetAddr;
+
+
+/**
  * vasum's client definition.
  *
  * Client uses dbus API.
@@ -227,6 +240,10 @@ public:
      */
     VsmStatus vsm_zone_get_netdevs(const char* zone, VsmArrayString* netdevIds) noexcept;
 
+    VsmStatus vsm_netdev_get_ip_addr(const char* zone,
+                                     const char* netdevId,
+                                     std::vector<InetAddr>& addrs) noexcept;
+
     /**
      *  @see ::vsm_netdev_get_ipv4_addr
      */
@@ -242,17 +259,17 @@ public:
                                        struct in6_addr *addr) noexcept;
 
     /**
-     *  @see ::vsm_netdev_set_ipv4_addr
+     *  @see ::vsm_netdev_add_ipv4_addr
      */
-    VsmStatus vsm_netdev_set_ipv4_addr(const char* zone,
+    VsmStatus vsm_netdev_add_ipv4_addr(const char* zone,
                                        const char* netdevId,
                                        struct in_addr *addr,
                                        int prefix) noexcept;
 
     /**
-     *  @see ::vsm_netdev_set_ipv6_addr
+     *  @see ::vsm_netdev_add_ipv6_addr
      */
-    VsmStatus vsm_netdev_set_ipv6_addr(const char* zone,
+    VsmStatus vsm_netdev_add_ipv6_addr(const char* zone,
                                        const char* netdevId,
                                        struct in6_addr *addr,
                                        int prefix) noexcept;
@@ -376,10 +393,6 @@ private:
     bool isInternalDispatcherEnabled() const;
     ipc::epoll::EventPoll& getEventPoll() const;
     VsmStatus coverException(const std::function<void(void)>& worker) noexcept;
-    VsmStatus vsm_netdev_get_ip_addr(const char* zone,
-                                     const char* netdevId,
-                                     int type,
-                                     void* addr) noexcept;
 };
 
 #endif /* VASUM_CLIENT_IMPL_HPP */

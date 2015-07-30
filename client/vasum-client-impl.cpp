@@ -525,42 +525,48 @@ VsmStatus Client::vsm_zone_get_netdevs(const char* id, VsmArrayString* netdevIds
 
 VsmStatus Client::vsm_netdev_get_ip_addr(const char* id,
                                          const char* netdevId,
-                                         int type,
-                                         void* addr) noexcept
+                                         std::vector<InetAddr>& addrs) noexcept
 {
     using namespace boost::algorithm;
 
     return coverException([&] {
         IS_SET(id);
         IS_SET(netdevId);
-        IS_SET(addr);
+
+        addrs.clear();
 
         api::GetNetDevAttrs attrs = *mClient->callSync<api::GetNetDevAttrsIn, api::GetNetDevAttrs>(
             api::ipc::METHOD_GET_NETDEV_ATTRS,
             std::make_shared<api::GetNetDevAttrsIn>(api::GetNetDevAttrsIn{ id, netdevId }));
 
-        auto it = find_if(attrs.values.begin(),
-                          attrs.values.end(),
-                          [type](const api::StringPair& entry) {
-                return entry.first == (type == AF_INET ? "ipv4" : "ipv6");
-        });
+        for (const auto &attr : attrs.values) {
+            InetAddr addr;
+            if (attr.first == "ipv4") {
+                addr.type = AF_INET;
+            }
+            else if (attr.first == "ipv6") {
+                addr.type = AF_INET6;
+            }
+            else continue;
 
-        if (it != attrs.values.end()) {
-            vector<string> addrAttrs;
-            for(auto addrAttr : split(addrAttrs, it->second, is_any_of(","))) {
+            std::vector<std::string> addrAttrs;
+            for(const auto& addrAttr : split(addrAttrs, attr.second, is_any_of(","))) {
                 size_t pos = addrAttr.find(":");
-                if (addrAttr.substr(0, pos) == "ip") {
-                    if (pos != string::npos && pos < addrAttr.length() &&
-                        inet_pton(type, addrAttr.substr(pos + 1).c_str(), addr) == 1) {
-                        //XXX: return only one address
-                        return;
-                    } else {
-                        throw InvalidResponseException("Wrong address format returned");
+                if (pos == string::npos) continue;
+
+                if (addrAttr.substr(0, pos) == "prefixlen") {
+                    addr.prefix = atoi(addrAttr.substr(pos + 1).c_str());
+                }
+                else if (addrAttr.substr(0, pos) == "ip") {
+                    if (inet_pton(addr.type, addrAttr.substr(pos + 1).c_str(), &addr.addr) != 1) {
+                        addr.type = -1;
+                        break;
                     }
                 }
             }
+            if (addr.type >= 0)
+                addrs.push_back(addr);
         }
-        throw OperationFailedException("Address not found");
     });
 }
 
@@ -568,17 +574,33 @@ VsmStatus Client::vsm_netdev_get_ipv4_addr(const char* id,
                                       const char* netdevId,
                                       struct in_addr* addr) noexcept
 {
-    return vsm_netdev_get_ip_addr(id, netdevId, AF_INET, addr);
+    std::vector<InetAddr> addrs;
+    VsmStatus st=vsm_netdev_get_ip_addr(id, netdevId, addrs);
+    for (const auto& a : addrs) {
+        if (a.type == AF_INET) {
+            memcpy(addr, &a.addr, sizeof(*addr));
+            break;
+        }
+    }
+    return st;
 }
 
 VsmStatus Client::vsm_netdev_get_ipv6_addr(const char* id,
                                       const char* netdevId,
                                       struct in6_addr* addr) noexcept
 {
-    return vsm_netdev_get_ip_addr(id, netdevId, AF_INET6, addr);
+    std::vector<InetAddr> addrs;
+    VsmStatus st=vsm_netdev_get_ip_addr(id, netdevId, addrs);
+    for (const auto& a : addrs) {
+        if (a.type == AF_INET6) {
+            memcpy(addr, &a.addr, sizeof(*addr));
+            break;
+        }
+    }
+    return st;
 }
 
-VsmStatus Client::vsm_netdev_set_ipv4_addr(const char* id,
+VsmStatus Client::vsm_netdev_add_ipv4_addr(const char* id,
                                       const char* netdevId,
                                       struct in_addr* addr,
                                       int prefix) noexcept
@@ -596,7 +618,7 @@ VsmStatus Client::vsm_netdev_set_ipv4_addr(const char* id,
     });
 }
 
-VsmStatus Client::vsm_netdev_set_ipv6_addr(const char* id,
+VsmStatus Client::vsm_netdev_add_ipv6_addr(const char* id,
                                       const char* netdevId,
                                       struct in6_addr* addr,
                                       int prefix) noexcept
