@@ -1,0 +1,15 @@
+#!/bin/bash
+OPT=""
+OPT+=" --enable=all"
+OPT+=" --std=c++11"
+OPT+=" --inconclusive"
+OPT+=" --suppressions tests/cppcheck/cppcheck.suppress"
+OPT+=" --suppress=missingIncludeSystem"
+OPT+=" --inline-suppr"
+OPT+=" -iCMakeFiles"
+OPT+=" -I common"
+OPT+=" -I libs"
+OPT+=" -I client"
+OPT+=" -I server"
+OPT+=" -U__NR_capset"
+cppcheck ${OPT} --template=gcc ./ 1>/dev/null

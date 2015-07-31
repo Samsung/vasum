@@ -289,14 +289,15 @@ inline int NetlinkResponse::getHdrPosition() const
 
 NetlinkResponse send(const NetlinkMessage& msg, int pid)
 {
-    assert(msg.hdr().nlmsg_flags & NLM_F_ACK);
+    const auto &hdr = msg.hdr();
+    assert(hdr.nlmsg_flags & NLM_F_ACK);
 
     std::unique_ptr<std::vector<char>> data;
     Netlink nl;
     nl.open(pid);
     try {
-        nl.send(&msg.hdr());
-        data = nl.rcv(msg.hdr().nlmsg_seq);
+        nl.send(&hdr);
+        data = nl.rcv(hdr.nlmsg_seq);
     } catch (const std::exception& ex) {
         LOGE("Sending failed (" << ex.what() << ")");
         nl.close();

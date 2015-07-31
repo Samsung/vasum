@@ -40,9 +40,9 @@ public:
     virtual ~Daemon();
 
 private:
-    void onNameLostCallback();
-    void onGainFocusCallback();
-    void onLoseFocusCallback();
+    void onNameLostCallback() const;
+    void onGainFocusCallback() const;
+    void onLoseFocusCallback() const;
     std::unique_ptr<DaemonConnection> mConnectionPtr;
 };
 

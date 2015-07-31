@@ -63,7 +63,7 @@ struct Fixture {
         LOGI("------------ setup complete -----------");
     }
 
-    void prepare()
+    static void prepare()
     {
         ScopedGlibLoop loop;
         ipc::epoll::ThreadDispatcher mDispatcher;

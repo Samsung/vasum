@@ -595,7 +595,7 @@ void setAttrs(const pid_t nsPid, const std::string& netdev, const Attrs& attrs)
                 size_t pos = addrAttr.find(":");
                 if (pos == string::npos || pos == addrAttr.length()) {
                     LOGE("Wrong input data format: ill formed address attribute: " << addrAttr);
-                    VasumException("Wrong input data format: ill formed address attribute");
+                    throw VasumException("Wrong input data format: ill formed address attribute");
                 }
                 attrs.push_back(make_tuple(addrAttr.substr(0, pos), addrAttr.substr(pos + 1)));
             }

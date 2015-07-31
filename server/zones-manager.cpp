@@ -399,7 +399,7 @@ void ZonesManager::focusInternal(Zones::iterator iter)
     }
 
     Zone& zoneToFocus = get(iter);
-    const std::string idToFocus = zoneToFocus.getId();
+    const std::string& idToFocus = zoneToFocus.getId();
 
     if (idToFocus == mActiveZoneId) {
         return;

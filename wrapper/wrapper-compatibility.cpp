@@ -342,10 +342,9 @@ API int wait_for_pid_status(pid_t pid)
 API vsm_fso_type_t fso_string_to_type(char *str)
 {
     LOGS("");
-    int len;
     int i;
     for (i = 0; i <= VSM_FSO_MAX_TYPE; i++) {
-        len = strlen(fso_type_strtab[i]);
+        int len = strlen(fso_type_strtab[i]);
         if (strncmp(str, fso_type_strtab[i], len) == 0)
             return static_cast<vsm_fso_type_t>(i);
     }
@@ -358,12 +357,11 @@ API int mkdir_p(const char *dir, mode_t mode)
     LOGS("");
     const char *tmp = dir;
     const char *orig = dir;
-    char *makeme;
 
     do {
         dir = tmp + strspn(tmp, "/");
         tmp = dir + strcspn(dir, "/");
-        makeme = strndup(orig, dir - orig);
+        char *makeme = strndup(orig, dir - orig);
         if (*makeme) {
             if (mkdir(makeme, mode) && errno != EEXIST) {
                 free(makeme);
@@ -421,8 +419,6 @@ API int remove_file(char *path)
 {
     LOGS("");
     struct stat path_stat;
-    DIR *dp;
-    struct dirent *d;
     int status = 0;
 
     if (lstat(path, &path_stat) < 0) {
@@ -433,6 +429,8 @@ API int remove_file(char *path)
     }
 
     if (S_ISDIR(path_stat.st_mode)) {
+        struct dirent *d;
+        DIR *dp;
         if ((dp = opendir(path)) == NULL) {
             ERROR("Unable to opendir %s", path);
             return -1;
@@ -475,7 +473,6 @@ API int copy_file(const char *source, const char *dest, int /*flags*/)
     LOGS("");
     int ret;
     FILE *sfp, *dfp;
-    size_t nread, nwritten, size = BUF_SIZE;
     char buffer[BUF_SIZE];
 
     if ((sfp = fopen(source, "r")) == NULL) {
@@ -490,6 +487,7 @@ API int copy_file(const char *source, const char *dest, int /*flags*/)
     }
 
     while (1) {
+        size_t nread, nwritten, size = BUF_SIZE;
         nread = fread(buffer, 1, size, sfp);
 
         if (nread != size && ferror(sfp)) {
@@ -840,7 +838,7 @@ API pid_t get_init_pid(const char *name)
     fp = fopen(filename, "r");
 
     if (fp != NULL) {
-        if (fscanf(fp, "%d", &ret) < 0) {
+        if (fscanf(fp, "%7d", &ret) < 0) {
             ERROR("Failed to read %s\n", filename);
             ret = -2;
         }
@@ -894,7 +892,7 @@ API pid_t get_zone_pid(const char *name, const char *target)
         FILE *cmdfp;
         char cmdpath[PATH_MAX];
 
-        res = sscanf(line, "%d", &pid);
+        res = sscanf(line, "%7d", &pid);
         if (res != 1) {
             ERROR("Failed to read %s\n", path);
             res = -1;
@@ -915,7 +913,7 @@ API pid_t get_zone_pid(const char *name, const char *target)
             continue;
         }
 
-        if (fscanf(cmdfp, "%s", cmd) < 0) {
+        if (fscanf(cmdfp, "%1023s", cmd) < 0) {
             ERROR("Failed to read cmdline - pid : %d\n", pid);
             continue;
         }
@@ -1271,11 +1269,12 @@ static int parse_statement(struct parser_context *ctx, int argc, char **argv,
 {
     struct parser_state state;
     char *args[PARSER_MAXARGS];
-    int i, nargs, done, rc;
+    int i;
     int ret = 0;
     UNUSED(ctx);
 
     for (i = 0; i < argc; i++) {
+        int nargs, done, rc;
         done = nargs = 0;
         parser_init_state(&state, argv[i]);
 

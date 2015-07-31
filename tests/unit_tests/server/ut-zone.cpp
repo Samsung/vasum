@@ -102,12 +102,12 @@ struct Fixture {
     }
 
 
-    void ensureStarted()
+    static void ensureStarted()
     {
         // wait for zones init to fully start
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
-    void ensureStop()
+    static void ensureStop()
     {
         // wait for fully stop
         std::this_thread::sleep_for(std::chrono::milliseconds(200));

@@ -159,14 +159,9 @@ struct EmptyData {
 
 struct ThrowOnAcceptData {
     template<typename Visitor>
-    void accept(Visitor)
+    static void accept(Visitor)
     {
         throw std::runtime_error("intentional failure in accept");
-    }
-    template<typename Visitor>
-    void accept(Visitor) const
-    {
-        throw std::runtime_error("intentional failure in accept const");
     }
 };
 

@@ -50,9 +50,7 @@ Connection::Connection(const std::string& path)
 
 Connection::~Connection()
 {
-    if (::sqlite3_close(mDbPtr) != SQLITE_OK) {
-        throw ConfigException("Error during closing the database. Error: " + getErrorMessage());
-    }
+    ::sqlite3_close(mDbPtr);
 }
 
 void Connection::exec(const std::string& query)

@@ -60,10 +60,7 @@
 
 #define CONFIG_REGISTER_EMPTY                                      \
     template<typename Visitor>                                     \
-    void accept(Visitor ) {                                        \
-    }                                                              \
-    template<typename Visitor>                                     \
-    void accept(Visitor ) const {                                  \
+    static void accept(Visitor ) {                                 \
     }                                                              \
 
 #define CONFIG_REGISTER(...)                                       \

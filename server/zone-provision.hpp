@@ -113,10 +113,10 @@ private:
     void file(const ZoneProvisioningConfig::File& config);
     void link(const ZoneProvisioningConfig::Link& config);
 
-    std::string getId(const ZoneProvisioningConfig::File& file) const;
-    std::string getId(const ZoneProvisioningConfig::Mount& mount) const;
-    std::string getId(const ZoneProvisioningConfig::Link& link) const;
-    std::string getId(const ZoneProvisioningConfig::Provision& provision) const;
+    static std::string getId(const ZoneProvisioningConfig::File& file);
+    static std::string getId(const ZoneProvisioningConfig::Mount& mount);
+    static std::string getId(const ZoneProvisioningConfig::Link& link);
+    static std::string getId(const ZoneProvisioningConfig::Provision& provision);
 };
 
 } // namespace vasum

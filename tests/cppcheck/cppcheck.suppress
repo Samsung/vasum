@@ -1,0 +1,7 @@
+// public API functions (or write tests to use them all)
+unusedFunction:wrapper/wrapper-compatibility.cpp
+unusedFunction:wrapper/wrapper.cpp
+
+// lambda not recognized to catch exception (v1.68)
+exceptThrowInNoexecptFunction:client/vasum-client-impl.cpp
+

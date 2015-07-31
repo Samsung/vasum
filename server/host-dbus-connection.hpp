@@ -97,7 +97,7 @@ private:
                       const std::string& objectPath,
                       const std::string& interface,
                       const std::string& signalName,
-                      GVariant* parameters);
+                      GVariant* parameters) const;
 };
 
 

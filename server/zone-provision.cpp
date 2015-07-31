@@ -255,7 +255,7 @@ void ZoneProvision::link(const ZoneProvisioningConfig::Link& config)
     throw UtilsException("Failed to hard link: path prefix is not valid");
 }
 
-std::string ZoneProvision::getId(const ZoneProvisioningConfig::File& file) const
+std::string ZoneProvision::getId(const ZoneProvisioningConfig::File& file)
 {
     //TODO output of type,flags and mode should be more user friendly
     return "file " +
@@ -265,7 +265,7 @@ std::string ZoneProvision::getId(const ZoneProvisioningConfig::File& file) const
            std::to_string(file.mode);
 }
 
-std::string ZoneProvision::getId(const ZoneProvisioningConfig::Mount& mount) const
+std::string ZoneProvision::getId(const ZoneProvisioningConfig::Mount& mount)
 {
     //TODO output of flags should be more user friendly
     return "mount " +
@@ -276,12 +276,12 @@ std::string ZoneProvision::getId(const ZoneProvisioningConfig::Mount& mount) con
            mount.data;
 }
 
-std::string ZoneProvision::getId(const ZoneProvisioningConfig::Link& link) const
+std::string ZoneProvision::getId(const ZoneProvisioningConfig::Link& link)
 {
     return "link " + link.source + " " + link.target;
 }
 
-std::string ZoneProvision::getId(const ZoneProvisioningConfig::Provision& provision) const
+std::string ZoneProvision::getId(const ZoneProvisioningConfig::Provision& provision)
 {
     using namespace vasum;
     if (provision.is<ZoneProvisioningConfig::File>()) {

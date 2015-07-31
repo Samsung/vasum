@@ -67,8 +67,8 @@ private:
 
 #else // ENABLE_SAME_THREAD_GUARD
 #   define ASSERT_SAME_THREAD(g)
-    bool check() {return true;}
-    void reset() {}
+    static bool check() {return true;}
+    static void reset() {}
 #endif // ENABLE_SAME_THREAD_GUARD
 };
 

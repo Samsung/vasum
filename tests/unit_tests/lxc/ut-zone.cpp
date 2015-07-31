@@ -60,7 +60,7 @@ struct Fixture {
         cleanup();
     }
 
-    void cleanup()
+    static void cleanup()
     {
         LxcZone lxc(ZONE_PATH, ZONE_NAME);
         if (lxc.isDefined()) {
@@ -71,7 +71,7 @@ struct Fixture {
         }
     }
 
-    void waitForInit()
+    static void waitForInit()
     {
         // wait for init fully started (wait for bash to be able to trap SIGTERM)
         std::this_thread::sleep_for(std::chrono::milliseconds(200));

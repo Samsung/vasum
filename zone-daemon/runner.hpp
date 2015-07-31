@@ -39,13 +39,13 @@ public:
     /**
      * Starts all the daemon and blocks until SIGINT or SIGTERM
      */
-    void run();
+    static void run();
 
     /**
      * Terminates the daemon.
      * Equivalent of sending SIGINT or SIGTERM signal
      */
-    void terminate();
+    static void terminate();
 };
 
 

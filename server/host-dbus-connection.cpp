@@ -424,8 +424,9 @@ void HostDbusConnection::onSignalCall(const std::string& /* senderBusName */,
                                       const std::string& objectPath,
                                       const std::string& interface,
                                       const std::string& /* signalName */,
-                                      GVariant* /* parameters */)
+                                      GVariant* /* parameters */) const
 {
+    (void)this; // satisfy cpp-check
     if (objectPath != api::dbus::OBJECT_PATH || interface != api::dbus::INTERFACE) {
         return;
     }

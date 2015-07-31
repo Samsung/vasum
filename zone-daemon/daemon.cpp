@@ -45,21 +45,23 @@ Daemon::~Daemon()
 {
 }
 
-void Daemon::onNameLostCallback()
+void Daemon::onNameLostCallback() const
 {
+    (void)this; // satisfy cpp-check
     //TODO: Try to reconnect or close the daemon.
     LOGE("Dbus name lost");
 }
 
-void Daemon::onGainFocusCallback()
+void Daemon::onGainFocusCallback() const
 {
+    (void)this; // satisfy cpp-check
     LOGD("Gained Focus");
 }
 
-void Daemon::onLoseFocusCallback()
+void Daemon::onLoseFocusCallback() const
 {
+    (void)this; // satisfy cpp-check
     LOGD("Lost Focus");
-
 }
 
 } // namespace zone_daemon

@@ -329,8 +329,6 @@ public:
     FileDescriptor getEventFD();
 
 private:
-    typedef std::function<void(int fd, std::shared_ptr<void>& data)> SerializeCallback;
-    typedef std::function<std::shared_ptr<void>(int fd)> ParseCallback;
     typedef std::unique_lock<std::mutex> Lock;
     typedef RequestQueue<Event>::Request Request;
 
@@ -340,7 +338,7 @@ private:
 
     struct RegisterSignalsProtocolMessage {
         RegisterSignalsProtocolMessage() = default;
-        RegisterSignalsProtocolMessage(const std::vector<MethodID> ids)
+        RegisterSignalsProtocolMessage(const std::vector<MethodID>& ids)
             : ids(ids) {}
 
         std::vector<MethodID> ids;

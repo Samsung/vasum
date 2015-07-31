@@ -182,11 +182,15 @@ int Socket::createSocketInternal(const std::string& path)
 Socket Socket::createSocket(const std::string& path)
 {
     // Initialize a socket
-    int fd = -1;
+    int fd;
 #ifdef HAVE_SYSTEMD
     fd = getSystemdSocketInternal(path);
+    if (fd == -1) {
+       fd = createSocketInternal(path);
+    }
+#else
+    fd = createSocketInternal(path);
 #endif // HAVE_SYSTEMD
-    fd = fd != -1 ? fd : createSocketInternal(path);
 
     return Socket(fd);
 }

@@ -34,13 +34,7 @@ struct TestConfig {
     struct SubConfig {
 
         struct SubSubConfig {
-            int intVal;
-            bool moved;
 
-            CONFIG_REGISTER
-            (
-                intVal
-            )
             SubSubConfig() : intVal(), moved(false) {}
             SubSubConfig(const SubSubConfig& config) : intVal(config.intVal), moved(false) {}
             SubSubConfig(SubSubConfig&& config) : intVal(std::move(config.intVal)), moved(false) {
@@ -60,6 +54,13 @@ struct TestConfig {
             bool isMoved() const {
                 return moved;
             }
+
+            int intVal;
+            bool moved;
+            CONFIG_REGISTER
+            (
+                intVal
+            )
         };
 
         int intVal;

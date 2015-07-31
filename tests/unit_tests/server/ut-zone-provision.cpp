@@ -69,7 +69,7 @@ struct Fixture {
         BOOST_REQUIRE(utils::saveFileContent(SOME_FILE_PATH.string(), "text"));
     }
 
-    ZoneProvision create(const std::vector<std::string>& validLinkPrefixes)
+    static ZoneProvision create(const std::vector<std::string>& validLinkPrefixes)
     {
         return ZoneProvision(ROOTFS_PATH.string(),
                              TEST_CONFIG_PATH,
@@ -78,12 +78,12 @@ struct Fixture {
                              validLinkPrefixes);
     }
 
-    void load(ZoneProvisioningConfig& config)
+    static void load(ZoneProvisioningConfig& config)
     {
         config::loadFromKVStoreWithJsonFile(DB_PATH.string(), TEST_CONFIG_PATH, config, DB_PREFIX);
     }
 
-    void save(const ZoneProvisioningConfig& config)
+    static void save(const ZoneProvisioningConfig& config)
     {
         config::saveToKVStore(DB_PATH.string(), config, DB_PREFIX);
     }

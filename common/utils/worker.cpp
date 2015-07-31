@@ -145,7 +145,7 @@ private:
         LOGT("Worker thread exited");
     }
 
-    void execute(const TaskInfo& taskInfo)
+    static void execute(const TaskInfo& taskInfo)
     {
         try {
             LOGT("Executing task from subgroup " << taskInfo.groupID);
