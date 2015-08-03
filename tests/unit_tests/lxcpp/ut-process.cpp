@@ -83,9 +83,9 @@ BOOST_AUTO_TEST_CASE(Setns)
                    Namespace::IPC,
                    Namespace::NET
                   });
-            exit(TEST_PASSED);
+            _exit(TEST_PASSED);
         } catch(...) {
-            exit(ERROR);
+            _exit(ERROR);
         }
     } else if(pid>0) {
         int status = -1;
@@ -105,11 +105,11 @@ BOOST_AUTO_TEST_CASE(SetnsUserNamespace)
     } else if(pid ==0) {
         try {
             setns({Namespace::USER});
-            exit(ERROR);
+            _exit(ERROR);
         } catch(ProcessSetupException) {
-            exit(TEST_PASSED);
+            _exit(TEST_PASSED);
         } catch(...) {
-            exit(ERROR);
+            _exit(ERROR);
         }
     } else if(pid>0) {
         int status;
