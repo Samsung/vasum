@@ -40,9 +40,10 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 )
 
 ## Link libraries ##############################################################
-INCLUDE_DIRECTORIES(${LIBS_FOLDER})
-INCLUDE_DIRECTORIES(${COMMON_FOLDER})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} Logger)
+FIND_PACKAGE(Boost COMPONENTS system filesystem)
+INCLUDE_DIRECTORIES(${LIBS_FOLDER} ${COMMON_FOLDER})
+INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} ${Boost_LIBRARIES} Logger)
 
 ## Generate the pc file ########################################################
 CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_CURRENT_BINARY_DIR}/${PC_FILE} @ONLY)
