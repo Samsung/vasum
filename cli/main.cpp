@@ -36,11 +36,14 @@
 #include <iterator>
 #include <iomanip>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/filesystem.hpp>
 
 #include <readline/readline.h>
 #include <readline/history.h>
 
 using namespace vasum::cli;
+
+namespace fs =  boost::filesystem;
 
 namespace {
 
@@ -480,6 +483,12 @@ int cliMode(const int argc, const char** argv)
     return rc;
 }
 
+fs::path getHomePath() {
+    const char *h = ::getenv("HOME");
+    return fs::path(h ? h : "");
+}
+
+
 } // namespace
 
 
@@ -508,13 +517,24 @@ int main(const int argc, const char *argv[])
         }
 
     } else {
+        fs::path historyfile(".vsm_history");
 
         if (isatty(0) == 1) {
+            fs::path home = getHomePath();
+            if (!home.empty()) {
+                historyfile = home / historyfile;
+            }
+            ::read_history(historyfile.c_str());
+
             interactiveMode = 1;
             ::rl_attempted_completion_function = completion;
         }
 
         rc = processStream(std::cin);
+
+        if (interactiveMode) {
+            ::write_history(historyfile.c_str());
+        }
     }
 
     disconnect();
