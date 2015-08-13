@@ -437,6 +437,8 @@ The package provides libConfig development tools and libs.
 Summary:            IPC library
 Group:              Security/Other
 Requires:           libConfig
+Requires:           libuuid
+BuildRequires:      libuuid-devel
 Requires(post):     /sbin/ldconfig
 Requires(postun):   /sbin/ldconfig
 

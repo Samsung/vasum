@@ -32,7 +32,7 @@ namespace ipc {
 
 Client::Client(epoll::EventPoll& eventPoll, const std::string& socketPath)
     : mEventPoll(eventPoll),
-      mServiceID(-1),
+      mServiceID(),
       mProcessor(eventPoll, "[CLIENT]  "),
       mSocketPath(socketPath)
 {

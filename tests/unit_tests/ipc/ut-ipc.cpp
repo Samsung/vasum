@@ -33,6 +33,7 @@
 #include "ipc/service.hpp"
 #include "ipc/client.hpp"
 #include "ipc/types.hpp"
+#include "ipc/unique-id.hpp"
 #include "ipc/result.hpp"
 #include "ipc/epoll/thread-dispatcher.hpp"
 #include "ipc/epoll/glib-dispatcher.hpp"
@@ -224,7 +225,7 @@ PeerID connect(Service& s, Client& c)
 
     PeerID peerID = peerIDLatch.get(TIMEOUT);
     s.setNewPeerCallback(nullptr);
-    BOOST_REQUIRE_NE(peerID, 0);
+    BOOST_REQUIRE_NE(peerID, static_cast<std::string>(ipc::UniqueID()));
     return peerID;
 }
 

@@ -26,7 +26,8 @@
 
 #include "ipc/exception.hpp"
 #include "ipc/internals/processor.hpp"
-#include "utils/exception.hpp"
+#include "config/manager.hpp"
+#include "config/exception.hpp"
 
 #include <cerrno>
 #include <cstring>
@@ -290,39 +291,36 @@ bool Processor::handleInput(const FileDescriptor fd)
         return false;
     }
 
-
-    MethodID methodID;
-    MessageID messageID;
+    MessageHeader hdr;
     {
         try {
             // Read information about the incoming data
             Socket& socket = *peerIt->socketPtr;
             Socket::Guard guard = socket.getGuard();
-            socket.read(&methodID, sizeof(methodID));
-            socket.read(&messageID, sizeof(messageID));
-        } catch (const UtilsException& e) {
+            config::loadFromFD<MessageHeader>(socket.getFD(), hdr);
+        } catch (const config::ConfigException& e) {
             LOGE(mLogPrefix + "Error during reading the socket");
             removePeerInternal(peerIt,
                                std::make_exception_ptr(IPCNaughtyPeerException()));
             return true;
         }
 
-        if (methodID == RETURN_METHOD_ID) {
-            return onReturnValue(peerIt, messageID);
+        if (hdr.methodID == RETURN_METHOD_ID) {
+            return onReturnValue(peerIt, hdr.messageID);
 
         } else {
-            if (mMethodsCallbacks.count(methodID)) {
+            if (mMethodsCallbacks.count(hdr.methodID)) {
                 // Method
-                std::shared_ptr<MethodHandlers> methodCallbacks = mMethodsCallbacks.at(methodID);
-                return onRemoteMethod(peerIt, methodID, messageID, methodCallbacks);
+                std::shared_ptr<MethodHandlers> methodCallbacks = mMethodsCallbacks.at(hdr.methodID);
+                return onRemoteMethod(peerIt, hdr.methodID, hdr.messageID, methodCallbacks);
 
-            } else if (mSignalsCallbacks.count(methodID)) {
+            } else if (mSignalsCallbacks.count(hdr.methodID)) {
                 // Signal
-                std::shared_ptr<SignalHandlers> signalCallbacks = mSignalsCallbacks.at(methodID);
-                return onRemoteSignal(peerIt, methodID, messageID, signalCallbacks);
+                std::shared_ptr<SignalHandlers> signalCallbacks = mSignalsCallbacks.at(hdr.methodID);
+                return onRemoteSignal(peerIt, hdr.methodID, hdr.messageID, signalCallbacks);
 
             } else {
-                LOGW(mLogPrefix + "No method or signal callback for methodID: " << methodID);
+                LOGW(mLogPrefix + "No method or signal callback for methodID: " << hdr.methodID);
                 removePeerInternal(peerIt,
                                    std::make_exception_ptr(IPCNaughtyPeerException()));
                 return true;
@@ -503,12 +501,14 @@ bool Processor::onMethodRequest(MethodRequest& request)
                                                                     std::move(request.parse),
                                                                     std::move(request.process)));
 
+    MessageHeader hdr;
     try {
         // Send the call with the socket
         Socket& socket = *peerIt->socketPtr;
         Socket::Guard guard = socket.getGuard();
-        socket.write(&request.methodID, sizeof(request.methodID));
-        socket.write(&request.messageID, sizeof(request.messageID));
+        hdr.methodID = request.methodID;
+        hdr.messageID = request.messageID;
+        config::saveToFD<MessageHeader>(socket.getFD(), hdr);
         LOGT(mLogPrefix + "Serializing the message");
         request.serialize(socket.getFD(), request.data);
     } catch (const std::exception& e) {
@@ -540,12 +540,14 @@ bool Processor::onSignalRequest(SignalRequest& request)
         return false;
     }
 
+    MessageHeader hdr;
     try {
         // Send the call with the socket
         Socket& socket = *peerIt->socketPtr;
         Socket::Guard guard = socket.getGuard();
-        socket.write(&request.methodID, sizeof(request.methodID));
-        socket.write(&request.messageID, sizeof(request.messageID));
+        hdr.methodID = request.methodID;
+        hdr.messageID = request.messageID;
+        config::saveToFD<MessageHeader>(socket.getFD(), hdr);
         request.serialize(socket.getFD(), request.data);
     } catch (const std::exception& e) {
         LOGE(mLogPrefix + "Error during sending a signal: " << e.what());
@@ -627,12 +629,14 @@ bool Processor::onSendResultRequest(SendResultRequest& request)
         return true;
     }
 
+    MessageHeader hdr;
     try {
         // Send the call with the socket
         Socket& socket = *peerIt->socketPtr;
         Socket::Guard guard = socket.getGuard();
-        socket.write(&RETURN_METHOD_ID, sizeof(RETURN_METHOD_ID));
-        socket.write(&request.messageID, sizeof(request.messageID));
+        hdr.methodID = RETURN_METHOD_ID;
+        hdr.messageID = request.messageID;
+        config::saveToFD<MessageHeader>(socket.getFD(), hdr);
         LOGT(mLogPrefix + "Serializing the message");
         methodCallbacks->serialize(socket.getFD(), request.data);
     } catch (const std::exception& e) {

@@ -336,6 +336,17 @@ private:
         CONFIG_REGISTER_EMPTY
     };
 
+    struct MessageHeader {
+        MethodID methodID;
+        MessageID messageID;
+
+        CONFIG_REGISTER
+        (
+            methodID,
+            messageID
+        )
+    };
+
     struct RegisterSignalsProtocolMessage {
         RegisterSignalsProtocolMessage() = default;
         RegisterSignalsProtocolMessage(const std::vector<MethodID>& ids)

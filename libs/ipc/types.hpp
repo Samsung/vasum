@@ -33,8 +33,8 @@ namespace ipc {
 
 typedef int FileDescriptor;
 typedef unsigned int MethodID;
-typedef unsigned int MessageID;
-typedef unsigned int PeerID;
+typedef std::string MessageID;
+typedef std::string PeerID;
 
 typedef std::function<void(const PeerID, const FileDescriptor)> PeerCallback;
 typedef std::function<void(int fd, std::shared_ptr<void>& data)> SerializeCallback;

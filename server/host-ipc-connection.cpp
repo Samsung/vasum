@@ -42,7 +42,7 @@ HostIPCConnection::HostIPCConnection(ipc::epoll::EventPoll& eventPoll, ZonesMana
 
     ipc::PeerCallback removedCallback = [this](const ipc::PeerID peerID,
                                                const ipc::FileDescriptor) {
-        std::string id = api::IPC_CONNECTION_PREFIX + std::to_string(peerID);
+        std::string id = api::IPC_CONNECTION_PREFIX + peerID;
         mZonesManagerPtr->disconnectedCallback(id);
     };
     mService.reset(new ipc::Service(eventPoll, HOST_IPC_SOCKET,

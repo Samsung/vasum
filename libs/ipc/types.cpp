@@ -25,25 +25,39 @@
 #include "config.hpp"
 
 #include "ipc/types.hpp"
+#include "ipc/unique-id.hpp"
 #include "logger/logger.hpp"
 
-#include <atomic>
+#include <mutex>
 
 namespace ipc {
 
 namespace {
-std::atomic<MessageID> gLastMessageID(0);
-std::atomic<PeerID> gLastPeerID(0);
+// complex types cannot be easily used with std::atomic - these require libatomic to be linked
+// instead, secure the ID getters with mutex
+MessageID gLastMessageID;
+PeerID gLastPeerID;
+
+std::mutex gMessageIDMutex;
+std::mutex gPeerIDMutex;
 } // namespace
 
 MessageID getNextMessageID()
 {
-    return ++gLastMessageID;
+    std::unique_lock<std::mutex> lock(gMessageIDMutex);
+    UniqueID uid;
+    uid.generate();
+    gLastMessageID = uid;
+    return gLastMessageID;
 }
 
 PeerID getNextPeerID()
 {
-    return ++gLastPeerID;
+    std::unique_lock<std::mutex> lock(gPeerIDMutex);
+    UniqueID uid;
+    uid.generate();
+    gLastPeerID = uid;
+    return gLastPeerID;
 }
 
 

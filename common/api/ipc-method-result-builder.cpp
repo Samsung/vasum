@@ -50,7 +50,7 @@ void IPCMethodResultBuilder::setError(const std::string& , const std::string& me
 
 std::string IPCMethodResultBuilder::getID() const
 {
-    return IPC_CONNECTION_PREFIX + std::to_string(mMethodResultPtr->getPeerID());
+    return IPC_CONNECTION_PREFIX + mMethodResultPtr->getPeerID();
 }
 
 } // namespace result

@@ -50,7 +50,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 
 ## Link libraries ##############################################################
 IF(NOT WITHOUT_SYSTEMD)
-PKG_CHECK_MODULES(IPC_DEPS REQUIRED libsystemd-daemon)
+PKG_CHECK_MODULES(IPC_DEPS REQUIRED libsystemd-daemon uuid)
 ENDIF(NOT WITHOUT_SYSTEMD)
 
 INCLUDE_DIRECTORIES(${LIBS_FOLDER})
