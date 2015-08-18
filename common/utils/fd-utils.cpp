@@ -111,6 +111,19 @@ void close(int fd)
     }
 }
 
+void shutdown(int fd)
+{
+    if (fd < 0) {
+        return;
+    }
+
+    if (-1 == ::shutdown(fd, SHUT_RDWR)) {
+        std::string msg = "shutdown() failed: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+}
+
 void write(int fd, const void* bufferPtr, const size_t size, int timeoutMS)
 {
     chr::high_resolution_clock::time_point deadline = chr::high_resolution_clock::now() +

@@ -63,8 +63,8 @@ const std::vector<Namespace> NAMESPACES  {{
 
 BOOST_AUTO_TEST_CASE(Clone)
 {
-    BOOST_CHECK_NO_THROW(clone(clonefn, nullptr, NAMESPACES));
-    BOOST_CHECK_NO_THROW(clone(clonefn, nullptr, {Namespace::MNT}));
+    BOOST_CHECK_NO_THROW(lxcpp::clone(clonefn, nullptr, NAMESPACES));
+    BOOST_CHECK_NO_THROW(lxcpp::clone(clonefn, nullptr, {Namespace::MNT}));
 }
 
 BOOST_AUTO_TEST_CASE(Setns)
@@ -72,22 +72,20 @@ BOOST_AUTO_TEST_CASE(Setns)
     const int TEST_PASSED = 0;
     const int ERROR = 1;
 
-    pid_t pid = fork();
-    if (pid==-1) {
-        BOOST_REQUIRE(false);
-    } else if(pid ==0) {
+    pid_t pid = lxcpp::fork();
+    if (pid == 0) {
         try {
-            setns({Namespace::MNT,
-                   Namespace::PID,
-                   Namespace::UTS,
-                   Namespace::IPC,
-                   Namespace::NET
-                  });
-            _exit(TEST_PASSED);
+            lxcpp::setns(::getpid(), {Namespace::MNT,
+                                      Namespace::PID,
+                                      Namespace::UTS,
+                                      Namespace::IPC,
+                                      Namespace::NET
+                                     });
+            ::_exit(TEST_PASSED);
         } catch(...) {
-            _exit(ERROR);
+            ::_exit(ERROR);
         }
-    } else if(pid>0) {
+    } else if (pid >  0) {
         int status = -1;
         BOOST_REQUIRE(utils::waitPid(pid, status));
         BOOST_REQUIRE(status == TEST_PASSED);
@@ -99,19 +97,17 @@ BOOST_AUTO_TEST_CASE(SetnsUserNamespace)
     const int TEST_PASSED = 0;
     const int ERROR = -1;
 
-    pid_t pid = fork();
-    if (pid==-1) {
-        BOOST_REQUIRE(false);
-    } else if(pid ==0) {
+    pid_t pid = lxcpp::fork();
+    if (pid == 0) {
         try {
-            setns({Namespace::USER});
-            _exit(ERROR);
+            lxcpp::setns(::getpid(), {Namespace::USER});
+            ::_exit(ERROR);
         } catch(ProcessSetupException) {
-            _exit(TEST_PASSED);
+            ::_exit(TEST_PASSED);
         } catch(...) {
-            _exit(ERROR);
+            ::_exit(ERROR);
         }
-    } else if(pid>0) {
+    } else if (pid > 0) {
         int status;
         BOOST_REQUIRE(utils::waitPid(pid, status));
         BOOST_REQUIRE(status == TEST_PASSED);

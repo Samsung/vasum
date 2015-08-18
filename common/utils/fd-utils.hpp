@@ -35,6 +35,11 @@ namespace utils {
 void close(int fd);
 
 /**
+ * Shut down part of a full-duplex connection
+ */
+void shutdown(int fd);
+
+/**
  * Write to a file descriptor, throw on error.
  *
  * @param fd file descriptor

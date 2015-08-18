@@ -25,11 +25,14 @@
 #define LXCPP_CONTAINER_HPP
 
 #include <string>
+#include <functional>
 
 namespace lxcpp {
 
 class Container {
 public:
+    typedef std::function<int()> AttachCall;
+
     virtual ~Container() {};
 
     virtual std::string getName() = 0;
@@ -48,6 +51,9 @@ public:
     virtual void destroy() = 0;
     virtual void setRootPath(const std::string& path) = 0;
     virtual std::string getRootPath() = 0;
+
+    // Other
+    virtual void attach(AttachCall& attachCall) = 0;
 };
 
 } // namespace lxcpp

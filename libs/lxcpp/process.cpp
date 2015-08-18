@@ -36,10 +36,21 @@
 
 namespace lxcpp {
 
+pid_t fork()
+{
+    pid_t pid = ::fork();
+    if (pid < 0) {
+        const std::string msg = "fork() failed: " +
+                                utils::getSystemErrorMessage();
+        LOGE(msg);
+        throw ProcessSetupException(msg);
+    }
+    return pid;
+}
+
 pid_t clone(int (*function)(void *),
             void *args,
-            const std::vector<Namespace>& namespaces,
-            const int additionalFlags)
+            const int flags)
 {
     // Won't fail, well known resource name
     size_t stackSize = ::sysconf(_SC_PAGESIZE);
@@ -47,61 +58,100 @@ pid_t clone(int (*function)(void *),
     // PAGESIZE is enough, it'll exec after this
     char *stack = static_cast<char*>(::alloca(stackSize));
 
-    pid_t pid = ::clone(function, stack  + stackSize, toFlag(namespaces) | additionalFlags | SIGCHLD, args);
+    pid_t pid = ::clone(function, stack  + stackSize, flags | SIGCHLD, args);
     if (pid < 0) {
-        const std::string msg = utils::getSystemErrorMessage();
-        LOGE("clone() failed: " << msg);
-        throw ProcessSetupException("clone() failed " + msg);
+        const std::string msg = "clone() failed: " +
+                                utils::getSystemErrorMessage();
+        LOGE(msg);
+        throw ProcessSetupException(msg);
     }
 
     return pid;
 }
 
-void setns(const std::vector<Namespace>& namespaces)
+pid_t clone(int (*function)(void *),
+            void *args,
+            const std::vector<Namespace>& namespaces,
+            const int additionalFlags)
 {
-    pid_t pid = ::getpid();
+    return clone(function, args, toFlag(namespaces) | additionalFlags);
+}
 
+void setns(const pid_t pid, const std::vector<Namespace>& namespaces)
+{
     int dirFD = ::open(getNsPath(pid).c_str(), O_DIRECTORY | O_CLOEXEC);
     if(dirFD < 0) {
-        const std::string msg = utils::getSystemErrorMessage();
-        LOGE("open() failed: " << msg);
-        throw ProcessSetupException("open() failed: " + msg);
+        const std::string msg = "open() failed: " +
+                                utils::getSystemErrorMessage();
+        LOGE(msg);
+        throw ProcessSetupException(msg);
     }
 
     // Open FDs connected with the requested namespaces
     std::vector<int> fds(namespaces.size(), -1);
     for(size_t i = 0; i < namespaces.size(); ++i) {
-        fds[i] = ::openat(dirFD, toString(namespaces[i]).c_str(), O_RDONLY | O_CLOEXEC);
+        fds[i] = ::openat(dirFD,
+                          toString(namespaces[i]).c_str(),
+                          O_RDONLY | O_CLOEXEC);
         if(fds[i] < 0) {
-            const std::string msg = utils::getSystemErrorMessage();
+            const std::string msg = "openat() failed: " + utils::getSystemErrorMessage();
 
             for (size_t j = 0; j < i; ++j) {
                 utils::close(fds[j]);
             }
             utils::close(dirFD);
 
-            LOGE("openat() failed: " << msg);
-            throw ProcessSetupException("openat() failed: " + msg);
+            LOGE(msg);
+            throw ProcessSetupException(msg);
         }
     }
 
     // Setns for every namespace
     for(size_t i = 0; i < fds.size(); ++i) {
         if(-1 == ::setns(fds[i], toFlag(namespaces[i]))) {
-            const std::string msg = utils::getSystemErrorMessage();
+            const std::string msg = "setns() failed: " + utils::getSystemErrorMessage();
 
             for (size_t j = i; j < fds.size(); ++j) {
                 utils::close(fds[j]);
             }
             utils::close(dirFD);
 
-            LOGE("setns() failed: " << msg);
-            throw ProcessSetupException("setns() failed: " + msg);
+            LOGE(msg);
+            throw ProcessSetupException(msg);
         }
         utils::close(fds[i]);
     }
 
     utils::close(dirFD);
+}
+
+int waitpid(const pid_t pid)
+{
+    int status;
+    while (-1 == ::waitpid(pid, &status, 0)) {
+        if (errno == EINTR) {
+            LOGT("waitpid() interrupted, retrying");
+            continue;
+        }
+        const std::string msg = "waitpid() failed: " + utils::getSystemErrorMessage();
+        LOGE(msg);
+        throw ProcessSetupException(msg);
+    }
+
+    // Return child's return status if everything is OK
+    if (WIFEXITED(status)) {
+        return WEXITSTATUS(status);
+    }
+
+    // Something went wrong in the child
+    std::string msg;
+    if (WIFSIGNALED(status)) {
+        msg = "Child killed by signal " + std::to_string(WTERMSIG(status));
+    } else {
+        msg = "Unknown eror in child process";
+    }
+    LOGE(msg);
+    throw ProcessSetupException(msg);
 }
 
 } // namespace lxcpp

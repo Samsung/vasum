@@ -31,12 +31,21 @@
 
 namespace lxcpp {
 
+pid_t fork();
+
+pid_t clone(int (*function)(void *),
+            void *args,
+            const int flags);
+
 pid_t clone(int (*function)(void *),
             void *args,
             const std::vector<Namespace>& namespaces,
             const int additionalFlags = 0);
 
-void setns(const std::vector<Namespace>& namespaces);
+void setns(const pid_t pid,
+           const std::vector<Namespace>& namespaces);
+
+int waitpid(const pid_t pid);
 
 } // namespace lxcpp
 

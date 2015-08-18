@@ -23,6 +23,11 @@
 
 #include "lxcpp/container-impl.hpp"
 #include "lxcpp/exception.hpp"
+#include "lxcpp/process.hpp"
+
+#include "utils/exception.hpp"
+
+#include <unistd.h>
 
 namespace lxcpp {
 
@@ -93,5 +98,58 @@ std::string ContainerImpl::getRootPath()
 {
     throw NotImplementedException();
 }
+
+
+int ContainerImpl::attachChild(void* data) {
+    try {
+        return (*static_cast<Container::AttachCall*>(data))();
+    } catch(...) {
+        return -1; // Non-zero on failure
+    }
+    return 0; // Success
+}
+
+void ContainerImpl::attachParent(utils::Channel& channel, const pid_t interPid)
+{
+    // TODO: Setup cgroups etc
+    pid_t childPid = channel.read<pid_t>();
+
+    // Wait for the Intermediate process
+    lxcpp::waitpid(interPid);
+
+    // Wait for the Child process
+    lxcpp::waitpid(childPid);
+}
+
+void ContainerImpl::attachIntermediate(utils::Channel& channel, Container::AttachCall& call)
+{
+    lxcpp::setns(mInitPid, mNamespaces);
+
+    // PID namespace won't affect the returned pid
+    // CLONE_PARENT: Child's PPID == Caller's PID
+    const pid_t pid = lxcpp::clone(&ContainerImpl::attachChild,
+                                   &call,
+                                   CLONE_PARENT);
+    channel.write(pid);
+}
+
+void ContainerImpl::attach(Container::AttachCall& call)
+{
+    utils::Channel channel;
+
+    const pid_t interPid = lxcpp::fork();
+    if (interPid > 0) {
+        channel.setLeft();
+        attachParent(channel, interPid);
+        channel.shutdown();
+    } else {
+        channel.setRight();
+        attachIntermediate(channel, call);
+        channel.shutdown();
+        ::_exit(0);
+    }
+}
+
+
 
 } // namespace lxcpp

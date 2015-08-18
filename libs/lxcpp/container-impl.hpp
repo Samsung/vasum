@@ -25,6 +25,9 @@
 #define LXCPP_CONTAINER_IMPL_HPP
 
 #include "lxcpp/container.hpp"
+#include "lxcpp/namespace.hpp"
+
+#include "utils/channel.hpp"
 
 namespace lxcpp {
 
@@ -49,6 +52,19 @@ public:
     void destroy();
     void setRootPath(const std::string& path);
     std::string getRootPath();
+
+    // Other
+    void attach(Container::AttachCall& attachCall);
+
+private:
+
+    // Methods for different stages of setting up the attachment
+    void attachParent(utils::Channel& channel, const pid_t pid);
+    void attachIntermediate(utils::Channel& channel, Container::AttachCall& call);
+    static int attachChild(void* data);
+
+    pid_t mInitPid;
+    std::vector<Namespace> mNamespaces;
 };
 
 } // namespace lxcpp
