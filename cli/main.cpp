@@ -390,7 +390,7 @@ static int processStream(std::istream& stream)
 
     int rc = EXIT_FAILURE;
     std::string ln;
-    while (readline_from(">>> ", stream, ln)) {
+    while (readline_from("vsm> ", stream, ln)) {
         if (ln.empty() || ln[0] == '#') { //skip empty line or comment
              continue;
         }
@@ -534,6 +534,7 @@ int main(const int argc, const char *argv[])
 
         if (interactiveMode) {
             ::write_history(historyfile.c_str());
+            std::cout << std::endl; // finish prompt line
         }
     }
 
