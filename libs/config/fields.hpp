@@ -18,8 +18,9 @@
 
 /**
  * @file
- * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Macros for registering configuration fields
+ * @author     Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
+ * @addtogroup libConfig libConfig
+ * @brief      C++ library for handling configurations
  */
 
 #ifndef COMMON_CONFIG_FIELDS_HPP
@@ -35,9 +36,21 @@
 #endif
 
 /**
- * Use this macro to register config fields.
+ * @ingroup libConfig
+ * Register empty config class
+ */
+#define CONFIG_REGISTER_EMPTY                                      \
+    template<typename Visitor>                                     \
+    static void accept(Visitor ) {                                 \
+    }                                                              \
+
+/**
+ * @ingroup libConfig
+ *
+ * Registers config fields within class.
  *
  * Example:
+ * @code
  *   struct Foo
  *   {
  *       std::string bar;
@@ -56,13 +69,8 @@
  *           sub_a
  *       )
  *   };
+ * @endcode
  */
-
-#define CONFIG_REGISTER_EMPTY                                      \
-    template<typename Visitor>                                     \
-    static void accept(Visitor ) {                                 \
-    }                                                              \
-
 #define CONFIG_REGISTER(...)                                       \
     template<typename Visitor>                                     \
     void accept(Visitor v) {                                       \

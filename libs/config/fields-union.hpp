@@ -31,10 +31,26 @@
 #include <utility>
 #include <boost/any.hpp>
 
+class DisableMoveAnyWrapper : public boost::any
+{
+    public:
+        DisableMoveAnyWrapper() {}
+        DisableMoveAnyWrapper(const DisableMoveAnyWrapper& any)
+            : boost::any(static_cast<const boost::any&>(any)) {};
+        DisableMoveAnyWrapper& operator=(DisableMoveAnyWrapper&& any) = delete;
+        DisableMoveAnyWrapper& operator=(const DisableMoveAnyWrapper& any) {
+            static_cast<boost::any&>(*this) = static_cast<const boost::any&>(any);
+            return *this;
+        }
+};
+
 /**
- * Use this macro to declare and register config fields
+ * @ingroup libConfig
  *
- * Example:
+ * Use this macro to declare and register config fields.
+ *
+ * Example of fields registration:
+ * @code
  *  struct Foo {
  *      std::string bar;
  *
@@ -52,8 +68,10 @@
  *          int
  *      )
  *  };
+ * @endcode
  *
- *  Example of valid configuration:
+ * Example of valid configuration:
+ * @code
  *   1. {
  *        "type": "Foo",
  *        "value": { "bar": "some string" }
@@ -62,9 +80,10 @@
  *        "type": "int",
  *        "value": 1
  *      }
+ * @endcode
  *
- *
- *  Usage:
+ * Usage of existing bindings:
+ * @code
  *   Config config;
  *   // ...
  *   if (config.isSet()) {
@@ -83,24 +102,11 @@
  *     config.set(std::move(foo));         //< copy sic!
  *     config.set(Foo({"some string"}));
  *   }
+ * @endcode
  */
-
-class DisbaleMoveAnyWrapper : public boost::any
-{
-    public:
-        DisbaleMoveAnyWrapper() {}
-        DisbaleMoveAnyWrapper(const DisbaleMoveAnyWrapper& any)
-            : boost::any(static_cast<const boost::any&>(any)) {};
-        DisbaleMoveAnyWrapper& operator=(DisbaleMoveAnyWrapper&& any) = delete;
-        DisbaleMoveAnyWrapper& operator=(const DisbaleMoveAnyWrapper& any) {
-            static_cast<boost::any&>(*this) = static_cast<const boost::any&>(any);
-            return *this;
-        }
-};
-
 #define CONFIG_DECLARE_UNION(...)                                                               \
 private:                                                                                        \
-    DisbaleMoveAnyWrapper mConfigDeclareField;                                                  \
+    DisableMoveAnyWrapper mConfigDeclareField;                                                  \
                                                                                                 \
     template<typename Visitor>                                                                  \
     void visitOption(Visitor& v, const std::string& name) {                                     \

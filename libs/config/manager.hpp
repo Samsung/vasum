@@ -19,7 +19,73 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
+ * @defgroup manager Manager
+ * @ingroup libConfig
  * @brief   Configuration management functions
+ *
+ * Example of various data formats operations:
+ *
+ * @code
+ * #include "config/fields.hpp"
+ * #include "config/manager.hpp"
+ * #include <iostream>
+ * #include <cstdio>
+ *
+ * struct Foo
+ * {
+ *     std::string bar = "plain-text";
+ *     std::vector<int> tab = std::vector<int>{1, 2, 4, 8};
+ *     double number = 3.14;
+ *
+ *     CONFIG_REGISTER
+ *     (
+ *         bar,
+ *         tab,
+ *         number
+ *     )
+ * };
+ *
+ * int main()
+ * {
+ *     Foo foo;
+ *
+ *     const std::string jsonString = config::saveToJsonString(foo);
+ *     config::loadFromJsonString(jsonString, foo);
+ *
+ *     const GVariant* gVariantPointer = config::saveToGVariant(foo);
+ *     config::loadFromGVariant(gVariantPointer, foo);
+ *     g_variant_unref(gVariantPointer);
+ *
+ *     constexpr std::string jsonFile = "foo.json";
+ *     config::saveToJsonFile(jsonFile, foo);
+ *     config::loadFromJsonFile(jsonFile, foo);
+ *
+ *     constexpr std::string kvDBPath = "kvdb";
+ *     constexpr std::string key = "foo";
+ *     config::saveToKVStore(kvDBPath, foo, key);
+ *     config::loadFromKVStore(kvDBPath, foo, key);
+ *
+ *     config::loadFromKVStoreWithJson(kvDBPath, jsonString, foo, key);
+ *     config::loadFromKVStoreWithJsonFile(kvDBPath, jsonFile, foo, key);
+ *
+ *     FILE* file = fopen("blob", "wb");
+ *     if (!file)
+ *     {
+ *         return EXIT_FAILURE;
+ *     }
+ *     const int fd = ::fileno(file);
+ *     config::saveToFD(fd, foo);
+ *     ::fclose(file);
+ *     file = ::fopen("blob", "rb");
+ *     if(!file) {
+ *         return EXIT_FAILURE;
+ *     }
+ *     config::loadFromFD(fd, foo);
+ *     ::fclose(file);
+ *
+ *     return 0;
+ * }
+ * @endcode
  */
 
 #ifndef COMMON_CONFIG_MANAGER_HPP
@@ -38,6 +104,8 @@
 #include "config/is-union.hpp"
 
 namespace config {
+
+/*@{*/
 
 /**
  * Fills the configuration with data stored in the GVariant
@@ -253,5 +321,7 @@ void saveToFD(const int fd, const Config& config)
 }
 
 } // namespace config
+
+/*@}*/
 
 #endif // COMMON_CONFIG_MANAGER_HPP
