@@ -143,6 +143,18 @@ void buildZoneList(std::vector<std::string>& list)
     vsm_array_string_free(ids);
 }
 
+void buildNetdevList(const std::string& zone,std::vector<std::string>& list)
+{
+    using namespace std::placeholders;
+    VsmArrayString ids;
+
+    CommandLineInterface::executeCallback(bind(vsm_zone_get_netdevs, _1, zone.c_str(), &ids));
+    for (VsmString* id = ids; *id; ++id) {
+        list.push_back(*id);
+    }
+    vsm_array_string_free(ids);
+}
+
 } // namespace
 
 const std::vector<std::string> CommandLineInterface::buildCompletionList(const Args& a) const
@@ -165,9 +177,7 @@ const std::vector<std::string> CommandLineInterface::buildCompletionList(const A
             buildZoneList(v);
         }
         else if (ss == "{NETDEV}") {
-            //TODO: get list of available interfaces
-            v.push_back("lo");
-            v.push_back("eth0");
+            buildNetdevList(a[a.size()-2],v); // zone name must precede netdev
         }
         else if (ss.length() > 0) {
             v.push_back(ss);
@@ -242,19 +252,28 @@ const std::string& CommandLineInterface::getDescription() const
 
 void CommandLineInterface::printUsage(std::ostream& out) const
 {
-    out << mName;
+    out << "Syntax\n";
+    out << "\t" << mName;
     for (const auto& args : mArgsSpec) {
         out << " " << args.name;
     }
 
     out << "\n\n"
-        << "\tDescription\n"
-        << "\t\t" << mDescription << "\n";
+        "Description\n"
+        "\t" << mDescription << "\n";
 
     if (!mArgsSpec.empty()) {
-        out << "\n\tOptions\n";
+        out << "\n"
+            "Options\n";
         for (const auto& args : mArgsSpec) {
-            out << "\t\t" << args.name << " -- " << args.description << "\n";
+            out << "\t" << args.name << " -- ";
+            const std::string& d=args.description;
+            std::stringstream ss(d);
+            std::string item;
+            std::getline(ss, item);
+            out << item << std::endl;
+            while (std::getline(ss, item))
+                out << "\t\t" << item << std::endl;
         }
     }
     out << "\n";
@@ -484,7 +503,7 @@ void create_netdev(const Args& argv)
 {
     using namespace std::placeholders;
 
-    if (argv.size() < 2) {
+    if (argv.size() < 3) {
         throw runtime_error("Not enough parameters");
     }
 

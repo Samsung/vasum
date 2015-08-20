@@ -153,14 +153,24 @@ std::vector<CommandLineInterface> commands = {
     {
         create_netdev,
         "net-create",
-        "Create network interface in zone",
+        "Create network virtualization for the zone",
         MODE_COMMAND_LINE | MODE_INTERACTIVE,
         {
          {"zone_id", "zone name", "{ZONE}"},
-         {"netdevtype", "interface  type", "macvlan|phys|veth"},
+         {"netdevtype", "interface type (veth, macvlan, phys)\n"
+            "   veth - create new zone iface and bridge to host\n"
+            "macvlan - create new zone slave iface briged to master with specified mode\n"
+            "   phys - move existing iface from host to zone (no way to move it back)",
+            "veth|macvlan|phys"
+         },
          {"zone_netdev", "interface name (eth0)", "eth0|eth1"},
          {"host_netdev", "bridge name (virbr0)", "virbr0|virbr1"},
-         {"mode", "macvlan mode (private, vepa, bridge, passthru)", "private|vepa|bridge|passthru"}}
+         {"mode", "macvlan mode (private, vepa, bridge, passthru)\n"
+             " private - bridge but no comunicate with otheri vlan\n"
+             "    vepa - ethernet switch\n"
+             "  bridge - light weight to other vlan\n"
+             "passthru - only one vlan device",
+             "private|vepa|bridge|passthru"}}
     },
     {
         destroy_netdev,
@@ -242,14 +252,14 @@ void printUsage(std::ostream& out, const std::string& name, unsigned int mode)
         n = name + " ";
     }
 
+    out << "Usage: " << n << "[-h|help|-f <filename>|[<command> [-h|help|<args>]]]\n\n";
     if (mode == MODE_COMMAND_LINE) {
-        out << "Usage: " << n << "[-h|-f <filename>|[<command> [-h|<args>]]\n"
-            << "Called without parameters enters interactive mode.\n"
+        out << "Description:\n"
+            << "\tCommand line tool to manage vasum containers.\n"
+            << "\tCalled without parameters enters interactive mode.\n"
             << "Options:\n"
-            << "-h            print help\n"
-            << "-f <filename> read and execute commands from file\n\n";
-    } else {
-        out << "Usage: [-h|<command> [-h|<args>]]\n\n";
+            << "\t-h,help        print this help\n"
+            << "\t-f <filename>  read and execute commands from file\n\n";
     }
     out << "command can be one of the following:\n";
 
@@ -258,12 +268,16 @@ void printUsage(std::ostream& out, const std::string& name, unsigned int mode)
             if (std::find(addLineBefore.begin(), addLineBefore.end(), command.getName()) != addLineBefore.end()) {
                 out << std::endl;
             }
-            out << "   " << std::setw(25) << std::left << command.getName()
-                << command.getDescription() << std::endl;
+            out << "   " << std::setw(20) << std::left << command.getName();
+            const std::string& d = command.getDescription();
+            std::stringstream ss(d);
+            std::string item;
+            std::getline(ss, item);
+            out << item << std::endl;
         }
     }
 
-    out << "\nSee " << n << "command -h to read about a specific one.\n";
+    out << "\nType '" << n << "command help' to read about a specific one.\n";
 }
 
 int connect()
@@ -303,8 +317,7 @@ int executeCommand(const Args& argv, int mode)
         return EXIT_FAILURE;
     }
 
-    auto it = std::find(argv.begin(), argv.end(), std::string("-h"));
-    if (it != argv.end()) {
+    if (argv.size() > 1 && (argv[1] == "-h" || argv[1] == "help")) {
         command.printUsage(std::cout);
         return EXIT_SUCCESS;
     }
@@ -466,7 +479,7 @@ int bashComplMode(int argc, const char *argv[])
 
 int cliMode(const int argc, const char** argv)
 {
-    if (std::string(argv[1]) == "-h") {
+    if (std::string(argv[1]) == "-h" || std::string(argv[1]) == "help") {
         printUsage(std::cout, argv[0], MODE_COMMAND_LINE);
         return EXIT_SUCCESS;
     }
