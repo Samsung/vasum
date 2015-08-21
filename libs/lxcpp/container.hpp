@@ -24,10 +24,24 @@
 #ifndef LXCPP_CONTAINER_HPP
 #define LXCPP_CONTAINER_HPP
 
+#include "lxcpp/network-config.hpp"
+
 #include <string>
 #include <functional>
+#include <vector>
 
 namespace lxcpp {
+
+enum class NetStatus {
+    DOWN,
+    UP
+};
+
+struct NetworkInterfaceInfo {
+    const std::string ifname;
+    const NetStatus status;
+    const std::vector<InetAddr> addrs;
+};
 
 class Container {
 public:
@@ -54,6 +68,26 @@ public:
 
     // Other
     virtual void attach(AttachCall& attachCall) = 0;
+
+    // Network interfaces setup/config
+    virtual void addInterfaceConfig(const std::string& hostif,
+                                 const std::string& zoneif,
+                                 InterfaceType type,
+                                 MacVLanMode mode) = 0;
+    virtual void addAddrConfig(const std::string& ifname, const InetAddr& addr) = 0;
+
+    // Network interfaces (runtime)
+    virtual std::vector<std::string> getInterfaces() = 0;
+    virtual NetworkInterfaceInfo getInterfaceInfo(const std::string& ifname) = 0;
+    virtual void createInterface(const std::string& hostif,
+                                 const std::string& zoneif,
+                                 InterfaceType type,
+                                 MacVLanMode mode) = 0;
+    virtual void destroyInterface(const std::string& ifname) = 0;
+    virtual void setUp(const std::string& ifname) = 0;
+    virtual void setDown(const std::string& ifname) = 0;
+    virtual void addAddr(const std::string& ifname, const InetAddr& addr) = 0;
+    virtual void delAddr(const std::string& ifname, const InetAddr& addr) = 0;
 };
 
 } // namespace lxcpp

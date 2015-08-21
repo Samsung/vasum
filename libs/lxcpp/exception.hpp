@@ -61,6 +61,11 @@ struct BadArgument: public Exception {
         : Exception(message) {}
 };
 
+struct NetworkException : public Exception {
+    NetworkException (const std::string& message = "Error during setting up a network")
+        : Exception(message) {}
+};
+
 } // namespace lxcpp
 
 #endif // LXCPP_EXCEPTION_HPP

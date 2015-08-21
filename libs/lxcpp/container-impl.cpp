@@ -33,7 +33,6 @@
 #include <unistd.h>
 #include <sys/mount.h>
 
-
 namespace lxcpp {
 
 ContainerImpl::ContainerImpl()
@@ -185,6 +184,61 @@ void ContainerImpl::attach(Container::AttachCall& call)
     }
 }
 
+void ContainerImpl::addInterfaceConfig(const std::string& hostif,
+                                       const std::string& zoneif,
+                                       InterfaceType type,
+                                       MacVLanMode mode)
+{
+    mInterfaceConfig.push_back(NetworkInterfaceConfig(hostif,zoneif,type,mode));
+}
 
+void ContainerImpl::addAddrConfig(const std::string& /*ifname*/, const InetAddr& /*addr*/)
+{
+    throw NotImplementedException();
+}
+
+std::vector<std::string> ContainerImpl::getInterfaces()
+{
+    return NetworkInterface::getInterfaces(getInitPid());
+}
+
+NetworkInterfaceInfo ContainerImpl::getInterfaceInfo(const std::string& /*ifname*/)
+{
+    throw NotImplementedException();
+}
+
+void ContainerImpl::createInterface(const std::string& hostif,
+        const std::string& zoneif,
+        InterfaceType type,
+        MacVLanMode mode)
+{
+    NetworkInterface ni(*this, zoneif);
+    ni.create(hostif, type, mode);
+}
+
+void ContainerImpl::destroyInterface(const std::string& /*ifname*/)
+{
+    throw NotImplementedException();
+}
+
+void ContainerImpl::setUp(const std::string& /*ifname*/)
+{
+    throw NotImplementedException();
+}
+
+void ContainerImpl::setDown(const std::string& /*ifname*/)
+{
+    throw NotImplementedException();
+}
+
+void ContainerImpl::addAddr(const std::string& /*ifname*/, const InetAddr& /*addr*/)
+{
+    throw NotImplementedException();
+}
+
+void ContainerImpl::delAddr(const std::string& /*ifname*/, const InetAddr& /*addr*/)
+{
+    throw NotImplementedException();
+}
 
 } // namespace lxcpp

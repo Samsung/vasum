@@ -26,6 +26,7 @@
 
 #include "lxcpp/container.hpp"
 #include "lxcpp/namespace.hpp"
+#include "lxcpp/network.hpp"
 
 #include "utils/channel.hpp"
 
@@ -56,6 +57,26 @@ public:
     // Other
     void attach(Container::AttachCall& attachCall);
 
+    // Network interfaces setup/config
+    void addInterfaceConfig(const std::string& hostif,
+                         const std::string& zoneif,
+                         InterfaceType type,
+                         MacVLanMode mode);
+    void addAddrConfig(const std::string& ifname, const InetAddr& addr);
+
+    // Network interfaces (runtime)
+    std::vector<std::string> getInterfaces();
+    NetworkInterfaceInfo getInterfaceInfo(const std::string& ifname);
+    void createInterface(const std::string& hostif,
+                         const std::string& zoneif,
+                         InterfaceType type,
+                         MacVLanMode mode);
+    void destroyInterface(const std::string& ifname);
+    void setUp(const std::string& ifname);
+    void setDown(const std::string& ifname);
+    void addAddr(const std::string& ifname, const InetAddr& addr);
+    void delAddr(const std::string& ifname, const InetAddr& addr);
+
 private:
 
     // Methods for different stages of setting up the attachment
@@ -65,6 +86,7 @@ private:
 
     pid_t mInitPid;
     std::vector<Namespace> mNamespaces;
+    std::vector<NetworkInterfaceConfig> mInterfaceConfig;
 };
 
 } // namespace lxcpp
