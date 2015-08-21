@@ -23,6 +23,7 @@
  */
 
 #include "command-line-interface.hpp"
+#include "cli-exception.hpp"
 
 #include <cstdlib>
 #include <map>
@@ -284,6 +285,10 @@ int connect()
 {
     try {
         CommandLineInterface::connect();
+    } catch (const IOException& ex) {
+        std::cerr << ex.what() << std::endl;
+        std::cout << "Client connection error. Is vasum-server running?" << std::endl;
+        return EXIT_FAILURE;
     } catch (const std::runtime_error& ex) {
         std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;

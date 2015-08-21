@@ -26,6 +26,7 @@
 #include "command-line-interface.hpp"
 #include "vasum-client.h"
 #include "utils/c-array.hpp"
+#include "cli-exception.hpp"
 
 #include <map>
 #include <stdexcept>
@@ -204,7 +205,7 @@ void CommandLineInterface::connect()
         string msg = vsm_get_status_message(CommandLineInterface::client);
         vsm_client_free(CommandLineInterface::client);
         CommandLineInterface::client = nullptr;
-        throw runtime_error(msg);
+        throw IOException(msg);
     }
 }
 
