@@ -24,10 +24,14 @@
 #include "lxcpp/container-impl.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"
+#include "lxcpp/filesystem.hpp"
+#include "lxcpp/namespace.hpp"
 
 #include "utils/exception.hpp"
 
 #include <unistd.h>
+#include <sys/mount.h>
+
 
 namespace lxcpp {
 
@@ -99,9 +103,37 @@ std::string ContainerImpl::getRootPath()
     throw NotImplementedException();
 }
 
+namespace {
+void setupMountPoints()
+{
+    /* TODO: Uncomment when preparing the final attach() version
+
+    // TODO: This unshare should be optional only if we attach to PID/NET namespace, but not MNT.
+    // Otherwise container already has remounted /proc /sys
+    lxcpp::unshare(Namespace::MNT);
+
+    if (isMountPointShared("/")) {
+        // TODO: Handle case when the container rootfs or mount location is MS_SHARED, but not '/'
+        lxcpp::mount(nullptr, "/", nullptr, MS_SLAVE | MS_REC, nullptr);
+    }
+
+    if(isMountPoint("/proc")) {
+        lxcpp::umount("/proc", MNT_DETACH);
+        lxcpp::mount("none", "/proc", "proc", 0, nullptr);
+    }
+
+    if(isMountPoint("/sys")) {
+        lxcpp::umount("/sys", MNT_DETACH);
+        lxcpp::mount("none", "/sys", "sysfs", 0, nullptr);
+    }
+
+    */
+}
+} // namespace
 
 int ContainerImpl::attachChild(void* data) {
     try {
+        setupMountPoints();
         return (*static_cast<Container::AttachCall*>(data))();
     } catch(...) {
         return -1; // Non-zero on failure

@@ -18,37 +18,35 @@
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   process handling routines
+ * @brief   file system handling routines
  */
 
-#ifndef LXCPP_PROCESS_HPP
-#define LXCPP_PROCESS_HPP
+#ifndef LXCPP_FILESYSTEM_HPP
+#define LXCPP_FILESYSTEM_HPP
 
-#include "lxcpp/namespace.hpp"
-
-#include <sys/types.h>
-#include <vector>
+#include <string>
 
 namespace lxcpp {
 
-pid_t fork();
+void mount(const std::string& source,
+           const std::string& target,
+           const std::string& filesystemtype,
+           unsigned long mountflags,
+           const std::string& data);
 
-pid_t clone(int (*function)(void *),
-            void *args,
-            const int flags);
+void umount(const std::string& path, const int flags);
 
-pid_t clone(int (*function)(void *),
-            void *args,
-            const std::vector<Namespace>& namespaces,
-            const int additionalFlags = 0);
+bool isMountPoint(const std::string& path);
 
-void setns(const pid_t pid,
-           const std::vector<Namespace>& namespaces);
-
-int waitpid(const pid_t pid);
-
-void unshare(const Namespace ns);
+/**
+ * Detect whether path is mounted as MS_SHARED.
+ * Parses /proc/self/mountinfo
+ *
+ * @param path mount point
+ * @return is the mount point shared
+ */
+bool isMountPointShared(const std::string& path);
 
 } // namespace lxcpp
 
-#endif // LXCPP_PROCESS_HPP
+#endif // LXCPP_FILESYSTEM_HPP

@@ -46,6 +46,11 @@ struct ProcessSetupException: public Exception {
         : Exception(message) {}
 };
 
+struct FileSystemSetupException: public Exception {
+    FileSystemSetupException(const std::string& message = "Error during a file system operation")
+        : Exception(message) {}
+};
+
 struct BadArgument: public Exception {
     BadArgument(const std::string& message = "Bad argument passed")
         : Exception(message) {}

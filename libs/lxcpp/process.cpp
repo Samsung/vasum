@@ -154,4 +154,12 @@ int waitpid(const pid_t pid)
     throw ProcessSetupException(msg);
 }
 
+void unshare(const Namespace ns)
+{
+    if(-1 == ::unshare(toFlag(ns))) {
+        const std::string msg = "unshare() failed: " + utils::getSystemErrorMessage();
+        LOGE(msg);
+        throw ProcessSetupException(msg);
+    }
+}
 } // namespace lxcpp
