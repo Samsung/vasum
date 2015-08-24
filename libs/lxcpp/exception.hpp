@@ -51,6 +51,11 @@ struct FileSystemSetupException: public Exception {
         : Exception(message) {}
 };
 
+struct CapabilitySetupException: public Exception {
+    CapabilitySetupException(const std::string& message = "Error during a capability operation")
+        : Exception(message) {}
+};
+
 struct BadArgument: public Exception {
     BadArgument(const std::string& message = "Bad argument passed")
         : Exception(message) {}

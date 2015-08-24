@@ -26,6 +26,7 @@
 #include "lxcpp/process.hpp"
 #include "lxcpp/filesystem.hpp"
 #include "lxcpp/namespace.hpp"
+#include "lxcpp/capability.hpp"
 
 #include "utils/exception.hpp"
 
@@ -133,6 +134,8 @@ void setupMountPoints()
 
 int ContainerImpl::attachChild(void* data) {
     try {
+        // TODO Pass mask and options via data
+        dropCapsFromBoundingExcept(0);
         setupMountPoints();
         return (*static_cast<Container::AttachCall*>(data))();
     } catch(...) {
