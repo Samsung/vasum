@@ -69,14 +69,15 @@ void waitForEvent(int fd,
             if (errno == EINTR) {
                 continue;
             }
-            const std::string msg = getSystemErrorMessage();
-            LOGE("Error in poll: " + msg);
-            throw UtilsException("Error in poll: " + msg);
+            const std::string msg = "Error in poll: " + getSystemErrorMessage();
+            LOGE(msg);
+            throw UtilsException(msg);
         }
 
         if (ret == 0) {
-            LOGE("Timeout in read");
-            throw UtilsException("Timeout in read");
+            const std::string msg = "Timeout in read";
+            LOGE(msg);
+            throw UtilsException(msg);
         }
 
         if (fds[0].revents & event) {
@@ -85,8 +86,9 @@ void waitForEvent(int fd,
         }
 
         if (fds[0].revents & POLLHUP) {
-            LOGW("Peer disconnected");
-            throw UtilsException("Peer disconnected");
+            const std::string msg = "Peer disconnected";
+            LOGW(msg);
+            throw UtilsException(msg);
         }
     }
 }
@@ -144,9 +146,9 @@ void write(int fd, const void* bufferPtr, const size_t size, int timeoutMS)
             // Neglected errors
             LOGD("Retrying write");
         } else {
-            const std::string msg = getSystemErrorMessage();
-            LOGE("Error during writing: " + msg);
-            throw UtilsException("Error during writing: " + msg);
+            const std::string msg = "Error during writing: " + getSystemErrorMessage();
+            LOGE(msg);
+            throw UtilsException(msg);
         }
 
         waitForEvent(fd, POLLOUT, deadline);
@@ -170,16 +172,17 @@ void read(int fd, void* bufferPtr, const size_t size, int timeoutMS)
                 break;
             }
             if (n == 0) {
-                LOGW("Peer disconnected");
-                throw UtilsException("Peer disconnected");
+                const std::string msg = "Peer disconnected";
+                LOGW(msg);
+                throw UtilsException(msg);
             }
         } else if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
             // Neglected errors
             LOGD("Retrying read");
         } else {
-            const std::string msg = getSystemErrorMessage();
-            LOGE("Error during reading: " + msg);
-            throw UtilsException("Error during reading: " + msg);
+            const std::string msg = "Error during reading: " + getSystemErrorMessage();
+            LOGE(msg);
+            throw UtilsException(msg);
         }
 
         waitForEvent(fd, POLLIN, deadline);
@@ -190,9 +193,9 @@ unsigned int getMaxFDNumber()
 {
     struct rlimit rlim;
     if (-1 ==  getrlimit(RLIMIT_NOFILE, &rlim)) {
-        const std::string msg = getSystemErrorMessage();
-        LOGE("Error during getrlimit: " + msg);
-        throw UtilsException("Error during getrlimit: " + msg);
+        const std::string msg = "Error during getrlimit: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
     }
     return rlim.rlim_cur;
 }
@@ -203,9 +206,9 @@ void setMaxFDNumber(unsigned int limit)
     rlim.rlim_cur = limit;
     rlim.rlim_max = limit;
     if (-1 ==  setrlimit(RLIMIT_NOFILE, &rlim)) {
-        const std::string msg = getSystemErrorMessage();
-        LOGE("Error during setrlimit: " + msg);
-        throw UtilsException("Error during setrlimit: " + msg);
+        const std::string msg = "Error during setrlimit: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
     }
 }
 

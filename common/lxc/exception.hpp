@@ -40,6 +40,10 @@ struct LxcException: public VasumException {
     LxcException(const std::string& error) : VasumException(error) {}
 };
 
+struct KeyNotFoundException: public LxcException {
+
+    KeyNotFoundException(const std::string& error) : LxcException(error) {}
+};
 
 } // namespace vasum
 

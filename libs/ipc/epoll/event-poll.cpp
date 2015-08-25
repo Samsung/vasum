@@ -42,8 +42,9 @@ EventPoll::EventPoll()
     : mPollFD(::epoll_create1(EPOLL_CLOEXEC))
 {
     if (mPollFD == -1) {
-        LOGE("Failed to create epoll: " << getSystemErrorMessage());
-        throw UtilsException("Could not create epoll");
+        const std::string msg = "Failed to create epoll: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
     }
 }
 
@@ -69,13 +70,15 @@ void EventPoll::addFD(const int fd, const Events events, Callback&& callback)
     std::lock_guard<Mutex> lock(mMutex);
 
     if (mCallbacks.find(fd) != mCallbacks.end()) {
-        LOGE("Already added fd: " << fd);
-        throw UtilsException("FD already added");
+        const std::string msg = "fd " + std::to_string(fd) + " already added";
+        LOGE(msg);
+        throw UtilsException(msg);
     }
 
     if (!addFDInternal(fd, events)) {
-        LOGE("Could not add fd");
-        throw UtilsException("Could not add fd");
+        const std::string msg = "Could not add fd";
+        LOGE(msg);
+        throw UtilsException(msg);
     }
 
     mCallbacks.insert({fd, std::make_shared<Callback>(std::move(callback))});
@@ -86,8 +89,9 @@ void EventPoll::modifyFD(const int fd, const Events events)
 {
     // No need to lock and check mCallbacks map
     if (!modifyFDInternal(fd, events)) {
-        LOGE("Could not modify fd: " << fd);
-        throw UtilsException("Could not modify fd");
+        const std::string msg = "Could not modify fd: " + std::to_string(fd);
+        LOGE(msg);
+        throw UtilsException(msg);
     }
 }
 
@@ -117,8 +121,9 @@ bool EventPoll::dispatchIteration(const int timeoutMs)
             if (errno == EINTR) {
                 continue;
             }
-            LOGE("Failed to wait on epoll: " << getSystemErrorMessage());
-            throw UtilsException("Could not wait for event");
+            const std::string msg = "Failed to wait on epoll: " + getSystemErrorMessage();
+            LOGE(msg);
+            throw UtilsException(msg);
         }
 
         // callback could be removed in the meantime, so be careful, find it inside lock

@@ -40,9 +40,9 @@ EventFD::EventFD()
 {
     mFD = ::eventfd(0, EFD_SEMAPHORE | EFD_CLOEXEC);
     if (mFD == -1) {
-        const std::string msg = getSystemErrorMessage();
-        LOGE("Error in eventfd: " << msg);
-        throw UtilsException("Error in eventfd: " + msg);
+        const std::string msg = "Error in eventfd: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
     }
 }
 

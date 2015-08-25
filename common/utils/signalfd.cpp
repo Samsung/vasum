@@ -39,9 +39,9 @@ SignalFD::SignalFD(ipc::epoll::EventPoll& eventPoll)
 
     mFD = ::signalfd(-1, &set, SFD_CLOEXEC);
     if (mFD == -1) {
-        const std::string msg = getSystemErrorMessage();
-        LOGE("Error in signalfd: " << msg);
-        throw UtilsException("Error in signalfd: " + msg);
+        const std::string msg = "Error in signalfd: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
     }
 
     mEventPoll.addFD(mFD, EPOLLIN, std::bind(&SignalFD::handleInternal, this));
@@ -66,9 +66,9 @@ void SignalFD::setHandler(const int sigNum, const Callback&& callback)
 
     int error = ::signalfd(mFD, &set, SFD_CLOEXEC);
     if (error != mFD) {
-        const std::string msg = getSystemErrorMessage();
-        LOGE("Error in signalfd: " << msg);
-        throw UtilsException("Error in signalfd: " + msg);
+        const std::string msg = "Error in signalfd: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
     }
 
     mCallbacks.insert({sigNum, callback});

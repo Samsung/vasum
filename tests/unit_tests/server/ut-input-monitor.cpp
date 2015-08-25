@@ -127,9 +127,8 @@ BOOST_AUTO_TEST_CASE(ConfigTimeWindowMsTooHigh)
     ZonesManager cm(getPoll(), TEST_CONFIG_PATH);
     inputConfig.timeWindowMs = 50000;
 
-    BOOST_REQUIRE_EXCEPTION(InputMonitor inputMonitor(getPoll(), inputConfig, &cm),
-                            InputMonitorException,
-                            WhatEquals("Time window exceeds maximum"));
+    BOOST_REQUIRE_THROW(InputMonitor inputMonitor(getPoll(), inputConfig, &cm),
+                        TimeoutException);
 }
 
 BOOST_AUTO_TEST_CASE(ConfigDeviceFilePathNotExisting)

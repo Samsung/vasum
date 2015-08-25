@@ -52,9 +52,9 @@ void setFdOptions(int fd)
 {
     // Prevent from inheriting fd by zones
     if (-1 == ::fcntl(fd, F_SETFD, FD_CLOEXEC)) {
-        const std::string msg = getSystemErrorMessage();
-        LOGE("Error in fcntl: " + msg);
-        throw IPCException("Error in fcntl: " + msg);
+        const std::string msg = "Error in fcntl: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw IPCException(msg);
     }
 }
 
@@ -94,9 +94,9 @@ std::shared_ptr<Socket> Socket::accept()
 {
     int sockfd = ::accept(mFD, nullptr, nullptr);
     if (sockfd == -1) {
-        const std::string msg = getSystemErrorMessage();
-        LOGE("Error in accept: " << msg);
-        throw IPCException("Error in accept: " + msg);
+        const std::string msg = "Error in accept: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw IPCException(msg);
     }
     setFdOptions(sockfd);
     return std::make_shared<Socket>(sockfd);
@@ -119,8 +119,9 @@ int Socket::getSystemdSocketInternal(const std::string& path)
 {
     int n = ::sd_listen_fds(-1 /*Block further calls to sd_listen_fds*/);
     if (n < 0) {
-        LOGE("sd_listen_fds fails with errno: " << n);
-        throw IPCException("sd_listen_fds fails with errno: " + std::to_string(n));
+        const std::string msg = "sd_listen_fds failed: " + getSystemErrorMessage(-n);
+        LOGE(msg);
+        throw IPCException(msg);
     }
 
     for (int fd = SD_LISTEN_FDS_START;
@@ -140,15 +141,16 @@ int Socket::createSocketInternal(const std::string& path)
 {
     // Isn't the path too long?
     if (path.size() >= sizeof(sockaddr_un::sun_path)) {
-        LOGE("Socket's path too long");
-        throw IPCException("Socket's path too long");
+        const std::string msg = "Socket's path too long";
+        LOGE(msg);
+        throw IPCException(msg);
     }
 
     int sockfd = ::socket(AF_UNIX, SOCK_STREAM, 0);
     if (sockfd == -1) {
-        const std::string msg = getSystemErrorMessage();
-        LOGE("Error in socket: " + msg);
-        throw IPCException("Error in socket: " + msg);
+        const std::string msg = "Error in socket: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw IPCException(msg);
     }
     setFdOptions(sockfd);
 
@@ -162,18 +164,18 @@ int Socket::createSocketInternal(const std::string& path)
     if (-1 == ::bind(sockfd,
                      reinterpret_cast<struct sockaddr*>(&serverAddress),
                      sizeof(struct sockaddr_un))) {
-        std::string message = getSystemErrorMessage();
         utils::close(sockfd);
-        LOGE("Error in bind: " << message);
-        throw IPCException("Error in bind: " + message);
+        const std::string msg = "Error in bind: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw IPCException(msg);
     }
 
     if (-1 == ::listen(sockfd,
                        MAX_QUEUE_LENGTH)) {
-        std::string message = getSystemErrorMessage();
         utils::close(sockfd);
-        LOGE("Error in listen: " << message);
-        throw IPCException("Error in listen: " + message);
+        const std::string msg = "Error in listen: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw IPCException(msg);
     }
 
     return sockfd;
@@ -199,15 +201,16 @@ Socket Socket::connectSocket(const std::string& path)
 {
     // Isn't the path too long?
     if (path.size() >= sizeof(sockaddr_un::sun_path)) {
-        LOGE("Socket's path too long");
-        throw IPCException("Socket's path too long");
+        const std::string msg = "Socket's path too long";
+        LOGE(msg);
+        throw IPCException(msg);
     }
 
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (fd == -1) {
-        const std::string msg = getSystemErrorMessage();
-        LOGE("Error in socket: " + msg);
-        throw IPCException("Error in socket: " + msg);
+        const std::string msg = "Error in socket: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw IPCException(msg);
     }
     setFdOptions(fd);
 
@@ -218,19 +221,19 @@ Socket Socket::connectSocket(const std::string& path)
     if (-1 == connect(fd,
                       reinterpret_cast<struct sockaddr*>(&serverAddress),
                       sizeof(struct sockaddr_un))) {
-        const std::string msg = getSystemErrorMessage();
         utils::close(fd);
-        LOGE("Error in connect: " + msg);
-        throw IPCException("Error in connect: " + msg);
+        const std::string msg = "Error in connect: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw IPCException(msg);
     }
 
     // Nonblock socket
     int flags = fcntl(fd, F_GETFL, 0);
     if (-1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
-        const std::string msg = getSystemErrorMessage();
         utils::close(fd);
-        LOGE("Error in fcntl: " + msg);
-        throw IPCException("Error in fcntl: " + msg);
+        const std::string msg = "Error in fcntl: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw IPCException(msg);
     }
 
     return Socket(fd);

@@ -82,6 +82,10 @@ struct InputMonitorException: public ServerException {
     InputMonitorException(const std::string& error) : ServerException(error) {}
 };
 
+struct TimeoutException: public InputMonitorException {
+
+    TimeoutException(const std::string& error) : InputMonitorException (error) {}
+};
 
 }
 

@@ -71,13 +71,15 @@ InputMonitor::InputMonitor(ipc::epoll::EventPoll& eventPoll,
     , mEventPoll(eventPoll)
 {
     if (mConfig.timeWindowMs > MAX_TIME_WINDOW_SEC * 1000L) {
-        LOGE("Time window exceeds maximum: " << MAX_TIME_WINDOW_SEC);
-        throw InputMonitorException("Time window exceeds maximum");
+        const std::string msg = "Time window exceeds maximum: " + MAX_TIME_WINDOW_SEC;
+        LOGE(msg);
+        throw TimeoutException(msg);
     }
 
     if (mConfig.numberOfEvents > MAX_NUMBER_OF_EVENTS) {
-        LOGE("Number of events exceeds maximum: " << MAX_NUMBER_OF_EVENTS);
-        throw InputMonitorException("Number of events exceeds maximum");
+        const std::string msg = "Number of events exceeds maximum: " + MAX_NUMBER_OF_EVENTS;
+        LOGE(msg);
+        throw InputMonitorException(msg);
     }
 
     mDevicePath = getDevicePath();
@@ -185,9 +187,10 @@ void InputMonitor::setHandler(const std::string& devicePath)
     // We need NONBLOCK for FIFOs in the tests
     mFd = ::open(devicePath.c_str(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
     if (mFd < 0) {
-        LOGE("Cannot create input monitor channel. Device file: " <<
-             devicePath << " doesn't exist");
-        throw InputMonitorException("Device does not exist");
+        const std::string msg = "Cannot create input monitor channel. Device file: " +
+                                devicePath + " doesn't exist";
+        LOGE(msg);
+        throw InputMonitorException(msg);
     }
     mEventPoll.addFD(mFd, EPOLLIN, std::bind(&InputMonitor::handleInternal, this, _1, _2));
 }

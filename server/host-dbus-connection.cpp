@@ -62,8 +62,9 @@ HostDbusConnection::HostDbusConnection(ZonesManager* zonesManagerPtr)
                              std::bind(&HostDbusConnection::onNameLost, this));
 
     if (!waitForName(NAME_ACQUIRED_TIMEOUT)) {
-        LOGE("Could not acquire dbus name: " << api::dbus::BUS_NAME);
-        throw HostConnectionException("Could not acquire dbus name: " + api::dbus::BUS_NAME);
+        const std::string msg = "Could not acquire dbus name: " + api::dbus::BUS_NAME;
+        LOGE(msg);
+        throw HostConnectionException(msg);
     }
 
     LOGT("Registering DBUS interface");

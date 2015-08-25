@@ -58,8 +58,9 @@ DaemonConnection::DaemonConnection(const NameLostCallback& nameLostCallback,
                              std::bind(&DaemonConnection::onNameLost, this));
 
     if (!waitForNameAndSetCallback(NAME_ACQUIRED_TIMEOUT, nameLostCallback)) {
-        LOGE("Could not acquire dbus name: " << zone_daemon::api::BUS_NAME);
-        throw ZoneDaemonException("Could not acquire dbus name: " + zone_daemon::api::BUS_NAME);
+        const std::string msg = "Could not acquire dbus name: " + zone_daemon::api::BUS_NAME;
+        LOGE(msg);
+        throw ZoneDaemonException(msg);
     }
 
     LOGD("Setting callbacks");

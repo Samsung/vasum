@@ -101,8 +101,9 @@ LxcZone::LxcZone(const std::string& lxcPath, const std::string& zoneName)
 {
     mLxcContainer = lxc_container_new(zoneName.c_str(), lxcPath.c_str());
     if (!mLxcContainer) {
-        LOGE("Could not initialize lxc zone " << zoneName << " in path " << lxcPath);
-        throw LxcException("Could not initialize lxc zone");
+        const std::string msg = "Could not initialize lxc zone " + zoneName + " in path " + lxcPath;
+        LOGE(msg);
+        throw LxcException(msg);
     }
 }
 
@@ -121,8 +122,9 @@ std::string LxcZone::getConfigItem(const std::string& key)
     char buffer[1024];
     int len = mLxcContainer->get_config_item(mLxcContainer, key.c_str(), buffer, sizeof(buffer));
     if (len < 0) {
-        LOGE("Key '" << key << "' not found in zone " << getName());
-        throw LxcException("Key not found");
+        const std::string msg = "Key '" + key + "' not found in zone " + getName();
+        LOGE(msg);
+        throw KeyNotFoundException(msg);
     }
     return buffer;
 }

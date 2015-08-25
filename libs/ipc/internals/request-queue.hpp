@@ -157,8 +157,9 @@ typename RequestQueue<RequestIdType>::Request RequestQueue<RequestIdType>::pop()
     Lock lock(mStateMutex);
     mEventFD.receive();
     if (mRequests.empty()) {
-        LOGE("Request queue is empty");
-        throw IPCException("Request queue is empty");
+        const std::string msg = "Request queue is empty";
+        LOGE(msg);
+        throw IPCException(msg);
     }
     Request request = std::move(mRequests.front());
     mRequests.pop_front();

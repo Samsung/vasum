@@ -357,8 +357,9 @@ void ZonesManager::destroyZone(const std::string& zoneId)
 
     auto iter = findZone(zoneId);
     if (iter == mZones.end()) {
-        LOGE("Failed to destroy zone " << zoneId << ": no such zone");
-        throw InvalidZoneIdException("No such zone");
+        const std::string msg = "Failed to destroy zone " + zoneId + ": no such zone";
+        LOGE(msg);
+        throw InvalidZoneIdException(msg);
     }
 
     get(iter).setDestroyOnExit();
@@ -1186,8 +1187,9 @@ int ZonesManager::getVTForNewZone()
         candidates.erase(zone->getVT());
     }
     if (candidates.empty()) {
-        LOGE("No free VT for zone");
-        throw ZoneOperationException("No free VT for zone");
+        const std::string msg = "No free VT for zone";
+        LOGE(msg);
+        throw ZoneOperationException(msg);
     }
     // return the smallest
     return *candidates.begin();
@@ -1197,13 +1199,15 @@ void ZonesManager::createZone(const std::string& id,
                               const std::string& templateName)
 {
     if (id.empty() || !isalnum(id)) {
-        LOGE("Failed to add zone - invalid name.");
-        throw InvalidZoneIdException("Invalid name");
+        const std::string msg = "Failed to add zone - invalid name.";
+        LOGE(msg);
+        throw InvalidZoneIdException(msg);
     }
 
     if (find(prohibitedZonesNames.begin(), prohibitedZonesNames.end(), id) != prohibitedZonesNames.end()) {
-        LOGE("Cannot create " << id << " zone - name is not allowed!");
-        throw InvalidZoneIdException("Zone name is not allowed");
+        const std::string msg = "Cannot create " + id + " zone - name is not allowed!";
+        LOGE(msg);
+        throw InvalidZoneIdException(msg);
     }
 
     LOGI("Creating zone " << id);
@@ -1216,14 +1220,15 @@ void ZonesManager::createZone(const std::string& id,
 
     // check if zone does not exist
     if (findZone(id) != mZones.end()) {
-        LOGE("Cannot create " << id << " zone - already exists!");
-        throw InvalidZoneIdException("Already exists");
+        const std::string msg = "Cannot create " + id + " zone - already exists!";
+        LOGE(msg);
+        throw InvalidZoneIdException(msg);
     }
 
     if (fs::exists(fs::path(mConfig.zonesPath) / id)) {
-        LOGE("Cannot create " << id << " zone - file system already exists!");
-        throw InvalidZoneIdException("Zone file system already exists but there is no configuration for it. "
-                                     "Check cleanUpZonesPath in daemon.conf");
+        const std::string msg = "Cannot create " + id + " zone - file system already exists!";
+        LOGE(msg);
+        throw InvalidZoneIdException(msg);
     }
 
     const std::string zonePathStr = utils::createFilePath(mConfig.zonesPath, id, "/");
@@ -1236,8 +1241,9 @@ void ZonesManager::createZone(const std::string& id,
                                                   zonePathStr);
 
         if (!utils::launchAsRoot(copyImageContentsWrapper)) {
-            LOGE("Failed to copy zone image.");
-            throw ZoneOperationException("Failed to copy zone image.");
+            const std::string msg = "Failed to copy zone image.";
+            LOGE(msg);
+            throw ZoneOperationException(msg);
         }
     }
 

@@ -98,8 +98,9 @@ string getUniqueVethName()
 uint32_t getInterfaceIndex(const string& name) {
     uint32_t index = if_nametoindex(name.c_str());
     if (!index) {
-        LOGE("Can't get " << name << " interface index (" << getSystemErrorMessage() << ")");
-        throw ZoneOperationException("Can't find interface");
+        const std::string msg = "Can't get " + name + " interface index (" + getSystemErrorMessage() + ")";
+        LOGE(msg);
+        throw ZoneOperationException(msg);
     }
     return index;
 }
@@ -163,8 +164,9 @@ void attachToBridge(const string& bridge, const string& netdev)
     uint32_t index = getInterfaceIndex(netdev);
     int fd = socket(AF_LOCAL, SOCK_STREAM, 0);
     if (fd < 0) {
-        LOGE("Can't open socket (" << getSystemErrorMessage() << ")");
-        throw ZoneOperationException("Can't attach to bridge");
+        const std::string msg = "Can't open socket (" + getSystemErrorMessage() + ")";
+        LOGE(msg);
+        throw ZoneOperationException(msg);
     }
 
     struct ifreq ifr = utils::make_clean<ifreq>();
@@ -175,8 +177,9 @@ void attachToBridge(const string& bridge, const string& netdev)
         int error = errno;
         //TODO: Close can be interrupted. Move util functions from ipc
         ::close(fd);
-        LOGE("Can't attach to bridge (" + getSystemErrorMessage(error) + ")");
-        throw ZoneOperationException("Can't attach to bridge");
+        const std::string msg = "Can't attach to bridge (" + getSystemErrorMessage(error) + ")";
+        LOGE(msg);
+        throw ZoneOperationException(msg);
     }
     close(fd);
 }
@@ -276,8 +279,9 @@ std::vector<Attrs> getIpAddresses(const pid_t nsPid, int family, uint32_t index)
                         }
                         addr = inet_ntop(family, addr, buf, sizeof(buf));
                         if (addr == NULL) {
-                            LOGE("Can't convert ip address: " << getSystemErrorMessage());
-                            throw VasumException("Can't get ip address");
+                            const std::string msg = "Can't convert ip address: " + getSystemErrorMessage();
+                            LOGE(msg);
+                            throw VasumException(msg);
                         }
                         attrs.push_back(make_tuple("ip", buf));
                         break;
@@ -594,8 +598,9 @@ void setAttrs(const pid_t nsPid, const std::string& netdev, const Attrs& attrs)
             for (const auto& addrAttr : split(params, ip, is_any_of(","))) {
                 size_t pos = addrAttr.find(":");
                 if (pos == string::npos || pos == addrAttr.length()) {
-                    LOGE("Wrong input data format: ill formed address attribute: " << addrAttr);
-                    throw VasumException("Wrong input data format: ill formed address attribute");
+                    const std::string msg = "Wrong input data format: ill formed address attribute: " + addrAttr;
+                    LOGE(msg);
+                    throw VasumException(msg);
                 }
                 attrs.push_back(make_tuple(addrAttr.substr(0, pos), addrAttr.substr(pos + 1)));
             }
@@ -614,15 +619,17 @@ void deleteIpAddress(const pid_t nsPid,
     uint32_t index = getInterfaceIndex(netdev, nsPid);
     size_t slash = ip.find('/');
     if (slash == string::npos) {
-        LOGE("Wrong address format: it is not CIDR notation: can't find '/'");
-        throw VasumException("Wrong address format");
+        const std::string msg = "Wrong address format: it is not CIDR notation: can't find '/'";
+        LOGE(msg);
+        throw VasumException(msg);
     }
     int prefixlen = 0;
     try {
         prefixlen = stoi(ip.substr(slash + 1));
     } catch (const std::exception& ex) {
-        LOGE("Wrong address format: invalid prefixlen");
-        throw VasumException("Wrong address format: invalid prefixlen");
+        const std::string msg = "Wrong address format: invalid prefixlen";
+        LOGE(msg);
+        throw VasumException(msg);
     }
     deleteIpAddress(nsPid, index, ip.substr(0, slash), prefixlen, getIpFamily(ip));
 }

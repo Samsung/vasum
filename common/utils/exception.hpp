@@ -39,6 +39,11 @@ struct UtilsException: public std::runtime_error {
     UtilsException(const std::string& error) : std::runtime_error(error) {}
 };
 
+struct ProvisionExistsException: public UtilsException {
+
+    ProvisionExistsException(const std::string& error) : UtilsException(error) {}
+};
+
 /**
  * Return string describing error number
  * it is wrapper for strerror_r

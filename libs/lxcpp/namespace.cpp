@@ -52,8 +52,9 @@ std::string toString(const Namespace ns)
     case Namespace::NET:
         return "net";
     default:
-        LOGE("Bad namespace passed to the function");
-        throw BadArgument("Bad namespace passed to the function");
+        const std::string msg = "Bad namespace passed to the function";
+        LOGE(msg);
+        throw BadArgument(msg);
     }
 }
 

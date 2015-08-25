@@ -192,8 +192,9 @@ NetlinkResponse& NetlinkResponse::openNested(int ifla)
 {
     const rtattr *rta = asAttr(get(RTA_LENGTH(0)));
     if (rta->rta_type == ifla) {
-        LOGE("Wrong attribute type, expected: " << ifla << ", got: " << rta->rta_type);
-        throw VasumException("Wrong attribute type");
+        const std::string msg = "Wrong attribute type, expected: " + std::to_string(ifla) + ", got: " + std::to_string(rta->rta_type);
+        LOGE(msg);
+        throw VasumException(msg);
     }
     int pos = mPosition;
     seek(RTA_LENGTH(0));
@@ -227,12 +228,14 @@ const char* NetlinkResponse::get(int ifla, int len) const
 {
     const rtattr *rta = asAttr(get(RTA_LENGTH(len < 0 ? 0 : len)));
     if (rta->rta_type != ifla) {
-        LOGE("Wrong attribute type, expected:" << ifla << ", got: " << rta->rta_type);
-        throw VasumException("Wrong attribute type");
+        const std::string msg = "Wrong attribute type, expected: " + std::to_string(ifla) + ", got: " + std::to_string(rta->rta_type);
+        LOGE(msg);
+        throw VasumException(msg);
     }
     if (len >= 0 && rta->rta_len != RTA_LENGTH(len)) {
-        LOGE("Wrong attribute length, expected: " << rta->rta_len << ", got " << len);
-        throw VasumException("Wrong attribute length");
+        const std::string msg = "Wrong attribute length, expected: " + std::to_string(rta->rta_len) + ", got: " + std::to_string(len);
+        LOGE(msg);
+        throw VasumException(msg);
     }
     return reinterpret_cast<const char*>(RTA_DATA(get(rta->rta_len)));
 }

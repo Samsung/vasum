@@ -75,8 +75,9 @@ void vsm_sendmsg(int fd, const struct msghdr *msg, int flags)
 {
     int ret = sendmsg(fd, msg, flags);
     if (ret < 0) {
-        LOGE("Can't send message: " << getSystemErrorMessage());
-        throw VasumException("Can't send netlink message");
+        const std::string msg = "Can't send netlink message: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw VasumException(msg);
     }
 }
 
@@ -117,8 +118,9 @@ void Netlink::open(int netNsPid)
     if (bind(mFd, (struct sockaddr *)&local, sizeof(local)) < 0) {
         int err = errno;
         close();
-        LOGE("Can't bind to socket: " << getSystemErrorMessage(err));
-        throw VasumException("Can't set up netlink connection");
+        const std::string msg = "Can't bind to socket: " + getSystemErrorMessage(err);
+        LOGE(msg);
+        throw VasumException(msg);
     }
 }
 
@@ -187,8 +189,9 @@ std::unique_ptr<std::vector<char>> Netlink::rcv(unsigned int nlmsgSeq)
             }
         }
         if (lastOk == NULL) {
-            LOGE("Something went terribly wrong. Check vsm_recvmsg function");
-            throw VasumException("Can't receive data from system");
+            const std::string msg = "Can't receive data from the system";
+            LOGE(msg);
+            throw VasumException(msg);
         }
         offset +=  NLMSG_ALIGN(ret);
     } while (lastOk->nlmsg_type != NLMSG_DONE && lastOk->nlmsg_flags & NLM_F_MULTI);

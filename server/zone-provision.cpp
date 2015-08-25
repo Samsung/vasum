@@ -77,8 +77,9 @@ std::string ZoneProvision::declareProvision(ZoneProvisioningConfig::Provision&& 
                                return getId(existingProvision) == id;
                            });
     if (it != mProvisioningConfig.provisions.end()) {
-        LOGE("Can't add provision. It already exists: " << id);
-        throw UtilsException("Provision already exists");
+        const std::string msg = "Can't add provision. It already exists: " + id;
+        LOGE(msg);
+        throw ProvisionExistsException(msg);
     }
     mProvisioningConfig.provisions.push_back(std::move(provision));
     saveProvisioningConfig();
@@ -249,10 +250,10 @@ void ZoneProvision::link(const ZoneProvisioningConfig::Link& config)
             return;
         }
     }
-    LOGE("Failed to create hard link: path=host: "
-         << srcHostPath
-         << ", msg: Path prefix is not valid path");
-    throw UtilsException("Failed to hard link: path prefix is not valid");
+    const std::string msg = "Failed to create hard link: path=host: " +
+                            srcHostPath + ", msg: Path prefix is not valid path";
+    LOGE(msg);
+    throw UtilsException(msg);
 }
 
 std::string ZoneProvision::getId(const ZoneProvisioningConfig::File& file)

@@ -257,9 +257,8 @@ BOOST_AUTO_TEST_CASE(DeclareMount)
     ZoneProvision zoneProvision = create({});
     zoneProvision.declareMount("/fake/path1", "/fake/path2", "tmpfs", 077, "fake");
     zoneProvision.declareMount("/fake/path2", "/fake/path2", "tmpfs", 077, "fake");
-    BOOST_CHECK_EXCEPTION(zoneProvision.declareMount("/fake/path2", "/fake/path2", "tmpfs", 077, "fake"),
-                          UtilsException,
-                          WhatEquals("Provision already exists"));
+    BOOST_CHECK_THROW(zoneProvision.declareMount("/fake/path2", "/fake/path2", "tmpfs", 077, "fake"),
+                      ProvisionExistsException);
 
     ZoneProvisioningConfig config;
     load(config);

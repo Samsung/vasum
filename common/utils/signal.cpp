@@ -39,24 +39,24 @@ void setSignalMask(int how, const ::sigset_t& set)
 {
     int ret = ::pthread_sigmask(how, &set, nullptr /*&oldSet*/);
     if(ret != 0) {
-        const std::string msg = getSystemErrorMessage(ret);
-        LOGE("Error in pthread_sigmask: " << msg);
-        throw UtilsException("Error in pthread_sigmask: " + msg);
+        const std::string msg = "Error in pthread_sigmask: " + getSystemErrorMessage(ret);
+        LOGE(msg);
+        throw UtilsException(msg);
     }
 }
 
 void changeSignal(int how, const int sigNum) {
     ::sigset_t set;
     if(-1 == ::sigemptyset(&set)) {
-        const std::string msg = getSystemErrorMessage();
-        LOGE("Error in sigfillset: " << msg);
-        throw UtilsException("Error in sigfillset: " + msg);
+        const std::string msg = "Error in sigfillset: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
     }
 
     if(-1 ==::sigaddset(&set, sigNum)) {
-        const std::string msg = getSystemErrorMessage();
-        LOGE("Error in sigdelset: " << msg);
-        throw UtilsException("Error in sigdelset: " + msg);
+        const std::string msg = "Error in sigdelset: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
     }
 
     setSignalMask(how, set);
@@ -69,9 +69,9 @@ void changeSignal(int how, const int sigNum) {
     ::sigset_t set;
     int ret = ::pthread_sigmask(0 /*ignored*/, nullptr /*get the oldset*/, &set);
     if(ret != 0) {
-        const std::string msg = getSystemErrorMessage(ret);
-        LOGE("Error in pthread_sigmask: " << msg);
-        throw UtilsException("Error in pthread_sigmask: " + msg);
+        const std::string msg = "Error in pthread_sigmask: " + getSystemErrorMessage(ret);
+        LOGE(msg);
+        throw UtilsException(msg);
     }
     return set;
 }
@@ -82,9 +82,9 @@ bool isSignalBlocked(const int sigNum)
 
     int ret = ::sigismember(&set, sigNum);
     if(-1 == ret) {
-        const std::string msg = getSystemErrorMessage();
-        LOGE("Error in sigismember: " << msg);
-        throw UtilsException("Error in sigismember: " + msg);
+        const std::string msg = "Error in sigismember: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
     }
 
     return ret == 1;
@@ -99,16 +99,16 @@ void signalBlockAllExcept(const std::initializer_list<int>& signals)
 {
     ::sigset_t set;
     if(-1 == ::sigfillset(&set)) {
-        const std::string msg = getSystemErrorMessage();
-        LOGE("Error in sigfillset: " << msg);
-        throw UtilsException("Error in sigfillset: " + msg);
+        const std::string msg = "Error in sigfillset: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
     }
 
     for(const int s: signals) {
         if(-1 == ::sigaddset(&set, s)) {
-            const std::string msg = getSystemErrorMessage();
-            LOGE("Error in sigaddset: " << msg);
-            throw UtilsException("Error in sigaddset: " + msg);
+            const std::string msg = "Error in sigaddset: " + getSystemErrorMessage();
+            LOGE(msg);
+            throw UtilsException(msg);
         }
     }
     setSignalMask(SIG_BLOCK, set);
@@ -126,9 +126,9 @@ void signalIgnore(const std::initializer_list<int>& signals)
 
     for(const int s: signals) {
         if(-1 == ::sigaction(s, &act, nullptr)) {
-            const std::string msg = getSystemErrorMessage();
-            LOGE("Error in sigaction: " << msg);
-            throw UtilsException("Error in sigaction: " + msg);
+            const std::string msg = "Error in sigaction: " + getSystemErrorMessage();
+            LOGE(msg);
+            throw UtilsException(msg);
         }
     }
 }

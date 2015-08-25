@@ -131,9 +131,9 @@ void Server::terminate()
     LOGI("Terminating server");
     int ret = ::pthread_kill(mDispatchingThread, SIGINT);
     if(ret != 0) {
-        const std::string msg = utils::getSystemErrorMessage(ret);
-        LOGE("Error during Server termination: " << msg);
-        throw ServerException("Error during Server termination: " + msg);
+        const std::string msg = "Error during Server termination: " + utils::getSystemErrorMessage(ret);
+        LOGE(msg);
+        throw ServerException(msg);
     }
 }
 
