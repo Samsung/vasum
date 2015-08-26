@@ -34,6 +34,7 @@
 #include <iterator>
 #include <sys/mount.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 
 namespace lxcpp {
@@ -117,6 +118,24 @@ bool isMountPointShared(const std::string& path)
 
     // Path not found
     return false;
+}
+
+void fchdir(int fd)
+{
+    if(-1 == ::fchdir(fd)) {
+        const std::string msg = "fchdir() failed: " + utils::getSystemErrorMessage();
+        LOGE(msg);
+        throw FileSystemSetupException(msg);
+    }
+}
+
+void chdir(const std::string& path)
+{
+    if(-1 == ::chdir(path.c_str())) {
+        const std::string msg = "chdir() failed: " + utils::getSystemErrorMessage();
+        LOGE(msg);
+        throw FileSystemSetupException(msg);
+    }
 }
 
 } // namespace lxcpp

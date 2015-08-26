@@ -25,6 +25,7 @@
 #define LXCPP_CONTAINER_HPP
 
 #include "lxcpp/network-config.hpp"
+#include <sys/types.h>
 
 #include <string>
 #include <functional>
@@ -58,7 +59,7 @@ public:
     virtual void freeze() = 0;
     virtual void unfreeze() = 0;
     virtual void reboot() = 0;
-    virtual int getInitPid() = 0;
+    virtual pid_t getInitPid() const = 0;
 
     //Filesystem actions
     virtual void create() = 0;
@@ -67,7 +68,8 @@ public:
     virtual std::string getRootPath() = 0;
 
     // Other
-    virtual void attach(AttachCall& attachCall) = 0;
+    virtual void attach(AttachCall& attachCall,
+                        const std::string& cwdInContainer) = 0;
 
     // Network interfaces setup/config
     virtual void addInterfaceConfig(const std::string& hostif,

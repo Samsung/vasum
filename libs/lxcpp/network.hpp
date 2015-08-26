@@ -44,7 +44,10 @@ public:
     NetworkInterface(Container& c, const std::string& ifname) :
         mContainer(c),
         mIfname(ifname)
-    { }
+    {
+        // TODO: Remove temporary usage
+        (void) mContainer;
+    }
 
     //Network actions on Container
     void create(const std::string& hostif, InterfaceType type, MacVLanMode mode=MacVLanMode::PRIVATE);

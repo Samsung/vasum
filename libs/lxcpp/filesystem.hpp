@@ -47,6 +47,10 @@ bool isMountPoint(const std::string& path);
  */
 bool isMountPointShared(const std::string& path);
 
+void fchdir(int fd);
+
+void chdir(const std::string& path);
+
 } // namespace lxcpp
 
 #endif // LXCPP_FILESYSTEM_HPP

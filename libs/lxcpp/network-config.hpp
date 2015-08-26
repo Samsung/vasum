@@ -99,7 +99,11 @@ public:
         mType(type),
         mMode(mode)
     {
+        // TODO: Remove temporary usage
+        (void) mType;
+        (void) mMode;
     }
+
     void addNetAddr(const InetAddr&);
     void delNetAddr(const InetAddr&);
 

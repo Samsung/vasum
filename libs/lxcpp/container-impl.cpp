@@ -27,6 +27,7 @@
 #include "lxcpp/filesystem.hpp"
 #include "lxcpp/namespace.hpp"
 #include "lxcpp/capability.hpp"
+#include "lxcpp/attach-manager.hpp"
 
 #include "utils/exception.hpp"
 
@@ -78,9 +79,9 @@ void ContainerImpl::reboot()
     throw NotImplementedException();
 }
 
-int ContainerImpl::getInitPid()
+pid_t ContainerImpl::getInitPid() const
 {
-    throw NotImplementedException();
+    return mInitPid;
 }
 
 void ContainerImpl::create()
@@ -103,86 +104,18 @@ std::string ContainerImpl::getRootPath()
     throw NotImplementedException();
 }
 
-namespace {
-void setupMountPoints()
+void ContainerImpl::attach(Container::AttachCall& call,
+                           const std::string& cwdInContainer)
 {
-    /* TODO: Uncomment when preparing the final attach() version
-
-    // TODO: This unshare should be optional only if we attach to PID/NET namespace, but not MNT.
-    // Otherwise container already has remounted /proc /sys
-    lxcpp::unshare(Namespace::MNT);
-
-    if (isMountPointShared("/")) {
-        // TODO: Handle case when the container rootfs or mount location is MS_SHARED, but not '/'
-        lxcpp::mount(nullptr, "/", nullptr, MS_SLAVE | MS_REC, nullptr);
-    }
-
-    if(isMountPoint("/proc")) {
-        lxcpp::umount("/proc", MNT_DETACH);
-        lxcpp::mount("none", "/proc", "proc", 0, nullptr);
-    }
-
-    if(isMountPoint("/sys")) {
-        lxcpp::umount("/sys", MNT_DETACH);
-        lxcpp::mount("none", "/sys", "sysfs", 0, nullptr);
-    }
-
-    */
-}
-} // namespace
-
-int ContainerImpl::attachChild(void* data) {
-    try {
-        // TODO Pass mask and options via data
-        dropCapsFromBoundingExcept(0);
-        setupMountPoints();
-        return (*static_cast<Container::AttachCall*>(data))();
-    } catch(...) {
-        return -1; // Non-zero on failure
-    }
-    return 0; // Success
+    AttachManager attachManager(*this);
+    attachManager.attach(call, cwdInContainer);
 }
 
-void ContainerImpl::attachParent(utils::Channel& channel, const pid_t interPid)
+const std::vector<Namespace>& ContainerImpl::getNamespaces() const
 {
-    // TODO: Setup cgroups etc
-    pid_t childPid = channel.read<pid_t>();
-
-    // Wait for the Intermediate process
-    lxcpp::waitpid(interPid);
-
-    // Wait for the Child process
-    lxcpp::waitpid(childPid);
+    return mNamespaces;
 }
 
-void ContainerImpl::attachIntermediate(utils::Channel& channel, Container::AttachCall& call)
-{
-    lxcpp::setns(mInitPid, mNamespaces);
-
-    // PID namespace won't affect the returned pid
-    // CLONE_PARENT: Child's PPID == Caller's PID
-    const pid_t pid = lxcpp::clone(&ContainerImpl::attachChild,
-                                   &call,
-                                   CLONE_PARENT);
-    channel.write(pid);
-}
-
-void ContainerImpl::attach(Container::AttachCall& call)
-{
-    utils::Channel channel;
-
-    const pid_t interPid = lxcpp::fork();
-    if (interPid > 0) {
-        channel.setLeft();
-        attachParent(channel, interPid);
-        channel.shutdown();
-    } else {
-        channel.setRight();
-        attachIntermediate(channel, call);
-        channel.shutdown();
-        ::_exit(0);
-    }
-}
 
 void ContainerImpl::addInterfaceConfig(const std::string& hostif,
                                        const std::string& zoneif,

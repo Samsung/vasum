@@ -46,7 +46,8 @@ public:
     void freeze();
     void unfreeze();
     void reboot();
-    int getInitPid();
+    pid_t getInitPid() const;
+    const std::vector<Namespace>& getNamespaces() const;
 
     //Filesystem actions
     void create();
@@ -55,7 +56,8 @@ public:
     std::string getRootPath();
 
     // Other
-    void attach(Container::AttachCall& attachCall);
+    void attach(Container::AttachCall& attachCall,
+                const std::string& cwdInContainer);
 
     // Network interfaces setup/config
     void addInterfaceConfig(const std::string& hostif,
@@ -78,12 +80,6 @@ public:
     void delAddr(const std::string& ifname, const InetAddr& addr);
 
 private:
-
-    // Methods for different stages of setting up the attachment
-    void attachParent(utils::Channel& channel, const pid_t pid);
-    void attachIntermediate(utils::Channel& channel, Container::AttachCall& call);
-    static int attachChild(void* data);
-
     pid_t mInitPid;
     std::vector<Namespace> mNamespaces;
     std::vector<NetworkInterfaceConfig> mInterfaceConfig;
