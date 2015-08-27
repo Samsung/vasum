@@ -294,6 +294,7 @@ BOOST_AUTO_TEST_CASE(GetNetdevAttrs)
     bool gotMtu = false;
     bool gotFlags = false;
     bool gotType = false;
+    bool gotLink = false;
     for (auto& attr : attrs) {
         if (std::get<0>(attr) == "mtu") {
             BOOST_CHECK(!gotMtu);
@@ -306,6 +307,9 @@ BOOST_AUTO_TEST_CASE(GetNetdevAttrs)
             BOOST_CHECK(!gotType);
             BOOST_CHECK_EQUAL(1 /*IFF_802_1Q_VLAN */, stol(std::get<1>(attr)));
             gotType = true;
+        } else if (std::get<0>(attr) == "link") {
+            BOOST_CHECK(!gotLink);
+            gotLink = true;
         } else {
             BOOST_CHECK_MESSAGE(false, "Got unexpected option " + std::get<0>(attr));
         }
