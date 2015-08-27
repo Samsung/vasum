@@ -34,14 +34,12 @@
 
 namespace lxcpp {
 
-enum class NetStatus {
-    DOWN,
-    UP
-};
-
 struct NetworkInterfaceInfo {
     const std::string ifname;
     const NetStatus status;
+    const std::string macaddr;
+    const int mtu;
+    const int flags;
     const std::vector<InetAddr> addrs;
 };
 
@@ -78,14 +76,14 @@ public:
 
     // Network interfaces setup/config
     virtual void addInterfaceConfig(const std::string& hostif,
-                                 const std::string& zoneif,
-                                 InterfaceType type,
-                                 MacVLanMode mode) = 0;
-    virtual void addAddrConfig(const std::string& ifname, const InetAddr& addr) = 0;
+                                    const std::string& zoneif,
+                                    InterfaceType type,
+                                    MacVLanMode mode) = 0;
+    virtual void addInetConfig(const std::string& ifname, const InetAddr& addr) = 0;
 
     // Network interfaces (runtime)
-    virtual std::vector<std::string> getInterfaces() = 0;
-    virtual NetworkInterfaceInfo getInterfaceInfo(const std::string& ifname) = 0;
+    virtual std::vector<std::string> getInterfaces() const = 0;
+    virtual NetworkInterfaceInfo getInterfaceInfo(const std::string& ifname) const = 0;
     virtual void createInterface(const std::string& hostif,
                                  const std::string& zoneif,
                                  InterfaceType type,

@@ -24,30 +24,64 @@
 #ifndef LXCPP_NETWORK_HPP
 #define LXCPP_NETWORK_HPP
 
-#include "lxcpp/container.hpp"
+#include "lxcpp/network-config.hpp"
+
+#include <string>
 #include <vector>
+#include <ostream>
 
 namespace lxcpp {
 
+enum class AttrName {
+    MAC,
+    FLAGS,
+    CHANGE,
+    TYPE,
+    MTU,
+    LINK,
+    TXQLEN,
+    IPV4,
+    IPV6,
+};
+
+inline std::ostream& operator<<(std::ostream& os, const AttrName& a) {
+    switch (a) {
+        case AttrName::MAC: os << "mac"; break;
+        case AttrName::FLAGS: os << "flags"; break;
+        case AttrName::CHANGE: os << "change"; break;
+        case AttrName::TYPE: os << "type"; break;
+        case AttrName::MTU: os << "mtu"; break;
+        case AttrName::LINK: os << "link"; break;
+        case AttrName::TXQLEN: os << "txq"; break;
+        case AttrName::IPV4: os << "ipv4"; break;
+        case AttrName::IPV6: os << "ipv6"; break;
+    }
+    return os;
+}
+
 struct Attr {
-    std::string name;
+    AttrName name;
     std::string value;
 };
 
 typedef std::vector<Attr> Attrs;
 
-
-/// Network operations to be performed on given container and interface
-/// operates on netlink device
+/**
+ * Network operations to be performed on given container and interface
+ * operates on netlink device
+ */
 class NetworkInterface {
 public:
-    NetworkInterface(Container& c, const std::string& ifname) :
-        mContainer(c),
+    /**
+     * Create network interface object for the ifname in the container
+     */
+    NetworkInterface(pid_t pid, const std::string& ifname) :
+        mContainerPid(pid),
         mIfname(ifname)
     {
-        // TODO: Remove temporary usage
-        (void) mContainer;
     }
+
+    const std::string& getName() const { return mIfname; }
 
     //Network actions on Container
     void create(const std::string& hostif, InterfaceType type, MacVLanMode mode=MacVLanMode::PRIVATE);
@@ -56,19 +90,39 @@ public:
     NetStatus status();
     void up();
     void down();
+
+    /**
+     * Rename interface name
+     * Equivalent to: ip link set dev $oldif name $this.mIfname
+     */
+    void renameFrom(const std::string& oldif);
+
     void setAttrs(const Attrs& attrs);
-    const Attrs getAttrs() const;
+    Attrs getAttrs() const;
+
+    void setMACAddress(const std::string& macaddr);
+    void setMTU(int mtu);
+    void setTxLength(int txlen);
+    void addInetAddr(const InetAddr& addr);
+    void delInetAddr(const InetAddr& addr);
 
     static std::vector<std::string> getInterfaces(pid_t initpid);
+
+    static void convertInetAddr2Attr(const InetAddr& addr, Attr& attr);
+    static bool convertAttr2InetAddr(const Attr& attr, InetAddr& addr);
 
 private:
     void createVeth(const std::string& hostif);
     void createBridge(const std::string& hostif);
     void createMacVLan(const std::string& hostif, MacVLanMode mode);
+    /**
+     * Move interface to container
+     * Equivalent to: ip link set dev $hostif netns $mContainerPid
+     */
     void move(const std::string& hostif);
 
-    Container& mContainer;       ///< Container to operate on
-    const std::string mIfname;   ///< network interface name inside zone
+    pid_t mContainerPid;       ///< Container pid to operate on (0=kernel)
+    const std::string mIfname; ///< network interface name inside zone
 };
 
 } // namespace lxcpp

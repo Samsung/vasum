@@ -182,22 +182,48 @@ void ContainerImpl::addInterfaceConfig(const std::string& hostif,
                                        InterfaceType type,
                                        MacVLanMode mode)
 {
-    mInterfaceConfig.push_back(NetworkInterfaceConfig(hostif,zoneif,type,mode));
+    mConfig.mNetwork.addInterfaceConfig(hostif, zoneif, type, mode);
 }
 
-void ContainerImpl::addAddrConfig(const std::string& /*ifname*/, const InetAddr& /*addr*/)
+void ContainerImpl::addInetConfig(const std::string& ifname, const InetAddr& addr)
 {
-    throw NotImplementedException();
+    mConfig.mNetwork.addInetConfig(ifname, addr);
 }
 
-std::vector<std::string> ContainerImpl::getInterfaces()
+std::vector<std::string> ContainerImpl::getInterfaces() const
 {
     return NetworkInterface::getInterfaces(getInitPid());
 }
 
-NetworkInterfaceInfo ContainerImpl::getInterfaceInfo(const std::string& /*ifname*/)
+NetworkInterfaceInfo ContainerImpl::getInterfaceInfo(const std::string& ifname) const
 {
-    throw NotImplementedException();
+    NetworkInterface ni(getInitPid(), ifname);
+    std::vector<InetAddr> addrs;
+    std::string macaddr;
+    InetAddr addr;
+    int mtu = 0, flags = 0;
+    Attrs attrs = ni.getAttrs();
+    for (const Attr& a : attrs) {
+        switch (a.name) {
+        case AttrName::MAC:
+            macaddr = a.value;
+            break;
+        case AttrName::MTU:
+            mtu = std::stoul(a.value);
+            break;
+        case AttrName::IPV6:
+        case AttrName::IPV4:
+            NetworkInterface::convertAttr2InetAddr(a, addr);
+            addrs.push_back(addr);
+            break;
+        case AttrName::FLAGS:
+            flags = std::stoul(a.value);
+            break;
+        default: //ignore others
+            break;
+        }
+    }
+    return NetworkInterfaceInfo{ifname, ni.status(), macaddr, mtu, flags, addrs};
 }
 
 void ContainerImpl::createInterface(const std::string& hostif,
@@ -205,7 +231,7 @@ void ContainerImpl::createInterface(const std::string& hostif,
                                     InterfaceType type,
                                     MacVLanMode mode)
 {
-    NetworkInterface ni(*this, zoneif);
+    NetworkInterface ni(getInitPid(), zoneif);
     ni.create(hostif, type, mode);
 }
 

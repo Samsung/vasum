@@ -24,11 +24,15 @@
 #ifndef LXCPP_NETWORK_CONFIG_HPP
 #define LXCPP_NETWORK_CONFIG_HPP
 
+#include "config/config.hpp"
+#include "config/fields.hpp"
+
 #include <vector>
 #include <string>
 
 #include <string.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 namespace lxcpp {
 
@@ -60,11 +64,18 @@ enum class InetAddrType {
     IPV6
 };
 
+enum class NetStatus {
+    DOWN,
+    UP
+};
+
+
 /**
  * Unified ip address
  */
 struct InetAddr {
     InetAddrType type;
+    uint32_t flags;
     int prefix;
     union {
         struct in_addr ipv4;
@@ -99,20 +110,54 @@ public:
         mType(type),
         mMode(mode)
     {
-        // TODO: Remove temporary usage
-        (void) mType;
-        (void) mMode;
     }
 
-    void addNetAddr(const InetAddr&);
-    void delNetAddr(const InetAddr&);
+    const std::string& getHostIf() const;
+
+    const std::string& getZoneIf() const;
+
+    const InterfaceType& getType() const;
+
+    const MacVLanMode& getMode() const;
+
+    const std::vector<InetAddr>& getAddrList() const;
+
+    void addInetAddr(const InetAddr&);
 
 private:
     const std::string mHostIf;
     const std::string mZoneIf;
     const InterfaceType mType;
     const MacVLanMode mMode;
+    //TODO mtu, macaddress, txqueue
+    /*
+     * above are interface parameters which can be read/modified:
+     *   MTU (Maximum Transmit Unit) is maximum length of link level packet in TCP stream
+     *   MAC address is also called hardware card address
+     *   TXQueue is transmit queue length
+     *
+     * I think most usufull would be possibility to set MAC address, other have their
+     * well working defaults but can be tuned to make faster networking (especially localy)
+     */
     std::vector<InetAddr> mIpAddrList;
+};
+
+/**
+ * Network interface configuration
+ */
+struct NetworkConfig {
+
+    //for convinience
+    void addInterfaceConfig(const std::string& hostif,
+                            const std::string& zoneif,
+                            InterfaceType type,
+                            MacVLanMode mode);
+    void addInetConfig(const std::string& ifname, const InetAddr& addr);
+
+    std::vector<NetworkInterfaceConfig> mInterfaces;
+
+    //TODO tmporary to allow serialization of this object
+    CONFIG_REGISTER_EMPTY
 };
 
 } //namespace lxcpp

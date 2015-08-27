@@ -428,7 +428,9 @@ std::vector<std::string> listNetdev(const pid_t& nsPid)
     while (response.hasMessage()) {
         std::string ifName;
         response.skip<ifinfomsg>();
-        response.fetch(IFLA_IFNAME, ifName);
+        // fetched value contains \0 terminator
+        int len = response.getAttributeLength();
+        response.fetch(IFLA_IFNAME, ifName, len - 1);
         interfaces.push_back(ifName);
         response.fetchNextMessage();
     }

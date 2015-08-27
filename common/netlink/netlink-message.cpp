@@ -191,7 +191,7 @@ void NetlinkResponse::skipAttribute()
 NetlinkResponse& NetlinkResponse::openNested(int ifla)
 {
     const rtattr *rta = asAttr(get(RTA_LENGTH(0)));
-    if (rta->rta_type == ifla) {
+    if (rta->rta_type != ifla) {
         const std::string msg = "Wrong attribute type, expected: " + std::to_string(ifla) + ", got: " + std::to_string(rta->rta_type);
         LOGE(msg);
         throw VasumException(msg);
@@ -217,9 +217,13 @@ NetlinkResponse& NetlinkResponse::closeNested()
     return *this;
 }
 
-NetlinkResponse& NetlinkResponse::fetch(int ifla, std::string& value, int maxSize)
+NetlinkResponse& NetlinkResponse::fetch(int ifla, std::string& value, unsigned len)
 {
-    value = std::string(get(ifla, maxSize));
+    const rtattr *rta = asAttr(get(RTA_LENGTH(0)));
+    if (len > RTA_PAYLOAD(rta)) {
+        len = RTA_PAYLOAD(rta);
+    }
+    value = std::string(get(ifla, -1), len);
     skipAttribute();
     return *this;
 }
@@ -228,12 +232,15 @@ const char* NetlinkResponse::get(int ifla, int len) const
 {
     const rtattr *rta = asAttr(get(RTA_LENGTH(len < 0 ? 0 : len)));
     if (rta->rta_type != ifla) {
-        const std::string msg = "Wrong attribute type, expected: " + std::to_string(ifla) + ", got: " + std::to_string(rta->rta_type);
+        const std::string msg = "Wrong attribute type, expected: " + std::to_string(ifla) +
+                                ", got: " + std::to_string(rta->rta_type);
         LOGE(msg);
         throw VasumException(msg);
     }
     if (len >= 0 && rta->rta_len != RTA_LENGTH(len)) {
-        const std::string msg = "Wrong attribute length, expected: " + std::to_string(rta->rta_len) + ", got: " + std::to_string(len);
+        const std::string msg = "Wrong attribute " + std::to_string(ifla) +
+                                " length, expected: " + std::to_string(rta->rta_len) +
+                                ", got: " + std::to_string(RTA_LENGTH(len));
         LOGE(msg);
         throw VasumException(msg);
     }
@@ -268,6 +275,11 @@ NetlinkResponse& NetlinkResponse::fetch(char* data, int len)
 int NetlinkResponse::getAttributeType() const
 {
     return asAttr(get(RTA_LENGTH(0)))->rta_type;
+}
+
+int NetlinkResponse::getAttributeLength() const
+{
+    return RTA_PAYLOAD(asAttr(get(RTA_LENGTH(0))));
 }
 
 NetlinkResponse& NetlinkResponse::seek(int len)

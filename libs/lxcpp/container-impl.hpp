@@ -34,7 +34,6 @@
 
 namespace lxcpp {
 
-
 class ContainerImpl : public virtual Container {
 public:
     ContainerImpl(const std::string &name, const std::string &path);
@@ -69,15 +68,19 @@ public:
                 const std::string& cwdInContainer);
 
     // Network interfaces setup/config
+    /**
+     * adds interface configration.
+     * throws NetworkException if zoneif name already on list
+     */
     void addInterfaceConfig(const std::string& hostif,
-                         const std::string& zoneif,
-                         InterfaceType type,
-                         MacVLanMode mode);
-    void addAddrConfig(const std::string& ifname, const InetAddr& addr);
+                            const std::string& zoneif,
+                            InterfaceType type,
+                            MacVLanMode mode);
+    void addInetConfig(const std::string& ifname, const InetAddr& addr);
 
     // Network interfaces (runtime)
-    std::vector<std::string> getInterfaces();
-    NetworkInterfaceInfo getInterfaceInfo(const std::string& ifname);
+    std::vector<std::string> getInterfaces() const;
+    NetworkInterfaceInfo getInterfaceInfo(const std::string& ifname) const;
     void createInterface(const std::string& hostif,
                          const std::string& zoneif,
                          InterfaceType type,
@@ -93,7 +96,6 @@ private:
 
     // TODO: convert to ContainerConfig struct
     std::vector<Namespace> mNamespaces;
-    std::vector<NetworkInterfaceConfig> mInterfaceConfig;
 };
 
 } // namespace lxcpp

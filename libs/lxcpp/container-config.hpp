@@ -25,6 +25,7 @@
 #define LXCPP_CONTAINER_CONFIG_HPP
 
 #include "lxcpp/logger-config.hpp"
+#include "lxcpp/network-config.hpp"
 
 #include <config/config.hpp>
 #include <config/fields.hpp>
@@ -69,6 +70,14 @@ struct ContainerConfig {
      * Get: getInitPid()
      */
     pid_t mInitPid;
+
+    /**
+     * Container network configration
+     *
+     * Set: by container network config methods
+     * Get: none
+     */
+    NetworkConfig mNetwork;
 
     /**
      * Argv of the container's init process to be executed.

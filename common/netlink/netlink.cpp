@@ -100,7 +100,7 @@ void Netlink::open(int netNsPid)
     auto fdFactory = []{ return socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE); };
 
     assert(mFd == -1);
-    if (netNsPid == 0 || netNsPid == getpid()) {
+    if (netNsPid == 0 || netNsPid == 1 || netNsPid == ::getpid()) {
         mFd = fdFactory();
         if (mFd == -1) {
             LOGE("Can't open socket: " << getSystemErrorMessage());

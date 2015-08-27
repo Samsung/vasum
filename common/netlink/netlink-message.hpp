@@ -25,6 +25,7 @@
 #ifndef COMMON_NETLINK_NETLINK_MESSAGE_HPP
 #define COMMON_NETLINK_NETLINK_MESSAGE_HPP
 
+#include <limits>
 #include <memory>
 #include <string>
 #include <vector>
@@ -150,7 +151,7 @@ public:
     /**
      * Fetch attribute
      */
-    NetlinkResponse& fetch(int ifla, std::string& value, int maxSize = -1);
+    NetlinkResponse& fetch(int ifla, std::string& value, unsigned maxLen = std::numeric_limits<unsigned>::max());
     template<class T>
     NetlinkResponse& fetch(int ifla, T& value);
     ///@}
@@ -159,6 +160,11 @@ public:
      * Get attributie type
      **/
     int getAttributeType() const;
+
+    /**
+     * Get attributie length
+     **/
+    int getAttributeLength() const;
 
     /**
      * Fetch data of type T
