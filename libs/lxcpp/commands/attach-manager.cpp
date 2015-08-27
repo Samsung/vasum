@@ -21,18 +21,20 @@
  * @brief   Implementation of attaching to a container
  */
 
-#include "lxcpp/attach-manager.hpp"
+#include "lxcpp/commands/attach-manager.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"
 #include "lxcpp/filesystem.hpp"
 #include "lxcpp/namespace.hpp"
 #include "lxcpp/capability.hpp"
+#include "lxcpp/environment.hpp"
 
 #include "utils/exception.hpp"
 
 #include <unistd.h>
 #include <sys/mount.h>
 
+#include <functional>
 
 namespace lxcpp {
 
@@ -64,6 +66,16 @@ void setupMountPoints()
     */
 }
 
+int execFunction(void* call)
+{
+    try {
+        return (*static_cast<AttachManager::Call*>(call))();
+    } catch(...) {
+        return -1; // Non-zero on failure
+    }
+    return 0; // Success
+}
+
 } // namespace
 
 AttachManager::AttachManager(lxcpp::ContainerImpl& container)
@@ -75,11 +87,20 @@ AttachManager::~AttachManager()
 {
 }
 
-void AttachManager::attach(Container::AttachCall& call,
-                           const std::string& wdInContainer)
+void AttachManager::attach(Container::AttachCall& userCall,
+                           const int capsToKeep,
+                           const std::string& workDirInContainer,
+                           const std::vector<std::string>& envToKeep,
+                           const std::vector<std::pair<std::string, std::string>>& envToSet)
 {
     // Channels for setup synchronization
     utils::Channel intermChannel;
+
+    Call call = std::bind(&AttachManager::child,
+                          std::move(userCall),
+                          capsToKeep,
+                          std::move(envToKeep),
+                          std::move(envToSet));
 
     const pid_t interPid = lxcpp::fork();
     if (interPid > 0) {
@@ -88,23 +109,29 @@ void AttachManager::attach(Container::AttachCall& call,
         intermChannel.shutdown();
     } else {
         intermChannel.setRight();
-        interm(intermChannel, wdInContainer, call);
+        interm(intermChannel, workDirInContainer, call);
         intermChannel.shutdown();
         ::_exit(0);
     }
 }
 
-int AttachManager::child(void* data)
+int AttachManager::child(const Container::AttachCall& call,
+                         const int capsToKeep,
+                         const std::vector<std::string>& envToKeep,
+                         const std::vector<std::pair<std::string, std::string>>& envToSet)
 {
-    try {
-        // TODO Pass mask and options via data
-        dropCapsFromBoundingExcept(0);
-        setupMountPoints();
-        return (*static_cast<Container::AttachCall*>(data))();
-    } catch(...) {
-        return -1; // Non-zero on failure
-    }
-    return 0; // Success
+    // Setup capabilities
+    dropCapsFromBoundingExcept(capsToKeep);
+
+    // Setup /proc /sys mount
+    setupMountPoints();
+
+    // Setup environment variables
+    clearenvExcept(envToKeep);
+    setenv(envToSet);
+
+    // Run user's code
+    return call();
 }
 
 void AttachManager::parent(utils::Channel& intermChannel, const pid_t interPid)
@@ -118,18 +145,18 @@ void AttachManager::parent(utils::Channel& intermChannel, const pid_t interPid)
 }
 
 void AttachManager::interm(utils::Channel& intermChannel,
-                           const std::string& wdInContainer,
-                           Container::AttachCall& call)
+                           const std::string& workDirInContainer,
+                           Call& call)
 {
     lxcpp::setns(mContainer.getInitPid(), mContainer.getNamespaces());
 
     // Change the current work directory
-    // wdInContainer is a path relative to the container's root
-    lxcpp::chdir(wdInContainer);
+    // workDirInContainer is a path relative to the container's root
+    lxcpp::chdir(workDirInContainer);
 
     // PID namespace won't affect the returned pid
     // CLONE_PARENT: Child's PPID == Caller's PID
-    const pid_t childPid = lxcpp::clone(&AttachManager::child,
+    const pid_t childPid = lxcpp::clone(execFunction,
                                         &call,
                                         CLONE_PARENT);
     intermChannel.write(childPid);

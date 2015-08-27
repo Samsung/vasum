@@ -46,7 +46,7 @@ struct NetworkInterfaceInfo {
 
 class Container {
 public:
-    typedef std::function<int()> AttachCall;
+    typedef std::function<int(void)> AttachCall;
 
     virtual ~Container() {};
 

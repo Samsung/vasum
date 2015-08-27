@@ -51,6 +51,11 @@ struct FileSystemSetupException: public Exception {
         : Exception(message) {}
 };
 
+struct EnvironmentSetupException: public Exception {
+    EnvironmentSetupException(const std::string& message = "Error during handling environment variables")
+        : Exception(message) {}
+};
+
 struct CapabilitySetupException: public Exception {
     CapabilitySetupException(const std::string& message = "Error during a capability operation")
         : Exception(message) {}
@@ -58,6 +63,11 @@ struct CapabilitySetupException: public Exception {
 
 struct BadArgument: public Exception {
     BadArgument(const std::string& message = "Bad argument passed")
+        : Exception(message) {}
+};
+
+struct NoSuchValue: public Exception {
+    NoSuchValue(const std::string& message = "Value not found")
         : Exception(message) {}
 };
 
