@@ -24,12 +24,13 @@ FILE(GLOB_RECURSE common_SRCS ${COMMON_FOLDER}/*.cpp ${COMMON_FOLDER}/*.hpp)
 FILE(GLOB         server_SRCS ${SERVER_FOLDER}/*.cpp ${SERVER_FOLDER}/*.hpp)
 FILE(GLOB         client_SRCS ${CLIENT_FOLDER}/*.cpp ${CLIENT_FOLDER}/*.h)
 FILE(GLOB         socket_test_SRCS ${SOCKET_TEST_FOLDER}/*.cpp ${SOCKET_TEST_FOLDER}/*.hpp)
+FILE(GLOB         lxcpp_test_SRCS lxcpp/lxcpp-api-compile-test.cpp)
 
 FILE(GLOB         main_SRC ${SERVER_FOLDER}/main.cpp)
 LIST(REMOVE_ITEM server_SRCS ${main_SRC})
 
 # We must compile socket-test separately, exclude it from unit-test build
-LIST(REMOVE_ITEM project_SRCS ${socket_test_SRCS})
+LIST(REMOVE_ITEM project_SRCS ${socket_test_SRCS} ${lxcpp_test_SRCS})
 
 
 ## Setup target ################################################################
@@ -38,6 +39,10 @@ ADD_EXECUTABLE(${UT_SERVER_CODENAME} ${project_SRCS} ${common_SRCS} ${server_SRC
 
 ## A fake target to test vasum-client C API
 ADD_EXECUTABLE("vasum-client-c-api-compile-test" client/client-c-api-compile-test.c)
+
+## A fake target to test lxcpp API
+ADD_EXECUTABLE("lxcpp-api-compile-test" lxcpp/lxcpp-api-compile-test.cpp)
+TARGET_LINK_LIBRARIES("lxcpp-api-compile-test" lxcpp)
 
 IF(NOT WITHOUT_SYSTEMD)
 SET(SOCKET_TEST_CODENAME "${PROJECT_NAME}-socket-test")

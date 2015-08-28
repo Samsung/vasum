@@ -23,17 +23,25 @@ MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the liblxcpp...")
 FILE(GLOB HEADERS       *.hpp)
 FILE(GLOB HEADERS_UTILS ${COMMON_FOLDER}/utils/fd-utils.hpp
-                        ${COMMON_FOLDER}/utils/exception.hpp)
+                        ${COMMON_FOLDER}/utils/exception.hpp
+                        ${COMMON_FOLDER}/utils/channel.hpp
+                        ${COMMON_FOLDER}/utils/environment.hpp
+                        ${COMMON_FOLDER}/utils/execute.hpp)
+FILE(GLOB HEADERS_NETLINK  ${COMMON_FOLDER}/netlink/*.hpp)
 FILE(GLOB SRCS          *.cpp *.hpp)
 FILE(GLOB SRCS_UTILS    ${COMMON_FOLDER}/utils/fd-utils.cpp
-                        ${COMMON_FOLDER}/utils/exception.cpp)
+                        ${COMMON_FOLDER}/utils/exception.cpp
+                        ${COMMON_FOLDER}/utils/channel.cpp
+                        ${COMMON_FOLDER}/utils/environment.cpp
+                        ${COMMON_FOLDER}/utils/execute.cpp)
+FILE(GLOB SRCS_NETLINK  ${COMMON_FOLDER}/netlink/*.cpp)
 
 SET(_LIB_VERSION_ "${VERSION}")
 SET(_LIB_SOVERSION_ "0")
 SET(PC_FILE "lib${PROJECT_NAME}.pc")
 
 ## Setup target ################################################################
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_UTILS})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_UTILS} ${SRCS_NETLINK})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
     SOVERSION   ${_LIB_SOVERSION_}
     VERSION     ${_LIB_VERSION_}
@@ -60,3 +68,5 @@ INSTALL(FILES       ${HEADERS}
         DESTINATION ${INCLUDE_INSTALL_DIR}/lxcpp)
 INSTALL(FILES       ${HEADERS_UTILS}
         DESTINATION ${INCLUDE_INSTALL_DIR}/lxcpp/utils)
+INSTALL(FILES       ${HEADERS_NETLINK}
+        DESTINATION ${INCLUDE_INSTALL_DIR}/lxcpp/netlink)

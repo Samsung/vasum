@@ -23,8 +23,7 @@
  */
 
 #include "config.hpp"
-#include "netlink.hpp"
-#include "utils.hpp"
+#include "netlink/netlink.hpp"
 #include "utils/exception.hpp"
 #include "utils/make-clean.hpp"
 #include "utils/environment.hpp"
