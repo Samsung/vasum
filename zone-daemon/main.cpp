@@ -55,12 +55,24 @@ const std::string PROGRAM_NAME_AND_VERSION =
 int main(int argc, char* argv[])
 {
     try {
+#ifndef NDEBUG
+        const char *defaultLoggingBackend = "stderr";
+#else
+        const char *defaultLoggingBackend = "syslog";
+#endif
+
         po::options_description desc("Allowed options");
 
         desc.add_options()
         ("help,h", "print this help")
         ("daemon,d", "Run server as daemon")
         ("log-level,l", po::value<std::string>()->default_value("DEBUG"), "set log level")
+        ("log-backend,b", po::value<std::string>()->default_value(defaultLoggingBackend),
+                          "set log backend [stderr,syslog"
+#ifdef HAVE_SYSTEMD
+                          ",journal"
+#endif
+                          "]")
         ("version,v", "show application version")
         ;
 
@@ -103,13 +115,22 @@ int main(int argc, char* argv[])
         }
 
         Logger::setLogLevel(vm["log-level"].as<std::string>());
-#if !defined(NDEBUG)
-        Logger::setLogBackend(new StderrBackend());
-#elif HAVE_SYSTEMD
-        Logger::setLogBackend(new SystemdJournalBackend());
-#else
-        Logger::setLogBackend(new SyslogBackend());
+        const std::string logBackend = vm["log-backend"].as<std::string>();
+        if(logBackend.compare("stderr") == 0) {
+            Logger::setLogBackend(new StderrBackend());
+        }
+#ifdef HAVE_SYSTEMD
+        else if(logBackend.compare("journal") == 0) {
+            Logger::setLogBackend(new SystemdJournalBackend());
+        }
 #endif
+        else if(logBackend.compare("syslog") == 0) {
+            Logger::setLogBackend(new SyslogBackend());
+        }
+        else {
+            std::cerr << "Error: unrecognized logging backend option: " << logBackend << std::endl;
+            return 1;
+        }
 
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
@@ -127,4 +148,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-

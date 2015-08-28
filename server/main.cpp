@@ -58,8 +58,12 @@ const std::string CONFIG_PATH = "/etc/vasum/daemon.conf";
 int main(int argc, char* argv[])
 {
     bool runAsRoot = false;
-
     try {
+#ifndef NDEBUG
+        const char *defaultLoggingBackend = "stderr";
+#else
+        const char *defaultLoggingBackend = "syslog";
+#endif
         po::options_description desc("Allowed options");
 
         desc.add_options()
@@ -67,6 +71,12 @@ int main(int argc, char* argv[])
         ("root,r", "Don't drop root privileges at startup")
         ("daemon,d", "Run server as daemon")
         ("log-level,l", po::value<std::string>()->default_value("DEBUG"), "set log level")
+        ("log-backend,b", po::value<std::string>()->default_value(defaultLoggingBackend),
+                          "set log backend [stderr,syslog"
+#ifdef HAVE_SYSTEMD
+                          ",journal"
+#endif
+                          "]")
         ("check,c", "check runtime environment and exit")
         ("version,v", "show application version")
         ;
@@ -113,13 +123,22 @@ int main(int argc, char* argv[])
         }
 
         Logger::setLogLevel(vm["log-level"].as<std::string>());
-#if !defined(NDEBUG)
-        Logger::setLogBackend(new StderrBackend());
-#elif HAVE_SYSTEMD
-        Logger::setLogBackend(new SystemdJournalBackend());
-#else
-        Logger::setLogBackend(new SyslogBackend());
+        const std::string logBackend = vm["log-backend"].as<std::string>();
+        if(logBackend.compare("stderr") == 0) {
+            Logger::setLogBackend(new StderrBackend());
+        }
+#ifdef HAVE_SYSTEMD
+        else if(logBackend.compare("journal") == 0) {
+            Logger::setLogBackend(new SystemdJournalBackend());
+        }
 #endif
+        else if(logBackend.compare("syslog") == 0) {
+            Logger::setLogBackend(new SyslogBackend());
+        }
+        else {
+            std::cerr << "Error: unrecognized logging backend option: " << logBackend << std::endl;
+            return 1;
+        }
 
         runAsRoot = vm.count("root") > 0;
 
@@ -149,4 +168,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
