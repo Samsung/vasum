@@ -177,13 +177,20 @@ $(document).ready(function(){initNavTree('logger_8hpp_source.html','');});
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;</div>
 <div class="line"><a name="l00118"></a><span class="lineno"><a class="line" href="group__libLogger.html#ga1c2a47cc5ee1b88cca411a169581151c">  118</a></span>&#160;<span class="preprocessor">#define LOGI(MESSAGE) LOG(INFO, MESSAGE)</span></div>
 <div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;</div>
-<div class="line"><a name="l00121"></a><span class="lineno"><a class="line" href="group__libLogger.html#ga478309c214861a9077346b8f4f2d86fe">  121</a></span>&#160;<span class="preprocessor">#define LOGD(MESSAGE) LOG(DEBUG, MESSAGE)</span></div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;</div>
-<div class="line"><a name="l00124"></a><span class="lineno"><a class="line" href="group__libLogger.html#gaa07404b238425c9be6ffd080fe2495c5">  124</a></span>&#160;<span class="preprocessor">#define LOGH(MESSAGE) LOG(HELP, MESSAGE)</span></div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;</div>
-<div class="line"><a name="l00127"></a><span class="lineno"><a class="line" href="group__libLogger.html#ga2abefd5fa3576d8dd9cc64a1aa84c428">  127</a></span>&#160;<span class="preprocessor">#define LOGT(MESSAGE) LOG(TRACE, MESSAGE)</span></div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;<span class="preprocessor">#endif // COMMON_LOGGER_LOGGER_HPP</span></div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;<span class="preprocessor">#if !defined(NDEBUG)</span></div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;<span class="preprocessor">#define LOGD(MESSAGE) LOG(DEBUG, MESSAGE)</span></div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
+<div class="line"><a name="l00125"></a><span class="lineno"><a class="line" href="group__libLogger.html#gaa07404b238425c9be6ffd080fe2495c5">  125</a></span>&#160;<span class="preprocessor">#define LOGH(MESSAGE) LOG(HELP, MESSAGE)</span></div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;</div>
+<div class="line"><a name="l00128"></a><span class="lineno"><a class="line" href="group__libLogger.html#ga2abefd5fa3576d8dd9cc64a1aa84c428">  128</a></span>&#160;<span class="preprocessor">#define LOGT(MESSAGE) LOG(TRACE, MESSAGE)</span></div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;<span class="preprocessor">#define LOGD(MESSAGE) do {} while (0)</span></div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;<span class="preprocessor">#define LOGH(MESSAGE) do {} while (0)</span></div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;<span class="preprocessor">#define LOGT(MESSAGE) do {} while (0)</span></div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;<span class="preprocessor">#endif // COMMON_LOGGER_LOGGER_HPP</span></div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;</div>
 <div class="ttc" id="classlogger_1_1Logger_html_acf31b5d2497fc5f9ed0d0145687bf14a"><div class="ttname"><a href="classlogger_1_1Logger.html#acf31b5d2497fc5f9ed0d0145687bf14a">logger::Logger::getLogLevel</a></div><div class="ttdeci">static LogLevel getLogLevel(void)</div><div class="ttdef"><b>Definition:</b> logger.cpp:65</div></div>
 <div class="ttc" id="classlogger_1_1Logger_html_a588197e9c4e3175175400ccfb4522de6"><div class="ttname"><a href="classlogger_1_1Logger.html#a588197e9c4e3175175400ccfb4522de6">logger::Logger::logMessage</a></div><div class="ttdeci">static void logMessage(LogLevel logLevel, const std::string &amp;message, const std::string &amp;file, const unsigned int line, const std::string &amp;func, const std::string &amp;rootDir)</div><div class="ttdef"><b>Definition:</b> logger.cpp:43</div></div>
 <div class="ttc" id="backend-file_8hpp_html"><div class="ttname"><a href="backend-file_8hpp.html">backend-file.hpp</a></div><div class="ttdoc">File backend for logger. </div></div>
@@ -202,7 +209,7 @@ $(document).ready(function(){initNavTree('logger_8hpp_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_258da5588bb15182dfffe9dae1cb498a.html">libs</a></li><li class="navelem"><a class="el" href="dir_96acf29ba294d52bdea2b996dda3fc27.html">logger</a></li><li class="navelem"><a class="el" href="logger_8hpp.html">logger.hpp</a></li>
-    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
+    <li class="footer">Generated on Mon Aug 31 2015 13:26:22 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

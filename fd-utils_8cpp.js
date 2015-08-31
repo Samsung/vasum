@@ -7,5 +7,6 @@ var fd_utils_8cpp =
     [ "getMaxFDNumber", "fd-utils_8cpp.html#ae98bb9e79c8f5c202bc00ecfe523b519", null ],
     [ "read", "fd-utils_8cpp.html#a89095c37dd559f83ea36172dc2a5ad3b", null ],
     [ "setMaxFDNumber", "fd-utils_8cpp.html#af42f00ec5c1bd181691e45abd848b6a4", null ],
+    [ "shutdown", "fd-utils_8cpp.html#a08c546d89635ef8199d9013f34f99366", null ],
     [ "write", "fd-utils_8cpp.html#ad60b22dc1db0623f51f90aa3fd04d9da", null ]
 ];

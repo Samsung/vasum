@@ -7,7 +7,7 @@ var classvasum_1_1HostDbusConnection =
     [ "onMessageCall", "classvasum_1_1HostDbusConnection.html#a294095bf7ea8b7a1ff7407afe3b84eb9", null ],
     [ "onNameAcquired", "classvasum_1_1HostDbusConnection.html#ac097a8bbe4aad85fdd32ecbeb4d0adfc", null ],
     [ "onNameLost", "classvasum_1_1HostDbusConnection.html#ad717e09d254cdb2ef7cd91f24eb89446", null ],
-    [ "onSignalCall", "classvasum_1_1HostDbusConnection.html#ab32c26b71dfeec688450c947c6350432", null ],
+    [ "onSignalCall", "classvasum_1_1HostDbusConnection.html#ad3e54b8b985d3cb3135c3bc9c6aa55bd", null ],
     [ "proxyCallAsync", "classvasum_1_1HostDbusConnection.html#aa04646f086a76f6730070af5f465ef17", null ],
     [ "setProxyCallCallback", "classvasum_1_1HostDbusConnection.html#a332bf11022c0c940f21406f68a210d50", null ],
     [ "waitForName", "classvasum_1_1HostDbusConnection.html#a1c3a677ed32ef4e11fa452317550e29f", null ],

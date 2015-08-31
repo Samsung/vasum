@@ -23,7 +23,7 @@ var searchData=
   ['handlegetzoneinfocall',['handleGetZoneInfoCall',['../classvasum_1_1ZonesManager.html#a369e58110c8a85330fbd08c87d64aada',1,'vasum::ZonesManager']]],
   ['handlegrantdevicecall',['handleGrantDeviceCall',['../classvasum_1_1ZonesManager.html#a8e0662131061e54d59885d39e19653dc',1,'vasum::ZonesManager']]],
   ['handleinput',['handleInput',['../classipc_1_1Processor.html#ab945cab3416a89ee1cc1db0349ea9607',1,'ipc::Processor']]],
-  ['handleinternal',['handleInternal',['../classutils_1_1SignalFD.html#a148da719bbe535319fa34691456194d7',1,'utils::SignalFD']]],
+  ['handleinternal',['handleInternal',['../classutils_1_1SignalFD.html#a148da719bbe535319fa34691456194d7',1,'utils::SignalFD::handleInternal()'],['../classvasum_1_1InputMonitor.html#a48d72afae312716ad01564173dfbcea2',1,'vasum::InputMonitor::handleInternal()']]],
   ['handlelockqueuecall',['handleLockQueueCall',['../classvasum_1_1ZonesManager.html#a27a589754202d9076273caed7f235b08',1,'vasum::ZonesManager']]],
   ['handlelockzonecall',['handleLockZoneCall',['../classvasum_1_1ZonesManager.html#a71f6701bd532b5ce0a422442e7ecccb2',1,'vasum::ZonesManager']]],
   ['handlelostconnection',['handleLostConnection',['../classipc_1_1Processor.html#acc487d21588789e4bae70fc2bc2b746b',1,'ipc::Processor']]],

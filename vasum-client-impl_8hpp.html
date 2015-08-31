@@ -122,6 +122,15 @@ $(document).ready(function(){initNavTree('vasum-client-impl_8hpp.html','');});
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZoneStructure.html">ZoneStructure</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Zone information structure.  <a href="structZoneStructure.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structNetdevStructure.html">NetdevStructure</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Network device information structure.  <a href="structNetdevStructure.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structInetAddr.html">InetAddr</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Network interface information structure.  <a href="structInetAddr.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classClient.html">Client</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">vasum's client definition.  <a href="classClient.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -133,11 +142,31 @@ Typedefs</h2></td></tr>
 <tr class="memitem:ac04ddae9093381eb8704d3d93ccbad04"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; void(const char *zoneId, const char *dbusAddress, void *<a class="el" href="initctl_8cpp.html#abbacd5f95515b76e7df78ef953e29cae">data</a>)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="vasum-client-impl_8hpp.html#ac04ddae9093381eb8704d3d93ccbad04">VsmZoneDbusStateFunction</a></td></tr>
 <tr class="memdesc:ac04ddae9093381eb8704d3d93ccbad04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Zone's D-Bus state change callback function signature.  <a href="#ac04ddae9093381eb8704d3d93ccbad04">More...</a><br /></td></tr>
 <tr class="separator:ac04ddae9093381eb8704d3d93ccbad04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a101fe60f8273404aebea70a31aa7d599"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structZoneStructure.html">ZoneStructure</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="vasum-client-impl_8hpp.html#a101fe60f8273404aebea70a31aa7d599">Zone</a></td></tr>
+<tr class="memdesc:a101fe60f8273404aebea70a31aa7d599"><td class="mdescLeft">&#160;</td><td class="mdescRight">Zone information structure.  <a href="#a101fe60f8273404aebea70a31aa7d599">More...</a><br /></td></tr>
+<tr class="separator:a101fe60f8273404aebea70a31aa7d599"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25fa0fc90a237ad2fb215da1f1bd753d"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structNetdevStructure.html">NetdevStructure</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="vasum-client-impl_8hpp.html#a25fa0fc90a237ad2fb215da1f1bd753d">Netdev</a></td></tr>
+<tr class="memdesc:a25fa0fc90a237ad2fb215da1f1bd753d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Network device information structure.  <a href="#a25fa0fc90a237ad2fb215da1f1bd753d">More...</a><br /></td></tr>
+<tr class="separator:a25fa0fc90a237ad2fb215da1f1bd753d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This file contains vasum-server's client definition. </p>
 <dl class="section author"><dt>Author</dt><dd>Mateusz Malicki (<a href="#" onclick="location.href='mai'+'lto:'+'m.m'+'al'+'ick'+'i2'+'@sa'+'ms'+'ung'+'.c'+'om'; return false;">m.mal<span style="display: none;">.nosp@m.</span>icki<span style="display: none;">.nosp@m.</span>2@sam<span style="display: none;">.nosp@m.</span>sung<span style="display: none;">.nosp@m.</span>.com</a>) </dd></dl>
 </div><h2 class="groupheader">Typedef Documentation</h2>
+<a class="anchor" id="a25fa0fc90a237ad2fb215da1f1bd753d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structNetdevStructure.html">NetdevStructure</a> * <a class="el" href="vasum-client-impl_8hpp.html#a25fa0fc90a237ad2fb215da1f1bd753d">Netdev</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Network device information structure. </p>
+
+</div>
+</div>
 <a class="anchor" id="ac04ddae9093381eb8704d3d93ccbad04"></a>
 <div class="memitem">
 <div class="memproto">
@@ -160,6 +189,20 @@ Typedefs</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a101fe60f8273404aebea70a31aa7d599"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structZoneStructure.html">ZoneStructure</a> * <a class="el" href="vasum-client-impl_8hpp.html#a101fe60f8273404aebea70a31aa7d599">Zone</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Zone information structure. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.6-->
@@ -167,7 +210,7 @@ Typedefs</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_315f437731ac8aa552155ee72563b5d3.html">client</a></li><li class="navelem"><a class="el" href="vasum-client-impl_8hpp.html">vasum-client-impl.hpp</a></li>
-    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
+    <li class="footer">Generated on Mon Aug 31 2015 13:26:22 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

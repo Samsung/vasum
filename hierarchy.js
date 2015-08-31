@@ -1,7 +1,7 @@
 var hierarchy =
 [
     [ "any", null, [
-      [ "DisbaleMoveAnyWrapper", "classDisbaleMoveAnyWrapper.html", null ]
+      [ "DisableMoveAnyWrapper", "classDisableMoveAnyWrapper.html", null ]
     ] ],
     [ "Client", "classClient.html", null ],
     [ "Client::Status", "structClient_1_1Status.html", null ],
@@ -31,6 +31,7 @@ var hierarchy =
     [ "dbus::DbusConnection::NameCallbacks", "structdbus_1_1DbusConnection_1_1NameCallbacks.html", null ],
     [ "dbus::DbusConnection::VanishedCallbacks", "structdbus_1_1DbusConnection_1_1VanishedCallbacks.html", null ],
     [ "dbus::MethodResultBuilder", "classdbus_1_1MethodResultBuilder.html", null ],
+    [ "InetAddr", "structInetAddr.html", null ],
     [ "ipc::Acceptor", "classipc_1_1Acceptor.html", null ],
     [ "ipc::AddPeerRequest", "classipc_1_1AddPeerRequest.html", null ],
     [ "ipc::Client", "classipc_1_1Client.html", null ],
@@ -73,7 +74,17 @@ var hierarchy =
     [ "logger::Logger", "classlogger_1_1Logger.html", null ],
     [ "logger::LoggerScope", "classlogger_1_1LoggerScope.html", null ],
     [ "logger::SStreamWrapper", "classlogger_1_1SStreamWrapper.html", null ],
+    [ "lxcpp::AttachManager", "classlxcpp_1_1AttachManager.html", null ],
+    [ "lxcpp::Attr", "structlxcpp_1_1Attr.html", null ],
+    [ "lxcpp::Container", "classlxcpp_1_1Container.html", [
+      [ "lxcpp::ContainerImpl", "classlxcpp_1_1ContainerImpl.html", null ]
+    ] ],
+    [ "lxcpp::InetAddr", "structlxcpp_1_1InetAddr.html", null ],
+    [ "lxcpp::NetworkInterface", "classlxcpp_1_1NetworkInterface.html", null ],
+    [ "lxcpp::NetworkInterfaceConfig", "classlxcpp_1_1NetworkInterfaceConfig.html", null ],
+    [ "lxcpp::NetworkInterfaceInfo", "structlxcpp_1_1NetworkInterfaceInfo.html", null ],
     [ "ipc::MethodHandler< void, void >", "structipc_1_1MethodHandler.html", null ],
+    [ "NetdevStructure", "structNetdevStructure.html", null ],
     [ "ipc::RequestQueue< Event >", "classipc_1_1RequestQueue.html", null ],
     [ "ipc::SignalHandler< void >", "structipc_1_1SignalHandler.html", null ],
     [ "std::exception", null, [
@@ -95,18 +106,35 @@ var hierarchy =
           [ "ipc::IPCTimeoutException", "structipc_1_1IPCTimeoutException.html", null ],
           [ "ipc::IPCUserException", "structipc_1_1IPCUserException.html", null ]
         ] ],
-        [ "utils::UtilsException", "structutils_1_1UtilsException.html", null ],
+        [ "lxcpp::Exception", "structlxcpp_1_1Exception.html", [
+          [ "lxcpp::BadArgument", "structlxcpp_1_1BadArgument.html", null ],
+          [ "lxcpp::CapabilitySetupException", "structlxcpp_1_1CapabilitySetupException.html", null ],
+          [ "lxcpp::FileSystemSetupException", "structlxcpp_1_1FileSystemSetupException.html", null ],
+          [ "lxcpp::NetworkException", "structlxcpp_1_1NetworkException.html", null ],
+          [ "lxcpp::NotImplementedException", "structlxcpp_1_1NotImplementedException.html", null ],
+          [ "lxcpp::ProcessSetupException", "structlxcpp_1_1ProcessSetupException.html", null ]
+        ] ],
+        [ "utils::UtilsException", "structutils_1_1UtilsException.html", [
+          [ "utils::ProvisionExistsException", "structutils_1_1ProvisionExistsException.html", null ]
+        ] ],
         [ "vasum::VasumException", "structvasum_1_1VasumException.html", [
+          [ "vasum::cli::CliException", "structvasum_1_1cli_1_1CliException.html", [
+            [ "vasum::cli::IOException", "structvasum_1_1cli_1_1IOException.html", null ]
+          ] ],
           [ "vasum::ClientException", "structvasum_1_1ClientException.html", [
             [ "vasum::InvalidArgumentException", "structvasum_1_1InvalidArgumentException.html", null ],
             [ "vasum::InvalidResponseException", "structvasum_1_1InvalidResponseException.html", null ],
             [ "vasum::IOException", "structvasum_1_1IOException.html", null ],
             [ "vasum::OperationFailedException", "structvasum_1_1OperationFailedException.html", null ]
           ] ],
-          [ "vasum::LxcException", "structvasum_1_1LxcException.html", null ],
+          [ "vasum::LxcException", "structvasum_1_1LxcException.html", [
+            [ "vasum::KeyNotFoundException", "structvasum_1_1KeyNotFoundException.html", null ]
+          ] ],
           [ "vasum::ServerException", "structvasum_1_1ServerException.html", [
             [ "vasum::HostConnectionException", "structvasum_1_1HostConnectionException.html", null ],
-            [ "vasum::InputMonitorException", "structvasum_1_1InputMonitorException.html", null ],
+            [ "vasum::InputMonitorException", "structvasum_1_1InputMonitorException.html", [
+              [ "vasum::TimeoutException", "structvasum_1_1TimeoutException.html", null ]
+            ] ],
             [ "vasum::InvalidZoneIdException", "structvasum_1_1InvalidZoneIdException.html", null ],
             [ "vasum::ZoneConnectionException", "structvasum_1_1ZoneConnectionException.html", null ],
             [ "vasum::ZoneOperationException", "structvasum_1_1ZoneOperationException.html", null ]
@@ -128,6 +156,7 @@ var hierarchy =
     [ "utils::CallbackGuard::SharedState", "classutils_1_1CallbackGuard_1_1SharedState.html", null ],
     [ "utils::CallbackWrapper< Callback >", "classutils_1_1CallbackWrapper.html", null ],
     [ "utils::CArrayBuilder< T >", "classutils_1_1CArrayBuilder.html", null ],
+    [ "utils::Channel", "classutils_1_1Channel.html", null ],
     [ "utils::CountingMap< Key >", "classutils_1_1CountingMap.html", null ],
     [ "utils::EventFD", "classutils_1_1EventFD.html", null ],
     [ "utils::Glib", "classutils_1_1Glib.html", null ],
@@ -160,6 +189,7 @@ var hierarchy =
     [ "vasum::api::VectorOfStrings", "structvasum_1_1api_1_1VectorOfStrings.html", null ],
     [ "vasum::api::Void", "structvasum_1_1api_1_1Void.html", null ],
     [ "vasum::api::ZoneInfoOut", "structvasum_1_1api_1_1ZoneInfoOut.html", null ],
+    [ "vasum::cli::ArgSpec", "structvasum_1_1cli_1_1ArgSpec.html", null ],
     [ "vasum::cli::CommandLineInterface", "classvasum_1_1cli_1_1CommandLineInterface.html", null ],
     [ "vasum::HostDbusConnection", "classvasum_1_1HostDbusConnection.html", null ],
     [ "vasum::HostIPCConnection", "classvasum_1_1HostIPCConnection.html", null ],
@@ -191,6 +221,5 @@ var hierarchy =
     [ "vasum::ZonesManagerConfig", "structvasum_1_1ZonesManagerConfig.html", null ],
     [ "vasum::ZonesManagerDynamicConfig", "structvasum_1_1ZonesManagerDynamicConfig.html", null ],
     [ "vasum::ZoneTemplatePathConfig", "structvasum_1_1ZoneTemplatePathConfig.html", null ],
-    [ "VsmNetdevStructure", "structVsmNetdevStructure.html", null ],
-    [ "VsmZoneStructure", "structVsmZoneStructure.html", null ]
+    [ "ZoneStructure", "structZoneStructure.html", null ]
 ];

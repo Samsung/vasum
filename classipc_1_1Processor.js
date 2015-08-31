@@ -8,10 +8,8 @@ var classipc_1_1Processor =
     [ "ReturnCallbacks", "structipc_1_1Processor_1_1ReturnCallbacks.html", "structipc_1_1Processor_1_1ReturnCallbacks" ],
     [ "SignalHandlers", "structipc_1_1Processor_1_1SignalHandlers.html", "structipc_1_1Processor_1_1SignalHandlers" ],
     [ "Lock", "classipc_1_1Processor.html#af2319029cf28aae562258d060d3b7be1", null ],
-    [ "ParseCallback", "classipc_1_1Processor.html#acda6a67a1d088a60b29cd32edebe4ba1", null ],
     [ "Peers", "classipc_1_1Processor.html#a80eb92e2f29ab8e8a9953b3b6b766b91", null ],
     [ "Request", "classipc_1_1Processor.html#a2b5538236e5c75442286c6824369b71d", null ],
-    [ "SerializeCallback", "classipc_1_1Processor.html#ab44d722b4085adfa40fdbcdd9c44d445", null ],
     [ "Event", "classipc_1_1Processor.html#af1a6569899a0aef5aaccceb81a143c8f", [
       [ "FINISH", "classipc_1_1Processor.html#af1a6569899a0aef5aaccceb81a143c8fae73b26e82a742972e6213f965a808795", null ],
       [ "METHOD", "classipc_1_1Processor.html#af1a6569899a0aef5aaccceb81a143c8fa725e74fd6435d86483781e2bd8e9d2c7", null ],

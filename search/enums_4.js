@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['runlevel',['RunLevel',['../namespaceutils.html#a349ac5fc810991a752e573a0c304ae80',1,'utils']]]
+  ['loglevel',['LogLevel',['../group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2',1,'logger']]]
 ];

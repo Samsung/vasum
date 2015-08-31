@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['log_5fto_5fconsole',['LOG_TO_CONSOLE',['../server_2main_8cpp.html#a1827d1ccfb41f62353aa6904450fbc92',1,'main.cpp']]]
+  ['mode_5fcommand_5fline',['MODE_COMMAND_LINE',['../command-line-interface_8hpp.html#a74f0bf4f6e4214449acf6aa9b1bea272',1,'command-line-interface.hpp']]],
+  ['mode_5finteractive',['MODE_INTERACTIVE',['../command-line-interface_8hpp.html#adbd386c2511dc9dae124eb48329a5557',1,'command-line-interface.hpp']]]
 ];

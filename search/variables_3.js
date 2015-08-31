@@ -7,5 +7,6 @@ var searchData=
   ['default_5fmax_5fnumber_5fof_5fpeers',['DEFAULT_MAX_NUMBER_OF_PEERS',['../namespaceipc.html#a293ac65189694f62c8c821e8ecff8006',1,'ipc']]],
   ['defaultid',['defaultId',['../structvasum_1_1ZonesManagerDynamicConfig.html#a214c36d5c2021dab7be67706036c2a5a',1,'vasum::ZonesManagerDynamicConfig']]],
   ['definition',['DEFINITION',['../namespacefake__power__manager__api.html#a396ed74b0ebfb57328d8400079e45678',1,'fake_power_manager_api::DEFINITION()'],['../namespacevasum_1_1api_1_1dbus.html#acbe1d1b60dd80569df7427a677e2b442',1,'vasum::api::dbus::DEFINITION()']]],
+  ['description',['description',['../structvasum_1_1cli_1_1ArgSpec.html#a458b4f3ad35b508dc02050c1889a3a82',1,'vasum::cli::ArgSpec']]],
   ['device',['device',['../structvasum_1_1api_1_1GrantDeviceIn.html#a60f8a04355a8f331ccecbe41ae9f90de',1,'vasum::api::GrantDeviceIn::device()'],['../structvasum_1_1InputConfig.html#a6d404bc96c28e702ef4a900ef9e06c7a',1,'vasum::InputConfig::device()']]]
 ];

@@ -120,15 +120,15 @@ $(document).ready(function(){initNavTree('classvasum_1_1cli_1_1CommandLineInterf
 Public Types</h2></td></tr>
 <tr class="memitem:aef2d1ce957fc2de93c5c525c75b2d52b"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; void(const <a class="el" href="namespacevasum_1_1cli.html#ae6812f0aab945a854c9c967549949b2c">Args</a> &amp;argv)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#aef2d1ce957fc2de93c5c525c75b2d52b">ExecutorCallback</a></td></tr>
 <tr class="separator:aef2d1ce957fc2de93c5c525c75b2d52b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa45722c09c4295de904609019ee931e7"><td class="memItemLeft" align="right" valign="top">typedef std::vector&lt; std::pair&lt; std::string, std::string &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#aa45722c09c4295de904609019ee931e7">ArgsSpec</a></td></tr>
-<tr class="separator:aa45722c09c4295de904609019ee931e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe3c86cb2b103554ef6422b8d507fddc"><td class="memItemLeft" align="right" valign="top">typedef std::vector&lt; <a class="el" href="structvasum_1_1cli_1_1ArgSpec.html">ArgSpec</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#afe3c86cb2b103554ef6422b8d507fddc">ArgsSpec</a></td></tr>
+<tr class="separator:afe3c86cb2b103554ef6422b8d507fddc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a8a70dff92ee3e6889b7205320e675ad9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#a8a70dff92ee3e6889b7205320e675ad9">CommandLineInterface</a> ()</td></tr>
 <tr class="memdesc:a8a70dff92ee3e6889b7205320e675ad9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dummy constructor (for stl usage)  <a href="#a8a70dff92ee3e6889b7205320e675ad9">More...</a><br /></td></tr>
 <tr class="separator:a8a70dff92ee3e6889b7205320e675ad9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1f268f65703872b9cfb092dceb5d2cf5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#a1f268f65703872b9cfb092dceb5d2cf5">CommandLineInterface</a> (const <a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#aef2d1ce957fc2de93c5c525c75b2d52b">ExecutorCallback</a> &amp;executorCallback, const std::string &amp;name, const std::string &amp;description, const unsigned int &amp;availability, const <a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#aa45722c09c4295de904609019ee931e7">ArgsSpec</a> &amp;argsSpec)</td></tr>
+<tr class="memitem:a1f268f65703872b9cfb092dceb5d2cf5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#a1f268f65703872b9cfb092dceb5d2cf5">CommandLineInterface</a> (const <a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#aef2d1ce957fc2de93c5c525c75b2d52b">ExecutorCallback</a> &amp;executorCallback, const std::string &amp;name, const std::string &amp;description, const unsigned int &amp;availability, const <a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#afe3c86cb2b103554ef6422b8d507fddc">ArgsSpec</a> &amp;argsSpec)</td></tr>
 <tr class="memdesc:a1f268f65703872b9cfb092dceb5d2cf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct command.  <a href="#a1f268f65703872b9cfb092dceb5d2cf5">More...</a><br /></td></tr>
 <tr class="separator:a1f268f65703872b9cfb092dceb5d2cf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7325951344aa949fd5bdbbc3184a9efd"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#a7325951344aa949fd5bdbbc3184a9efd">getName</a> () const </td></tr>
@@ -143,9 +143,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af6c88c794d516071a1046e357a4c1ff3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#af6c88c794d516071a1046e357a4c1ff3">isAvailable</a> (unsigned int mode) const </td></tr>
 <tr class="memdesc:af6c88c794d516071a1046e357a4c1ff3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the command is available in specific mode.  <a href="#af6c88c794d516071a1046e357a4c1ff3">More...</a><br /></td></tr>
 <tr class="separator:af6c88c794d516071a1046e357a4c1ff3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3cedf40978fdd8cbe9bada335b6ce1ac"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#a3cedf40978fdd8cbe9bada335b6ce1ac">execute</a> (const <a class="el" href="namespacevasum_1_1cli.html#ae6812f0aab945a854c9c967549949b2c">Args</a> &amp;argv)</td></tr>
-<tr class="memdesc:a3cedf40978fdd8cbe9bada335b6ce1ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do the work.  <a href="#a3cedf40978fdd8cbe9bada335b6ce1ac">More...</a><br /></td></tr>
-<tr class="separator:a3cedf40978fdd8cbe9bada335b6ce1ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f09e129bc42491781decb22cae111dc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#a0f09e129bc42491781decb22cae111dc">execute</a> (const <a class="el" href="namespacevasum_1_1cli.html#ae6812f0aab945a854c9c967549949b2c">Args</a> &amp;argv) const </td></tr>
+<tr class="memdesc:a0f09e129bc42491781decb22cae111dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do the work.  <a href="#a0f09e129bc42491781decb22cae111dc">More...</a><br /></td></tr>
+<tr class="separator:a0f09e129bc42491781decb22cae111dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e06b1acc183be18c79440590906cb6b"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#a3e06b1acc183be18c79440590906cb6b">buildCompletionList</a> (const <a class="el" href="namespacevasum_1_1cli.html#ae6812f0aab945a854c9c967549949b2c">Args</a> &amp;argv) const </td></tr>
+<tr class="separator:a3e06b1acc183be18c79440590906cb6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -169,7 +171,7 @@ Private Attributes</h2></td></tr>
 <tr class="separator:a7cdc6a3a37d66952c39e3aacc4ff4b7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e5cca6a340d3f7e12675a8c96bf9b2f"><td class="memItemLeft" align="right" valign="top">const unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#a3e5cca6a340d3f7e12675a8c96bf9b2f">mAvailability</a></td></tr>
 <tr class="separator:a3e5cca6a340d3f7e12675a8c96bf9b2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a84b02f933e771a39d6fb3ba93098a8"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#aa45722c09c4295de904609019ee931e7">ArgsSpec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#a4a84b02f933e771a39d6fb3ba93098a8">mArgsSpec</a></td></tr>
+<tr class="memitem:a4a84b02f933e771a39d6fb3ba93098a8"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#afe3c86cb2b103554ef6422b8d507fddc">ArgsSpec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#a4a84b02f933e771a39d6fb3ba93098a8">mArgsSpec</a></td></tr>
 <tr class="separator:a4a84b02f933e771a39d6fb3ba93098a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
@@ -180,12 +182,12 @@ Static Private Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class that implements command pattern. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
-<a class="anchor" id="aa45722c09c4295de904609019ee931e7"></a>
+<a class="anchor" id="afe3c86cb2b103554ef6422b8d507fddc"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef std::vector&lt;std::pair&lt;std::string, std::string&gt; &gt; <a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#aa45722c09c4295de904609019ee931e7">vasum::cli::CommandLineInterface::ArgsSpec</a></td>
+          <td class="memname">typedef std::vector&lt;<a class="el" href="structvasum_1_1cli_1_1ArgSpec.html">ArgSpec</a>&gt; <a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#afe3c86cb2b103554ef6422b8d507fddc">vasum::cli::CommandLineInterface::ArgsSpec</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -202,7 +204,7 @@ Static Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#a3cedf40978fdd8cbe9bada335b6ce1ac" title="Do the work. ">CommandLineInterface::execute</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#a0f09e129bc42491781decb22cae111dc" title="Do the work. ">CommandLineInterface::execute</a> </dd></dl>
 
 </div>
 </div>
@@ -266,7 +268,7 @@ Static Private Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#aa45722c09c4295de904609019ee931e7">ArgsSpec</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#afe3c86cb2b103554ef6422b8d507fddc">ArgsSpec</a> &amp;&#160;</td>
           <td class="paramname"><em>argsSpec</em>&#160;</td>
         </tr>
         <tr>
@@ -298,6 +300,22 @@ Static Private Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a3e06b1acc183be18c79440590906cb6b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; std::string &gt; vasum::cli::CommandLineInterface::buildCompletionList </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacevasum_1_1cli.html#ae6812f0aab945a854c9c967549949b2c">Args</a> &amp;&#160;</td>
+          <td class="paramname"><em>argv</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a2461c386eb69a645671a9f419ee0d1ef"></a>
 <div class="memitem">
 <div class="memproto">
@@ -349,7 +367,7 @@ Static Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a3cedf40978fdd8cbe9bada335b6ce1ac"></a>
+<a class="anchor" id="a0f09e129bc42491781decb22cae111dc"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -358,7 +376,7 @@ Static Private Attributes</h2></td></tr>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="namespacevasum_1_1cli.html#ae6812f0aab945a854c9c967549949b2c">Args</a> &amp;&#160;</td>
           <td class="paramname"><em>argv</em></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -517,7 +535,7 @@ Static Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const <a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#aa45722c09c4295de904609019ee931e7">ArgsSpec</a> vasum::cli::CommandLineInterface::mArgsSpec</td>
+          <td class="memname">const <a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#afe3c86cb2b103554ef6422b8d507fddc">ArgsSpec</a> vasum::cli::CommandLineInterface::mArgsSpec</td>
         </tr>
       </table>
   </td>
@@ -620,7 +638,7 @@ Static Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacevasum.html">vasum</a></li><li class="navelem"><a class="el" href="namespacevasum_1_1cli.html">cli</a></li><li class="navelem"><a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html">CommandLineInterface</a></li>
-    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
+    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

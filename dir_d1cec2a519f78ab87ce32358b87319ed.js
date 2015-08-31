@@ -8,7 +8,8 @@ var dir_d1cec2a519f78ab87ce32358b87319ed =
       [ "InvalidZoneIdException", "structvasum_1_1InvalidZoneIdException.html", "structvasum_1_1InvalidZoneIdException" ],
       [ "ZoneConnectionException", "structvasum_1_1ZoneConnectionException.html", "structvasum_1_1ZoneConnectionException" ],
       [ "HostConnectionException", "structvasum_1_1HostConnectionException.html", "structvasum_1_1HostConnectionException" ],
-      [ "InputMonitorException", "structvasum_1_1InputMonitorException.html", "structvasum_1_1InputMonitorException" ]
+      [ "InputMonitorException", "structvasum_1_1InputMonitorException.html", "structvasum_1_1InputMonitorException" ],
+      [ "TimeoutException", "structvasum_1_1TimeoutException.html", "structvasum_1_1TimeoutException" ]
     ] ],
     [ "fake-power-manager-dbus-definitions.hpp", "fake-power-manager-dbus-definitions_8hpp.html", "fake-power-manager-dbus-definitions_8hpp" ],
     [ "host-dbus-connection.cpp", "host-dbus-connection_8cpp.html", null ],

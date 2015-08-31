@@ -2,9 +2,13 @@ var searchData=
 [
   ['_7eacceptor',['~Acceptor',['../classipc_1_1Acceptor.html#aa762478e8b902a9b1b707a798d1f1e06',1,'ipc::Acceptor']]],
   ['_7easyncmethodcallresult',['~AsyncMethodCallResult',['../classdbus_1_1AsyncMethodCallResult.html#a32fd0270469100a1ade5c324f4b900c8',1,'dbus::AsyncMethodCallResult']]],
+  ['_7eattachmanager',['~AttachManager',['../classlxcpp_1_1AttachManager.html#ad90f7e753a6ffad8e934dd5e8b91b4a0',1,'lxcpp::AttachManager']]],
   ['_7ecallbackguard',['~CallbackGuard',['../classutils_1_1CallbackGuard.html#a1ad098725b22ee0f04d359401c611f23',1,'utils::CallbackGuard']]],
+  ['_7echannel',['~Channel',['../classutils_1_1Channel.html#ab4dcadabed847eaabf632d066f6ada9e',1,'utils::Channel']]],
   ['_7eclient',['~Client',['../classClient.html#a841e86d45a84a2929e5c82755a861bde',1,'Client::~Client()'],['../classipc_1_1Client.html#a840e519ca781888cbd54181572ebe3a7',1,'ipc::Client::~Client()']]],
   ['_7econnection',['~Connection',['../structconfig_1_1sqlite3_1_1Connection.html#ad87a9320d6e366b3ebe81d166e16840a',1,'config::sqlite3::Connection']]],
+  ['_7econtainer',['~Container',['../classlxcpp_1_1Container.html#ac8b0b0092d4988bc14a77eeeb556f617',1,'lxcpp::Container']]],
+  ['_7econtainerimpl',['~ContainerImpl',['../classlxcpp_1_1ContainerImpl.html#a03f8b28cf820321ef1601ef211f49274',1,'lxcpp::ContainerImpl']]],
   ['_7edbusconnection',['~DbusConnection',['../classdbus_1_1DbusConnection.html#a7fc770551e1bf7a6388b4dbe63219206',1,'dbus::DbusConnection']]],
   ['_7edbusmethodresultbuilder',['~DbusMethodResultBuilder',['../classvasum_1_1api_1_1DbusMethodResultBuilder.html#a2ab426c2a2e38ebfe0d7c53de1089174',1,'vasum::api::DbusMethodResultBuilder']]],
   ['_7eeventfd',['~EventFD',['../classutils_1_1EventFD.html#ac5c5adec5270726a89e91ef13043e7af',1,'utils::EventFD']]],

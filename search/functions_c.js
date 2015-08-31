@@ -9,9 +9,10 @@ var searchData=
   ['methodresult',['MethodResult',['../classipc_1_1MethodResult.html#a4b9dbf3c67cec1129c3da30a17ad9e4e',1,'ipc::MethodResult']]],
   ['modifyfd',['modifyFD',['../classipc_1_1epoll_1_1EventPoll.html#a5095da4319de3a7bacb3ecca78772221',1,'ipc::epoll::EventPoll']]],
   ['modifyfdinternal',['modifyFDInternal',['../classipc_1_1epoll_1_1EventPoll.html#a87f0b46e0915956fe6b46f01b53df11d',1,'ipc::epoll::EventPoll']]],
-  ['mount',['mount',['../classvasum_1_1ZoneProvision.html#a3252f02f2910214c6d40290f35c803f7',1,'vasum::ZoneProvision::mount()'],['../namespaceutils.html#aae434628be8185d4b771f1f917605c2f',1,'utils::mount()']]],
+  ['mount',['mount',['../classvasum_1_1ZoneProvision.html#a3252f02f2910214c6d40290f35c803f7',1,'vasum::ZoneProvision::mount()'],['../namespaceutils.html#aae434628be8185d4b771f1f917605c2f',1,'utils::mount()'],['../namespacelxcpp.html#a651952d160fae4e561be6d06f627ec65',1,'lxcpp::mount()']]],
   ['mountimage',['mountImage',['../namespaceutils.html#a01f6332597e9550d7f477c89095d7e62',1,'utils']]],
   ['mountrun',['mountRun',['../namespaceutils.html#aa3ae06f1a4f7384d1c6e90b926fc7089',1,'utils']]],
+  ['move',['move',['../classlxcpp_1_1NetworkInterface.html#a5f8d9653c14e49f64bac31e4a287639b',1,'lxcpp::NetworkInterface']]],
   ['movefile',['moveFile',['../namespaceutils.html#a6899ee31173c10807054717ac62a4ec9',1,'utils']]],
   ['movenetdev',['moveNetdev',['../classvasum_1_1Zone.html#a3abd5f5783510dc2cd60887e8a05645f',1,'vasum::Zone']]],
   ['movephys',['movePhys',['../namespacevasum_1_1netdev.html#aa77f8f0539db329b0879f5319be52895',1,'vasum::netdev']]]

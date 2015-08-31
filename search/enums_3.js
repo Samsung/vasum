@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['loglevel',['LogLevel',['../group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2',1,'logger']]]
+  ['inetaddrtype',['InetAddrType',['../namespacelxcpp.html#ac69b362ff5ccf004420a2f3c910f47cf',1,'lxcpp']]],
+  ['interfacetype',['InterfaceType',['../namespacelxcpp.html#aafb1b4d1bed6405375e4e736ebcb3494',1,'lxcpp']]]
 ];

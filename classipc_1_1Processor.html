@@ -234,10 +234,6 @@ Private Types</h2></td></tr>
 <br />
  }<tr class="separator:af1a6569899a0aef5aaccceb81a143c8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </td></tr>
-<tr class="memitem:ab44d722b4085adfa40fdbcdd9c44d445"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; void(int fd, std::shared_ptr&lt; void &gt; &amp;<a class="el" href="initctl_8cpp.html#abbacd5f95515b76e7df78ef953e29cae">data</a>)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Processor.html#ab44d722b4085adfa40fdbcdd9c44d445">SerializeCallback</a></td></tr>
-<tr class="separator:ab44d722b4085adfa40fdbcdd9c44d445"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acda6a67a1d088a60b29cd32edebe4ba1"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; std::shared_ptr&lt; void &gt;int fd)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Processor.html#acda6a67a1d088a60b29cd32edebe4ba1">ParseCallback</a></td></tr>
-<tr class="separator:acda6a67a1d088a60b29cd32edebe4ba1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2319029cf28aae562258d060d3b7be1"><td class="memItemLeft" align="right" valign="top">typedef std::unique_lock&lt; std::mutex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Processor.html#af2319029cf28aae562258d060d3b7be1">Lock</a></td></tr>
 <tr class="separator:af2319029cf28aae562258d060d3b7be1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b5538236e5c75442286c6824369b71d"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classipc_1_1RequestQueue.html">RequestQueue</a>&lt; <a class="el" href="classipc_1_1Processor.html#af1a6569899a0aef5aaccceb81a143c8f">Event</a> &gt;::<a class="el" href="classipc_1_1Processor.html#a2b5538236e5c75442286c6824369b71d">Request</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1Processor.html#a2b5538236e5c75442286c6824369b71d">Request</a></td></tr>
@@ -365,26 +361,6 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="acda6a67a1d088a60b29cd32edebe4ba1"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef std::function&lt;std::shared_ptr&lt;void&gt;int fd)&gt; <a class="el" href="classipc_1_1Processor.html#acda6a67a1d088a60b29cd32edebe4ba1">ipc::Processor::ParseCallback</a></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a80eb92e2f29ab8e8a9953b3b6b766b91"></a>
 <div class="memitem">
 <div class="memproto">
@@ -414,26 +390,6 @@ Friends</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">typedef <a class="el" href="classipc_1_1RequestQueue.html">RequestQueue</a>&lt;<a class="el" href="classipc_1_1Processor.html#af1a6569899a0aef5aaccceb81a143c8f">Event</a>&gt;::<a class="el" href="classipc_1_1Processor.html#a2b5538236e5c75442286c6824369b71d">Request</a> <a class="el" href="classipc_1_1Processor.html#a2b5538236e5c75442286c6824369b71d">ipc::Processor::Request</a></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ab44d722b4085adfa40fdbcdd9c44d445"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef std::function&lt;void(int fd, std::shared_ptr&lt;void&gt;&amp; <a class="el" href="initctl_8cpp.html#abbacd5f95515b76e7df78ef953e29cae">data</a>)&gt; <a class="el" href="classipc_1_1Processor.html#ab44d722b4085adfa40fdbcdd9c44d445">ipc::Processor::SerializeCallback</a></td>
         </tr>
       </table>
   </td>
@@ -2247,7 +2203,7 @@ template&lt;typename SentDataType &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceipc.html">ipc</a></li><li class="navelem"><a class="el" href="classipc_1_1Processor.html">Processor</a></li>
-    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
+    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

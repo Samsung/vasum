@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['parent',['parent',['../classlxcpp_1_1AttachManager.html#ad1eb9562cc9647ca4ae69191e77364d5',1,'lxcpp::AttachManager']]],
   ['parseloglevel',['parseLogLevel',['../namespacelogger.html#a7dfbaa4626e4e33b6d05a3c28af4dd70',1,'logger']]],
   ['parsezoneidfromcpuset',['parseZoneIdFromCpuSet',['../utils_8cpp.html#aed1e17d685a6356dd0333541780f1f0a',1,'parseZoneIdFromCpuSet(const std::string &amp;cpuset, std::string &amp;id):&#160;utils.cpp'],['../utils_8hpp.html#aed1e17d685a6356dd0333541780f1f0a',1,'parseZoneIdFromCpuSet(const std::string &amp;cpuset, std::string &amp;id):&#160;utils.cpp']]],
   ['passnamespacedfd',['passNamespacedFd',['../namespaceutils.html#a4fd8c5e7b86467a449a08b642dcfc87f',1,'utils']]],
@@ -10,6 +11,8 @@ var searchData=
   ['preparestatements',['prepareStatements',['../classconfig_1_1KVStore.html#a3bd2054416359d5c167c0c588c0103fa',1,'config::KVStore']]],
   ['printusage',['printUsage',['../classvasum_1_1cli_1_1CommandLineInterface.html#af11c704f52377de5d7cdfbcf05173f57',1,'vasum::cli::CommandLineInterface']]],
   ['processor',['Processor',['../classipc_1_1Processor.html#abd29f2d154f60864078092bec4f375f2',1,'ipc::Processor::Processor(epoll::EventPoll &amp;eventPoll, const std::string &amp;logName=&quot;&quot;, const PeerCallback &amp;newPeerCallback=nullptr, const PeerCallback &amp;removedPeerCallback=nullptr, const unsigned int maxNumberOfPeers=DEFAULT_MAX_NUMBER_OF_PEERS)'],['../classipc_1_1Processor.html#a306f8af2efc839d568f8ed749b45aa7c',1,'ipc::Processor::Processor(const Processor &amp;)=delete'],['../classipc_1_1Processor.html#ae8a409d543aead390975a06062095c77',1,'ipc::Processor::Processor(Processor &amp;&amp;)=delete']]],
+  ['processsetupexception',['ProcessSetupException',['../structlxcpp_1_1ProcessSetupException.html#ada69767556697698a6c3fc0eaf886752',1,'lxcpp::ProcessSetupException']]],
+  ['provisionexistsexception',['ProvisionExistsException',['../structutils_1_1ProvisionExistsException.html#a875dcd2042e1026d3e98b05218c3a59b',1,'utils::ProvisionExistsException']]],
   ['proxycallasync',['proxyCallAsync',['../classvasum_1_1HostDbusConnection.html#aa04646f086a76f6730070af5f465ef17',1,'vasum::HostDbusConnection']]],
   ['proxycallpolicy',['ProxyCallPolicy',['../classvasum_1_1ProxyCallPolicy.html#afce39a04315f70dde9f7e120c5bbfdcc',1,'vasum::ProxyCallPolicy']]],
   ['pushback',['pushBack',['../classipc_1_1RequestQueue.html#a118ba1cab4768b8f4dbea5f71d210aee',1,'ipc::RequestQueue']]],

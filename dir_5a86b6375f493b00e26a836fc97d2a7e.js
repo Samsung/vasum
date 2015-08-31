@@ -6,11 +6,17 @@ var dir_5a86b6375f493b00e26a836fc97d2a7e =
       [ "CallbackGuard", "classutils_1_1CallbackGuard.html", "classutils_1_1CallbackGuard" ]
     ] ],
     [ "callback-wrapper.hpp", "callback-wrapper_8hpp.html", "callback-wrapper_8hpp" ],
+    [ "channel.cpp", "channel_8cpp.html", null ],
+    [ "channel.hpp", "channel_8hpp.html", [
+      [ "Channel", "classutils_1_1Channel.html", "classutils_1_1Channel" ]
+    ] ],
     [ "counting-map.hpp", "counting-map_8hpp.html", [
       [ "CountingMap", "classutils_1_1CountingMap.html", "classutils_1_1CountingMap" ]
     ] ],
-    [ "environment.cpp", "environment_8cpp.html", "environment_8cpp" ],
-    [ "environment.hpp", "environment_8hpp.html", "environment_8hpp" ],
+    [ "daemon.cpp", "daemon_8cpp.html", "daemon_8cpp" ],
+    [ "daemon.hpp", "daemon_8hpp.html", "daemon_8hpp" ],
+    [ "environment.cpp", "common_2utils_2environment_8cpp.html", "common_2utils_2environment_8cpp" ],
+    [ "environment.hpp", "common_2utils_2environment_8hpp.html", "common_2utils_2environment_8hpp" ],
     [ "eventfd.cpp", "eventfd_8cpp.html", null ],
     [ "eventfd.hpp", "eventfd_8hpp.html", [
       [ "EventFD", "classutils_1_1EventFD.html", "classutils_1_1EventFD" ]

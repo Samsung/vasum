@@ -134,15 +134,22 @@ $(document).ready(function(){initNavTree('common_2utils_2exception_8hpp_source.h
 <div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="structutils_1_1UtilsException.html#ae6430547b81798b081d621cb10726276">   39</a></span>&#160;    <a class="code" href="structutils_1_1UtilsException.html#ae6430547b81798b081d621cb10726276">UtilsException</a>(<span class="keyword">const</span> std::string&amp; error) : <a class="code" href="namespacestd.html">std</a>::runtime_error(error) {}</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;};</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;std::string <a class="code" href="namespaceutils.html#abcffeccc173643f5ddfb642671213fab">getSystemErrorMessage</a>();</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;std::string <a class="code" href="namespaceutils.html#abcffeccc173643f5ddfb642671213fab">getSystemErrorMessage</a>(<span class="keywordtype">int</span> err);</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;} <span class="comment">// namespace utils</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#endif // COMMON_UTILS_EXCEPTION_HPP</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="structutils_1_1ProvisionExistsException.html">   42</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structutils_1_1ProvisionExistsException.html">ProvisionExistsException</a>: <span class="keyword">public</span> <a class="code" href="structutils_1_1UtilsException.html">UtilsException</a> {</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;</div>
+<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="structutils_1_1ProvisionExistsException.html#a875dcd2042e1026d3e98b05218c3a59b">   44</a></span>&#160;    <a class="code" href="structutils_1_1ProvisionExistsException.html#a875dcd2042e1026d3e98b05218c3a59b">ProvisionExistsException</a>(<span class="keyword">const</span> std::string&amp; error) : <a class="code" href="structutils_1_1UtilsException.html">UtilsException</a>(error) {}</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;};</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;std::string <a class="code" href="namespaceutils.html#abcffeccc173643f5ddfb642671213fab">getSystemErrorMessage</a>();</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;std::string <a class="code" href="namespaceutils.html#abcffeccc173643f5ddfb642671213fab">getSystemErrorMessage</a>(<span class="keywordtype">int</span> err);</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;} <span class="comment">// namespace utils</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="preprocessor">#endif // COMMON_UTILS_EXCEPTION_HPP</span></div>
 <div class="ttc" id="namespacestd_html"><div class="ttname"><a href="namespacestd.html">std</a></div><div class="ttdoc">STL namespace. </div></div>
 <div class="ttc" id="structutils_1_1UtilsException_html"><div class="ttname"><a href="structutils_1_1UtilsException.html">utils::UtilsException</a></div><div class="ttdoc">Base class for exceptions in utils. </div><div class="ttdef"><b>Definition:</b> exception.hpp:37</div></div>
+<div class="ttc" id="structutils_1_1ProvisionExistsException_html_a875dcd2042e1026d3e98b05218c3a59b"><div class="ttname"><a href="structutils_1_1ProvisionExistsException.html#a875dcd2042e1026d3e98b05218c3a59b">utils::ProvisionExistsException::ProvisionExistsException</a></div><div class="ttdeci">ProvisionExistsException(const std::string &amp;error)</div><div class="ttdef"><b>Definition:</b> exception.hpp:44</div></div>
 <div class="ttc" id="namespaceutils_html"><div class="ttname"><a href="namespaceutils.html">utils</a></div><div class="ttdef"><b>Definition:</b> c-array.hpp:30</div></div>
+<div class="ttc" id="structutils_1_1ProvisionExistsException_html"><div class="ttname"><a href="structutils_1_1ProvisionExistsException.html">utils::ProvisionExistsException</a></div><div class="ttdef"><b>Definition:</b> exception.hpp:42</div></div>
 <div class="ttc" id="namespaceutils_html_abcffeccc173643f5ddfb642671213fab"><div class="ttname"><a href="namespaceutils.html#abcffeccc173643f5ddfb642671213fab">utils::getSystemErrorMessage</a></div><div class="ttdeci">std::string getSystemErrorMessage()</div><div class="ttdoc">Return string describing error number it is wrapper for strerror_r. </div><div class="ttdef"><b>Definition:</b> exception.cpp:35</div></div>
 <div class="ttc" id="structutils_1_1UtilsException_html_ae6430547b81798b081d621cb10726276"><div class="ttname"><a href="structutils_1_1UtilsException.html#ae6430547b81798b081d621cb10726276">utils::UtilsException::UtilsException</a></div><div class="ttdeci">UtilsException(const std::string &amp;error)</div><div class="ttdef"><b>Definition:</b> exception.hpp:39</div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -152,7 +159,7 @@ $(document).ready(function(){initNavTree('common_2utils_2exception_8hpp_source.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_353a0b29ed1fe2c048306a7c13ef1174.html">common</a></li><li class="navelem"><a class="el" href="dir_5a86b6375f493b00e26a836fc97d2a7e.html">utils</a></li><li class="navelem"><a class="el" href="common_2utils_2exception_8hpp.html">exception.hpp</a></li>
-    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
+    <li class="footer">Generated on Mon Aug 31 2015 13:26:22 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

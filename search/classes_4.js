@@ -1,13 +1,9 @@
 var searchData=
 [
-  ['fdstore',['FDStore',['../classconfig_1_1FDStore.html',1,'config']]],
-  ['file',['File',['../structvasum_1_1ZoneProvisioningConfig_1_1File.html',1,'vasum::ZoneProvisioningConfig']]],
-  ['filebackend',['FileBackend',['../classlogger_1_1FileBackend.html',1,'logger']]],
-  ['filedescriptor',['FileDescriptor',['../structconfig_1_1FileDescriptor.html',1,'config']]],
-  ['finishrequest',['FinishRequest',['../classipc_1_1FinishRequest.html',1,'ipc']]],
-  ['fromfdstorevisitor',['FromFDStoreVisitor',['../classconfig_1_1FromFDStoreVisitor.html',1,'config']]],
-  ['fromgvariantvisitor',['FromGVariantVisitor',['../classconfig_1_1FromGVariantVisitor.html',1,'config']]],
-  ['fromjsonvisitor',['FromJsonVisitor',['../classconfig_1_1FromJsonVisitor.html',1,'config']]],
-  ['fromkvjsonvisitor',['FromKVJsonVisitor',['../classconfig_1_1FromKVJsonVisitor.html',1,'config']]],
-  ['fromkvstorevisitor',['FromKVStoreVisitor',['../classconfig_1_1FromKVStoreVisitor.html',1,'config']]]
+  ['emptydata',['EmptyData',['../structipc_1_1Processor_1_1EmptyData.html',1,'ipc::Processor']]],
+  ['errorprotocolmessage',['ErrorProtocolMessage',['../structipc_1_1Processor_1_1ErrorProtocolMessage.html',1,'ipc::Processor']]],
+  ['eventfd',['EventFD',['../classutils_1_1EventFD.html',1,'utils']]],
+  ['eventpoll',['EventPoll',['../classipc_1_1epoll_1_1EventPoll.html',1,'ipc::epoll']]],
+  ['eventqueue',['EventQueue',['../classipc_1_1EventQueue.html',1,'ipc']]],
+  ['exception',['Exception',['../structlxcpp_1_1Exception.html',1,'lxcpp']]]
 ];

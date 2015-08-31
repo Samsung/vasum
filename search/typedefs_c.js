@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['parsecallback',['ParseCallback',['../classipc_1_1Processor.html#acda6a67a1d088a60b29cd32edebe4ba1',1,'ipc::Processor::ParseCallback()'],['../namespaceipc.html#af0f96fbc8935784a751de5e4c1d7922f',1,'ipc::ParseCallback()']]],
+  ['parsecallback',['ParseCallback',['../namespaceipc.html#af0f96fbc8935784a751de5e4c1d7922f',1,'ipc']]],
   ['peercallback',['PeerCallback',['../namespaceipc.html#a10f0847e0310ada6fda2f1b870302d58',1,'ipc']]],
   ['peerid',['PeerID',['../namespaceipc.html#a6c3b8b1165d57e46d4114634ab08e301',1,'ipc']]],
   ['peers',['Peers',['../classipc_1_1Processor.html#a80eb92e2f29ab8e8a9953b3b6b766b91',1,'ipc::Processor']]],

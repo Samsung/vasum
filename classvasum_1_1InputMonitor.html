@@ -100,11 +100,9 @@ $(document).ready(function(){initNavTree('classvasum_1_1InputMonitor.html','');}
 
 <div class="header">
   <div class="summary">
-<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-types">Private Types</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
-<a href="#pri-static-methods">Static Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classvasum_1_1InputMonitor-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -114,68 +112,54 @@ $(document).ready(function(){initNavTree('classvasum_1_1InputMonitor.html','');}
 
 <p><code>#include &lt;<a class="el" href="input-monitor_8hpp_source.html">input-monitor.hpp</a>&gt;</code></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
-Public Types</h2></td></tr>
-<tr class="memitem:a281d19af28c71ba313a2d0cf8be7f720"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; void()&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a281d19af28c71ba313a2d0cf8be7f720">NotifyCallback</a></td></tr>
-<tr class="separator:a281d19af28c71ba313a2d0cf8be7f720"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab630561bab64bb34c1ea8083994e076b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#ab630561bab64bb34c1ea8083994e076b">InputMonitor</a> (const <a class="el" href="structvasum_1_1InputConfig.html">InputConfig</a> &amp;inputConfig, const <a class="el" href="classvasum_1_1InputMonitor.html#a281d19af28c71ba313a2d0cf8be7f720">NotifyCallback</a> &amp;notifyCallback)</td></tr>
-<tr class="separator:ab630561bab64bb34c1ea8083994e076b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa88d62ea766cfa65729fc406f46f4bf3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#aa88d62ea766cfa65729fc406f46f4bf3">InputMonitor</a> (<a class="el" href="classipc_1_1epoll_1_1EventPoll.html">ipc::epoll::EventPoll</a> &amp;eventPoll, const <a class="el" href="structvasum_1_1InputConfig.html">InputConfig</a> &amp;inputConfig, <a class="el" href="classvasum_1_1ZonesManager.html">ZonesManager</a> *zonesManager)</td></tr>
+<tr class="separator:aa88d62ea766cfa65729fc406f46f4bf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeeb0cd029f978c3420475b90dd38d985"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#aeeb0cd029f978c3420475b90dd38d985">~InputMonitor</a> ()</td></tr>
 <tr class="separator:aeeb0cd029f978c3420475b90dd38d985"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4dc9e9f44af53dbc978d1d7a16513d9f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a4dc9e9f44af53dbc978d1d7a16513d9f">start</a> ()</td></tr>
+<tr class="separator:a4dc9e9f44af53dbc978d1d7a16513d9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ccf60543bfac28e69695156a015d33e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a9ccf60543bfac28e69695156a015d33e">stop</a> ()</td></tr>
+<tr class="separator:a9ccf60543bfac28e69695156a015d33e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-types"></a>
 Private Types</h2></td></tr>
-<tr class="memitem:a66d72622edf4492258a90ea662715314"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; void(GIOChannel *gio)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a66d72622edf4492258a90ea662715314">ReadDeviceCallback</a></td></tr>
-<tr class="separator:a66d72622edf4492258a90ea662715314"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1af053a46c914f630d6fb12c509d8492"><td class="memItemLeft" align="right" valign="top">typedef std::mutex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a1af053a46c914f630d6fb12c509d8492">Mutex</a></td></tr>
+<tr class="separator:a1af053a46c914f630d6fb12c509d8492"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
 <tr class="memitem:ab8e7ba46c71eb56a4ec6f464abc44198"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#ab8e7ba46c71eb56a4ec6f464abc44198">getDevicePath</a> () const </td></tr>
 <tr class="separator:ab8e7ba46c71eb56a4ec6f464abc44198"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a37c7c10ae968c4ee67780df93cf151b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a37c7c10ae968c4ee67780df93cf151b6">createGIOChannel</a> (const std::string &amp;devicePath)</td></tr>
-<tr class="separator:a37c7c10ae968c4ee67780df93cf151b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb7517f5f2fa33b8b885389918abd3cb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#aeb7517f5f2fa33b8b885389918abd3cb">setHandler</a> (const std::string &amp;devicePath)</td></tr>
+<tr class="separator:aeb7517f5f2fa33b8b885389918abd3cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48d72afae312716ad01564173dfbcea2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a48d72afae312716ad01564173dfbcea2">handleInternal</a> (int fd, <a class="el" href="namespaceipc_1_1epoll.html#a246524f40b0e6d4bb51dca01dc7e535a">ipc::epoll::Events</a> events)</td></tr>
+<tr class="separator:a48d72afae312716ad01564173dfbcea2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add6e315d785b64fe402a1d8ef94f554a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#add6e315d785b64fe402a1d8ef94f554a">leaveDevice</a> ()</td></tr>
+<tr class="separator:add6e315d785b64fe402a1d8ef94f554a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45fcbdfcae44158af3a00d1d6690c16a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a45fcbdfcae44158af3a00d1d6690c16a">isExpectedEventSequence</a> (const struct input_event &amp;)</td></tr>
 <tr class="separator:a45fcbdfcae44158af3a00d1d6690c16a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa4eb0673a06c4b852612b10377a56eda"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#aa4eb0673a06c4b852612b10377a56eda">readDevice</a> (GIOChannel *)</td></tr>
-<tr class="separator:aa4eb0673a06c4b852612b10377a56eda"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-methods"></a>
-Static Private Member Functions</h2></td></tr>
-<tr class="memitem:a70d34319d32c70495eb3639b12da5381"><td class="memItemLeft" align="right" valign="top">static gboolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a70d34319d32c70495eb3639b12da5381">readDeviceCallback</a> (GIOChannel *, GIOCondition, gpointer)</td></tr>
-<tr class="separator:a70d34319d32c70495eb3639b12da5381"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr class="memitem:a5ec836ca5d0bdbbbaae7f181e3ff9ee2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structvasum_1_1InputConfig.html">InputConfig</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a5ec836ca5d0bdbbbaae7f181e3ff9ee2">mConfig</a></td></tr>
 <tr class="separator:a5ec836ca5d0bdbbbaae7f181e3ff9ee2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a60a74d9b0c82307ccb8c8eef967f72ee"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1InputMonitor.html#a281d19af28c71ba313a2d0cf8be7f720">NotifyCallback</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a60a74d9b0c82307ccb8c8eef967f72ee">mNotifyCallback</a></td></tr>
-<tr class="separator:a60a74d9b0c82307ccb8c8eef967f72ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a843941542809286430dd36c7c671686d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1ZonesManager.html">ZonesManager</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a843941542809286430dd36c7c671686d">mZonesManager</a></td></tr>
+<tr class="separator:a843941542809286430dd36c7c671686d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3817a8b45374de117a4486bb5858b3b0"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a3817a8b45374de117a4486bb5858b3b0">mFd</a></td></tr>
+<tr class="separator:a3817a8b45374de117a4486bb5858b3b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a520d3ecf9f3cc672109ac584a35d95a1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html">ipc::epoll::EventPoll</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a520d3ecf9f3cc672109ac584a35d95a1">mEventPoll</a></td></tr>
+<tr class="separator:a520d3ecf9f3cc672109ac584a35d95a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b695c96e8b2192a70085f08739d160f"><td class="memItemLeft" align="right" valign="top">std::list&lt; struct timeval &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a5b695c96e8b2192a70085f08739d160f">mEventTimes</a></td></tr>
 <tr class="separator:a5b695c96e8b2192a70085f08739d160f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a918883a84950577b0b979489062fcb72"><td class="memItemLeft" align="right" valign="top">GIOChannel *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a918883a84950577b0b979489062fcb72">mChannelPtr</a></td></tr>
-<tr class="separator:a918883a84950577b0b979489062fcb72"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2d967f02c6d6ca16c43a1f4dd12a7a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classutils_1_1CallbackGuard.html">utils::CallbackGuard</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#ae2d967f02c6d6ca16c43a1f4dd12a7a8">mGuard</a></td></tr>
-<tr class="separator:ae2d967f02c6d6ca16c43a1f4dd12a7a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9816895d0a54181f19fa390646dd04f5"><td class="memItemLeft" align="right" valign="top">guint&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a9816895d0a54181f19fa390646dd04f5">mSourceId</a></td></tr>
-<tr class="separator:a9816895d0a54181f19fa390646dd04f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab51cf2b6f36f1bfdcd25246fef79d5e3"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#ab51cf2b6f36f1bfdcd25246fef79d5e3">mDevicePath</a></td></tr>
+<tr class="separator:ab51cf2b6f36f1bfdcd25246fef79d5e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7392f2287708d5df91d7aea06a48b4db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classvasum_1_1InputMonitor.html#a1af053a46c914f630d6fb12c509d8492">Mutex</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvasum_1_1InputMonitor.html#a7392f2287708d5df91d7aea06a48b4db">mMutex</a></td></tr>
+<tr class="separator:a7392f2287708d5df91d7aea06a48b4db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Typedef Documentation</h2>
-<a class="anchor" id="a281d19af28c71ba313a2d0cf8be7f720"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef std::function&lt;void()&gt; <a class="el" href="classvasum_1_1InputMonitor.html#a281d19af28c71ba313a2d0cf8be7f720">vasum::InputMonitor::NotifyCallback</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a66d72622edf4492258a90ea662715314"></a>
+<a class="anchor" id="a1af053a46c914f630d6fb12c509d8492"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -183,7 +167,7 @@ Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">typedef std::function&lt;void(GIOChannel* gio)&gt; <a class="el" href="classvasum_1_1InputMonitor.html#a66d72622edf4492258a90ea662715314">vasum::InputMonitor::ReadDeviceCallback</a></td>
+          <td class="memname">typedef std::mutex <a class="el" href="classvasum_1_1InputMonitor.html#a1af053a46c914f630d6fb12c509d8492">vasum::InputMonitor::Mutex</a></td>
         </tr>
       </table>
   </td>
@@ -196,21 +180,27 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="ab630561bab64bb34c1ea8083994e076b"></a>
+<a class="anchor" id="aa88d62ea766cfa65729fc406f46f4bf3"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">vasum::InputMonitor::InputMonitor </td>
           <td>(</td>
+          <td class="paramtype"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html">ipc::epoll::EventPoll</a> &amp;&#160;</td>
+          <td class="paramname"><em>eventPoll</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const <a class="el" href="structvasum_1_1InputConfig.html">InputConfig</a> &amp;&#160;</td>
           <td class="paramname"><em>inputConfig</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classvasum_1_1InputMonitor.html#a281d19af28c71ba313a2d0cf8be7f720">NotifyCallback</a> &amp;&#160;</td>
-          <td class="paramname"><em>notifyCallback</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="classvasum_1_1ZonesManager.html">ZonesManager</a> *&#160;</td>
+          <td class="paramname"><em>zonesManager</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -238,30 +228,6 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a37c7c10ae968c4ee67780df93cf151b6"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void vasum::InputMonitor::createGIOChannel </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>devicePath</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="ab8e7ba46c71eb56a4ec6f464abc44198"></a>
 <div class="memitem">
 <div class="memproto">
@@ -274,6 +240,40 @@ Private Attributes</h2></td></tr>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a48d72afae312716ad01564173dfbcea2"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void vasum::InputMonitor::handleInternal </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>fd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespaceipc_1_1epoll.html#a246524f40b0e6d4bb51dca01dc7e535a">ipc::epoll::Events</a>&#160;</td>
+          <td class="paramname"><em>events</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -309,7 +309,7 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aa4eb0673a06c4b852612b10377a56eda"></a>
+<a class="anchor" id="add6e315d785b64fe402a1d8ef94f554a"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -317,10 +317,9 @@ Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void vasum::InputMonitor::readDevice </td>
+          <td class="memname">void vasum::InputMonitor::leaveDevice </td>
           <td>(</td>
-          <td class="paramtype">GIOChannel *&#160;</td>
-          <td class="paramname"><em>gio</em></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -333,7 +332,7 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a70d34319d32c70495eb3639b12da5381"></a>
+<a class="anchor" id="aeb7517f5f2fa33b8b885389918abd3cb"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -341,59 +340,53 @@ Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">gboolean vasum::InputMonitor::readDeviceCallback </td>
+          <td class="memname">void vasum::InputMonitor::setHandler </td>
           <td>(</td>
-          <td class="paramtype">GIOChannel *&#160;</td>
-          <td class="paramname"><em>gio</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>devicePath</em></td><td>)</td>
           <td></td>
-          <td class="paramtype">GIOCondition&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">gpointer&#160;</td>
-          <td class="paramname"><em>data</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
   </tr>
 </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a4dc9e9f44af53dbc978d1d7a16513d9f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void vasum::InputMonitor::start </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a9ccf60543bfac28e69695156a015d33e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void vasum::InputMonitor::stop </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
 </div><div class="memdoc">
 
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a class="anchor" id="a918883a84950577b0b979489062fcb72"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">GIOChannel* vasum::InputMonitor::mChannelPtr</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a5ec836ca5d0bdbbbaae7f181e3ff9ee2"></a>
 <div class="memitem">
 <div class="memproto">
@@ -403,6 +396,46 @@ Private Attributes</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="structvasum_1_1InputConfig.html">InputConfig</a> vasum::InputMonitor::mConfig</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ab51cf2b6f36f1bfdcd25246fef79d5e3"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string vasum::InputMonitor::mDevicePath</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a520d3ecf9f3cc672109ac584a35d95a1"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html">ipc::epoll::EventPoll</a>&amp; vasum::InputMonitor::mEventPoll</td>
         </tr>
       </table>
   </td>
@@ -434,7 +467,7 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ae2d967f02c6d6ca16c43a1f4dd12a7a8"></a>
+<a class="anchor" id="a3817a8b45374de117a4486bb5858b3b0"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -442,7 +475,7 @@ Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classutils_1_1CallbackGuard.html">utils::CallbackGuard</a> vasum::InputMonitor::mGuard</td>
+          <td class="memname">int vasum::InputMonitor::mFd</td>
         </tr>
       </table>
   </td>
@@ -454,7 +487,7 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a60a74d9b0c82307ccb8c8eef967f72ee"></a>
+<a class="anchor" id="a7392f2287708d5df91d7aea06a48b4db"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -462,7 +495,7 @@ Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classvasum_1_1InputMonitor.html#a281d19af28c71ba313a2d0cf8be7f720">NotifyCallback</a> vasum::InputMonitor::mNotifyCallback</td>
+          <td class="memname"><a class="el" href="classvasum_1_1InputMonitor.html#a1af053a46c914f630d6fb12c509d8492">Mutex</a> vasum::InputMonitor::mMutex</td>
         </tr>
       </table>
   </td>
@@ -474,7 +507,7 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a9816895d0a54181f19fa390646dd04f5"></a>
+<a class="anchor" id="a843941542809286430dd36c7c671686d"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -482,7 +515,7 @@ Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">guint vasum::InputMonitor::mSourceId</td>
+          <td class="memname"><a class="el" href="classvasum_1_1ZonesManager.html">ZonesManager</a>* vasum::InputMonitor::mZonesManager</td>
         </tr>
       </table>
   </td>
@@ -505,7 +538,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacevasum.html">vasum</a></li><li class="navelem"><a class="el" href="classvasum_1_1InputMonitor.html">InputMonitor</a></li>
-    <li class="footer">Generated on Fri Jul 24 2015 15:00:38 for Vasum by
+    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

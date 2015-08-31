@@ -160,19 +160,25 @@ $(document).ready(function(){initNavTree('server_2exception_8hpp_source.html',''
 <div class="line"><a name="l00082"></a><span class="lineno"><a class="line" href="structvasum_1_1InputMonitorException.html#a059403cb891c07e2bd0318b8bbe89cbe">   82</a></span>&#160;    <a class="code" href="structvasum_1_1InputMonitorException.html#a059403cb891c07e2bd0318b8bbe89cbe">InputMonitorException</a>(<span class="keyword">const</span> std::string&amp; error) : <a class="code" href="structvasum_1_1ServerException.html">ServerException</a>(error) {}</div>
 <div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;};</div>
 <div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;}</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="preprocessor">#endif // SERVER_EXCEPTION_HPP</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="structvasum_1_1TimeoutException.html">   85</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structvasum_1_1TimeoutException.html">TimeoutException</a>: <span class="keyword">public</span> <a class="code" href="structvasum_1_1InputMonitorException.html">InputMonitorException</a> {</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;</div>
+<div class="line"><a name="l00087"></a><span class="lineno"><a class="line" href="structvasum_1_1TimeoutException.html#ad0fd10dbd2657521aa9b8f7fdb7fb460">   87</a></span>&#160;    <a class="code" href="structvasum_1_1TimeoutException.html#ad0fd10dbd2657521aa9b8f7fdb7fb460">TimeoutException</a>(<span class="keyword">const</span> std::string&amp; error) : <a class="code" href="structvasum_1_1InputMonitorException.html">InputMonitorException</a> (error) {}</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;};</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;}</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="preprocessor">#endif // SERVER_EXCEPTION_HPP</span></div>
 <div class="ttc" id="base-exception_8hpp_html"><div class="ttname"><a href="base-exception_8hpp.html">base-exception.hpp</a></div><div class="ttdoc">Vasum base exception. </div></div>
 <div class="ttc" id="structvasum_1_1InputMonitorException_html"><div class="ttname"><a href="structvasum_1_1InputMonitorException.html">vasum::InputMonitorException</a></div><div class="ttdoc">Exception during performing an operation by input monitor, e.g. </div><div class="ttdef"><b>Definition:</b> exception.hpp:80</div></div>
 <div class="ttc" id="structvasum_1_1HostConnectionException_html_a84f527016163cb1d33fe767477531e12"><div class="ttname"><a href="structvasum_1_1HostConnectionException.html#a84f527016163cb1d33fe767477531e12">vasum::HostConnectionException::HostConnectionException</a></div><div class="ttdeci">HostConnectionException(const std::string &amp;error)</div><div class="ttdef"><b>Definition:</b> exception.hpp:73</div></div>
+<div class="ttc" id="structvasum_1_1TimeoutException_html_ad0fd10dbd2657521aa9b8f7fdb7fb460"><div class="ttname"><a href="structvasum_1_1TimeoutException.html#ad0fd10dbd2657521aa9b8f7fdb7fb460">vasum::TimeoutException::TimeoutException</a></div><div class="ttdeci">TimeoutException(const std::string &amp;error)</div><div class="ttdef"><b>Definition:</b> exception.hpp:87</div></div>
 <div class="ttc" id="structvasum_1_1InvalidZoneIdException_html_a650fc3c5e6a194b69217b8c154b90aed"><div class="ttname"><a href="structvasum_1_1InvalidZoneIdException.html#a650fc3c5e6a194b69217b8c154b90aed">vasum::InvalidZoneIdException::InvalidZoneIdException</a></div><div class="ttdeci">InvalidZoneIdException(const std::string &amp;error)</div><div class="ttdef"><b>Definition:</b> exception.hpp:57</div></div>
 <div class="ttc" id="structvasum_1_1InputMonitorException_html_a059403cb891c07e2bd0318b8bbe89cbe"><div class="ttname"><a href="structvasum_1_1InputMonitorException.html#a059403cb891c07e2bd0318b8bbe89cbe">vasum::InputMonitorException::InputMonitorException</a></div><div class="ttdeci">InputMonitorException(const std::string &amp;error)</div><div class="ttdef"><b>Definition:</b> exception.hpp:82</div></div>
 <div class="ttc" id="structvasum_1_1ZoneOperationException_html"><div class="ttname"><a href="structvasum_1_1ZoneOperationException.html">vasum::ZoneOperationException</a></div><div class="ttdoc">Error occurred during an attempt to perform an operation on a zone, e.g. </div><div class="ttdef"><b>Definition:</b> exception.hpp:47</div></div>
 <div class="ttc" id="structvasum_1_1ServerException_html_a4b1b2b87231e884694b0727420cc7b4c"><div class="ttname"><a href="structvasum_1_1ServerException.html#a4b1b2b87231e884694b0727420cc7b4c">vasum::ServerException::ServerException</a></div><div class="ttdeci">ServerException(const std::string &amp;error)</div><div class="ttdef"><b>Definition:</b> exception.hpp:40</div></div>
 <div class="ttc" id="structvasum_1_1ServerException_html"><div class="ttname"><a href="structvasum_1_1ServerException.html">vasum::ServerException</a></div><div class="ttdoc">Base class for exceptions in Vasum Server. </div><div class="ttdef"><b>Definition:</b> exception.hpp:38</div></div>
+<div class="ttc" id="structvasum_1_1TimeoutException_html"><div class="ttname"><a href="structvasum_1_1TimeoutException.html">vasum::TimeoutException</a></div><div class="ttdef"><b>Definition:</b> exception.hpp:85</div></div>
 <div class="ttc" id="structvasum_1_1VasumException_html"><div class="ttname"><a href="structvasum_1_1VasumException.html">vasum::VasumException</a></div><div class="ttdoc">Base class vasum exceptions. </div><div class="ttdef"><b>Definition:</b> base-exception.hpp:39</div></div>
 <div class="ttc" id="structvasum_1_1ZoneOperationException_html_a72b711e7e3409ec8181855b7f2b890fb"><div class="ttname"><a href="structvasum_1_1ZoneOperationException.html#a72b711e7e3409ec8181855b7f2b890fb">vasum::ZoneOperationException::ZoneOperationException</a></div><div class="ttdeci">ZoneOperationException(const std::string &amp;error)</div><div class="ttdef"><b>Definition:</b> exception.hpp:49</div></div>
 <div class="ttc" id="structvasum_1_1InvalidZoneIdException_html"><div class="ttname"><a href="structvasum_1_1InvalidZoneIdException.html">vasum::InvalidZoneIdException</a></div><div class="ttdoc">Invalid zone id. </div><div class="ttdef"><b>Definition:</b> exception.hpp:55</div></div>
@@ -187,7 +193,7 @@ $(document).ready(function(){initNavTree('server_2exception_8hpp_source.html',''
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d1cec2a519f78ab87ce32358b87319ed.html">server</a></li><li class="navelem"><a class="el" href="server_2exception_8hpp.html">exception.hpp</a></li>
-    <li class="footer">Generated on Fri Jul 24 2015 15:00:37 for Vasum by
+    <li class="footer">Generated on Mon Aug 31 2015 13:26:22 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>
