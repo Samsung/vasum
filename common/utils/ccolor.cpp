@@ -19,15 +19,14 @@
 /**
  * @file
  * @author  Dariusz Michaluk (d.michaluk@samsung.com)
- * @brief   Console color for StderrBackend logger
+ * @brief   Console colors utility
  */
 
-#include "logger/config.hpp"
-#include "logger/ccolor.hpp"
+#include "utils/ccolor.hpp"
 
 #include <stdio.h>
 
-namespace logger {
+namespace utils {
 
 std::string getConsoleEscapeSequence(Attributes attr, Color color)
 {
@@ -38,4 +37,4 @@ std::string getConsoleEscapeSequence(Attributes attr, Color color)
     return std::string(command);
 }
 
-} // namespace logger
+} // namespace utils

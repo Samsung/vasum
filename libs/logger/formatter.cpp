@@ -24,7 +24,7 @@
 
 #include "logger/config.hpp"
 #include "logger/formatter.hpp"
-#include "logger/ccolor.hpp"
+#include "utils/ccolor.hpp"
 
 #include <sys/time.h>
 #include <cassert>
@@ -78,25 +78,25 @@ std::string LogFormatter::getConsoleColor(LogLevel logLevel)
 {
     switch (logLevel) {
     case LogLevel::ERROR:
-        return getConsoleEscapeSequence(Attributes::BOLD, Color::RED);
+        return utils::getConsoleEscapeSequence(utils::Attributes::BOLD, utils::Color::RED);
     case LogLevel::WARN:
-        return getConsoleEscapeSequence(Attributes::BOLD, Color::YELLOW);
+        return utils::getConsoleEscapeSequence(utils::Attributes::BOLD, utils::Color::YELLOW);
     case LogLevel::INFO:
-        return getConsoleEscapeSequence(Attributes::BOLD, Color::BLUE);
+        return utils::getConsoleEscapeSequence(utils::Attributes::BOLD, utils::Color::BLUE);
     case LogLevel::DEBUG:
-        return getConsoleEscapeSequence(Attributes::DEFAULT, Color::GREEN);
+        return utils::getConsoleEscapeSequence(utils::Attributes::DEFAULT, utils::Color::GREEN);
     case LogLevel::TRACE:
-        return getConsoleEscapeSequence(Attributes::DEFAULT, Color::BLACK);
+        return utils::getConsoleEscapeSequence(utils::Attributes::DEFAULT, utils::Color::BLACK);
     case LogLevel::HELP:
-        return getConsoleEscapeSequence(Attributes::BOLD, Color::MAGENTA);
+        return utils::getConsoleEscapeSequence(utils::Attributes::BOLD, utils::Color::MAGENTA);
     default:
-        return getConsoleEscapeSequence(Attributes::DEFAULT, Color::DEFAULT);
+        return utils::getConsoleEscapeSequence(utils::Attributes::DEFAULT, utils::Color::DEFAULT);
     }
 }
 
 std::string LogFormatter::getDefaultConsoleColor(void)
 {
-    return getConsoleEscapeSequence(Attributes::DEFAULT, Color::DEFAULT);
+    return utils::getConsoleEscapeSequence(utils::Attributes::DEFAULT, utils::Color::DEFAULT);
 }
 
 std::string LogFormatter::stripProjectDir(const std::string& file,

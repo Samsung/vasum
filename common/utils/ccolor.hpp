@@ -19,15 +19,15 @@
 /**
  * @file
  * @author  Dariusz Michaluk (d.michaluk@samsung.com)
- * @brief   Console color for StderrBackend logger
+ * @brief   Console colors utility
  */
 
-#ifndef COMMON_LOGGER_CCOLOR_HPP
-#define COMMON_LOGGER_CCOLOR_HPP
+#ifndef COMMON_UTILS_CCOLOR_HPP
+#define COMMON_UTILS_CCOLOR_HPP
 
 #include <string>
 
-namespace logger {
+namespace utils {
 
 enum class Color : unsigned int {
     DEFAULT     = 0,
@@ -48,6 +48,6 @@ enum class Attributes : unsigned int {
 
 std::string getConsoleEscapeSequence(Attributes attr, Color color);
 
-} // namespace logger
+} // namespace utils
 
-#endif // COMMON_LOGGER_CCOLOR_HPP
+#endif // COMMON_UTILS_CCOLOR_HPP
