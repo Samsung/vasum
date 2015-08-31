@@ -35,7 +35,7 @@ INCLUDE(GNUInstallDirs)
 IF (( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9))
       OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" ))
 
-    ADD_DEFINITIONS("-fdiagnostics-color=always")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
 ENDIF()
 
 ## Compiler flags, depending on the build type #################################
@@ -93,7 +93,7 @@ ADD_DEFINITIONS(-D__STDC_LIMIT_MACROS)
 
 IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     # Warn about documentation problems
-    ADD_DEFINITIONS("-Wdocumentation")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wdocumentation")
 
     IF(ALL_WARNINGS)
         # turn on every -W flags except a few explicitly mentioned
