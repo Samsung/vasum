@@ -24,6 +24,7 @@
 
 #include "command-line-interface.hpp"
 #include "cli-exception.hpp"
+#include "utils/ccolor.hpp"
 
 #include <cstdlib>
 #include <map>
@@ -38,17 +39,48 @@
 #include <iomanip>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
 
 #include <readline/readline.h>
 #include <readline/history.h>
 
 using namespace vasum::cli;
 
-namespace fs =  boost::filesystem;
+namespace fs = boost::filesystem;
+namespace po = boost::program_options;
 
 namespace {
 
 static int interactiveMode = 0;
+static bool useColors = false;
+
+const std::string getStrongColor()
+{
+    if (useColors) {
+        return utils::getConsoleEscapeSequence(utils::Attributes::BOLD, utils::Color::RED);
+    } else {
+        return "";
+    }
+}
+
+const std::string getBoldColor()
+{
+    if (useColors) {
+        return utils::getConsoleEscapeSequence(utils::Attributes::BOLD, utils::Color::GREEN);
+    } else {
+        return "";
+    }
+}
+
+const std::string getDefaultColor()
+{
+    if (useColors) {
+        return utils::getConsoleEscapeSequence(utils::Attributes::DEFAULT, utils::Color::DEFAULT);
+    } else {
+        return "";
+    }
+}
+
 std::vector<CommandLineInterface> commands = {
     {
         create_zone,
@@ -257,12 +289,13 @@ void printUsage(std::ostream& out, const std::string& name, unsigned int mode)
     if (mode == MODE_COMMAND_LINE) {
         out << "Description:\n"
             << "\tCommand line tool to manage vasum containers.\n"
-            << "\tCalled without parameters enters interactive mode.\n"
+            << "\tCalled without positional parameters enters interactive mode.\n\n"
             << "Options:\n"
-            << "\t-h,help        print this help\n"
-            << "\t-f <filename>  read and execute commands from file\n\n";
+            << "\t-h,help         print this help\n"
+            << "\t-f <filename>   read and execute commands from file\n"
+            << "\t--color=[=WHEN] colorize the output. WHEN can be never, always or auto\n\n";
     }
-    out << "command can be one of the following:\n";
+    out << "Command can be one of the following:\n";
 
     for (const auto& command : commands) {
         if (command.isAvailable(mode)) {
@@ -278,7 +311,8 @@ void printUsage(std::ostream& out, const std::string& name, unsigned int mode)
         }
     }
 
-    out << "\nType '" << n << "command help' to read about a specific one.\n";
+    out << "\nType '" << n << getStrongColor() << "command help"
+        << getDefaultColor() << "' to read about a specific one.\n";
 }
 
 int connect()
@@ -407,10 +441,11 @@ static int processStream(std::istream& stream)
     }
 
     int rc = EXIT_FAILURE;
+    const std::string prompt = getBoldColor() + "vsm> " + getDefaultColor();
     std::string ln;
-    while (readline_from("vsm> ", stream, ln)) {
+    while (readline_from(prompt, stream, ln)) {
         if (ln.empty() || ln[0] == '#') { //skip empty line or comment
-             continue;
+            continue;
         }
 
         std::istringstream iss(ln);
@@ -446,7 +481,7 @@ static int processFile(const std::string& fn)
 void printList(const std::vector<std::string>& list)
 {
     for (const auto& i : list) {
-        std::cout << i << std::endl;
+        std::cout << getBoldColor() << i << getDefaultColor() << std::endl;
     }
 }
 
@@ -482,23 +517,23 @@ int bashComplMode(int argc, const char *argv[])
     return rc;
 }
 
-int cliMode(const int argc, const char** argv)
+int cliMode(const int argc, const char* name, const char** argv)
 {
-    if (std::string(argv[1]) == "-h" || std::string(argv[1]) == "help") {
-        printUsage(std::cout, argv[0], MODE_COMMAND_LINE);
-        return EXIT_SUCCESS;
+    if (argc > 0) {
+        if (std::string(argv[0]) == "-h" || std::string(argv[0]) == "help") {
+            printUsage(std::cout, name, MODE_COMMAND_LINE);
+            return EXIT_SUCCESS;
+        }
+
+        if (commandMap.find(argv[0]) == commandMap.end()) {
+            printUsage(std::cout, name, MODE_COMMAND_LINE);
+            return EXIT_FAILURE;
+        }
+
+        Args commandArgs(argv, argv + argc);
+        return executeCommand(commandArgs, MODE_COMMAND_LINE);
     }
-
-    if (commandMap.find(argv[1]) == commandMap.end()) {
-        printUsage(std::cout, argv[0], MODE_COMMAND_LINE);
-        return EXIT_FAILURE;
-    }
-
-    // pass all the arguments excluding argv[0] - the executable name
-    Args commandArgs(argv + 1, argv + argc);
-    int rc = executeCommand(commandArgs, MODE_COMMAND_LINE);
-
-    return rc;
+    return EXIT_SUCCESS;
 }
 
 fs::path getHomePath() {
@@ -506,6 +541,30 @@ fs::path getHomePath() {
     return fs::path(h ? h : "");
 }
 
+void setColorUsage(const std::string& value) {
+    if (value == "always") {
+        useColors = true;
+    } else if (value == "never"){
+        useColors = false;
+    } else if (value == "auto") {
+        if (isatty(fileno(stdout)) == 1) {
+            useColors = true;
+        } else {
+            useColors = false;
+        }
+    }
+}
+
+bool checkColorOption(const std::string& arg) {
+    const std::string colorOption = "--color=";
+    if (arg.find(colorOption) == 0) {
+        const std::string value = arg.substr(colorOption.length());
+        setColorUsage(value);
+        return true;
+    } else {
+        return false;
+    }
+}
 
 } // namespace
 
@@ -518,26 +577,39 @@ int main(const int argc, const char *argv[])
 
     int rc = EXIT_FAILURE;
     if (argc > 1) {
-
         //process arguments
         if (std::string(argv[1]) == "--bash-completion") {
-            rc = bashComplMode(argc - 2, argv + 2);
+            interactiveMode = MODE_COMMAND_LINE;
+            int argShift;
+            if (argc > 2) {
+                argShift = (checkColorOption(argv[2]) ? 1 : 0) + 2;
+            } else {
+                argShift = 2;
+            }
+            useColors = false;
+            rc = bashComplMode(argc - argShift, argv + argShift);
         } else if (std::string(argv[1]) == "-f") {
+            interactiveMode = MODE_COMMAND_LINE;
             if (argc < 3) {
                 std::cerr << "Filename expected" << std::endl;
                 rc = EXIT_FAILURE;
-            }
-            else {
+            } else {
                 rc = processFile(std::string(argv[2]));
             }
         } else {
-            rc = cliMode(argc, argv);
-        }
+            int argShift = (checkColorOption(argv[1]) ? 1 : 0) + 1;
 
-    } else {
+            if (argc - argShift > 0) {
+                interactiveMode = MODE_COMMAND_LINE;
+                rc = cliMode(argc - argShift, argv[0], argv + argShift);
+            }
+        }
+    }
+
+    if (interactiveMode != MODE_COMMAND_LINE) {
         fs::path historyfile(".vsm_history");
 
-        if (isatty(0) == 1) {
+        if (isatty(fileno(stdin)) == 1) {
             fs::path home = getHomePath();
             if (!home.empty()) {
                 historyfile = home / historyfile;

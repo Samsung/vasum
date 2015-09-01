@@ -2,9 +2,8 @@
 [ -z "$BASH_VERSION" ] && return
 
 __@PROJECT_NAME@_cli() {
-    local exe=$1 cur=$2 prev=$3
-    words=`@CLI_CODENAME@ --bash-completion "${COMP_WORDS[@]:1}"`
-    COMPREPLY=($(compgen -W "$words" -- $cur))
+    words=`@CLI_CODENAME@ --bash-completion ${COMP_WORDS[COMP_CWORD]}`
+    COMPREPLY=($(compgen -W "$words" -- ${COMP_WORDS[COMP_CWORD]}))
 }
 
 complete -F __@PROJECT_NAME@_cli vsm
