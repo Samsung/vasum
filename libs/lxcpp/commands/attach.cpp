@@ -21,7 +21,7 @@
  * @brief   Implementation of attaching to a container
  */
 
-#include "lxcpp/commands/attach-manager.hpp"
+#include "lxcpp/commands/attach.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"
 #include "lxcpp/filesystem.hpp"
@@ -69,7 +69,7 @@ void setupMountPoints()
 int execFunction(void* call)
 {
     try {
-        return (*static_cast<AttachManager::Call*>(call))();
+        return (*static_cast<Attach::Call*>(call))();
     } catch(...) {
         return -1; // Non-zero on failure
     }
@@ -78,29 +78,35 @@ int execFunction(void* call)
 
 } // namespace
 
-AttachManager::AttachManager(lxcpp::ContainerImpl& container)
-    : mContainer(container)
+Attach::Attach(lxcpp::ContainerImpl& container,
+               Container::AttachCall& userCall,
+               const int capsToKeep,
+               const std::string& workDirInContainer,
+               const std::vector<std::string>& envToKeep,
+               const std::vector<std::pair<std::string, std::string>>& envToSet)
+    : mContainer(container),
+      mUserCall(userCall),
+      mCapsToKeep(capsToKeep),
+      mWorkDirInContainer(workDirInContainer),
+      mEnvToKeep(envToKeep),
+      mEnvToSet(envToSet)
 {
 }
 
-AttachManager::~AttachManager()
+Attach::~Attach()
 {
 }
 
-void AttachManager::attach(Container::AttachCall& userCall,
-                           const int capsToKeep,
-                           const std::string& workDirInContainer,
-                           const std::vector<std::string>& envToKeep,
-                           const std::vector<std::pair<std::string, std::string>>& envToSet)
+void Attach::execute()
 {
     // Channels for setup synchronization
     utils::Channel intermChannel;
 
-    Call call = std::bind(&AttachManager::child,
-                          std::move(userCall),
-                          capsToKeep,
-                          std::move(envToKeep),
-                          std::move(envToSet));
+    Call call = std::bind(&Attach::child,
+                          mUserCall,
+                          mCapsToKeep,
+                          mEnvToKeep,
+                          mEnvToSet);
 
     const pid_t interPid = lxcpp::fork();
     if (interPid > 0) {
@@ -109,16 +115,16 @@ void AttachManager::attach(Container::AttachCall& userCall,
         intermChannel.shutdown();
     } else {
         intermChannel.setRight();
-        interm(intermChannel, workDirInContainer, call);
+        interm(intermChannel, call);
         intermChannel.shutdown();
         ::_exit(0);
     }
 }
 
-int AttachManager::child(const Container::AttachCall& call,
-                         const int capsToKeep,
-                         const std::vector<std::string>& envToKeep,
-                         const std::vector<std::pair<std::string, std::string>>& envToSet)
+int Attach::child(const Container::AttachCall& call,
+                  const int capsToKeep,
+                  const std::vector<std::string>& envToKeep,
+                  const std::vector<std::pair<std::string, std::string>>& envToSet)
 {
     // Setup capabilities
     dropCapsFromBoundingExcept(capsToKeep);
@@ -134,7 +140,7 @@ int AttachManager::child(const Container::AttachCall& call,
     return call();
 }
 
-void AttachManager::parent(utils::Channel& intermChannel, const pid_t interPid)
+void Attach::parent(utils::Channel& intermChannel, const pid_t interPid)
 {
     // TODO: Setup cgroups etc
     const pid_t childPid = intermChannel.read<pid_t>();
@@ -144,15 +150,13 @@ void AttachManager::parent(utils::Channel& intermChannel, const pid_t interPid)
     lxcpp::waitpid(childPid);
 }
 
-void AttachManager::interm(utils::Channel& intermChannel,
-                           const std::string& workDirInContainer,
-                           Call& call)
+void Attach::interm(utils::Channel& intermChannel, Call& call)
 {
     lxcpp::setns(mContainer.getInitPid(), mContainer.getNamespaces());
 
     // Change the current work directory
     // workDirInContainer is a path relative to the container's root
-    lxcpp::chdir(workDirInContainer);
+    lxcpp::chdir(mWorkDirInContainer);
 
     // PID namespace won't affect the returned pid
     // CLONE_PARENT: Child's PPID == Caller's PID
@@ -160,7 +164,6 @@ void AttachManager::interm(utils::Channel& intermChannel,
                                         &call,
                                         CLONE_PARENT);
     intermChannel.write(childPid);
-
 }
 
 } // namespace lxcpp

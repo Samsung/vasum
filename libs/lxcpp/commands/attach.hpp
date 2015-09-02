@@ -21,9 +21,10 @@
  * @brief   Implementation of attaching to a container
  */
 
-#ifndef LXCPP_ATTACH_MANAGER_HPP
-#define LXCPP_ATTACH_MANAGER_HPP
+#ifndef LXCPP_COMMANDS_ATTACH_HPP
+#define LXCPP_COMMANDS_ATTACH_HPP
 
+#include "lxcpp/commands/command.hpp"
 #include "lxcpp/container-impl.hpp"
 #include "utils/channel.hpp"
 
@@ -31,31 +32,40 @@
 
 namespace lxcpp {
 
-class AttachManager final {
+class Attach final: Command {
 public:
     typedef std::function<int(void)> Call;
 
-    AttachManager(lxcpp::ContainerImpl& container);
-    ~AttachManager();
-
     /**
-     * Runs the call in the container's context
+     * Runs call in the container's context
      *
-     * @param call function to run inside container
-     * @param capsToKeep mask of the capabilities that shouldn't be dropped
-     * @param workDirInContainer Current Work Directory. Path relative to container's root
-     * @param envToKeep environment variables to keep in container
-     * @param envToSet environment variables to add/modify in container
+     * Object attach should be used immediately after creation.
+     * It will not be stored for future use like most other commands.
+     *
+     * @param container container to which it attaches
+     * @param userCall user's function to run
+     * @param capsToKeep capabilities that will be kept
+     * @param workDirInContainer work directory set for the new process
+     * @param envToKeep environment variables that will be kept
+     * @param envToSet new environment variables that will be set
      */
-    void attach(Container::AttachCall& call,
-                const int capsToKeep,
-                const std::string& workDirInContainer,
-                const std::vector<std::string>& envToKeep,
-                const std::vector<std::pair<std::string, std::string>>& envToSet);
+    Attach(lxcpp::ContainerImpl& container,
+           Container::AttachCall& userCall,
+           const int capsToKeep,
+           const std::string& workDirInContainer,
+           const std::vector<std::string>& envToKeep,
+           const std::vector<std::pair<std::string, std::string>>& envToSet);
+    ~Attach();
+
+    void execute();
 
 private:
-
     const lxcpp::ContainerImpl& mContainer;
+    const Container::AttachCall& mUserCall;
+    const int mCapsToKeep;
+    const std::string& mWorkDirInContainer;
+    const std::vector<std::string>& mEnvToKeep;
+    const std::vector<std::pair<std::string, std::string>>& mEnvToSet;
 
     // Methods for different stages of setting up the attachment
     static int child(const Container::AttachCall& call,
@@ -67,10 +77,9 @@ private:
                 const pid_t pid);
 
     void interm(utils::Channel& intermChannel,
-                const std::string& workDirInContainer,
-                Container::AttachCall& call);
+                Call& call);
 };
 
 } // namespace lxcpp
 
-#endif // LXCPP_ATTACH_MANAGER_HPP
+#endif // LXCPP_COMMANDS_ATTACH_HPP

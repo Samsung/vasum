@@ -27,7 +27,7 @@
 #include "lxcpp/filesystem.hpp"
 #include "lxcpp/namespace.hpp"
 #include "lxcpp/capability.hpp"
-#include "lxcpp/commands/attach-manager.hpp"
+#include "lxcpp/commands/attach.hpp"
 
 #include "utils/exception.hpp"
 
@@ -107,13 +107,14 @@ std::string ContainerImpl::getRootPath()
 void ContainerImpl::attach(Container::AttachCall& call,
                            const std::string& cwdInContainer)
 {
-    AttachManager attachManager(*this);
+    Attach attach(*this,
+                  call,
+                  /*capsToKeep*/ 0,
+                  cwdInContainer,
+                  /*envToKeep*/ {},
+                  /*envInContainer*/ {{"container","lxcpp"}});
     // TODO: Env variables should agree with the ones already in the container
-    attachManager.attach(call,
-                         /*capsToKeep*/ 0,
-                         cwdInContainer,
-                         /*envToKeep*/ {},
-                         /*envInContainer*/{{"container","lxcpp"}} );
+    attach.execute();
 }
 
 const std::vector<Namespace>& ContainerImpl::getNamespaces() const
