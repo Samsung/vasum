@@ -35,6 +35,7 @@
 #include <sys/socket.h>
 #include <linux/netlink.h>
 
+//FIXME remove from namespace vasum
 namespace vasum {
 namespace netlink {
 

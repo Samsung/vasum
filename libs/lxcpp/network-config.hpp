@@ -26,6 +26,9 @@
 
 #include "config/config.hpp"
 #include "config/fields.hpp"
+//#include "config/fields-union.hpp"
+#include "lxcpp/network.hpp"
+#include "lxcpp/exception.hpp"
 
 #include <vector>
 #include <string>
@@ -37,78 +40,25 @@
 namespace lxcpp {
 
 /**
- * Created interface type
- */
-enum class InterfaceType {
-    VETH,
-    BRIDGE,
-    MACVLAN,
-    MOVE
-};
-
-/**
- * Suported MacVLan modes
- */
-enum class MacVLanMode {
-    PRIVATE,
-    VEPA,
-    BRIDGE,
-    PASSTHRU
-};
-
-/**
- * Suported address types
- */
-enum class InetAddrType {
-    IPV4,
-    IPV6
-};
-
-enum class NetStatus {
-    DOWN,
-    UP
-};
-
-
-/**
- * Unified ip address
- */
-struct InetAddr {
-    InetAddrType type;
-    uint32_t flags;
-    int prefix;
-    union {
-        struct in_addr ipv4;
-        struct in6_addr ipv6;
-    } addr;
-};
-
-static inline bool operator==(const InetAddr& a, const InetAddr& b) {
-    if (a.type == b.type && a.prefix == b.prefix) {
-        if (a.type == InetAddrType::IPV4) {
-            return ::memcmp(&a.addr.ipv4, &b.addr.ipv4, sizeof(a.addr.ipv4)) == 0;
-        }
-        if (a.type == InetAddrType::IPV6) {
-            return ::memcmp(&a.addr.ipv6, &b.addr.ipv6, sizeof(a.addr.ipv6)) == 0;
-        }
-    }
-    return false;
-}
-
-
-/**
  * Network interface configuration
  */
 class NetworkInterfaceConfig {
 public:
+    NetworkInterfaceConfig() = default;  // default constructor required by visitor
+
     NetworkInterfaceConfig(const std::string& hostif,
                            const std::string& zoneif,
                            InterfaceType type,
-                           MacVLanMode mode = MacVLanMode::PRIVATE) :
+                           const std::vector<InetAddr>& addrs,
+                           MacVLanMode mode) :
         mHostIf(hostif),
         mZoneIf(zoneif),
-        mType(type),
-        mMode(mode)
+        mType(static_cast<int>(type)),
+        mMode(static_cast<int>(mode)),
+        mMtu(0),
+        mMacAddress(),
+        mTxLength(0),
+        mIpAddrList(addrs)
     {
     }
 
@@ -116,48 +66,79 @@ public:
 
     const std::string& getZoneIf() const;
 
-    const InterfaceType& getType() const;
+    InterfaceType getType() const;
 
-    const MacVLanMode& getMode() const;
+    MacVLanMode getMode() const;
+
+    void setMTU(int mtu);
+    int getMTU() const;
+
+    void setMACAddress(const std::string& mac);
+    const std::string& getMACAddress() const;
+
+    void setTxLength(int txlen);
+    int getTxLength() const;
 
     const std::vector<InetAddr>& getAddrList() const;
 
-    void addInetAddr(const InetAddr&);
+    void addInetAddr(const InetAddr& addr);
+
+    CONFIG_REGISTER
+    (
+        mHostIf,
+        mZoneIf,
+        mType,
+        mMode,
+        mIpAddrList
+    )
 
 private:
-    const std::string mHostIf;
-    const std::string mZoneIf;
-    const InterfaceType mType;
-    const MacVLanMode mMode;
-    //TODO mtu, macaddress, txqueue
+    std::string mHostIf;
+    std::string mZoneIf;
+    int mType;
+    int mMode;
+
     /*
-     * above are interface parameters which can be read/modified:
+     * interface parameters which can be set after interface is created
      *   MTU (Maximum Transmit Unit) is maximum length of link level packet in TCP stream
      *   MAC address is also called hardware card address
      *   TXQueue is transmit queue length
      *
-     * I think most usufull would be possibility to set MAC address, other have their
-     * well working defaults but can be tuned to make faster networking (especially localy)
+     * I think most useful would be possibility to set MAC address, other have their
+     * well working defaults but can be tuned to make faster networking (especially locally)
      */
+    int mMtu;
+    std::string mMacAddress;
+    int mTxLength;
+
     std::vector<InetAddr> mIpAddrList;
 };
 
 /**
  * Network interface configuration
  */
-struct NetworkConfig {
-
-    //for convinience
+class NetworkConfig {
+public:
+    /**
+     * adds interface configuration.
+     * throws NetworkException if zoneif name already on list
+     */
     void addInterfaceConfig(const std::string& hostif,
                             const std::string& zoneif,
                             InterfaceType type,
-                            MacVLanMode mode);
+                            const std::vector<InetAddr>& addrs = std::vector<InetAddr>(),
+                            MacVLanMode mode = MacVLanMode::PRIVATE);
     void addInetConfig(const std::string& ifname, const InetAddr& addr);
 
-    std::vector<NetworkInterfaceConfig> mInterfaces;
+    const std::vector<NetworkInterfaceConfig>& getInterfaces() const { return mInterfaces; }
+    const NetworkInterfaceConfig& getInterface(int i) const { return mInterfaces.at(i); }
 
-    //TODO tmporary to allow serialization of this object
-    CONFIG_REGISTER_EMPTY
+    CONFIG_REGISTER(
+        mInterfaces
+    )
+
+private:
+    std::vector<NetworkInterfaceConfig> mInterfaces;
 };
 
 } //namespace lxcpp

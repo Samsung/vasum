@@ -30,7 +30,6 @@
 #include "lxcpp/container-config.hpp"
 #include "lxcpp/container.hpp"
 #include "lxcpp/namespace.hpp"
-#include "lxcpp/network.hpp"
 
 namespace lxcpp {
 
@@ -77,6 +76,7 @@ public:
     void addInterfaceConfig(const std::string& hostif,
                             const std::string& zoneif,
                             InterfaceType type,
+                            const std::vector<InetAddr>& addrs,
                             MacVLanMode mode);
     void addInetConfig(const std::string& ifname, const InetAddr& addr);
 
@@ -87,11 +87,12 @@ public:
                          const std::string& zoneif,
                          InterfaceType type,
                          MacVLanMode mode);
+    void moveInterface(const std::string& ifname);
     void destroyInterface(const std::string& ifname);
     void setUp(const std::string& ifname);
     void setDown(const std::string& ifname);
-    void addAddr(const std::string& ifname, const InetAddr& addr);
-    void delAddr(const std::string& ifname, const InetAddr& addr);
+    void addInetAddr(const std::string& ifname, const InetAddr& addr);
+    void delInetAddr(const std::string& ifname, const InetAddr& addr);
 
 private:
     ContainerConfig mConfig;

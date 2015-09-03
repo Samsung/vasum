@@ -28,17 +28,46 @@ namespace lxcpp {
 
 void NetCreateAll::execute()
 {
-    for (const auto& i : mInterfaceConfigs) {
-        NetworkInterface networkInerface(mContainerPid, i.getZoneIf());
-        networkInerface.create(i.getHostIf(), i.getType(), i.getMode());
+    pid_t pid = mContainer.getInitPid();
+    for (const auto& interface : mNetwork.getInterfaces()) {
+        NetworkInterface networkInterface(interface.getZoneIf(), pid);
+        networkInterface.create(interface.getType(), interface.getHostIf(), interface.getMode());
 
         Attrs attrs;
-        for (const auto& a : i.getAddrList()) {
-            Attr attr;
-            NetworkInterface::convertInetAddr2Attr(a, attr);
-            attrs.push_back(attr);
+        if (interface.getMTU() > 0) {
+            attrs.push_back(Attr{AttrName::MTU, std::to_string(interface.getMTU())});
         }
-        networkInerface.setAttrs(attrs);
+        if (!interface.getMACAddress().empty()) {
+            attrs.push_back(Attr{AttrName::MAC, interface.getMACAddress()});
+        }
+        if (interface.getTxLength() > 0) {
+            attrs.push_back(Attr{AttrName::TXQLEN, std::to_string(interface.getTxLength())});
+        }
+        networkInterface.setAttrs(attrs);
+
+        for (const auto& addr : interface.getAddrList()) {
+            networkInterface.addInetAddr(addr);
+        }
+    }
+}
+
+void NetInteraceCreate::execute()
+{
+    NetworkInterface networkInterface(mZoneIf, mContainer.getInitPid());
+    networkInterface.create(mType, mHostIf, mMode);
+}
+
+void NetInterfaceSetAttrs::execute()
+{
+    NetworkInterface networkInterface(mIfname, mContainer.getInitPid());
+    networkInterface.setAttrs(mAttrs);
+}
+
+void NetInterfaceAddInetAddr::execute()
+{
+    NetworkInterface networkInterface(mIfname, mContainer.getInitPid());
+    for (const auto& a : mAddrList) {
+        networkInterface.addInetAddr(a);
     }
 }
 

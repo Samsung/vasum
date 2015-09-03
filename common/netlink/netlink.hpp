@@ -28,6 +28,7 @@
 #include <memory>
 #include <vector>
 
+//FIXME remove from namespace vasum
 namespace vasum {
 namespace netlink {
 

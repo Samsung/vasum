@@ -26,6 +26,7 @@
 
 #include "lxcpp/commands/command.hpp"
 #include "lxcpp/network-config.hpp"
+#include "lxcpp/container.hpp"
 
 #include <sys/types.h>
 
@@ -37,19 +38,81 @@ public:
     * Runs call in the container's context
     *
     * Creates and configures network interfaces in the container
-    *
     */
-    NetCreateAll(pid_t containerPid, const std::vector<NetworkInterfaceConfig>& iflist) :
-        mContainerPid(containerPid),
-        mInterfaceConfigs(iflist)
+    NetCreateAll(const Container& container, const NetworkConfig& network) :
+        mContainer(container),
+        mNetwork(network)
     {
     }
 
     void execute();
 
 private:
-    const pid_t mContainerPid;
-    const std::vector<NetworkInterfaceConfig>& mInterfaceConfigs;
+    const Container& mContainer;
+    const NetworkConfig& mNetwork;
+};
+
+class NetInteraceCreate final: Command {
+public:
+    NetInteraceCreate(const Container& container,
+                      const std::string& zoneif,
+                      const std::string& hostif,
+                      InterfaceType type,
+                      MacVLanMode mode=MacVLanMode::PRIVATE) :
+        mContainer(container),
+        mZoneIf(zoneif),
+        mHostIf(hostif),
+        mType(type),
+        mMode(mode)
+    {
+    }
+
+    void execute();
+
+private:
+    const Container& mContainer;
+    const std::string& mZoneIf;
+    const std::string& mHostIf;
+    InterfaceType mType;
+    MacVLanMode mMode;
+};
+
+class NetInterfaceSetAttrs final: Command {
+public:
+    NetInterfaceSetAttrs(const Container& container,
+                         const std::string& ifname,
+                         const Attrs& attrs) :
+        mContainer(container),
+        mIfname(ifname),
+        mAttrs(attrs)
+    {
+    }
+
+    void execute();
+
+private:
+    const Container& mContainer;
+    const std::string& mIfname;
+    const Attrs& mAttrs;
+};
+
+class NetInterfaceAddInetAddr final: Command {
+public:
+    NetInterfaceAddInetAddr(const Container& container,
+                            const std::string& ifname,
+                            const std::vector<InetAddr>& addrList) :
+        mContainer(container),
+        mIfname(ifname),
+        mAddrList(addrList)
+    {
+    }
+
+    void execute();
+
+private:
+    const Container& mContainer;
+    const std::string& mIfname;
+    const std::vector<InetAddr>& mAddrList;
 };
 
 } // namespace lxcpp

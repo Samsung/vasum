@@ -230,9 +230,10 @@ const std::vector<Namespace>& ContainerImpl::getNamespaces() const
 void ContainerImpl::addInterfaceConfig(const std::string& hostif,
                                        const std::string& zoneif,
                                        InterfaceType type,
+                                       const std::vector<InetAddr>& addrs,
                                        MacVLanMode mode)
 {
-    mConfig.mNetwork.addInterfaceConfig(hostif, zoneif, type, mode);
+    mConfig.mNetwork.addInterfaceConfig(hostif, zoneif, type, addrs, mode);
 }
 
 void ContainerImpl::addInetConfig(const std::string& ifname, const InetAddr& addr)
@@ -247,10 +248,9 @@ std::vector<std::string> ContainerImpl::getInterfaces() const
 
 NetworkInterfaceInfo ContainerImpl::getInterfaceInfo(const std::string& ifname) const
 {
-    NetworkInterface ni(getInitPid(), ifname);
+    NetworkInterface ni(ifname, getInitPid());
     std::vector<InetAddr> addrs;
     std::string macaddr;
-    InetAddr addr;
     int mtu = 0, flags = 0;
     Attrs attrs = ni.getAttrs();
     for (const Attr& a : attrs) {
@@ -261,11 +261,6 @@ NetworkInterfaceInfo ContainerImpl::getInterfaceInfo(const std::string& ifname) 
         case AttrName::MTU:
             mtu = std::stoul(a.value);
             break;
-        case AttrName::IPV6:
-        case AttrName::IPV4:
-            NetworkInterface::convertAttr2InetAddr(a, addr);
-            addrs.push_back(addr);
-            break;
         case AttrName::FLAGS:
             flags = std::stoul(a.value);
             break;
@@ -273,6 +268,7 @@ NetworkInterfaceInfo ContainerImpl::getInterfaceInfo(const std::string& ifname) 
             break;
         }
     }
+    addrs = ni.getInetAddressList();
     return NetworkInterfaceInfo{ifname, ni.status(), macaddr, mtu, flags, addrs};
 }
 
@@ -281,33 +277,44 @@ void ContainerImpl::createInterface(const std::string& hostif,
                                     InterfaceType type,
                                     MacVLanMode mode)
 {
-    NetworkInterface ni(getInitPid(), zoneif);
-    ni.create(hostif, type, mode);
+    NetworkInterface ni(zoneif, getInitPid());
+    ni.create(type, hostif, mode);
 }
 
-void ContainerImpl::destroyInterface(const std::string& /*ifname*/)
+void ContainerImpl::destroyInterface(const std::string& ifname)
 {
-    throw NotImplementedException();
+    NetworkInterface ni(ifname, getInitPid());
+    ni.destroy();
 }
 
-void ContainerImpl::setUp(const std::string& /*ifname*/)
+void ContainerImpl::moveInterface(const std::string& ifname)
 {
-    throw NotImplementedException();
+    NetworkInterface ni(ifname);
+    ni.moveToContainer(getInitPid());
 }
 
-void ContainerImpl::setDown(const std::string& /*ifname*/)
+void ContainerImpl::setUp(const std::string& ifname)
 {
-    throw NotImplementedException();
+    NetworkInterface ni(ifname, getInitPid());
+    ni.up();
 }
 
-void ContainerImpl::addAddr(const std::string& /*ifname*/, const InetAddr& /*addr*/)
+void ContainerImpl::setDown(const std::string& ifname)
 {
-    throw NotImplementedException();
+    NetworkInterface ni(ifname, getInitPid());
+    ni.down();
 }
 
-void ContainerImpl::delAddr(const std::string& /*ifname*/, const InetAddr& /*addr*/)
+void ContainerImpl::addInetAddr(const std::string& ifname, const InetAddr& addr)
 {
-    throw NotImplementedException();
+    NetworkInterface ni(ifname, getInitPid());
+    ni.addInetAddr(addr);
+}
+
+void ContainerImpl::delInetAddr(const std::string& ifname, const InetAddr& addr)
+{
+    NetworkInterface ni(ifname, getInitPid());
+    ni.delInetAddr(addr);
 }
 
 } // namespace lxcpp

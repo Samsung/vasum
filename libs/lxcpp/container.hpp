@@ -78,6 +78,7 @@ public:
     virtual void addInterfaceConfig(const std::string& hostif,
                                     const std::string& zoneif,
                                     InterfaceType type,
+                                    const std::vector<InetAddr>& addrs,
                                     MacVLanMode mode) = 0;
     virtual void addInetConfig(const std::string& ifname, const InetAddr& addr) = 0;
 
@@ -89,10 +90,11 @@ public:
                                  InterfaceType type,
                                  MacVLanMode mode) = 0;
     virtual void destroyInterface(const std::string& ifname) = 0;
+    virtual void moveInterface(const std::string& ifname) = 0;
     virtual void setUp(const std::string& ifname) = 0;
     virtual void setDown(const std::string& ifname) = 0;
-    virtual void addAddr(const std::string& ifname, const InetAddr& addr) = 0;
-    virtual void delAddr(const std::string& ifname, const InetAddr& addr) = 0;
+    virtual void addInetAddr(const std::string& ifname, const InetAddr& addr) = 0;
+    virtual void delInetAddr(const std::string& ifname, const InetAddr& addr) = 0;
 };
 
 } // namespace lxcpp

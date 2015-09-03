@@ -42,8 +42,6 @@
 #include <thread>
 #include <chrono>
 #include <sys/socket.h>
-#include <linux/in6.h>
-#include <linux/if_bridge.h>
 #include <linux/if.h>
 
 using namespace utils;

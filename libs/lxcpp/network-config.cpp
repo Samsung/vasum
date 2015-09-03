@@ -23,11 +23,9 @@
  */
 
 #include "lxcpp/network-config.hpp"
-#include "lxcpp/network.hpp"
 #include "lxcpp/exception.hpp"
 #include "logger/logger.hpp"
 #include <algorithm>
-
 
 namespace lxcpp {
 
@@ -41,14 +39,44 @@ const std::string& NetworkInterfaceConfig::getZoneIf() const
     return mZoneIf;
 }
 
-const InterfaceType& NetworkInterfaceConfig::getType() const
+InterfaceType NetworkInterfaceConfig::getType() const
 {
-    return mType;
+    return static_cast<InterfaceType>(mType);
 }
 
-const MacVLanMode& NetworkInterfaceConfig::getMode() const
+MacVLanMode NetworkInterfaceConfig::getMode() const
 {
-    return mMode;
+    return static_cast<MacVLanMode>(mMode);
+}
+
+void NetworkInterfaceConfig::setMTU(int mtu)
+{
+    mMtu = mtu;
+}
+
+void NetworkInterfaceConfig::setMACAddress(const std::string& mac)
+{
+    mMacAddress = mac;
+}
+
+void NetworkInterfaceConfig::setTxLength(int txlen)
+{
+    mTxLength = txlen;
+}
+
+int NetworkInterfaceConfig::getMTU() const
+{
+    return mMtu;
+}
+
+const std::string& NetworkInterfaceConfig::getMACAddress() const
+{
+    return mMacAddress;
+}
+
+int NetworkInterfaceConfig::getTxLength() const
+{
+    return mTxLength;
 }
 
 const std::vector<InetAddr>& NetworkInterfaceConfig::getAddrList() const
@@ -60,7 +88,7 @@ void NetworkInterfaceConfig::addInetAddr(const InetAddr& addr)
 {
     std::vector<InetAddr>::iterator exists = std::find(mIpAddrList.begin(), mIpAddrList.end(), addr);
     if (exists != mIpAddrList.end()) {
-        std::string msg("Address already assigned");
+        const std::string msg("Address already assigned");
         throw NetworkException(msg);
     }
     mIpAddrList.push_back(addr);
@@ -69,6 +97,7 @@ void NetworkInterfaceConfig::addInetAddr(const InetAddr& addr)
 void NetworkConfig::addInterfaceConfig(const std::string& hostif,
                                        const std::string& zoneif,
                                        InterfaceType type,
+                                       const std::vector<InetAddr>& addrs,
                                        MacVLanMode mode)
 {
     auto it = std::find_if(mInterfaces.begin(), mInterfaces.end(),
@@ -76,12 +105,13 @@ void NetworkConfig::addInterfaceConfig(const std::string& hostif,
             return entry.getZoneIf() == zoneif;
         }
     );
+
     if (it != mInterfaces.end()) {
-        std::string msg = "Interface already exists";
+        const std::string msg = "Interface already exists";
         LOGE(msg);
         throw NetworkException(msg);
     }
-    mInterfaces.push_back(NetworkInterfaceConfig(hostif,zoneif,type,mode));
+    mInterfaces.push_back(NetworkInterfaceConfig(hostif, zoneif, type, addrs, mode));
 }
 
 void NetworkConfig::addInetConfig(const std::string& ifname, const InetAddr& addr)
@@ -93,7 +123,7 @@ void NetworkConfig::addInetConfig(const std::string& ifname, const InetAddr& add
     );
 
     if (it == mInterfaces.end()) {
-        std::string msg = "No such interface";
+        const std::string msg = "No such interface";
         LOGE(msg);
         throw NetworkException(msg);
     }
