@@ -240,7 +240,7 @@ NetworkInterfaceInfo ContainerImpl::getInterfaceInfo(const std::string& ifname) 
     std::vector<InetAddr> addrs;
     std::string macaddr;
     int mtu = 0, flags = 0;
-    Attrs attrs = ni.getAttrs();
+    const Attrs& attrs = ni.getAttrs();
     for (const Attr& a : attrs) {
         switch (a.name) {
         case AttrName::MAC:

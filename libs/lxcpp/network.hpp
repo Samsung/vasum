@@ -54,8 +54,8 @@ enum class InetAddrType {
  */
 class InetAddr {
 public:
-    InetAddr() {}
-    InetAddr(uint32_t flags, int prefix, const std::string& addr);
+    InetAddr() = default;
+    InetAddr(const std::string& addr, unsigned prefix, uint32_t flags=0);
 
     InetAddrType getType() const {
         return static_cast<InetAddrType>(type);
@@ -77,8 +77,8 @@ public:
         return *(reinterpret_cast<const T*>(v));
     }
 
+    unsigned prefix;
     uint32_t flags;
-    int prefix;
 
     CONFIG_REGISTER
     (
@@ -127,7 +127,9 @@ enum class RoutingTable {
     LOCAL,
     USER,
 };
-inline std::string toString(RoutingTable rt) {
+
+inline std::string toString(const RoutingTable rt)
+{
     switch (rt) {
     case RoutingTable::UNSPEC:
         return "unspec";
@@ -143,6 +145,14 @@ inline std::string toString(RoutingTable rt) {
         return "user";
     }
 }
+
+struct Route {
+    InetAddr dst;
+    InetAddr src;
+    unsigned metric;
+    std::string ifname;
+    RoutingTable table;
+};
 
 enum class AttrName {
     MAC,
@@ -205,10 +215,10 @@ std::string toString(const InetAddr& a);
  * operates on netlink device
  */
 class NetworkInterface {
+    //TODO implement Netlink singleton per pid
 public:
     /**
      * Create network interface object for the ifname in the container (network namespace)
-     * Note: pid=0 is kernel
      */
     NetworkInterface(const std::string& ifname, pid_t pid = 0) :
         mIfname(ifname),
@@ -224,7 +234,8 @@ public:
     NetStatus status() const;
 
     /**
-     * Create network interface in container identified by mContainerPid
+     * Create network interface in container identified by @mContainerPid
+     *
      * Equivalent to: ip link add @mIfname type @type [...]
      *   Create pair of virtual ethernet interfaces
      *      ip link add @mIfname type veth peer name @peerif
@@ -233,7 +244,7 @@ public:
      *   Create psedo-ethernet interface on existing one
      *      ip link add @mIfname type macvlan link @peerif [mode @a mode]
      */
-    void create(InterfaceType type, const std::string& peerif, MacVLanMode mode = MacVLanMode::PRIVATE);
+    void create(InterfaceType type, const std::string& peerif = "", MacVLanMode mode = MacVLanMode::PRIVATE);
 
     /**
      * Delete interface
@@ -243,9 +254,9 @@ public:
 
     /**
      * Move interface to container
-     * Equivalent to: ip link set dev @hostif netns @mContainerPid
+     * Equivalent to: ip link set dev @mIfname netns @pid
      */
-    void moveToContainer(pid_t p);
+    void moveToContainer(pid_t pid);
 
     /**
      * Rename interface name
@@ -291,8 +302,26 @@ public:
     std::vector<InetAddr> getInetAddressList() const;
 
     /**
+     * Add route to specified routing table
+     * Equivalent to: ip route add @route.dst.addr/@route.dst.prefix dev @mIfname (if route.src.prefix=0)
+     */
+    void addRoute(const Route& route, const RoutingTable rt = RoutingTable::MAIN);
+
+    /**
+     * Remove route from specified routing table
+     * Equivalent to: ip route del @route.dst.addr dev @mIfname
+     */
+    void delRoute(const Route& route, const RoutingTable rt = RoutingTable::MAIN);
+
+    /**
+     * Retrieve routing table for the interface
+     * Equivalent to: ip route show dev @mIfname table @rt
+     */
+    std::vector<Route> getRoutes(const RoutingTable rt = RoutingTable::MAIN) const;
+
+    /**
      * Set interface up
-     * Equivalent to: ip link set @mInface up
+     * Equivalent to: ip link set @mIfname up
      */
     void up();
 
@@ -304,20 +333,26 @@ public:
 
     /**
      * Set MAC address attribute
-     * Equivalent to: ip link set @mIface address @macaddr
+     * Equivalent to: ip link set @mIfname address @macaddr
      * @macaddr in format AA:BB:CC:DD:FF:GG
+     *
+     * Note: two lower bits of first byte (leftmost) specifies MAC address class:
+     *       b1: 0=unicast, 1=broadcast
+     *       b2: 0=global,  1=local
+     *       in most cases should be b2=0, b1=1
+     *       (see: https://en.wikipedia.org/wiki/MAC_address)
      */
     void setMACAddress(const std::string& macaddr);
 
     /**
      * Set MTU attribute
-     * Equivalent to: ip link set @mIface mtu @mtu
+     * Equivalent to: ip link set @mIfname mtu @mtu
      */
     void setMTU(int mtu);
 
     /**
      * Set TxQ attribute
-     * Equivalent to: ip link set @mIface txqueue @txlen
+     * Equivalent to: ip link set @mIfname txqueue @txlen
      */
     void setTxLength(int txlen);
 
@@ -327,10 +362,18 @@ public:
      */
     static std::vector<std::string> getInterfaces(pid_t initpid);
 
+    /**
+     * Get list of routes (specified routing table)
+     * Equivalent to: ip route show table @rt
+     */
+    static std::vector<Route> getRoutes(pid_t initpid, const RoutingTable rt = RoutingTable::MAIN);
+
 private:
     void createVeth(const std::string& peerif);
     void createBridge();
     void createMacVLan(const std::string& masterif, MacVLanMode mode);
+
+    void modifyRoute(int cmd, const InetAddr& src, const InetAddr& dst);
 
     const std::string mIfname; ///< network interface name inside zone
     pid_t mContainerPid;       ///< Container pid to operate on (0 means kernel)

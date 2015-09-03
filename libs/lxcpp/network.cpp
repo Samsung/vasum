@@ -70,7 +70,18 @@ uint32_t getInterfaceIndex(const std::string& name)
     return index;
 }
 
-uint32_t getInterfaceIndex(const std::string& name, pid_t pid)
+std::string getInterfaceName(uint32_t index)
+{
+    char buf[IFNAMSIZ];
+    if (::if_indextoname(index, buf) == NULL) {
+        const std::string msg = "No interface for index: " + std::to_string(index);
+        LOGE(msg);
+        throw NetworkException(msg);
+    }
+    return buf;
+}
+
+uint32_t getInterfaceIndex(pid_t pid, const std::string& name)
 {
     NetlinkMessage nlm(RTM_GETLINK, NLM_F_REQUEST | NLM_F_ACK);
     ifinfomsg info = utils::make_clean<ifinfomsg>();
@@ -81,7 +92,7 @@ uint32_t getInterfaceIndex(const std::string& name, pid_t pid)
 
     NetlinkResponse response = send(nlm, pid);
     if (!response.hasMessage()) {
-        const std::string msg = "Can't get interface index";
+        const std::string msg = "Can't get interface index for " + name;
         LOGE(msg);
         throw NetworkException(msg);
     }
@@ -90,7 +101,7 @@ uint32_t getInterfaceIndex(const std::string& name, pid_t pid)
     return info.ifi_index;
 }
 
-void bridgeModify(const std::string& ifname, uint32_t masterIndex) {
+void bridgeModify(pid_t pid, const std::string& ifname, uint32_t masterIndex) {
     NetlinkMessage nlm(RTM_SETLINK, NLM_F_REQUEST | NLM_F_ACK);
     ifinfomsg info = utils::make_clean<ifinfomsg>();
     info.ifi_family = AF_UNSPEC;
@@ -98,12 +109,12 @@ void bridgeModify(const std::string& ifname, uint32_t masterIndex) {
     info.ifi_index = getInterfaceIndex(ifname);
     nlm.put(info)
         .put(IFLA_MASTER, masterIndex);
-    send(nlm);
+    send(nlm, pid);
 }
 
-void getAddressList(std::vector<InetAddr>& addrs, int family, const std::string& ifname, pid_t pid)
+void getAddressList(pid_t pid, std::vector<InetAddr>& addrs, int family, const std::string& ifname)
 {
-    uint32_t index = getInterfaceIndex(ifname, pid);
+    uint32_t index = getInterfaceIndex(pid, ifname);
     NetlinkMessage nlm(RTM_GETADDR, NLM_F_REQUEST | NLM_F_ACK | NLM_F_DUMP);
     ifaddrmsg infoAddr = utils::make_clean<ifaddrmsg>();
     infoAddr.ifa_family = family; //test AF_PACKET to get all AF_INET* ?
@@ -174,6 +185,33 @@ void getAddressList(std::vector<InetAddr>& addrs, int family, const std::string&
         response.fetchNextMessage();
     }
 }
+
+/*
+ * convert string-hex to byte array
+ */
+void toMacAddressArray(const std::string& s, char *buf, size_t bs)
+{
+    static const std::string hex = "0123456789ABCDEF";
+    int nibble = 0; //nibble counter, one nibble = 4 bits (or one hex digit)
+    int v = 0;
+    ::memset(buf, 0, bs);
+    for (size_t i = 0; i < s.length() && bs > 0; ++i) {
+        const char c = s.at(i);
+        size_t pos = hex.find(c);
+        if (pos == std::string::npos) { // ignore eny non-hex character
+            continue;
+        }
+        v <<= 4;
+        v |= pos; // add nibble
+        if (++nibble == 2) { // two nibbles collected (one byte)
+            *buf++ = v; // assign the byte
+            --bs;       // decrease space left
+            v = 0;      // reset byte and nibble counter
+            nibble = 0;
+        }
+    }
+}
+
 } // anonymous namespace
 
 
@@ -236,7 +274,9 @@ std::string toString(const InetAddr& a) {
     return "";
 }
 
-InetAddr::InetAddr(uint32_t f, int p, const std::string& a)
+InetAddr::InetAddr(const std::string& a, unsigned p, uint32_t f) :
+    prefix(p),
+    flags(f)
 {
     if (a.find(":") != std::string::npos) {
         setType(InetAddrType::IPV6);
@@ -245,8 +285,6 @@ InetAddr::InetAddr(uint32_t f, int p, const std::string& a)
         setType(InetAddrType::IPV4);
         fromString(a, getAddr<in_addr>());
     }
-    flags = f;
-    prefix = p;
 }
 
 void NetworkInterface::create(InterfaceType type,
@@ -285,7 +323,7 @@ void NetworkInterface::createVeth(const std::string& peerif)
                 .endNested()
             .endNested()
         .endNested();
-    send(nlm);
+    send(nlm, mContainerPid);
 }
 
 void NetworkInterface::createBridge()
@@ -304,7 +342,7 @@ void NetworkInterface::createBridge()
             .endNested()
         .endNested()
         .put(IFLA_IFNAME, mIfname); //bridge name (will be created)
-    send(nlm);
+    send(nlm, mContainerPid);
 }
 
 void NetworkInterface::createMacVLan(const std::string& maserif, MacVLanMode mode)
@@ -323,7 +361,7 @@ void NetworkInterface::createMacVLan(const std::string& maserif, MacVLanMode mod
         .endNested()
         .put(IFLA_LINK, index)      //master index
         .put(IFLA_IFNAME, mIfname); //slave name (will be created)
-    send(nlm);
+    send(nlm, mContainerPid);
 }
 
 void NetworkInterface::moveToContainer(pid_t pid)
@@ -334,7 +372,7 @@ void NetworkInterface::moveToContainer(pid_t pid)
     info.ifi_index = getInterfaceIndex(mIfname);
     nlm.put(info)
         .put(IFLA_NET_NS_PID, pid);
-    send(nlm);
+    send(nlm, mContainerPid);
     mContainerPid = pid;
 }
 
@@ -345,28 +383,25 @@ void NetworkInterface::destroy()
     ifinfomsg info = utils::make_clean<ifinfomsg>();
     info.ifi_family = AF_UNSPEC;
     info.ifi_change = CHANGE_FLAGS_DEFAULT;
-    info.ifi_index = getInterfaceIndex(mIfname, mContainerPid);
+    info.ifi_index = getInterfaceIndex(mContainerPid, mIfname);
     nlm.put(info)
         .put(IFLA_IFNAME, mIfname);
-    send(nlm);
+    send(nlm, mContainerPid);
 }
 
 NetStatus NetworkInterface::status() const
 {
-    NetlinkMessage nlm(RTM_GETLINK, NLM_F_REQUEST | NLM_F_ACK);
-    ifinfomsg info = utils::make_clean<ifinfomsg>();
-    info.ifi_family = AF_UNSPEC;
-    info.ifi_change = CHANGE_FLAGS_DEFAULT;
-    nlm.put(info)
-        .put(IFLA_IFNAME, mIfname);
-
-    NetlinkResponse response = send(nlm, mContainerPid);
-    if (!response.hasMessage()) {
-        throw NetworkException("Can't get interface information");
-    }
-
-    response.fetch(info);
-    return (info.ifi_flags & IFF_UP) != 0 ? NetStatus::UP : NetStatus::DOWN;
+    const Attrs& attrs = getAttrs();
+    NetStatus st = NetStatus::DOWN;
+    for (const Attr& a : attrs)
+        if (a.name == AttrName::FLAGS) {
+            uint32_t f = stoul(a.value);
+            if (f & IFF_UP) {
+                st = NetStatus::UP;
+                break;
+            }
+        }
+    return st;
 }
 
 void NetworkInterface::renameFrom(const std::string& oldif)
@@ -374,7 +409,7 @@ void NetworkInterface::renameFrom(const std::string& oldif)
     NetlinkMessage nlm(RTM_SETLINK, NLM_F_REQUEST | NLM_F_ACK);
     ifinfomsg info = utils::make_clean<ifinfomsg>();
     info.ifi_family = AF_UNSPEC;
-    info.ifi_index = getInterfaceIndex(oldif, mContainerPid);
+    info.ifi_index = getInterfaceIndex(mContainerPid, oldif);
     info.ifi_change = CHANGE_FLAGS_DEFAULT;
 
     nlm.put(info)
@@ -384,14 +419,13 @@ void NetworkInterface::renameFrom(const std::string& oldif)
 
 void NetworkInterface::addToBridge(const std::string& bridge)
 {
-    bridgeModify(mIfname, getInterfaceIndex(bridge));
+    bridgeModify(mContainerPid, mIfname, getInterfaceIndex(mContainerPid, bridge));
 }
 
 void NetworkInterface::delFromBridge()
 {
-    bridgeModify(mIfname, 0);
+    bridgeModify(mContainerPid, mIfname, 0);
 }
-
 
 void NetworkInterface::setAttrs(const Attrs& attrs)
 {
@@ -402,7 +436,7 @@ void NetworkInterface::setAttrs(const Attrs& attrs)
     //TODO check this: NetlinkMessage nlm(RTM_SETLINK, NLM_F_REQUEST | NLM_F_ACK);
     NetlinkMessage nlm(RTM_NEWLINK, NLM_F_REQUEST | NLM_F_CREATE | NLM_F_ACK);
     ifinfomsg info = utils::make_clean<ifinfomsg>();
-    info.ifi_index = getInterfaceIndex(mIfname, mContainerPid);
+    info.ifi_index = getInterfaceIndex(mContainerPid, mIfname);
     info.ifi_family = AF_UNSPEC;
     info.ifi_change = CHANGE_FLAGS_DEFAULT;
 
@@ -437,7 +471,9 @@ void NetworkInterface::setAttrs(const Attrs& attrs)
         nlm.put<uint32_t>(IFLA_TXQLEN, txq);
     }
     if (!mac.empty()) {
-        nlm.put(IFLA_ADDRESS, mac);
+        char buf[6];
+        toMacAddressArray(mac, buf, 6);
+        nlm.put(IFLA_ADDRESS, buf);
     }
 
     NetlinkResponse response = send(nlm, mContainerPid);
@@ -460,8 +496,8 @@ Attrs NetworkInterface::getAttrs() const
         throw NetworkException("Can't get interface information");
     }
 
-    Attrs attrs;
     response.fetch(info);
+    Attrs attrs;
     attrs.push_back(Attr{AttrName::FLAGS, std::to_string(info.ifi_flags)});
     attrs.push_back(Attr{AttrName::TYPE, std::to_string(info.ifi_type)});
 
@@ -471,7 +507,7 @@ Attrs NetworkInterface::getAttrs() const
          * a few types of networks require 64-bit addresses instead.
          */
         std::string mac;
-        uint32_t mtu, link, txq;
+        uint32_t tmp;
         int attrType = response.getAttributeType();
         switch (attrType) {
         case IFLA_ADDRESS: //1
@@ -479,17 +515,18 @@ Attrs NetworkInterface::getAttrs() const
             attrs.push_back(Attr{AttrName::MAC, utils::toHexString(mac.c_str(), mac.size())});
             break;
         case IFLA_MTU: //4
-            response.fetch(IFLA_MTU, mtu);
-            attrs.push_back(Attr{AttrName::MTU, std::to_string(mtu)});
+            response.fetch(IFLA_MTU, tmp);
+            attrs.push_back(Attr{AttrName::MTU, std::to_string(tmp)});
             break;
         case IFLA_LINK://5
-            response.fetch(IFLA_LINK, link);
-            attrs.push_back(Attr{AttrName::LINK, std::to_string(link)});
+            response.fetch(IFLA_LINK, tmp);
+            attrs.push_back(Attr{AttrName::LINK, std::to_string(tmp)});
             break;
         case IFLA_TXQLEN://13
-            response.fetch(IFLA_TXQLEN, txq);
-            attrs.push_back(Attr{AttrName::TXQLEN, std::to_string(txq)});
+            response.fetch(IFLA_TXQLEN, tmp);
+            attrs.push_back(Attr{AttrName::TXQLEN, std::to_string(tmp)});
             break;
+        case IFLA_OPERSTATE://16  (IF_OPER_DOWN,...,IF_OPER_UP)
         case IFLA_BROADCAST://2 MAC broadcast
         case IFLA_IFNAME:   //3
         case IFLA_QDISC:    //6 queue discipline
@@ -500,6 +537,7 @@ Attrs NetworkInterface::getAttrs() const
         case IFLA_WIRELESS: //11
         case IFLA_PROTINFO: //12
         case IFLA_MAP:      //14
+        case IFLA_WEIGHT:   //15
         default:
             response.skipAttribute();
             break;
@@ -512,7 +550,7 @@ void NetworkInterface::addInetAddr(const InetAddr& addr)
 {
     NetlinkMessage nlm(RTM_NEWADDR, NLM_F_CREATE | NLM_F_REQUEST | NLM_F_ACK);
     ifaddrmsg infoAddr = utils::make_clean<ifaddrmsg>();
-    infoAddr.ifa_index = getInterfaceIndex(mIfname, mContainerPid);
+    infoAddr.ifa_index = getInterfaceIndex(mContainerPid, mIfname);
     infoAddr.ifa_family = addr.getType() == InetAddrType::IPV4 ? AF_INET : AF_INET6;
     infoAddr.ifa_prefixlen = addr.prefix;
     infoAddr.ifa_flags = addr.flags;
@@ -533,7 +571,7 @@ void NetworkInterface::delInetAddr(const InetAddr& addr)
 {
     NetlinkMessage nlm(RTM_DELADDR, NLM_F_REQUEST | NLM_F_ACK);
     ifaddrmsg infoAddr = utils::make_clean<ifaddrmsg>();
-    infoAddr.ifa_index = getInterfaceIndex(mIfname, mContainerPid);
+    infoAddr.ifa_index = getInterfaceIndex(mContainerPid, mIfname);
     infoAddr.ifa_family = addr.getType() == InetAddrType::IPV4 ? AF_INET : AF_INET6;
     infoAddr.ifa_prefixlen = addr.prefix;
     infoAddr.ifa_flags = addr.flags;
@@ -553,8 +591,248 @@ void NetworkInterface::delInetAddr(const InetAddr& addr)
 std::vector<InetAddr> NetworkInterface::getInetAddressList() const
 {
     std::vector<InetAddr> addrs;
-    getAddressList(addrs, AF_UNSPEC, mIfname, mContainerPid);
+    getAddressList(mContainerPid, addrs, AF_UNSPEC, mIfname);
     return addrs;
+}
+
+static rt_class_t getRoutingTableClass(const RoutingTable rt)
+{
+    switch (rt) {
+    case RoutingTable::UNSPEC:
+        return RT_TABLE_UNSPEC; //0
+    case RoutingTable::COMPAT:
+        return RT_TABLE_COMPAT; //252
+    case RoutingTable::DEFAULT:
+        return RT_TABLE_DEFAULT;//253
+    case RoutingTable::MAIN:
+        return RT_TABLE_MAIN;   //254
+    case RoutingTable::LOCAL:
+        return RT_TABLE_LOCAL;  //255
+    default: //all other are user tables (1...251), but I use only '1'
+        return static_cast<rt_class_t>(1);
+    }
+}
+static RoutingTable getRoutingTable(unsigned tbl)
+{
+    switch (tbl) {
+    case RT_TABLE_UNSPEC:
+        return RoutingTable::UNSPEC;
+    case RT_TABLE_COMPAT:
+        return RoutingTable::COMPAT;
+    case RT_TABLE_DEFAULT:
+        return RoutingTable::DEFAULT;
+    case RT_TABLE_MAIN:
+        return RoutingTable::MAIN;
+    case RT_TABLE_LOCAL:
+        return RoutingTable::LOCAL;
+    default:
+        return RoutingTable::USER;
+    }
+}
+
+void NetworkInterface::addRoute(const Route& route, const RoutingTable rt)
+{
+    InetAddrType type = route.dst.getType();
+    if (route.src.getType() != type) {
+        const std::string msg = "Family type must be the same";
+        LOGE(msg);
+        throw NetworkException(msg);
+    }
+    uint32_t index = getInterfaceIndex(mContainerPid, mIfname);
+    NetlinkMessage nlm(RTM_NEWROUTE, NLM_F_REQUEST | NLM_F_CREATE | NLM_F_EXCL | NLM_F_ACK);
+
+    rtmsg msg = utils::make_clean<rtmsg>();
+
+    if (type == InetAddrType::IPV6) {
+        msg.rtm_family = AF_INET6;
+    } else if (type == InetAddrType::IPV4) {
+        msg.rtm_family = AF_INET;
+    }
+    msg.rtm_table = getRoutingTableClass(rt);
+    msg.rtm_protocol = RTPROT_BOOT;
+    msg.rtm_scope = RT_SCOPE_UNIVERSE;
+    msg.rtm_type = RTN_UNICAST;
+    msg.rtm_dst_len = route.dst.prefix;
+
+    nlm.put(msg);
+
+    if (type == InetAddrType::IPV6) {
+        if (route.dst.prefix == 0)
+            nlm.put(RTA_GATEWAY, route.dst.getAddr<in6_addr>());
+        else
+            nlm.put(RTA_DST, route.dst.getAddr<in6_addr>());
+
+        if (route.src.prefix == 128) {
+            nlm.put(RTA_PREFSRC, route.src.getAddr<in6_addr>());
+        }
+    } else if (type == InetAddrType::IPV4) {
+        if (route.dst.prefix == 0)
+            nlm.put(RTA_GATEWAY, route.dst.getAddr<in_addr>());
+        else
+            nlm.put(RTA_DST, route.dst.getAddr<in_addr>());
+
+        if (route.src.prefix == 32) {
+            nlm.put(RTA_PREFSRC, route.src.getAddr<in_addr>());
+        }
+    }
+
+    nlm.put(RTA_OIF, index);
+
+    send(nlm, mContainerPid);
+}
+
+void NetworkInterface::delRoute(const Route& route, const RoutingTable rt)
+{
+    InetAddrType type = route.dst.getType();
+    if (route.src.getType() != type) {
+        const std::string msg = "Family type must be the same";
+        LOGE(msg);
+        throw NetworkException(msg);
+    }
+    uint32_t index = getInterfaceIndex(mContainerPid, mIfname);
+    NetlinkMessage nlm(RTM_DELROUTE, NLM_F_REQUEST | NLM_F_ACK);
+
+    rtmsg msg = utils::make_clean<rtmsg>();
+    msg.rtm_scope = RT_SCOPE_NOWHERE;
+    msg.rtm_table = getRoutingTableClass(rt);
+    msg.rtm_dst_len = route.dst.prefix;
+    if (type == InetAddrType::IPV6) {
+        msg.rtm_family = AF_INET6;
+    } else if (type == InetAddrType::IPV4) {
+        msg.rtm_family = AF_INET;
+    }
+    nlm.put(msg);
+
+    if (type == InetAddrType::IPV6) {
+        nlm.put(RTA_DST, route.dst.getAddr<in6_addr>());
+    } else if (type == InetAddrType::IPV4) {
+        nlm.put(RTA_DST, route.dst.getAddr<in_addr>());
+    }
+    nlm.put(RTA_OIF, index);
+
+    send(nlm, mContainerPid);
+}
+
+static std::vector<Route> getRoutesImpl(pid_t pid, rt_class_t tbl, const std::string& ifname, int family)
+{
+    uint32_t searchindex = 0;
+    NetlinkMessage nlm(RTM_GETROUTE, NLM_F_REQUEST | NLM_F_ACK | NLM_F_DUMP);
+    ifinfomsg info = utils::make_clean<ifinfomsg>();
+    info.ifi_family = family;
+    info.ifi_change = CHANGE_FLAGS_DEFAULT;
+
+    nlm.put(info);
+
+    NetlinkResponse response = send(nlm, pid);
+
+    if (!ifname.empty()) {
+        searchindex = getInterfaceIndex(pid, ifname);
+    }
+
+    std::vector<Route> routes;
+    for ( ; response.hasMessage(); response.fetchNextMessage()) {
+        if (response.getMessageType() != RTM_NEWROUTE) {
+            LOGW("Not route info in response");
+            continue;
+        }
+        rtmsg rt;
+        response.fetch(rt);
+        if (tbl != RT_TABLE_UNSPEC && rt.rtm_table != tbl) {
+            continue;
+        }
+        if (rt.rtm_flags & RTM_F_CLONED) {
+            continue;
+        }
+
+        Route route;
+        uint32_t index = 0;
+        route.dst.flags = 0;
+        route.src.flags = 0;
+        route.dst.prefix = 0;
+        route.src.prefix = 0;
+        route.table = getRoutingTable(rt.rtm_table);
+
+        if (rt.rtm_family == AF_INET6) {
+            route.dst.setType(InetAddrType::IPV6);
+            route.src.setType(InetAddrType::IPV6);
+        } else if (rt.rtm_family == AF_INET) {
+            route.dst.setType(InetAddrType::IPV4);
+            route.src.setType(InetAddrType::IPV4);
+        } else {
+            const std::string msg = "Unsupported inet family";
+            LOGE(msg);
+            throw NetworkException(msg);
+        }
+
+        route.dst.prefix = rt.rtm_dst_len;
+        while (response.hasAttribute()) {
+            std::string tmpval;
+            uint32_t tmp;
+            int attrType = response.getAttributeType();
+            //int len = response.getAttributeLength();
+            switch (attrType) {
+            case RTA_DST:    // 1
+            case RTA_GATEWAY:// 5
+                if (route.dst.getType() == InetAddrType::IPV6) {
+                    response.fetch(attrType, route.dst.getAddr<in6_addr>());
+                } else {
+                    response.fetch(attrType, route.dst.getAddr<in_addr>());
+                }
+                break;
+            case RTA_SRC:    // 2
+            case RTA_PREFSRC:// 7
+                if (route.src.getType() == InetAddrType::IPV6) {
+                    response.fetch(attrType, route.src.getAddr<in6_addr>());
+                    route.src.prefix = 128;
+                } else {
+                    response.fetch(attrType, route.src.getAddr<in_addr>());
+                    route.src.prefix = 32;
+                }
+                break;
+            case RTA_OIF: //4
+                response.fetch(RTA_OIF, tmp);
+                index = tmp;
+                break;
+            case RTA_PRIORITY: // 6
+                response.fetch(RTA_PRIORITY, tmp);
+                route.metric = tmp;
+                break;
+            case RTA_TABLE:    //15  extends and ovewrites rt.rtm_table
+                response.fetch(RTA_TABLE, tmp);
+                route.table = getRoutingTable(tmp);
+                break;
+
+            case RTA_CACHEINFO://12
+                response.skipAttribute();
+                break;
+            case RTA_IIF:      // 3
+            case RTA_METRICS:  // 8  array of struct rtattr
+            case RTA_MULTIPATH:// 9  array of struct rtnexthop
+            case RTA_FLOW:     //11
+            default:
+                if (!searchindex) {
+                    response.fetch(attrType, tmpval);
+                    LOGW("rtAttr " << attrType << ":" <<
+                        utils::toHexString(tmpval.c_str(), tmpval.size()));
+                } else {
+                    response.skipAttribute();
+                }
+                break;
+            }
+        }
+        if (index == 0) continue;
+
+        if (searchindex == 0 || searchindex == index) {
+            route.ifname = getInterfaceName(index);
+            routes.push_back(route);
+        }
+    }
+    return routes;
+}
+
+std::vector<Route> NetworkInterface::getRoutes(const RoutingTable rt) const
+{
+    return getRoutesImpl(mContainerPid, getRoutingTableClass(rt), mIfname, AF_UNSPEC);
 }
 
 void NetworkInterface::up()
@@ -615,6 +893,12 @@ std::vector<std::string> NetworkInterface::getInterfaces(pid_t initpid)
         response.fetchNextMessage();
     }
     return iflist;
+}
+
+std::vector<Route> NetworkInterface::getRoutes(pid_t initpid, const RoutingTable rt)
+{
+    rt_class_t tbl = getRoutingTableClass(rt);
+    return getRoutesImpl(initpid, tbl, "", AF_UNSPEC);
 }
 
 } // namespace lxcpp

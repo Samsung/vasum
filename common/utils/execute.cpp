@@ -99,6 +99,7 @@ bool executeAndWait(const char* fname, const char* const* argv, int& status)
 
     bool success = executeAndWait([=]() {
         execv(fname, const_cast<char* const*>(argv));
+        LOGE("execv failed: " << getSystemErrorMessage());
         _exit(EXIT_FAILURE);
     }, status);
     if (!success) {
