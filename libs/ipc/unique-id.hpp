@@ -66,8 +66,8 @@ public:
     friend std::ostream& operator<<(std::ostream& str, const UniqueID& id);
 
 
-    TimestampType mTime;    //< timestamp when generate() was called
-    UUIDType mUUID;         //< random UUID generated with libuuid
+    TimestampType mTime;    ///< timestamp when generate() was called
+    UUIDType mUUID;         ///< random UUID generated with libuuid
 };
 
 template <typename T>
