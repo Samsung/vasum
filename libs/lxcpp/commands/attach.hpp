@@ -28,6 +28,8 @@
 #include "lxcpp/container-impl.hpp"
 #include "utils/channel.hpp"
 
+#include <sys/types.h>
+
 #include <string>
 
 namespace lxcpp {
@@ -44,6 +46,9 @@ public:
      *
      * @param container container to which it attaches
      * @param userCall user's function to run
+     * @param uid uid in the container
+     * @param gid gid in the container
+     * @param supplementaryGids supplementary groups in container
      * @param capsToKeep capabilities that will be kept
      * @param workDirInContainer work directory set for the new process
      * @param envToKeep environment variables that will be kept
@@ -51,6 +56,9 @@ public:
      */
     Attach(lxcpp::ContainerImpl& container,
            Container::AttachCall& userCall,
+           const uid_t uid,
+           const gid_t gid,
+           const std::vector<gid_t>& supplementaryGids,
            const int capsToKeep,
            const std::string& workDirInContainer,
            const std::vector<std::string>& envToKeep,
@@ -62,6 +70,9 @@ public:
 private:
     const lxcpp::ContainerImpl& mContainer;
     const Container::AttachCall& mUserCall;
+    const uid_t mUid;
+    const gid_t mGid;
+    const std::vector<gid_t>& mSupplementaryGids;
     const int mCapsToKeep;
     const std::string& mWorkDirInContainer;
     const std::vector<std::string>& mEnvToKeep;
@@ -69,6 +80,9 @@ private:
 
     // Methods for different stages of setting up the attachment
     static int child(const Container::AttachCall& call,
+                     const uid_t uid,
+                     const gid_t gid,
+                     const std::vector<gid_t>& supplementaryGids,
                      const int capsToKeep,
                      const std::vector<std::string>& envToKeep,
                      const std::vector<std::pair<std::string, std::string>>& envToSet);

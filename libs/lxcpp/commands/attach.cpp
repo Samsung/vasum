@@ -28,6 +28,7 @@
 #include "lxcpp/namespace.hpp"
 #include "lxcpp/capability.hpp"
 #include "lxcpp/environment.hpp"
+#include "lxcpp/credentials.hpp"
 
 #include "utils/exception.hpp"
 
@@ -80,12 +81,18 @@ int execFunction(void* call)
 
 Attach::Attach(lxcpp::ContainerImpl& container,
                Container::AttachCall& userCall,
+               const uid_t uid,
+               const gid_t gid,
+               const std::vector<gid_t>& supplementaryGids,
                const int capsToKeep,
                const std::string& workDirInContainer,
                const std::vector<std::string>& envToKeep,
                const std::vector<std::pair<std::string, std::string>>& envToSet)
     : mContainer(container),
       mUserCall(userCall),
+      mUid(uid),
+      mGid(gid),
+      mSupplementaryGids(supplementaryGids),
       mCapsToKeep(capsToKeep),
       mWorkDirInContainer(workDirInContainer),
       mEnvToKeep(envToKeep),
@@ -104,6 +111,9 @@ void Attach::execute()
 
     Call call = std::bind(&Attach::child,
                           mUserCall,
+                          mUid,
+                          mGid,
+                          mSupplementaryGids,
                           mCapsToKeep,
                           mEnvToKeep,
                           mEnvToSet);
@@ -122,19 +132,28 @@ void Attach::execute()
 }
 
 int Attach::child(const Container::AttachCall& call,
+                  const uid_t uid,
+                  const gid_t gid,
+                  const std::vector<gid_t>& supplementaryGids,
                   const int capsToKeep,
                   const std::vector<std::string>& envToKeep,
                   const std::vector<std::pair<std::string, std::string>>& envToSet)
 {
-    // Setup capabilities
-    dropCapsFromBoundingExcept(capsToKeep);
-
     // Setup /proc /sys mount
     setupMountPoints();
+
+    // Setup capabilities
+    dropCapsFromBoundingExcept(capsToKeep);
 
     // Setup environment variables
     clearenvExcept(envToKeep);
     setenv(envToSet);
+
+    // Set uid/gids
+    lxcpp::setgid(gid);
+    setgroups(supplementaryGids);
+
+    lxcpp::setuid(uid);
 
     // Run user's code
     return call();

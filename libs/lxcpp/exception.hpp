@@ -56,6 +56,11 @@ struct EnvironmentSetupException: public Exception {
         : Exception(message) {}
 };
 
+struct CredentialSetupException: public Exception {
+    CredentialSetupException(const std::string& message = "Error during handling environment variables")
+        : Exception(message) {}
+};
+
 struct CapabilitySetupException: public Exception {
     CapabilitySetupException(const std::string& message = "Error during a capability operation")
         : Exception(message) {}
