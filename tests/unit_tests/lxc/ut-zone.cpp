@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(StartShutdown)
     const char* argv[] = {
         "/bin/bash",
         "-c",
-        "trap exit SIGTERM; read",
+        "trap exit SIGTERM; while true; do sleep 0.1; done",
         NULL
     };
     BOOST_CHECK(lxc.start(argv));
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(FreezeUnfreeze)
     const char* argv[] = {
         "/bin/bash",
         "-c",
-        "trap exit SIGTERM; read",
+        "trap exit SIGTERM; while true; do sleep 0.1; done",
         NULL
     };
     BOOST_CHECK(lxc.start(argv));
@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(FreezeStop)
     const char* argv[] = {
         "/bin/bash",
         "-c",
-        "trap exit SIGTERM; read",
+        "trap exit SIGTERM; while true; do sleep 0.1; done",
         NULL
     };
     BOOST_CHECK(lxc.start(argv));
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(Repeat)
     const char* argv[] = {
         "/bin/bash",
         "-c",
-        "trap exit SIGTERM; read",
+        "trap exit SIGTERM; while true; do sleep 0.1; done",
         NULL
     };
     BOOST_CHECK(lxc.start(argv));
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(CreateFile)
     const char* argv[] = {
         "/bin/bash",
         "-c",
-        "trap exit SIGTERM; read",
+        "trap exit SIGTERM; while true; do sleep 0.1; done",
         NULL
     };
     BOOST_REQUIRE(lxc.start(argv));

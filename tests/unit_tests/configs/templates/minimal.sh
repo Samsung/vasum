@@ -59,8 +59,6 @@ lxc.tty = 0
 #lxc.loglevel = TRACE
 #lxc.logfile = /tmp/${name}.log
 
-lxc.cgroup.devices.deny = a
-
 lxc.mount.auto = proc sys cgroup
 lxc.mount.entry = /bin bin none ro,bind 0 0
 lxc.mount.entry = /etc etc none ro,bind 0 0
