@@ -38,28 +38,72 @@ namespace ipc {
 
 
 /**
- * This class wraps communication via UX sockets.
+ * @brief This class wraps communication via UX sockets.
  * It uses serialization mechanism from Config.
  *
- * For message format @see ipc::Processor
+ * @code
+ * // eventPoll - epoll wrapper class
+ * // address - server socket address
+ * ipc::epoll::EventPoll examplePoll;
+ * // create callbacks for connected / disconnected events
+ * ipc::PeerCallback connectedCallback = [this](const ipc::PeerID peerID,
+ *                                              const ipc::FileDescriptor) {
+ *     // new connection came!
+ * };
+ * ipc::PeerCallback disconnectedCallback = [this](const ipc::PeerID peerID,
+ *                                                 const ipc::FileDescriptor) {
+ *     // connection disconnected!
+ * };
+ * // create the service
+ * ipc::Service myService(eventPoll, "/tmp/example_service.socket",
+ *                        connectedCallback, disconnectedCallback));
+ * // add example method handler
+ * auto exampleMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>& data, MethodResult::Pointer methodResult) {
+ *     // got example method call! Incoming data in "data" argument
+ *     // respond with some data
+ *     auto returnData = std::make_shared<SendData>(data->intVal);
+ *     methodResult->set(returnData);
+ * };
+ * const MethodID exampleMethodID = 1234;
+ * myService.setMethodHandler<SendData, RecvData>(exampleMethodID, exampleMethodHandler);
+ * myService.start(); // start the service, clients may connect via /tmp/example_service.socket
+ * @endcode
+ *
+ * @see libConfig
+ * @see ipc::Processor
+ *
+ * @ingroup libIpc
  */
 class Service {
 public:
     /**
-     * @param eventPoll event poll
-     * @param path path to the socket
+     * Constructs the Service, but doesn't start it.
+     * The object is ready to add methods.
+     * Once set-up, call start() to start the service.
+     *
+     * @param eventPoll             event poll
+     * @param path                  path to the socket
+     * @param addPeerCallback       optional on new peer connection callback
+     * @param removePeerCallback    optional on peer removal callback
      */
     Service(epoll::EventPoll& eventPoll,
             const std::string& path,
             const PeerCallback& addPeerCallback = nullptr,
             const PeerCallback& removePeerCallback = nullptr);
-    ~Service();
+    virtual ~Service();
 
+    /**
+     * Copying Service class is prohibited.
+     */
     Service(const Service&) = delete;
+    /**
+     * Copying Service class is prohibited.
+     */
     Service& operator=(const Service&) = delete;
 
     /**
      * Starts processing
+     * @note if the service is already running, it quits immediately (no exception thrown)
      */
     void start();
 
@@ -71,62 +115,79 @@ public:
     /**
      * Stops all working threads
      *
-     * @param wait does it block waiting for all internals to stop
+     * @param wait      should the call block while waiting for all internals to stop? By default true - do block.
      */
     void stop(bool wait = true);
 
     /**
     * Set the callback called for each new connection to a peer
     *
-    * @param newPeerCallback the callback
+    * @param newPeerCallback        the callback to call on new connection event
+    * @note if callback is already set, it will be overridden
     */
     void setNewPeerCallback(const PeerCallback& newPeerCallback);
 
     /**
      * Set the callback called when connection to a peer is lost
      *
-     * @param removedPeerCallback the callback
+     * @param removedPeerCallback   the callback to call on peer disconnected event
+     * @note if callback is already set, it will be overridden
      */
     void setRemovedPeerCallback(const PeerCallback& removedPeerCallback);
 
     /**
-     * Saves the callback connected to the method id.
-     * When a message with the given method id is received
-     * the data will be parsed and passed to this callback.
+     * Saves the callbacks connected to the method id.
+     * When a message with the given method id is received,
+     * the data will be passed to the serialization callback through file descriptor.
      *
-     * @param methodID API dependent id of the method
-     * @param method method handling implementation
+     * Then the process callback will be called with the parsed data.
+     *
+     * @param methodID              API dependent id of the method
+     * @param method                data processing callback
+     * @tparam SentDataType         data type to send
+     * @tparam ReceivedDataType     data type to receive
      */
     template<typename SentDataType, typename ReceivedDataType>
     void setMethodHandler(const MethodID methodID,
                           const typename MethodHandler<SentDataType, ReceivedDataType>::type& method);
 
     /**
-     * Saves the callback connected to the method id.
-     * When a message with the given method id is received
-     * the data will be parsed and passed to this callback.
+     * Saves the callbacks connected to the method id.
+     * When a message with the given method id is received,
+     * the data will be passed to the serialization callback through file descriptor.
      *
-     * @param methodID API dependent id of the method
-     * @param handler handling implementation
-     * @tparam ReceivedDataType data type to serialize
+     * Then the process callback will be called with the parsed data.
+     * There is no return data to send back.
+     *
+     * Adding signal sends a registering message to all peers
+     *
+     * @param methodID              API dependent id of the method
+     * @param handler               data processing callback
+     * @tparam ReceivedDataType     data type to receive
      */
     template<typename ReceivedDataType>
     void setSignalHandler(const MethodID methodID,
                           const typename SignalHandler<ReceivedDataType>::type& handler);
 
     /**
-     * Removes the callback
+     * Removes the callback associated with specific method id.
      *
-     * @param methodID API dependent id of the method
+     * @param methodID              API dependent id of the method
+     * @see setMethodHandler()
+     * @see setSignalHandler()
      */
     void removeMethod(const MethodID methodID);
 
     /**
      * Synchronous method call.
      *
-     * @param methodID API dependent id of the method
-     * @param data data to send
-     * @return result data
+     * @param methodID              API dependent id of the method
+     * @param peerID                id of the peer
+     * @param data                  data to send
+     * @param timeoutMS             optional, how long to wait for the return value before throw (milliseconds, default: 5000)
+     * @tparam SentDataType         data type to send
+     * @tparam ReceivedDataType     data type to receive
+     * @return pointer to the call result data
      */
     template<typename SentDataType, typename ReceivedDataType>
     std::shared_ptr<ReceivedDataType> callSync(const MethodID methodID,
@@ -138,10 +199,12 @@ public:
      * Asynchronous method call. The return callback will be called on
      * return data arrival. It will be run in the PROCESSOR thread.
      *
-     *
-     * @param methodID API dependent id of the method
-     * @param data data to send
-     * @param resultCallback callback for result serialization and handling
+     * @param methodID              API dependent id of the method
+     * @param peerID                id of the peer
+     * @param data                  data to send
+     * @param resultCallback        callback processing the return data
+     * @tparam SentDataType         data type to send
+     * @tparam ReceivedDataType     data type to receive
      */
     template<typename SentDataType, typename ReceivedDataType>
     void callAsync(const MethodID methodID,
@@ -154,9 +217,9 @@ public:
     * There is no return value from the peer
     * Sends any data only if a peer registered this a signal
     *
-    * @param methodID API dependent id of the method
-    * @param data data to sent
-    * @tparam SentDataType data type to send
+    * @param methodID               API dependent id of the method
+    * @param data                   data to send
+    * @tparam SentDataType          data type to send
     */
     template<typename SentDataType>
     void signal(const MethodID methodID,

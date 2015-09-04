@@ -19,6 +19,7 @@
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
+ * @defgroup libIpc libIpc
  * @brief   Handling client connections
  */
 
@@ -36,29 +37,68 @@
 namespace ipc {
 
 /**
- * This class wraps communication via UX sockets for client applications.
+ * @brief This class wraps communication via UX sockets for client applications.
  * It uses serialization mechanism from Config.
  *
- * For message format @see ipc::Processor
+ * @code
+ * // eventPoll - epoll wrapper class
+ * // address - server socket address
+ * ipc::epoll::EventPoll examplePoll;
+ * ipc::Client myClient(examplePoll, address);
+ * myClient.start(); // connect to the service
+ * // call method synchronously
+ * const auto result = mClient.callSync<api::Void, api::ZoneIds>(
+ *                            api::ipc::METHOD_GET_ZONE_ID_LIST,
+ *                            std::make_shared<api::Void>());
+ * // call method asynchronously
+ * // first: declare lambda function to call on completion
+ * auto asyncResult = [result](ipc::Result<api::Void>&& out) {
+ *      if (out.isValid()) {
+ *          // got successful response!
+ *      }
+ * };
+ * std::string id = "example_zone_id";
+ * mClient.callAsync<api::ZoneId, api::Void>(api::ipc::METHOD_DESTROY_ZONE,
+ *                            std::make_shared<api::ZoneId>(api::ZoneId{id}),
+ *                            asyncResult);
+ * @endcode
+ *
+ * @see libConfig
+ * @see ipc::Processor
+ * @see ipc::epoll::EventPoll
+ *
+ * @ingroup libIpc
  */
 class Client {
 public:
     /**
-     * @param eventPoll event poll
-     * @param serverPath path to the server's socket
+     * Constructs the Client, but doesn't start it.
+     * Once set-up, call start() to connect client to the server.
+     *
+     * @param eventPoll     event poll
+     * @param serverPath    path to the server's socket
      */
     Client(epoll::EventPoll& eventPoll, const std::string& serverPath);
     ~Client();
 
+    /**
+     * Copying Client class is prohibited.
+     */
     Client(const Client&) = delete;
+    /**
+     * Copying Client class is prohibited.
+     */
     Client& operator=(const Client&) = delete;
 
     /**
      * Starts processing
+     * @note if the Client is already running, it quits immediately (no exception thrown)
      */
     void start();
 
     /**
+    * Is the communication thread running?
+    *
     * @return is the communication thread running
     */
     bool isStarted();
@@ -66,21 +106,23 @@ public:
     /**
      * Stops processing
      *
-     * @param wait does it block waiting for all internals to stop
+     * @param wait      should the call block while waiting for all internals to stop? By default true - do block.
      */
     void stop(bool wait = true);
 
     /**
      * Set the callback called for each new connection to a peer
      *
-     * @param newPeerCallback the callback
+     * @param newPeerCallback    the callback to call on new connection event
+     * @note if callback is already set, it will be overridden
      */
     void setNewPeerCallback(const PeerCallback& newPeerCallback);
 
     /**
      * Set the callback called when connection to a peer is lost
      *
-     * @param removedPeerCallback the callback
+     * @param removedPeerCallback   the callback to call on peer disconnected event
+     * @note if callback is already set, it will be overridden
      */
     void setRemovedPeerCallback(const PeerCallback& removedPeerCallback);
 
@@ -89,8 +131,10 @@ public:
      * When a message with the given method id is received
      * the data will be parsed and passed to this callback.
      *
-     * @param methodID API dependent id of the method
-     * @param method method handling implementation
+     * @param methodID          API dependent id of the method
+     * @param method            method handling implementation
+     * @tparam SentDataType     data type to send
+     * @tparam ReceivedDataType data type to receive
      */
     template<typename SentDataType, typename ReceivedDataType>
     void setMethodHandler(const MethodID methodID,
@@ -101,28 +145,32 @@ public:
      * When a message with the given method id is received
      * the data will be parsed and passed to this callback.
      *
-     * @param methodID API dependent id of the method
-     * @param signal signal handling implementation
-     * @tparam ReceivedDataType data type to serialize
+     * @param methodID          API dependent id of the method
+     * @param signal            data processing callback
+     * @tparam ReceivedDataType data type to receive
      */
     template<typename ReceivedDataType>
     void setSignalHandler(const MethodID methodID,
                           const typename SignalHandler<ReceivedDataType>::type& signal);
 
     /**
-     * Removes the callback
+     * Removes the callback associated with specific method id.
      *
-     * @param methodID API dependent id of the method
+     * @param methodID          API dependent id of the method
+     * @see setMethodHandler()
+     * @see setSignalHandler()
      */
     void removeMethod(const MethodID methodID);
 
     /**
      * Synchronous method call.
      *
-     * @param methodID API dependent id of the method
-     * @param data data to send
-     * @param timeoutMS how long to wait for the return value before throw
-     * @return result data
+     * @param methodID              API dependent id of the method
+     * @param data                  data to send
+     * @param timeoutMS             optional, how long to wait for the return value before throw (milliseconds, default: 5000)
+     * @tparam SentDataType         data type to send
+     * @tparam ReceivedDataType     data type to receive
+     * @return pointer to the call result data
      */
     template<typename SentDataType, typename ReceivedDataType>
     std::shared_ptr<ReceivedDataType> callSync(const MethodID methodID,
@@ -133,10 +181,11 @@ public:
      * Asynchronous method call. The return callback will be called on
      * return data arrival. It will be run in the PROCESSOR thread.
      *
-     *
-     * @param methodID API dependent id of the method
-     * @param data data to send
-     * @param resultCallback callback for result serialization and handling
+     * @param methodID               API dependent id of the method
+     * @param data                   data to send
+     * @param resultCallback         callback processing the return data
+     * @tparam SentDataType          data type to send
+     * @tparam ReceivedDataType      data type to receive
      */
     template<typename SentDataType, typename ReceivedDataType>
     void callAsync(const MethodID methodID,
@@ -148,9 +197,9 @@ public:
     * There is no return value from the peer
     * Sends any data only if a peer registered this a signal
     *
-    * @param methodID API dependent id of the method
-    * @param data data to sent
-    * @tparam SentDataType data type to send
+    * @param methodID           API dependent id of the method
+    * @param data               data to send
+    * @tparam SentDataType      data type to send
     */
     template<typename SentDataType>
     void signal(const MethodID methodID,

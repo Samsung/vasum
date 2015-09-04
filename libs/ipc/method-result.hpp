@@ -33,6 +33,10 @@ namespace ipc {
 
 class Processor;
 
+/**
+ * @brief Class used to obtain method call result code.
+ * @ingroup Types
+ */
 class MethodResult {
 public:
     typedef std::shared_ptr<MethodResult> Pointer;

@@ -31,48 +31,82 @@
 namespace ipc {
 
 /**
- * Base class for exceptions in IPC
+ * @brief Base class for all exceptions in libIpc.
+ * @ingroup Types
+ * @defgroup IPCException   IPCException
  */
 struct IPCException: public std::runtime_error {
     IPCException(const std::string& message)
         : std::runtime_error(message) {}
 };
 
+/**
+ * Exception to indicate error while reading/parsing data from the socket.
+ * @ingroup IPCException
+ */
 struct IPCParsingException: public IPCException {
     IPCParsingException(const std::string& message = "Exception during reading/parsing data from the socket")
         : IPCException(message) {}
 };
 
+/**
+ * Exception to indicate error while writing/serializing data to the socket.
+ * @ingroup IPCException
+ */
 struct IPCSerializationException: public IPCException {
     IPCSerializationException(const std::string& message = "Exception during writing/serializing data to the socket")
         : IPCException(message) {}
 };
 
+/**
+ * Exception to indicate that requested peer is not available, i.e. might got disconnected.
+ * @ingroup IPCException
+ */
 struct IPCPeerDisconnectedException: public IPCException {
     IPCPeerDisconnectedException(const std::string& message = "No such peer. Might got disconnected.")
         : IPCException(message) {}
 };
 
+/**
+ * Exception to indicate that peer performed a forbidden action.
+ * @ingroup IPCException
+ */
 struct IPCNaughtyPeerException: public IPCException {
     IPCNaughtyPeerException(const std::string& message = "Peer performed a forbidden action.")
         : IPCException(message) {}
 };
 
+/**
+ * Exception to indicate error while removing peer
+ * @ingroup IPCException
+ */
 struct IPCRemovedPeerException: public IPCException {
     IPCRemovedPeerException(const std::string& message = "Removing peer")
         : IPCException(message) {}
 };
 
+/**
+ * Exception to indicate error while closing IPC channel
+ * @ingroup IPCException
+ */
 struct IPCClosingException: public IPCException {
     IPCClosingException(const std::string& message = "Closing IPC")
         : IPCException(message) {}
 };
 
+/**
+ * Exception to indicate timeout event error
+ * @ingroup IPCException
+ */
 struct IPCTimeoutException: public IPCException {
     IPCTimeoutException(const std::string& message)
         : IPCException(message) {}
 };
 
+/**
+ * Exception to indicate user error
+ * @ingroup IPCException
+ */
 struct IPCUserException: public IPCException {
     IPCUserException(const int code, const std::string& message)
         : IPCException(message),

@@ -31,19 +31,67 @@
 
 namespace ipc {
 
+/**
+ * @brief Generic types used in libIpc.
+ *
+ * @ingroup libIpc
+ * @defgroup Types libIpc tools
+ */
+
 typedef int FileDescriptor;
 typedef unsigned int MethodID;
 typedef std::string MessageID;
 typedef std::string PeerID;
 
-typedef std::function<void(const PeerID, const FileDescriptor)> PeerCallback;
-typedef std::function<void(int fd, std::shared_ptr<void>& data)> SerializeCallback;
-typedef std::function<std::shared_ptr<void>(int fd)> ParseCallback;
+/**
+ * Generic function type used as callback for peer events.
+ *
+ * @param   peerID          peer identifier that event relates to
+ * @param   fd              event origin
+ * @ingroup Types
+ */
+typedef std::function<void(const ipc::PeerID peerID, const ipc::FileDescriptor fd)> PeerCallback;
 
+/**
+ * Generic function type used as callback for serializing and
+ * saving serialized data to the descriptor.
+ *
+ * @param   fd              descriptor to save the serialized data to
+ * @param   data            data to serialize
+ * @ingroup Types
+ */
+typedef std::function<void(ipc::FileDescriptor fd, std::shared_ptr<void>& data)> SerializeCallback;
+
+/**
+ * Generic function type used as callback for reading and parsing data.
+ *
+ * @param   fd              descriptor to read the data from
+ * @ingroup Types
+ */
+typedef std::function<std::shared_ptr<void>(ipc::FileDescriptor fd)> ParseCallback;
+
+/**
+ * Generate an unique message id.
+ *
+ * @return new, unique MessageID
+ * @ingroup Types
+ */
 MessageID getNextMessageID();
+
+/**
+ * Generate an unique peer id.
+ *
+ * @return new, unique PeerID
+ * @ingroup Types
+ */
 PeerID getNextPeerID();
 
 
+/**
+ * Generic type used as a callback function for handling signals.
+ * @tparam ReceivedDataType     type of received data
+ * @ingroup Types
+ */
 template<typename ReceivedDataType>
 struct SignalHandler {
     typedef std::function<void(PeerID peerID,

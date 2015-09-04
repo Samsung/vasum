@@ -246,21 +246,24 @@ public:
                   const MessageID messageID);
 
     /**
-     * Removes the callback
+     * Removes the callback associated with specific method id.
      *
-     * @param methodID API dependent id of the method
+     * @param methodID              API dependent id of the method
+     * @see setMethodHandler()
+     * @see setSignalHandler()
      */
     void removeMethod(const MethodID methodID);
 
     /**
      * Synchronous method call.
      *
-     * @param methodID API dependent id of the method
-     * @param peerID id of the peer
-     * @param data data to send
-     * @param timeoutMS how long to wait for the return value before throw
-     * @tparam SentDataType data type to send
+     * @param methodID          API dependent id of the method
+     * @param peerID            id of the peer
+     * @param data              data to send
+     * @param timeoutMS         optional, how long to wait for the return value before throw (milliseconds, default: 5000)
+     * @tparam SentDataType     data type to send
      * @tparam ReceivedDataType data type to receive
+     * @return call result data
      */
     template<typename SentDataType, typename ReceivedDataType>
     std::shared_ptr<ReceivedDataType> callSync(const MethodID methodID,

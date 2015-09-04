@@ -31,8 +31,18 @@
 namespace ipc {
 namespace epoll {
 
-typedef unsigned int Events; ///< bitmask of EPOLL* constants
+/**
+ * @brief bitmask of EPOLL* constants
+ * @ingroup Types
+ */
+typedef unsigned int Events;
 
+/**
+ * Convert event mask into readable string.
+ * Values will be comma separated.
+ * @param events    event type mask to convert
+ * @return string describing the mask
+ */
 std::string eventsToString(Events events);
 
 } // namespace epoll
