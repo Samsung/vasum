@@ -61,18 +61,21 @@ int main(int argc, char* argv[])
         const char *defaultLoggingBackend = "syslog";
 #endif
 
-        po::options_description desc("Allowed options");
+        // 100 - wider terminal, nicer option descriptions
+        po::options_description desc("Allowed options", 100);
 
         desc.add_options()
         ("help,h", "print this help")
         ("daemon,d", "Run server as daemon")
         ("log-level,l", po::value<std::string>()->default_value("DEBUG"), "set log level")
         ("log-backend,b", po::value<std::string>()->default_value(defaultLoggingBackend),
-                          "set log backend [stderr,syslog"
+                          "set log backend [stderr,syslog,file"
 #ifdef HAVE_SYSTEMD
                           ",journal"
 #endif
                           "]")
+        ("log-file,f", po::value<std::string>()->default_value("zoned.log"),
+                          "set filename for file logging, optional")
         ("version,v", "show application version")
         ;
 
@@ -118,6 +121,14 @@ int main(int argc, char* argv[])
         const std::string logBackend = vm["log-backend"].as<std::string>();
         if(logBackend.compare("stderr") == 0) {
             Logger::setLogBackend(new StderrBackend());
+        }
+        else if(logBackend.compare("file") == 0) {
+            const std::string logFilename = vm["log-file"].as<std::string>();
+            if(logFilename.empty()) {
+                std::cerr << "Error: invalid log file provided for file logging backend" << std::endl;
+                return 1;
+            }
+            Logger::setLogBackend(new FileBackend(logFilename));
         }
 #ifdef HAVE_SYSTEMD
         else if(logBackend.compare("journal") == 0) {
