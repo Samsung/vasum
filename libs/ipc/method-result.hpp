@@ -43,8 +43,8 @@ public:
 
     MethodResult(Processor& processor,
                  const MethodID methodID,
-                 const MessageID messageID,
-                 const PeerID peerID);
+                 const MessageID& messageID,
+                 const PeerID& peerID);
 
 
     template<typename Data>
@@ -55,7 +55,7 @@ public:
 
     void setVoid();
     void setError(const int code, const std::string& message);
-    PeerID getPeerID();
+    PeerID getPeerID() const;
 
 private:
     Processor& mProcessor;

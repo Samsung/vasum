@@ -36,12 +36,12 @@ namespace utils {
  */
 struct UtilsException: public std::runtime_error {
 
-    UtilsException(const std::string& error) : std::runtime_error(error) {}
+    explicit UtilsException(const std::string& error) : std::runtime_error(error) {}
 };
 
 struct ProvisionExistsException: public UtilsException {
 
-    ProvisionExistsException(const std::string& error) : UtilsException(error) {}
+    explicit ProvisionExistsException(const std::string& error) : UtilsException(error) {}
 };
 
 /**

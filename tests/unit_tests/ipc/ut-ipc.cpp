@@ -237,7 +237,7 @@ void testEcho(Client& c, const MethodID methodID)
     BOOST_CHECK_EQUAL(recvData->intVal, sentData->intVal);
 }
 
-void testEcho(Service& s, const MethodID methodID, const PeerID peerID)
+void testEcho(Service& s, const MethodID methodID, const PeerID& peerID)
 {
     std::shared_ptr<SendData> sentData(new SendData(56));
     std::shared_ptr<RecvData> recvData = s.callSync<SendData, RecvData>(methodID, peerID, sentData, TIMEOUT);

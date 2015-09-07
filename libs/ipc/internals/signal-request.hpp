@@ -38,7 +38,7 @@ public:
 
     template<typename SentDataType>
     static std::shared_ptr<SignalRequest> create(const MethodID methodID,
-                                                 const PeerID peerID,
+                                                 const PeerID& peerID,
                                                  const std::shared_ptr<SentDataType>& data);
 
     MethodID methodID;
@@ -48,7 +48,7 @@ public:
     SerializeCallback serialize;
 
 private:
-    SignalRequest(const MethodID methodID, const PeerID peerID)
+    SignalRequest(const MethodID methodID, const PeerID& peerID)
         : methodID(methodID),
           peerID(peerID),
           messageID(getNextMessageID())
@@ -58,7 +58,7 @@ private:
 
 template<typename SentDataType>
 std::shared_ptr<SignalRequest> SignalRequest::create(const MethodID methodID,
-                                                     const PeerID peerID,
+                                                     const PeerID& peerID,
                                                      const std::shared_ptr<SentDataType>& data)
 {
     std::shared_ptr<SignalRequest> request(new SignalRequest(methodID, peerID));

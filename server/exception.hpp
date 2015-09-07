@@ -37,7 +37,7 @@ namespace vasum {
  */
 struct ServerException: public VasumException {
 
-    ServerException(const std::string& error) : VasumException(error) {}
+    explicit ServerException(const std::string& error) : VasumException(error) {}
 };
 
 /**
@@ -46,7 +46,7 @@ struct ServerException: public VasumException {
  */
 struct ZoneOperationException: public ServerException {
 
-    ZoneOperationException(const std::string& error) : ServerException(error) {}
+    explicit ZoneOperationException(const std::string& error) : ServerException(error) {}
 };
 
 /**
@@ -54,7 +54,7 @@ struct ZoneOperationException: public ServerException {
  */
 struct InvalidZoneIdException : public ServerException {
 
-    InvalidZoneIdException(const std::string& error) : ServerException(error) {}
+    explicit InvalidZoneIdException(const std::string& error) : ServerException(error) {}
 };
 
 /**
@@ -62,7 +62,7 @@ struct InvalidZoneIdException : public ServerException {
  */
 struct ZoneConnectionException: public ServerException {
 
-    ZoneConnectionException(const std::string& error) : ServerException(error) {}
+    explicit ZoneConnectionException(const std::string& error) : ServerException(error) {}
 };
 
 /**
@@ -70,7 +70,7 @@ struct ZoneConnectionException: public ServerException {
  */
 struct HostConnectionException: public ServerException {
 
-    HostConnectionException(const std::string& error) : ServerException(error) {}
+    explicit HostConnectionException(const std::string& error) : ServerException(error) {}
 };
 
 /**
@@ -79,12 +79,12 @@ struct HostConnectionException: public ServerException {
 */
 struct InputMonitorException: public ServerException {
 
-    InputMonitorException(const std::string& error) : ServerException(error) {}
+    explicit InputMonitorException(const std::string& error) : ServerException(error) {}
 };
 
 struct TimeoutException: public InputMonitorException {
 
-    TimeoutException(const std::string& error) : InputMonitorException (error) {}
+    explicit TimeoutException(const std::string& error) : InputMonitorException (error) {}
 };
 
 }

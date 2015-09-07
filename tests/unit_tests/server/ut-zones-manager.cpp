@@ -163,7 +163,7 @@ public:
 
     void signalSubscribe(const DbusConnection::SignalCallback& callback)
     {
-        mClient->signalSubscribe(callback, isHost() ? api::dbus::BUS_NAME : api::dbus::BUS_NAME);
+        mClient->signalSubscribe(callback, api::dbus::BUS_NAME);
     }
 
     void callSwitchToDefault()
@@ -225,12 +225,9 @@ public:
                                                    interface.c_str(),
                                                    method.c_str(),
                                                    parameters);
-        GVariantPtr result = mClient->callMethod(isHost() ? api::dbus::BUS_NAME :
-                                                            api::dbus::BUS_NAME,
-                                                 isHost() ? api::dbus::OBJECT_PATH :
-                                                            api::dbus::OBJECT_PATH,
-                                                 isHost() ? api::dbus::INTERFACE :
-                                                            api::dbus::INTERFACE,
+        GVariantPtr result = mClient->callMethod(api::dbus::BUS_NAME,
+                                                 api::dbus::OBJECT_PATH,
+                                                 api::dbus::INTERFACE,
                                                  api::dbus::METHOD_PROXY_CALL,
                                                  packedParameters,
                                                  "(v)");

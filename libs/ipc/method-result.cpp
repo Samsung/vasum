@@ -31,8 +31,8 @@ namespace ipc {
 
 MethodResult::MethodResult(Processor& processor,
                            const MethodID methodID,
-                           const MessageID messageID,
-                           const PeerID peerID)
+                           const MessageID& messageID,
+                           const PeerID& peerID)
     : mProcessor(processor),
       mMethodID(methodID),
       mPeerID(peerID),
@@ -54,7 +54,7 @@ void MethodResult::setError(const int code, const std::string& message)
     mProcessor.sendError(mPeerID, mMessageID, code, message);
 }
 
-PeerID MethodResult::getPeerID()
+PeerID MethodResult::getPeerID() const
 {
     return mPeerID;
 }

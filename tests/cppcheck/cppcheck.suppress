@@ -1,7 +1,26 @@
 // public API functions (or write tests to use them all)
 unusedFunction:wrapper/wrapper-compatibility.cpp
 unusedFunction:wrapper/wrapper.cpp
+unusedFunction:libs/config/kvstore.cpp
+unusedFunction:libs/ipc/internals/processor.cpp
+unusedFunction:server/zones-manager.cpp
+unusedFunction:libs/lxcpp/container-impl.cpp
+unusedFunction:libs/lxcpp/filesystem.cpp
+unusedFunction:libs/lxcpp/network.cpp
+unusedFunction:libs/lxcpp/network-config.cpp
+unusedFunction:client/vasum-client.cpp
+unusedFunction:common/netlink/netlink-message.cpp
+unusedFunction:common/utils/fd-utils.cpp
+unusedFunction:server/zone.cpp
 
-// lambda not recognized to catch exception (v1.68)
-exceptThrowInNoexecptFunction:client/vasum-client-impl.cpp
+// lambda not recognized to catch exception (v1.69)
+throwInNoexceptFunction:client/vasum-client-impl.cpp
 
+// complains that all constructors with 1 argument should be explicit
+noExplicitConstructor
+
+// required for C abstraction
+unusedStructMember:common/utils/initctl.cpp
+
+// functions called by external utilities
+unusedFunction:tests/unit_tests/ut.cpp

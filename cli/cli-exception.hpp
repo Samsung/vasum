@@ -38,12 +38,12 @@ namespace cli {
  */
 struct CliException: public VasumException {
 
-    CliException(const std::string& error) : VasumException(error) {}
+    explicit CliException(const std::string& error) : VasumException(error) {}
 };
 
 struct IOException: public CliException {
 
-    IOException(const std::string& error) : CliException(error) {}
+    explicit IOException(const std::string& error) : CliException(error) {}
 };
 
 } // namespace cli

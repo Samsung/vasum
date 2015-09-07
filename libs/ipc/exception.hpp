@@ -36,7 +36,7 @@ namespace ipc {
  * @defgroup IPCException   IPCException
  */
 struct IPCException: public std::runtime_error {
-    IPCException(const std::string& message)
+    explicit IPCException(const std::string& message)
         : std::runtime_error(message) {}
 };
 
@@ -45,7 +45,7 @@ struct IPCException: public std::runtime_error {
  * @ingroup IPCException
  */
 struct IPCParsingException: public IPCException {
-    IPCParsingException(const std::string& message = "Exception during reading/parsing data from the socket")
+    explicit IPCParsingException(const std::string& message = "Exception during reading/parsing data from the socket")
         : IPCException(message) {}
 };
 
@@ -54,7 +54,7 @@ struct IPCParsingException: public IPCException {
  * @ingroup IPCException
  */
 struct IPCSerializationException: public IPCException {
-    IPCSerializationException(const std::string& message = "Exception during writing/serializing data to the socket")
+    explicit IPCSerializationException(const std::string& message = "Exception during writing/serializing data to the socket")
         : IPCException(message) {}
 };
 
@@ -63,7 +63,7 @@ struct IPCSerializationException: public IPCException {
  * @ingroup IPCException
  */
 struct IPCPeerDisconnectedException: public IPCException {
-    IPCPeerDisconnectedException(const std::string& message = "No such peer. Might got disconnected.")
+    explicit IPCPeerDisconnectedException(const std::string& message = "No such peer. Might got disconnected.")
         : IPCException(message) {}
 };
 
@@ -72,7 +72,7 @@ struct IPCPeerDisconnectedException: public IPCException {
  * @ingroup IPCException
  */
 struct IPCNaughtyPeerException: public IPCException {
-    IPCNaughtyPeerException(const std::string& message = "Peer performed a forbidden action.")
+    explicit IPCNaughtyPeerException(const std::string& message = "Peer performed a forbidden action.")
         : IPCException(message) {}
 };
 
@@ -81,7 +81,7 @@ struct IPCNaughtyPeerException: public IPCException {
  * @ingroup IPCException
  */
 struct IPCRemovedPeerException: public IPCException {
-    IPCRemovedPeerException(const std::string& message = "Removing peer")
+    explicit IPCRemovedPeerException(const std::string& message = "Removing peer")
         : IPCException(message) {}
 };
 
@@ -90,7 +90,7 @@ struct IPCRemovedPeerException: public IPCException {
  * @ingroup IPCException
  */
 struct IPCClosingException: public IPCException {
-    IPCClosingException(const std::string& message = "Closing IPC")
+    explicit IPCClosingException(const std::string& message = "Closing IPC")
         : IPCException(message) {}
 };
 
@@ -99,7 +99,7 @@ struct IPCClosingException: public IPCException {
  * @ingroup IPCException
  */
 struct IPCTimeoutException: public IPCException {
-    IPCTimeoutException(const std::string& message)
+    explicit IPCTimeoutException(const std::string& message)
         : IPCException(message) {}
 };
 

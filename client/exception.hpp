@@ -37,27 +37,27 @@ namespace vasum {
  */
 struct ClientException: public VasumException {
 
-    ClientException(const std::string& error) : VasumException(error) {}
+    explicit ClientException(const std::string& error) : VasumException(error) {}
 };
 
 struct IOException: public ClientException {
 
-    IOException(const std::string& error) : ClientException(error) {}
+    explicit IOException(const std::string& error) : ClientException(error) {}
 };
 
 struct OperationFailedException: public ClientException {
 
-    OperationFailedException(const std::string& error) : ClientException(error) {}
+    explicit OperationFailedException(const std::string& error) : ClientException(error) {}
 };
 
 struct InvalidArgumentException: public ClientException {
 
-    InvalidArgumentException(const std::string& error) : ClientException(error) {}
+    explicit InvalidArgumentException(const std::string& error) : ClientException(error) {}
 };
 
 struct InvalidResponseException: public ClientException {
 
-    InvalidResponseException(const std::string& error) : ClientException(error) {}
+    explicit InvalidResponseException(const std::string& error) : ClientException(error) {}
 };
 
 }

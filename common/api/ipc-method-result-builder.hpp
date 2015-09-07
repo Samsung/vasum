@@ -40,7 +40,7 @@ const std::string IPC_CONNECTION_PREFIX = "ipc://";
 
 class IPCMethodResultBuilder: public MethodResultBuilder {
 public:
-    IPCMethodResultBuilder(const ipc::MethodResult::Pointer& methodResult);
+    explicit IPCMethodResultBuilder(const ipc::MethodResult::Pointer& methodResult);
     ~IPCMethodResultBuilder() {}
 
 private:

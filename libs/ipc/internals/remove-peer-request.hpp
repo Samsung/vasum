@@ -37,7 +37,7 @@ public:
     RemovePeerRequest(const RemovePeerRequest&) = delete;
     RemovePeerRequest& operator=(const RemovePeerRequest&) = delete;
 
-    RemovePeerRequest(const PeerID peerID,
+    RemovePeerRequest(const PeerID& peerID,
                       const std::shared_ptr<std::condition_variable>& conditionPtr)
         : peerID(peerID),
           conditionPtr(conditionPtr)

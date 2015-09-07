@@ -191,7 +191,7 @@ public:
      */
     template<typename SentDataType, typename ReceivedDataType>
     std::shared_ptr<ReceivedDataType> callSync(const MethodID methodID,
-                                               const PeerID peerID,
+                                               const PeerID& peerID,
                                                const std::shared_ptr<SentDataType>& data,
                                                unsigned int timeoutMS = 5000);
 
@@ -208,7 +208,7 @@ public:
      */
     template<typename SentDataType, typename ReceivedDataType>
     void callAsync(const MethodID methodID,
-                   const PeerID peerID,
+                   const PeerID& peerID,
                    const std::shared_ptr<SentDataType>& data,
                    const typename ResultHandler<ReceivedDataType>::type& resultCallback);
 
@@ -251,7 +251,7 @@ void Service::setSignalHandler(const MethodID methodID,
 
 template<typename SentDataType, typename ReceivedDataType>
 std::shared_ptr<ReceivedDataType> Service::callSync(const MethodID methodID,
-                                                    const PeerID peerID,
+                                                    const PeerID& peerID,
                                                     const std::shared_ptr<SentDataType>& data,
                                                     unsigned int timeoutMS)
 {
@@ -263,7 +263,7 @@ std::shared_ptr<ReceivedDataType> Service::callSync(const MethodID methodID,
 
 template<typename SentDataType, typename ReceivedDataType>
 void Service::callAsync(const MethodID methodID,
-                        const PeerID peerID,
+                        const PeerID& peerID,
                         const std::shared_ptr<SentDataType>& data,
                         const typename ResultHandler<ReceivedDataType>::type& resultCallback)
 {

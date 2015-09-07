@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(NoCopy)
         Task(Task&& r) : count(r.count) {}
         Task& operator=(const Task&) = delete;
         Task& operator=(Task&&) = delete;
-        void operator() () {}
+        void operator() () const {}
 
     };
 

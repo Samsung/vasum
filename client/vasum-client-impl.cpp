@@ -899,4 +899,3 @@ VsmStatus Client::vsm_clean_up_zones_root() noexcept
             std::make_shared<api::Void>());
     });
 }
-

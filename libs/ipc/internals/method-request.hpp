@@ -41,7 +41,7 @@ public:
 
     template<typename SentDataType, typename ReceivedDataType>
     static std::shared_ptr<MethodRequest> create(const MethodID methodID,
-                                                 const PeerID peerID,
+                                                 const PeerID& peerID,
                                                  const std::shared_ptr<SentDataType>& data,
                                                  const typename ResultHandler<ReceivedDataType>::type& process);
 
@@ -54,7 +54,7 @@ public:
     ResultBuilderHandler process;
 
 private:
-    MethodRequest(const MethodID methodID, const PeerID peerID)
+    MethodRequest(const MethodID methodID, const PeerID& peerID)
         : methodID(methodID),
           peerID(peerID),
           messageID(getNextMessageID())
@@ -64,7 +64,7 @@ private:
 
 template<typename SentDataType, typename ReceivedDataType>
 std::shared_ptr<MethodRequest> MethodRequest::create(const MethodID methodID,
-                                                     const PeerID peerID,
+                                                     const PeerID& peerID,
                                                      const std::shared_ptr<SentDataType>& data,
                                                      const typename ResultHandler<ReceivedDataType>::type& process)
 {

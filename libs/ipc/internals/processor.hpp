@@ -217,8 +217,8 @@ public:
      * @param data data to send
      */
     void sendResult(const MethodID methodID,
-                    const PeerID peerID,
-                    const MessageID messageID,
+                    const PeerID& peerID,
+                    const MessageID& messageID,
                     const std::shared_ptr<void>& data);
 
     /**
@@ -229,8 +229,8 @@ public:
      * @param errorCode code of the error
      * @param message description of the error
      */
-    void sendError(const PeerID peerID,
-                   const MessageID messageID,
+    void sendError(const PeerID& peerID,
+                   const MessageID& messageID,
                    const int errorCode,
                    const std::string& message);
 
@@ -242,8 +242,8 @@ public:
      * @param messageID id of the message to which it replies
      */
     void sendVoid(const MethodID methodID,
-                  const PeerID peerID,
-                  const MessageID messageID);
+                  const PeerID& peerID,
+                  const MessageID& messageID);
 
     /**
      * Removes the callback associated with specific method id.
@@ -267,7 +267,7 @@ public:
      */
     template<typename SentDataType, typename ReceivedDataType>
     std::shared_ptr<ReceivedDataType> callSync(const MethodID methodID,
-                                               const PeerID peerID,
+                                               const PeerID& peerID,
                                                const std::shared_ptr<SentDataType>& data,
                                                unsigned int timeoutMS = 5000);
 
@@ -283,7 +283,7 @@ public:
      */
     template<typename SentDataType, typename ReceivedDataType>
     MessageID callAsync(const MethodID methodID,
-                        const PeerID peerID,
+                        const PeerID& peerID,
                         const std::shared_ptr<SentDataType>& data,
                         const typename ResultHandler<ReceivedDataType>::type& process);
 
@@ -352,7 +352,7 @@ private:
 
     struct RegisterSignalsProtocolMessage {
         RegisterSignalsProtocolMessage() = default;
-        RegisterSignalsProtocolMessage(const std::vector<MethodID>& ids)
+        explicit RegisterSignalsProtocolMessage(const std::vector<MethodID>& ids)
             : ids(ids) {}
 
         std::vector<MethodID> ids;
@@ -365,7 +365,7 @@ private:
 
     struct ErrorProtocolMessage {
         ErrorProtocolMessage() = default;
-        ErrorProtocolMessage(const MessageID messageID, const int code, const std::string& message)
+        ErrorProtocolMessage(const MessageID& messageID, const int code, const std::string& message)
             : messageID(messageID), code(code), message(message) {}
 
         MessageID messageID;
@@ -461,7 +461,7 @@ private:
 
     template<typename SentDataType, typename ReceivedDataType>
     MessageID callAsyncInternal(const MethodID methodID,
-                                const PeerID peerID,
+                                const PeerID& peerID,
                                 const std::shared_ptr<SentDataType>& data,
                                 const typename ResultHandler<ReceivedDataType>::type& process);
 
@@ -475,7 +475,7 @@ private:
 
     template<typename SentDataType>
     void signalInternal(const MethodID methodID,
-                        const PeerID peerID,
+                        const PeerID& peerID,
                         const std::shared_ptr<SentDataType>& data);
 
     // Request handlers
@@ -487,28 +487,28 @@ private:
     bool onFinishRequest(FinishRequest& request);
 
     bool onReturnValue(Peers::iterator& peerIt,
-                       const MessageID messageID);
+                       const MessageID& messageID);
     bool onRemoteMethod(Peers::iterator& peerIt,
                         const MethodID methodID,
-                        const MessageID messageID,
+                        const MessageID& messageID,
                         std::shared_ptr<MethodHandlers> methodCallbacks);
     bool onRemoteSignal(Peers::iterator& peerIt,
                         const MethodID methodID,
-                        const MessageID messageID,
+                        const MessageID& messageID,
                         std::shared_ptr<SignalHandlers> signalCallbacks);
 
     void removePeerInternal(Peers::iterator peerIt,
                             const std::exception_ptr& exceptionPtr);
-    void removePeerSyncInternal(const PeerID peerID, Lock& lock);
+    void removePeerSyncInternal(const PeerID& peerID, Lock& lock);
 
-    void onNewSignals(const PeerID peerID,
+    void onNewSignals(const PeerID& peerID,
                       std::shared_ptr<RegisterSignalsProtocolMessage>& data);
 
-    void onErrorSignal(const PeerID peerID,
+    void onErrorSignal(const PeerID& peerID,
                        std::shared_ptr<ErrorProtocolMessage>& data);
 
     Peers::iterator getPeerInfoIterator(const FileDescriptor fd);
-    Peers::iterator getPeerInfoIterator(const PeerID peerID);
+    Peers::iterator getPeerInfoIterator(const PeerID& peerID);
 
 };
 
@@ -616,7 +616,7 @@ void Processor::setSignalHandler(const MethodID methodID,
 
 template<typename SentDataType, typename ReceivedDataType>
 MessageID Processor::callAsync(const MethodID methodID,
-                               const PeerID peerID,
+                               const PeerID& peerID,
                                const std::shared_ptr<SentDataType>& data,
                                const typename ResultHandler<ReceivedDataType>::type& process)
 {
@@ -626,7 +626,7 @@ MessageID Processor::callAsync(const MethodID methodID,
 
 template<typename SentDataType, typename ReceivedDataType>
 MessageID Processor::callAsyncInternal(const MethodID methodID,
-                                       const PeerID peerID,
+                                       const PeerID& peerID,
                                        const std::shared_ptr<SentDataType>& data,
                                        const typename ResultHandler<ReceivedDataType>::type& process)
 {
@@ -638,7 +638,7 @@ MessageID Processor::callAsyncInternal(const MethodID methodID,
 
 template<typename SentDataType, typename ReceivedDataType>
 std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
-                                                      const PeerID peerID,
+                                                      const PeerID& peerID,
                                                       const std::shared_ptr<SentDataType>& data,
                                                       unsigned int timeoutMS)
 {
@@ -692,7 +692,7 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
 
 template<typename SentDataType>
 void Processor::signalInternal(const MethodID methodID,
-                               const PeerID peerID,
+                               const PeerID& peerID,
                                const std::shared_ptr<SentDataType>& data)
 {
     auto requestPtr = SignalRequest::create<SentDataType>(methodID, peerID, data);

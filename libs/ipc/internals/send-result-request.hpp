@@ -36,8 +36,8 @@ public:
     SendResultRequest& operator=(const SendResultRequest&) = delete;
 
     SendResultRequest(const MethodID methodID,
-                      const PeerID peerID,
-                      const MessageID messageID,
+                      const PeerID& peerID,
+                      const MessageID& messageID,
                       const std::shared_ptr<void>& data)
         : methodID(methodID),
           peerID(peerID),

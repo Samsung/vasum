@@ -34,7 +34,7 @@ namespace dbus {
  */
 struct DbusException: public std::runtime_error {
 
-    DbusException(const std::string& error = "") : std::runtime_error(error) {}
+    explicit DbusException(const std::string& error = "") : std::runtime_error(error) {}
 };
 
 /**
@@ -42,7 +42,7 @@ struct DbusException: public std::runtime_error {
  */
 struct DbusIOException: public DbusException {
 
-    DbusIOException(const std::string& error = "") : DbusException(error) {}
+    explicit DbusIOException(const std::string& error = "") : DbusException(error) {}
 };
 
 /**
@@ -50,7 +50,7 @@ struct DbusIOException: public DbusException {
  */
 struct DbusOperationException: public DbusException {
 
-    DbusOperationException(const std::string& error = "") : DbusException(error) {}
+    explicit DbusOperationException(const std::string& error = "") : DbusException(error) {}
 };
 
 /**
@@ -58,7 +58,7 @@ struct DbusOperationException: public DbusException {
  */
 struct DbusCustomException: public DbusException {
 
-    DbusCustomException(const std::string& error = "") : DbusException(error) {}
+    explicit DbusCustomException(const std::string& error = "") : DbusException(error) {}
 };
 
 /**
@@ -66,7 +66,7 @@ struct DbusCustomException: public DbusException {
  */
 struct DbusInvalidArgumentException: public DbusException {
 
-    DbusInvalidArgumentException(const std::string& error = "") : DbusException(error) {}
+    explicit DbusInvalidArgumentException(const std::string& error = "") : DbusException(error) {}
 };
 
 } // namespace dbus

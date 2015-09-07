@@ -92,7 +92,7 @@ Processor::Peers::iterator Processor::getPeerInfoIterator(const FileDescriptor f
     });
 }
 
-Processor::Peers::iterator Processor::getPeerInfoIterator(const PeerID peerID)
+Processor::Peers::iterator Processor::getPeerInfoIterator(const PeerID & peerID)
 {
     return std::find_if(mPeerInfo.begin(), mPeerInfo.end(), [peerID](const PeerInfo & peerInfo) {
         return peerID == peerInfo.peerID;
@@ -162,16 +162,16 @@ FileDescriptor Processor::getEventFD()
 }
 
 void Processor::sendResult(const MethodID methodID,
-                           const PeerID peerID,
-                           const MessageID messageID,
+                           const PeerID& peerID,
+                           const MessageID& messageID,
                            const std::shared_ptr<void>& data)
 {
     auto requestPtr = std::make_shared<SendResultRequest>(methodID, peerID, messageID, data);
     mRequestQueue.pushFront(Event::SEND_RESULT, requestPtr);
 }
 
-void Processor::sendError(const PeerID peerID,
-                          const MessageID messageID,
+void Processor::sendError(const PeerID& peerID,
+                          const MessageID& messageID,
                           const int errorCode,
                           const std::string& message)
 {
@@ -180,8 +180,8 @@ void Processor::sendError(const PeerID peerID,
 }
 
 void Processor::sendVoid(const MethodID methodID,
-                         const PeerID peerID,
-                         const MessageID messageID)
+                         const PeerID& peerID,
+                         const MessageID& messageID)
 {
     auto data = std::make_shared<EmptyData>();
     auto requestPtr = std::make_shared<SendResultRequest>(methodID, peerID, messageID, data);
@@ -208,7 +208,7 @@ PeerID Processor::addPeer(const std::shared_ptr<Socket>& socketPtr)
     return requestPtr->peerID;
 }
 
-void Processor::removePeerSyncInternal(const PeerID peerID, Lock& lock)
+void Processor::removePeerSyncInternal(const PeerID& peerID, Lock& lock)
 {
     LOGS(mLogPrefix + "Processor removePeer peerID: " << peerID);
 
@@ -329,7 +329,7 @@ bool Processor::handleInput(const FileDescriptor fd)
     }
 }
 
-void Processor::onNewSignals(const PeerID peerID, std::shared_ptr<RegisterSignalsProtocolMessage>& data)
+void Processor::onNewSignals(const PeerID& peerID, std::shared_ptr<RegisterSignalsProtocolMessage>& data)
 {
     LOGS(mLogPrefix + "Processor onNewSignals peerID: " << peerID);
 
@@ -338,7 +338,7 @@ void Processor::onNewSignals(const PeerID peerID, std::shared_ptr<RegisterSignal
     }
 }
 
-void Processor::onErrorSignal(const PeerID, std::shared_ptr<ErrorProtocolMessage>& data)
+void Processor::onErrorSignal(const PeerID&, std::shared_ptr<ErrorProtocolMessage>& data)
 {
     LOGS(mLogPrefix + "Processor onErrorSignal messageID: " << data->messageID);
 
@@ -351,7 +351,7 @@ void Processor::onErrorSignal(const PeerID, std::shared_ptr<ErrorProtocolMessage
 }
 
 bool Processor::onReturnValue(Peers::iterator& peerIt,
-                              const MessageID messageID)
+                              const MessageID& messageID)
 {
     LOGS(mLogPrefix + "Processor onReturnValue messageID: " << messageID);
 
@@ -388,7 +388,7 @@ bool Processor::onReturnValue(Peers::iterator& peerIt,
 
 bool Processor::onRemoteSignal(Peers::iterator& peerIt,
                                __attribute__((unused)) const MethodID methodID,
-                               __attribute__((unused)) const MessageID messageID,
+                               __attribute__((unused)) const MessageID& messageID,
                                std::shared_ptr<SignalHandlers> signalCallbacks)
 {
     LOGS(mLogPrefix + "Processor onRemoteSignal; methodID: " << methodID << " messageID: " << messageID);
@@ -422,7 +422,7 @@ bool Processor::onRemoteSignal(Peers::iterator& peerIt,
 
 bool Processor::onRemoteMethod(Peers::iterator& peerIt,
                                const MethodID methodID,
-                               const MessageID messageID,
+                               const MessageID& messageID,
                                std::shared_ptr<MethodHandlers> methodCallbacks)
 {
     LOGS(mLogPrefix + "Processor onRemoteMethod; methodID: " << methodID << " messageID: " << messageID);

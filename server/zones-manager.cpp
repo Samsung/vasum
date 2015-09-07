@@ -1266,7 +1266,7 @@ void ZonesManager::createZone(const std::string& id,
     } catch (std::runtime_error& e) {
         LOGE("Generate config failed: " << e.what());
         utils::launchAsRoot(std::bind(removeAllWrapper, zonePathStr));
-        throw e;
+        throw;
     }
 
     LOGT("Creating new zone");
@@ -1275,7 +1275,7 @@ void ZonesManager::createZone(const std::string& id,
     } catch (std::runtime_error& e) {
         LOGE("Creating new zone failed: " << e.what());
         utils::launchAsRoot(std::bind(removeAllWrapper, zonePathStr));
-        throw e;
+        throw;
     }
 
     mDynamicConfig.zoneIds.push_back(id);

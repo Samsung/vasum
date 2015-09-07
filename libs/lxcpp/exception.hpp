@@ -32,57 +32,57 @@ namespace lxcpp {
  * Base class for exceptions in lxcpp
  */
 struct Exception: public std::runtime_error {
-    Exception(const std::string& message)
+    explicit Exception(const std::string& message)
         : std::runtime_error(message) {}
 };
 
 struct NotImplementedException: public Exception {
-    NotImplementedException(const std::string& message = "Functionality not yet implemented")
+    explicit NotImplementedException(const std::string& message = "Functionality not yet implemented")
         : Exception(message) {}
 };
 
 struct ProcessSetupException: public Exception {
-    ProcessSetupException(const std::string& message = "Error while setting up a process")
+    explicit ProcessSetupException(const std::string& message = "Error while setting up a process")
         : Exception(message) {}
 };
 
 struct FileSystemSetupException: public Exception {
-    FileSystemSetupException(const std::string& message = "Error during a file system operation")
+    explicit FileSystemSetupException(const std::string& message = "Error during a file system operation")
         : Exception(message) {}
 };
 
 struct EnvironmentSetupException: public Exception {
-    EnvironmentSetupException(const std::string& message = "Error during handling environment variables")
+    explicit EnvironmentSetupException(const std::string& message = "Error during handling environment variables")
         : Exception(message) {}
 };
 
 struct CredentialSetupException: public Exception {
-    CredentialSetupException(const std::string& message = "Error during handling environment variables")
+    explicit CredentialSetupException(const std::string& message = "Error during handling environment variables")
         : Exception(message) {}
 };
 
 struct CapabilitySetupException: public Exception {
-    CapabilitySetupException(const std::string& message = "Error during a capability operation")
+    explicit CapabilitySetupException(const std::string& message = "Error during a capability operation")
         : Exception(message) {}
 };
 
 struct BadArgument: public Exception {
-    BadArgument(const std::string& message = "Bad argument passed")
+    explicit BadArgument(const std::string& message = "Bad argument passed")
         : Exception(message) {}
 };
 
 struct NoSuchValue: public Exception {
-    NoSuchValue(const std::string& message = "Value not found")
+    explicit NoSuchValue(const std::string& message = "Value not found")
         : Exception(message) {}
 };
 
 struct NetworkException : public Exception {
-    NetworkException (const std::string& message = "Error during setting up a network")
+    explicit NetworkException (const std::string& message = "Error during setting up a network")
         : Exception(message) {}
 };
 
 struct ConfigureException: public Exception {
-    ConfigureException(const std::string& message = "Error while configuring a container")
+    explicit ConfigureException(const std::string& message = "Error while configuring a container")
         : Exception(message) {}
 };
 

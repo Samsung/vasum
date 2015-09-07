@@ -39,12 +39,12 @@ public:
           mExceptionPtr(nullptr)
     {}
 
-    ResultBuilder(const std::exception_ptr& exceptionPtr)
+    explicit ResultBuilder(const std::exception_ptr& exceptionPtr)
         : mData(nullptr),
           mExceptionPtr(exceptionPtr)
     {}
 
-    ResultBuilder(const std::shared_ptr<void>& data)
+    explicit ResultBuilder(const std::shared_ptr<void>& data)
         : mData(data),
           mExceptionPtr(nullptr)
 
@@ -68,9 +68,3 @@ typedef std::function<void(ResultBuilder&)> ResultBuilderHandler;
 } // namespace ipc
 
 #endif // COMMON_IPC_RESULT_BUILDER_HPP
-
-
-
-
-
-
