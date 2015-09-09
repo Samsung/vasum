@@ -27,12 +27,6 @@ FILE(GLOB wrapper_SRCS *.cpp *.hpp *.h
      ${CLIENT_FOLDER}/host-ipc-connection.hpp   ${CLIENT_FOLDER}/host-ipc-connection.cpp
      ${CLIENT_FOLDER}/utils.hpp                 ${CLIENT_FOLDER}/utils.cpp)
 
-FILE(GLOB common_SRCS ${COMMON_FOLDER}/epoll/*.hpp              ${COMMON_FOLDER}/epoll/*.cpp
-                      ${COMMON_FOLDER}/ipc/*.hpp                ${COMMON_FOLDER}/ipc/*.cpp
-                      ${COMMON_FOLDER}/ipc/internals/*.hpp      ${COMMON_FOLDER}/ipc/internals/*.cpp
-                      ${COMMON_FOLDER}/utils/*.hpp              ${COMMON_FOLDER}/utils/*.cpp
-                      ${COMMON_FOLDER}/*.hpp                    ${COMMON_FOLDER}/*.cpp)
-
 SET(_LIB_VERSION_ "${VERSION}")
 SET(_LIB_SOVERSION_ "0")
 SET(PC_FILE "${PROJECT_NAME}.pc")
@@ -44,11 +38,13 @@ SET(PC_FILE "${PROJECT_NAME}.pc")
 ADD_DEFINITIONS(-fvisibility=hidden)
 ADD_DEFINITIONS(-D__STDC_FORMAT_MACROS)
 
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${wrapper_SRCS} ${common_SRCS})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${wrapper_SRCS})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
         SOVERSION ${_LIB_SOVERSION_}
         VERSION ${_LIB_VERSION_}
         COMPILE_DEFINITIONS HOST_IPC_SOCKET="${VSM_SERVER_IPC_SOCKET_PATH}")
+
+ADD_DEPENDENCIES(${PROJECT_NAME} Common Config Ipc)
 
 ## Link libraries ##############################################################
 FIND_PACKAGE(Boost COMPONENTS system filesystem)
@@ -59,7 +55,7 @@ INCLUDE_DIRECTORIES(${LIBS_FOLDER})
 INCLUDE_DIRECTORIES(${SERVER_FOLDER})
 INCLUDE_DIRECTORIES(${CLIENT_FOLDER})
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_DEPS_LIBRARIES} ${Boost_LIBRARIES} Config Ipc)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} Common ${LIB_DEPS_LIBRARIES} ${Boost_LIBRARIES} Config Ipc)
 IF(NOT WITHOUT_DBUS)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} SimpleDbus)
 ENDIF(NOT WITHOUT_DBUS)

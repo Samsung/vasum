@@ -22,14 +22,7 @@ PROJECT(SimpleDbus)
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the libSimpleDbus...")
 FILE(GLOB HEADERS       *.hpp)
-FILE(GLOB HEADERS_UTILS ${COMMON_FOLDER}/utils/callback-guard.hpp
-                        ${COMMON_FOLDER}/utils/scoped-gerror.hpp
-                        ${COMMON_FOLDER}/utils/glib-utils.hpp
-                        ${COMMON_FOLDER}/utils/callback-wrapper.hpp)
-FILE(GLOB SRCS_UTILS    ${COMMON_FOLDER}/utils/callback-guard.cpp
-                        ${COMMON_FOLDER}/utils/scoped-gerror.cpp
-                        ${COMMON_FOLDER}/utils/glib-utils.cpp
-                        ${COMMON_FOLDER}/utils/callback-wrapper.cpp)
+FILE(GLOB HEADERS_UTILS ${COMMON_FOLDER}/utils/callback-guard.hpp)
 FILE(GLOB SRCS          *.cpp *.hpp)
 
 SET(_LIB_VERSION_ "${VERSION}")
@@ -37,18 +30,20 @@ SET(_LIB_SOVERSION_ "0")
 SET(PC_FILE "lib${PROJECT_NAME}.pc")
 
 ## Setup target ################################################################
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_UTILS})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
     SOVERSION   ${_LIB_SOVERSION_}
     VERSION     ${_LIB_VERSION_}
 )
+
+ADD_DEPENDENCIES(${PROJECT_NAME} Common)
 
 ## Link libraries ##############################################################
 PKG_CHECK_MODULES(DBUS_DEPS REQUIRED glib-2.0 gio-2.0)
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(${LIBS_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${DBUS_DEPS_INCLUDE_DIRS})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} ${DBUS_DEPS_LIBRARIES} Logger)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} Common ${pkgs_LDFLAGS} ${DBUS_DEPS_LIBRARIES} Logger)
 
 ## Generate the pc file ########################################################
 CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_CURRENT_BINARY_DIR}/${PC_FILE} @ONLY)

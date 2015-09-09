@@ -21,22 +21,11 @@ PROJECT(lxcpp)
 
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the liblxcpp...")
-FILE(GLOB HEADERS       *.hpp)
-FILE(GLOB HEADERS_UTILS    ${COMMON_FOLDER}/utils/fd-utils.hpp
-                           ${COMMON_FOLDER}/utils/exception.hpp
-                           ${COMMON_FOLDER}/utils/channel.hpp
-                           ${COMMON_FOLDER}/utils/environment.hpp
-                           ${COMMON_FOLDER}/utils/execute.hpp)
-FILE(GLOB HEADERS_NETLINK  ${COMMON_FOLDER}/netlink/*.hpp)
+FILE(GLOB HEADERS          *.hpp)
+FILE(GLOB HEADERS_UTILS    ${COMMON_FOLDER}/utils/channel.hpp)
 FILE(GLOB HEADERS_COMMANDS commands/*.hpp)
 
 FILE(GLOB SRCS          *.cpp *.hpp)
-FILE(GLOB SRCS_UTILS    ${COMMON_FOLDER}/utils/fd-utils.cpp
-                        ${COMMON_FOLDER}/utils/exception.cpp
-                        ${COMMON_FOLDER}/utils/channel.cpp
-                        ${COMMON_FOLDER}/utils/environment.cpp
-                        ${COMMON_FOLDER}/utils/execute.cpp)
-FILE(GLOB SRCS_NETLINK  ${COMMON_FOLDER}/netlink/*.cpp)
 FILE(GLOB SRCS_COMMANDS commands/*.cpp)
 
 SET(_LIB_VERSION_ "${VERSION}")
@@ -44,17 +33,19 @@ SET(_LIB_SOVERSION_ "0")
 SET(PC_FILE "lib${PROJECT_NAME}.pc")
 
 ## Setup target ################################################################
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_UTILS} ${SRCS_NETLINK} ${SRCS_COMMANDS})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_COMMANDS})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
     SOVERSION   ${_LIB_SOVERSION_}
     VERSION     ${_LIB_VERSION_}
 )
 
+ADD_DEPENDENCIES(${PROJECT_NAME} Common Logger)
+
 ## Link libraries ##############################################################
 FIND_PACKAGE(Boost COMPONENTS system filesystem)
 INCLUDE_DIRECTORIES(${LIBS_FOLDER} ${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIRS})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} ${Boost_LIBRARIES} Logger)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} Common ${pkgs_LDFLAGS} ${Boost_LIBRARIES} Logger)
 
 ## Generate the pc file ########################################################
 CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_CURRENT_BINARY_DIR}/${PC_FILE} @ONLY)
@@ -71,7 +62,5 @@ INSTALL(FILES       ${HEADERS}
         DESTINATION ${INCLUDE_INSTALL_DIR}/lxcpp)
 INSTALL(FILES       ${HEADERS_UTILS}
         DESTINATION ${INCLUDE_INSTALL_DIR}/lxcpp/utils)
-INSTALL(FILES       ${HEADERS_NETLINK}
-        DESTINATION ${INCLUDE_INSTALL_DIR}/lxcpp/netlink)
 INSTALL(FILES       ${HEADERS_COMMANDS}
         DESTINATION ${INCLUDE_INSTALL_DIR}/lxcpp/commands)

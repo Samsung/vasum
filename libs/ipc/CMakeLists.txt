@@ -25,28 +25,24 @@ MESSAGE(STATUS "Generating makefile for the libIpc...")
 FILE(GLOB HEADERS           *.hpp)
 FILE(GLOB HEADERS_INTERNALS internals/*.hpp)
 FILE(GLOB HEADERS_EPOLL     epoll/*.hpp)
-FILE(GLOB HEADERS_UTILS     ${COMMON_FOLDER}/utils/fd-utils.hpp
-                            ${COMMON_FOLDER}/utils/eventfd.hpp
-                            ${COMMON_FOLDER}/utils/exception.hpp
+FILE(GLOB HEADERS_UTILS     ${COMMON_FOLDER}/utils/eventfd.hpp
                             ${COMMON_FOLDER}/utils/callback-guard.hpp)
 FILE(GLOB SRCS              *.cpp)
 FILE(GLOB SRCS_INTERNALS    internals/*.cpp)
 FILE(GLOB SRCS_EPOLL        epoll/*.cpp)
-FILE(GLOB SRCS_UTILS        ${COMMON_FOLDER}/utils/fd-utils.cpp
-                            ${COMMON_FOLDER}/utils/eventfd.cpp
-                            ${COMMON_FOLDER}/utils/exception.cpp
-                            ${COMMON_FOLDER}/utils/callback-guard.cpp)
 
 SET(_LIB_VERSION_ "${VERSION}")
 SET(_LIB_SOVERSION_ "0")
 SET(PC_FILE "lib${PROJECT_NAME}.pc")
 
 ## Setup target ################################################################
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_INTERNALS} ${SRCS_UTILS} ${SRCS_EPOLL})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_INTERNALS} ${SRCS_EPOLL})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
     SOVERSION   ${_LIB_SOVERSION_}
     VERSION     ${_LIB_VERSION_}
     )
+
+ADD_DEPENDENCIES(${PROJECT_NAME} Common)
 
 ## Link libraries ##############################################################
 IF(NOT WITHOUT_SYSTEMD)
@@ -56,7 +52,7 @@ ENDIF(NOT WITHOUT_SYSTEMD)
 INCLUDE_DIRECTORIES(${LIBS_FOLDER})
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${DBUS_DEPS_INCLUDE_DIRS} ${IPC_DEPS_INCLUDE_DIRS} ${CONFIG_DEPS_INCLUDE_DIRS} ${JSON_C_INCLUDE_DIRS})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} ${IPC_DEPS_LIBRARIES} Logger Config)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} Common ${pkgs_LDFLAGS} ${IPC_DEPS_LIBRARIES} Logger Config)
 
 ## Generate the pc file ########################################################
 CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_CURRENT_BINARY_DIR}/${PC_FILE} @ONLY)

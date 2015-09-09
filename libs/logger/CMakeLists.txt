@@ -21,21 +21,21 @@ PROJECT(Logger)
 
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the libLogger...")
-FILE(GLOB HEADERS           *.hpp)
-FILE(GLOB SRCS              *.cpp *.hpp)
-FILE(GLOB HEADERS_UTILS     ${COMMON_FOLDER}/utils/ccolor.hpp)
-FILE(GLOB SRCS_UTILS        ${COMMON_FOLDER}/utils/ccolor.cpp)
+FILE(GLOB HEADERS *.hpp)
+FILE(GLOB SRCS    *.cpp *.hpp)
 
 SET(_LIB_VERSION_ "${VERSION}")
 SET(_LIB_SOVERSION_ "0")
 SET(PC_FILE "lib${PROJECT_NAME}.pc")
 
 ## Setup target ################################################################
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_UTILS})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
     SOVERSION   ${_LIB_SOVERSION_}
     VERSION     ${_LIB_VERSION_}
 )
+
+ADD_DEPENDENCIES(${PROJECT_NAME} Common)
 
 ## Link libraries ##############################################################
 IF(NOT WITHOUT_SYSTEMD)
@@ -44,7 +44,7 @@ ENDIF(NOT WITHOUT_SYSTEMD)
 
 INCLUDE_DIRECTORIES(${LIBS_FOLDER} ${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${LOGGER_DEPS_INCLUDE_DIRS})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} ${LOGGER_DEPS_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} Common ${pkgs_LDFLAGS} ${LOGGER_DEPS_LIBRARIES})
 
 ## Generate the pc file ########################################################
 CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_CURRENT_BINARY_DIR}/${PC_FILE} @ONLY)
@@ -59,6 +59,3 @@ INSTALL(TARGETS     ${PROJECT_NAME}
 
 INSTALL(FILES       ${HEADERS}
         DESTINATION ${INCLUDE_INSTALL_DIR}/vasum-tools/logger)
-
-INSTALL(FILES       ${HEADERS_UTILS}
-        DESTINATION ${INCLUDE_INSTALL_DIR}/vasum-tools/logger/utils)

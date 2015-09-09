@@ -20,7 +20,6 @@
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Unit Tests...")
 FILE(GLOB_RECURSE project_SRCS *.cpp *.hpp)
-FILE(GLOB_RECURSE common_SRCS ${COMMON_FOLDER}/*.cpp ${COMMON_FOLDER}/*.hpp)
 FILE(GLOB         server_SRCS ${SERVER_FOLDER}/*.cpp ${SERVER_FOLDER}/*.hpp)
 FILE(GLOB         client_SRCS ${CLIENT_FOLDER}/*.cpp ${CLIENT_FOLDER}/*.h)
 FILE(GLOB         socket_test_SRCS ${SOCKET_TEST_FOLDER}/*.cpp ${SOCKET_TEST_FOLDER}/*.hpp)
@@ -35,20 +34,25 @@ LIST(REMOVE_ITEM project_SRCS ${socket_test_SRCS} ${lxcpp_test_SRCS})
 
 ## Setup target ################################################################
 SET(UT_SERVER_CODENAME "${PROJECT_NAME}-server-unit-tests")
-ADD_EXECUTABLE(${UT_SERVER_CODENAME} ${project_SRCS} ${common_SRCS} ${server_SRCS} ${client_SRCS})
+ADD_EXECUTABLE(${UT_SERVER_CODENAME} ${project_SRCS} ${server_SRCS} ${client_SRCS})
+ADD_DEPENDENCIES(${UT_SERVER_CODENAME} ${PROJECT_NAME}-server)
 
 ## A fake target to test vasum-client C API
-ADD_EXECUTABLE("vasum-client-c-api-compile-test" client/client-c-api-compile-test.c)
+SET(CLIENT_C_API_COMPILE_TEST "vasum-client-c-api-compile-test")
+ADD_EXECUTABLE(${CLIENT_C_API_COMPILE_TEST} client/client-c-api-compile-test.c)
+ADD_DEPENDENCIES(${CLIENT_C_API_COMPILE_TEST} ${PROJECT_NAME}-client)
 
 ## A fake target to test lxcpp API
-ADD_EXECUTABLE("lxcpp-api-compile-test" lxcpp/lxcpp-api-compile-test.cpp)
-TARGET_LINK_LIBRARIES("lxcpp-api-compile-test" lxcpp)
+SET(LXCPP_API_COMPILE_TEST "lxcpp-api-compile-test")
+ADD_EXECUTABLE(${LXCPP_API_COMPILE_TEST} lxcpp/lxcpp-api-compile-test.cpp)
+ADD_DEPENDENCIES(${LXCPP_API_COMPILE_TEST} lxcpp)
+TARGET_LINK_LIBRARIES(${LXCPP_API_COMPILE_TEST} lxcpp)
 
 IF(NOT WITHOUT_SYSTEMD)
 SET(SOCKET_TEST_CODENAME "${PROJECT_NAME}-socket-test")
 
 ## A stub mini-service to test socket functionality
-ADD_EXECUTABLE(${SOCKET_TEST_CODENAME} ${socket_test_SRCS} ${common_SRCS} ${client_SRCS})
+ADD_EXECUTABLE(${SOCKET_TEST_CODENAME} ${socket_test_SRCS} ${client_SRCS})
 ENDIF(NOT WITHOUT_SYSTEMD)
 
 ## Link libraries ##############################################################
@@ -65,7 +69,7 @@ SET_TARGET_PROPERTIES(${UT_SERVER_CODENAME} PROPERTIES
     LINK_FLAGS "-pthread"
 )
 
-TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
+TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} Common ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
                       Logger Config Ipc lxcpp)
 IF(NOT WITHOUT_DBUS)
 TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} SimpleDbus)
@@ -78,7 +82,7 @@ SET_TARGET_PROPERTIES(${SOCKET_TEST_CODENAME} PROPERTIES
     LINK_FLAGS "-pthread"
 )
 
-TARGET_LINK_LIBRARIES(${SOCKET_TEST_CODENAME} ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
+TARGET_LINK_LIBRARIES(${SOCKET_TEST_CODENAME} Common ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
                       Logger Config Ipc)
 IF(NOT WITHOUT_DBUS)
 TARGET_LINK_LIBRARIES(${SOCKET_TEST_CODENAME} SimpleDbus)
@@ -100,4 +104,3 @@ INSTALL(TARGETS ${UT_SERVER_CODENAME} DESTINATION bin)
 IF(NOT WITHOUT_SYSTEMD)
 INSTALL(TARGETS ${SOCKET_TEST_CODENAME} DESTINATION bin)
 ENDIF(NOT WITHOUT_SYSTEMD)
-

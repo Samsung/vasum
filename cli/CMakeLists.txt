@@ -19,13 +19,13 @@
 
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the command line interface...")
-FILE(GLOB cli_SRCS *.cpp *.hpp
-                    ${COMMON_FOLDER}/utils/c-array.cpp
-                    ${COMMON_FOLDER}/utils/c-array.hpp)
+FILE(GLOB cli_SRCS *.cpp *.hpp)
 
 ## Setup target ################################################################
 SET(CLI_CODENAME "vsm")
 ADD_EXECUTABLE(${CLI_CODENAME} ${cli_SRCS})
+
+ADD_DEPENDENCIES(${CLI_CODENAME} Common ${PROJECT_NAME}-client Ipc)
 
 ## Readline detection ##########################################################
 
@@ -46,11 +46,9 @@ INCLUDE_DIRECTORIES(${READLINE_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(${CLI_CODENAME} ${READLINE_LIBRARIES})
 
 ## Link libraries ##############################################################
-PKG_CHECK_MODULES(LIB_DEPS REQUIRED vasum)
-
 INCLUDE_DIRECTORIES(${CLIENT_FOLDER})
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
-TARGET_LINK_LIBRARIES(${CLI_CODENAME} ${PROJECT_NAME}-client ${LIB_DEPS_LIBRARIES} Ipc)
+TARGET_LINK_LIBRARIES(${CLI_CODENAME} Common ${PROJECT_NAME}-client ${LIB_DEPS_LIBRARIES} Ipc)
 
 CONFIGURE_FILE(support/vsm-completion.sh.in
                ${CMAKE_BINARY_DIR}/vsm-completion.sh

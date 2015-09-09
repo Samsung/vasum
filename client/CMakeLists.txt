@@ -22,9 +22,6 @@ MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Client...")
 FILE(GLOB project_SRCS *.cpp *.hpp *.h)
 
-FILE(GLOB common_SRCS ${COMMON_FOLDER}/utils/*.hpp              ${COMMON_FOLDER}/utils/*.cpp
-                      ${COMMON_FOLDER}/*.hpp                    ${COMMON_FOLDER}/*.cpp)
-
 SET(_LIB_VERSION_ "${VERSION}")
 SET(_LIB_SOVERSION_ "0")
 SET(PC_FILE "${PROJECT_NAME}.pc")
@@ -36,11 +33,13 @@ SET(PC_FILE "${PROJECT_NAME}.pc")
 ADD_DEFINITIONS(-fvisibility=hidden)
 
 ## Setup target ################################################################
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${project_SRCS} ${common_SRCS})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${project_SRCS})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
         SOVERSION ${_LIB_SOVERSION_}
         VERSION ${_LIB_VERSION_}
         COMPILE_DEFINITIONS HOST_IPC_SOCKET="${VSM_SERVER_IPC_SOCKET_PATH}")
+
+ADD_DEPENDENCIES(${PROJECT_NAME} Common Config Ipc)
 
 ## Link libraries ##############################################################
 FIND_PACKAGE(Boost COMPONENTS system filesystem)
@@ -51,7 +50,7 @@ INCLUDE_DIRECTORIES(${LIBS_FOLDER})
 INCLUDE_DIRECTORIES(${IPC_FOLDER})
 INCLUDE_DIRECTORIES(${SERVER_FOLDER})
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_DEPS_LIBRARIES} ${Boost_LIBRARIES} Config Ipc)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} Common ${LIB_DEPS_LIBRARIES} ${Boost_LIBRARIES} Config Ipc)
 IF(NOT WITHOUT_DBUS)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} SimpleDbus)
 ENDIF(NOT WITHOUT_DBUS)

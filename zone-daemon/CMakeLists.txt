@@ -20,13 +20,12 @@
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Zone Daemon...")
 FILE(GLOB project_SRCS *.cpp *.hpp)
-FILE(GLOB common_SRCS ${COMMON_FOLDER}/utils/*.cpp  ${COMMON_FOLDER}/utils/*.hpp
-                      ${COMMON_FOLDER}/*.cpp)
 
 ## Setup target ################################################################
 SET(ZONE_DAEMON_CODENAME "${PROJECT_NAME}-zone-daemon")
-ADD_EXECUTABLE(${ZONE_DAEMON_CODENAME} ${project_SRCS} ${common_SRCS})
+ADD_EXECUTABLE(${ZONE_DAEMON_CODENAME} ${project_SRCS})
 
+ADD_DEPENDENCIES(${ZONE_DAEMON_CODENAME} Common Logger SimpleDbus Ipc)
 
 ## Link libraries ##############################################################
 FIND_PACKAGE (Boost COMPONENTS program_options system filesystem)
@@ -42,7 +41,7 @@ SET_TARGET_PROPERTIES(${ZONE_DAEMON_CODENAME} PROPERTIES
     LINK_FLAGS "-pthread"
 )
 
-TARGET_LINK_LIBRARIES(${ZONE_DAEMON_CODENAME} ${ZONE_DAEMON_DEPS_LIBRARIES}
+TARGET_LINK_LIBRARIES(${ZONE_DAEMON_CODENAME} Common ${ZONE_DAEMON_DEPS_LIBRARIES}
                       ${Boost_LIBRARIES} Logger SimpleDbus Ipc)
 
 
