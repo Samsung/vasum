@@ -2,8 +2,13 @@
 [ -z "$BASH_VERSION" ] && return
 
 __@PROJECT_NAME@_cli() {
-    words=`@CLI_CODENAME@ --bash-completion ${COMP_WORDS[COMP_CWORD]}`
-    COMPREPLY=($(compgen -W "$words" -- ${COMP_WORDS[COMP_CWORD]}))
+    if [ "${COMP_WORDS[COMP_CWORD]}" = "" ]; then
+        comp="''"
+    else
+        comp=
+    fi
+    words=`@CLI_CODENAME@ --bash-completion $(echo "${COMP_WORDS[@]:1}" | sed 's/ = /=/g') $comp`
+    COMPREPLY=($(compgen -W "$words" -- "${COMP_WORDS[COMP_CWORD]}"))
 }
 
 complete -F __@PROJECT_NAME@_cli vsm
