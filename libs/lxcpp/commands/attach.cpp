@@ -31,9 +31,13 @@
 #include "lxcpp/credentials.hpp"
 
 #include "utils/exception.hpp"
+#include "utils/fd-utils.hpp"
+#include "logger/logger.hpp"
 
 #include <unistd.h>
 #include <sys/mount.h>
+#include <sys/types.h>
+#include <fcntl.h>
 
 #include <functional>
 
@@ -67,6 +71,35 @@ void setupMountPoints()
     */
 }
 
+bool setupControlTTY(const int ttyFD)
+{
+    if (!::isatty(ttyFD)) {
+        return false;
+    }
+
+    if (::setsid() < 0) {
+        return false;
+    }
+
+    if (::ioctl(ttyFD, TIOCSCTTY, NULL) < 0) {
+        return false;
+    }
+
+    if (::dup2(ttyFD, STDIN_FILENO) < 0) {
+        return false;
+    }
+
+    if (::dup2(ttyFD, STDOUT_FILENO) < 0) {
+        return false;
+    }
+
+    if (::dup2(ttyFD, STDERR_FILENO) < 0) {
+        return false;
+    }
+
+    return true;
+}
+
 int execFunction(void* call)
 {
     try {
@@ -83,6 +116,7 @@ Attach::Attach(lxcpp::ContainerImpl& container,
                Container::AttachCall& userCall,
                const uid_t uid,
                const gid_t gid,
+               const std::string& ttyPath,
                const std::vector<gid_t>& supplementaryGids,
                const int capsToKeep,
                const std::string& workDirInContainer,
@@ -98,10 +132,18 @@ Attach::Attach(lxcpp::ContainerImpl& container,
       mEnvToKeep(envToKeep),
       mEnvToSet(envToSet)
 {
+    mTTYFD = ::open(ttyPath.c_str(), O_RDWR | O_NOCTTY);
+    if (mTTYFD < 0) {
+        const std::string msg = "open() failed: " +
+                                utils::getSystemErrorMessage();
+        LOGE(msg);
+        throw BadArgument(msg);
+    }
 }
 
 Attach::~Attach()
 {
+    utils::close(mTTYFD);
 }
 
 void Attach::execute()
@@ -113,6 +155,7 @@ void Attach::execute()
                           mUserCall,
                           mUid,
                           mGid,
+                          mTTYFD,
                           mSupplementaryGids,
                           mCapsToKeep,
                           mEnvToKeep,
@@ -127,13 +170,14 @@ void Attach::execute()
         intermChannel.setRight();
         interm(intermChannel, call);
         intermChannel.shutdown();
-        ::_exit(0);
+        ::_exit(EXIT_SUCCESS);
     }
 }
 
 int Attach::child(const Container::AttachCall& call,
                   const uid_t uid,
                   const gid_t gid,
+                  const int ttyFD,
                   const std::vector<gid_t>& supplementaryGids,
                   const int capsToKeep,
                   const std::vector<std::string>& envToKeep,
@@ -154,6 +198,11 @@ int Attach::child(const Container::AttachCall& call,
     setgroups(supplementaryGids);
 
     lxcpp::setuid(uid);
+
+    // Set control TTY
+    if(!setupControlTTY(ttyFD)) {
+        ::_exit(EXIT_FAILURE);
+    }
 
     // Run user's code
     return call();

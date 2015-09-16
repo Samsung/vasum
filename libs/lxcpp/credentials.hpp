@@ -36,8 +36,6 @@ void setgid(const gid_t gid);
 
 void setuid(const uid_t uid);
 
-
-
 } // namespace lxcpp
 
 #endif // LXCPP_CREDENTIALS_HPP

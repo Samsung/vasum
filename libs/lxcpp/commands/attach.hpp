@@ -58,6 +58,7 @@ public:
            Container::AttachCall& userCall,
            const uid_t uid,
            const gid_t gid,
+           const std::string& ttyPath,
            const std::vector<gid_t>& supplementaryGids,
            const int capsToKeep,
            const std::string& workDirInContainer,
@@ -72,6 +73,7 @@ private:
     const Container::AttachCall& mUserCall;
     const uid_t mUid;
     const gid_t mGid;
+    int mTTYFD;
     const std::vector<gid_t>& mSupplementaryGids;
     const int mCapsToKeep;
     const std::string& mWorkDirInContainer;
@@ -82,6 +84,7 @@ private:
     static int child(const Container::AttachCall& call,
                      const uid_t uid,
                      const gid_t gid,
+                     const int ttyFD,
                      const std::vector<gid_t>& supplementaryGids,
                      const int capsToKeep,
                      const std::vector<std::string>& envToKeep,
