@@ -66,7 +66,7 @@ public:
     void reboot();
 
     // Other
-    void attach(Container::AttachCall& attachCall,
+    void attach(const std::vector<const char*>& argv,
                 const std::string& cwdInContainer);
 
     // Network interfaces setup/config

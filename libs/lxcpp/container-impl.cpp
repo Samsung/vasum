@@ -205,11 +205,11 @@ void ContainerImpl::reboot()
     throw NotImplementedException();
 }
 
-void ContainerImpl::attach(Container::AttachCall& call,
+void ContainerImpl::attach(const std::vector<const char*>& argv,
                            const std::string& cwdInContainer)
 {
     Attach attach(*this,
-                  call,
+                  argv,
                   /*uid in container*/ 0,
                   /*gid in container*/ 0,
                   "/dev/tty",
@@ -217,7 +217,7 @@ void ContainerImpl::attach(Container::AttachCall& call,
                   /*capsToKeep*/ 0,
                   cwdInContainer,
                   /*envToKeep*/ {},
-                  /*envInContainer*/ {{"container","lxcpp"}});
+    /*envInContainer*/ {{"container","lxcpp"}});
     // TODO: Env variables should agree with the ones already in the container
     attach.execute();
 }

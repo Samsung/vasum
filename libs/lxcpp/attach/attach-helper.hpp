@@ -17,32 +17,35 @@
 
 /**
  * @file
- * @author  Lukasz Pawelczyk (l.pawelczyk@samsung.com)
- * @brief   LXCPP utils headers
+ * @author  Jan Olszak (j.olszak@samsung.com)
+ * @brief   Implementation of attaching to a container
  */
 
-#ifndef LXCPP_UTILS_HPP
-#define LXCPP_UTILS_HPP
+#ifndef LXCPP_ATTACH_ATTACH_HELPER_HPP
+#define LXCPP_ATTACH_ATTACH_HELPER_HPP
 
-#include <string>
+#include "lxcpp/attach/attach-config.hpp"
 
+#include "utils/channel.hpp"
 
 namespace lxcpp {
 
-
 /**
- * Changes the tittle of a current process title (e.g. visible in ps tool).
- *
- * @param title  A new tittle to be set
+ * Implementation of the Intermediate helper process.
+ * @see Attach
  */
-void setProcTitle(const std::string &title);
+class AttachHelper {
+public:
+    AttachHelper(const int channelFD);
+    ~AttachHelper();
 
-void setupMountPoints();
+    void execute();
 
-bool setupControlTTY(const int ttyFD);
-
+private:
+    utils::Channel mChannel;
+    AttachConfig mConfig;
+};
 
 } // namespace lxcpp
 
-
-#endif // LXCPP_START_HPP
+#endif // LXCPP_ATTACH_ATTACH_HELPER_HPP

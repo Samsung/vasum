@@ -45,8 +45,6 @@ struct NetworkInterfaceInfo {
 
 class Container {
 public:
-    typedef std::function<int(void)> AttachCall;
-
     virtual ~Container() {};
 
     // Configuration
@@ -73,7 +71,7 @@ public:
     virtual void reboot() = 0;
 
     // Other
-    virtual void attach(AttachCall& attachCall,
+    virtual void attach(const std::vector<const char*>& argv,
                         const std::string& cwdInContainer) = 0;
 
     // Network interfaces setup/config

@@ -26,6 +26,9 @@
 #endif
 
 #include "lxcpp/exception.hpp"
+#include "lxcpp/namespace.hpp"
+#include "lxcpp/filesystem.hpp"
+#include "lxcpp/process.hpp"
 
 #include "logger/logger.hpp"
 #include "utils/fd-utils.hpp"
@@ -35,7 +38,10 @@
 #include <iterator>
 #include <unistd.h>
 #include <string.h>
+
 #include <sys/prctl.h>
+#include <sys/ioctl.h>
+#include <sys/mount.h>
 
 
 namespace lxcpp {
@@ -81,6 +87,64 @@ void setProcTitle(const std::string &title)
 
     ::strcpy(mem, title.c_str());
 }
+
+void setupMountPoints()
+{
+#if 0
+    // TODO: This unshare should be optional only if we attach to PID/NET namespace, but not MNT.
+    // Otherwise container already has remounted /proc /sys
+    lxcpp::unshare(Namespace::MNT);
+
+    if (isMountPointShared("/")) {
+        // TODO: Handle case when the container rootfs or mount location is MS_SHARED, but not '/'
+        lxcpp::mount(nullptr, "/", nullptr, MS_SLAVE | MS_REC, nullptr);
+    }
+
+    if(isMountPoint("/proc")) {
+        lxcpp::umount("/proc", MNT_DETACH);
+        lxcpp::mount("none", "/proc", "proc", 0, nullptr);
+    }
+
+    if(isMountPoint("/sys")) {
+        lxcpp::umount("/sys", MNT_DETACH);
+        lxcpp::mount("none", "/sys", "sysfs", 0, nullptr);
+    }
+#endif
+}
+
+bool setupControlTTY(const int ttyFD)
+{
+    if (ttyFD != -1) {
+        return true;
+    }
+
+    if (!::isatty(ttyFD)) {
+        return false;
+    }
+
+    if (::setsid() < 0) {
+        return false;
+    }
+
+    if (::ioctl(ttyFD, TIOCSCTTY, NULL) < 0) {
+        return false;
+    }
+
+    if (::dup2(ttyFD, STDIN_FILENO) < 0) {
+        return false;
+    }
+
+    if (::dup2(ttyFD, STDOUT_FILENO) < 0) {
+        return false;
+    }
+
+    if (::dup2(ttyFD, STDERR_FILENO) < 0) {
+        return false;
+    }
+
+    return true;
+}
+
 
 
 } // namespace lxcpp

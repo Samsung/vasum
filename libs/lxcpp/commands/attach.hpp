@@ -25,6 +25,7 @@
 #define LXCPP_COMMANDS_ATTACH_HPP
 
 #include "lxcpp/commands/command.hpp"
+#include "lxcpp/attach/attach-config.hpp"
 #include "lxcpp/container-impl.hpp"
 #include "utils/channel.hpp"
 
@@ -36,7 +37,6 @@ namespace lxcpp {
 
 class Attach final: Command {
 public:
-    typedef std::function<int(void)> Call;
 
     /**
      * Runs call in the container's context
@@ -45,17 +45,18 @@ public:
      * It will not be stored for future use like most other commands.
      *
      * @param container container to which it attaches
-     * @param userCall user's function to run
+     * @param argv path and arguments for the user's executable
      * @param uid uid in the container
      * @param gid gid in the container
+     * @param ttyPath path of the TTY in the host
      * @param supplementaryGids supplementary groups in container
      * @param capsToKeep capabilities that will be kept
      * @param workDirInContainer work directory set for the new process
      * @param envToKeep environment variables that will be kept
      * @param envToSet new environment variables that will be set
      */
-    Attach(lxcpp::ContainerImpl& container,
-           Container::AttachCall& userCall,
+    Attach(const lxcpp::ContainerImpl& container,
+           const std::vector<const char*>& argv,
            const uid_t uid,
            const gid_t gid,
            const std::string& ttyPath,
@@ -69,32 +70,11 @@ public:
     void execute();
 
 private:
-    const lxcpp::ContainerImpl& mContainer;
-    const Container::AttachCall& mUserCall;
-    const uid_t mUid;
-    const gid_t mGid;
-    int mTTYFD;
-    const std::vector<gid_t>& mSupplementaryGids;
-    const int mCapsToKeep;
-    const std::string& mWorkDirInContainer;
-    const std::vector<std::string>& mEnvToKeep;
-    const std::vector<std::pair<std::string, std::string>>& mEnvToSet;
+    utils::Channel mIntermChannel;
+    AttachConfig mConfig;
 
-    // Methods for different stages of setting up the attachment
-    static int child(const Container::AttachCall& call,
-                     const uid_t uid,
-                     const gid_t gid,
-                     const int ttyFD,
-                     const std::vector<gid_t>& supplementaryGids,
-                     const int capsToKeep,
-                     const std::vector<std::string>& envToKeep,
-                     const std::vector<std::pair<std::string, std::string>>& envToSet);
+    void parent(const pid_t pid);
 
-    void parent(utils::Channel& intermChannel,
-                const pid_t pid);
-
-    void interm(utils::Channel& intermChannel,
-                Call& call);
 };
 
 } // namespace lxcpp
