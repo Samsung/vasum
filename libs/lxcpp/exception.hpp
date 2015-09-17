@@ -71,6 +71,11 @@ struct UtilityException: public Exception {
         : Exception(message) {}
 };
 
+struct TerminalException: public Exception {
+    explicit TerminalException(const std::string& message = "Error during a terminal operation")
+        : Exception(message) {}
+};
+
 struct BadArgument: public Exception {
     explicit BadArgument(const std::string& message = "Bad argument passed")
         : Exception(message) {}

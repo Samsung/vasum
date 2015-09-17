@@ -18,35 +18,40 @@
 /**
  * @file
  * @author  Lukasz Pawelczyk (l.pawelczyk@samsung.com)
- * @brief   Main file for the Guard process (libexec)
+ * @brief   Headers for host terminal preparation
  */
 
-#include "lxcpp/guard/guard.hpp"
+#ifndef LXCPP_COMMANDS_PREP_HOST_TERMINAL_HPP
+#define LXCPP_COMMANDS_PREP_HOST_TERMINAL_HPP
 
-#include "utils/fd-utils.hpp"
+#include "lxcpp/commands/command.hpp"
+#include "lxcpp/terminal-config.hpp"
 
-#include <iostream>
-#include <unistd.h>
 
-int main(int argc, char *argv[])
-{
-    if (argc == 1) {
-        std::cout << "This file should not be executed by hand" << std::endl;
-        ::_exit(EXIT_FAILURE);
-    }
+namespace lxcpp {
 
-    int channel = std::stoi(argv[1]);
 
-    // NOTE: this might not be required now, but I leave it here not to forget.
-    // We need to investigate this with vasum and think about possibility of
-    // poorly written software that leaks file descriptors and might use LXCPP.
-#if 0
-    for(int fd = 3; fd < ::sysconf(_SC_OPEN_MAX); ++fd) {
-        if (fd != channel) {
-            utils::close(fd);
-        }
-    }
-#endif
+class PrepHostTerminal final: Command {
+public:
+    /**
+     * Prepares the terminal on the host side.
+     *
+     * It creates a number of pseudoterminals and stores them
+     * to be passed to the guard and prepared for init process.
+     *
+     * @param config container's config
+     */
+    PrepHostTerminal(TerminalsConfig &config);
+    ~PrepHostTerminal();
 
-    return lxcpp::startGuard(channel);
-}
+    void execute();
+
+private:
+    TerminalsConfig &mTerminals;
+};
+
+
+} // namespace lxcpp
+
+
+#endif // LXCPP_COMMANDS_PREP_HOST_TERMINAL_HPP

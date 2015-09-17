@@ -86,6 +86,16 @@ bool fdSend(int socket, int fd, const unsigned int timeoutMS = 5000);
  */
 int fdRecv(int socket, const unsigned int timeoutMS = 5000);
 
+/**
+ * Set or remove CLOEXEC on a file descriptor
+ */
+void setCloseOnExec(int fd, bool closeOnExec);
+
+/**
+ * Set or remove NONBLOCK on a file descriptor
+ */
+void setNonBlocking(int fd, bool nonBlocking);
+
 } // namespace utils
 
 #endif // COMMON_UTILS_FD_HPP

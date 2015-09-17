@@ -18,35 +18,38 @@
 /**
  * @file
  * @author  Lukasz Pawelczyk (l.pawelczyk@samsung.com)
- * @brief   Main file for the Guard process (libexec)
+ * @brief   Implementation of host terminal preparation
  */
 
-#include "lxcpp/guard/guard.hpp"
+#include "lxcpp/commands/prep-host-terminal.hpp"
+#include "lxcpp/terminal.hpp"
 
-#include "utils/fd-utils.hpp"
+#include "logger/logger.hpp"
 
-#include <iostream>
-#include <unistd.h>
 
-int main(int argc, char *argv[])
+namespace lxcpp {
+
+
+PrepHostTerminal::PrepHostTerminal(TerminalsConfig &terminals)
+    : mTerminals(terminals)
 {
-    if (argc == 1) {
-        std::cout << "This file should not be executed by hand" << std::endl;
-        ::_exit(EXIT_FAILURE);
-    }
-
-    int channel = std::stoi(argv[1]);
-
-    // NOTE: this might not be required now, but I leave it here not to forget.
-    // We need to investigate this with vasum and think about possibility of
-    // poorly written software that leaks file descriptors and might use LXCPP.
-#if 0
-    for(int fd = 3; fd < ::sysconf(_SC_OPEN_MAX); ++fd) {
-        if (fd != channel) {
-            utils::close(fd);
-        }
-    }
-#endif
-
-    return lxcpp::startGuard(channel);
 }
+
+PrepHostTerminal::~PrepHostTerminal()
+{
+}
+
+void PrepHostTerminal::execute()
+{
+    LOGD("Creating " << mTerminals.count << " pseudoterminal(s) on the host side:");
+
+    for (int i = 0; i < mTerminals.count; ++i)
+    {
+        const auto pty = lxcpp::openPty(true);
+        LOGD(pty.second << " has been created");
+        mTerminals.PTYs.emplace_back(pty.first, pty.second);
+    }
+}
+
+
+} // namespace lxcpp

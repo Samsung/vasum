@@ -18,27 +18,42 @@
 /**
  * @file
  * @author  Lukasz Pawelczyk (l.pawelczyk@samsung.com)
- * @brief   LXCPP utils headers
+ * @brief   Terminal helpers headers
  */
 
-#ifndef LXCPP_UTILS_HPP
-#define LXCPP_UTILS_HPP
-
-#include <string>
+#ifndef LXCPP_TERMINAL_HPP
+#define LXCPP_TERMINAL_HPP
 
 
 namespace lxcpp {
 
 
 /**
- * Changes the tittle of a current process title (e.g. visible in ps tool).
+ * Nullifies all standard file descriptors (stdin, stdout, stderr)
+ * replacing them with file descriptor to /dev/null. Used to
+ * as a part of a process to detach a process from a control terminal.
  *
- * @param title  A new tittle to be set
+ * This function has to be safe in regard to signal(7)
+ *
+ * @returns an error code in case of failure.
  */
-void setProcTitle(const std::string &title);
+int nullStdFDs();
+
+/**
+ * This function creates a new pair of virtual character devices
+ * using a pseudtoreminal interface. It also configures as much as it
+ * can so the devices are immediately usable.
+ *
+ * @param rawMode  Whether to set the terminal in the raw mode (termios(2))
+ *
+ * @returns file descriptor to the master device and the path/name of
+ *          the pts slace device.
+ */
+std::pair<int, std::string> openPty(bool rawMode);
 
 
 } // namespace lxcpp
 
 
-#endif // LXCPP_START_HPP
+
+#endif // LXCPP_TERMINAL_HPP

@@ -26,6 +26,7 @@
 
 #include "lxcpp/logger-config.hpp"
 #include "lxcpp/network-config.hpp"
+#include "lxcpp/terminal-config.hpp"
 
 #include <config/config.hpp>
 #include <config/fields.hpp>
@@ -100,6 +101,14 @@ struct ContainerConfig {
      */
     LoggerConfig mLogger;
 
+    /**
+     * Configuration for terminal(s), from API point of view, only their number.
+     *
+     * Set: setTerminalCount()
+     * Get: none
+     */
+    TerminalsConfig mTerminals;
+
     ContainerConfig() : mGuardPid(-1), mInitPid(-1) {}
 
     CONFIG_REGISTER
@@ -109,7 +118,8 @@ struct ContainerConfig {
         mGuardPid,
         mInitPid,
         mInit,
-        mLogger
+        mLogger,
+        mTerminals
     )
 };
 

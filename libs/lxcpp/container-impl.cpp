@@ -29,6 +29,7 @@
 #include "lxcpp/capability.hpp"
 #include "lxcpp/commands/attach.hpp"
 #include "lxcpp/commands/start.hpp"
+#include "lxcpp/commands/prep-host-terminal.hpp"
 
 #include "logger/logger.hpp"
 #include "utils/exception.hpp"
@@ -128,9 +129,24 @@ void ContainerImpl::setLogger(const logger::LogType type,
     mConfig.mLogger.set(type, level, arg);
 }
 
+void ContainerImpl::setTerminalCount(const unsigned int count)
+{
+    if (count == 0) {
+        const std::string msg = "Container needs at least one terminal";
+        LOGE(msg);
+        throw ConfigureException(msg);
+    }
+
+    mConfig.mTerminals.count = count;
+}
+
 void ContainerImpl::start()
 {
     // TODO: check config consistency and completeness somehow
+
+    PrepHostTerminal terminal(mConfig.mTerminals);
+    terminal.execute();
+
     Start start(mConfig);
     start.execute();
 }

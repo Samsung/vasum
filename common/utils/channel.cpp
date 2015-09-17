@@ -113,11 +113,7 @@ void Channel::setCloseOnExec(const bool closeOnExec)
 {
     const int fd = getFD();
 
-    if (closeOnExec) {
-        ::fcntl(fd, F_SETFD, ::fcntl(fd, F_GETFD) | FD_CLOEXEC);
-    } else {
-        ::fcntl(fd, F_SETFD, ::fcntl(fd, F_GETFD) & ~FD_CLOEXEC);
-    }
+    utils::setCloseOnExec(fd, closeOnExec);
 }
 
 void Channel::closeSocket(int socketIndex)

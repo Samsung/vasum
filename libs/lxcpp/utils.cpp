@@ -21,15 +21,15 @@
  * @brief   LXCPP utils implementation
  */
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 #include "lxcpp/exception.hpp"
 
 #include "logger/logger.hpp"
 #include "utils/fd-utils.hpp"
 #include "utils/exception.hpp"
-
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
 
 #include <iostream>
 #include <iterator>
@@ -40,42 +40,6 @@
 
 namespace lxcpp {
 
-
-/*
- * This function has to be safe in regard to signal(7)
- */
-int nullStdFDs()
-{
-    int ret = -1;
-
-    int fd = TEMP_FAILURE_RETRY(open("/dev/null", O_RDWR | O_CLOEXEC));
-    if (fd == -1) {
-        goto err;
-    }
-
-    if (-1 == TEMP_FAILURE_RETRY(::dup2(fd, STDIN_FILENO))) {
-        goto err_close;
-    }
-
-    if (-1 == TEMP_FAILURE_RETRY(::dup2(fd, STDOUT_FILENO))) {
-        goto err_close;
-    }
-
-    if (-1 == TEMP_FAILURE_RETRY(::dup2(fd, STDERR_FILENO))) {
-        goto err_close;
-    }
-
-    if (-1 == TEMP_FAILURE_RETRY(::close(fd))) {
-        goto err_close;
-    }
-
-    return 0;
-
-err_close:
-    TEMP_FAILURE_RETRY(::close(fd));
-err:
-    return ret;
-}
 
 void setProcTitle(const std::string &title)
 {

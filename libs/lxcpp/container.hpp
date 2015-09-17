@@ -63,6 +63,8 @@ public:
                            const logger::LogLevel level,
                            const std::string &arg) = 0;
 
+    virtual void setTerminalCount(const unsigned int count) = 0;
+
     // Execution actions
     virtual void start() = 0;
     virtual void stop() = 0;

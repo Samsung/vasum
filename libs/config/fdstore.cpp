@@ -262,7 +262,7 @@ int FDStore::receiveFD(const unsigned int timeoutMS)
 
     // Receive
     for(;;) {
-        ssize_t ret = ::recvmsg(mFD, &msgh, MSG_WAITALL);
+        ssize_t ret = ::recvmsg(mFD, &msgh, MSG_WAITALL | MSG_CMSG_CLOEXEC);
         if (ret < 0) {
             if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
                 // Neglected errors, retry

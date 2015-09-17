@@ -93,6 +93,28 @@ void waitForEvent(int fd,
     }
 }
 
+void setFDFlag(const int fd, const int getOp, const int setOp, const int flag, const bool set)
+{
+    int ret = ::fcntl(fd, getOp);
+    if (ret == -1) {
+        std::string msg = "fcntl(): Failed to get FD flags: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+
+    if (set) {
+        ret = ::fcntl(fd, setOp, ret | flag);
+    } else {
+        ret = ::fcntl(fd, setOp, ret & ~flag);
+    }
+
+    if (ret == -1) {
+        std::string msg = "fcntl(): Failed to set FD flag: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+}
+
 } // namespace
 
 void close(int fd)
@@ -346,6 +368,16 @@ bool fdSend(int socket, int fd, const unsigned int timeoutMS)
 
     // TODO: It shouldn't return
     return true;
+}
+
+void setCloseOnExec(int fd, bool closeOnExec)
+{
+    setFDFlag(fd, F_GETFD, F_SETFD, FD_CLOEXEC, closeOnExec);
+}
+
+void setNonBlocking(int fd, bool nonBlocking)
+{
+    setFDFlag(fd, F_GETFL, F_SETFL, O_NONBLOCK, nonBlocking);
 }
 
 } // namespace utils

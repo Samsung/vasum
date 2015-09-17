@@ -25,11 +25,14 @@
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"
 #include "lxcpp/utils.hpp"
+#include "lxcpp/terminal.hpp"
 
 #include "logger/logger.hpp"
 #include "config/manager.hpp"
 
 #include <unistd.h>
+#include <stdio.h>
+#include <sys/ioctl.h>
 
 
 namespace lxcpp {
@@ -94,41 +97,44 @@ void Start::parent(const pid_t pid)
 
 void Start::daemonize()
 {
+    // Prepare a clean daemonized environment for a guard process:
+
+    // Set a new session so the process looses its control terminal
+    if (::setsid() < 0) {
+        ::_exit(EXIT_FAILURE);
+    }
+
     // Double fork() with exit() to reattach the process under the host's init
+    // and to make sure that the child (guard) is not a process group leader
+    // and cannot reacquire its control terminal
     pid_t pid = ::fork();
-    if (pid < 0) {
+    if (pid < 0) { // fork failed
+        ::_exit(EXIT_FAILURE);
+    }
+    if (pid > 0) { // exit in parent process
+        ::_exit(EXIT_SUCCESS);
+    }
+
+    // Chdir to / so it's independent on other directories
+    if (::chdir("/") < 0) {
         ::_exit(EXIT_FAILURE);
     }
 
-    if (pid == 0) {
-        // Prepare a clean environment for a guard process:
-        // - chdir to / so it's independent on other directories
-        // - null std* fds so it's properly dettached from the terminal
-        // - set a new session so it cannot reacquire a terminal
-
-        if (::chdir("/") < 0) {
-            ::_exit(EXIT_FAILURE);
-        }
-        if (nullStdFDs() <0) {
-            ::_exit(EXIT_FAILURE);
-        }
-        if (::setsid() < 0) {
-            ::_exit(EXIT_FAILURE);
-        }
-
-        // Add name and path of the container to argv. They are not used, but will
-        // identify the container in the process list in case setProcTitle() fails
-        // and will guarantee we have enough argv memory to write the title we want.
-        const char *argv[] = {mGuardPath.c_str(),
-                              mChannelFD.c_str(),
-                              mConfig.mName.c_str(),
-                              mConfig.mRootPath.c_str(),
-                              NULL};
-        ::execve(argv[0], const_cast<char *const*>(argv), NULL);
+    // Null std* fds so it's properly dettached from the terminal
+    if (nullStdFDs() < 0) {
         ::_exit(EXIT_FAILURE);
     }
 
-    ::_exit(EXIT_SUCCESS);
+    // Add name and path of the container to argv. They are not used, but will
+    // identify the container in the process list in case setProcTitle() fails
+    // and will guarantee we have enough argv memory to write the title we want.
+    const char *argv[] = {mGuardPath.c_str(),
+                          mChannelFD.c_str(),
+                          mConfig.mName.c_str(),
+                          mConfig.mRootPath.c_str(),
+                          NULL};
+    ::execve(argv[0], const_cast<char *const*>(argv), NULL);
+    ::_exit(EXIT_FAILURE);
 }
 
 

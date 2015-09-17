@@ -54,6 +54,8 @@ public:
                    const logger::LogLevel level,
                    const std::string &arg);
 
+    void setTerminalCount(const unsigned int count);
+
     const std::vector<Namespace>& getNamespaces() const;
 
     // Execution actions
