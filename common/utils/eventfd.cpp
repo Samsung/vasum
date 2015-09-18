@@ -42,7 +42,7 @@ EventFD::EventFD()
     if (mFD == -1) {
         const std::string msg = "Error in eventfd: " + getSystemErrorMessage();
         LOGE(msg);
-        throw UtilsException(msg);
+        throw EventFDException(msg);
     }
 }
 

@@ -104,6 +104,25 @@ struct IPCTimeoutException: public IPCException {
 };
 
 /**
+ * Exception to indicate socket error
+ * @ingroup IPCException
+ */
+struct IPCSocketException: public IPCException {
+    IPCSocketException(const int code, const std::string& message)
+        : IPCException(message),
+          mCode(code)
+    {}
+
+    int getCode() const
+    {
+        return mCode;
+    }
+
+private:
+    int mCode;
+};
+
+/**
  * Exception to indicate user error
  * @ingroup IPCException
  */

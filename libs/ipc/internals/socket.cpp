@@ -150,7 +150,7 @@ int Socket::createSocketInternal(const std::string& path)
     if (sockfd == -1) {
         const std::string msg = "Error in socket: " + getSystemErrorMessage();
         LOGE(msg);
-        throw IPCException(msg);
+        throw IPCSocketException(errno, msg);
     }
     setFdOptions(sockfd);
 
@@ -210,7 +210,7 @@ Socket Socket::connectSocket(const std::string& path)
     if (fd == -1) {
         const std::string msg = "Error in socket: " + getSystemErrorMessage();
         LOGE(msg);
-        throw IPCException(msg);
+        throw IPCSocketException(errno, msg);
     }
     setFdOptions(fd);
 

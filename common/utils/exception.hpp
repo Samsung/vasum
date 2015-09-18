@@ -39,6 +39,11 @@ struct UtilsException: public std::runtime_error {
     explicit UtilsException(const std::string& error) : std::runtime_error(error) {}
 };
 
+struct EventFDException: public UtilsException {
+
+    explicit EventFDException(const std::string& error) : UtilsException(error) {}
+};
+
 struct ProvisionExistsException: public UtilsException {
 
     explicit ProvisionExistsException(const std::string& error) : UtilsException(error) {}

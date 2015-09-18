@@ -130,7 +130,7 @@ void Processor::stop(bool wait)
             mRequestQueue.pushBack(Event::FINISH, request);
         }
 
-        if(wait){
+        if (wait) {
             LOGD(mLogPrefix + "Waiting for the Processor to stop");
 
             // Wait till the FINISH request is served

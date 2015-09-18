@@ -29,6 +29,7 @@
 #include "ipc/unique-id.hpp"
 
 #include <string>
+#include <sstream>
 #include <uuid/uuid.h>
 
 namespace {
@@ -68,6 +69,24 @@ BOOST_AUTO_TEST_CASE(DoubleGenerate)
     uid1.generate();
     uid2.generate();
     BOOST_CHECK_NE(uid1, uid2);
+}
+
+// compare two empty UIDs
+BOOST_AUTO_TEST_CASE(EmptyCompare)
+{
+    ipc::UniqueID uid1, uid2;
+
+    BOOST_CHECK_EQUAL(uid1, uid2);
+}
+
+// pass empty UID to a stream
+BOOST_AUTO_TEST_CASE(StreamOperator)
+{
+    ipc::UniqueID uid;
+    std::stringstream ss;
+
+    ss << uid;
+    BOOST_CHECK_EQUAL(ss.str(), "0.0:" + EMPTY_UUID);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

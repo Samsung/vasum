@@ -55,9 +55,7 @@ UniqueID::operator std::string() const
 
 std::ostream& operator<<(std::ostream& str, const UniqueID& id)
 {
-    char uuid[37];
-    ::uuid_unparse(id.mUUID, uuid);
-    str << id.mTime.tv_sec << "." << id.mTime.tv_nsec << ":" << uuid;
+    str << static_cast<std::string>(id);
     return str;
 }
 

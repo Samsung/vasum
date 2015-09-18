@@ -39,20 +39,15 @@ def launchTest(cmd=[], externalToolCmd=[], parsing=True):
     if externalToolCmd and not _checkIfBinExists(externalToolCmd[0]):
         return
 
-    cmd[1:] = ["'{0}'".format(arg) if re.search("^\s*[^']*/.*<.*>\s*$", arg)
-               else arg
-               for arg in cmd[1:]]
-
     log.info("Starting " + cmd[0] + " ...")
 
     if parsing:
         parser = Parser()
-        command = " ".join(externalToolCmd + cmd + _defLaunchArgs)
-        log.info("Invoking `" + command + "`")
-        p = subprocess.Popen(command,
-                         shell=True,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT)
+        commandString = " ".join(externalToolCmd + cmd + _defLaunchArgs)
+        log.info("Invoking `" + commandString + "`")
+        p = subprocess.Popen(externalToolCmd + cmd + _defLaunchArgs,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT)
         testResult = parser.parseOutputFromProcess(p)
         if testResult != "":
             domResult = minidom.parseString(testResult)
@@ -63,10 +58,9 @@ def launchTest(cmd=[], externalToolCmd=[], parsing=True):
     else:
         # Launching process without coloring does not require report in XML form
         # Avoid providing --report_format=XML, redirect std* by default to system's std*
-        command = " ".join(externalToolCmd + cmd + _defLaunchArgs[1:])
-        log.info("Invoking `" + command + "`")
-        p = subprocess.Popen(command,
-                             shell=True)
+        commandString = " ".join(externalToolCmd + cmd + _defLaunchArgs[1:])
+        log.info("Invoking `" + commandString + "`")
+        p = subprocess.Popen(externalToolCmd + cmd + _defLaunchArgs[1:])
         p.wait()
 
     log.info(cmd[0] + " finished.")
@@ -82,7 +76,8 @@ def main():
     group.add_argument('--valgrind', action='store_true',
                         help='Launch test binary inside Valgrind (assuming it is installed).')
     group.add_argument('--gdb', action='store_true',
-                        help='Launch test binary with GDB (assuming it is installed).')
+                        help='Launch test binary with a tool specified by $VSM_DEBUGGER variable. '
+                            +'Defaults to gdb.')
     argparser.add_argument('binary', nargs=argparse.REMAINDER,
                         help='Binary to be launched using script.')
 
@@ -90,7 +85,12 @@ def main():
 
     if args[0].binary:
         if args[0].gdb:
-            launchTest(args[0].binary, externalToolCmd=_gdbCmd + args[1], parsing=False)
+            debuggerVar = os.getenv("VSM_DEBUGGER")
+            if (debuggerVar):
+                _customDebuggerCmd = debuggerVar.split()
+            else:
+                _customDebuggerCmd = _gdbCmd
+            launchTest(args[0].binary, externalToolCmd=_customDebuggerCmd + args[1], parsing=False)
         elif args[0].valgrind:
             launchTest(args[0].binary, externalToolCmd=_valgrindCmd + args[1])
         else:
