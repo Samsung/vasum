@@ -80,7 +80,7 @@ class Logger(object):
         commandPrefix = "vsm_launch_test.py " + bin + " -t "
         self.infoTitle("Some tests failed. Use following command(s) to launch them explicitly:")
         for test in self.__failedTests:
-            self.error(self.__indentChar + commandPrefix + test)
+            self.error(self.__indentChar + commandPrefix + "'{0}'".format(test))
 
     def terminatedBySignal(self, bin, signum):
         self.error("\n=========== FAILED ===========\n")

@@ -5,6 +5,7 @@ from vsm_test_parser import Logger, Parser
 import subprocess
 import argparse
 import os
+import re
 
 _defLaunchArgs = ["--report_format=XML",
                   "--catch_system_errors=no",
@@ -37,6 +38,10 @@ def launchTest(cmd=[], externalToolCmd=[], parsing=True):
         return
     if externalToolCmd and not _checkIfBinExists(externalToolCmd[0]):
         return
+
+    cmd[1:] = ["'{0}'".format(arg) if re.search("^\s*[^']*/.*<.*>\s*$", arg)
+               else arg
+               for arg in cmd[1:]]
 
     log.info("Starting " + cmd[0] + " ...")
 
