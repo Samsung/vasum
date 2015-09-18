@@ -25,9 +25,16 @@
 #ifndef COMMON_UTILS_FD_HPP
 #define COMMON_UTILS_FD_HPP
 
+#include <string>
 #include <cstddef>
+#include <sys/types.h>
 
 namespace utils {
+
+/**
+ * Open a file.
+ */
+int open(const std::string &path, int flags, mode_t mode = -1);
 
 /**
  * Close the file descriptor.
@@ -38,6 +45,16 @@ void close(int fd);
  * Shut down part of a full-duplex connection
  */
 void shutdown(int fd);
+
+/**
+ * Operation on a special file
+ */
+int ioctl(int fd, unsigned long request, void *argp);
+
+/**
+ * Duplicate one file desciptor onto another
+ */
+int dup2(int olfFD, int newFD, bool closeOnExec = false);
 
 /**
  * Write to a file descriptor, throw on error.

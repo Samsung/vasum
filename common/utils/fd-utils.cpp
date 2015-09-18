@@ -22,6 +22,10 @@
  * @brief   File descriptor utility functions
  */
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 #include "config.hpp"
 
 #include "utils/fd-utils.hpp"
@@ -32,9 +36,11 @@
 #include <cstring>
 #include <chrono>
 #include <unistd.h>
+#include <fcntl.h>
 #include <poll.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
@@ -117,6 +123,31 @@ void setFDFlag(const int fd, const int getOp, const int setOp, const int flag, c
 
 } // namespace
 
+
+int open(const std::string &path, int flags, mode_t mode)
+{
+    assert(!(flags & O_CREAT || flags & O_TMPFILE) || mode >= 0);
+
+    int fd;
+
+    for (;;) {
+        fd = ::open(path.c_str(), flags, mode);
+
+        if (-1 == fd) {
+            if (errno == EINTR) {
+                LOGT("open() interrupted by a signal, retrying");
+                continue;
+            }
+            const std::string msg = "open() failed: " + getSystemErrorMessage();
+            LOGE(msg);
+            throw UtilsException(msg);
+        }
+        break;
+    }
+
+    return fd;
+}
+
 void close(int fd)
 {
     if (fd < 0) {
@@ -126,7 +157,7 @@ void close(int fd)
     for (;;) {
         if (-1 == ::close(fd)) {
             if (errno == EINTR) {
-                LOGT("Close interrupted by a signal, retrying");
+                LOGT("close() interrupted by a signal, retrying");
                 continue;
             }
             LOGE("Error in close: " << getSystemErrorMessage());
@@ -146,6 +177,32 @@ void shutdown(int fd)
         LOGE(msg);
         throw UtilsException(msg);
     }
+}
+
+int ioctl(int fd, unsigned long request, void *argp)
+{
+    int ret = ::ioctl(fd, request, argp);
+    if (ret == -1) {
+        const std::string msg = "ioctl() failed: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+    return ret;
+}
+
+int dup2(int oldFD, int newFD, bool closeOnExec)
+{
+    int flags = 0;
+    if (closeOnExec) {
+        flags |= O_CLOEXEC;
+    }
+    int fd = dup3(oldFD, newFD, flags);
+    if (fd == -1) {
+        const std::string msg = "dup3() failed: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+    return fd;
 }
 
 void write(int fd, const void* bufferPtr, const size_t size, int timeoutMS)

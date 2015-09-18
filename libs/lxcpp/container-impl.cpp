@@ -40,6 +40,34 @@
 #include <mutex>
 #include <algorithm>
 
+#include <ext/stdio_filebuf.h>
+#include <fstream>
+#include <iostream>
+#include <stdio.h>
+
+
+namespace {
+
+// TODO: UGLY: REMOVEME:
+// It will be removed as soon as Container::console() will get implemented
+// I need it for now to know I didn't brake anything. It will be eradicated.
+void readTerminal(const lxcpp::TerminalConfig &term)
+{
+    char *buf = NULL;
+    size_t size = 0;
+    ssize_t ret;
+
+    printf("%s output:\n", term.ptsName.c_str());
+    usleep(10000);
+
+    FILE *fp = fdopen(term.masterFD.value, "r");
+    while((ret = getline(&buf, &size, fp)) != -1L) {
+        printf("%s", buf);
+    }
+    free(buf);
+}
+
+} // namespace
 
 namespace lxcpp {
 
@@ -149,10 +177,16 @@ void ContainerImpl::start()
 
     Start start(mConfig);
     start.execute();
+
+    // TODO: UGLY: REMOVEME: read from 1st terminal
+    readTerminal(mConfig.mTerminals.PTYs[0]);
 }
 
 void ContainerImpl::stop()
 {
+    // TODO: things to do when shuttting down the container:
+    // - close PTY master FDs from the config so we won't keep PTYs open
+
     throw NotImplementedException();
 }
 

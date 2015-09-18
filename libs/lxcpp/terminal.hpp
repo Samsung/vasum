@@ -40,6 +40,16 @@ namespace lxcpp {
 int nullStdFDs();
 
 /**
+ * Checks if a file descriptor is a terminal
+ */
+bool isatty(int fd);
+
+/**
+ * Setups the passed fd as a new control and IO (in, out, err) terminal
+ */
+void setupIOControlTTY(const int ttyFD);
+
+/**
  * This function creates a new pair of virtual character devices
  * using a pseudtoreminal interface. It also configures as much as it
  * can so the devices are immediately usable.

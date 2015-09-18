@@ -132,13 +132,7 @@ Attach::Attach(lxcpp::ContainerImpl& container,
       mEnvToKeep(envToKeep),
       mEnvToSet(envToSet)
 {
-    mTTYFD = ::open(ttyPath.c_str(), O_RDWR | O_NOCTTY);
-    if (mTTYFD < 0) {
-        const std::string msg = "open() failed: " +
-                                utils::getSystemErrorMessage();
-        LOGE(msg);
-        throw BadArgument(msg);
-    }
+    mTTYFD = utils::open(ttyPath, O_RDWR | O_NOCTTY);
 }
 
 Attach::~Attach()

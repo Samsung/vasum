@@ -35,18 +35,18 @@ int main(int argc, char *argv[])
         ::_exit(EXIT_FAILURE);
     }
 
-    int channel = std::stoi(argv[1]);
+    int channelFD = std::stoi(argv[1]);
 
     // NOTE: this might not be required now, but I leave it here not to forget.
     // We need to investigate this with vasum and think about possibility of
     // poorly written software that leaks file descriptors and might use LXCPP.
 #if 0
     for(int fd = 3; fd < ::sysconf(_SC_OPEN_MAX); ++fd) {
-        if (fd != channel) {
+        if (fd != channelFD) {
             utils::close(fd);
         }
     }
 #endif
 
-    return lxcpp::startGuard(channel);
+    return lxcpp::startGuard(channelFD);
 }

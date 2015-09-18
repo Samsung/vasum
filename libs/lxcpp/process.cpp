@@ -79,13 +79,7 @@ pid_t clone(int (*function)(void *),
 
 void setns(const pid_t pid, const std::vector<Namespace>& namespaces)
 {
-    int dirFD = ::open(getNsPath(pid).c_str(), O_DIRECTORY | O_CLOEXEC);
-    if(dirFD < 0) {
-        const std::string msg = "open() failed: " +
-                                utils::getSystemErrorMessage();
-        LOGE(msg);
-        throw ProcessSetupException(msg);
-    }
+    int dirFD = utils::open(getNsPath(pid), O_DIRECTORY | O_CLOEXEC);
 
     // Open FDs connected with the requested namespaces
     std::vector<int> fds(namespaces.size(), -1);

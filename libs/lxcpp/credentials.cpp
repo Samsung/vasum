@@ -62,5 +62,17 @@ void setuid(const uid_t uid)
     }
 }
 
+pid_t setsid()
+{
+    pid_t pid = ::setsid();
+    if (pid == -1) {
+        const std::string msg = "setsid() failed: " +
+                                utils::getSystemErrorMessage();
+        LOGE(msg);
+        throw CredentialSetupException(msg);
+    }
+    return pid;
+}
+
 } // namespace lxcpp
 

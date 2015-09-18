@@ -22,6 +22,7 @@
  */
 
 #include "lxcpp/exception.hpp"
+#include "lxcpp/credentials.hpp"
 
 #include "logger/logger.hpp"
 #include "utils/exception.hpp"
@@ -117,6 +118,37 @@ err_close:
     TEMP_FAILURE_RETRY(::close(fd));
 err:
     return ret;
+}
+
+bool isatty(int fd)
+{
+    int ret = ::isatty(fd);
+    if (ret) {
+        return true;
+    }
+    if (errno == EINVAL || errno == ENOTTY) {
+        return false;
+    }
+
+    const std::string msg = "isatty() failed: " + utils::getSystemErrorMessage();
+    LOGE(msg);
+    throw TerminalException(msg);
+}
+
+void setupIOControlTTY(const int ttyFD)
+{
+    if (!lxcpp::isatty(ttyFD)) {
+        const std::string msg = "setupIOControlTTY(): file descriptor passed is not a terminal";
+        LOGE(msg);
+        throw TerminalException(msg);
+    }
+
+    lxcpp::setsid();
+    utils::ioctl(ttyFD, TIOCSCTTY, NULL);
+
+    utils::dup2(ttyFD, STDIN_FILENO);
+    utils::dup2(ttyFD, STDOUT_FILENO);
+    utils::dup2(ttyFD, STDERR_FILENO);
 }
 
 std::pair<int, std::string> openPty(bool rawMode)

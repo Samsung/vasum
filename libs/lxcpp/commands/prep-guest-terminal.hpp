@@ -18,37 +18,41 @@
 /**
  * @file
  * @author  Lukasz Pawelczyk (l.pawelczyk@samsung.com)
- * @brief   Implementation of host terminal preparation
+ * @brief   Headers for guest terminal preparation
  */
 
-#include "lxcpp/commands/prep-host-terminal.hpp"
-#include "lxcpp/terminal.hpp"
+#ifndef LXCPP_COMMANDS_PREP_GUEST_TERMINAL_HPP
+#define LXCPP_COMMANDS_PREP_GUEST_TERMINAL_HPP
 
-#include "logger/logger.hpp"
+#include "lxcpp/commands/command.hpp"
+#include "lxcpp/terminal-config.hpp"
 
 
 namespace lxcpp {
 
 
-PrepHostTerminal::PrepHostTerminal(TerminalsConfig &terminals)
-    : mTerminals(terminals)
-{
-}
+class PrepGuestTerminal final: Command {
+public:
+    /**
+     * Prepares the terminal on the guest side.
+     *
+     * It fills the /dev/ directory of a container with appropriate
+     * entries representing the created PTYs. It also takes already
+     * created PTYs and sets the first one as a controlling terminal.
+     *
+     * @param config container's config
+     */
+    PrepGuestTerminal(TerminalsConfig &config);
+    ~PrepGuestTerminal();
 
-PrepHostTerminal::~PrepHostTerminal()
-{
-}
+    void execute();
 
-void PrepHostTerminal::execute()
-{
-    LOGD("Creating " << mTerminals.count << " pseudoterminal(s) on the host side:");
-
-    for (int i = 0; i < mTerminals.count; ++i) {
-        const auto pty = lxcpp::openPty(true);
-        LOGD(pty.second << " has been created");
-        mTerminals.PTYs.emplace_back(pty.first, pty.second);
-    }
-}
+private:
+    TerminalsConfig &mTerminals;
+};
 
 
 } // namespace lxcpp
+
+
+#endif // LXCPP_COMMANDS_PREP_GUEST_TERMINAL_HPP

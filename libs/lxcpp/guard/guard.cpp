@@ -24,6 +24,7 @@
 #include "lxcpp/utils.hpp"
 #include "lxcpp/guard/guard.hpp"
 #include "lxcpp/process.hpp"
+#include "lxcpp/commands/prep-guest-terminal.hpp"
 
 #include "config/manager.hpp"
 #include "logger/logger.hpp"
@@ -79,6 +80,9 @@ int startGuard(int channelFD)
 
     if (pid == 0) {
         // TODO: container preparation part 2
+
+        PrepGuestTerminal terminals(cfg.mTerminals);
+        terminals.execute();
 
         startContainer(cfg);
         ::_exit(EXIT_FAILURE);
