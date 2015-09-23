@@ -131,7 +131,7 @@ bool isDeviceWithName(const boost::regex& deviceNameRegex,
     }
 
     char name[DEVICE_NAME_LENGTH];
-    if (ioctl(fd, EVIOCGNAME(sizeof(name)), name) < 0) {
+    if (::ioctl(fd, EVIOCGNAME(sizeof(name)), name) < 0) {
         LOGD("Failed to get the device name of: " << path);
         if (::close(fd) < 0) {
             LOGE("Error during closing file " << path);

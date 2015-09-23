@@ -126,7 +126,7 @@ void setFDFlag(const int fd, const int getOp, const int setOp, const int flag, c
 
 int open(const std::string &path, int flags, mode_t mode)
 {
-    assert(!(flags & O_CREAT || flags & O_TMPFILE) || mode >= 0);
+    assert(!(flags & O_CREAT || flags & O_TMPFILE) || mode != static_cast<unsigned>(-1));
 
     int fd;
 
