@@ -14,8 +14,11 @@ Requirements
 Instructions
 ------------
 
-All command should be run from within your build directory. **repodir** is a
-path to your repository root.
+All command should be run from within your build directory. Replace following expressions:
+ - **repodir** - with a path to your repository root.
+ - **covdir** - with a path you'd like to place your coverage report
+
+-------------------------------------------------------------------------------
 
 1. Generate your build using CCOV profile
 ```bash
@@ -33,8 +36,8 @@ sudo vsm_all_tests.py
 
 3. Generate HTML report
 ```bash
-gcovr -e tests -s -v -r repodir --html -o coverage.html
+gcovr -e tests -s -v -r repodir --html --html-details -o covdir/index.html
 ```
 
-4. Coverage report consists of single page **coverage.html**. Find it in your
-   build directory and open in a web browser.
+4. Open *index.html* in a web browser to see generated documentation. Click on any source file
+   to see line coverage visualization.
