@@ -273,6 +273,16 @@ private:
         checkType(object, json_type_string);
         value = json_object_get_string(object);
     }
+
+    static void fromJsonObject(json_object* object, char* &value)
+    {
+        checkType(object, json_type_string);
+
+        int len = json_object_get_string_len(object);
+        value = new char[len + 1];
+        std::strncpy(value, json_object_get_string(object), len);
+        value[len] = '\0';
+    }
 };
 
 } // namespace config

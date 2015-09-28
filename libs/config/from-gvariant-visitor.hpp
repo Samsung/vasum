@@ -127,6 +127,18 @@ private:
         value = g_variant_get_string(object, NULL);
     }
 
+    static void fromGVariant(GVariant* object, char* &value)
+    {
+        checkType(object, G_VARIANT_TYPE_STRING);
+
+        const char* source = g_variant_get_string(object, NULL);
+        size_t len = std::strlen(source);
+
+        value = new char[len + 1];
+        std::strncpy(value, source, len);
+        value[len] = '\0';
+    }
+
     static void fromGVariant(GVariant* object, config::FileDescriptor& value)
     {
         checkType(object, G_VARIANT_TYPE_INT32);

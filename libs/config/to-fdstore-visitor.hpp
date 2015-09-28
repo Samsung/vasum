@@ -30,6 +30,7 @@
 #include "config/types.hpp"
 
 #include <string>
+#include <cstring>
 
 namespace config {
 
@@ -58,6 +59,13 @@ private:
     {
         writeInternal(value.size());
         mStore.write(value.c_str(), value.size());
+    }
+
+    void writeInternal(const char* &value)
+    {
+        size_t size = std::strlen(value);
+        writeInternal(size);
+        mStore.write(value, size);
     }
 
     void writeInternal(const config::FileDescriptor& fd)

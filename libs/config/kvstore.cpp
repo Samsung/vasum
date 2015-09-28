@@ -32,6 +32,7 @@
 #include <memory>
 #include <set>
 #include <cassert>
+#include <cstring>
 
 namespace config {
 
@@ -231,19 +232,24 @@ void KVStore::remove(const std::string& key)
     transaction.commit();
 }
 
-void KVStore::setInternal(const std::string& key, const std::string& value)
+void KVStore::setInternal(const std::string& key, const char* value)
 {
     Transaction transaction(*this);
     ScopedReset scopedReset(mSetValueStmt);
 
     ::sqlite3_bind_text(mSetValueStmt->get(), 1, key.c_str(), AUTO_DETERM_SIZE, SQLITE_STATIC);
-    ::sqlite3_bind_text(mSetValueStmt->get(), 2, value.c_str(), AUTO_DETERM_SIZE, SQLITE_STATIC);
+    ::sqlite3_bind_text(mSetValueStmt->get(), 2, value, AUTO_DETERM_SIZE, SQLITE_STATIC);
 
 
     if (::sqlite3_step(mSetValueStmt->get()) != SQLITE_DONE) {
         throw ConfigException("Error during stepping: " + mConn.getErrorMessage());
     }
     transaction.commit();
+}
+
+void KVStore::setInternal(const std::string& key, const std::string& value)
+{
+    setInternal(key, value.c_str());
 }
 
 void KVStore::setInternal(const std::string& key, const std::initializer_list<std::string>& values)
@@ -289,6 +295,33 @@ std::string KVStore::getInternal(const std::string& key, std::string*)
 
     std::string value = reinterpret_cast<const char*>(
             sqlite3_column_text(mGetValueStmt->get(), FIRST_COLUMN));
+
+    transaction.commit();
+    return value;
+}
+
+char* KVStore::getInternal(const std::string& key, char**)
+{
+    Transaction transaction(*this);
+    ScopedReset scopedReset(mGetValueStmt);
+
+    ::sqlite3_bind_text(mGetValueStmt->get(), 1, key.c_str(), AUTO_DETERM_SIZE, SQLITE_TRANSIENT);
+
+    int ret = ::sqlite3_step(mGetValueStmt->get());
+    if (ret == SQLITE_DONE) {
+        throw ConfigException("No value corresponding to the key: " + key + "@" + mPath);
+    }
+    if (ret != SQLITE_ROW) {
+        throw ConfigException("Error during stepping: " + mConn.getErrorMessage());
+    }
+
+    const char* source = reinterpret_cast<const char*>(sqlite3_column_text(mGetValueStmt->get(), FIRST_COLUMN));
+
+    size_t length = std::strlen(source);
+    char* value = new char[length + 1];
+
+    std::strncpy(value, source, length);
+    value[length] = '\0';
 
     transaction.commit();
     return value;

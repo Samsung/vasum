@@ -88,6 +88,7 @@ struct TestConfig {
     std::uint32_t uint32Val;
     std::uint64_t uint64Val;
     std::string stringVal;
+    char* cstringVal;
     double doubleVal;
     bool boolVal;
 
@@ -110,6 +111,7 @@ struct TestConfig {
         uint32Val,
         uint64Val,
         stringVal,
+        cstringVal,
         doubleVal,
         boolVal,
 
@@ -150,6 +152,7 @@ const std::string jsonTestString =
     "\"uint32Val\": 123456, "
     "\"uint64Val\": 1234567890123456789, "
     "\"stringVal\": \"blah\", "
+    "\"cstringVal\": \"blah\", "
     "\"doubleVal\": -1.234000, "
     "\"boolVal\": true, "
     "\"emptyIntVector\": [ ], "
@@ -173,6 +176,7 @@ const std::string jsonEmptyTestString =
     "\"uint32Val\": 0, "
     "\"uint64Val\": 0, "
     "\"stringVal\": \"\", "
+    "\"cstringVal\": \"\", "
     "\"boolVal\": false, "
     "\"emptyIntVector\": [ ], "
     "\"intVector\": [ ], "

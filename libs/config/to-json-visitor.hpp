@@ -120,6 +120,11 @@ private:
         return json_object_new_string(value.c_str());
     }
 
+    static json_object* toJsonObject(char* value)
+    {
+        return json_object_new_string(value);
+    }
+
     template<typename T>
     static json_object* toJsonObject(const std::vector<T>& value)
     {

@@ -61,6 +61,16 @@ private:
         mStore.read(&value.front(), size);
     }
 
+    void readInternal(char* &value)
+    {
+        size_t size;
+        readInternal(size);
+
+        value = new char[size + 1];
+        mStore.read(value, size);
+        value[size] = '\0';
+    }
+
     void readInternal(config::FileDescriptor& fd)
     {
         fd = mStore.receiveFD();

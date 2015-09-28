@@ -134,6 +134,7 @@ private:
     bool mIsTransactionCommited;
 
     void setInternal(const std::string& key, const std::string& value);
+    void setInternal(const std::string& key, const char* value);
     void setInternal(const std::string& key, const std::initializer_list<std::string>& values);
     void setInternal(const std::string& key, const std::vector<std::string>& values);
     template<typename T>
@@ -142,6 +143,7 @@ private:
     void setInternal(const std::string& key, const std::vector<T>& values);
 
     std::string getInternal(const std::string& key, std::string*);
+    char* getInternal(const std::string& key, char**);
     std::vector<std::string> getInternal(const std::string& key, std::vector<std::string>*);
     template<typename T>
     T getInternal(const std::string& key, T*);

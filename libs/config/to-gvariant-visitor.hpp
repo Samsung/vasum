@@ -83,6 +83,7 @@ private:
     void writeInternal(bool value) { add("b", value); };
     void writeInternal(double value) { add("d", value); };
     void writeInternal(const std::string& value) { add("s", value.c_str()); };
+    void writeInternal(const char* value) { add("s", value); };
     void writeInternal(const config::FileDescriptor& value) { add("h", value.value); };
 
     template<typename T>
