@@ -1,8 +1,8 @@
 var classipc_1_1MethodResult =
 [
     [ "Pointer", "classipc_1_1MethodResult.html#a75551061d4014841c943dff517b96390", null ],
-    [ "MethodResult", "classipc_1_1MethodResult.html#a4b9dbf3c67cec1129c3da30a17ad9e4e", null ],
-    [ "getPeerID", "classipc_1_1MethodResult.html#a9659b179a11c7982eb6790227f179390", null ],
+    [ "MethodResult", "classipc_1_1MethodResult.html#a6b913f7f775787b2152d864c146323a8", null ],
+    [ "getPeerID", "classipc_1_1MethodResult.html#acbb5ce6985ebf347833ca98c3c1cc3e5", null ],
     [ "set", "classipc_1_1MethodResult.html#a5fa0369479e27c2965e601714173ec4e", null ],
     [ "setError", "classipc_1_1MethodResult.html#a91289d7d7c61b18b91d40adf250c9da8", null ],
     [ "setInternal", "classipc_1_1MethodResult.html#a8cabb716b96f912ccf94d773948ef0dc", null ],

@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['api',['API',['../vasum-client_8cpp.html#ad8ce4efaa307683d3d763b37b4711c53',1,'vasum-client.cpp']]],
-  ['assert_5fsame_5fthread',['ASSERT_SAME_THREAD',['../same-thread-guard_8hpp.html#ad26ad593fb1590b761a396734d371fa6',1,'same-thread-guard.hpp']]]
+  ['_5fgnu_5fsource',['_GNU_SOURCE',['../fd-utils_8cpp.html#a369266c24eacffb87046522897a570d5',1,'_GNU_SOURCE():&#160;fd-utils.cpp'],['../libs_2lxcpp_2utils_8cpp.html#a369266c24eacffb87046522897a570d5',1,'_GNU_SOURCE():&#160;utils.cpp']]]
 ];

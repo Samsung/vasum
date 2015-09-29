@@ -143,11 +143,16 @@ Private Member Functions</h2></td></tr>
 <tr class="separator:a9df4c59211a313a2291492a1b0a49479"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d1e24fc81a210dd79a92bb24333e607"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1ToGVariantVisitor.html#a4d1e24fc81a210dd79a92bb24333e607">writeInternal</a> (const std::string &amp;value)</td></tr>
 <tr class="separator:a4d1e24fc81a210dd79a92bb24333e607"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f1fb18dd4fae19bb5776d404ce74e43"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1ToGVariantVisitor.html#a2f1fb18dd4fae19bb5776d404ce74e43">writeInternal</a> (const char *value)</td></tr>
+<tr class="separator:a2f1fb18dd4fae19bb5776d404ce74e43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc18a514c7d44b660a3205d9f19a362f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1ToGVariantVisitor.html#adc18a514c7d44b660a3205d9f19a362f">writeInternal</a> (const <a class="el" href="structconfig_1_1FileDescriptor.html">config::FileDescriptor</a> &amp;value)</td></tr>
 <tr class="separator:adc18a514c7d44b660a3205d9f19a362f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a782f2a5c861b3d6a663d9b1817bf9ce6"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a782f2a5c861b3d6a663d9b1817bf9ce6"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1ToGVariantVisitor.html#a782f2a5c861b3d6a663d9b1817bf9ce6">writeInternal</a> (const std::vector&lt; T &gt; &amp;value)</td></tr>
 <tr class="separator:a782f2a5c861b3d6a663d9b1817bf9ce6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a771b802b92ba41237406d0c6a688c196"><td class="memTemplParams" colspan="2">template&lt;typename T , std::size_t N&gt; </td></tr>
+<tr class="memitem:a771b802b92ba41237406d0c6a688c196"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1ToGVariantVisitor.html#a771b802b92ba41237406d0c6a688c196">writeInternal</a> (const std::array&lt; T, N &gt; &amp;values)</td></tr>
+<tr class="separator:a771b802b92ba41237406d0c6a688c196"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a25e9535d3b4a5de705a5521a37deab6d"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a25e9535d3b4a5de705a5521a37deab6d"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if&lt; <a class="el" href="structconfig_1_1isVisitable.html">isVisitable</a>&lt; T &gt;::value &amp;&amp;!<a class="el" href="structconfig_1_1isUnion.html">isUnion</a>&lt; T &gt;::value &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1ToGVariantVisitor.html#a25e9535d3b4a5de705a5521a37deab6d">writeInternal</a> (const T &amp;value)</td></tr>
 <tr class="separator:a25e9535d3b4a5de705a5521a37deab6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -522,6 +527,30 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a class="anchor" id="a2f1fb18dd4fae19bb5776d404ce74e43"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void config::ToGVariantVisitor::writeInternal </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="adc18a514c7d44b660a3205d9f19a362f"></a>
 <div class="memitem">
 <div class="memproto">
@@ -560,6 +589,32 @@ template&lt;typename T &gt; </div>
           <td>(</td>
           <td class="paramtype">const std::vector&lt; T &gt; &amp;&#160;</td>
           <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a771b802b92ba41237406d0c6a688c196"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , std::size_t N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void config::ToGVariantVisitor::writeInternal </td>
+          <td>(</td>
+          <td class="paramtype">const std::array&lt; T, N &gt; &amp;&#160;</td>
+          <td class="paramname"><em>values</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -655,7 +710,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceconfig.html">config</a></li><li class="navelem"><a class="el" href="classconfig_1_1ToGVariantVisitor.html">ToGVariantVisitor</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

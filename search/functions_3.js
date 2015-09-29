@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['daemonize',['daemonize',['../namespaceutils.html#a802d7d8d6f4e085219b6edad75728a94',1,'utils']]],
+  ['daemonize',['daemonize',['../classlxcpp_1_1Start.html#aefe2a483538f701e0dca0179f4c0c136',1,'lxcpp::Start::daemonize()'],['../namespaceutils.html#a802d7d8d6f4e085219b6edad75728a94',1,'utils::daemonize()']]],
   ['dbusconnection',['DbusConnection',['../classdbus_1_1DbusConnection.html#a3ec2e400bf1a6fab074647225cc05321',1,'dbus::DbusConnection']]],
   ['dbuscustomexception',['DbusCustomException',['../structdbus_1_1DbusCustomException.html#a1ea4fb89b9eecab26862b6444a3a75d4',1,'dbus::DbusCustomException']]],
   ['dbusexception',['DbusException',['../structdbus_1_1DbusException.html#a662da044f90ab1185eb7b1216a68e5d7',1,'dbus::DbusException']]],
@@ -18,8 +18,8 @@ var searchData=
   ['deletecallbackwrapper',['deleteCallbackWrapper',['../namespaceutils.html#afb2375997b9f72843ec98b402af855ef',1,'utils']]],
   ['deleteipaddress',['deleteIpAddress',['../namespacevasum_1_1netdev.html#af7935e41c57a39e59ec4ed7525938987',1,'vasum::netdev']]],
   ['deletenetdevipaddress',['deleteNetdevIpAddress',['../classvasum_1_1Zone.html#ab518f6e2add859194cc2e32d32aedf1b',1,'vasum::Zone']]],
-  ['delnetaddr',['delNetAddr',['../classlxcpp_1_1NetworkInterfaceConfig.html#a1e305e42c9eb76a6ba6211677fabfee9',1,'lxcpp::NetworkInterfaceConfig']]],
-  ['destroy',['destroy',['../classvasum_1_1lxc_1_1LxcZone.html#a32d53f3e01da46fdadb9d0d103863180',1,'vasum::lxc::LxcZone::destroy()'],['../classlxcpp_1_1ContainerImpl.html#acfdedda26b3b2b17410602b435b88814',1,'lxcpp::ContainerImpl::destroy()'],['../classlxcpp_1_1Container.html#a6bd131da14ebb254d9415c586e6c557c',1,'lxcpp::Container::destroy()'],['../classlxcpp_1_1NetworkInterface.html#a8460d6ab228683bdb47a4a7e8f0f3976',1,'lxcpp::NetworkInterface::destroy()']]],
+  ['delinetaddr',['delInetAddr',['../classlxcpp_1_1NetworkInterface.html#ae442f8fadee061b751a559e92059ec37',1,'lxcpp::NetworkInterface']]],
+  ['destroy',['destroy',['../classvasum_1_1lxc_1_1LxcZone.html#a32d53f3e01da46fdadb9d0d103863180',1,'vasum::lxc::LxcZone::destroy()'],['../classlxcpp_1_1NetworkInterface.html#a8460d6ab228683bdb47a4a7e8f0f3976',1,'lxcpp::NetworkInterface::destroy()']]],
   ['destroy_5fnetdev',['destroy_netdev',['../namespacevasum_1_1cli.html#a84e7c7f7ebcad2c1af40055364a04015',1,'vasum::cli']]],
   ['destroy_5fzone',['destroy_zone',['../namespacevasum_1_1cli.html#a18a97cc73e88d2756286d667c6782d80',1,'vasum::cli']]],
   ['destroyinterface',['destroyInterface',['../classlxcpp_1_1ContainerImpl.html#a1a50a8c1f200f9bd681b106f63ad5e99',1,'lxcpp::ContainerImpl::destroyInterface()'],['../classlxcpp_1_1Container.html#a61aa3505663d83f1226b0ee6940df71d',1,'lxcpp::Container::destroyInterface()']]],
@@ -34,5 +34,6 @@ var searchData=
   ['dispatchiteration',['dispatchIteration',['../classipc_1_1epoll_1_1EventPoll.html#a3c795b47f082d4b28e162ab3ff9e4e67',1,'ipc::epoll::EventPoll']]],
   ['down',['down',['../classlxcpp_1_1NetworkInterface.html#a745c778aa7bbce38ec7a7452977fdc0a',1,'lxcpp::NetworkInterface']]],
   ['dropcapsfromboundingexcept',['dropCapsFromBoundingExcept',['../namespacelxcpp.html#a0805dda020d1695ad5b82af6f97a8cf2',1,'lxcpp']]],
-  ['droproot',['dropRoot',['../namespaceutils.html#a8f9fe7c38ee9414a390f295dc82ce7b2',1,'utils']]]
+  ['droproot',['dropRoot',['../namespaceutils.html#a8f9fe7c38ee9414a390f295dc82ce7b2',1,'utils']]],
+  ['dup2',['dup2',['../namespaceutils.html#aa7ff1a5d9fb5a20d3e6d447ed17a0733',1,'utils']]]
 ];

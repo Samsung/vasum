@@ -4,6 +4,8 @@ var searchData=
   ['latch_2ehpp',['latch.hpp',['../latch_8hpp.html',1,'']]],
   ['level_2ecpp',['level.cpp',['../level_8cpp.html',1,'']]],
   ['level_2ehpp',['level.hpp',['../level_8hpp.html',1,'']]],
+  ['logger_2dconfig_2ecpp',['logger-config.cpp',['../logger-config_8cpp.html',1,'']]],
+  ['logger_2dconfig_2ehpp',['logger-config.hpp',['../logger-config_8hpp.html',1,'']]],
   ['logger_2dscope_2ecpp',['logger-scope.cpp',['../logger-scope_8cpp.html',1,'']]],
   ['logger_2dscope_2ehpp',['logger-scope.hpp',['../logger-scope_8hpp.html',1,'']]],
   ['logger_2ecpp',['logger.cpp',['../logger_8cpp.html',1,'']]],

@@ -100,7 +100,6 @@ $(document).ready(function(){initNavTree('classlxcpp_1_1Container.html','');});
 
 <div class="header">
   <div class="summary">
-<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classlxcpp_1_1Container-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -121,19 +120,26 @@ $(document).ready(function(){initNavTree('classlxcpp_1_1Container.html','');});
 </map>
  </div></div>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
-Public Types</h2></td></tr>
-<tr class="memitem:a8b7b1b454cc967137df4ff0325bd5f77"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; int(void)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a8b7b1b454cc967137df4ff0325bd5f77">AttachCall</a></td></tr>
-<tr class="separator:a8b7b1b454cc967137df4ff0325bd5f77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ac8b0b0092d4988bc14a77eeeb556f617"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#ac8b0b0092d4988bc14a77eeeb556f617">~Container</a> ()</td></tr>
 <tr class="separator:ac8b0b0092d4988bc14a77eeeb556f617"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9f0ac84d131a8e6ce49a81ce30fbfd2"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#ae9f0ac84d131a8e6ce49a81ce30fbfd2">getName</a> ()=0</td></tr>
-<tr class="separator:ae9f0ac84d131a8e6ce49a81ce30fbfd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8fba3d8c4c449ddad60c16f9354db14e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a8fba3d8c4c449ddad60c16f9354db14e">setName</a> (const std::string &amp;name)=0</td></tr>
-<tr class="separator:a8fba3d8c4c449ddad60c16f9354db14e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a089add2fbad44c0b70b522bd0d190bb8"><td class="memItemLeft" align="right" valign="top">virtual const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a089add2fbad44c0b70b522bd0d190bb8">getName</a> () const  =0</td></tr>
+<tr class="separator:a089add2fbad44c0b70b522bd0d190bb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af26e53f8ce4ef7ab34d70328f8ab1bc8"><td class="memItemLeft" align="right" valign="top">virtual const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#af26e53f8ce4ef7ab34d70328f8ab1bc8">getRootPath</a> () const  =0</td></tr>
+<tr class="separator:af26e53f8ce4ef7ab34d70328f8ab1bc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92afc780cb896ef6f6f81110f35794b9"><td class="memItemLeft" align="right" valign="top">virtual pid_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a92afc780cb896ef6f6f81110f35794b9">getGuardPid</a> () const  =0</td></tr>
+<tr class="separator:a92afc780cb896ef6f6f81110f35794b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10e673af84438d952472eba29b034ba1"><td class="memItemLeft" align="right" valign="top">virtual pid_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a10e673af84438d952472eba29b034ba1">getInitPid</a> () const  =0</td></tr>
+<tr class="separator:a10e673af84438d952472eba29b034ba1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70aec06c519ff385c1895acab10f3d1a"><td class="memItemLeft" align="right" valign="top">virtual const std::vector&lt; std::string &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a70aec06c519ff385c1895acab10f3d1a">getInit</a> ()=0</td></tr>
+<tr class="separator:a70aec06c519ff385c1895acab10f3d1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e706b4b3d608ee24fa39b5d43d7ab8f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a0e706b4b3d608ee24fa39b5d43d7ab8f">setInit</a> (const std::vector&lt; std::string &gt; &amp;init)=0</td></tr>
+<tr class="separator:a0e706b4b3d608ee24fa39b5d43d7ab8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a633705588eb5d57b9b227d5990128cb8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a633705588eb5d57b9b227d5990128cb8">setLogger</a> (const <a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1e">logger::LogType</a> type, const <a class="el" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">logger::LogLevel</a> level, const std::string &amp;arg)=0</td></tr>
+<tr class="separator:a633705588eb5d57b9b227d5990128cb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8869aee14a85a3e49aeaf1eaec0a56d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#ae8869aee14a85a3e49aeaf1eaec0a56d">setTerminalCount</a> (const unsigned int count)=0</td></tr>
+<tr class="separator:ae8869aee14a85a3e49aeaf1eaec0a56d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adaffedab2424bb838bb082ecb84fb8b1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#adaffedab2424bb838bb082ecb84fb8b1">start</a> ()=0</td></tr>
 <tr class="separator:adaffedab2424bb838bb082ecb84fb8b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aefc81e1e4e527e3a238bab8ce95391fc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#aefc81e1e4e527e3a238bab8ce95391fc">stop</a> ()=0</td></tr>
@@ -144,26 +150,16 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a20600c7e2618d3989f1435969a3a872b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a370a141501d3995e5f09cb66f4540a4a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a370a141501d3995e5f09cb66f4540a4a">reboot</a> ()=0</td></tr>
 <tr class="separator:a370a141501d3995e5f09cb66f4540a4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10e673af84438d952472eba29b034ba1"><td class="memItemLeft" align="right" valign="top">virtual pid_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a10e673af84438d952472eba29b034ba1">getInitPid</a> () const  =0</td></tr>
-<tr class="separator:a10e673af84438d952472eba29b034ba1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aed51192d29bfdb162da791b2a69650d6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#aed51192d29bfdb162da791b2a69650d6">create</a> ()=0</td></tr>
-<tr class="separator:aed51192d29bfdb162da791b2a69650d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6bd131da14ebb254d9415c586e6c557c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a6bd131da14ebb254d9415c586e6c557c">destroy</a> ()=0</td></tr>
-<tr class="separator:a6bd131da14ebb254d9415c586e6c557c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2366d021555c5438b207a4251c43843d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a2366d021555c5438b207a4251c43843d">setRootPath</a> (const std::string &amp;path)=0</td></tr>
-<tr class="separator:a2366d021555c5438b207a4251c43843d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad8f1a2f4fb4d2e39dc113ee45e52b58b"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#ad8f1a2f4fb4d2e39dc113ee45e52b58b">getRootPath</a> ()=0</td></tr>
-<tr class="separator:ad8f1a2f4fb4d2e39dc113ee45e52b58b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a98475a357d1ec1ea1d8c7514c5de54af"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a98475a357d1ec1ea1d8c7514c5de54af">attach</a> (<a class="el" href="classlxcpp_1_1Container.html#a8b7b1b454cc967137df4ff0325bd5f77">AttachCall</a> &amp;attachCall, const std::string &amp;cwdInContainer)=0</td></tr>
-<tr class="separator:a98475a357d1ec1ea1d8c7514c5de54af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c517becf3bc6a0f618ea7f993f07b40"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a8c517becf3bc6a0f618ea7f993f07b40">attach</a> (const std::vector&lt; const char * &gt; &amp;argv, const std::string &amp;cwdInContainer)=0</td></tr>
+<tr class="separator:a8c517becf3bc6a0f618ea7f993f07b40"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae049df6b01afc5657e3ce36883e30d57"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#ae049df6b01afc5657e3ce36883e30d57">addInterfaceConfig</a> (const std::string &amp;hostif, const std::string &amp;zoneif, <a class="el" href="namespacelxcpp.html#aafb1b4d1bed6405375e4e736ebcb3494">InterfaceType</a> type, <a class="el" href="namespacelxcpp.html#a0f96c82d026536451715834778913018">MacVLanMode</a> mode)=0</td></tr>
 <tr class="separator:ae049df6b01afc5657e3ce36883e30d57"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4f155f73b4bb7f51e4d72418f6469cc7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a4f155f73b4bb7f51e4d72418f6469cc7">addAddrConfig</a> (const std::string &amp;ifname, const <a class="el" href="structlxcpp_1_1InetAddr.html">InetAddr</a> &amp;addr)=0</td></tr>
-<tr class="separator:a4f155f73b4bb7f51e4d72418f6469cc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d96e40bbbe99dde6c726b5d15141367"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a7d96e40bbbe99dde6c726b5d15141367">getInterfaces</a> ()=0</td></tr>
-<tr class="separator:a7d96e40bbbe99dde6c726b5d15141367"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a13810b6f08722a8e55bc2e5581af2356"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structlxcpp_1_1NetworkInterfaceInfo.html">NetworkInterfaceInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a13810b6f08722a8e55bc2e5581af2356">getInterfaceInfo</a> (const std::string &amp;ifname)=0</td></tr>
-<tr class="separator:a13810b6f08722a8e55bc2e5581af2356"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6020f5b9121d60c1893b35688e714ddd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a6020f5b9121d60c1893b35688e714ddd">addInetConfig</a> (const std::string &amp;ifname, const <a class="el" href="structlxcpp_1_1InetAddr.html">InetAddr</a> &amp;addr)=0</td></tr>
+<tr class="separator:a6020f5b9121d60c1893b35688e714ddd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad38c18cc10eaa1da5b9304d045962307"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#ad38c18cc10eaa1da5b9304d045962307">getInterfaces</a> () const  =0</td></tr>
+<tr class="separator:ad38c18cc10eaa1da5b9304d045962307"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04deeb43e0a022ff7069930acd0eb840"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structlxcpp_1_1NetworkInterfaceInfo.html">NetworkInterfaceInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a04deeb43e0a022ff7069930acd0eb840">getInterfaceInfo</a> (const std::string &amp;ifname) const  =0</td></tr>
+<tr class="separator:a04deeb43e0a022ff7069930acd0eb840"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc4e5cffead8d1b69ac1c0adf6b92ab7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#abc4e5cffead8d1b69ac1c0adf6b92ab7">createInterface</a> (const std::string &amp;hostif, const std::string &amp;zoneif, <a class="el" href="namespacelxcpp.html#aafb1b4d1bed6405375e4e736ebcb3494">InterfaceType</a> type, <a class="el" href="namespacelxcpp.html#a0f96c82d026536451715834778913018">MacVLanMode</a> mode)=0</td></tr>
 <tr class="separator:abc4e5cffead8d1b69ac1c0adf6b92ab7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61aa3505663d83f1226b0ee6940df71d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a61aa3505663d83f1226b0ee6940df71d">destroyInterface</a> (const std::string &amp;ifname)=0</td></tr>
@@ -177,19 +173,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a82600788ebabf4b8365304b4c6804442"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1Container.html#a82600788ebabf4b8365304b4c6804442">delAddr</a> (const std::string &amp;ifname, const <a class="el" href="structlxcpp_1_1InetAddr.html">InetAddr</a> &amp;addr)=0</td></tr>
 <tr class="separator:a82600788ebabf4b8365304b4c6804442"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Typedef Documentation</h2>
-<a class="anchor" id="a8b7b1b454cc967137df4ff0325bd5f77"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef std::function&lt;int(void)&gt; <a class="el" href="classlxcpp_1_1Container.html#a8b7b1b454cc967137df4ff0325bd5f77">lxcpp::Container::AttachCall</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="ac8b0b0092d4988bc14a77eeeb556f617"></a>
 <div class="memitem">
@@ -251,7 +234,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a4f155f73b4bb7f51e4d72418f6469cc7"></a>
+<a class="anchor" id="a6020f5b9121d60c1893b35688e714ddd"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -259,7 +242,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void lxcpp::Container::addAddrConfig </td>
+          <td class="memname">virtual void lxcpp::Container::addInetConfig </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>ifname</em>, </td>
@@ -283,7 +266,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a2f2d7748c18853cf4135a6065a6a14ed">lxcpp::ContainerImpl</a>.</p>
+<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a7975b26c6bac6a674355d9547a6b928e">lxcpp::ContainerImpl</a>.</p>
 
 </div>
 </div>
@@ -335,7 +318,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a98475a357d1ec1ea1d8c7514c5de54af"></a>
+<a class="anchor" id="a8c517becf3bc6a0f618ea7f993f07b40"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -345,8 +328,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual void lxcpp::Container::attach </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classlxcpp_1_1Container.html#a8b7b1b454cc967137df4ff0325bd5f77">AttachCall</a> &amp;&#160;</td>
-          <td class="paramname"><em>attachCall</em>, </td>
+          <td class="paramtype">const std::vector&lt; const char * &gt; &amp;&#160;</td>
+          <td class="paramname"><em>argv</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -367,32 +350,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a35da4b6f9713f7af340e07ee782fdda9">lxcpp::ContainerImpl</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="aed51192d29bfdb162da791b2a69650d6"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual void lxcpp::Container::create </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a264ac85df770f5ab13926a3a7b09431a">lxcpp::ContainerImpl</a>.</p>
+<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a180b50b2a1596ffad451c9ea729fda9e">lxcpp::ContainerImpl</a>.</p>
 
 </div>
 </div>
@@ -480,31 +438,6 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a6bd131da14ebb254d9415c586e6c557c"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual void lxcpp::Container::destroy </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#acfdedda26b3b2b17410602b435b88814">lxcpp::ContainerImpl</a>.</p>
-
-</div>
-</div>
 <a class="anchor" id="a61aa3505663d83f1226b0ee6940df71d"></a>
 <div class="memitem">
 <div class="memproto">
@@ -556,6 +489,56 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a92afc780cb896ef6f6f81110f35794b9"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual pid_t lxcpp::Container::getGuardPid </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a877dcb4afde68d651c4535bc36311284">lxcpp::ContainerImpl</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a70aec06c519ff385c1895acab10f3d1a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual const std::vector&lt;std::string&gt;&amp; lxcpp::Container::getInit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a7cea1185d35119135362f3e6c5e7bb3d">lxcpp::ContainerImpl</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a10e673af84438d952472eba29b034ba1"></a>
 <div class="memitem">
 <div class="memproto">
@@ -581,7 +564,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a13810b6f08722a8e55bc2e5581af2356"></a>
+<a class="anchor" id="a04deeb43e0a022ff7069930acd0eb840"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -593,7 +576,7 @@ Public Member Functions</h2></td></tr>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>ifname</em></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
   </td>
@@ -603,11 +586,11 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#aaa63410aba25f1cbe7ff4f76aac3f28a">lxcpp::ContainerImpl</a>.</p>
+<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a50ebdad34c64da839ea4b245c13f555d">lxcpp::ContainerImpl</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a7d96e40bbbe99dde6c726b5d15141367"></a>
+<a class="anchor" id="ad38c18cc10eaa1da5b9304d045962307"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -618,7 +601,7 @@ Public Member Functions</h2></td></tr>
           <td class="memname">virtual std::vector&lt;std::string&gt; lxcpp::Container::getInterfaces </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
   </td>
@@ -628,11 +611,11 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#ae4a29101199a5b37622b11fa9b48d76e">lxcpp::ContainerImpl</a>.</p>
+<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a8ec6b353c51cfa68f0a50f404bf89a2c">lxcpp::ContainerImpl</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="ae9f0ac84d131a8e6ce49a81ce30fbfd2"></a>
+<a class="anchor" id="a089add2fbad44c0b70b522bd0d190bb8"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -640,10 +623,10 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual std::string lxcpp::Container::getName </td>
+          <td class="memname">virtual const std::string&amp; lxcpp::Container::getName </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
   </td>
@@ -653,11 +636,11 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a25a71db975d2fd3980f68ef5fc4f0384">lxcpp::ContainerImpl</a>.</p>
+<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a68cfd015f8cce341706187467ce56723">lxcpp::ContainerImpl</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="ad8f1a2f4fb4d2e39dc113ee45e52b58b"></a>
+<a class="anchor" id="af26e53f8ce4ef7ab34d70328f8ab1bc8"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -665,10 +648,10 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual std::string lxcpp::Container::getRootPath </td>
+          <td class="memname">virtual const std::string&amp; lxcpp::Container::getRootPath </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
   </td>
@@ -678,7 +661,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#ac75520614035d04c1327c207564282c4">lxcpp::ContainerImpl</a>.</p>
+<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#af1278c6f9b2f6bf1891c6c3bf761d196">lxcpp::ContainerImpl</a>.</p>
 
 </div>
 </div>
@@ -733,7 +716,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a8fba3d8c4c449ddad60c16f9354db14e"></a>
+<a class="anchor" id="a0e706b4b3d608ee24fa39b5d43d7ab8f"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -741,10 +724,10 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void lxcpp::Container::setName </td>
+          <td class="memname">virtual void lxcpp::Container::setInit </td>
           <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>name</em></td><td>)</td>
+          <td class="paramtype">const std::vector&lt; std::string &gt; &amp;&#160;</td>
+          <td class="paramname"><em>init</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -755,11 +738,11 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a4a846dd0bbf5424318d63ff95b4aa55e">lxcpp::ContainerImpl</a>.</p>
+<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a01b9f9509d56ea5e82b9181fdfec2f9b">lxcpp::ContainerImpl</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a2366d021555c5438b207a4251c43843d"></a>
+<a class="anchor" id="a633705588eb5d57b9b227d5990128cb8"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -767,10 +750,52 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void lxcpp::Container::setRootPath </td>
+          <td class="memname">virtual void lxcpp::Container::setLogger </td>
           <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1e">logger::LogType</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">logger::LogLevel</a>&#160;</td>
+          <td class="paramname"><em>level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>path</em></td><td>)</td>
+          <td class="paramname"><em>arg</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a305e75ef9345721bc370e656def22930">lxcpp::ContainerImpl</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ae8869aee14a85a3e49aeaf1eaec0a56d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void lxcpp::Container::setTerminalCount </td>
+          <td>(</td>
+          <td class="paramtype">const unsigned int&#160;</td>
+          <td class="paramname"><em>count</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -781,7 +806,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a85d6cb9e840fc3dffcbec511c5314a10">lxcpp::ContainerImpl</a>.</p>
+<p>Implemented in <a class="el" href="classlxcpp_1_1ContainerImpl.html#a27ca8993538d702f428c0ee1d0c2ce80">lxcpp::ContainerImpl</a>.</p>
 
 </div>
 </div>
@@ -896,7 +921,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacelxcpp.html">lxcpp</a></li><li class="navelem"><a class="el" href="classlxcpp_1_1Container.html">Container</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

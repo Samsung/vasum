@@ -17,6 +17,7 @@ var searchData=
   ['signalrequest',['SignalRequest',['../classipc_1_1SignalRequest.html',1,'ipc']]],
   ['socket',['Socket',['../classipc_1_1Socket.html',1,'ipc']]],
   ['sstreamwrapper',['SStreamWrapper',['../classlogger_1_1SStreamWrapper.html',1,'logger']]],
+  ['start',['Start',['../classlxcpp_1_1Start.html',1,'lxcpp']]],
   ['statement',['Statement',['../structconfig_1_1sqlite3_1_1Statement.html',1,'config::sqlite3']]],
   ['status',['Status',['../structClient_1_1Status.html',1,'Client']]],
   ['stderrbackend',['StderrBackend',['../classlogger_1_1StderrBackend.html',1,'logger']]],

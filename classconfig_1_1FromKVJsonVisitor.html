@@ -146,6 +146,9 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a50ede18f5d0ded43d89cc8cabd4a34d8"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a50ede18f5d0ded43d89cc8cabd4a34d8"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromKVJsonVisitor.html#a50ede18f5d0ded43d89cc8cabd4a34d8">getValue</a> (const std::string &amp;name, std::vector&lt; T &gt; &amp;value)</td></tr>
 <tr class="separator:a50ede18f5d0ded43d89cc8cabd4a34d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa98289689c6db4392f427bfcc32bc86b"><td class="memTemplParams" colspan="2">template&lt;typename T , std::size_t N&gt; </td></tr>
+<tr class="memitem:aa98289689c6db4392f427bfcc32bc86b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromKVJsonVisitor.html#aa98289689c6db4392f427bfcc32bc86b">getValue</a> (const std::string &amp;name, std::array&lt; T, N &gt; &amp;values)</td></tr>
+<tr class="separator:aa98289689c6db4392f427bfcc32bc86b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae78a925d8f812c85ac27e6774466f516"><td class="memTemplParams" colspan="2">template&lt;typename T , typename std::enable_if&lt;!isVisitable&lt; T &gt;::value, int &gt;::type  = 0&gt; </td></tr>
 <tr class="memitem:ae78a925d8f812c85ac27e6774466f516"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromKVJsonVisitor.html#ae78a925d8f812c85ac27e6774466f516">getValue</a> (int i, T &amp;t)</td></tr>
 <tr class="separator:ae78a925d8f812c85ac27e6774466f516"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -158,6 +161,9 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a45c4609bbfaf45df911e221586ec6b09"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a45c4609bbfaf45df911e221586ec6b09"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromKVJsonVisitor.html#a45c4609bbfaf45df911e221586ec6b09">getValue</a> (int i, std::vector&lt; T &gt; &amp;value)</td></tr>
 <tr class="separator:a45c4609bbfaf45df911e221586ec6b09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c32f4e2d00e3999e9876326842d8d9a"><td class="memTemplParams" colspan="2">template&lt;typename T , std::size_t N&gt; </td></tr>
+<tr class="memitem:a7c32f4e2d00e3999e9876326842d8d9a"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromKVJsonVisitor.html#a7c32f4e2d00e3999e9876326842d8d9a">getValue</a> (int i, std::array&lt; T, N &gt; &amp;values)</td></tr>
+<tr class="separator:a7c32f4e2d00e3999e9876326842d8d9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-methods"></a>
 Static Private Member Functions</h2></td></tr>
@@ -177,6 +183,8 @@ Static Private Member Functions</h2></td></tr>
 <tr class="separator:a807952f42ac6bcf9df073d5bf29cf15f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae0857fb59e6e3f2f4668c26fcb54fded"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromKVJsonVisitor.html#ae0857fb59e6e3f2f4668c26fcb54fded">fromJsonObject</a> (json_object *object, std::string &amp;value)</td></tr>
 <tr class="separator:ae0857fb59e6e3f2f4668c26fcb54fded"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b3d365e6ef425f6906439b46d26ab19"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromKVJsonVisitor.html#a8b3d365e6ef425f6906439b46d26ab19">fromJsonObject</a> (json_object *object, char *&amp;value)</td></tr>
+<tr class="separator:a8b3d365e6ef425f6906439b46d26ab19"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -630,6 +638,40 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a8b3d365e6ef425f6906439b46d26ab19"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void config::FromKVJsonVisitor::fromJsonObject </td>
+          <td>(</td>
+          <td class="paramtype">json_object *&#160;</td>
+          <td class="paramname"><em>object</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&amp;&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a72065e7b27ef31df66c36d27896aa445"></a>
 <div class="memitem">
 <div class="memproto">
@@ -808,6 +850,42 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a class="anchor" id="aa98289689c6db4392f427bfcc32bc86b"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , std::size_t N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void config::FromKVJsonVisitor::getValue </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; T, N &gt; &amp;&#160;</td>
+          <td class="paramname"><em>values</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="ae78a925d8f812c85ac27e6774466f516"></a>
 <div class="memitem">
 <div class="memproto">
@@ -936,6 +1014,42 @@ template&lt;typename T &gt; </div>
           <td></td>
           <td class="paramtype">std::vector&lt; T &gt; &amp;&#160;</td>
           <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a7c32f4e2d00e3999e9876326842d8d9a"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , std::size_t N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void config::FromKVJsonVisitor::getValue </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>i</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; T, N &gt; &amp;&#160;</td>
+          <td class="paramname"><em>values</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1103,7 +1217,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceconfig.html">config</a></li><li class="navelem"><a class="el" href="classconfig_1_1FromKVJsonVisitor.html">FromKVJsonVisitor</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

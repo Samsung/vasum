@@ -7,5 +7,7 @@ var searchData=
   ['privilege',['privilege',['../structvasum_1_1ZoneConfig.html#a94cc060ba10453d44716b9a41732c991',1,'vasum::ZoneConfig']]],
   ['process',['process',['../classipc_1_1MethodRequest.html#aad269147b897d6e647b7312f88c324a1',1,'ipc::MethodRequest::process()'],['../structipc_1_1Processor_1_1ReturnCallbacks.html#a6da45c0687929d32c3024fa93f120aa0',1,'ipc::Processor::ReturnCallbacks::process()']]],
   ['provisions',['provisions',['../structvasum_1_1ZoneProvisioningConfig.html#a8b1e1a6207135f9998fab672cdb200e1',1,'vasum::ZoneProvisioningConfig']]],
-  ['proxycallrules',['proxyCallRules',['../structvasum_1_1ZonesManagerConfig.html#ae203f9d0884341da82109d727f3c90c9',1,'vasum::ZonesManagerConfig']]]
+  ['proxycallrules',['proxyCallRules',['../structvasum_1_1ZonesManagerConfig.html#ae203f9d0884341da82109d727f3c90c9',1,'vasum::ZonesManagerConfig']]],
+  ['ptsname',['ptsName',['../structlxcpp_1_1TerminalConfig.html#a92760f85435208857b108417ea7997dd',1,'lxcpp::TerminalConfig']]],
+  ['ptys',['PTYs',['../structlxcpp_1_1TerminalsConfig.html#a799cb521842ded1d404ebe37ea85b2ad',1,'lxcpp::TerminalsConfig']]]
 ];

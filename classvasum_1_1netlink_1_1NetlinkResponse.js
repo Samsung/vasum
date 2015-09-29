@@ -2,7 +2,7 @@ var classvasum_1_1netlink_1_1NetlinkResponse =
 [
     [ "NetlinkResponse", "classvasum_1_1netlink_1_1NetlinkResponse.html#aaaf887b802609c2b2224c4bcdd681a0b", null ],
     [ "closeNested", "classvasum_1_1netlink_1_1NetlinkResponse.html#ac5844fc3355bac2a2677c9bed443ed9a", null ],
-    [ "fetch", "classvasum_1_1netlink_1_1NetlinkResponse.html#ad42fb92fa42ff980d67194aec1d8e0b6", null ],
+    [ "fetch", "classvasum_1_1netlink_1_1NetlinkResponse.html#a4f1e4d0c9b263e28337a766905bb0f79", null ],
     [ "fetch", "classvasum_1_1netlink_1_1NetlinkResponse.html#ab09c2c3140d7bfd85af442bb02321846", null ],
     [ "fetch", "classvasum_1_1netlink_1_1NetlinkResponse.html#a52bdcd6ff54f7b245fdf8356c0fca9e7", null ],
     [ "fetch", "classvasum_1_1netlink_1_1NetlinkResponse.html#a74fbb21d20c03ae4a440db98de8548f7", null ],
@@ -10,6 +10,7 @@ var classvasum_1_1netlink_1_1NetlinkResponse =
     [ "fetchNextMessage", "classvasum_1_1netlink_1_1NetlinkResponse.html#acbd981fe999bb0f9ef8f8fa7cc4ca88e", null ],
     [ "get", "classvasum_1_1netlink_1_1NetlinkResponse.html#ab6217f8270fe346ee747b6c7971891c7", null ],
     [ "get", "classvasum_1_1netlink_1_1NetlinkResponse.html#a7dd288ef88157162f9ee7bd6550525bf", null ],
+    [ "getAttributeLength", "classvasum_1_1netlink_1_1NetlinkResponse.html#a1a9217d73b92a4ba77a9d4e415192a46", null ],
     [ "getAttributeType", "classvasum_1_1netlink_1_1NetlinkResponse.html#aa5be7d41f161bae4cc584fc11b728b17", null ],
     [ "getHdrPosition", "classvasum_1_1netlink_1_1NetlinkResponse.html#ac5d8e0f50783d671343027909da95955", null ],
     [ "getMessageType", "classvasum_1_1netlink_1_1NetlinkResponse.html#a2535dd9889041855035d1c7dbfde6528", null ],

@@ -102,13 +102,18 @@ $(document).ready(function(){initNavTree('logger_8hpp.html','');});
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#define-members">Macros</a>  </div>
+<a href="#define-members">Macros</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">logger.hpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="level_8hpp_source.html">logger/level.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="backend-null_8hpp_source.html">logger/backend-null.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="backend-file_8hpp_source.html">logger/backend-file.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="backend-persistent-file_8hpp_source.html">logger/backend-persistent-file.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="backend-syslog_8hpp_source.html">logger/backend-syslog.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="backend-stderr_8hpp_source.html">logger/backend-stderr.hpp</a>&quot;</code><br />
 <code>#include &lt;sstream&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
@@ -150,6 +155,26 @@ Macros</h2></td></tr>
 <tr class="memitem:ga2abefd5fa3576d8dd9cc64a1aa84c428"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__libLogger.html#ga2abefd5fa3576d8dd9cc64a1aa84c428">LOGT</a>(MESSAGE)&#160;&#160;&#160;<a class="el" href="group__libLogger.html#gaa368cecb96d45ee8d44827234f011b98">LOG</a>(TRACE, MESSAGE)</td></tr>
 <tr class="memdesc:ga2abefd5fa3576d8dd9cc64a1aa84c428"><td class="mdescLeft">&#160;</td><td class="mdescRight">Logging tracing information.  <a href="group__libLogger.html#ga2abefd5fa3576d8dd9cc64a1aa84c428">More...</a><br /></td></tr>
 <tr class="separator:ga2abefd5fa3576d8dd9cc64a1aa84c428"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:ad98eaa94cd8d9a04148bed0359e6ce1e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1e">logger::LogType</a> : int { <br />
+&#160;&#160;<a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea892f8dc57383885a98aa1d5ac51bf775">logger::LogType::LOG_NULL</a>, 
+<a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea0c6224dee85112c7a79b435d9794e92b">logger::LogType::LOG_JOURNALD</a>, 
+<a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea957b3db3f6c69ff73379f3fdc8e446f6">logger::LogType::LOG_FILE</a>, 
+<a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1eab9ff184630c9a941461f3168c6021ff6">logger::LogType::LOG_PERSISTENT_FILE</a>, 
+<br />
+&#160;&#160;<a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea5c7bd379a25f9fb8591ce63a5be5ee8c">logger::LogType::LOG_SYSLOG</a>, 
+<a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1eaccdd93dba2f76067def6c67c463a6eba">logger::LogType::LOG_STDERR</a>
+<br />
+ }<tr class="separator:ad98eaa94cd8d9a04148bed0359e6ce1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a59754c618d1a16d43970a1761bc72a9f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelogger.html#a59754c618d1a16d43970a1761bc72a9f">logger::setupLogger</a> (const LogType type, const LogLevel level, const std::string &amp;arg=&quot;&quot;)</td></tr>
+<tr class="memdesc:a59754c618d1a16d43970a1761bc72a9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">A helper function to easily and completely setup a new logger.  <a href="namespacelogger.html#a59754c618d1a16d43970a1761bc72a9f">More...</a><br /></td></tr>
+<tr class="separator:a59754c618d1a16d43970a1761bc72a9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><dl class="section author"><dt>Author</dt><dd>Jan Olszak (<a href="#" onclick="location.href='mai'+'lto:'+'j.o'+'ls'+'zak'+'@s'+'ams'+'un'+'g.c'+'om'; return false;">j.ols<span style="display: none;">.nosp@m.</span>zak@<span style="display: none;">.nosp@m.</span>samsu<span style="display: none;">.nosp@m.</span>ng.c<span style="display: none;">.nosp@m.</span>om</a>) </dd></dl>
@@ -172,8 +197,8 @@ Macros</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_258da5588bb15182dfffe9dae1cb498a.html">libs</a></li><li class="navelem"><a class="el" href="dir_96acf29ba294d52bdea2b996dda3fc27.html">logger</a></li><li class="navelem"><a class="el" href="logger_8hpp.html">logger.hpp</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:22 for Vasum by
+    <li class="navelem"><a class="el" href="dir_6719ab1f1f7655efc2fa43f7eb574fd1.html">libs</a></li><li class="navelem"><a class="el" href="dir_6c7e384648d47264394868fbb7af8ef7.html">logger</a></li><li class="navelem"><a class="el" href="logger_8hpp.html">logger.hpp</a></li>
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

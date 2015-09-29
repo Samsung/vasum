@@ -2,6 +2,8 @@ var searchData=
 [
   ['main_2ecpp',['main.cpp',['../server_2main_8cpp.html',1,'']]],
   ['main_2ecpp',['main.cpp',['../cli_2main_8cpp.html',1,'']]],
+  ['main_2ecpp',['main.cpp',['../libs_2lxcpp_2attach_2main_8cpp.html',1,'']]],
+  ['main_2ecpp',['main.cpp',['../libs_2lxcpp_2guard_2main_8cpp.html',1,'']]],
   ['mainpage_2emd',['mainpage.md',['../mainpage_8md.html',1,'']]],
   ['make_2dclean_2ehpp',['make-clean.hpp',['../make-clean_8hpp.html',1,'']]],
   ['manager_2ehpp',['manager.hpp',['../manager_8hpp.html',1,'']]],

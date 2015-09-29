@@ -121,86 +121,117 @@ $(document).ready(function(){initNavTree('logger_8hpp_source.html','');});
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> *  limitations under the License</span></div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"> */</span></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor">#ifndef COMMON_LOGGER_LOGGER_HPP</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor">#define COMMON_LOGGER_LOGGER_HPP</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="level_8hpp.html">logger/level.hpp</a>&quot;</span></div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="backend-file_8hpp.html">logger/backend-file.hpp</a>&quot;</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="backend-stderr_8hpp.html">logger/backend-stderr.hpp</a>&quot;</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor">#include &lt;sstream&gt;</span></div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="preprocessor">#ifndef PROJECT_SOURCE_DIR</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno"><a class="line" href="logger_8hpp.html#aececb108fc5b089853be5646004b1739">   70</a></span>&#160;<span class="preprocessor">#define PROJECT_SOURCE_DIR &quot;&quot;</span></div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor">#ifndef COMMON_LOGGER_LOGGER_HPP</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="preprocessor">#define COMMON_LOGGER_LOGGER_HPP</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="level_8hpp.html">logger/level.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="backend-null_8hpp.html">logger/backend-null.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor">#ifdef HAVE_SYSTEMD</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="backend-journal_8hpp.html">logger/backend-journal.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="backend-file_8hpp.html">logger/backend-file.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="backend-persistent-file_8hpp.html">logger/backend-persistent-file.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="backend-syslog_8hpp.html">logger/backend-syslog.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="backend-stderr_8hpp.html">logger/backend-stderr.hpp</a>&quot;</span></div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacelogger.html">logger</a> {</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="keyword">class </span>LogBackend;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
-<div class="line"><a name="l00077"></a><span class="lineno"><a class="line" href="classlogger_1_1Logger.html">   77</a></span>&#160;<span class="keyword">class </span><a class="code" href="classlogger_1_1Logger.html">Logger</a> {</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classlogger_1_1Logger.html#a588197e9c4e3175175400ccfb4522de6">logMessage</a>(<a class="code" href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">LogLevel</a> logLevel,</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                           <span class="keyword">const</span> std::string&amp; message,</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                           <span class="keyword">const</span> std::string&amp; file,</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                           <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> line,</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                           <span class="keyword">const</span> std::string&amp; func,</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                           <span class="keyword">const</span> std::string&amp; rootDir);</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classlogger_1_1Logger.html#a659c94682c0f59653acf25ac8bc74e59">setLogLevel</a>(<span class="keyword">const</span> <a class="code" href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">LogLevel</a> level);</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classlogger_1_1Logger.html#a659c94682c0f59653acf25ac8bc74e59">setLogLevel</a>(<span class="keyword">const</span> std::string&amp; level);</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <span class="keyword">static</span> <a class="code" href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">LogLevel</a> <a class="code" href="classlogger_1_1Logger.html#acf31b5d2497fc5f9ed0d0145687bf14a">getLogLevel</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classlogger_1_1Logger.html#a6dce87da89a73cf7440e12a335f36299">setLogBackend</a>(<a class="code" href="classlogger_1_1LogBackend.html">LogBackend</a>* pBackend);</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;};</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;} <span class="comment">// namespace logger</span></div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="preprocessor">#define LOG(SEVERITY, MESSAGE)                                             \</span></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="preprocessor">    do {                                                                   \</span></div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="preprocessor">        if (logger::Logger::getLogLevel() &lt;= logger::LogLevel::SEVERITY) { \</span></div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="preprocessor">            std::ostringstream messageStream__;                            \</span></div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="preprocessor">            messageStream__ &lt;&lt; MESSAGE;                                    \</span></div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="preprocessor">            logger::Logger::logMessage(logger::LogLevel::SEVERITY,         \</span></div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="preprocessor">                                       messageStream__.str(),              \</span></div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="preprocessor">                                       __FILE__,                           \</span></div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="preprocessor">                                       __LINE__,                           \</span></div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="preprocessor">                                       __func__,                           \</span></div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="preprocessor">                                       PROJECT_SOURCE_DIR);                \</span></div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;<span class="preprocessor">        }                                                                  \</span></div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="preprocessor">    } while (0)</span></div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;</div>
-<div class="line"><a name="l00112"></a><span class="lineno"><a class="line" href="group__libLogger.html#gae1947e9347378aa787f6188ec9488198">  112</a></span>&#160;<span class="preprocessor">#define LOGE(MESSAGE) LOG(ERROR, MESSAGE)</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="preprocessor">#include &lt;sstream&gt;</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="preprocessor">#ifndef PROJECT_SOURCE_DIR</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno"><a class="line" href="logger_8hpp.html#aececb108fc5b089853be5646004b1739">   77</a></span>&#160;<span class="preprocessor">#define PROJECT_SOURCE_DIR &quot;&quot;</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacelogger.html">logger</a> {</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;</div>
+<div class="line"><a name="l00082"></a><span class="lineno"><a class="line" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1e">   82</a></span>&#160;<span class="keyword">enum class</span> <a class="code" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1e">LogType</a> : int {</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    <a class="code" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea892f8dc57383885a98aa1d5ac51bf775">LOG_NULL</a>,</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <a class="code" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea0c6224dee85112c7a79b435d9794e92b">LOG_JOURNALD</a>,</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <a class="code" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea957b3db3f6c69ff73379f3fdc8e446f6">LOG_FILE</a>,</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <a class="code" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1eab9ff184630c9a941461f3168c6021ff6">LOG_PERSISTENT_FILE</a>,</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <a class="code" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea5c7bd379a25f9fb8591ce63a5be5ee8c">LOG_SYSLOG</a>,</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <a class="code" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1eaccdd93dba2f76067def6c67c463a6eba">LOG_STDERR</a></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;};</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespacelogger.html#a59754c618d1a16d43970a1761bc72a9f">setupLogger</a>(<span class="keyword">const</span> <a class="code" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1e">LogType</a> type,</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;                 <span class="keyword">const</span> <a class="code" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">LogLevel</a> level,</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                 <span class="keyword">const</span> std::string &amp;arg = <span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="keyword">class </span>LogBackend;</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;</div>
+<div class="line"><a name="l00105"></a><span class="lineno"><a class="line" href="classlogger_1_1Logger.html">  105</a></span>&#160;<span class="keyword">class </span><a class="code" href="classlogger_1_1Logger.html">Logger</a> {</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classlogger_1_1Logger.html#a588197e9c4e3175175400ccfb4522de6">logMessage</a>(<a class="code" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">LogLevel</a> logLevel,</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;                           <span class="keyword">const</span> std::string&amp; message,</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                           <span class="keyword">const</span> std::string&amp; file,</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;                           <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> line,</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;                           <span class="keyword">const</span> std::string&amp; func,</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;                           <span class="keyword">const</span> std::string&amp; rootDir);</div>
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;</div>
-<div class="line"><a name="l00115"></a><span class="lineno"><a class="line" href="group__libLogger.html#gaaf90f078bcff2cec2bd10c98c417d5fa">  115</a></span>&#160;<span class="preprocessor">#define LOGW(MESSAGE) LOG(WARN, MESSAGE)</span></div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;</div>
-<div class="line"><a name="l00118"></a><span class="lineno"><a class="line" href="group__libLogger.html#ga1c2a47cc5ee1b88cca411a169581151c">  118</a></span>&#160;<span class="preprocessor">#define LOGI(MESSAGE) LOG(INFO, MESSAGE)</span></div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classlogger_1_1Logger.html#a659c94682c0f59653acf25ac8bc74e59">setLogLevel</a>(<span class="keyword">const</span> <a class="code" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">LogLevel</a> level);</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classlogger_1_1Logger.html#a659c94682c0f59653acf25ac8bc74e59">setLogLevel</a>(<span class="keyword">const</span> std::string&amp; level);</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    <span class="keyword">static</span> <a class="code" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">LogLevel</a> <a class="code" href="classlogger_1_1Logger.html#acf31b5d2497fc5f9ed0d0145687bf14a">getLogLevel</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classlogger_1_1Logger.html#a6dce87da89a73cf7440e12a335f36299">setLogBackend</a>(<a class="code" href="classlogger_1_1LogBackend.html">LogBackend</a>* pBackend);</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;};</div>
 <div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;<span class="preprocessor">#if !defined(NDEBUG)</span></div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;<span class="preprocessor">#define LOGD(MESSAGE) LOG(DEBUG, MESSAGE)</span></div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
-<div class="line"><a name="l00125"></a><span class="lineno"><a class="line" href="group__libLogger.html#gaa07404b238425c9be6ffd080fe2495c5">  125</a></span>&#160;<span class="preprocessor">#define LOGH(MESSAGE) LOG(HELP, MESSAGE)</span></div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;</div>
-<div class="line"><a name="l00128"></a><span class="lineno"><a class="line" href="group__libLogger.html#ga2abefd5fa3576d8dd9cc64a1aa84c428">  128</a></span>&#160;<span class="preprocessor">#define LOGT(MESSAGE) LOG(TRACE, MESSAGE)</span></div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;<span class="preprocessor">#else</span></div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;<span class="preprocessor">#define LOGD(MESSAGE) do {} while (0)</span></div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;<span class="preprocessor">#define LOGH(MESSAGE) do {} while (0)</span></div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;<span class="preprocessor">#define LOGT(MESSAGE) do {} while (0)</span></div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;<span class="preprocessor">#endif // COMMON_LOGGER_LOGGER_HPP</span></div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;</div>
-<div class="ttc" id="classlogger_1_1Logger_html_acf31b5d2497fc5f9ed0d0145687bf14a"><div class="ttname"><a href="classlogger_1_1Logger.html#acf31b5d2497fc5f9ed0d0145687bf14a">logger::Logger::getLogLevel</a></div><div class="ttdeci">static LogLevel getLogLevel(void)</div><div class="ttdef"><b>Definition:</b> logger.cpp:65</div></div>
-<div class="ttc" id="classlogger_1_1Logger_html_a588197e9c4e3175175400ccfb4522de6"><div class="ttname"><a href="classlogger_1_1Logger.html#a588197e9c4e3175175400ccfb4522de6">logger::Logger::logMessage</a></div><div class="ttdeci">static void logMessage(LogLevel logLevel, const std::string &amp;message, const std::string &amp;file, const unsigned int line, const std::string &amp;func, const std::string &amp;rootDir)</div><div class="ttdef"><b>Definition:</b> logger.cpp:43</div></div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;} <span class="comment">// namespace logger</span></div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;<span class="preprocessor">#define LOG(SEVERITY, MESSAGE)                                             \</span></div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;<span class="preprocessor">    do {                                                                   \</span></div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;<span class="preprocessor">        if (logger::Logger::getLogLevel() &lt;= logger::LogLevel::SEVERITY) { \</span></div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;<span class="preprocessor">            std::ostringstream messageStream__;                            \</span></div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;<span class="preprocessor">            messageStream__ &lt;&lt; MESSAGE;                                    \</span></div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;<span class="preprocessor">            logger::Logger::logMessage(logger::LogLevel::SEVERITY,         \</span></div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;<span class="preprocessor">                                       messageStream__.str(),              \</span></div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;<span class="preprocessor">                                       __FILE__,                           \</span></div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;<span class="preprocessor">                                       __LINE__,                           \</span></div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;<span class="preprocessor">                                       __func__,                           \</span></div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;<span class="preprocessor">                                       PROJECT_SOURCE_DIR);                \</span></div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;<span class="preprocessor">        }                                                                  \</span></div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;<span class="preprocessor">    } while (0)</span></div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;</div>
+<div class="line"><a name="l00140"></a><span class="lineno"><a class="line" href="group__libLogger.html#gae1947e9347378aa787f6188ec9488198">  140</a></span>&#160;<span class="preprocessor">#define LOGE(MESSAGE) LOG(ERROR, MESSAGE)</span></div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;</div>
+<div class="line"><a name="l00143"></a><span class="lineno"><a class="line" href="group__libLogger.html#gaaf90f078bcff2cec2bd10c98c417d5fa">  143</a></span>&#160;<span class="preprocessor">#define LOGW(MESSAGE) LOG(WARN, MESSAGE)</span></div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;</div>
+<div class="line"><a name="l00146"></a><span class="lineno"><a class="line" href="group__libLogger.html#ga1c2a47cc5ee1b88cca411a169581151c">  146</a></span>&#160;<span class="preprocessor">#define LOGI(MESSAGE) LOG(INFO, MESSAGE)</span></div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;<span class="preprocessor">#if !defined(NDEBUG)</span></div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;<span class="preprocessor">#define LOGD(MESSAGE) LOG(DEBUG, MESSAGE)</span></div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;</div>
+<div class="line"><a name="l00153"></a><span class="lineno"><a class="line" href="group__libLogger.html#gaa07404b238425c9be6ffd080fe2495c5">  153</a></span>&#160;<span class="preprocessor">#define LOGH(MESSAGE) LOG(HELP, MESSAGE)</span></div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;</div>
+<div class="line"><a name="l00156"></a><span class="lineno"><a class="line" href="group__libLogger.html#ga2abefd5fa3576d8dd9cc64a1aa84c428">  156</a></span>&#160;<span class="preprocessor">#define LOGT(MESSAGE) LOG(TRACE, MESSAGE)</span></div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;<span class="preprocessor">#define LOGD(MESSAGE) do {} while (0)</span></div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;<span class="preprocessor">#define LOGH(MESSAGE) do {} while (0)</span></div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;<span class="preprocessor">#define LOGT(MESSAGE) do {} while (0)</span></div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;<span class="preprocessor">#endif // COMMON_LOGGER_LOGGER_HPP</span></div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;</div>
+<div class="ttc" id="namespacelogger_html_ad98eaa94cd8d9a04148bed0359e6ce1ea892f8dc57383885a98aa1d5ac51bf775"><div class="ttname"><a href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea892f8dc57383885a98aa1d5ac51bf775">logger::LogType::LOG_NULL</a></div></div>
+<div class="ttc" id="classlogger_1_1Logger_html_acf31b5d2497fc5f9ed0d0145687bf14a"><div class="ttname"><a href="classlogger_1_1Logger.html#acf31b5d2497fc5f9ed0d0145687bf14a">logger::Logger::getLogLevel</a></div><div class="ttdeci">static LogLevel getLogLevel(void)</div><div class="ttdef"><b>Definition:</b> logger.cpp:103</div></div>
+<div class="ttc" id="classlogger_1_1Logger_html_a588197e9c4e3175175400ccfb4522de6"><div class="ttname"><a href="classlogger_1_1Logger.html#a588197e9c4e3175175400ccfb4522de6">logger::Logger::logMessage</a></div><div class="ttdeci">static void logMessage(LogLevel logLevel, const std::string &amp;message, const std::string &amp;file, const unsigned int line, const std::string &amp;func, const std::string &amp;rootDir)</div><div class="ttdef"><b>Definition:</b> logger.cpp:81</div></div>
 <div class="ttc" id="backend-file_8hpp_html"><div class="ttname"><a href="backend-file_8hpp.html">backend-file.hpp</a></div><div class="ttdoc">File backend for logger. </div></div>
-<div class="ttc" id="classlogger_1_1Logger_html_a6dce87da89a73cf7440e12a335f36299"><div class="ttname"><a href="classlogger_1_1Logger.html#a6dce87da89a73cf7440e12a335f36299">logger::Logger::setLogBackend</a></div><div class="ttdeci">static void setLogBackend(LogBackend *pBackend)</div><div class="ttdef"><b>Definition:</b> logger.cpp:70</div></div>
-<div class="ttc" id="group__libLogger_html_ga08ef41fb8da9e671d65fcbd87b6574a2"><div class="ttname"><a href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">logger::LogLevel</a></div><div class="ttdeci">LogLevel</div><div class="ttdoc">Available log levels. </div><div class="ttdef"><b>Definition:</b> level.hpp:36</div></div>
+<div class="ttc" id="classlogger_1_1Logger_html_a6dce87da89a73cf7440e12a335f36299"><div class="ttname"><a href="classlogger_1_1Logger.html#a6dce87da89a73cf7440e12a335f36299">logger::Logger::setLogBackend</a></div><div class="ttdeci">static void setLogBackend(LogBackend *pBackend)</div><div class="ttdef"><b>Definition:</b> logger.cpp:108</div></div>
+<div class="ttc" id="namespacelogger_html_ad98eaa94cd8d9a04148bed0359e6ce1ea0c6224dee85112c7a79b435d9794e92b"><div class="ttname"><a href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea0c6224dee85112c7a79b435d9794e92b">logger::LogType::LOG_JOURNALD</a></div></div>
+<div class="ttc" id="backend-persistent-file_8hpp_html"><div class="ttname"><a href="backend-persistent-file_8hpp.html">backend-persistent-file.hpp</a></div><div class="ttdoc">Persistent file backend for logger. </div></div>
+<div class="ttc" id="namespacelogger_html_ad98eaa94cd8d9a04148bed0359e6ce1ea5c7bd379a25f9fb8591ce63a5be5ee8c"><div class="ttname"><a href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea5c7bd379a25f9fb8591ce63a5be5ee8c">logger::LogType::LOG_SYSLOG</a></div></div>
+<div class="ttc" id="namespacelogger_html_ad98eaa94cd8d9a04148bed0359e6ce1ea957b3db3f6c69ff73379f3fdc8e446f6"><div class="ttname"><a href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea957b3db3f6c69ff73379f3fdc8e446f6">logger::LogType::LOG_FILE</a></div></div>
+<div class="ttc" id="group__libLogger_html_ga2fd86a5d52b225b4c00af13284f44479"><div class="ttname"><a href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">logger::LogLevel</a></div><div class="ttdeci">LogLevel</div><div class="ttdoc">Available log levels. </div><div class="ttdef"><b>Definition:</b> level.hpp:36</div></div>
+<div class="ttc" id="namespacelogger_html_a59754c618d1a16d43970a1761bc72a9f"><div class="ttname"><a href="namespacelogger.html#a59754c618d1a16d43970a1761bc72a9f">logger::setupLogger</a></div><div class="ttdeci">void setupLogger(const LogType type, const LogLevel level, const std::string &amp;arg)</div><div class="ttdoc">A helper function to easily and completely setup a new logger. </div><div class="ttdef"><b>Definition:</b> logger.cpp:43</div></div>
 <div class="ttc" id="namespacelogger_html"><div class="ttname"><a href="namespacelogger.html">logger</a></div><div class="ttdef"><b>Definition:</b> backend-file.cpp:31</div></div>
-<div class="ttc" id="classlogger_1_1Logger_html"><div class="ttname"><a href="classlogger_1_1Logger.html">logger::Logger</a></div><div class="ttdef"><b>Definition:</b> logger.hpp:77</div></div>
+<div class="ttc" id="backend-null_8hpp_html"><div class="ttname"><a href="backend-null_8hpp.html">backend-null.hpp</a></div><div class="ttdoc">Null backend for logger. </div></div>
+<div class="ttc" id="namespacelogger_html_ad98eaa94cd8d9a04148bed0359e6ce1eab9ff184630c9a941461f3168c6021ff6"><div class="ttname"><a href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1eab9ff184630c9a941461f3168c6021ff6">logger::LogType::LOG_PERSISTENT_FILE</a></div></div>
+<div class="ttc" id="classlogger_1_1Logger_html"><div class="ttname"><a href="classlogger_1_1Logger.html">logger::Logger</a></div><div class="ttdef"><b>Definition:</b> logger.hpp:105</div></div>
+<div class="ttc" id="namespacelogger_html_ad98eaa94cd8d9a04148bed0359e6ce1e"><div class="ttname"><a href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1e">logger::LogType</a></div><div class="ttdeci">LogType</div><div class="ttdef"><b>Definition:</b> logger.hpp:82</div></div>
 <div class="ttc" id="backend-stderr_8hpp_html"><div class="ttname"><a href="backend-stderr_8hpp.html">backend-stderr.hpp</a></div><div class="ttdoc">Stderr backend for logger. </div></div>
 <div class="ttc" id="classlogger_1_1LogBackend_html"><div class="ttname"><a href="classlogger_1_1LogBackend.html">logger::LogBackend</a></div><div class="ttdoc">Abstract class for logger backends. </div><div class="ttdef"><b>Definition:</b> backend.hpp:38</div></div>
-<div class="ttc" id="classlogger_1_1Logger_html_a659c94682c0f59653acf25ac8bc74e59"><div class="ttname"><a href="classlogger_1_1Logger.html#a659c94682c0f59653acf25ac8bc74e59">logger::Logger::setLogLevel</a></div><div class="ttdeci">static void setLogLevel(const LogLevel level)</div><div class="ttdef"><b>Definition:</b> logger.cpp:55</div></div>
+<div class="ttc" id="backend-syslog_8hpp_html"><div class="ttname"><a href="backend-syslog_8hpp.html">backend-syslog.hpp</a></div><div class="ttdoc">Syslog backend for logger. </div></div>
+<div class="ttc" id="classlogger_1_1Logger_html_a659c94682c0f59653acf25ac8bc74e59"><div class="ttname"><a href="classlogger_1_1Logger.html#a659c94682c0f59653acf25ac8bc74e59">logger::Logger::setLogLevel</a></div><div class="ttdeci">static void setLogLevel(const LogLevel level)</div><div class="ttdef"><b>Definition:</b> logger.cpp:93</div></div>
+<div class="ttc" id="namespacelogger_html_ad98eaa94cd8d9a04148bed0359e6ce1eaccdd93dba2f76067def6c67c463a6eba"><div class="ttname"><a href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1eaccdd93dba2f76067def6c67c463a6eba">logger::LogType::LOG_STDERR</a></div></div>
+<div class="ttc" id="backend-journal_8hpp_html"><div class="ttname"><a href="backend-journal_8hpp.html">backend-journal.hpp</a></div><div class="ttdoc">Systemd journal backend for logger. </div></div>
 <div class="ttc" id="level_8hpp_html"><div class="ttname"><a href="level_8hpp.html">level.hpp</a></div><div class="ttdoc">LogLevel. </div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -208,8 +239,8 @@ $(document).ready(function(){initNavTree('logger_8hpp_source.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_258da5588bb15182dfffe9dae1cb498a.html">libs</a></li><li class="navelem"><a class="el" href="dir_96acf29ba294d52bdea2b996dda3fc27.html">logger</a></li><li class="navelem"><a class="el" href="logger_8hpp.html">logger.hpp</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:22 for Vasum by
+    <li class="navelem"><a class="el" href="dir_6719ab1f1f7655efc2fa43f7eb574fd1.html">libs</a></li><li class="navelem"><a class="el" href="dir_6c7e384648d47264394868fbb7af8ef7.html">logger</a></li><li class="navelem"><a class="el" href="logger_8hpp.html">logger.hpp</a></li>
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

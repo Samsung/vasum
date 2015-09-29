@@ -12,12 +12,12 @@ var group__libLogger =
     [ "LOGS", "group__libLogger.html#gabfaa26a239ef7d8a83648c018f8c5613", null ],
     [ "LOGT", "group__libLogger.html#ga2abefd5fa3576d8dd9cc64a1aa84c428", null ],
     [ "LOGW", "group__libLogger.html#gaaf90f078bcff2cec2bd10c98c417d5fa", null ],
-    [ "LogLevel", "group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2", [
-      [ "TRACE", "group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2a2d3e4144aa384b18849ab9a8abad74d6", null ],
-      [ "DEBUG", "group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2adc30ec20708ef7b0f641ef78b7880a15", null ],
-      [ "INFO", "group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2a551b723eafd6a31d444fcb2f5920fbd3", null ],
-      [ "WARN", "group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2a32bd8a1db2275458673903bdb84cb277", null ],
-      [ "ERROR", "group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2abb1ca97ec761fc37101737ba0aa2e7c5", null ],
-      [ "HELP", "group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2a4fc963e213bba362778f5c175eb4d5ff", null ]
+    [ "LogLevel", "group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479", [
+      [ "TRACE", "group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479a2d3e4144aa384b18849ab9a8abad74d6", null ],
+      [ "DEBUG", "group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479adc30ec20708ef7b0f641ef78b7880a15", null ],
+      [ "INFO", "group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479a551b723eafd6a31d444fcb2f5920fbd3", null ],
+      [ "WARN", "group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479a32bd8a1db2275458673903bdb84cb277", null ],
+      [ "ERROR", "group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479abb1ca97ec761fc37101737ba0aa2e7c5", null ],
+      [ "HELP", "group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479a4fc963e213bba362778f5c175eb4d5ff", null ]
     ] ]
 ];

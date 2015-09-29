@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['red',['RED',['../namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3aa2d9547b5d3dd9f05984475f7c926da0',1,'logger']]],
+  ['red',['RED',['../namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051aa2d9547b5d3dd9f05984475f7c926da0',1,'utils']]],
   ['remove_5fpeer',['REMOVE_PEER',['../classipc_1_1Processor.html#af1a6569899a0aef5aaccceb81a143c8fa49f99b2f033733d2f256374cce03b9be',1,'ipc::Processor']]],
   ['runlevel_5fpoweroff',['RUNLEVEL_POWEROFF',['../namespaceutils.html#a349ac5fc810991a752e573a0c304ae80ad40438f842e9a4f6e90bf40ffe191733',1,'utils']]],
   ['runlevel_5freboot',['RUNLEVEL_REBOOT',['../namespaceutils.html#a349ac5fc810991a752e573a0c304ae80a5f052689aec56386ac02bbebfa8d43c7',1,'utils']]],

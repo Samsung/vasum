@@ -10,5 +10,6 @@ var searchData=
   ['source',['source',['../structvasum_1_1api_1_1DeclareMountIn.html#ae7d0d73f63e5b33c38d3f9471f6a2eb3',1,'vasum::api::DeclareMountIn::source()'],['../structvasum_1_1api_1_1DeclareLinkIn.html#a352db2a037dc5f3c8772c1fe6455db9f',1,'vasum::api::DeclareLinkIn::source()'],['../structvasum_1_1ZoneProvisioningConfig_1_1Mount.html#a777a8cb37479617c8a7744ea579b8fab',1,'vasum::ZoneProvisioningConfig::Mount::source()'],['../structvasum_1_1ZoneProvisioningConfig_1_1Link.html#a93546fa685ae186eb2ad42a719fc39ab',1,'vasum::ZoneProvisioningConfig::Link::source()']]],
   ['state',['state',['../structvasum_1_1api_1_1ZoneInfoOut.html#a7199e45c88f455aa3f635ed82841fc36',1,'vasum::api::ZoneInfoOut::state()'],['../structZoneStructure.html#a1f3912f7f0ee9263c20f6c37e66ea200',1,'ZoneStructure::state()']]],
   ['status',['status',['../structlxcpp_1_1NetworkInterfaceInfo.html#a690c5dcaf91117d221070fa194decfd9',1,'lxcpp::NetworkInterfaceInfo']]],
+  ['supplementarygids',['supplementaryGids',['../structlxcpp_1_1AttachConfig.html#ac56eae66f22cdb6faeadbc8ca2d96aea',1,'lxcpp::AttachConfig']]],
   ['switchtodefaultaftertimeout',['switchToDefaultAfterTimeout',['../structvasum_1_1ZoneConfig.html#a04ce8afe6c5ecda41f468f31364dcaa3',1,'vasum::ZoneConfig']]]
 ];

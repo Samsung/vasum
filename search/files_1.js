@@ -5,6 +5,8 @@ var searchData=
   ['backend_2djournal_2ecpp',['backend-journal.cpp',['../backend-journal_8cpp.html',1,'']]],
   ['backend_2djournal_2ehpp',['backend-journal.hpp',['../backend-journal_8hpp.html',1,'']]],
   ['backend_2dnull_2ehpp',['backend-null.hpp',['../backend-null_8hpp.html',1,'']]],
+  ['backend_2dpersistent_2dfile_2ecpp',['backend-persistent-file.cpp',['../backend-persistent-file_8cpp.html',1,'']]],
+  ['backend_2dpersistent_2dfile_2ehpp',['backend-persistent-file.hpp',['../backend-persistent-file_8hpp.html',1,'']]],
   ['backend_2dstderr_2ecpp',['backend-stderr.cpp',['../backend-stderr_8cpp.html',1,'']]],
   ['backend_2dstderr_2ehpp',['backend-stderr.hpp',['../backend-stderr_8hpp.html',1,'']]],
   ['backend_2dsyslog_2ecpp',['backend-syslog.cpp',['../backend-syslog_8cpp.html',1,'']]],

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['color',['Color',['../namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3',1,'logger']]]
+  ['color',['Color',['../namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051',1,'utils']]]
 ];

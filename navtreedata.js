@@ -45,18 +45,19 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "acceptor_8cpp.html",
-"classconfig_1_1KVStore.html#a48f0364159f5a9e1957b8085c6c4d920",
-"classipc_1_1Processor.html#a80eb92e2f29ab8e8a9953b3b6b766b91",
-"classlxcpp_1_1ContainerImpl.html#a61756f80b793ae951a63f1931b8b2404",
-"classvasum_1_1HostIPCConnection.html#aeb9685a6614647777925f028d327cb05",
-"classvasum_1_1api_1_1MethodResultBuilder.html#a281c6c48d50004c8d2fd34a85bc7d4f8",
-"dir_44ad2f858e79411b37ee8b41487cb926.html",
-"glib-loop_8cpp.html",
-"group__libvasum-client.html#gad052b5c4aafdc19e147c17e2474451d9",
-"level_8hpp.html#gga08ef41fb8da9e671d65fcbd87b6574a2a32bd8a1db2275458673903bdb84cb277",
-"proxy-call-config_8hpp.html",
-"structipc_1_1SignalHandler.html#aacb6563f52f26ed2b20898fb1ca3be5b",
-"zones-manager_8hpp.html"
+"classconfig_1_1FromKVStoreVisitor.html#a8a0937bec9bc0e81d5b9953e5d1d7f5d",
+"classipc_1_1Processor.html#a16c6f46a6703f4c304159b3d1864e2ba",
+"classlxcpp_1_1Attach.html#ab10755edc90669e28003f682c2a92b72",
+"classutils_1_1SignalFD.html#ad433122b89ba023fb54f174f24c68c06",
+"classvasum_1_1ZonesManager.html#a10dec82cf1dfc567bac9276f17e6218b",
+"command-line-interface_8hpp.html#a18a97cc73e88d2756286d667c6782d80",
+"from-kvstore-visitor_8hpp.html",
+"group__libvasum-client.html#ga4361cb57d32a7f936504c6ca1158bf99",
+"host-dbus-definitions_8hpp.html",
+"messages_8hpp.html#aae1ae1e19bb8f60b99744764e9e8b657",
+"signal_8cpp.html#a61b893f67e224553a41d8bcb71e2ac70",
+"structlxcpp_1_1FileSystemSetupException.html#adc302ad9523416ba11240ce9ba32e988",
+"typeinfo_8hpp_source.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

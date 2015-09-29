@@ -6,6 +6,8 @@ var namespaceipc =
     [ "Client", "classipc_1_1Client.html", "classipc_1_1Client" ],
     [ "EventQueue", "classipc_1_1EventQueue.html", "classipc_1_1EventQueue" ],
     [ "FinishRequest", "classipc_1_1FinishRequest.html", "classipc_1_1FinishRequest" ],
+    [ "hash", "classipc_1_1hash.html", null ],
+    [ "hash< ipc::UniqueID >", "classipc_1_1hash_3_01ipc_1_1UniqueID_01_4.html", "classipc_1_1hash_3_01ipc_1_1UniqueID_01_4" ],
     [ "IPCClosingException", "structipc_1_1IPCClosingException.html", "structipc_1_1IPCClosingException" ],
     [ "IPCException", "structipc_1_1IPCException.html", "structipc_1_1IPCException" ],
     [ "IPCGSource", "structipc_1_1IPCGSource.html", "structipc_1_1IPCGSource" ],
@@ -29,5 +31,6 @@ var namespaceipc =
     [ "Service", "classipc_1_1Service.html", "classipc_1_1Service" ],
     [ "SignalHandler", "structipc_1_1SignalHandler.html", "structipc_1_1SignalHandler" ],
     [ "SignalRequest", "classipc_1_1SignalRequest.html", "classipc_1_1SignalRequest" ],
-    [ "Socket", "classipc_1_1Socket.html", "classipc_1_1Socket" ]
+    [ "Socket", "classipc_1_1Socket.html", "classipc_1_1Socket" ],
+    [ "UniqueID", "classipc_1_1UniqueID.html", "classipc_1_1UniqueID" ]
 ];

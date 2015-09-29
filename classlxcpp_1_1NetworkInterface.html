@@ -117,8 +117,11 @@ $(document).ready(function(){initNavTree('classlxcpp_1_1NetworkInterface.html','
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aecd979ec5ace77021122802099a13bfe"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#aecd979ec5ace77021122802099a13bfe">NetworkInterface</a> (<a class="el" href="classlxcpp_1_1Container.html">Container</a> &amp;c, const std::string &amp;ifname)</td></tr>
-<tr class="separator:aecd979ec5ace77021122802099a13bfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4930ce199db309a5b543199ba161665f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a4930ce199db309a5b543199ba161665f">NetworkInterface</a> (pid_t pid, const std::string &amp;ifname)</td></tr>
+<tr class="memdesc:a4930ce199db309a5b543199ba161665f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create network interface object for the ifname in the container.  <a href="#a4930ce199db309a5b543199ba161665f">More...</a><br /></td></tr>
+<tr class="separator:a4930ce199db309a5b543199ba161665f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a873368d65793a02cbaf6bf7db0f4511f"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a873368d65793a02cbaf6bf7db0f4511f">getName</a> () const </td></tr>
+<tr class="separator:a873368d65793a02cbaf6bf7db0f4511f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a224cac40664ae6bb769f6a58184ccab6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a224cac40664ae6bb769f6a58184ccab6">create</a> (const std::string &amp;hostif, <a class="el" href="namespacelxcpp.html#aafb1b4d1bed6405375e4e736ebcb3494">InterfaceType</a> type, <a class="el" href="namespacelxcpp.html#a0f96c82d026536451715834778913018">MacVLanMode</a> mode=<a class="el" href="namespacelxcpp.html#a0f96c82d026536451715834778913018a84c6d22cfdf3772e66b07bde636e0571">MacVLanMode::PRIVATE</a>)</td></tr>
 <tr class="separator:a224cac40664ae6bb769f6a58184ccab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8460d6ab228683bdb47a4a7e8f0f3976"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a8460d6ab228683bdb47a4a7e8f0f3976">destroy</a> ()</td></tr>
@@ -129,15 +132,32 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a5682b4915a2d17b9571bfda05965dce2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a745c778aa7bbce38ec7a7452977fdc0a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a745c778aa7bbce38ec7a7452977fdc0a">down</a> ()</td></tr>
 <tr class="separator:a745c778aa7bbce38ec7a7452977fdc0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3034bacefd62c56929c585ec9c78593"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#ae3034bacefd62c56929c585ec9c78593">renameFrom</a> (const std::string &amp;oldif)</td></tr>
+<tr class="memdesc:ae3034bacefd62c56929c585ec9c78593"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rename interface name Equivalent to: ip link set dev $oldif name $this.mIfname.  <a href="#ae3034bacefd62c56929c585ec9c78593">More...</a><br /></td></tr>
+<tr class="separator:ae3034bacefd62c56929c585ec9c78593"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca4edaa70a6c6c37980f064f53a96866"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#aca4edaa70a6c6c37980f064f53a96866">setAttrs</a> (const <a class="el" href="namespacelxcpp.html#af439bcb669746e87964d579296a466df">Attrs</a> &amp;attrs)</td></tr>
 <tr class="separator:aca4edaa70a6c6c37980f064f53a96866"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a909f16f401f8083effbe689b992dd3"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="namespacelxcpp.html#af439bcb669746e87964d579296a466df">Attrs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a5a909f16f401f8083effbe689b992dd3">getAttrs</a> () const </td></tr>
-<tr class="separator:a5a909f16f401f8083effbe689b992dd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5d748b48ded096a3aededb90c37e896"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacelxcpp.html#af439bcb669746e87964d579296a466df">Attrs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#ab5d748b48ded096a3aededb90c37e896">getAttrs</a> () const </td></tr>
+<tr class="separator:ab5d748b48ded096a3aededb90c37e896"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e6938ecc3387f90d1604e2e9a104970"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a9e6938ecc3387f90d1604e2e9a104970">setMACAddress</a> (const std::string &amp;macaddr)</td></tr>
+<tr class="separator:a9e6938ecc3387f90d1604e2e9a104970"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8cd8f63a57e42fb6ab0a8b5a74a07283"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a8cd8f63a57e42fb6ab0a8b5a74a07283">setMTU</a> (int mtu)</td></tr>
+<tr class="separator:a8cd8f63a57e42fb6ab0a8b5a74a07283"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04929f2bb4113e866ca900b269cea324"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a04929f2bb4113e866ca900b269cea324">setTxLength</a> (int txlen)</td></tr>
+<tr class="separator:a04929f2bb4113e866ca900b269cea324"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8b7831eb378f6d79c38acd556e1c1b2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#ac8b7831eb378f6d79c38acd556e1c1b2">addInetAddr</a> (const <a class="el" href="structlxcpp_1_1InetAddr.html">InetAddr</a> &amp;addr)</td></tr>
+<tr class="separator:ac8b7831eb378f6d79c38acd556e1c1b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae442f8fadee061b751a559e92059ec37"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#ae442f8fadee061b751a559e92059ec37">delInetAddr</a> (const <a class="el" href="structlxcpp_1_1InetAddr.html">InetAddr</a> &amp;addr)</td></tr>
+<tr class="separator:ae442f8fadee061b751a559e92059ec37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a90816427f1a13292f16b9ba4ab185583"><td class="memItemLeft" align="right" valign="top">static std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a90816427f1a13292f16b9ba4ab185583">getInterfaces</a> (pid_t initpid)</td></tr>
 <tr class="separator:a90816427f1a13292f16b9ba4ab185583"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac81838e5be709a600d106f32e2b2f36c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#ac81838e5be709a600d106f32e2b2f36c">convertInetAddr2Attr</a> (const <a class="el" href="structlxcpp_1_1InetAddr.html">InetAddr</a> &amp;addr, <a class="el" href="structlxcpp_1_1Attr.html">Attr</a> &amp;attr)</td></tr>
+<tr class="separator:ac81838e5be709a600d106f32e2b2f36c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47ebc32c12a89643db1b2216a594e816"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a47ebc32c12a89643db1b2216a594e816">convertAttr2InetAddr</a> (const <a class="el" href="structlxcpp_1_1Attr.html">Attr</a> &amp;attr, <a class="el" href="structlxcpp_1_1InetAddr.html">InetAddr</a> &amp;addr)</td></tr>
+<tr class="separator:a47ebc32c12a89643db1b2216a594e816"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
@@ -148,13 +168,14 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:af98880a29105b1d3915ad7118576d498"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#af98880a29105b1d3915ad7118576d498">createMacVLan</a> (const std::string &amp;hostif, <a class="el" href="namespacelxcpp.html#a0f96c82d026536451715834778913018">MacVLanMode</a> mode)</td></tr>
 <tr class="separator:af98880a29105b1d3915ad7118576d498"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f8d9653c14e49f64bac31e4a287639b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a5f8d9653c14e49f64bac31e4a287639b">move</a> (const std::string &amp;hostif)</td></tr>
+<tr class="memdesc:a5f8d9653c14e49f64bac31e4a287639b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move interface to container Equivalent to: ip link set dev $hostif netns $mContainerPid.  <a href="#a5f8d9653c14e49f64bac31e4a287639b">More...</a><br /></td></tr>
 <tr class="separator:a5f8d9653c14e49f64bac31e4a287639b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:a6fa74e98ca36f4b4cc923f5d17fd5dce"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classlxcpp_1_1Container.html">Container</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a6fa74e98ca36f4b4cc923f5d17fd5dce">mContainer</a></td></tr>
-<tr class="memdesc:a6fa74e98ca36f4b4cc923f5d17fd5dce"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classlxcpp_1_1Container.html">Container</a> to operate on.  <a href="#a6fa74e98ca36f4b4cc923f5d17fd5dce">More...</a><br /></td></tr>
-<tr class="separator:a6fa74e98ca36f4b4cc923f5d17fd5dce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75748498032adcf36f5871e16a34c1b6"><td class="memItemLeft" align="right" valign="top">pid_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#a75748498032adcf36f5871e16a34c1b6">mContainerPid</a></td></tr>
+<tr class="memdesc:a75748498032adcf36f5871e16a34c1b6"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classlxcpp_1_1Container.html">Container</a> pid to operate on (0=kernel)  <a href="#a75748498032adcf36f5871e16a34c1b6">More...</a><br /></td></tr>
+<tr class="separator:a75748498032adcf36f5871e16a34c1b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3df23035c6f0b5bf1981d9cab422f6c"><td class="memItemLeft" align="right" valign="top">const std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlxcpp_1_1NetworkInterface.html#ad3df23035c6f0b5bf1981d9cab422f6c">mIfname</a></td></tr>
 <tr class="memdesc:ad3df23035c6f0b5bf1981d9cab422f6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">network interface name inside zone  <a href="#ad3df23035c6f0b5bf1981d9cab422f6c">More...</a><br /></td></tr>
 <tr class="separator:ad3df23035c6f0b5bf1981d9cab422f6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -162,7 +183,7 @@ Private Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Network operations to be performed on given container and interface operates on netlink device. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="aecd979ec5ace77021122802099a13bfe"></a>
+<a class="anchor" id="a4930ce199db309a5b543199ba161665f"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -172,8 +193,8 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname">lxcpp::NetworkInterface::NetworkInterface </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classlxcpp_1_1Container.html">Container</a> &amp;&#160;</td>
-          <td class="paramname"><em>c</em>, </td>
+          <td class="paramtype">pid_t&#160;</td>
+          <td class="paramname"><em>pid</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -194,9 +215,95 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Create network interface object for the ifname in the container. </p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="ac8b7831eb378f6d79c38acd556e1c1b2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void lxcpp::NetworkInterface::addInetAddr </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structlxcpp_1_1InetAddr.html">InetAddr</a> &amp;&#160;</td>
+          <td class="paramname"><em>addr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a47ebc32c12a89643db1b2216a594e816"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool lxcpp::NetworkInterface::convertAttr2InetAddr </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structlxcpp_1_1Attr.html">Attr</a> &amp;&#160;</td>
+          <td class="paramname"><em>attr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structlxcpp_1_1InetAddr.html">InetAddr</a> &amp;&#160;</td>
+          <td class="paramname"><em>addr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ac81838e5be709a600d106f32e2b2f36c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void lxcpp::NetworkInterface::convertInetAddr2Attr </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structlxcpp_1_1InetAddr.html">InetAddr</a> &amp;&#160;</td>
+          <td class="paramname"><em>addr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structlxcpp_1_1Attr.html">Attr</a> &amp;&#160;</td>
+          <td class="paramname"><em>attr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a224cac40664ae6bb769f6a58184ccab6"></a>
 <div class="memitem">
 <div class="memproto">
@@ -311,6 +418,22 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ae442f8fadee061b751a559e92059ec37"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void lxcpp::NetworkInterface::delInetAddr </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structlxcpp_1_1InetAddr.html">InetAddr</a> &amp;&#160;</td>
+          <td class="paramname"><em>addr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a8460d6ab228683bdb47a4a7e8f0f3976"></a>
 <div class="memitem">
 <div class="memproto">
@@ -341,12 +464,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a5a909f16f401f8083effbe689b992dd3"></a>
+<a class="anchor" id="ab5d748b48ded096a3aededb90c37e896"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const <a class="el" href="namespacelxcpp.html#af439bcb669746e87964d579296a466df">Attrs</a> lxcpp::NetworkInterface::getAttrs </td>
+          <td class="memname"><a class="el" href="namespacelxcpp.html#af439bcb669746e87964d579296a466df">Attrs</a> lxcpp::NetworkInterface::getAttrs </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -380,6 +503,29 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a873368d65793a02cbaf6bf7db0f4511f"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::string&amp; lxcpp::NetworkInterface::getName </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a5f8d9653c14e49f64bac31e4a287639b"></a>
 <div class="memitem">
 <div class="memproto">
@@ -402,6 +548,26 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Move interface to container Equivalent to: ip link set dev $hostif netns $mContainerPid. </p>
+
+</div>
+</div>
+<a class="anchor" id="ae3034bacefd62c56929c585ec9c78593"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void lxcpp::NetworkInterface::renameFrom </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>oldif</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Rename interface name Equivalent to: ip link set dev $oldif name $this.mIfname. </p>
+
 </div>
 </div>
 <a class="anchor" id="aca4edaa70a6c6c37980f064f53a96866"></a>
@@ -413,6 +579,54 @@ Private Attributes</h2></td></tr>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="namespacelxcpp.html#af439bcb669746e87964d579296a466df">Attrs</a> &amp;&#160;</td>
           <td class="paramname"><em>attrs</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a9e6938ecc3387f90d1604e2e9a104970"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void lxcpp::NetworkInterface::setMACAddress </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>macaddr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a8cd8f63a57e42fb6ab0a8b5a74a07283"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void lxcpp::NetworkInterface::setMTU </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>mtu</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a04929f2bb4113e866ca900b269cea324"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void lxcpp::NetworkInterface::setTxLength </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>txlen</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -451,7 +665,7 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a class="anchor" id="a6fa74e98ca36f4b4cc923f5d17fd5dce"></a>
+<a class="anchor" id="a75748498032adcf36f5871e16a34c1b6"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -459,7 +673,7 @@ Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classlxcpp_1_1Container.html">Container</a>&amp; lxcpp::NetworkInterface::mContainer</td>
+          <td class="memname">pid_t lxcpp::NetworkInterface::mContainerPid</td>
         </tr>
       </table>
   </td>
@@ -469,7 +683,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p><a class="el" href="classlxcpp_1_1Container.html">Container</a> to operate on. </p>
+<p><a class="el" href="classlxcpp_1_1Container.html">Container</a> pid to operate on (0=kernel) </p>
 
 </div>
 </div>
@@ -506,7 +720,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacelxcpp.html">lxcpp</a></li><li class="navelem"><a class="el" href="classlxcpp_1_1NetworkInterface.html">NetworkInterface</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

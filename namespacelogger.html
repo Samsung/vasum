@@ -125,6 +125,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlogger_1_1NullLogger.html">NullLogger</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Null logging backend.  <a href="classlogger_1_1NullLogger.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlogger_1_1PersistentFileBackend.html">PersistentFileBackend</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlogger_1_1SStreamWrapper.html">SStreamWrapper</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlogger_1_1StderrBackend.html">StderrBackend</a></td></tr>
@@ -138,49 +140,42 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a2630a80180af193bfa10a53f9cfcaaa3"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3">Color</a> : unsigned int { <br />
-&#160;&#160;<a class="el" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a5b39c8b553c821e7cddc6da64b5bd2ee">Color::DEFAULT</a> = 0, 
-<a class="el" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a08d0012388564e95c3b4a7407cf04965">Color::BLACK</a> = 90, 
-<a class="el" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3aa2d9547b5d3dd9f05984475f7c926da0">Color::RED</a> = 91, 
-<a class="el" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a9de0e5dd94e861317e74964bed179fa0">Color::GREEN</a> = 92, 
+<tr class="memitem:ga2fd86a5d52b225b4c00af13284f44479"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">LogLevel</a> : int { <br />
+&#160;&#160;<a class="el" href="group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479a2d3e4144aa384b18849ab9a8abad74d6">LogLevel::TRACE</a>, 
+<a class="el" href="group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479adc30ec20708ef7b0f641ef78b7880a15">LogLevel::DEBUG</a>, 
+<a class="el" href="group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479a551b723eafd6a31d444fcb2f5920fbd3">LogLevel::INFO</a>, 
+<a class="el" href="group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479a32bd8a1db2275458673903bdb84cb277">LogLevel::WARN</a>, 
 <br />
-&#160;&#160;<a class="el" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a8a568e5f41b7e4da88fe5c4a00aad34e">Color::YELLOW</a> = 93, 
-<a class="el" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a1b3e1ee9bff86431dea6b181365ba65f">Color::BLUE</a> = 94, 
-<a class="el" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3ac634ffea7195608364671ac52ee59a61">Color::MAGENTA</a> = 95, 
-<a class="el" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a344dd8cd533280795b9db82ef0c92749">Color::CYAN</a> = 96, 
+&#160;&#160;<a class="el" href="group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479abb1ca97ec761fc37101737ba0aa2e7c5">LogLevel::ERROR</a>, 
+<a class="el" href="group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479a4fc963e213bba362778f5c175eb4d5ff">LogLevel::HELP</a>
 <br />
-&#160;&#160;<a class="el" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3ab5bf627e448384cf3a4c35121ca6008d">Color::WHITE</a> = 97
-<br />
- }<tr class="separator:a2630a80180af193bfa10a53f9cfcaaa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+ }<tr class="memdesc:ga2fd86a5d52b225b4c00af13284f44479"><td class="mdescLeft">&#160;</td><td class="mdescRight">Available log levels.  <a href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">More...</a><br /></td></tr>
+<tr class="separator:ga2fd86a5d52b225b4c00af13284f44479"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </td></tr>
-<tr class="memitem:af002a52cf3f988312f21f1e4d942d5c9"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelogger.html#af002a52cf3f988312f21f1e4d942d5c9">Attributes</a> : unsigned int { <a class="el" href="namespacelogger.html#af002a52cf3f988312f21f1e4d942d5c9a5b39c8b553c821e7cddc6da64b5bd2ee">Attributes::DEFAULT</a> = 0, 
-<a class="el" href="namespacelogger.html#af002a52cf3f988312f21f1e4d942d5c9a2909dd0e0336f10b6da9735b859a3d19">Attributes::BOLD</a> = 1
- }<tr class="separator:af002a52cf3f988312f21f1e4d942d5c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</td></tr>
-<tr class="memitem:ga08ef41fb8da9e671d65fcbd87b6574a2"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">LogLevel</a> { <br />
-&#160;&#160;<a class="el" href="group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2a2d3e4144aa384b18849ab9a8abad74d6">LogLevel::TRACE</a>, 
-<a class="el" href="group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2adc30ec20708ef7b0f641ef78b7880a15">LogLevel::DEBUG</a>, 
-<a class="el" href="group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2a551b723eafd6a31d444fcb2f5920fbd3">LogLevel::INFO</a>, 
-<a class="el" href="group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2a32bd8a1db2275458673903bdb84cb277">LogLevel::WARN</a>, 
+<tr class="memitem:ad98eaa94cd8d9a04148bed0359e6ce1e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1e">LogType</a> : int { <br />
+&#160;&#160;<a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea892f8dc57383885a98aa1d5ac51bf775">LogType::LOG_NULL</a>, 
+<a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea0c6224dee85112c7a79b435d9794e92b">LogType::LOG_JOURNALD</a>, 
+<a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea957b3db3f6c69ff73379f3fdc8e446f6">LogType::LOG_FILE</a>, 
+<a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1eab9ff184630c9a941461f3168c6021ff6">LogType::LOG_PERSISTENT_FILE</a>, 
 <br />
-&#160;&#160;<a class="el" href="group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2abb1ca97ec761fc37101737ba0aa2e7c5">LogLevel::ERROR</a>, 
-<a class="el" href="group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2a4fc963e213bba362778f5c175eb4d5ff">LogLevel::HELP</a>
+&#160;&#160;<a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1ea5c7bd379a25f9fb8591ce63a5be5ee8c">LogType::LOG_SYSLOG</a>, 
+<a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1eaccdd93dba2f76067def6c67c463a6eba">LogType::LOG_STDERR</a>
 <br />
- }<tr class="memdesc:ga08ef41fb8da9e671d65fcbd87b6574a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Available log levels.  <a href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">More...</a><br /></td></tr>
-<tr class="separator:ga08ef41fb8da9e671d65fcbd87b6574a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+ }<tr class="separator:ad98eaa94cd8d9a04148bed0359e6ce1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a96adb4cf1c0e3d28bd30c388d99844a6"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelogger.html#a96adb4cf1c0e3d28bd30c388d99844a6">getConsoleEscapeSequence</a> (<a class="el" href="namespacelogger.html#af002a52cf3f988312f21f1e4d942d5c9">Attributes</a> attr, <a class="el" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3">Color</a> color)</td></tr>
-<tr class="separator:a96adb4cf1c0e3d28bd30c388d99844a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7dfbaa4626e4e33b6d05a3c28af4dd70"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">LogLevel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelogger.html#a7dfbaa4626e4e33b6d05a3c28af4dd70">parseLogLevel</a> (const std::string &amp;level)</td></tr>
+<tr class="memitem:a7dfbaa4626e4e33b6d05a3c28af4dd70"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">LogLevel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelogger.html#a7dfbaa4626e4e33b6d05a3c28af4dd70">parseLogLevel</a> (const std::string &amp;level)</td></tr>
 <tr class="separator:a7dfbaa4626e4e33b6d05a3c28af4dd70"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a6609454cf822fa690cc036b6ea528e"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelogger.html#a6a6609454cf822fa690cc036b6ea528e">toString</a> (const <a class="el" href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">LogLevel</a> logLevel)</td></tr>
+<tr class="memitem:a6a6609454cf822fa690cc036b6ea528e"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelogger.html#a6a6609454cf822fa690cc036b6ea528e">toString</a> (const <a class="el" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">LogLevel</a> logLevel)</td></tr>
 <tr class="separator:a6a6609454cf822fa690cc036b6ea528e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59754c618d1a16d43970a1761bc72a9f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelogger.html#a59754c618d1a16d43970a1761bc72a9f">setupLogger</a> (const <a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1e">LogType</a> type, const <a class="el" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">LogLevel</a> level, const std::string &amp;arg=&quot;&quot;)</td></tr>
+<tr class="memdesc:a59754c618d1a16d43970a1761bc72a9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">A helper function to easily and completely setup a new logger.  <a href="#a59754c618d1a16d43970a1761bc72a9f">More...</a><br /></td></tr>
+<tr class="separator:a59754c618d1a16d43970a1761bc72a9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
-<a class="anchor" id="af002a52cf3f988312f21f1e4d942d5c9"></a>
+<a class="anchor" id="ad98eaa94cd8d9a04148bed0359e6ce1e"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -188,7 +183,7 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">enum <a class="el" href="namespacelogger.html#af002a52cf3f988312f21f1e4d942d5c9">logger::Attributes</a> : unsigned int</td>
+          <td class="memname">enum <a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1e">logger::LogType</a> : int</td>
         </tr>
       </table>
   </td>
@@ -198,87 +193,29 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="af002a52cf3f988312f21f1e4d942d5c9a5b39c8b553c821e7cddc6da64b5bd2ee"></a>DEFAULT&#160;</td><td class="fielddoc">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="ad98eaa94cd8d9a04148bed0359e6ce1ea892f8dc57383885a98aa1d5ac51bf775"></a>LOG_NULL&#160;</td><td class="fielddoc">
 </td></tr>
-<tr><td class="fieldname"><a class="anchor" id="af002a52cf3f988312f21f1e4d942d5c9a2909dd0e0336f10b6da9735b859a3d19"></a>BOLD&#160;</td><td class="fielddoc">
+<tr><td class="fieldname"><a class="anchor" id="ad98eaa94cd8d9a04148bed0359e6ce1ea0c6224dee85112c7a79b435d9794e92b"></a>LOG_JOURNALD&#160;</td><td class="fielddoc">
 </td></tr>
-</table>
-
-</div>
-</div>
-<a class="anchor" id="a2630a80180af193bfa10a53f9cfcaaa3"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum <a class="el" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3">logger::Color</a> : unsigned int</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="a2630a80180af193bfa10a53f9cfcaaa3a5b39c8b553c821e7cddc6da64b5bd2ee"></a>DEFAULT&#160;</td><td class="fielddoc">
+<tr><td class="fieldname"><a class="anchor" id="ad98eaa94cd8d9a04148bed0359e6ce1ea957b3db3f6c69ff73379f3fdc8e446f6"></a>LOG_FILE&#160;</td><td class="fielddoc">
 </td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a2630a80180af193bfa10a53f9cfcaaa3a08d0012388564e95c3b4a7407cf04965"></a>BLACK&#160;</td><td class="fielddoc">
+<tr><td class="fieldname"><a class="anchor" id="ad98eaa94cd8d9a04148bed0359e6ce1eab9ff184630c9a941461f3168c6021ff6"></a>LOG_PERSISTENT_FILE&#160;</td><td class="fielddoc">
 </td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a2630a80180af193bfa10a53f9cfcaaa3aa2d9547b5d3dd9f05984475f7c926da0"></a>RED&#160;</td><td class="fielddoc">
+<tr><td class="fieldname"><a class="anchor" id="ad98eaa94cd8d9a04148bed0359e6ce1ea5c7bd379a25f9fb8591ce63a5be5ee8c"></a>LOG_SYSLOG&#160;</td><td class="fielddoc">
 </td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a2630a80180af193bfa10a53f9cfcaaa3a9de0e5dd94e861317e74964bed179fa0"></a>GREEN&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a2630a80180af193bfa10a53f9cfcaaa3a8a568e5f41b7e4da88fe5c4a00aad34e"></a>YELLOW&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a2630a80180af193bfa10a53f9cfcaaa3a1b3e1ee9bff86431dea6b181365ba65f"></a>BLUE&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a2630a80180af193bfa10a53f9cfcaaa3ac634ffea7195608364671ac52ee59a61"></a>MAGENTA&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a2630a80180af193bfa10a53f9cfcaaa3a344dd8cd533280795b9db82ef0c92749"></a>CYAN&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a2630a80180af193bfa10a53f9cfcaaa3ab5bf627e448384cf3a4c35121ca6008d"></a>WHITE&#160;</td><td class="fielddoc">
+<tr><td class="fieldname"><a class="anchor" id="ad98eaa94cd8d9a04148bed0359e6ce1eaccdd93dba2f76067def6c67c463a6eba"></a>LOG_STDERR&#160;</td><td class="fielddoc">
 </td></tr>
 </table>
 
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="a96adb4cf1c0e3d28bd30c388d99844a6"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::string logger::getConsoleEscapeSequence </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacelogger.html#af002a52cf3f988312f21f1e4d942d5c9">Attributes</a>&#160;</td>
-          <td class="paramname"><em>attr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3">Color</a>&#160;</td>
-          <td class="paramname"><em>color</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a7dfbaa4626e4e33b6d05a3c28af4dd70"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">LogLevel</a> logger::parseLogLevel </td>
+          <td class="memname"><a class="el" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">LogLevel</a> logger::parseLogLevel </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>level</em></td><td>)</td>
@@ -296,6 +233,48 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a59754c618d1a16d43970a1761bc72a9f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void logger::setupLogger </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacelogger.html#ad98eaa94cd8d9a04148bed0359e6ce1e">LogType</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">LogLevel</a>&#160;</td>
+          <td class="paramname"><em>level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>arg</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>A helper function to easily and completely setup a new logger. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td>logger type to be set up </td></tr>
+    <tr><td class="paramname">level</td><td>maximum log level that will be logged </td></tr>
+    <tr><td class="paramname">arg</td><td>an argument used by some loggers, specific to them (e.g. file name for file loggers) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a6a6609454cf822fa690cc036b6ea528e"></a>
 <div class="memitem">
 <div class="memproto">
@@ -303,7 +282,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">std::string logger::toString </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">LogLevel</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">LogLevel</a>&#160;</td>
           <td class="paramname"><em>logLevel</em></td><td>)</td>
           <td></td>
         </tr>
@@ -326,7 +305,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacelogger.html">logger</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

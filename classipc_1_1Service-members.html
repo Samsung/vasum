@@ -106,8 +106,8 @@ $(document).ready(function(){initNavTree('classipc_1_1Service.html','');});
 
 <p>This is the complete list of members for <a class="el" href="classipc_1_1Service.html">ipc::Service</a>, including all inherited members.</p>
 <table class="directory">
-  <tr class="even"><td class="entry"><a class="el" href="classipc_1_1Service.html#ae9b4925ea29a3cf8bfc0d9d2c092e9f3">callAsync</a>(const MethodID methodID, const PeerID peerID, const std::shared_ptr&lt; SentDataType &gt; &amp;data, const typename ResultHandler&lt; ReceivedDataType &gt;::type &amp;resultCallback)</td><td class="entry"><a class="el" href="classipc_1_1Service.html">ipc::Service</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="classipc_1_1Service.html#aff2767fab9993b0ba0502f8e0934ded3">callSync</a>(const MethodID methodID, const PeerID peerID, const std::shared_ptr&lt; SentDataType &gt; &amp;data, unsigned int timeoutMS=5000)</td><td class="entry"><a class="el" href="classipc_1_1Service.html">ipc::Service</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classipc_1_1Service.html#a0441fc9a57d803ed0676420083061fcf">callAsync</a>(const MethodID methodID, const PeerID &amp;peerID, const std::shared_ptr&lt; SentDataType &gt; &amp;data, const typename ResultHandler&lt; ReceivedDataType &gt;::type &amp;resultCallback)</td><td class="entry"><a class="el" href="classipc_1_1Service.html">ipc::Service</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="classipc_1_1Service.html#a6caabc22114745527df805c00cb7f78e">callSync</a>(const MethodID methodID, const PeerID &amp;peerID, const std::shared_ptr&lt; SentDataType &gt; &amp;data, unsigned int timeoutMS=5000)</td><td class="entry"><a class="el" href="classipc_1_1Service.html">ipc::Service</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classipc_1_1Service.html#aba5cc776a836404569060e1613c2828b">handle</a>(const FileDescriptor fd, const epoll::Events pollEvents)</td><td class="entry"><a class="el" href="classipc_1_1Service.html">ipc::Service</a></td><td class="entry"><span class="mlabel">private</span></td></tr>
   <tr><td class="entry"><a class="el" href="classipc_1_1Service.html#a9bb68ef774f381a5216d6c90e29735cb">isStarted</a>()</td><td class="entry"><a class="el" href="classipc_1_1Service.html">ipc::Service</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classipc_1_1Service.html#a534fca05ba12243da1eb10b5b7905837">mAcceptor</a></td><td class="entry"><a class="el" href="classipc_1_1Service.html">ipc::Service</a></td><td class="entry"><span class="mlabel">private</span></td></tr>
@@ -124,14 +124,14 @@ $(document).ready(function(){initNavTree('classipc_1_1Service.html','');});
   <tr><td class="entry"><a class="el" href="classipc_1_1Service.html#acb632121af7d7e8ef7869e94ac34e1fa">signal</a>(const MethodID methodID, const std::shared_ptr&lt; SentDataType &gt; &amp;data)</td><td class="entry"><a class="el" href="classipc_1_1Service.html">ipc::Service</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classipc_1_1Service.html#a7e76a410a029083acda50032852c6b92">start</a>()</td><td class="entry"><a class="el" href="classipc_1_1Service.html">ipc::Service</a></td><td class="entry"></td></tr>
   <tr><td class="entry"><a class="el" href="classipc_1_1Service.html#a0bcd30e48fa09c89ff9420b5506bb76f">stop</a>(bool wait=true)</td><td class="entry"><a class="el" href="classipc_1_1Service.html">ipc::Service</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classipc_1_1Service.html#ac704ef1fdca1109c6cf770e3158c6eab">~Service</a>()</td><td class="entry"><a class="el" href="classipc_1_1Service.html">ipc::Service</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classipc_1_1Service.html#ac704ef1fdca1109c6cf770e3158c6eab">~Service</a>()</td><td class="entry"><a class="el" href="classipc_1_1Service.html">ipc::Service</a></td><td class="entry"><span class="mlabel">virtual</span></td></tr>
 </table></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

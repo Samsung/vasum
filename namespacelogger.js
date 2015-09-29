@@ -6,6 +6,7 @@ var namespacelogger =
     [ "Logger", "classlogger_1_1Logger.html", "classlogger_1_1Logger" ],
     [ "LoggerScope", "classlogger_1_1LoggerScope.html", "classlogger_1_1LoggerScope" ],
     [ "NullLogger", "classlogger_1_1NullLogger.html", "classlogger_1_1NullLogger" ],
+    [ "PersistentFileBackend", "classlogger_1_1PersistentFileBackend.html", "classlogger_1_1PersistentFileBackend" ],
     [ "SStreamWrapper", "classlogger_1_1SStreamWrapper.html", "classlogger_1_1SStreamWrapper" ],
     [ "StderrBackend", "classlogger_1_1StderrBackend.html", "classlogger_1_1StderrBackend" ],
     [ "SyslogBackend", "classlogger_1_1SyslogBackend.html", "classlogger_1_1SyslogBackend" ],

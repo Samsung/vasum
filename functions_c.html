@@ -110,11 +110,11 @@ $(document).ready(function(){initNavTree('functions_c.html','');});
 </li>
 <li>callAsync()
 : <a class="el" href="classipc_1_1Client.html#ac2e40ccde13303f4e1237990b3211984">ipc::Client</a>
-, <a class="el" href="classipc_1_1Processor.html#ad8a2c2a6d0b89879d1d85f17358b8d5b">ipc::Processor</a>
-, <a class="el" href="classipc_1_1Service.html#ae9b4925ea29a3cf8bfc0d9d2c092e9f3">ipc::Service</a>
+, <a class="el" href="classipc_1_1Processor.html#a0996a9c343accdc27757baaa3fd26cff">ipc::Processor</a>
+, <a class="el" href="classipc_1_1Service.html#a0441fc9a57d803ed0676420083061fcf">ipc::Service</a>
 </li>
 <li>callAsyncInternal()
-: <a class="el" href="classipc_1_1Processor.html#ab87168622be97d7cec47559dc7a2feb1">ipc::Processor</a>
+: <a class="el" href="classipc_1_1Processor.html#a1d95ccf3c296cbe5c8435982f5529159">ipc::Processor</a>
 </li>
 <li>Callback
 : <a class="el" href="classipc_1_1epoll_1_1EventPoll.html#ad3edbfb11e6e20390f581bc14fe43d06">ipc::epoll::EventPoll</a>
@@ -140,17 +140,20 @@ $(document).ready(function(){initNavTree('functions_c.html','');});
 </li>
 <li>callSync()
 : <a class="el" href="classipc_1_1Client.html#ad4f446e82318bc3eeb098bdd48304bba">ipc::Client</a>
-, <a class="el" href="classipc_1_1Processor.html#a5f1f0914cf3dac8aab4ff1a1f647735e">ipc::Processor</a>
-, <a class="el" href="classipc_1_1Service.html#aff2767fab9993b0ba0502f8e0934ded3">ipc::Service</a>
+, <a class="el" href="classipc_1_1Processor.html#ac52d8d5f4aaa0be4008b075c6d1ae85f">ipc::Processor</a>
+, <a class="el" href="classipc_1_1Service.html#a6caabc22114745527df805c00cb7f78e">ipc::Service</a>
 </li>
 <li>CapabilitySetupException()
 : <a class="el" href="structlxcpp_1_1CapabilitySetupException.html#a26b989110298c76ce72b5e1634fc4b47">lxcpp::CapabilitySetupException</a>
+</li>
+<li>capsToKeep
+: <a class="el" href="structlxcpp_1_1AttachConfig.html#a6ee8fedac587142d9adc9462cf817b0f">lxcpp::AttachConfig</a>
 </li>
 <li>CArrayBuilder()
 : <a class="el" href="classutils_1_1CArrayBuilder.html#a2026b7bf156569d707dd889755e273ba">utils::CArrayBuilder&lt; T &gt;</a>
 </li>
 <li>Channel()
-: <a class="el" href="classutils_1_1Channel.html#a700a3caa0bccc44376db729eedd938ce">utils::Channel</a>
+: <a class="el" href="classutils_1_1Channel.html#a65e47bba3a13893650e28b8db761d80f">utils::Channel</a>
 </li>
 <li>check()
 : <a class="el" href="structconfig_1_1has__member__impl.html#a95ebe73d73af18ec98d4fea23f824aff">config::has_member_impl&lt; T, F &gt;</a>
@@ -164,9 +167,6 @@ $(document).ready(function(){initNavTree('functions_c.html','');});
 : <a class="el" href="classconfig_1_1FromGVariantVisitor.html#af3afdc98d26e728fef45d4fedc1af8aa">config::FromGVariantVisitor</a>
 , <a class="el" href="classconfig_1_1FromJsonVisitor.html#aca05f015b47eb46195236010f796f3f8">config::FromJsonVisitor</a>
 , <a class="el" href="classconfig_1_1FromKVJsonVisitor.html#af197e0aee0c3ce64723bcd2fff22ca71">config::FromKVJsonVisitor</a>
-</li>
-<li>child()
-: <a class="el" href="classlxcpp_1_1AttachManager.html#a1f1d23e7cc586a9f7775ea9b38b8f049">lxcpp::AttachManager</a>
 </li>
 <li>cleanUpZonesPath
 : <a class="el" href="structvasum_1_1ZonesManagerConfig.html#a7d364f61ad3a13556ce23c8200af08d9">vasum::ZonesManagerConfig</a>
@@ -224,12 +224,15 @@ $(document).ready(function(){initNavTree('functions_c.html','');});
 <li>ConfigException()
 : <a class="el" href="structconfig_1_1ConfigException.html#a8d389f4239095cd6c6330454a8858485">config::ConfigException</a>
 </li>
+<li>ConfigureException()
+: <a class="el" href="structlxcpp_1_1ConfigureException.html#ae0c41f12bec45b36629331980d841eec">lxcpp::ConfigureException</a>
+</li>
 <li>connect()
 : <a class="el" href="classClient.html#a225851d40b97d7c8e13258fe855a94d7">Client</a>
 , <a class="el" href="classvasum_1_1cli_1_1CommandLineInterface.html#a2461c386eb69a645671a9f419ee0d1ef">vasum::cli::CommandLineInterface</a>
 </li>
 <li>Connection()
-: <a class="el" href="structconfig_1_1sqlite3_1_1Connection.html#a27321ceaf76661a7d54fdcedc92d8df8">config::sqlite3::Connection</a>
+: <a class="el" href="structconfig_1_1sqlite3_1_1Connection.html#a46f272541630382679a031c9fe43464c">config::sqlite3::Connection</a>
 </li>
 <li>connectSocket()
 : <a class="el" href="classipc_1_1Socket.html#addeb408f61e5743026ee569832518269">ipc::Socket</a>
@@ -237,8 +240,20 @@ $(document).ready(function(){initNavTree('functions_c.html','');});
 <li>connectSystem()
 : <a class="el" href="classClient.html#a71a72f3d5161aa0310061239bf60fb37">Client</a>
 </li>
+<li>ContainerConfig()
+: <a class="el" href="structlxcpp_1_1ContainerConfig.html#a8e19bb34fdedc42debf9ff17187bac6e">lxcpp::ContainerConfig</a>
+</li>
 <li>ContainerImpl()
-: <a class="el" href="classlxcpp_1_1ContainerImpl.html#a471ee95266ac64c7db7200844fd53211">lxcpp::ContainerImpl</a>
+: <a class="el" href="classlxcpp_1_1ContainerImpl.html#a2e481afd08d4e04125b00f0cb76e78cf">lxcpp::ContainerImpl</a>
+</li>
+<li>convertAttr2InetAddr()
+: <a class="el" href="classlxcpp_1_1NetworkInterface.html#a47ebc32c12a89643db1b2216a594e816">lxcpp::NetworkInterface</a>
+</li>
+<li>convertInetAddr2Attr()
+: <a class="el" href="classlxcpp_1_1NetworkInterface.html#ac81838e5be709a600d106f32e2b2f36c">lxcpp::NetworkInterface</a>
+</li>
+<li>count
+: <a class="el" href="structlxcpp_1_1TerminalsConfig.html#a790ef7c23adb5be9b0218d58f283458e">lxcpp::TerminalsConfig</a>
 </li>
 <li>coverException()
 : <a class="el" href="classClient.html#ae7230fbc49b7438ed79a0c0b5db8c03a">Client</a>
@@ -252,10 +267,8 @@ $(document).ready(function(){initNavTree('functions_c.html','');});
 <li>create()
 : <a class="el" href="classdbus_1_1DbusConnection.html#a82cb9716148693d69b385b3d49b0b06a">dbus::DbusConnection</a>
 , <a class="el" href="structipc_1_1IPCGSource.html#ac46b76d1428824cfb3e0ee0a81d37393">ipc::IPCGSource</a>
-, <a class="el" href="classipc_1_1MethodRequest.html#aa9962ae7a9e29a6f6ee9ab6720b88e30">ipc::MethodRequest</a>
-, <a class="el" href="classipc_1_1SignalRequest.html#af4fd9e9106613ac590ef79a766c666a9">ipc::SignalRequest</a>
-, <a class="el" href="classlxcpp_1_1Container.html#aed51192d29bfdb162da791b2a69650d6">lxcpp::Container</a>
-, <a class="el" href="classlxcpp_1_1ContainerImpl.html#a264ac85df770f5ab13926a3a7b09431a">lxcpp::ContainerImpl</a>
+, <a class="el" href="classipc_1_1MethodRequest.html#a7ac545938a5c36becb28095a0ef8258f">ipc::MethodRequest</a>
+, <a class="el" href="classipc_1_1SignalRequest.html#a83f0e8577d4f7267ea5e7de9f350f79a">ipc::SignalRequest</a>
 , <a class="el" href="classlxcpp_1_1NetworkInterface.html#a224cac40664ae6bb769f6a58184ccab6">lxcpp::NetworkInterface</a>
 , <a class="el" href="classutils_1_1Worker.html#a9ec21c6b7e469a2d664b0516c087d43b">utils::Worker</a>
 , <a class="el" href="classvasum_1_1lxc_1_1LxcZone.html#a5ecb337ced418fa4cb9dfd93f4924993">vasum::lxc::LxcZone</a>
@@ -301,6 +314,9 @@ $(document).ready(function(){initNavTree('functions_c.html','');});
 <li>createZone()
 : <a class="el" href="classvasum_1_1ZonesManager.html#a9c7282e841e3e22affcad58dbca38733">vasum::ZonesManager</a>
 </li>
+<li>CredentialSetupException()
+: <a class="el" href="structlxcpp_1_1CredentialSetupException.html#a9d7e40c1f3b39d8626f6ab293af5d2cf">lxcpp::CredentialSetupException</a>
+</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -308,7 +324,7 @@ $(document).ready(function(){initNavTree('functions_c.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:11 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

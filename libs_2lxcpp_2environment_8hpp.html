@@ -101,7 +101,6 @@ $(document).ready(function(){initNavTree('libs_2lxcpp_2environment_8hpp.html',''
 <div class="header">
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#typedef-members">Typedefs</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">environment.hpp File Reference</div>  </div>
@@ -121,17 +120,19 @@ Namespaces</h2></td></tr>
 <tr class="memitem:namespacelxcpp"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelxcpp.html">lxcpp</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:a4fa4b14ba6662fcaf241272ea1438854"><td class="memItemLeft" align="right" valign="top">typedef std::pair&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelxcpp.html#a4fa4b14ba6662fcaf241272ea1438854">lxcpp::EnvironmentVariable</a></td></tr>
-<tr class="separator:a4fa4b14ba6662fcaf241272ea1438854"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a1d145398a751b22912c3104a155159ed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelxcpp.html#a1d145398a751b22912c3104a155159ed">lxcpp::clearenv</a> ()</td></tr>
 <tr class="separator:a1d145398a751b22912c3104a155159ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8aa67aa23665a065e213c4af88f487e2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelxcpp.html#a8aa67aa23665a065e213c4af88f487e2">lxcpp::clearenvExcept</a> (const std::vector&lt; std::string &gt; &amp;names)</td></tr>
+<tr class="memdesc:a8aa67aa23665a065e213c4af88f487e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears the env variables except those listed.  <a href="namespacelxcpp.html#a8aa67aa23665a065e213c4af88f487e2">More...</a><br /></td></tr>
+<tr class="separator:a8aa67aa23665a065e213c4af88f487e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4836da4d05563e2b9fc60d20c8df62bb"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelxcpp.html#a4836da4d05563e2b9fc60d20c8df62bb">lxcpp::getenv</a> (const std::string &amp;name)</td></tr>
+<tr class="separator:a4836da4d05563e2b9fc60d20c8df62bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f25d4206ea00524711a89a5cf77cab6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelxcpp.html#a2f25d4206ea00524711a89a5cf77cab6">lxcpp::setenv</a> (const std::string &amp;name, const std::string &amp;value)</td></tr>
 <tr class="separator:a2f25d4206ea00524711a89a5cf77cab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1974000edaca36250295be52f4adba12"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacelxcpp.html#a1974000edaca36250295be52f4adba12">lxcpp::setenv</a> (const std::vector&lt; std::pair&lt; std::string, std::string &gt;&gt; &amp;variables)</td></tr>
+<tr class="separator:a1974000edaca36250295be52f4adba12"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Handling environment variables. </p>
@@ -142,8 +143,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_258da5588bb15182dfffe9dae1cb498a.html">libs</a></li><li class="navelem"><a class="el" href="dir_44ad2f858e79411b37ee8b41487cb926.html">lxcpp</a></li><li class="navelem"><a class="el" href="libs_2lxcpp_2environment_8hpp.html">environment.hpp</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:22 for Vasum by
+    <li class="navelem"><a class="el" href="dir_6719ab1f1f7655efc2fa43f7eb574fd1.html">libs</a></li><li class="navelem"><a class="el" href="dir_d9aa34519a081c014ba0a7c6776c773d.html">lxcpp</a></li><li class="navelem"><a class="el" href="libs_2lxcpp_2environment_8hpp.html">environment.hpp</a></li>
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -109,7 +109,9 @@ $(document).ready(function(){initNavTree('fd-utils_8hpp.html','');});
 
 <p>File descriptor utility functions.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;cstddef&gt;</code><br />
+<div class="textblock"><code>#include &lt;string&gt;</code><br />
+<code>#include &lt;cstddef&gt;</code><br />
+<code>#include &lt;sys/types.h&gt;</code><br />
 </div>
 <p><a href="fd-utils_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -120,12 +122,21 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a71765bbf18806767b9aaaff6e84e5216"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a71765bbf18806767b9aaaff6e84e5216">utils::open</a> (const std::string &amp;path, int flags, mode_t mode=-1)</td></tr>
+<tr class="memdesc:a71765bbf18806767b9aaaff6e84e5216"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open a file.  <a href="namespaceutils.html#a71765bbf18806767b9aaaff6e84e5216">More...</a><br /></td></tr>
+<tr class="separator:a71765bbf18806767b9aaaff6e84e5216"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a592f45119eb5c0f8bf2aa6b495acb217"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a592f45119eb5c0f8bf2aa6b495acb217">utils::close</a> (int fd)</td></tr>
 <tr class="memdesc:a592f45119eb5c0f8bf2aa6b495acb217"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close the file descriptor.  <a href="namespaceutils.html#a592f45119eb5c0f8bf2aa6b495acb217">More...</a><br /></td></tr>
 <tr class="separator:a592f45119eb5c0f8bf2aa6b495acb217"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a08c546d89635ef8199d9013f34f99366"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a08c546d89635ef8199d9013f34f99366">utils::shutdown</a> (int fd)</td></tr>
 <tr class="memdesc:a08c546d89635ef8199d9013f34f99366"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shut down part of a full-duplex connection.  <a href="namespaceutils.html#a08c546d89635ef8199d9013f34f99366">More...</a><br /></td></tr>
 <tr class="separator:a08c546d89635ef8199d9013f34f99366"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad02e6f95e39a3b8eb1544253763b330e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#ad02e6f95e39a3b8eb1544253763b330e">utils::ioctl</a> (int fd, unsigned long request, void *argp)</td></tr>
+<tr class="memdesc:ad02e6f95e39a3b8eb1544253763b330e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Operation on a special file.  <a href="namespaceutils.html#ad02e6f95e39a3b8eb1544253763b330e">More...</a><br /></td></tr>
+<tr class="separator:ad02e6f95e39a3b8eb1544253763b330e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7ff1a5d9fb5a20d3e6d447ed17a0733"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#aa7ff1a5d9fb5a20d3e6d447ed17a0733">utils::dup2</a> (int olfFD, int newFD, bool closeOnExec=false)</td></tr>
+<tr class="memdesc:aa7ff1a5d9fb5a20d3e6d447ed17a0733"><td class="mdescLeft">&#160;</td><td class="mdescRight">Duplicate one file desciptor onto another.  <a href="namespaceutils.html#aa7ff1a5d9fb5a20d3e6d447ed17a0733">More...</a><br /></td></tr>
+<tr class="separator:aa7ff1a5d9fb5a20d3e6d447ed17a0733"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad60b22dc1db0623f51f90aa3fd04d9da"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#ad60b22dc1db0623f51f90aa3fd04d9da">utils::write</a> (int fd, const void *bufferPtr, const size_t size, int timeoutMS=5000)</td></tr>
 <tr class="memdesc:ad60b22dc1db0623f51f90aa3fd04d9da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write to a file descriptor, throw on error.  <a href="namespaceutils.html#ad60b22dc1db0623f51f90aa3fd04d9da">More...</a><br /></td></tr>
 <tr class="separator:ad60b22dc1db0623f51f90aa3fd04d9da"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -145,6 +156,12 @@ Functions</h2></td></tr>
 <tr class="memitem:aa048f028e890c2702b9bb3f08f5dfc1b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#aa048f028e890c2702b9bb3f08f5dfc1b">utils::fdRecv</a> (int socket, const unsigned int timeoutMS=5000)</td></tr>
 <tr class="memdesc:aa048f028e890c2702b9bb3f08f5dfc1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receive fd via Unix Domain socket.  <a href="namespaceutils.html#aa048f028e890c2702b9bb3f08f5dfc1b">More...</a><br /></td></tr>
 <tr class="separator:aa048f028e890c2702b9bb3f08f5dfc1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abed804448b861f5ea56dec366388bae3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#abed804448b861f5ea56dec366388bae3">utils::setCloseOnExec</a> (int fd, bool closeOnExec)</td></tr>
+<tr class="memdesc:abed804448b861f5ea56dec366388bae3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set or remove CLOEXEC on a file descriptor.  <a href="namespaceutils.html#abed804448b861f5ea56dec366388bae3">More...</a><br /></td></tr>
+<tr class="separator:abed804448b861f5ea56dec366388bae3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fcf75c62a0b1b5db54156071752bcd7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutils.html#a5fcf75c62a0b1b5db54156071752bcd7">utils::setNonBlocking</a> (int fd, bool nonBlocking)</td></tr>
+<tr class="memdesc:a5fcf75c62a0b1b5db54156071752bcd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set or remove NONBLOCK on a file descriptor.  <a href="namespaceutils.html#a5fcf75c62a0b1b5db54156071752bcd7">More...</a><br /></td></tr>
+<tr class="separator:a5fcf75c62a0b1b5db54156071752bcd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>File descriptor utility functions. </p>
@@ -155,8 +172,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_353a0b29ed1fe2c048306a7c13ef1174.html">common</a></li><li class="navelem"><a class="el" href="dir_5a86b6375f493b00e26a836fc97d2a7e.html">utils</a></li><li class="navelem"><a class="el" href="fd-utils_8hpp.html">fd-utils.hpp</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:22 for Vasum by
+    <li class="navelem"><a class="el" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html">common</a></li><li class="navelem"><a class="el" href="dir_85effdddc426fd82e3610be0948fd413.html">utils</a></li><li class="navelem"><a class="el" href="fd-utils_8hpp.html">fd-utils.hpp</a></li>
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

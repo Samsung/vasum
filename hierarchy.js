@@ -40,6 +40,8 @@ var hierarchy =
     [ "ipc::epoll::ThreadDispatcher", "classipc_1_1epoll_1_1ThreadDispatcher.html", null ],
     [ "ipc::EventQueue< MessageType >", "classipc_1_1EventQueue.html", null ],
     [ "ipc::FinishRequest", "classipc_1_1FinishRequest.html", null ],
+    [ "ipc::hash< T >", "classipc_1_1hash.html", null ],
+    [ "ipc::hash< ipc::UniqueID >", "classipc_1_1hash_3_01ipc_1_1UniqueID_01_4.html", null ],
     [ "ipc::IPCGSource", "structipc_1_1IPCGSource.html", null ],
     [ "ipc::MethodHandler< SentDataType, ReceivedDataType >", "structipc_1_1MethodHandler.html", null ],
     [ "ipc::MethodRequest", "classipc_1_1MethodRequest.html", null ],
@@ -47,6 +49,7 @@ var hierarchy =
     [ "ipc::Processor", "classipc_1_1Processor.html", null ],
     [ "ipc::Processor::EmptyData", "structipc_1_1Processor_1_1EmptyData.html", null ],
     [ "ipc::Processor::ErrorProtocolMessage", "structipc_1_1Processor_1_1ErrorProtocolMessage.html", null ],
+    [ "ipc::Processor::MessageHeader", "structipc_1_1Processor_1_1MessageHeader.html", null ],
     [ "ipc::Processor::MethodHandlers", "structipc_1_1Processor_1_1MethodHandlers.html", null ],
     [ "ipc::Processor::PeerInfo", "structipc_1_1Processor_1_1PeerInfo.html", null ],
     [ "ipc::Processor::RegisterSignalsProtocolMessage", "structipc_1_1Processor_1_1RegisterSignalsProtocolMessage.html", null ],
@@ -63,9 +66,11 @@ var hierarchy =
     [ "ipc::SignalHandler< ReceivedDataType >", "structipc_1_1SignalHandler.html", null ],
     [ "ipc::SignalRequest", "classipc_1_1SignalRequest.html", null ],
     [ "ipc::Socket", "classipc_1_1Socket.html", null ],
+    [ "ipc::UniqueID", "classipc_1_1UniqueID.html", null ],
     [ "logger::LogBackend", "classlogger_1_1LogBackend.html", [
       [ "logger::FileBackend", "classlogger_1_1FileBackend.html", null ],
       [ "logger::NullLogger", "classlogger_1_1NullLogger.html", null ],
+      [ "logger::PersistentFileBackend", "classlogger_1_1PersistentFileBackend.html", null ],
       [ "logger::StderrBackend", "classlogger_1_1StderrBackend.html", null ],
       [ "logger::SyslogBackend", "classlogger_1_1SyslogBackend.html", null ],
       [ "logger::SystemdJournalBackend", "classlogger_1_1SystemdJournalBackend.html", null ]
@@ -74,15 +79,28 @@ var hierarchy =
     [ "logger::Logger", "classlogger_1_1Logger.html", null ],
     [ "logger::LoggerScope", "classlogger_1_1LoggerScope.html", null ],
     [ "logger::SStreamWrapper", "classlogger_1_1SStreamWrapper.html", null ],
-    [ "lxcpp::AttachManager", "classlxcpp_1_1AttachManager.html", null ],
+    [ "lxcpp::AttachConfig", "structlxcpp_1_1AttachConfig.html", null ],
+    [ "lxcpp::AttachHelper", "classlxcpp_1_1AttachHelper.html", null ],
     [ "lxcpp::Attr", "structlxcpp_1_1Attr.html", null ],
+    [ "lxcpp::Command", "classlxcpp_1_1Command.html", [
+      [ "lxcpp::Attach", "classlxcpp_1_1Attach.html", null ],
+      [ "lxcpp::NetCreateAll", "classlxcpp_1_1NetCreateAll.html", null ],
+      [ "lxcpp::PrepGuestTerminal", "classlxcpp_1_1PrepGuestTerminal.html", null ],
+      [ "lxcpp::PrepHostTerminal", "classlxcpp_1_1PrepHostTerminal.html", null ],
+      [ "lxcpp::Start", "classlxcpp_1_1Start.html", null ]
+    ] ],
     [ "lxcpp::Container", "classlxcpp_1_1Container.html", [
       [ "lxcpp::ContainerImpl", "classlxcpp_1_1ContainerImpl.html", null ]
     ] ],
+    [ "lxcpp::ContainerConfig", "structlxcpp_1_1ContainerConfig.html", null ],
     [ "lxcpp::InetAddr", "structlxcpp_1_1InetAddr.html", null ],
+    [ "lxcpp::LoggerConfig", "structlxcpp_1_1LoggerConfig.html", null ],
+    [ "lxcpp::NetworkConfig", "structlxcpp_1_1NetworkConfig.html", null ],
     [ "lxcpp::NetworkInterface", "classlxcpp_1_1NetworkInterface.html", null ],
     [ "lxcpp::NetworkInterfaceConfig", "classlxcpp_1_1NetworkInterfaceConfig.html", null ],
     [ "lxcpp::NetworkInterfaceInfo", "structlxcpp_1_1NetworkInterfaceInfo.html", null ],
+    [ "lxcpp::TerminalConfig", "structlxcpp_1_1TerminalConfig.html", null ],
+    [ "lxcpp::TerminalsConfig", "structlxcpp_1_1TerminalsConfig.html", null ],
     [ "ipc::MethodHandler< void, void >", "structipc_1_1MethodHandler.html", null ],
     [ "NetdevStructure", "structNetdevStructure.html", null ],
     [ "ipc::RequestQueue< Event >", "classipc_1_1RequestQueue.html", null ],
@@ -109,10 +127,16 @@ var hierarchy =
         [ "lxcpp::Exception", "structlxcpp_1_1Exception.html", [
           [ "lxcpp::BadArgument", "structlxcpp_1_1BadArgument.html", null ],
           [ "lxcpp::CapabilitySetupException", "structlxcpp_1_1CapabilitySetupException.html", null ],
+          [ "lxcpp::ConfigureException", "structlxcpp_1_1ConfigureException.html", null ],
+          [ "lxcpp::CredentialSetupException", "structlxcpp_1_1CredentialSetupException.html", null ],
+          [ "lxcpp::EnvironmentSetupException", "structlxcpp_1_1EnvironmentSetupException.html", null ],
           [ "lxcpp::FileSystemSetupException", "structlxcpp_1_1FileSystemSetupException.html", null ],
           [ "lxcpp::NetworkException", "structlxcpp_1_1NetworkException.html", null ],
+          [ "lxcpp::NoSuchValue", "structlxcpp_1_1NoSuchValue.html", null ],
           [ "lxcpp::NotImplementedException", "structlxcpp_1_1NotImplementedException.html", null ],
-          [ "lxcpp::ProcessSetupException", "structlxcpp_1_1ProcessSetupException.html", null ]
+          [ "lxcpp::ProcessSetupException", "structlxcpp_1_1ProcessSetupException.html", null ],
+          [ "lxcpp::TerminalException", "structlxcpp_1_1TerminalException.html", null ],
+          [ "lxcpp::UtilityException", "structlxcpp_1_1UtilityException.html", null ]
         ] ],
         [ "utils::UtilsException", "structutils_1_1UtilsException.html", [
           [ "utils::ProvisionExistsException", "structutils_1_1ProvisionExistsException.html", null ]

@@ -127,6 +127,8 @@ Public Member Functions</h2></td></tr>
 Private Member Functions</h2></td></tr>
 <tr class="memitem:a5bb1fe60bddb2602f36503b2ffedeea3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1ToFDStoreVisitor.html#a5bb1fe60bddb2602f36503b2ffedeea3">writeInternal</a> (const std::string &amp;value)</td></tr>
 <tr class="separator:a5bb1fe60bddb2602f36503b2ffedeea3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a105364a9cd1aaea382b4832e7866671f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1ToFDStoreVisitor.html#a105364a9cd1aaea382b4832e7866671f">writeInternal</a> (const char *&amp;value)</td></tr>
+<tr class="separator:a105364a9cd1aaea382b4832e7866671f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98f9fd510042999a5ee03bc6a20dc7c5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1ToFDStoreVisitor.html#a98f9fd510042999a5ee03bc6a20dc7c5">writeInternal</a> (const <a class="el" href="structconfig_1_1FileDescriptor.html">config::FileDescriptor</a> &amp;fd)</td></tr>
 <tr class="separator:a98f9fd510042999a5ee03bc6a20dc7c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade96c80fce31accc028626f6a3fa2a4e"><td class="memTemplParams" colspan="2">template&lt;typename T , typename std::enable_if&lt; std::is_arithmetic&lt; T &gt;::value, int &gt;::type  = 0&gt; </td></tr>
@@ -138,6 +140,9 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a2f73c7417f99ed887786bd59fcefc9b0"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a2f73c7417f99ed887786bd59fcefc9b0"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1ToFDStoreVisitor.html#a2f73c7417f99ed887786bd59fcefc9b0">writeInternal</a> (const std::vector&lt; T &gt; &amp;values)</td></tr>
 <tr class="separator:a2f73c7417f99ed887786bd59fcefc9b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43520cbd159a2b0afff6725e0927177b"><td class="memTemplParams" colspan="2">template&lt;typename T , std::size_t N&gt; </td></tr>
+<tr class="memitem:a43520cbd159a2b0afff6725e0927177b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1ToFDStoreVisitor.html#a43520cbd159a2b0afff6725e0927177b">writeInternal</a> (const std::array&lt; T, N &gt; &amp;values)</td></tr>
+<tr class="separator:a43520cbd159a2b0afff6725e0927177b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -278,6 +283,30 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a class="anchor" id="a105364a9cd1aaea382b4832e7866671f"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void config::ToFDStoreVisitor::writeInternal </td>
+          <td>(</td>
+          <td class="paramtype">const char *&amp;&#160;</td>
+          <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a98f9fd510042999a5ee03bc6a20dc7c5"></a>
 <div class="memitem">
 <div class="memproto">
@@ -380,6 +409,32 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a class="anchor" id="a43520cbd159a2b0afff6725e0927177b"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , std::size_t N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void config::ToFDStoreVisitor::writeInternal </td>
+          <td>(</td>
+          <td class="paramtype">const std::array&lt; T, N &gt; &amp;&#160;</td>
+          <td class="paramname"><em>values</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
 <a class="anchor" id="a56ae746ba62467ed67054890ec48cfbb"></a>
 <div class="memitem">
@@ -411,7 +466,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceconfig.html">config</a></li><li class="navelem"><a class="el" href="classconfig_1_1ToFDStoreVisitor.html">ToFDStoreVisitor</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

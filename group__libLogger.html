@@ -146,17 +146,17 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:ga08ef41fb8da9e671d65fcbd87b6574a2"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">logger::LogLevel</a> { <br />
-&#160;&#160;<a class="el" href="group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2a2d3e4144aa384b18849ab9a8abad74d6">logger::LogLevel::TRACE</a>, 
-<a class="el" href="group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2adc30ec20708ef7b0f641ef78b7880a15">logger::LogLevel::DEBUG</a>, 
-<a class="el" href="group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2a551b723eafd6a31d444fcb2f5920fbd3">logger::LogLevel::INFO</a>, 
-<a class="el" href="group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2a32bd8a1db2275458673903bdb84cb277">logger::LogLevel::WARN</a>, 
+<tr class="memitem:ga2fd86a5d52b225b4c00af13284f44479"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">logger::LogLevel</a> : int { <br />
+&#160;&#160;<a class="el" href="group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479a2d3e4144aa384b18849ab9a8abad74d6">logger::LogLevel::TRACE</a>, 
+<a class="el" href="group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479adc30ec20708ef7b0f641ef78b7880a15">logger::LogLevel::DEBUG</a>, 
+<a class="el" href="group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479a551b723eafd6a31d444fcb2f5920fbd3">logger::LogLevel::INFO</a>, 
+<a class="el" href="group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479a32bd8a1db2275458673903bdb84cb277">logger::LogLevel::WARN</a>, 
 <br />
-&#160;&#160;<a class="el" href="group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2abb1ca97ec761fc37101737ba0aa2e7c5">logger::LogLevel::ERROR</a>, 
-<a class="el" href="group__libLogger.html#gga08ef41fb8da9e671d65fcbd87b6574a2a4fc963e213bba362778f5c175eb4d5ff">logger::LogLevel::HELP</a>
+&#160;&#160;<a class="el" href="group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479abb1ca97ec761fc37101737ba0aa2e7c5">logger::LogLevel::ERROR</a>, 
+<a class="el" href="group__libLogger.html#gga2fd86a5d52b225b4c00af13284f44479a4fc963e213bba362778f5c175eb4d5ff">logger::LogLevel::HELP</a>
 <br />
- }<tr class="memdesc:ga08ef41fb8da9e671d65fcbd87b6574a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Available log levels.  <a href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">More...</a><br /></td></tr>
-<tr class="separator:ga08ef41fb8da9e671d65fcbd87b6574a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+ }<tr class="memdesc:ga2fd86a5d52b225b4c00af13284f44479"><td class="mdescLeft">&#160;</td><td class="mdescRight">Available log levels.  <a href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">More...</a><br /></td></tr>
+<tr class="separator:ga2fd86a5d52b225b4c00af13284f44479"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -172,6 +172,7 @@ Enumerations</h2></td></tr>
 <div class="line"><a class="code" href="classlogger_1_1Logger.html#a6dce87da89a73cf7440e12a335f36299">Logger::setLogBackend</a>(<span class="keyword">new</span> <a class="code" href="classlogger_1_1NullLogger.html">NullLogger</a>());</div>
 <div class="line"><a class="code" href="classlogger_1_1Logger.html#a6dce87da89a73cf7440e12a335f36299">Logger::setLogBackend</a>(<span class="keyword">new</span> <a class="code" href="classlogger_1_1SystemdJournalBackend.html">SystemdJournalBackend</a>());</div>
 <div class="line"><a class="code" href="classlogger_1_1Logger.html#a6dce87da89a73cf7440e12a335f36299">Logger::setLogBackend</a>(<span class="keyword">new</span> <a class="code" href="classlogger_1_1FileBackend.html">FileBackend</a>(<span class="stringliteral">&quot;/tmp/logs.txt&quot;</span>));</div>
+<div class="line"><a class="code" href="classlogger_1_1Logger.html#a6dce87da89a73cf7440e12a335f36299">Logger::setLogBackend</a>(<span class="keyword">new</span> <a class="code" href="classlogger_1_1PersistentFileBackend.html">PersistentFileBackend</a>(<span class="stringliteral">&quot;/tmp/logs.txt&quot;</span>));</div>
 <div class="line"><a class="code" href="classlogger_1_1Logger.html#a6dce87da89a73cf7440e12a335f36299">Logger::setLogBackend</a>(<span class="keyword">new</span> <a class="code" href="classlogger_1_1SyslogBackend.html">SyslogBackend</a>());</div>
 <div class="line"><a class="code" href="classlogger_1_1Logger.html#a6dce87da89a73cf7440e12a335f36299">Logger::setLogBackend</a>(<span class="keyword">new</span> <a class="code" href="classlogger_1_1StderrBackend.html">StderrBackend</a>());</div>
 <div class="line"></div>
@@ -223,7 +224,7 @@ Enumerations</h2></td></tr>
 <div class="line">                                       PROJECT_SOURCE_DIR);                \</div>
 <div class="line">        }                                                                  \</div>
 <div class="line">    } <span class="keywordflow">while</span> (0)</div>
-<div class="ttc" id="classlogger_1_1Logger_html_acf31b5d2497fc5f9ed0d0145687bf14a"><div class="ttname"><a href="classlogger_1_1Logger.html#acf31b5d2497fc5f9ed0d0145687bf14a">logger::Logger::getLogLevel</a></div><div class="ttdeci">static LogLevel getLogLevel(void)</div><div class="ttdef"><b>Definition:</b> logger.cpp:65</div></div>
+<div class="ttc" id="classlogger_1_1Logger_html_acf31b5d2497fc5f9ed0d0145687bf14a"><div class="ttname"><a href="classlogger_1_1Logger.html#acf31b5d2497fc5f9ed0d0145687bf14a">logger::Logger::getLogLevel</a></div><div class="ttdeci">static LogLevel getLogLevel(void)</div><div class="ttdef"><b>Definition:</b> logger.cpp:103</div></div>
 </div><!-- fragment -->
 <p>Generic logging macro. </p>
 
@@ -318,7 +319,7 @@ Enumerations</h2></td></tr>
 <div class="line">                                                    <a class="code" href="classlogger_1_1SStreamWrapper.html">logger::SStreamWrapper</a>() &lt;&lt; MSG, \</div>
 <div class="line">                                                    <a class="code" href="logger_8hpp.html#aececb108fc5b089853be5646004b1739">PROJECT_SOURCE_DIR</a>)</div>
 <div class="ttc" id="classlogger_1_1LoggerScope_html"><div class="ttname"><a href="classlogger_1_1LoggerScope.html">logger::LoggerScope</a></div><div class="ttdoc">Class specifically for scope debug logging. </div><div class="ttdef"><b>Definition:</b> logger-scope.hpp:53</div></div>
-<div class="ttc" id="logger_8hpp_html_aececb108fc5b089853be5646004b1739"><div class="ttname"><a href="logger_8hpp.html#aececb108fc5b089853be5646004b1739">PROJECT_SOURCE_DIR</a></div><div class="ttdeci">#define PROJECT_SOURCE_DIR</div><div class="ttdef"><b>Definition:</b> logger.hpp:70</div></div>
+<div class="ttc" id="logger_8hpp_html_aececb108fc5b089853be5646004b1739"><div class="ttname"><a href="logger_8hpp.html#aececb108fc5b089853be5646004b1739">PROJECT_SOURCE_DIR</a></div><div class="ttdeci">#define PROJECT_SOURCE_DIR</div><div class="ttdef"><b>Definition:</b> logger.hpp:77</div></div>
 <div class="ttc" id="classlogger_1_1SStreamWrapper_html"><div class="ttname"><a href="classlogger_1_1SStreamWrapper.html">logger::SStreamWrapper</a></div><div class="ttdef"><b>Definition:</b> logger-scope.hpp:33</div></div>
 </div><!-- fragment -->
 <p>Automatically create LoggerScope object which logs at the construction and destruction. </p>
@@ -362,7 +363,7 @@ Enumerations</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
-<a class="anchor" id="ga08ef41fb8da9e671d65fcbd87b6574a2"></a>
+<a class="anchor" id="ga2fd86a5d52b225b4c00af13284f44479"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -370,7 +371,7 @@ Enumerations</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">enum <a class="el" href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">logger::LogLevel</a></td>
+          <td class="memname">enum <a class="el" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">logger::LogLevel</a> : int</td>
         </tr>
       </table>
   </td>
@@ -382,22 +383,22 @@ Enumerations</h2></td></tr>
 
 <p>Available log levels. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="gga08ef41fb8da9e671d65fcbd87b6574a2a2d3e4144aa384b18849ab9a8abad74d6"></a>TRACE&#160;</td><td class="fielddoc">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="gga2fd86a5d52b225b4c00af13284f44479a2d3e4144aa384b18849ab9a8abad74d6"></a>TRACE&#160;</td><td class="fielddoc">
 <p>Most detailed log level. </p>
 </td></tr>
-<tr><td class="fieldname"><a class="anchor" id="gga08ef41fb8da9e671d65fcbd87b6574a2adc30ec20708ef7b0f641ef78b7880a15"></a>DEBUG&#160;</td><td class="fielddoc">
+<tr><td class="fieldname"><a class="anchor" id="gga2fd86a5d52b225b4c00af13284f44479adc30ec20708ef7b0f641ef78b7880a15"></a>DEBUG&#160;</td><td class="fielddoc">
 <p>Debug logs. </p>
 </td></tr>
-<tr><td class="fieldname"><a class="anchor" id="gga08ef41fb8da9e671d65fcbd87b6574a2a551b723eafd6a31d444fcb2f5920fbd3"></a>INFO&#160;</td><td class="fielddoc">
+<tr><td class="fieldname"><a class="anchor" id="gga2fd86a5d52b225b4c00af13284f44479a551b723eafd6a31d444fcb2f5920fbd3"></a>INFO&#160;</td><td class="fielddoc">
 <p>Information. </p>
 </td></tr>
-<tr><td class="fieldname"><a class="anchor" id="gga08ef41fb8da9e671d65fcbd87b6574a2a32bd8a1db2275458673903bdb84cb277"></a>WARN&#160;</td><td class="fielddoc">
+<tr><td class="fieldname"><a class="anchor" id="gga2fd86a5d52b225b4c00af13284f44479a32bd8a1db2275458673903bdb84cb277"></a>WARN&#160;</td><td class="fielddoc">
 <p>Warnings. </p>
 </td></tr>
-<tr><td class="fieldname"><a class="anchor" id="gga08ef41fb8da9e671d65fcbd87b6574a2abb1ca97ec761fc37101737ba0aa2e7c5"></a>ERROR&#160;</td><td class="fielddoc">
+<tr><td class="fieldname"><a class="anchor" id="gga2fd86a5d52b225b4c00af13284f44479abb1ca97ec761fc37101737ba0aa2e7c5"></a>ERROR&#160;</td><td class="fielddoc">
 <p>Errors. </p>
 </td></tr>
-<tr><td class="fieldname"><a class="anchor" id="gga08ef41fb8da9e671d65fcbd87b6574a2a4fc963e213bba362778f5c175eb4d5ff"></a>HELP&#160;</td><td class="fielddoc">
+<tr><td class="fieldname"><a class="anchor" id="gga2fd86a5d52b225b4c00af13284f44479a4fc963e213bba362778f5c175eb4d5ff"></a>HELP&#160;</td><td class="fielddoc">
 <p>Helper logs. </p>
 </td></tr>
 </table>
@@ -410,7 +411,7 @@ Enumerations</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:22 for Vasum by
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -116,8 +116,10 @@ $(document).ready(function(){initNavTree('classutils_1_1Channel.html','');});
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a700a3caa0bccc44376db729eedd938ce"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Channel.html#a700a3caa0bccc44376db729eedd938ce">Channel</a> ()</td></tr>
-<tr class="separator:a700a3caa0bccc44376db729eedd938ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65e47bba3a13893650e28b8db761d80f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Channel.html#a65e47bba3a13893650e28b8db761d80f">Channel</a> (const bool closeOnExec=true)</td></tr>
+<tr class="separator:a65e47bba3a13893650e28b8db761d80f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e52d6ec586f54d17ac1d9b0271d54ab"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Channel.html#a0e52d6ec586f54d17ac1d9b0271d54ab">Channel</a> (const int fd)</td></tr>
+<tr class="separator:a0e52d6ec586f54d17ac1d9b0271d54ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4dcadabed847eaabf632d066f6ada9e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Channel.html#ab4dcadabed847eaabf632d066f6ada9e">~Channel</a> ()</td></tr>
 <tr class="separator:ab4dcadabed847eaabf632d066f6ada9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a47710a6a13c650485803927051fe6d9a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Channel.html#a47710a6a13c650485803927051fe6d9a">Channel</a> (const <a class="el" href="classutils_1_1Channel.html">Channel</a> &amp;)=delete</td></tr>
@@ -141,6 +143,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3f69128a111aaca4cac55e34cd4f50cb"><td class="memTemplItemLeft" align="right" valign="top">Data&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classutils_1_1Channel.html#a3f69128a111aaca4cac55e34cd4f50cb">read</a> ()</td></tr>
 <tr class="memdesc:a3f69128a111aaca4cac55e34cd4f50cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receive data of a given type (size)  <a href="#a3f69128a111aaca4cac55e34cd4f50cb">More...</a><br /></td></tr>
 <tr class="separator:a3f69128a111aaca4cac55e34cd4f50cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae17e1e8c3e847ecbbaf5c6a69a247eae"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Channel.html#ae17e1e8c3e847ecbbaf5c6a69a247eae">getFD</a> ()</td></tr>
+<tr class="memdesc:ae17e1e8c3e847ecbbaf5c6a69a247eae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get an active file descriptor.  <a href="#ae17e1e8c3e847ecbbaf5c6a69a247eae">More...</a><br /></td></tr>
+<tr class="separator:ae17e1e8c3e847ecbbaf5c6a69a247eae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a284003ce9ee396ab3afa4bceac33d0e6"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Channel.html#a284003ce9ee396ab3afa4bceac33d0e6">getLeftFD</a> ()</td></tr>
+<tr class="memdesc:a284003ce9ee396ab3afa4bceac33d0e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gen the left file descriptor.  <a href="#a284003ce9ee396ab3afa4bceac33d0e6">More...</a><br /></td></tr>
+<tr class="separator:a284003ce9ee396ab3afa4bceac33d0e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91623222713dfe930d72dc2bf83da46b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Channel.html#a91623222713dfe930d72dc2bf83da46b">getRightFD</a> ()</td></tr>
+<tr class="memdesc:a91623222713dfe930d72dc2bf83da46b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gen the right file descriptor.  <a href="#a91623222713dfe930d72dc2bf83da46b">More...</a><br /></td></tr>
+<tr class="separator:a91623222713dfe930d72dc2bf83da46b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd0c4f6ae5c085515b0e299d1549579e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Channel.html#abd0c4f6ae5c085515b0e299d1549579e">setCloseOnExec</a> (const bool closeOnExec)</td></tr>
+<tr class="memdesc:abd0c4f6ae5c085515b0e299d1549579e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets close on exec on an active fd to either true or false.  <a href="#abd0c4f6ae5c085515b0e299d1549579e">More...</a><br /></td></tr>
+<tr class="separator:abd0c4f6ae5c085515b0e299d1549579e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
@@ -151,23 +165,56 @@ Private Member Functions</h2></td></tr>
 Private Attributes</h2></td></tr>
 <tr class="memitem:aab79b6c3b3138bb2786a8617343a2864"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Channel.html#aab79b6c3b3138bb2786a8617343a2864">mSocketIndex</a></td></tr>
 <tr class="separator:aab79b6c3b3138bb2786a8617343a2864"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8b89461028dae7fe197eff8be059f7d5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Channel.html#a8b89461028dae7fe197eff8be059f7d5">mSockets</a> [2]</td></tr>
-<tr class="separator:a8b89461028dae7fe197eff8be059f7d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaca5cfe8199b5666b699a4b3ce976418"><td class="memItemLeft" align="right" valign="top">std::array&lt; int, 2 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutils_1_1Channel.html#aaca5cfe8199b5666b699a4b3ce976418">mSockets</a></td></tr>
+<tr class="separator:aaca5cfe8199b5666b699a4b3ce976418"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classutils_1_1Channel.html" title="Channel is implemented with a pair of anonymous sockets. ">Channel</a> is implemented with a pair of anonymous sockets. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a700a3caa0bccc44376db729eedd938ce"></a>
+<a class="anchor" id="a65e47bba3a13893650e28b8db761d80f"></a>
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">utils::Channel::Channel </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>closeOnExec</em> = <code>true</code></td><td>)</td>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a0e52d6ec586f54d17ac1d9b0271d54ab"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">utils::Channel::Channel </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>fd</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 </div>
@@ -236,6 +283,57 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ae17e1e8c3e847ecbbaf5c6a69a247eae"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int utils::Channel::getFD </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get an active file descriptor. </p>
+
+</div>
+</div>
+<a class="anchor" id="a284003ce9ee396ab3afa4bceac33d0e6"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int utils::Channel::getLeftFD </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gen the left file descriptor. </p>
+
+</div>
+</div>
+<a class="anchor" id="a91623222713dfe930d72dc2bf83da46b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int utils::Channel::getRightFD </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gen the right file descriptor. </p>
+
+</div>
+</div>
 <a class="anchor" id="ae7b1198a8f49b89aec51d272c7f3ff49"></a>
 <div class="memitem">
 <div class="memproto">
@@ -276,6 +374,24 @@ template&lt;typename Data &gt; </div>
 </div><div class="memdoc">
 
 <p>Receive data of a given type (size) </p>
+
+</div>
+</div>
+<a class="anchor" id="abd0c4f6ae5c085515b0e299d1549579e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void utils::Channel::setCloseOnExec </td>
+          <td>(</td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>closeOnExec</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets close on exec on an active fd to either true or false. </p>
 
 </div>
 </div>
@@ -377,7 +493,7 @@ template&lt;typename Data &gt; </div>
 
 </div>
 </div>
-<a class="anchor" id="a8b89461028dae7fe197eff8be059f7d5"></a>
+<a class="anchor" id="aaca5cfe8199b5666b699a4b3ce976418"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -385,7 +501,7 @@ template&lt;typename Data &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int utils::Channel::mSockets[2]</td>
+          <td class="memname">std::array&lt;int, 2&gt; utils::Channel::mSockets</td>
         </tr>
       </table>
   </td>
@@ -408,7 +524,7 @@ template&lt;typename Data &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceutils.html">utils</a></li><li class="navelem"><a class="el" href="classutils_1_1Channel.html">Channel</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:11 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

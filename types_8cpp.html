@@ -111,8 +111,9 @@ $(document).ready(function(){initNavTree('types_8cpp.html','');});
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;config.hpp&quot;</code><br />
 <code>#include &quot;<a class="el" href="ipc_2types_8hpp_source.html">ipc/types.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="unique-id_8hpp_source.html">ipc/unique-id.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="logger_8hpp_source.html">logger/logger.hpp</a>&quot;</code><br />
-<code>#include &lt;atomic&gt;</code><br />
+<code>#include &lt;mutex&gt;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
@@ -121,10 +122,12 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a7f5b1afe03526298c9e9e99bdc5d7f60"><td class="memItemLeft" align="right" valign="top">MessageID&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceipc.html#a7f5b1afe03526298c9e9e99bdc5d7f60">ipc::getNextMessageID</a> ()</td></tr>
-<tr class="separator:a7f5b1afe03526298c9e9e99bdc5d7f60"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a701a72f407d22b75ce70dbd6b8156f4c"><td class="memItemLeft" align="right" valign="top">PeerID&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceipc.html#a701a72f407d22b75ce70dbd6b8156f4c">ipc::getNextPeerID</a> ()</td></tr>
-<tr class="separator:a701a72f407d22b75ce70dbd6b8156f4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7f5b1afe03526298c9e9e99bdc5d7f60"><td class="memItemLeft" align="right" valign="top">MessageID&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__Types.html#ga7f5b1afe03526298c9e9e99bdc5d7f60">ipc::getNextMessageID</a> ()</td></tr>
+<tr class="memdesc:ga7f5b1afe03526298c9e9e99bdc5d7f60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate an unique message id.  <a href="group__Types.html#ga7f5b1afe03526298c9e9e99bdc5d7f60">More...</a><br /></td></tr>
+<tr class="separator:ga7f5b1afe03526298c9e9e99bdc5d7f60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga701a72f407d22b75ce70dbd6b8156f4c"><td class="memItemLeft" align="right" valign="top">PeerID&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__Types.html#ga701a72f407d22b75ce70dbd6b8156f4c">ipc::getNextPeerID</a> ()</td></tr>
+<tr class="memdesc:ga701a72f407d22b75ce70dbd6b8156f4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate an unique peer id.  <a href="group__Types.html#ga701a72f407d22b75ce70dbd6b8156f4c">More...</a><br /></td></tr>
+<tr class="separator:ga701a72f407d22b75ce70dbd6b8156f4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Types definitions and helper functions. </p>
@@ -135,8 +138,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_258da5588bb15182dfffe9dae1cb498a.html">libs</a></li><li class="navelem"><a class="el" href="dir_122b1cf7a6eb989f6018ca461f59466d.html">ipc</a></li><li class="navelem"><a class="el" href="types_8cpp.html">types.cpp</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:22 for Vasum by
+    <li class="navelem"><a class="el" href="dir_6719ab1f1f7655efc2fa43f7eb574fd1.html">libs</a></li><li class="navelem"><a class="el" href="dir_f847b95548613d13aa4989406fcbb756.html">ipc</a></li><li class="navelem"><a class="el" href="types_8cpp.html">types.cpp</a></li>
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

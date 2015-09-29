@@ -121,15 +121,16 @@ $(document).ready(function(){initNavTree('classlogger_1_1LogBackend.html','');})
   <map id="logger::LogBackend_map" name="logger::LogBackend_map">
 <area href="classlogger_1_1FileBackend.html" alt="logger::FileBackend" shape="rect" coords="0,56,193,80"/>
 <area href="classlogger_1_1NullLogger.html" title="Null logging backend. " alt="logger::NullLogger" shape="rect" coords="203,56,396,80"/>
-<area href="classlogger_1_1StderrBackend.html" title="Stderr logging backend. " alt="logger::StderrBackend" shape="rect" coords="406,56,599,80"/>
-<area href="classlogger_1_1SyslogBackend.html" alt="logger::SyslogBackend" shape="rect" coords="609,56,802,80"/>
-<area href="classlogger_1_1SystemdJournalBackend.html" title="systemd journal logging backend " alt="logger::SystemdJournalBackend" shape="rect" coords="812,56,1005,80"/>
+<area href="classlogger_1_1PersistentFileBackend.html" alt="logger::PersistentFileBackend" shape="rect" coords="406,56,599,80"/>
+<area href="classlogger_1_1StderrBackend.html" title="Stderr logging backend. " alt="logger::StderrBackend" shape="rect" coords="609,56,802,80"/>
+<area href="classlogger_1_1SyslogBackend.html" alt="logger::SyslogBackend" shape="rect" coords="812,56,1005,80"/>
+<area href="classlogger_1_1SystemdJournalBackend.html" title="systemd journal logging backend " alt="logger::SystemdJournalBackend" shape="rect" coords="1015,56,1208,80"/>
 </map>
  </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a18662bf04806b11dcecde83c1aa7c9cb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlogger_1_1LogBackend.html#a18662bf04806b11dcecde83c1aa7c9cb">log</a> (<a class="el" href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">LogLevel</a> logLevel, const std::string &amp;file, const unsigned int &amp;line, const std::string &amp;func, const std::string &amp;message)=0</td></tr>
+<tr class="memitem:a18662bf04806b11dcecde83c1aa7c9cb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlogger_1_1LogBackend.html#a18662bf04806b11dcecde83c1aa7c9cb">log</a> (<a class="el" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">LogLevel</a> logLevel, const std::string &amp;file, const unsigned int &amp;line, const std::string &amp;func, const std::string &amp;message)=0</td></tr>
 <tr class="separator:a18662bf04806b11dcecde83c1aa7c9cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a21fd60abd0c4d6e84dbe881c015c8c1b"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlogger_1_1LogBackend.html#a21fd60abd0c4d6e84dbe881c015c8c1b">~LogBackend</a> ()</td></tr>
 <tr class="separator:a21fd60abd0c4d6e84dbe881c015c8c1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -171,7 +172,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual void logger::LogBackend::log </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__libLogger.html#ga08ef41fb8da9e671d65fcbd87b6574a2">LogLevel</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__libLogger.html#ga2fd86a5d52b225b4c00af13284f44479">LogLevel</a>&#160;</td>
           <td class="paramname"><em>logLevel</em>, </td>
         </tr>
         <tr>
@@ -211,7 +212,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="classlogger_1_1StderrBackend.html#acbdf01549f35e1a7772ddcf6dcffcd03">logger::StderrBackend</a>, <a class="el" href="classlogger_1_1SystemdJournalBackend.html#a0a293c925ff21353aee670bc3207203a">logger::SystemdJournalBackend</a>, <a class="el" href="classlogger_1_1NullLogger.html#aea72f22f0951e0b1f2e7c6ae3b15a449">logger::NullLogger</a>, <a class="el" href="classlogger_1_1FileBackend.html#a2f9445eda198ee8597adc72ba9703132">logger::FileBackend</a>, and <a class="el" href="classlogger_1_1SyslogBackend.html#a3a25f50f3c4ad09b343136005a79cca8">logger::SyslogBackend</a>.</p>
+<p>Implemented in <a class="el" href="classlogger_1_1PersistentFileBackend.html#a514e41f56f7b5333fadd79b76a00155e">logger::PersistentFileBackend</a>, <a class="el" href="classlogger_1_1StderrBackend.html#acbdf01549f35e1a7772ddcf6dcffcd03">logger::StderrBackend</a>, <a class="el" href="classlogger_1_1SystemdJournalBackend.html#a0a293c925ff21353aee670bc3207203a">logger::SystemdJournalBackend</a>, <a class="el" href="classlogger_1_1NullLogger.html#aea72f22f0951e0b1f2e7c6ae3b15a449">logger::NullLogger</a>, <a class="el" href="classlogger_1_1FileBackend.html#a2f9445eda198ee8597adc72ba9703132">logger::FileBackend</a>, and <a class="el" href="classlogger_1_1SyslogBackend.html#a3a25f50f3c4ad09b343136005a79cca8">logger::SyslogBackend</a>.</p>
 
 </div>
 </div>
@@ -225,7 +226,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacelogger.html">logger</a></li><li class="navelem"><a class="el" href="classlogger_1_1LogBackend.html">LogBackend</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

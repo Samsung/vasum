@@ -145,11 +145,16 @@ Static Private Member Functions</h2></td></tr>
 <tr class="separator:ae392940a82d192aff1d39bb36019b3d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8cfccb27df7110927ad9f2c6edb5711a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromGVariantVisitor.html#a8cfccb27df7110927ad9f2c6edb5711a">fromGVariant</a> (GVariant *object, std::string &amp;value)</td></tr>
 <tr class="separator:a8cfccb27df7110927ad9f2c6edb5711a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b61686b805aa9b23aa618100c2ed844"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromGVariantVisitor.html#a6b61686b805aa9b23aa618100c2ed844">fromGVariant</a> (GVariant *object, char *&amp;value)</td></tr>
+<tr class="separator:a6b61686b805aa9b23aa618100c2ed844"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad76ba61b8278579dea9a38200d86b693"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromGVariantVisitor.html#ad76ba61b8278579dea9a38200d86b693">fromGVariant</a> (GVariant *object, <a class="el" href="structconfig_1_1FileDescriptor.html">config::FileDescriptor</a> &amp;value)</td></tr>
 <tr class="separator:ad76ba61b8278579dea9a38200d86b693"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2619ea1c00e97ea6b11af7c11323ef62"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a2619ea1c00e97ea6b11af7c11323ef62"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromGVariantVisitor.html#a2619ea1c00e97ea6b11af7c11323ef62">fromGVariant</a> (GVariant *object, std::vector&lt; T &gt; &amp;value)</td></tr>
 <tr class="separator:a2619ea1c00e97ea6b11af7c11323ef62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44c951c229a2d06c5cebf4f6799958bb"><td class="memTemplParams" colspan="2">template&lt;typename T , std::size_t Size&gt; </td></tr>
+<tr class="memitem:a44c951c229a2d06c5cebf4f6799958bb"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromGVariantVisitor.html#a44c951c229a2d06c5cebf4f6799958bb">fromGVariant</a> (GVariant *object, std::array&lt; T, Size &gt; &amp;values)</td></tr>
+<tr class="separator:a44c951c229a2d06c5cebf4f6799958bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0471a801bce7d738166127cde614fdc4"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a0471a801bce7d738166127cde614fdc4"><td class="memTemplItemLeft" align="right" valign="top">static std::enable_if&lt; <a class="el" href="structconfig_1_1isUnion.html">isUnion</a>&lt; T &gt;::value &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classconfig_1_1FromGVariantVisitor.html#a0471a801bce7d738166127cde614fdc4">fromGVariant</a> (GVariant *object, T &amp;value)</td></tr>
 <tr class="separator:a0471a801bce7d738166127cde614fdc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -507,6 +512,40 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a6b61686b805aa9b23aa618100c2ed844"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void config::FromGVariantVisitor::fromGVariant </td>
+          <td>(</td>
+          <td class="paramtype">GVariant *&#160;</td>
+          <td class="paramname"><em>object</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&amp;&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="ad76ba61b8278579dea9a38200d86b693"></a>
 <div class="memitem">
 <div class="memproto">
@@ -561,6 +600,42 @@ template&lt;typename T &gt; </div>
           <td></td>
           <td class="paramtype">std::vector&lt; T &gt; &amp;&#160;</td>
           <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a44c951c229a2d06c5cebf4f6799958bb"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , std::size_t Size&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void config::FromGVariantVisitor::fromGVariant </td>
+          <td>(</td>
+          <td class="paramtype">GVariant *&#160;</td>
+          <td class="paramname"><em>object</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; T, Size &gt; &amp;&#160;</td>
+          <td class="paramname"><em>values</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -764,7 +839,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceconfig.html">config</a></li><li class="navelem"><a class="el" href="classconfig_1_1FromGVariantVisitor.html">FromGVariantVisitor</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -2,6 +2,8 @@ var searchData=
 [
   ['enabled',['enabled',['../structvasum_1_1InputConfig.html#a1498bf66d3454fb11eabe5dbb5e6bc85',1,'vasum::InputConfig']]],
   ['environ',['environ',['../server_8cpp.html#aa006daaf11f1e2e45a6ababaf463212b',1,'server.cpp']]],
+  ['envtokeep',['envToKeep',['../structlxcpp_1_1AttachConfig.html#a7a983e49d7e78a6476a8851b2cf21879',1,'lxcpp::AttachConfig']]],
+  ['envtoset',['envToSet',['../structlxcpp_1_1AttachConfig.html#a58871725865d00073078acd1622e7cdf',1,'lxcpp::AttachConfig']]],
   ['error_5fcreate_5ffile_5ffailed',['ERROR_CREATE_FILE_FAILED',['../namespacevasum_1_1api.html#af66aa3b9c1d2f66f054f0ad9da82d49d',1,'vasum::api']]],
   ['error_5fforbidden',['ERROR_FORBIDDEN',['../namespacevasum_1_1api.html#a40d4139c144e923a52c51f0eea2d391b',1,'vasum::api']]],
   ['error_5fforwarded',['ERROR_FORWARDED',['../namespacevasum_1_1api.html#a449cd3ed199d72aef4469b9970cc620b',1,'vasum::api']]],

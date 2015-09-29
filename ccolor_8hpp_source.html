@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
-<title>Vasum: libs/logger/ccolor.hpp Source File</title>
+<title>Vasum: common/utils/ccolor.hpp Source File</title>
 <link href="favicon.ico" rel="icon" type="image/ico" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -121,57 +121,57 @@ $(document).ready(function(){initNavTree('ccolor_8hpp_source.html','');});
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> *  limitations under the License</span></div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"> */</span></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="preprocessor">#ifndef COMMON_LOGGER_CCOLOR_HPP</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="preprocessor">#define COMMON_LOGGER_CCOLOR_HPP</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="preprocessor">#ifndef COMMON_UTILS_CCOLOR_HPP</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="preprocessor">#define COMMON_UTILS_CCOLOR_HPP</span></div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacelogger.html">logger</a> {</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceutils.html">utils</a> {</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;</div>
-<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3">   32</a></span>&#160;<span class="keyword">enum class</span> <a class="code" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3">Color</a> : unsigned int {</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <a class="code" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a5b39c8b553c821e7cddc6da64b5bd2ee">DEFAULT</a>     = 0,</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <a class="code" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a08d0012388564e95c3b4a7407cf04965">BLACK</a>       = 90,</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <a class="code" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3aa2d9547b5d3dd9f05984475f7c926da0">RED</a>         = 91,</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <a class="code" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a9de0e5dd94e861317e74964bed179fa0">GREEN</a>       = 92,</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <a class="code" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a8a568e5f41b7e4da88fe5c4a00aad34e">YELLOW</a>      = 93,</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <a class="code" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a1b3e1ee9bff86431dea6b181365ba65f">BLUE</a>        = 94,</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <a class="code" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3ac634ffea7195608364671ac52ee59a61">MAGENTA</a>     = 95,</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <a class="code" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a344dd8cd533280795b9db82ef0c92749">CYAN</a>        = 96,</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <a class="code" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3ab5bf627e448384cf3a4c35121ca6008d">WHITE</a>       = 97</div>
+<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051">   32</a></span>&#160;<span class="keyword">enum class</span> <a class="code" href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051">Color</a> : unsigned int {</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <a class="code" href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051a5b39c8b553c821e7cddc6da64b5bd2ee">DEFAULT</a>     = 0,</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <a class="code" href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051a08d0012388564e95c3b4a7407cf04965">BLACK</a>       = 90,</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <a class="code" href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051aa2d9547b5d3dd9f05984475f7c926da0">RED</a>         = 91,</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <a class="code" href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051a9de0e5dd94e861317e74964bed179fa0">GREEN</a>       = 92,</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <a class="code" href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051a8a568e5f41b7e4da88fe5c4a00aad34e">YELLOW</a>      = 93,</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <a class="code" href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051a1b3e1ee9bff86431dea6b181365ba65f">BLUE</a>        = 94,</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <a class="code" href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051ac634ffea7195608364671ac52ee59a61">MAGENTA</a>     = 95,</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <a class="code" href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051a344dd8cd533280795b9db82ef0c92749">CYAN</a>        = 96,</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <a class="code" href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051ab5bf627e448384cf3a4c35121ca6008d">WHITE</a>       = 97</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;};</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;</div>
-<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="namespacelogger.html#af002a52cf3f988312f21f1e4d942d5c9">   44</a></span>&#160;<span class="keyword">enum class</span> <a class="code" href="namespacelogger.html#af002a52cf3f988312f21f1e4d942d5c9">Attributes</a> : unsigned int {</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <a class="code" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a5b39c8b553c821e7cddc6da64b5bd2ee">DEFAULT</a>     = 0,</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <a class="code" href="namespacelogger.html#af002a52cf3f988312f21f1e4d942d5c9a2909dd0e0336f10b6da9735b859a3d19">BOLD</a>        = 1</div>
+<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="namespaceutils.html#abc745938bdcb99079cebc78da2066cc5">   44</a></span>&#160;<span class="keyword">enum class</span> <a class="code" href="namespaceutils.html#abc745938bdcb99079cebc78da2066cc5">Attributes</a> : unsigned int {</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <a class="code" href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051a5b39c8b553c821e7cddc6da64b5bd2ee">DEFAULT</a>     = 0,</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <a class="code" href="namespaceutils.html#abc745938bdcb99079cebc78da2066cc5a2909dd0e0336f10b6da9735b859a3d19">BOLD</a>        = 1</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;};</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;std::string <a class="code" href="namespacelogger.html#a96adb4cf1c0e3d28bd30c388d99844a6">getConsoleEscapeSequence</a>(<a class="code" href="namespacelogger.html#af002a52cf3f988312f21f1e4d942d5c9">Attributes</a> attr, <a class="code" href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3">Color</a> color);</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;std::string <a class="code" href="namespaceutils.html#abccc77bc9af574bf2dc590e782929d5d">getConsoleEscapeSequence</a>(<a class="code" href="namespaceutils.html#abc745938bdcb99079cebc78da2066cc5">Attributes</a> attr, <a class="code" href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051">Color</a> color);</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;} <span class="comment">// namespace logger</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;} <span class="comment">// namespace utils</span></div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="preprocessor">#endif // COMMON_LOGGER_CCOLOR_HPP</span></div>
-<div class="ttc" id="namespacelogger_html_a2630a80180af193bfa10a53f9cfcaaa3a1b3e1ee9bff86431dea6b181365ba65f"><div class="ttname"><a href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a1b3e1ee9bff86431dea6b181365ba65f">logger::Color::BLUE</a></div></div>
-<div class="ttc" id="namespacelogger_html_af002a52cf3f988312f21f1e4d942d5c9a2909dd0e0336f10b6da9735b859a3d19"><div class="ttname"><a href="namespacelogger.html#af002a52cf3f988312f21f1e4d942d5c9a2909dd0e0336f10b6da9735b859a3d19">logger::Attributes::BOLD</a></div></div>
-<div class="ttc" id="namespacelogger_html_a2630a80180af193bfa10a53f9cfcaaa3aa2d9547b5d3dd9f05984475f7c926da0"><div class="ttname"><a href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3aa2d9547b5d3dd9f05984475f7c926da0">logger::Color::RED</a></div></div>
-<div class="ttc" id="namespacelogger_html_a2630a80180af193bfa10a53f9cfcaaa3a5b39c8b553c821e7cddc6da64b5bd2ee"><div class="ttname"><a href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a5b39c8b553c821e7cddc6da64b5bd2ee">logger::Color::DEFAULT</a></div></div>
-<div class="ttc" id="namespacelogger_html_a2630a80180af193bfa10a53f9cfcaaa3a9de0e5dd94e861317e74964bed179fa0"><div class="ttname"><a href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a9de0e5dd94e861317e74964bed179fa0">logger::Color::GREEN</a></div></div>
-<div class="ttc" id="namespacelogger_html_a2630a80180af193bfa10a53f9cfcaaa3"><div class="ttname"><a href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3">logger::Color</a></div><div class="ttdeci">Color</div><div class="ttdef"><b>Definition:</b> ccolor.hpp:32</div></div>
-<div class="ttc" id="namespacelogger_html_af002a52cf3f988312f21f1e4d942d5c9"><div class="ttname"><a href="namespacelogger.html#af002a52cf3f988312f21f1e4d942d5c9">logger::Attributes</a></div><div class="ttdeci">Attributes</div><div class="ttdef"><b>Definition:</b> ccolor.hpp:44</div></div>
-<div class="ttc" id="namespacelogger_html_a2630a80180af193bfa10a53f9cfcaaa3a08d0012388564e95c3b4a7407cf04965"><div class="ttname"><a href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a08d0012388564e95c3b4a7407cf04965">logger::Color::BLACK</a></div></div>
-<div class="ttc" id="namespacelogger_html"><div class="ttname"><a href="namespacelogger.html">logger</a></div><div class="ttdef"><b>Definition:</b> backend-file.cpp:31</div></div>
-<div class="ttc" id="namespacelogger_html_a2630a80180af193bfa10a53f9cfcaaa3ab5bf627e448384cf3a4c35121ca6008d"><div class="ttname"><a href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3ab5bf627e448384cf3a4c35121ca6008d">logger::Color::WHITE</a></div></div>
-<div class="ttc" id="namespacelogger_html_a96adb4cf1c0e3d28bd30c388d99844a6"><div class="ttname"><a href="namespacelogger.html#a96adb4cf1c0e3d28bd30c388d99844a6">logger::getConsoleEscapeSequence</a></div><div class="ttdeci">std::string getConsoleEscapeSequence(Attributes attr, Color color)</div><div class="ttdef"><b>Definition:</b> ccolor.cpp:32</div></div>
-<div class="ttc" id="namespacelogger_html_a2630a80180af193bfa10a53f9cfcaaa3a8a568e5f41b7e4da88fe5c4a00aad34e"><div class="ttname"><a href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a8a568e5f41b7e4da88fe5c4a00aad34e">logger::Color::YELLOW</a></div></div>
-<div class="ttc" id="namespacelogger_html_a2630a80180af193bfa10a53f9cfcaaa3ac634ffea7195608364671ac52ee59a61"><div class="ttname"><a href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3ac634ffea7195608364671ac52ee59a61">logger::Color::MAGENTA</a></div></div>
-<div class="ttc" id="namespacelogger_html_a2630a80180af193bfa10a53f9cfcaaa3a344dd8cd533280795b9db82ef0c92749"><div class="ttname"><a href="namespacelogger.html#a2630a80180af193bfa10a53f9cfcaaa3a344dd8cd533280795b9db82ef0c92749">logger::Color::CYAN</a></div></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="preprocessor">#endif // COMMON_UTILS_CCOLOR_HPP</span></div>
+<div class="ttc" id="namespaceutils_html_abc745938bdcb99079cebc78da2066cc5"><div class="ttname"><a href="namespaceutils.html#abc745938bdcb99079cebc78da2066cc5">utils::Attributes</a></div><div class="ttdeci">Attributes</div><div class="ttdef"><b>Definition:</b> ccolor.hpp:44</div></div>
+<div class="ttc" id="namespaceutils_html_a8a6006ec550e41cdad78643ce8a12051ab5bf627e448384cf3a4c35121ca6008d"><div class="ttname"><a href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051ab5bf627e448384cf3a4c35121ca6008d">utils::Color::WHITE</a></div></div>
+<div class="ttc" id="namespaceutils_html_a8a6006ec550e41cdad78643ce8a12051a5b39c8b553c821e7cddc6da64b5bd2ee"><div class="ttname"><a href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051a5b39c8b553c821e7cddc6da64b5bd2ee">utils::Color::DEFAULT</a></div></div>
+<div class="ttc" id="namespaceutils_html_a8a6006ec550e41cdad78643ce8a12051aa2d9547b5d3dd9f05984475f7c926da0"><div class="ttname"><a href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051aa2d9547b5d3dd9f05984475f7c926da0">utils::Color::RED</a></div></div>
+<div class="ttc" id="namespaceutils_html_a8a6006ec550e41cdad78643ce8a12051ac634ffea7195608364671ac52ee59a61"><div class="ttname"><a href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051ac634ffea7195608364671ac52ee59a61">utils::Color::MAGENTA</a></div></div>
+<div class="ttc" id="namespaceutils_html_abc745938bdcb99079cebc78da2066cc5a2909dd0e0336f10b6da9735b859a3d19"><div class="ttname"><a href="namespaceutils.html#abc745938bdcb99079cebc78da2066cc5a2909dd0e0336f10b6da9735b859a3d19">utils::Attributes::BOLD</a></div></div>
+<div class="ttc" id="namespaceutils_html_a8a6006ec550e41cdad78643ce8a12051a1b3e1ee9bff86431dea6b181365ba65f"><div class="ttname"><a href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051a1b3e1ee9bff86431dea6b181365ba65f">utils::Color::BLUE</a></div></div>
+<div class="ttc" id="namespaceutils_html_a8a6006ec550e41cdad78643ce8a12051a8a568e5f41b7e4da88fe5c4a00aad34e"><div class="ttname"><a href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051a8a568e5f41b7e4da88fe5c4a00aad34e">utils::Color::YELLOW</a></div></div>
+<div class="ttc" id="namespaceutils_html_abccc77bc9af574bf2dc590e782929d5d"><div class="ttname"><a href="namespaceutils.html#abccc77bc9af574bf2dc590e782929d5d">utils::getConsoleEscapeSequence</a></div><div class="ttdeci">std::string getConsoleEscapeSequence(Attributes attr, Color color)</div><div class="ttdef"><b>Definition:</b> ccolor.cpp:31</div></div>
+<div class="ttc" id="namespaceutils_html_a8a6006ec550e41cdad78643ce8a12051a344dd8cd533280795b9db82ef0c92749"><div class="ttname"><a href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051a344dd8cd533280795b9db82ef0c92749">utils::Color::CYAN</a></div></div>
+<div class="ttc" id="namespaceutils_html_a8a6006ec550e41cdad78643ce8a12051a08d0012388564e95c3b4a7407cf04965"><div class="ttname"><a href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051a08d0012388564e95c3b4a7407cf04965">utils::Color::BLACK</a></div></div>
+<div class="ttc" id="namespaceutils_html"><div class="ttname"><a href="namespaceutils.html">utils</a></div><div class="ttdef"><b>Definition:</b> c-array.hpp:30</div></div>
+<div class="ttc" id="namespaceutils_html_a8a6006ec550e41cdad78643ce8a12051a9de0e5dd94e861317e74964bed179fa0"><div class="ttname"><a href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051a9de0e5dd94e861317e74964bed179fa0">utils::Color::GREEN</a></div></div>
+<div class="ttc" id="namespaceutils_html_a8a6006ec550e41cdad78643ce8a12051"><div class="ttname"><a href="namespaceutils.html#a8a6006ec550e41cdad78643ce8a12051">utils::Color</a></div><div class="ttdeci">Color</div><div class="ttdef"><b>Definition:</b> ccolor.hpp:32</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_258da5588bb15182dfffe9dae1cb498a.html">libs</a></li><li class="navelem"><a class="el" href="dir_96acf29ba294d52bdea2b996dda3fc27.html">logger</a></li><li class="navelem"><a class="el" href="ccolor_8hpp.html">ccolor.hpp</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:22 for Vasum by
+    <li class="navelem"><a class="el" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html">common</a></li><li class="navelem"><a class="el" href="dir_85effdddc426fd82e3610be0948fd413.html">utils</a></li><li class="navelem"><a class="el" href="ccolor_8hpp.html">ccolor.hpp</a></li>
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:09 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -2,6 +2,7 @@ var processor_8hpp =
 [
     [ "Processor", "classipc_1_1Processor.html", "classipc_1_1Processor" ],
     [ "EmptyData", "structipc_1_1Processor_1_1EmptyData.html", null ],
+    [ "MessageHeader", "structipc_1_1Processor_1_1MessageHeader.html", "structipc_1_1Processor_1_1MessageHeader" ],
     [ "RegisterSignalsProtocolMessage", "structipc_1_1Processor_1_1RegisterSignalsProtocolMessage.html", "structipc_1_1Processor_1_1RegisterSignalsProtocolMessage" ],
     [ "ErrorProtocolMessage", "structipc_1_1Processor_1_1ErrorProtocolMessage.html", "structipc_1_1Processor_1_1ErrorProtocolMessage" ],
     [ "MethodHandlers", "structipc_1_1Processor_1_1MethodHandlers.html", "structipc_1_1Processor_1_1MethodHandlers" ],

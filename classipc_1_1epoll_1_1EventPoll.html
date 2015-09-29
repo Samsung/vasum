@@ -107,33 +107,42 @@ $(document).ready(function(){initNavTree('classipc_1_1epoll_1_1EventPoll.html','
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classipc_1_1epoll_1_1EventPoll-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">ipc::epoll::EventPoll Class Reference</div>  </div>
+<div class="title">ipc::epoll::EventPoll Class Reference<div class="ingroups"><a class="el" href="group__libIpc.html">libIpc</a> &raquo; <a class="el" href="group__Types.html">libIpc tools</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>This class waits on registered file descriptor for events.  
+ <a href="classipc_1_1epoll_1_1EventPoll.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="event-poll_8hpp_source.html">event-poll.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:ad3edbfb11e6e20390f581bc14fe43d06"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; void(int fd, <a class="el" href="namespaceipc_1_1epoll.html#a246524f40b0e6d4bb51dca01dc7e535a">Events</a> events)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#ad3edbfb11e6e20390f581bc14fe43d06">Callback</a></td></tr>
+<tr class="memitem:ad3edbfb11e6e20390f581bc14fe43d06"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; void(int fd, <a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a">Events</a> events)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#ad3edbfb11e6e20390f581bc14fe43d06">Callback</a></td></tr>
+<tr class="memdesc:ad3edbfb11e6e20390f581bc14fe43d06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic function type used as callback for epoll events.  <a href="#ad3edbfb11e6e20390f581bc14fe43d06">More...</a><br /></td></tr>
 <tr class="separator:ad3edbfb11e6e20390f581bc14fe43d06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:abaef64158058d73711921ffa0c99758e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#abaef64158058d73711921ffa0c99758e">EventPoll</a> ()</td></tr>
+<tr class="memdesc:abaef64158058d73711921ffa0c99758e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs the <a class="el" href="classipc_1_1epoll_1_1EventPoll.html" title="This class waits on registered file descriptor for events. ">EventPoll</a> and initializes the underlaying epoll mechanism.  <a href="#abaef64158058d73711921ffa0c99758e">More...</a><br /></td></tr>
 <tr class="separator:abaef64158058d73711921ffa0c99758e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad834b90d07c31ac83f5c0878990ada7e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#ad834b90d07c31ac83f5c0878990ada7e">~EventPoll</a> ()</td></tr>
 <tr class="separator:ad834b90d07c31ac83f5c0878990ada7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64fcbfc1504b0f443747ae9b9ca19c11"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#a64fcbfc1504b0f443747ae9b9ca19c11">getPollFD</a> () const </td></tr>
+<tr class="memdesc:a64fcbfc1504b0f443747ae9b9ca19c11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns epoll handle.  <a href="#a64fcbfc1504b0f443747ae9b9ca19c11">More...</a><br /></td></tr>
 <tr class="separator:a64fcbfc1504b0f443747ae9b9ca19c11"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d4ba8b981e4cad86a8fa9514072cde0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#a5d4ba8b981e4cad86a8fa9514072cde0">addFD</a> (const int fd, const <a class="el" href="namespaceipc_1_1epoll.html#a246524f40b0e6d4bb51dca01dc7e535a">Events</a> events, <a class="el" href="classipc_1_1epoll_1_1EventPoll.html#ad3edbfb11e6e20390f581bc14fe43d06">Callback</a> &amp;&amp;callback)</td></tr>
+<tr class="memitem:a5d4ba8b981e4cad86a8fa9514072cde0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#a5d4ba8b981e4cad86a8fa9514072cde0">addFD</a> (const int fd, const <a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a">Events</a> events, <a class="el" href="classipc_1_1epoll_1_1EventPoll.html#ad3edbfb11e6e20390f581bc14fe43d06">Callback</a> &amp;&amp;callback)</td></tr>
+<tr class="memdesc:a5d4ba8b981e4cad86a8fa9514072cde0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add descriptor and it's watched events.  <a href="#a5d4ba8b981e4cad86a8fa9514072cde0">More...</a><br /></td></tr>
 <tr class="separator:a5d4ba8b981e4cad86a8fa9514072cde0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5095da4319de3a7bacb3ecca78772221"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#a5095da4319de3a7bacb3ecca78772221">modifyFD</a> (const int fd, const <a class="el" href="namespaceipc_1_1epoll.html#a246524f40b0e6d4bb51dca01dc7e535a">Events</a> events)</td></tr>
+<tr class="memitem:a5095da4319de3a7bacb3ecca78772221"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#a5095da4319de3a7bacb3ecca78772221">modifyFD</a> (const int fd, const <a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a">Events</a> events)</td></tr>
+<tr class="memdesc:a5095da4319de3a7bacb3ecca78772221"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modify watched events for descriptor.  <a href="#a5095da4319de3a7bacb3ecca78772221">More...</a><br /></td></tr>
 <tr class="separator:a5095da4319de3a7bacb3ecca78772221"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64939203c54269dff418f215d920a861"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#a64939203c54269dff418f215d920a861">removeFD</a> (const int fd)</td></tr>
+<tr class="memdesc:a64939203c54269dff418f215d920a861"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove descriptor from the watch list.  <a href="#a64939203c54269dff418f215d920a861">More...</a><br /></td></tr>
 <tr class="separator:a64939203c54269dff418f215d920a861"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c795b47f082d4b28e162ab3ff9e4e67"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#a3c795b47f082d4b28e162ab3ff9e4e67">dispatchIteration</a> (const int timeoutMs)</td></tr>
-<tr class="memdesc:a3c795b47f082d4b28e162ab3ff9e4e67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispatch at most one signaled FD.  <a href="#a3c795b47f082d4b28e162ab3ff9e4e67">More...</a><br /></td></tr>
+<tr class="memdesc:a3c795b47f082d4b28e162ab3ff9e4e67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wait for events on descriptor on the watch list.  <a href="#a3c795b47f082d4b28e162ab3ff9e4e67">More...</a><br /></td></tr>
 <tr class="separator:a3c795b47f082d4b28e162ab3ff9e4e67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-types"></a>
@@ -143,9 +152,9 @@ Private Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr class="memitem:aefdd07f69a2b77124f850e91905b192f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#aefdd07f69a2b77124f850e91905b192f">addFDInternal</a> (const int fd, const <a class="el" href="namespaceipc_1_1epoll.html#a246524f40b0e6d4bb51dca01dc7e535a">Events</a> events)</td></tr>
+<tr class="memitem:aefdd07f69a2b77124f850e91905b192f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#aefdd07f69a2b77124f850e91905b192f">addFDInternal</a> (const int fd, const <a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a">Events</a> events)</td></tr>
 <tr class="separator:aefdd07f69a2b77124f850e91905b192f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87f0b46e0915956fe6b46f01b53df11d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#a87f0b46e0915956fe6b46f01b53df11d">modifyFDInternal</a> (const int fd, const <a class="el" href="namespaceipc_1_1epoll.html#a246524f40b0e6d4bb51dca01dc7e535a">Events</a> events)</td></tr>
+<tr class="memitem:a87f0b46e0915956fe6b46f01b53df11d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#a87f0b46e0915956fe6b46f01b53df11d">modifyFDInternal</a> (const int fd, const <a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a">Events</a> events)</td></tr>
 <tr class="separator:a87f0b46e0915956fe6b46f01b53df11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab3d8284517aef5b72ff3a23909c041e2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#ab3d8284517aef5b72ff3a23909c041e2">removeFDInternal</a> (const int fd)</td></tr>
 <tr class="separator:ab3d8284517aef5b72ff3a23909c041e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -159,16 +168,30 @@ Private Attributes</h2></td></tr>
 <tr class="memitem:a2171bedc4ca2b4bd94121d18148a59ce"><td class="memItemLeft" align="right" valign="top">std::unordered_map&lt; int, std::shared_ptr&lt; <a class="el" href="classipc_1_1epoll_1_1EventPoll.html#ad3edbfb11e6e20390f581bc14fe43d06">Callback</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html#a2171bedc4ca2b4bd94121d18148a59ce">mCallbacks</a></td></tr>
 <tr class="separator:a2171bedc4ca2b4bd94121d18148a59ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Typedef Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>This class waits on registered file descriptor for events. </p>
+<p>It uses epoll mechanism.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a" title="bitmask of EPOLL* constants ">ipc::epoll::Events</a> </dd></dl>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a class="anchor" id="ad3edbfb11e6e20390f581bc14fe43d06"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef std::function&lt;void(int fd, <a class="el" href="namespaceipc_1_1epoll.html#a246524f40b0e6d4bb51dca01dc7e535a">Events</a> events)&gt; <a class="el" href="classipc_1_1epoll_1_1EventPoll.html#ad3edbfb11e6e20390f581bc14fe43d06">ipc::epoll::EventPoll::Callback</a></td>
+          <td class="memname">typedef std::function&lt;void(int fd, <a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a">Events</a> events)&gt; <a class="el" href="classipc_1_1epoll_1_1EventPoll.html#ad3edbfb11e6e20390f581bc14fe43d06">ipc::epoll::EventPoll::Callback</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Generic function type used as callback for epoll events. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fd</td><td>descriptor that triggered the event </td></tr>
+    <tr><td class="paramname">events</td><td>event mask that occured </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a" title="bitmask of EPOLL* constants ">ipc::epoll::Events</a> </dd></dl>
 
 </div>
 </div>
@@ -206,6 +229,14 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Constructs the <a class="el" href="classipc_1_1epoll_1_1EventPoll.html" title="This class waits on registered file descriptor for events. ">EventPoll</a> and initializes the underlaying epoll mechanism. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">UtilsException</td><td>thrown if epoll initialization failed </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a class="anchor" id="ad834b90d07c31ac83f5c0878990ada7e"></a>
@@ -237,7 +268,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="namespaceipc_1_1epoll.html#a246524f40b0e6d4bb51dca01dc7e535a">Events</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a">Events</a>&#160;</td>
           <td class="paramname"><em>events</em>, </td>
         </tr>
         <tr>
@@ -253,6 +284,23 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Add descriptor and it's watched events. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fd</td><td>descriptor to watch </td></tr>
+    <tr><td class="paramname">events</td><td>events to associate with the descriptor </td></tr>
+    <tr><td class="paramname">callback</td><td>callback to call once the event occurs </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">UtilsException</td><td>thrown if descriptor already registered or add fail </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a" title="bitmask of EPOLL* constants ">ipc::epoll::Events</a> </dd></dl>
 
 </div>
 </div>
@@ -272,7 +320,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="namespaceipc_1_1epoll.html#a246524f40b0e6d4bb51dca01dc7e535a">Events</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a">Events</a>&#160;</td>
           <td class="paramname"><em>events</em>&#160;</td>
         </tr>
         <tr>
@@ -304,10 +352,17 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Dispatch at most one signaled FD. </p>
+<p>Wait for events on descriptor on the watch list. </p>
+<p>Dispatch at most one signaled FD.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">timeoutMs</td><td>how long should wait in case of no pending events (0 - return immediately, -1 - wait forever) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">UtilsException</td><td>if epoll_wait fails </td></tr>
   </table>
   </dd>
 </dl>
@@ -328,6 +383,9 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Returns epoll handle. </p>
+<dl class="section return"><dt>Returns</dt><dd>handle or -1 if not initialized </dd></dl>
+
 </div>
 </div>
 <a class="anchor" id="a5095da4319de3a7bacb3ecca78772221"></a>
@@ -343,7 +401,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="namespaceipc_1_1epoll.html#a246524f40b0e6d4bb51dca01dc7e535a">Events</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a">Events</a>&#160;</td>
           <td class="paramname"><em>events</em>&#160;</td>
         </tr>
         <tr>
@@ -353,6 +411,22 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Modify watched events for descriptor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fd</td><td>watched descriptor, already registered </td></tr>
+    <tr><td class="paramname">events</td><td>events to associate with the descriptor </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">UtilsException</td><td>if descriptor not found or epoll modify fail </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a" title="bitmask of EPOLL* constants ">ipc::epoll::Events</a> </dd></dl>
 
 </div>
 </div>
@@ -372,7 +446,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="namespaceipc_1_1epoll.html#a246524f40b0e6d4bb51dca01dc7e535a">Events</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="group__Types.html#ga246524f40b0e6d4bb51dca01dc7e535a">Events</a>&#160;</td>
           <td class="paramname"><em>events</em>&#160;</td>
         </tr>
         <tr>
@@ -403,6 +477,14 @@ Private Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Remove descriptor from the watch list. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fd</td><td>watched descriptor </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -502,7 +584,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespaceipc.html">ipc</a></li><li class="navelem"><a class="el" href="namespaceipc_1_1epoll.html">epoll</a></li><li class="navelem"><a class="el" href="classipc_1_1epoll_1_1EventPoll.html">EventPoll</a></li>
-    <li class="footer">Generated on Mon Aug 31 2015 13:26:23 for Vasum by
+    <li class="footer">Generated on Tue Sep 29 2015 18:05:10 for Vasum by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,5 +1,10 @@
 var searchData=
 [
+  ['terminal_2dconfig_2ehpp',['terminal-config.hpp',['../terminal-config_8hpp.html',1,'']]],
+  ['terminal_2ecpp',['terminal.cpp',['../terminal_8cpp.html',1,'']]],
+  ['terminal_2ehpp',['terminal.hpp',['../terminal_8hpp.html',1,'']]],
+  ['text_2ecpp',['text.cpp',['../text_8cpp.html',1,'']]],
+  ['text_2ehpp',['text.hpp',['../text_8hpp.html',1,'']]],
   ['thread_2ddispatcher_2ecpp',['thread-dispatcher.cpp',['../thread-dispatcher_8cpp.html',1,'']]],
   ['thread_2ddispatcher_2ehpp',['thread-dispatcher.hpp',['../thread-dispatcher_8hpp.html',1,'']]],
   ['to_2dfdstore_2dvisitor_2ehpp',['to-fdstore-visitor.hpp',['../to-fdstore-visitor_8hpp.html',1,'']]],
@@ -9,6 +14,6 @@ var searchData=
   ['typeinfo_2ecpp',['typeinfo.cpp',['../typeinfo_8cpp.html',1,'']]],
   ['typeinfo_2ehpp',['typeinfo.hpp',['../typeinfo_8hpp.html',1,'']]],
   ['types_2ecpp',['types.cpp',['../types_8cpp.html',1,'']]],
-  ['types_2ehpp',['types.hpp',['../config_2types_8hpp.html',1,'']]],
-  ['types_2ehpp',['types.hpp',['../ipc_2types_8hpp.html',1,'']]]
+  ['types_2ehpp',['types.hpp',['../ipc_2types_8hpp.html',1,'']]],
+  ['types_2ehpp',['types.hpp',['../config_2types_8hpp.html',1,'']]]
 ];
