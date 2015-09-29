@@ -135,6 +135,16 @@ private:
         return array;
     }
 
+    template<typename T, std::size_t N>
+    static json_object* toJsonObject(const std::array<T, N>& values)
+    {
+        json_object* array = json_object_new_array();
+        for (const T& v : values) {
+            json_object_array_add(array, toJsonObject(v));
+        }
+        return array;
+    }
+
     template<typename T, class = typename std::enable_if<isVisitable<T>::value>::type>
     static json_object* toJsonObject(const T& value)
     {

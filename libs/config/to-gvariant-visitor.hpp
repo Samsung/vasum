@@ -29,6 +29,7 @@
 #include "config/is-union.hpp"
 #include "config/types.hpp"
 
+#include <array>
 #include <string>
 #include <vector>
 #include <glib.h>
@@ -92,6 +93,20 @@ private:
         if (!value.empty()) {
             g_variant_builder_open(mBuilder, G_VARIANT_TYPE_ARRAY);
             for (const T& v : value) {
+                writeInternal(v);
+            }
+            g_variant_builder_close(mBuilder);
+        } else {
+            g_variant_builder_add(mBuilder, "as", NULL);
+        }
+    }
+
+    template<typename T, std::size_t N>
+    void writeInternal(const std::array<T, N>& values)
+    {
+        if (!values.empty()) {
+            g_variant_builder_open(mBuilder, G_VARIANT_TYPE_ARRAY);
+            for (const T& v : values) {
                 writeInternal(v);
             }
             g_variant_builder_close(mBuilder);

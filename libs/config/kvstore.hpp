@@ -141,6 +141,8 @@ private:
     void setInternal(const std::string& key, const T& value);
     template<typename T>
     void setInternal(const std::string& key, const std::vector<T>& values);
+    template<typename T, std::size_t N>
+    void setInternal(const std::string& key, const std::array<T, N>& values);
 
     std::string getInternal(const std::string& key, std::string*);
     char* getInternal(const std::string& key, char**);
@@ -149,6 +151,8 @@ private:
     T getInternal(const std::string& key, T*);
     template<typename T>
     std::vector<T> getInternal(const std::string& key, std::vector<T>*);
+    template<typename T, std::size_t N>
+    std::array<T, N> getInternal(const std::string& key, std::array<T, N>*);
 
     std::string mPath;
     sqlite3::Connection mConn;
@@ -204,10 +208,37 @@ void KVStore::setInternal(const std::string& key, const std::vector<T>& values)
     setInternal(key, strValues);
 }
 
+template<typename T, std::size_t N>
+void KVStore::setInternal(const std::string& key, const std::array<T, N>& values)
+{
+    std::vector<std::string> strValues(N);
+
+    std::transform(values.begin(),
+                   values.end(),
+                   strValues.begin(),
+                   toString<T>);
+
+    setInternal(key, strValues);
+}
+
 template<typename T>
 T KVStore::getInternal(const std::string& key, T*)
 {
     return fromString<T>(getInternal(key, static_cast<std::string*>(nullptr)));
+}
+
+template<typename T, std::size_t N>
+std::array<T, N> KVStore::getInternal(const std::string& key, std::array<T, N>*)
+{
+    std::vector<std::string> strValues = getInternal(key, static_cast<std::vector<std::string>*>(nullptr));
+    std::array<T, N> values;
+
+    std::transform(strValues.begin(),
+                   strValues.end(),
+                   values.begin(),
+                   fromString<T>);
+
+    return values;
 }
 
 template<typename T>

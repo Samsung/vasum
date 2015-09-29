@@ -167,6 +167,25 @@ private:
         }
     }
 
+    template<typename T, std::size_t N>
+    void getValue(const std::string& name, std::array<T, N>& values)
+    {
+        json_object* object = nullptr;
+        if (mObject && json_object_object_get_ex(mObject, name.c_str(), &object)) {
+            checkType(object, json_type_array);
+        }
+
+        std::string k = key(mKeyPrefix, name);
+        FromKVJsonVisitor visitor(*this, name, false);
+        if (mStore.exists(k)) {
+            json_object_put(visitor.mObject);
+            visitor.mObject = nullptr;
+        }
+        for (std::size_t i = 0; i < N; ++i) {
+            visitor.getValue(i, values[i]);
+        }
+    }
+
     template<typename T, typename std::enable_if<!isVisitable<T>::value, int>::type = 0>
     void getValue(int i, T& t)
     {
@@ -210,6 +229,21 @@ private:
         }
         for (int idx = 0; idx < length; ++idx) {
             visitor.getValue(idx, value[idx]);
+        }
+    }
+
+    template<typename T, std::size_t N>
+    void getValue(int i, std::array<T, N>& values)
+    {
+        std::string k = key(mKeyPrefix, std::to_string(i));
+
+        FromKVJsonVisitor visitor(*this, i, false);
+        if (mStore.exists(k)) {
+            json_object_put(visitor.mObject);
+            visitor.mObject = nullptr;
+        }
+        for (std::size_t idx = 0; idx < N; ++idx) {
+            visitor.getValue(idx, values[idx]);
         }
     }
 

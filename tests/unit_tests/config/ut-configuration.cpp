@@ -71,9 +71,9 @@ BOOST_AUTO_TEST_CASE(FromJsonString)
     BOOST_REQUIRE_EQUAL(0, testConfig.emptyIntVector.size());
 
     BOOST_REQUIRE_EQUAL(3, testConfig.intVector.size());
-    BOOST_CHECK_EQUAL(1, testConfig.intVector[0]);
-    BOOST_CHECK_EQUAL(2, testConfig.intVector[1]);
-    BOOST_CHECK_EQUAL(3, testConfig.intVector[2]);
+    BOOST_CHECK_EQUAL(1,   testConfig.intVector[0]);
+    BOOST_CHECK_EQUAL(2,   testConfig.intVector[1]);
+    BOOST_CHECK_EQUAL(3,   testConfig.intVector[2]);
 
     BOOST_REQUIRE_EQUAL(2, testConfig.stringVector.size());
     BOOST_CHECK_EQUAL("a", testConfig.stringVector[0]);
@@ -83,6 +83,10 @@ BOOST_AUTO_TEST_CASE(FromJsonString)
     BOOST_CHECK_CLOSE(0.0, testConfig.doubleVector[0], TOLERANCE);
     BOOST_CHECK_CLOSE(1.0, testConfig.doubleVector[1], TOLERANCE);
     BOOST_CHECK_CLOSE(2.0, testConfig.doubleVector[2], TOLERANCE);
+
+    BOOST_REQUIRE_EQUAL(2, testConfig.intArray.size());
+    BOOST_CHECK_EQUAL(0,   testConfig.intArray[0]);
+    BOOST_CHECK_EQUAL(1,   testConfig.intArray[1]);
 
     BOOST_CHECK_EQUAL(54321, testConfig.subObj.intVal);
     BOOST_CHECK_EQUAL(2,     testConfig.subObj.intVector.size());

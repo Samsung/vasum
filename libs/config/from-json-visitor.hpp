@@ -32,6 +32,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <array>
 
 namespace config {
 
@@ -149,13 +150,23 @@ private:
     }
 
     template<typename T>
-    static void fromJsonObject(json_object* object, std::vector<T>& value)
+    static void fromJsonObject(json_object* object, std::vector<T>& values)
     {
         checkType(object, json_type_array);
         int length = json_object_array_length(object);
-        value.resize(static_cast<size_t>(length));
+        values.resize(static_cast<size_t>(length));
         for (int i = 0; i < length; ++i) {
-            fromJsonObject(json_object_array_get_idx(object, i), value[static_cast<size_t>(i)]);
+            fromJsonObject(json_object_array_get_idx(object, i), values[static_cast<size_t>(i)]);
+        }
+    }
+
+    template<typename T, std::size_t N>
+    static void fromJsonObject(json_object* object, std::array<T, N>& values)
+    {
+        checkType(object, json_type_array);
+
+        for (std::size_t i = 0; i < N; ++i) {
+            fromJsonObject(json_object_array_get_idx(object, i), values[i]);
         }
     }
 

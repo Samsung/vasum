@@ -32,6 +32,7 @@
 
 #include <string>
 #include <vector>
+#include <array>
 #include <memory>
 #include <cassert>
 #include <glib.h>
@@ -157,6 +158,20 @@ private:
             auto child = makeUnique(g_variant_iter_next_value(&iter));
             assert(child);
             fromGVariant(child.get(), value[static_cast<size_t>(i)]);
+        }
+    }
+
+    template<typename T, std::size_t N>
+    static void fromGVariant(GVariant* object, std::array<T, N>& values)
+    {
+        checkType(object, G_VARIANT_TYPE_ARRAY);
+
+        GVariantIter iter;
+        g_variant_iter_init(&iter, object);
+
+        for (T& value: values) {
+            auto child = makeUnique(g_variant_iter_next_value(&iter));
+            fromGVariant(child.get(), value);
         }
     }
 

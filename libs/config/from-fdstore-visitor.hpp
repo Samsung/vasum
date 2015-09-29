@@ -29,7 +29,9 @@
 #include "config/fdstore.hpp"
 #include "config/types.hpp"
 
+#include <array>
 #include <string>
+#include <vector>
 
 namespace config {
 
@@ -96,6 +98,14 @@ private:
         readInternal(vectorSize);
         values.resize(vectorSize);
 
+        for (T& value : values) {
+            readInternal(value);
+        }
+    }
+
+    template<typename T, std::size_t N>
+    void readInternal(std::array<T, N>& values)
+    {
         for (T& value : values) {
             readInternal(value);
         }

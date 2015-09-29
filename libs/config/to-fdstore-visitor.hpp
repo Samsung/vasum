@@ -29,8 +29,10 @@
 #include "config/fdstore.hpp"
 #include "config/types.hpp"
 
-#include <string>
+#include <array>
 #include <cstring>
+#include <string>
+#include <vector>
 
 namespace config {
 
@@ -90,7 +92,15 @@ private:
     void writeInternal(const std::vector<T>& values)
     {
         writeInternal(values.size());
-        for (const T& value : values) {
+        for (const T& value: values) {
+            writeInternal(value);
+        }
+    }
+
+    template<typename T, std::size_t N>
+    void writeInternal(const std::array<T, N>& values)
+    {
+        for (const T& value: values) {
             writeInternal(value);
         }
     }
