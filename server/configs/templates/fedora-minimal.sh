@@ -49,7 +49,7 @@ eval set -- "$options"
 while true
 do
     case "$1" in
-        -h|--help)      usage $0 && exit 0;;
+        -h|--help)      usage $(basename $0) && exit 0;;
         --rootfs)       rootfs=$2; shift 2;;
         -p|--path)      path=$2; shift 2;;
         --vt)           vt=$2; shift 2;;

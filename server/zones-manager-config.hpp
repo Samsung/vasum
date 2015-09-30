@@ -65,6 +65,11 @@ struct ZonesManagerConfig {
     std::string zoneTemplateDir;
 
     /**
+     * Host VT
+     */
+    int hostVT;
+
+    /**
      * VTs available for zones
      */
     std::vector<int> availableVTs;
@@ -91,6 +96,7 @@ struct ZonesManagerConfig {
         cleanUpZonesPath,
         zoneImagePath,
         zoneTemplateDir,
+        hostVT,
         availableVTs,
         inputConfig,
         runMountPointPrefix,

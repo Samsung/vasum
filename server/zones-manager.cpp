@@ -37,6 +37,7 @@
 #include "utils/fs.hpp"
 #include "utils/img.hpp"
 #include "utils/environment.hpp"
+#include "utils/vt.hpp"
 #include "api/messages.hpp"
 
 #include <boost/filesystem.hpp>
@@ -392,8 +393,7 @@ void ZonesManager::focusInternal(Zones::iterator iter)
     if (iter == mZones.end()) {
         if (!mActiveZoneId.empty()) {
             LOGI("Focus to: host");
-            // give back the focus to the host
-            // TODO switch to host vt
+            utils::activateVT(mConfig.hostVT);
             mActiveZoneId.clear();
         }
         return;
@@ -519,10 +519,7 @@ ZonesManager::Zones::iterator ZonesManager::getRunningForegroundZoneIterator()
     }
     auto iter = findZone(mActiveZoneId);
     if (!get(iter).isRunning()) {
-        // Can zone change its state by itself?
-        // Maybe when it is shut down by itself? TODO check it
         LOGW("Active zone " << mActiveZoneId << " is not running any more!");
-        assert(false);
         return mZones.end();
     }
     return iter;
@@ -1149,21 +1146,23 @@ void ZonesManager::generateNewConfig(const std::string& id,
                                                        ZONE_NAME_REGEX,
                                                        id);
 
-    if (dynamicConfig.vt >= 0 && !dynamicConfig.ipv4Gateway.empty() && !dynamicConfig.ipv4.empty()) {
+    if (dynamicConfig.vt >= 0) {
         // generate first free VT number
         const int freeVT = getVTForNewZone();
         LOGD("VT number: " << freeVT);
         dynamicConfig.vt = freeVT;
 
-        // generate third IP octet for network config
-        std::string thirdOctetStr = std::to_string(ZONE_IP_BASE_THIRD_OCTET + freeVT);
-        LOGD("IP third octet: " << thirdOctetStr);
-        dynamicConfig.ipv4Gateway = boost::regex_replace(dynamicConfig.ipv4Gateway,
-                                                         ZONE_IP_THIRD_OCTET_REGEX,
-                                                         thirdOctetStr);
-        dynamicConfig.ipv4 = boost::regex_replace(dynamicConfig.ipv4,
-                                                  ZONE_IP_THIRD_OCTET_REGEX,
-                                                  thirdOctetStr);
+        if (!dynamicConfig.ipv4Gateway.empty() && !dynamicConfig.ipv4.empty()) {
+            // generate third IP octet for network config
+            std::string thirdOctetStr = std::to_string(ZONE_IP_BASE_THIRD_OCTET + freeVT);
+            LOGD("IP third octet: " << thirdOctetStr);
+            dynamicConfig.ipv4Gateway = boost::regex_replace(dynamicConfig.ipv4Gateway,
+                                                             ZONE_IP_THIRD_OCTET_REGEX,
+                                                             thirdOctetStr);
+            dynamicConfig.ipv4 = boost::regex_replace(dynamicConfig.ipv4,
+                                                      ZONE_IP_THIRD_OCTET_REGEX,
+                                                      thirdOctetStr);
+        }
     }
 
     // save dynamic config

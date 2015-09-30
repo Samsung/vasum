@@ -108,7 +108,7 @@ mkdir -p %{buildroot}/%{_datadir}/zones
 %if %{platform_type} == "TIZEN"
 ln -s tizen.conf %{buildroot}/etc/vasum/templates/default.conf
 %else
-ln -s fedora.conf %{buildroot}/etc/vasum/templates/default.conf
+ln -s fedora-minimal.conf %{buildroot}/etc/vasum/templates/default.conf
 %endif
 
 %clean
