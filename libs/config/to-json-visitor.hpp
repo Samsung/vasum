@@ -27,10 +27,14 @@
 
 #include "config/is-visitable.hpp"
 #include "config/exception.hpp"
+#include "config/visit-fields.hpp"
 
-#include <json.h>
+#include <array>
 #include <string>
 #include <vector>
+#include <utility>
+
+#include <json.h>
 
 namespace config {
 
@@ -142,6 +146,25 @@ private:
         for (const T& v : values) {
             json_object_array_add(array, toJsonObject(v));
         }
+        return array;
+    }
+
+    struct HelperVisitor
+    {
+        template<typename T>
+        static void visit(json_object* array, const T& value)
+        {
+            json_object_array_add(array, toJsonObject(value));
+        }
+    };
+
+    template<typename ... T>
+    static json_object* toJsonObject(const std::pair<T...>& values)
+    {
+        json_object* array = json_object_new_array();
+
+        HelperVisitor visitor;
+        visitFields(values, &visitor, array);
         return array;
     }
 

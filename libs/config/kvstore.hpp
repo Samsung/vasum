@@ -27,6 +27,7 @@
 
 #include "config/sqlite3/connection.hpp"
 #include "config/sqlite3/statement.hpp"
+#include "config/visit-fields.hpp"
 
 #include <algorithm>
 #include <initializer_list>
@@ -36,6 +37,7 @@
 #include <string>
 #include <vector>
 #include <atomic>
+#include <utility>
 
 namespace config {
 
@@ -143,6 +145,8 @@ private:
     void setInternal(const std::string& key, const std::vector<T>& values);
     template<typename T, std::size_t N>
     void setInternal(const std::string& key, const std::array<T, N>& values);
+    template<typename ... T>
+    void setInternal(const std::string& key, const std::pair<T...>& values);
 
     std::string getInternal(const std::string& key, std::string*);
     char* getInternal(const std::string& key, char**);
@@ -153,6 +157,8 @@ private:
     std::vector<T> getInternal(const std::string& key, std::vector<T>*);
     template<typename T, std::size_t N>
     std::array<T, N> getInternal(const std::string& key, std::array<T, N>*);
+    template<typename ... T>
+    std::pair<T...> getInternal(const std::string& key, std::pair<T...>*);
 
     std::string mPath;
     sqlite3::Connection mConn;
@@ -221,6 +227,26 @@ void KVStore::setInternal(const std::string& key, const std::array<T, N>& values
     setInternal(key, strValues);
 }
 
+struct SetTupleVisitor
+{
+    template<typename T>
+    static void visit(std::vector<std::string>::iterator& it, const T& value)
+    {
+        *it = toString<T>(value);
+        ++it;
+    }
+};
+
+template<typename ... T>
+void KVStore::setInternal(const std::string& key, const std::pair<T...>& values)
+{
+    std::vector<std::string> strValues(std::tuple_size<std::pair<T...>>::value);
+
+    SetTupleVisitor visitor;
+    visitFields(values, &visitor, strValues.begin());
+    setInternal(key, strValues);
+}
+
 template<typename T>
 T KVStore::getInternal(const std::string& key, T*)
 {
@@ -251,6 +277,28 @@ std::vector<T> KVStore::getInternal(const std::string& key, std::vector<T>*)
                    strValues.end(),
                    values.begin(),
                    fromString<T>);
+
+    return values;
+}
+
+struct GetTupleVisitor
+{
+    template<typename T>
+    static void visit(std::vector<std::string>::iterator& it, T& value)
+    {
+        value = fromString<T>(*it);
+        ++it;
+    }
+};
+
+template<typename ... T>
+std::pair<T...> KVStore::getInternal(const std::string& key, std::pair<T...>*)
+{
+    std::vector<std::string> strValues = getInternal(key, static_cast<std::vector<std::string>*>(nullptr));
+    std::pair<T...> values;
+
+    GetTupleVisitor visitor;
+    visitFields(values, &visitor, strValues.begin());
 
     return values;
 }

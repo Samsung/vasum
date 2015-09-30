@@ -28,11 +28,13 @@
 #include "config/is-visitable.hpp"
 #include "config/is-union.hpp"
 #include "config/types.hpp"
+#include "config/visit-fields.hpp"
 
 #include <array>
 #include <string>
 #include <vector>
 #include <glib.h>
+#include <utility>
 
 namespace config {
 
@@ -77,15 +79,33 @@ public:
 private:
     GVariantBuilder* mBuilder;
 
-    void writeInternal(std::int32_t value) { add("i", value); };
-    void writeInternal(std::int64_t value) { add("x", value); };
-    void writeInternal(std::uint32_t value) { add("u", value); };
-    void writeInternal(std::uint64_t value) { add("t", value); };
-    void writeInternal(bool value) { add("b", value); };
-    void writeInternal(double value) { add("d", value); };
-    void writeInternal(const std::string& value) { add("s", value.c_str()); };
-    void writeInternal(const char* value) { add("s", value); };
-    void writeInternal(const config::FileDescriptor& value) { add("h", value.value); };
+    void writeInternal(std::int32_t value) {
+        add("i", value);
+    };
+    void writeInternal(std::int64_t value) {
+        add("x", value);
+    };
+    void writeInternal(std::uint32_t value) {
+        add("u", value);
+    };
+    void writeInternal(std::uint64_t value) {
+        add("t", value);
+    };
+    void writeInternal(bool value) {
+        add("b", value);
+    };
+    void writeInternal(double value) {
+        add("d", value);
+    };
+    void writeInternal(const std::string& value) {
+        add("s", value.c_str());
+    };
+    void writeInternal(const char* value) {
+        add("s", value);
+    };
+    void writeInternal(const config::FileDescriptor& value) {
+        add("h", value.value);
+    };
 
     template<typename T>
     void writeInternal(const std::vector<T>& value)
@@ -113,6 +133,14 @@ private:
         } else {
             g_variant_builder_add(mBuilder, "as", NULL);
         }
+    }
+
+    template<typename ... T>
+    void writeInternal(const std::pair<T...>& values)
+    {
+        g_variant_builder_open(mBuilder, G_VARIANT_TYPE_ARRAY);
+        visitFields(values, this, std::string());
+        g_variant_builder_close(mBuilder);
     }
 
     template<typename T>

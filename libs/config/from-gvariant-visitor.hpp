@@ -29,12 +29,15 @@
 #include "config/exception.hpp"
 #include "config/is-union.hpp"
 #include "config/types.hpp"
+#include "config/visit-fields.hpp"
 
 #include <string>
 #include <vector>
 #include <array>
+#include <utility>
 #include <memory>
 #include <cassert>
+
 #include <glib.h>
 
 namespace config {
@@ -173,6 +176,28 @@ private:
             auto child = makeUnique(g_variant_iter_next_value(&iter));
             fromGVariant(child.get(), value);
         }
+    }
+
+    struct HelperVisitor
+    {
+        template<typename T>
+        static void visit(GVariantIter* iter, T&& value)
+        {
+            auto child = makeUnique(g_variant_iter_next_value(iter));
+            fromGVariant(child.get(), value);
+        }
+    };
+
+    template<typename ... T>
+    static void fromGVariant(GVariant* object, std::pair<T...>& values)
+    {
+        checkType(object, G_VARIANT_TYPE_ARRAY);
+
+        GVariantIter iter;
+        g_variant_iter_init(&iter, object);
+
+        HelperVisitor visitor;
+        visitFields(values, &visitor, &iter);
     }
 
     template<typename T>

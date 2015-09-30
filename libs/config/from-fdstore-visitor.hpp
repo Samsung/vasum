@@ -28,9 +28,11 @@
 #include "config/is-visitable.hpp"
 #include "config/fdstore.hpp"
 #include "config/types.hpp"
+#include "config/visit-fields.hpp"
 
 #include <array>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace config {
@@ -109,6 +111,12 @@ private:
         for (T& value : values) {
             readInternal(value);
         }
+    }
+
+    template<typename ... T>
+    void readInternal(std::pair<T...>& values)
+    {
+        visitFields(values, this, std::string());
     }
 };
 

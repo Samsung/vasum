@@ -99,6 +99,8 @@ struct TestConfig {
 
     std::array<int, 2> intArray;
 
+    std::pair<int, int> intIntPair;
+
     SubConfig subObj;
     std::vector<SubConfig> subVector;
 
@@ -123,6 +125,8 @@ struct TestConfig {
         doubleVector,
 
         intArray,
+
+        intIntPair,
 
         subObj,
         subVector,
@@ -164,16 +168,17 @@ const std::string jsonTestString =
     "\"stringVector\": [ \"a\", \"b\" ], "
     "\"doubleVector\": [ 0.000000, 1.000000, 2.000000 ], "
     "\"intArray\": [ 0, 1 ], "
+    "\"intIntPair\": [ 8, 9 ], "
     "\"subObj\": { \"intVal\": 54321, \"intVector\": [ 1, 2 ], \"subSubObj\": { \"intVal\": 234 } }, "
     "\"subVector\": [ { \"intVal\": 123, \"intVector\": [ 3, 4 ], \"subSubObj\": { \"intVal\": 345 } }, "
-        "{ \"intVal\": 456, \"intVector\": [ 5, 6 ], \"subSubObj\": { \"intVal\": 567 } } ], "
+    "{ \"intVal\": 456, \"intVector\": [ 5, 6 ], \"subSubObj\": { \"intVal\": 567 } } ], "
     "\"union1\": { \"type\": \"int\", \"value\": 2 }, "
     "\"union2\": { \"type\": \"SubConfig\", \"value\": { \"intVal\": 54321, \"intVector\": [ 1 ], "
-        "\"subSubObj\": { \"intVal\": 234 } } }, "
+    "\"subSubObj\": { \"intVal\": 234 } } }, "
     "\"unions\": [ "
-        "{ \"type\": \"int\", \"value\": 2 }, "
-        "{ \"type\": \"SubConfig\", \"value\": { \"intVal\": 54321, \"intVector\": [ 1 ], "
-            "\"subSubObj\": { \"intVal\": 234 } } } ] }";
+    "{ \"type\": \"int\", \"value\": 2 }, "
+    "{ \"type\": \"SubConfig\", \"value\": { \"intVal\": 54321, \"intVector\": [ 1 ], "
+    "\"subSubObj\": { \"intVal\": 234 } } } ] }";
 
 const std::string jsonEmptyTestString =
     "{ \"intVal\": 0, "
@@ -188,6 +193,7 @@ const std::string jsonEmptyTestString =
     "\"stringVector\": [ ], "
     "\"doubleVector\": [ ], "
     "\"intArray\": [ ], "
+    "\"intIntPair\": [ ], "
     "\"subObj\": { \"intVal\": 0, \"intVector\": [ ], \"subSubObj\": { \"intVal\": 0 } }, "
     "\"subVector\": [ ], "
     "\"union1\": { \"type\": \"int\", \"value\": 0 }, "

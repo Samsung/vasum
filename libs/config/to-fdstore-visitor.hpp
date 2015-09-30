@@ -28,11 +28,14 @@
 #include "config/is-visitable.hpp"
 #include "config/fdstore.hpp"
 #include "config/types.hpp"
+#include "config/visit-fields.hpp"
 
 #include <array>
 #include <cstring>
 #include <string>
 #include <vector>
+#include <utility>
+
 
 namespace config {
 
@@ -103,6 +106,12 @@ private:
         for (const T& value: values) {
             writeInternal(value);
         }
+    }
+
+    template<typename ... T>
+    void writeInternal(const std::pair<T...>& values)
+    {
+        visitFields(values, this, std::string());
     }
 
 };

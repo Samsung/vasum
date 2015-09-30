@@ -88,6 +88,9 @@ BOOST_AUTO_TEST_CASE(FromJsonString)
     BOOST_CHECK_EQUAL(0,   testConfig.intArray[0]);
     BOOST_CHECK_EQUAL(1,   testConfig.intArray[1]);
 
+    BOOST_CHECK_EQUAL(8, testConfig.intIntPair.first);
+    BOOST_CHECK_EQUAL(9, testConfig.intIntPair.second);
+
     BOOST_CHECK_EQUAL(54321, testConfig.subObj.intVal);
     BOOST_CHECK_EQUAL(2,     testConfig.subObj.intVector.size());
     BOOST_CHECK_EQUAL(1,     testConfig.subObj.intVector[0]);

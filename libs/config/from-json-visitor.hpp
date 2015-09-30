@@ -27,12 +27,14 @@
 
 #include "config/is-visitable.hpp"
 #include "config/exception.hpp"
+#include "config/visit-fields.hpp"
 
 #include <json.h>
 #include <string>
 #include <cstring>
 #include <vector>
 #include <array>
+#include <utility>
 
 namespace config {
 
@@ -168,6 +170,26 @@ private:
         for (std::size_t i = 0; i < N; ++i) {
             fromJsonObject(json_object_array_get_idx(object, i), values[i]);
         }
+    }
+
+    struct HelperVisitor
+    {
+        template<typename T>
+        static void visit(json_object* object, std::size_t& idx, T&& value)
+        {
+            fromJsonObject(json_object_array_get_idx(object, idx), value);
+            idx += 1;
+        }
+    };
+
+    template<typename ... T>
+    static void fromJsonObject(json_object* object, std::pair<T...>& values)
+    {
+        checkType(object, json_type_array);
+
+        std::size_t idx = 0;
+        HelperVisitor visitor;
+        visitFields(values, &visitor, object, idx);
     }
 
     template<typename T, class = typename std::enable_if<isVisitable<T>::value>::type>

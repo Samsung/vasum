@@ -28,7 +28,9 @@
 
 #include "config/from-kvstore-visitor.hpp"
 #include "config/is-union.hpp"
+#include "config/visit-fields.hpp"
 
+#include <utility>
 #include <json.h>
 
 namespace config {
@@ -63,6 +65,12 @@ public:
     template<typename T>
     void visit(const std::string& name, T& value) {
         getValue(name, value);
+    }
+
+    template<typename T>
+    void visit(std::size_t& idx, T& value) {
+        getValue(idx, value);
+        idx += 1;
     }
 
 private:
@@ -105,14 +113,13 @@ private:
         std::string k = key(mKeyPrefix, name);
         if (mStore.exists(k)) {
             t = mStore.get<T>(k);
-        }
-        else {
+        } else {
             json_object* object = nullptr;
             if (mObject) {
                 json_object_object_get_ex(mObject, name.c_str(), &object);
             }
             if (!object) {
-                throw ConfigException("Missing json field " + key(mKeyPrefix, name));
+                throw ConfigException("Missing json field " + k);
             }
             fromJsonObject(object, t);
         }
@@ -184,6 +191,25 @@ private:
         for (std::size_t i = 0; i < N; ++i) {
             visitor.getValue(i, values[i]);
         }
+    }
+
+    template<typename ... T>
+    void getValue(const std::string& name, std::pair<T...>& values)
+    {
+        json_object* object = nullptr;
+        if (mObject && json_object_object_get_ex(mObject, name.c_str(), &object)) {
+            checkType(object, json_type_array);
+        }
+
+        std::string k = key(mKeyPrefix, name);
+        FromKVJsonVisitor visitor(*this, name, false);
+        if (mStore.exists(k)) {
+            json_object_put(visitor.mObject);
+            visitor.mObject = nullptr;
+        }
+
+        std::size_t idx = 0;
+        visitFields(values, &visitor, idx);
     }
 
     template<typename T, typename std::enable_if<!isVisitable<T>::value, int>::type = 0>
