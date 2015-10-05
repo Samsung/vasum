@@ -230,7 +230,7 @@ public:
      *   Create bridge interface
      *      ip link add @mIfname type bridge
      *   Create psedo-ethernet interface on existing one
-     *      ip link add @mIfname type macvlan link @peerif [mode @mode]
+     *      ip link add @mIfname type macvlan link @peerif [mode @a mode]
      */
     void create(InterfaceType type, const std::string& peerif, MacVLanMode mode = MacVLanMode::PRIVATE);
 
