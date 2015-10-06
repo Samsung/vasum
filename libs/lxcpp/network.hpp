@@ -24,7 +24,8 @@
 #ifndef LXCPP_NETWORK_HPP
 #define LXCPP_NETWORK_HPP
 
-#include "config/fields.hpp"
+#include <config/config.hpp>
+#include <config/fields.hpp>
 
 #include <cstring>
 #include <string>
