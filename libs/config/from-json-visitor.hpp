@@ -192,7 +192,14 @@ private:
         visitFields(values, &visitor, object, idx);
     }
 
-    template<typename T, class = typename std::enable_if<isVisitable<T>::value>::type>
+    template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    static void fromJsonObject(json_object* object, T& value)
+    {
+        fromJsonObject(object,
+                       *reinterpret_cast<typename std::underlying_type<T>::type*>(&value));
+    }
+
+    template<typename T, typename std::enable_if<isVisitable<T>::value, int>::type = 0>
     static void fromJsonObject(json_object* object, T& value)
     {
         checkType(object, json_type_object);

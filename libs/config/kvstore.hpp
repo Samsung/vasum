@@ -139,7 +139,9 @@ private:
     void setInternal(const std::string& key, const char* value);
     void setInternal(const std::string& key, const std::initializer_list<std::string>& values);
     void setInternal(const std::string& key, const std::vector<std::string>& values);
-    template<typename T>
+    template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
+    void setInternal(const std::string& key, const T& value);
+    template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
     void setInternal(const std::string& key, const T& value);
     template<typename T>
     void setInternal(const std::string& key, const std::vector<T>& values);
@@ -151,7 +153,9 @@ private:
     std::string getInternal(const std::string& key, std::string*);
     char* getInternal(const std::string& key, char**);
     std::vector<std::string> getInternal(const std::string& key, std::vector<std::string>*);
-    template<typename T>
+    template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
+    T getInternal(const std::string& key, T*);
+    template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
     T getInternal(const std::string& key, T*);
     template<typename T>
     std::vector<T> getInternal(const std::string& key, std::vector<T>*);
@@ -195,10 +199,17 @@ T fromString(const std::string& strValue)
 
 } // namespace
 
-template<typename T>
+template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type>
 void KVStore::setInternal(const std::string& key, const T& value)
 {
     setInternal(key, toString(value));
+}
+
+template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type>
+void KVStore::setInternal(const std::string& key, const T& value)
+{
+    setInternal(key,
+                static_cast<const typename std::underlying_type<T>::type>(value));
 }
 
 template<typename T>
@@ -247,10 +258,17 @@ void KVStore::setInternal(const std::string& key, const std::pair<T...>& values)
     setInternal(key, strValues);
 }
 
-template<typename T>
+template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type>
 T KVStore::getInternal(const std::string& key, T*)
 {
     return fromString<T>(getInternal(key, static_cast<std::string*>(nullptr)));
+}
+
+template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type>
+T KVStore::getInternal(const std::string& key, T*)
+{
+    return static_cast<T>(getInternal(key,
+                                      static_cast<typename std::underlying_type<T>::type*>(nullptr)));
 }
 
 template<typename T, std::size_t N>

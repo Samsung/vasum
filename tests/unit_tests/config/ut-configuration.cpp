@@ -67,6 +67,7 @@ BOOST_AUTO_TEST_CASE(FromJsonString)
     BOOST_CHECK_EQUAL("blah", testConfig.cstringVal);
     BOOST_CHECK_CLOSE(-1.234, testConfig.doubleVal, TOLERANCE);
     BOOST_CHECK_EQUAL(true, testConfig.boolVal);
+    BOOST_CHECK(TestEnum::SECOND == testConfig.enumVal);
 
     BOOST_REQUIRE_EQUAL(0, testConfig.emptyIntVector.size());
 

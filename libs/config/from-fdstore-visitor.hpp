@@ -93,6 +93,12 @@ private:
         value.accept(visitor);
     }
 
+    template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    void readInternal(T& value)
+    {
+        readInternal(*reinterpret_cast<typename std::underlying_type<T>::type*>(&value));
+    }
+
     template<typename T>
     void readInternal(std::vector<T>& values)
     {

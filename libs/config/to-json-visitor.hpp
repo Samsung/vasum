@@ -168,13 +168,20 @@ private:
         return array;
     }
 
-    template<typename T, class = typename std::enable_if<isVisitable<T>::value>::type>
+    template<typename T, typename std::enable_if<isVisitable<T>::value, int>::type = 0>
     static json_object* toJsonObject(const T& value)
     {
         ToJsonVisitor visitor;
         value.accept(visitor);
         return visitor.detach();
     }
+
+    template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    static json_object* toJsonObject(const T& value)
+    {
+        return toJsonObject(static_cast<const typename std::underlying_type<T>::type>(value));
+    }
+
 };
 
 } // namespace config

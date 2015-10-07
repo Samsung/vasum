@@ -143,6 +143,12 @@ private:
         g_variant_builder_close(mBuilder);
     }
 
+    template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    void writeInternal(const T& value)
+    {
+        writeInternal(static_cast<const typename std::underlying_type<T>::type>(value));
+    }
+
     template<typename T>
     typename std::enable_if<isVisitable<T>::value && !isUnion<T>::value>::type
     writeInternal(const T& value)

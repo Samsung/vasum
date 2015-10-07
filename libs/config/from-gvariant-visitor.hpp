@@ -200,6 +200,13 @@ private:
         visitFields(values, &visitor, &iter);
     }
 
+    template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    static void fromGVariant(GVariant* object, T& value)
+    {
+        fromGVariant(object,
+                     *reinterpret_cast<typename std::underlying_type<T>::type*>(&value));
+    }
+
     template<typename T>
     static typename std::enable_if<isUnion<T>::value>::type
     fromGVariant(GVariant* object, T& value)

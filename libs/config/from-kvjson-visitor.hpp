@@ -107,7 +107,16 @@ private:
         mObject = object ? json_object_get(object) : nullptr;
     }
 
-    template<typename T, typename std::enable_if<!isVisitable<T>::value, int>::type = 0>
+    template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    void getValue(const std::string& name, T& t)
+    {
+        getValue(name,
+                 *reinterpret_cast<typename std::underlying_type<T>::type*>(&t));
+    }
+
+    template<typename T,
+             typename std::enable_if<!isVisitable<T>::value &&
+                                     !std::is_enum<T>::value, int>::type = 0>
     void getValue(const std::string& name, T& t)
     {
         std::string k = key(mKeyPrefix, name);

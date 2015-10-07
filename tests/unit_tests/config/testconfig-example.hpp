@@ -29,6 +29,11 @@
 #include "config/fields.hpp"
 #include "config/fields-union.hpp"
 
+enum class TestEnum: int {
+    FIRST = 0,
+    SECOND = 12
+};
+
 struct TestConfig {
     // subtree class
     struct SubConfig {
@@ -91,6 +96,7 @@ struct TestConfig {
     char* cstringVal;
     double doubleVal;
     bool boolVal;
+    TestEnum enumVal;
 
     std::vector<int> emptyIntVector;
     std::vector<int> intVector;
@@ -118,6 +124,7 @@ struct TestConfig {
         cstringVal,
         doubleVal,
         boolVal,
+        enumVal,
 
         emptyIntVector,
         intVector,
@@ -163,6 +170,7 @@ const std::string jsonTestString =
     "\"cstringVal\": \"blah\", "
     "\"doubleVal\": -1.234000, "
     "\"boolVal\": true, "
+    "\"enumVal\": 12, "
     "\"emptyIntVector\": [ ], "
     "\"intVector\": [ 1, 2, 3 ], "
     "\"stringVector\": [ \"a\", \"b\" ], "
@@ -188,6 +196,7 @@ const std::string jsonEmptyTestString =
     "\"stringVal\": \"\", "
     "\"cstringVal\": \"\", "
     "\"boolVal\": false, "
+    "\"enumVal\": 0, "
     "\"emptyIntVector\": [ ], "
     "\"intVector\": [ ], "
     "\"stringVector\": [ ], "

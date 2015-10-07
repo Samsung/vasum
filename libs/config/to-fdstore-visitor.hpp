@@ -78,6 +78,12 @@ private:
         mStore.sendFD(fd.value);
     }
 
+    template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    void writeInternal(const T& value)
+    {
+        writeInternal(static_cast<const typename std::underlying_type<T>::type>(value));
+    }
+
     template<typename T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>
     void writeInternal(const T& value)
     {
