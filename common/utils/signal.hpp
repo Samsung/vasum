@@ -27,16 +27,23 @@
 
 #include <initializer_list>
 #include <csignal>
+#include <vector>
+
 
 namespace utils {
 
+
 ::sigset_t getSignalMask();
+bool isSignalPending(const int sigNum);
+bool waitForSignal(const int sigNum, int timeoutMs);
 bool isSignalBlocked(const int sigNum);
 void signalBlockAllExcept(const std::initializer_list<int>& signals);
 void signalBlock(const int sigNum);
 void signalUnblock(const int sigNum);
-void signalIgnore(const std::initializer_list<int>& signals);
+std::vector<std::pair<int, struct ::sigaction>> signalIgnore(const std::initializer_list<int>& signals);
+struct ::sigaction signalSet(const int sigNum, const struct ::sigaction *sigAct);
 void sendSignal(const pid_t pid, const int sigNum);
+
 
 } // namespace utils
 

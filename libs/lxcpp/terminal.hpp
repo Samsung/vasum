@@ -24,6 +24,8 @@
 #ifndef LXCPP_TERMINAL_HPP
 #define LXCPP_TERMINAL_HPP
 
+#include <termios.h>
+
 
 namespace lxcpp {
 
@@ -40,9 +42,19 @@ namespace lxcpp {
 int nullStdFDs();
 
 /**
- * Checks if a file descriptor is a terminal
+ * Checks if a file descriptor is a terminal.
  */
 bool isatty(int fd);
+
+/**
+ * Get terminal attributes.
+ */
+void tcgetattr(const int fd, struct termios *termios_p);
+
+/**
+ * Set terminal attributes.
+ */
+void tcsetattr(const int fd, const int optional_actions, const struct termios *termios_p);
 
 /**
  * Setups the passed fd as a new control and IO (in, out, err) terminal
@@ -63,7 +75,6 @@ std::pair<int, std::string> openPty(bool rawMode);
 
 
 } // namespace lxcpp
-
 
 
 #endif // LXCPP_TERMINAL_HPP

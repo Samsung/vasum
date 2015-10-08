@@ -39,9 +39,9 @@ public:
      * It creates a number of pseudoterminals and stores them
      * to be passed to the guard and prepared for init process.
      *
-     * @param config container's config
+     * @param terminals  container's terminals config
      */
-    PrepHostTerminal(TerminalsConfig &config);
+    PrepHostTerminal(TerminalsConfig &terminals);
     ~PrepHostTerminal();
 
     void execute();

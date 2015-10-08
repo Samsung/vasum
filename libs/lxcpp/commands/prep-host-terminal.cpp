@@ -43,8 +43,8 @@ void PrepHostTerminal::execute()
 {
     LOGD("Creating " << mTerminals.count << " pseudoterminal(s) on the host side:");
 
-    for (int i = 0; i < mTerminals.count; ++i) {
-        const auto pty = lxcpp::openPty(true);
+    for (unsigned int i = 0; i < mTerminals.count; ++i) {
+        const auto pty = lxcpp::openPty(false);
         LOGD(pty.second << " has been created");
         mTerminals.PTYs.emplace_back(pty.first, pty.second);
     }

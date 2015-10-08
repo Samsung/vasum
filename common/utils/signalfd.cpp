@@ -35,9 +35,14 @@ namespace utils {
 SignalFD::SignalFD(ipc::epoll::EventPoll& eventPoll)
     :mEventPoll(eventPoll)
 {
-    ::sigset_t set = getSignalMask();
+    int error = ::sigemptyset(&mSet);
+    if (error == -1) {
+        const std::string msg = "Error in sigemptyset: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
 
-    mFD = ::signalfd(-1, &set, SFD_CLOEXEC);
+    mFD = ::signalfd(-1, &mSet, SFD_CLOEXEC);
     if (mFD == -1) {
         const std::string msg = "Error in signalfd: " + getSystemErrorMessage();
         LOGE(msg);
@@ -51,6 +56,20 @@ SignalFD::~SignalFD()
 {
     mEventPoll.removeFD(mFD);
     utils::close(mFD);
+
+    // Unblock the signals that have been blocked previously, but also eat
+    // them if they were pending. It seems that signals are delivered twice,
+    // independently for signalfd and async. If we don't eat them before
+    // unblocking they will be delivered immediately potentially doing harm.
+    for (const int sigNum : mBlockedSignals) {
+        waitForSignal(sigNum, 0);
+
+        // Yes, there is a race here between waitForSignal and signalUnlock, but if
+        // a signal is sent at this point it's not by us, signalFD is inactive. So
+        // if that is the case I'd expect someone to have set some handler already.
+
+        signalUnblock(sigNum);
+    }
 }
 
 int SignalFD::getFD() const
@@ -62,35 +81,30 @@ void SignalFD::setHandler(const int sigNum, const Callback&& callback)
 {
     Lock lock(mMutex);
 
-    ::sigset_t set = getSignalMask();
-
-    int error = ::signalfd(mFD, &set, SFD_CLOEXEC);
-    if (error != mFD) {
-        const std::string msg = "Error in signalfd: " + getSystemErrorMessage();
-        LOGE(msg);
-        throw UtilsException(msg);
-    }
-
-    mCallbacks.insert({sigNum, callback});
-}
-
-void SignalFD::setHandlerAndBlock(const int sigNum, const Callback&& callback)
-{
-    Lock lock(mMutex);
-
     bool isBlocked = isSignalBlocked(sigNum);
-
-    ::sigset_t set = getSignalMask();
     if(!isBlocked) {
         signalBlock(sigNum);
+        mBlockedSignals.push_back(sigNum);
     }
 
-    int error = ::signalfd(mFD, &set, SFD_CLOEXEC);
+    int error = ::sigaddset(&mSet, sigNum);
+    if (error == -1) {
+        const std::string msg = getSystemErrorMessage();
+        LOGE("Error in signalfd: " << msg);
+        if(!isBlocked) {
+            signalUnblock(sigNum);
+            mBlockedSignals.pop_back();
+        }
+        throw UtilsException("Error in signalfd: " + msg);
+    }
+
+    error = ::signalfd(mFD, &mSet, SFD_CLOEXEC);
     if (error != mFD) {
         const std::string msg = getSystemErrorMessage();
         LOGE("Error in signalfd: " << msg);
         if(!isBlocked) {
             signalUnblock(sigNum);
+            mBlockedSignals.pop_back();
         }
         throw UtilsException("Error in signalfd: " + msg);
     }
@@ -103,7 +117,7 @@ void SignalFD::handleInternal()
     signalfd_siginfo sigInfo;
     utils::read(mFD, &sigInfo, sizeof(sigInfo));
 
-    LOGD("Got signal: " << sigInfo.ssi_signo);
+    LOGT("Got signal: " << sigInfo.ssi_signo);
 
     {
         Lock lock(mMutex);

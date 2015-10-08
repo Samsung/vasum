@@ -87,7 +87,7 @@ void EventPoll::addFD(const int fd, const Events events, Callback&& callback)
 
 void EventPoll::modifyFD(const int fd, const Events events)
 {
-    // No need to lock and check mCallbacks map
+    // No need to lock as modify doesn't touch the mCallbacks map
     if (!modifyFDInternal(fd, events)) {
         const std::string msg = "Could not modify fd: " + std::to_string(fd);
         LOGE(msg);

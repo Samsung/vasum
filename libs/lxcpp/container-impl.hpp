@@ -68,6 +68,7 @@ public:
     // Other
     void attach(const std::vector<std::string>& argv,
                 const std::string& cwdInContainer);
+    void console();
 
     // Network interfaces setup/config
     /**

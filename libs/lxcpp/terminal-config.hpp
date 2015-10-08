@@ -55,10 +55,10 @@ struct TerminalConfig {
 };
 
 struct TerminalsConfig {
-    int count;
+    unsigned int count;
     std::vector<TerminalConfig> PTYs;
 
-    TerminalsConfig(const int count = 1)
+    TerminalsConfig(const unsigned int count = 1)
         : count(count)
     {}
 

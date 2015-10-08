@@ -75,6 +75,7 @@ public:
     // Other
     virtual void attach(const std::vector<std::string>& argv,
                         const std::string& cwdInContainer) = 0;
+    virtual void console() = 0;
 
     // Network interfaces setup/config
     virtual void addInterfaceConfig(const std::string& hostif,

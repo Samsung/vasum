@@ -34,6 +34,7 @@
 #include <mutex>
 #include <unordered_map>
 #include <memory>
+#include <vector>
 
 namespace utils {
 
@@ -55,21 +56,12 @@ public:
 
     /**
      * Add a callback for a specified signal.
-     * Doesn't block the signal.
+     * Blocks the async signal handler if it's not already blocked.
      *
      * @param sigNum number of the signal
      * @param callback handler callback
      */
     void setHandler(const int sigNum, const Callback&& callback);
-
-    /**
-     * Add a callback for a specified signal
-     * Blocks the asynchronous signal handling.
-     *
-     * @param sigNum number of the signal
-     * @param callback handler callback
-     */
-    void setHandlerAndBlock(const int sigNum, const Callback&& callback);
 
     /**
      * @return signal file descriptor
@@ -80,9 +72,11 @@ private:
     typedef std::unique_lock<std::mutex> Lock;
 
     int mFD;
+    ::sigset_t mSet;
     std::mutex mMutex;
     ipc::epoll::EventPoll& mEventPoll;
     std::unordered_map<int, Callback> mCallbacks;
+    std::vector<int> mBlockedSignals;
 
     void handleInternal();
 };

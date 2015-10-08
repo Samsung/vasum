@@ -49,24 +49,6 @@ void openpty(int *master, int *slave)
     }
 }
 
-void tcgetattr(const int fd, struct termios *termios_p)
-{
-    if (-1 == ::tcgetattr(fd, termios_p)) {
-        const std::string msg = "tcgetattr() failed: " + utils::getSystemErrorMessage();
-        LOGE(msg);
-        throw TerminalException(msg);
-    }
-}
-
-void tcsetattr(const int fd, const int optional_actions, const struct termios *termios_p)
-{
-    if (-1 == ::tcsetattr(fd, optional_actions, termios_p)) {
-        const std::string msg = "tcsetattr() failed: " + utils::getSystemErrorMessage();
-        LOGE(msg);
-        throw TerminalException(msg);
-    }
-}
-
 std::string ttyname_r(const int fd)
 {
     char ptsName[PATH_MAX];
@@ -133,6 +115,24 @@ bool isatty(int fd)
     const std::string msg = "isatty() failed: " + utils::getSystemErrorMessage();
     LOGE(msg);
     throw TerminalException(msg);
+}
+
+void tcgetattr(const int fd, struct termios *termios_p)
+{
+    if (-1 == ::tcgetattr(fd, termios_p)) {
+        const std::string msg = "tcgetattr() failed: " + utils::getSystemErrorMessage();
+        LOGE(msg);
+        throw TerminalException(msg);
+    }
+}
+
+void tcsetattr(const int fd, const int optional_actions, const struct termios *termios_p)
+{
+    if (-1 == ::tcsetattr(fd, optional_actions, termios_p)) {
+        const std::string msg = "tcsetattr() failed: " + utils::getSystemErrorMessage();
+        LOGE(msg);
+        throw TerminalException(msg);
+    }
 }
 
 void setupIOControlTTY(const int ttyFD)

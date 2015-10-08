@@ -84,8 +84,8 @@ Server::Server(const std::string& configPath)
       mZonesManager(mEventPoll, mConfigPath),
       mDispatchingThread(::pthread_self())
 {
-    mSignalFD.setHandlerAndBlock(SIGUSR1, std::bind(&Server::handleUpdate, this));
-    mSignalFD.setHandlerAndBlock(SIGINT, std::bind(&Server::handleStop, this));
+    mSignalFD.setHandler(SIGUSR1, std::bind(&Server::handleUpdate, this));
+    mSignalFD.setHandler(SIGINT, std::bind(&Server::handleStop, this));
     mSignalFD.setHandler(SIGTERM, std::bind(&Server::handleStop, this));
 }
 

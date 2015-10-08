@@ -79,8 +79,8 @@ BOOST_AUTO_TEST_CASE(BlockingSignalHandler)
 {
     ipc::epoll::EventPoll poll;
     SignalFD s(poll);
-    s.setHandlerAndBlock(SIGUSR1, [](const int) {});
-    s.setHandlerAndBlock(SIGINT, [](const int) {});
+    s.setHandler(SIGUSR1, [](const int) {});
+    s.setHandler(SIGINT, [](const int) {});
 
     ::raise(SIGINT);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT));

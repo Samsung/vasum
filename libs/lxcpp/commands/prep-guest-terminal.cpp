@@ -57,7 +57,6 @@ void PrepGuestTerminal::execute()
     int fd = utils::open(mTerminals.PTYs[0].ptsName,
                          O_RDWR | O_CLOEXEC | O_NOCTTY);
     setupIOControlTTY(fd);
-
 }
 
 

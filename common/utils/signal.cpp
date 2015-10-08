@@ -48,13 +48,13 @@ void setSignalMask(int how, const ::sigset_t& set)
 void changeSignal(int how, const int sigNum) {
     ::sigset_t set;
     if(-1 == ::sigemptyset(&set)) {
-        const std::string msg = "Error in sigfillset: " + getSystemErrorMessage();
+        const std::string msg = "Error in sigemptyset: " + getSystemErrorMessage();
         LOGE(msg);
         throw UtilsException(msg);
     }
 
     if(-1 ==::sigaddset(&set, sigNum)) {
-        const std::string msg = "Error in sigdelset: " + getSystemErrorMessage();
+        const std::string msg = "Error in sigaddset: " + getSystemErrorMessage();
         LOGE(msg);
         throw UtilsException(msg);
     }
@@ -74,6 +74,62 @@ void changeSignal(int how, const int sigNum) {
         throw UtilsException(msg);
     }
     return set;
+}
+
+bool isSignalPending(const int sigNum)
+{
+    ::sigset_t set;
+    if (::sigpending(&set) == -1) {
+        const std::string msg = "Error in sigpending: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+
+    int ret = ::sigismember(&set, sigNum);
+    if (ret == -1) {
+        const std::string msg = "Error in sigismember: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+
+    return ret;
+}
+
+bool waitForSignal(const int sigNum, int timeoutMs)
+{
+    int timeoutS = timeoutMs / 1000;
+    timeoutMs -= timeoutS * 1000;
+
+    struct ::timespec timeout = {
+        timeoutS,
+        timeoutMs * 1000000
+    };
+
+    ::sigset_t set;
+    if(-1 == ::sigemptyset(&set)) {
+        const std::string msg = "Error in sigemptyset: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+
+    if(-1 ==::sigaddset(&set, sigNum)) {
+        const std::string msg = "Error in sigaddset: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+
+    ::siginfo_t info;
+    if (::sigtimedwait(&set, &info, &timeout) == -1) {
+        if (errno == EAGAIN) {
+            return false;
+        }
+
+        const std::string msg = "Error in sigtimedwait: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+
+    return true;
 }
 
 bool isSignalBlocked(const int sigNum)
@@ -119,18 +175,36 @@ void signalUnblock(const int sigNum)
     changeSignal(SIG_UNBLOCK, sigNum);
 }
 
-void signalIgnore(const std::initializer_list<int>& signals)
+std::vector<std::pair<int, struct ::sigaction>> signalIgnore(const std::initializer_list<int>& signals)
 {
     struct ::sigaction act;
+    struct ::sigaction old;
     act.sa_handler = SIG_IGN;
+    std::vector<std::pair<int, struct ::sigaction>> oldAct;
 
     for(const int s: signals) {
-        if(-1 == ::sigaction(s, &act, nullptr)) {
+        if(-1 == ::sigaction(s, &act, &old)) {
             const std::string msg = "Error in sigaction: " + getSystemErrorMessage();
             LOGE(msg);
             throw UtilsException(msg);
         }
+        oldAct.emplace_back(s, old);
     }
+
+    return oldAct;
+}
+
+struct ::sigaction signalSet(const int sigNum, const struct ::sigaction *sigAct)
+{
+    struct ::sigaction old;
+
+    if(-1 == ::sigaction(sigNum, sigAct, &old)) {
+        const std::string msg = "Error in sigaction: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+
+    return old;
 }
 
 void sendSignal(const pid_t pid, const int sigNum)
@@ -145,8 +219,3 @@ void sendSignal(const pid_t pid, const int sigNum)
 }
 
 } // namespace utils
-
-
-
-
-

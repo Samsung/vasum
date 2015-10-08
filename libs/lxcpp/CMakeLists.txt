@@ -51,7 +51,7 @@ TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME}
     PRIVATE ATTACH_PATH="${LIBEXEC_DIR}/${ATTACH_CODENAME}"
 )
 
-ADD_DEPENDENCIES(${PROJECT_NAME} Common Logger)
+ADD_DEPENDENCIES(${PROJECT_NAME} Common Logger Config Ipc)
 
 ## Link libraries ##############################################################
 FIND_PACKAGE(Boost COMPONENTS system filesystem)
@@ -59,7 +59,7 @@ PKG_CHECK_MODULES(LXCPP_DEPS REQUIRED glib-2.0)
 
 INCLUDE_DIRECTORIES(${LIBS_FOLDER} ${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIRS} ${LXCPP_DEPS_INCLUDE_DIRS} ${JSON_C_INCLUDE_DIRS})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} Common ${pkgs_LDFLAGS} ${Boost_LIBRARIES} Logger Config util)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} Common ${pkgs_LDFLAGS} util ${Boost_LIBRARIES} Logger Config Ipc)
 
 ## Generate the pc file ########################################################
 CONFIGURE_FILE(${PC_FILE}.in ${CMAKE_CURRENT_BINARY_DIR}/${PC_FILE} @ONLY)
