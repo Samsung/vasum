@@ -34,7 +34,7 @@
 namespace lxcpp {
 
 Attach::Attach(const lxcpp::ContainerImpl& container,
-               const std::vector<const char*>& argv,
+               const std::vector<std::string>& argv,
                const uid_t uid,
                const gid_t gid,
                const std::string& ttyPath,

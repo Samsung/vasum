@@ -205,7 +205,7 @@ void ContainerImpl::reboot()
     throw NotImplementedException();
 }
 
-void ContainerImpl::attach(const std::vector<const char*>& argv,
+void ContainerImpl::attach(const std::vector<std::string>& argv,
                            const std::string& cwdInContainer)
 {
     Attach attach(*this,

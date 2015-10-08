@@ -70,8 +70,8 @@ int child(void* data)
         ::_exit(EXIT_FAILURE);
     }
 
-    // Run user's binary
-    ::execve(config.argv[0], const_cast<char *const*>(config.argv.data()), nullptr);
+    lxcpp::execve(config.argv);
+
     return EXIT_FAILURE;
 }
 

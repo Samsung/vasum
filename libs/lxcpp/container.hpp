@@ -71,7 +71,7 @@ public:
     virtual void reboot() = 0;
 
     // Other
-    virtual void attach(const std::vector<const char*>& argv,
+    virtual void attach(const std::vector<std::string>& argv,
                         const std::string& cwdInContainer) = 0;
 
     // Network interfaces setup/config

@@ -156,4 +156,20 @@ void unshare(const Namespace ns)
         throw ProcessSetupException(msg);
     }
 }
+
+void execve(const std::vector<std::string>& argv)
+{
+    // Prepare the arguments
+    std::vector<char const *> tmpArgv;
+    tmpArgv.reserve(argv.size() + 1);
+
+    for (auto const &str : argv) {
+        tmpArgv.push_back(str.c_str());
+    }
+    tmpArgv.push_back(nullptr);
+
+    // Run user's binary
+    ::execve(tmpArgv[0], const_cast<char *const*>(tmpArgv.data()), nullptr);
+}
+
 } // namespace lxcpp

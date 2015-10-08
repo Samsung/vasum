@@ -39,7 +39,7 @@ namespace lxcpp {
 struct AttachConfig {
 
     /// Arguments passed by user, argv[0] is the binary's path in container
-    std::vector<const char*> argv;
+    std::vector<std::string> argv;
 
     /// PID of the container's init process
     pid_t initPid;
@@ -73,7 +73,7 @@ struct AttachConfig {
 
     AttachConfig() = default;
 
-    AttachConfig(const std::vector<const char*>& argv,
+    AttachConfig(const std::vector<std::string>& argv,
                  const pid_t initPid,
                  const std::vector<Namespace>& namespaces,
                  const uid_t uid,
@@ -99,19 +99,17 @@ struct AttachConfig {
     CONFIG_REGISTER
     (
         //TODO: Uncomment and fix cstring serialization
-        // argv,
+        argv,
         initPid,
-        //TODO: Uncomment and fix Namespace serialization (or remove Namespace)
-        // namespaces,
+        namespaces,
         uid,
         gid,
         ttyFD,
         supplementaryGids,
         capsToKeep,
         workDirInContainer,
-        envToKeep
-        //TODO: Uncomment and fix std::pair serialization
-        // envToSet
+        envToKeep,
+        envToSet
     )
 };
 

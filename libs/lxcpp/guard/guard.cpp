@@ -38,16 +38,7 @@ namespace lxcpp {
 
 void startContainer(const ContainerConfig &cfg)
 {
-    std::vector<char const *> argv;
-    argv.reserve(cfg.mInit.size() + 1);
-    for (auto const & it : cfg.mInit) {
-        argv.push_back(it.c_str());
-    }
-    argv.push_back(nullptr);
-
-    LOGD("Executing container's init: " << argv[0]);
-    ::execve(argv[0], const_cast<char *const*>(argv.data()), NULL);
-    ::_exit(EXIT_FAILURE);
+    lxcpp::execve(cfg.mInit);
 }
 
 int startGuard(int channelFD)

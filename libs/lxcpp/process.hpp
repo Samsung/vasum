@@ -49,6 +49,8 @@ int waitpid(const pid_t pid);
 
 void unshare(const Namespace ns);
 
+void execve(const std::vector<std::string>& argv);
+
 } // namespace lxcpp
 
 #endif // LXCPP_PROCESS_HPP
