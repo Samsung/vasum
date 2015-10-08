@@ -59,7 +59,7 @@ public:
 
     virtual void setLogger(const logger::LogType type,
                            const logger::LogLevel level,
-                           const std::string &arg) = 0;
+                           const std::string &arg = "") = 0;
 
     virtual void setTerminalCount(const unsigned int count) = 0;
 

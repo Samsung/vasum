@@ -29,10 +29,29 @@
 #include "lxcpp/lxcpp.hpp"
 #include "lxcpp/exception.hpp"
 
+#include "utils/scoped-dir.hpp"
+
+#include <memory>
+
 namespace {
 
+const std::string TEST_DIR            = "/tmp/ut-zones";
+const std::string ROOT_DIR            = TEST_DIR + "/root";
+const std::string NON_EXISTANT_BINARY = TEST_DIR + "/nonexistantpath/bash";
+const std::string LOGGER_FILE         = TEST_DIR + "/loggerFile";
+
+const std::vector<std::string> COMMAND = {"/bin/bash",
+                                          "-c", "trap exit SIGTERM; while true; do sleep 0.1; done"
+                                         };
+
 struct Fixture {
-    Fixture() {}
+    utils::ScopedDir mTestDir;
+    utils::ScopedDir mRoot;
+
+    Fixture()
+        :mTestDir(TEST_DIR),
+         mRoot(ROOT_DIR)
+    {}
     ~Fixture() {}
 };
 
@@ -44,8 +63,60 @@ using namespace lxcpp;
 
 BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 {
-    auto c = createContainer("FirstTestContainer", "/");
+    auto c = createContainer("ConstructorDestructor", ROOT_DIR);
     delete c;
 }
+
+BOOST_AUTO_TEST_CASE(SetInit)
+{
+    auto c = std::unique_ptr<Container>(createContainer("SetInit", "/"));
+
+    BOOST_CHECK_THROW(c->setInit({""}), ConfigureException);
+    BOOST_CHECK_THROW(c->setInit({}), ConfigureException);
+    BOOST_CHECK_THROW(c->setInit({NON_EXISTANT_BINARY}), ConfigureException);
+
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+}
+
+BOOST_AUTO_TEST_CASE(SetLogger)
+{
+    auto c = std::unique_ptr<Container>(createContainer("SetLogger", ROOT_DIR));
+
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_NULL,
+                                      logger::LogLevel::DEBUG));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_JOURNALD,
+                                      logger::LogLevel::DEBUG));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_SYSLOG,
+                                      logger::LogLevel::DEBUG));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_STDERR,
+                                      logger::LogLevel::DEBUG));
+
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
+
+    BOOST_CHECK_THROW(c->setLogger(logger::LogType::LOG_FILE,
+                                   logger::LogLevel::DEBUG,
+                                   ""),
+                      BadArgument);
+
+    BOOST_CHECK_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                   logger::LogLevel::DEBUG,
+                                   ""),
+                      BadArgument);
+}
+
+// BOOST_AUTO_TEST_CASE(StartStop)
+// {
+//     auto c = std::unique_ptr<Container>(createContainer("StartStop", "/"));
+//     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+//     BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+//                                       logger::LogLevel::DEBUG,
+//                                       LOGGER_FILE));
+//     BOOST_CHECK_NO_THROW(c->start());
+// }
 
 BOOST_AUTO_TEST_SUITE_END()

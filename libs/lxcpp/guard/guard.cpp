@@ -60,7 +60,7 @@ int startGuard(int channelFD)
         setProcTitle(title);
     } catch (std::exception &e) {
         // Ignore, this is optional
-        LOGW("Failed to set the guard process title");
+        LOGW("Failed to set the guard process title: " << e.what());
     }
 
     // TODO: container preparation part 1
