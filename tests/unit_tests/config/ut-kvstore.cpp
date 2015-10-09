@@ -57,41 +57,6 @@ struct Fixture {
     }
 };
 
-class TestClass {
-public:
-    TestClass(int v): value(v) {}
-    TestClass(): value(0) {}
-    friend std::ostream& operator<< (std::ostream& out, const TestClass& cPoint);
-    friend std::istream& operator>> (std::istream& in, TestClass& cPoint);
-    friend bool operator== (const TestClass& lhs, const TestClass& rhs);
-    friend bool operator!= (const TestClass& lhs, const TestClass& rhs);
-
-private:
-    int value ;
-};
-
-bool operator==(const TestClass& lhs, const TestClass& rhs)
-{
-    return lhs.value == rhs.value;
-}
-
-bool operator!=(const TestClass& lhs, const TestClass& rhs)
-{
-    return lhs.value != rhs.value;
-}
-
-std::ostream& operator<< (std::ostream& out, const TestClass& tc)
-{
-    out << tc.value;;
-    return out;
-}
-
-std::istream& operator>> (std::istream& in, TestClass& tc)
-{
-    in >> tc.value;
-    return in;
-}
-
 } // namespace
 
 BOOST_FIXTURE_TEST_SUITE(KVStoreSuite, Fixture)
@@ -113,114 +78,77 @@ BOOST_AUTO_TEST_CASE(EscapedCharacters)
 {
     // '*' ?' '[' ']' are escaped
     // They shouldn't influence the internal implementation
-    std::string HARD_KEY = "[" + KEY;
-    BOOST_CHECK_NO_THROW(c.set(HARD_KEY, "A"));
-    BOOST_CHECK_NO_THROW(c.set(KEY, "B"));
-    BOOST_CHECK(c.exists(HARD_KEY));
-    BOOST_CHECK(c.exists(KEY));
-    BOOST_CHECK_NO_THROW(c.clear());
+    for (char sc: {'[', ']', '?', '*'}) {
+        std::string HARD_KEY = sc + KEY;
 
-    HARD_KEY = "]" + KEY;
-    BOOST_CHECK_NO_THROW(c.set(HARD_KEY, "A"));
-    BOOST_CHECK_NO_THROW(c.set(KEY, "B"));
-    BOOST_CHECK(c.exists(HARD_KEY));
-    BOOST_CHECK(c.exists(KEY));
-    BOOST_CHECK_NO_THROW(c.clear());
+        BOOST_CHECK_NO_THROW(c.set(HARD_KEY, "A"));
+        BOOST_CHECK_NO_THROW(c.set(KEY, "B"));
 
-    HARD_KEY = "?" + KEY;
-    BOOST_CHECK_NO_THROW(c.set(HARD_KEY, "A"));
-    BOOST_CHECK_NO_THROW(c.set(KEY, "B"));
-    BOOST_CHECK(c.exists(HARD_KEY));
-    BOOST_CHECK(c.exists(KEY));
-    BOOST_CHECK_NO_THROW(c.clear());
+        BOOST_CHECK(c.exists(HARD_KEY));
+        BOOST_CHECK(c.exists(KEY));
 
-    HARD_KEY = "*" + KEY;
-    BOOST_CHECK_NO_THROW(c.set(HARD_KEY, "A"));
-    BOOST_CHECK_NO_THROW(c.set(KEY, "B"));
-    BOOST_CHECK(c.exists(HARD_KEY));
-    BOOST_CHECK(c.exists(KEY));
+        BOOST_CHECK_NO_THROW(c.clear());
+    }
+}
+
+BOOST_AUTO_TEST_CASE(PrefixExists)
+{
+    // '*' ?' '[' ']' are escaped
+    // They shouldn't influence the internal implementation
+    for (char sc: {'[', ']', '?', '*'}) {
+        std::string HARD_KEY = sc + KEY;
+        std::string FIELD_HARD_KEY = HARD_KEY + ".field";
+
+        BOOST_CHECK_NO_THROW(c.set(FIELD_HARD_KEY, "C"));
+
+        BOOST_CHECK(!c.exists(KEY));
+        BOOST_CHECK(!c.exists(HARD_KEY));
+        BOOST_CHECK(c.exists(FIELD_HARD_KEY));
+
+        BOOST_CHECK(!c.prefixExists(KEY));
+        BOOST_CHECK(c.prefixExists(HARD_KEY));
+        BOOST_CHECK(c.prefixExists(FIELD_HARD_KEY));
+
+        BOOST_CHECK_NO_THROW(c.clear());
+    }
 }
 
 namespace {
-template<typename A, typename B>
-void testSingleValue(Fixture& f, const A& a, const B& b)
+void testSingleValue(Fixture& f, const std::string& a, const std::string& b)
 {
     // Set
     BOOST_CHECK_NO_THROW(f.c.set(KEY, a));
-    BOOST_CHECK_EQUAL(f.c.get<A>(KEY), a);
+    BOOST_CHECK_EQUAL(f.c.get(KEY), a);
 
     // Update
     BOOST_CHECK_NO_THROW(f.c.set(KEY, b));
-    BOOST_CHECK_EQUAL(f.c.get<B>(KEY), b);
+    BOOST_CHECK_EQUAL(f.c.get(KEY), b);
     BOOST_CHECK(f.c.exists(KEY));
 
     // Remove
     BOOST_CHECK_NO_THROW(f.c.remove(KEY));
     BOOST_CHECK(!f.c.exists(KEY));
-    BOOST_CHECK_THROW(f.c.get<B>(KEY), ConfigException);
+    BOOST_CHECK_THROW(f.c.get(KEY), ConfigException);
 }
 } // namespace
 
 
 BOOST_AUTO_TEST_CASE(SingleValue)
 {
-    testSingleValue<std::string, std::string>(*this, "A", "B");
-    testSingleValue<int, int>(*this, 1, 2);
-    testSingleValue<double, double>(*this, 1.1, 2.2);
-    testSingleValue<int, std::string>(*this, 2, "A");
-    testSingleValue<int64_t, int64_t>(*this, INT64_MAX, INT64_MAX - 2);
-    testSingleValue<TestClass, int>(*this, 11, 22);
-}
-
-namespace {
-template<typename T>
-void setVector(Fixture& f, const std::vector<T>& vec)
-{
-    std::vector<T> storedVec;
-    BOOST_CHECK_NO_THROW(f.c.set(KEY, vec));
-    BOOST_CHECK_NO_THROW(storedVec = f.c.get<std::vector<T>>(KEY))
-    BOOST_CHECK_EQUAL_COLLECTIONS(storedVec.begin(), storedVec.end(), vec.begin(), vec.end());
-}
-
-template<typename T>
-void testVectorOfValues(Fixture& f,
-                        const std::vector<T>& a,
-                        const std::vector<T>& b,
-                        const std::vector<T>& c)
-{
-    // Set
-    setVector(f, a);
-    setVector(f, b);
-    setVector(f, c);
-
-    // Remove
-    BOOST_CHECK_NO_THROW(f.c.remove(KEY));
-    BOOST_CHECK(!f.c.exists(KEY));
-    BOOST_CHECK(f.c.isEmpty());
-    BOOST_CHECK_THROW(f.c.get<std::vector<T> >(KEY), ConfigException);
-    BOOST_CHECK_THROW(f.c.get(KEY), ConfigException);
-}
-} // namespace
-
-BOOST_AUTO_TEST_CASE(VectorOfValues)
-{
-    testVectorOfValues<std::string>(*this, {"A", "B"}, {"A", "C"}, {"A", "B", "C"});
-    testVectorOfValues<int>(*this, {1, 2}, {1, 3}, {1, 2, 3});
-    testVectorOfValues<int64_t>(*this, {INT64_MAX, 2}, {1, 3}, {INT64_MAX, 2, INT64_MAX});
-    testVectorOfValues<double>(*this, {1.1, 2.2}, {1.1, 3.3}, {1.1, 2.2, 3.3});
-    testVectorOfValues<TestClass>(*this, {1, 2}, {1, 3}, {1, 2, 3});
+    testSingleValue(*this, "A", "B");
 }
 
 BOOST_AUTO_TEST_CASE(Clear)
 {
     BOOST_CHECK_NO_THROW(c.clear());
-    std::vector<std::string> vec = {"A", "B"};
-    BOOST_CHECK_NO_THROW(c.set(KEY, vec));
+    BOOST_CHECK_NO_THROW(c.set(KEY, "2"));
+    BOOST_CHECK_NO_THROW(c.set(KEY + ".0", "A"));
+    BOOST_CHECK_NO_THROW(c.set(KEY + ".1", "B"));
     BOOST_CHECK_NO_THROW(c.clear());
     BOOST_CHECK(c.isEmpty());
 
     BOOST_CHECK_NO_THROW(c.remove(KEY));
-    BOOST_CHECK_THROW(c.get<std::vector<std::string>>(KEY), ConfigException);
+    BOOST_CHECK_THROW(c.get(KEY), ConfigException);
     BOOST_CHECK_THROW(c.get(KEY), ConfigException);
 }
 
@@ -228,17 +156,17 @@ BOOST_AUTO_TEST_CASE(Transaction)
 {
     {
         KVStore::Transaction trans(c);
-        c.set<int>(KEY, 1);
+        c.set(KEY, "a");
         trans.commit();
     }
-    BOOST_CHECK_EQUAL(c.get<int>(KEY), 1);
+    BOOST_CHECK_EQUAL(c.get(KEY), "a");
 
     {
         KVStore::Transaction trans(c);
-        c.set<int>(KEY, 2);
+        c.set(KEY, "b");
         // no commit
     }
-    BOOST_CHECK_EQUAL(c.get<int>(KEY), 1);
+    BOOST_CHECK_EQUAL(c.get(KEY), "a");
 
     {
         KVStore::Transaction trans(c);
@@ -259,23 +187,23 @@ BOOST_AUTO_TEST_CASE(TransactionStacked)
         KVStore::Transaction transOuter(c);
         {
             KVStore::Transaction transInner(c);
-            c.set<int>(KEY, 1);
+            c.set(KEY, "a");
             // no inner commit
         }
         transOuter.commit();
     }
-    BOOST_CHECK_EQUAL(c.get<int>(KEY), 1);
+    BOOST_CHECK_EQUAL(c.get(KEY), "a");
 
     {
         KVStore::Transaction transOuter(c);
         {
             KVStore::Transaction transInner(c);
-            c.set<int>(KEY, 2);
+            c.set(KEY, "b");
             transInner.commit();
         }
         // no outer commit
     }
-    BOOST_CHECK_EQUAL(c.get<int>(KEY), 1);
+    BOOST_CHECK_EQUAL(c.get(KEY), "a");
 
     {
         KVStore::Transaction transOuter(c);
@@ -304,19 +232,6 @@ BOOST_AUTO_TEST_CASE(TransactionThreads)
     thread1.join();
     trans2Released.wait();
     thread2.join();
-}
-
-BOOST_AUTO_TEST_CASE(Key)
-{
-    BOOST_CHECK_EQUAL(key(), "");
-    BOOST_CHECK_EQUAL(key<>(), "");
-    BOOST_CHECK_EQUAL(key(""), "");
-    BOOST_CHECK_EQUAL(key("KEY"), "KEY");
-    BOOST_CHECK_EQUAL(key<>("KEY"), "KEY");
-    BOOST_CHECK_EQUAL(key("KEY", "A"), "KEY.A");
-    BOOST_CHECK_EQUAL(key("KEY", 1, 2.2), "KEY.1.2.2");
-    BOOST_CHECK_EQUAL(key("KEY", 1, "B"), "KEY.1.B");
-    BOOST_CHECK_EQUAL(key<'_'>("KEY", 1, 2.2), "KEY_1_2.2");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

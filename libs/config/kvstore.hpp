@@ -27,7 +27,6 @@
 
 #include "config/sqlite3/connection.hpp"
 #include "config/sqlite3/statement.hpp"
-#include "config/visit-fields.hpp"
 
 #include <algorithm>
 #include <initializer_list>
@@ -82,11 +81,18 @@ public:
     bool isEmpty();
 
     /**
-     * @param key string regexp of the stored values
+     * @param key string of the stored value
      *
      * @return Does this key exist in the database
      */
     bool exists(const std::string& key);
+
+    /**
+     * @param key string of the stored value
+     *
+     * @return Does a key starting with an argument exist in the database
+     */
+    bool prefixExists(const std::string& key);
 
     /**
      * Removes values corresponding to the passed key.
@@ -103,25 +109,15 @@ public:
      * @param key string key of the value
      * @param value value corresponding to the key
      */
-    template<typename T>
-    void set(const std::string& key, const T& value)
-    {
-        return setInternal(key, value);
-    }
+    void set(const std::string& key, const std::string& value);
 
     /**
      * Gets the value corresponding to the key.
-     * Uses stringstreams to parse.
      *
      * @param key string key of the value
-     * @tparam T = std::string desired type of the return value
      * @return value corresponding to the key
      */
-    template<typename T = std::string>
-    T get(const std::string& key)
-    {
-        return getInternal(key, static_cast<T*>(nullptr));
-    }
+    std::string get(const std::string& key);
 
     /**
      * Returns all stored keys.
@@ -135,39 +131,11 @@ private:
     size_t mTransactionDepth;
     bool mIsTransactionCommited;
 
-    void setInternal(const std::string& key, const std::string& value);
-    void setInternal(const std::string& key, const char* value);
-    void setInternal(const std::string& key, const std::initializer_list<std::string>& values);
-    void setInternal(const std::string& key, const std::vector<std::string>& values);
-    template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
-    void setInternal(const std::string& key, const T& value);
-    template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-    void setInternal(const std::string& key, const T& value);
-    template<typename T>
-    void setInternal(const std::string& key, const std::vector<T>& values);
-    template<typename T, std::size_t N>
-    void setInternal(const std::string& key, const std::array<T, N>& values);
-    template<typename ... T>
-    void setInternal(const std::string& key, const std::pair<T...>& values);
-
-    std::string getInternal(const std::string& key, std::string*);
-    char* getInternal(const std::string& key, char**);
-    std::vector<std::string> getInternal(const std::string& key, std::vector<std::string>*);
-    template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
-    T getInternal(const std::string& key, T*);
-    template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-    T getInternal(const std::string& key, T*);
-    template<typename T>
-    std::vector<T> getInternal(const std::string& key, std::vector<T>*);
-    template<typename T, std::size_t N>
-    std::array<T, N> getInternal(const std::string& key, std::array<T, N>*);
-    template<typename ... T>
-    std::pair<T...> getInternal(const std::string& key, std::pair<T...>*);
-
     std::string mPath;
     sqlite3::Connection mConn;
     std::unique_ptr<sqlite3::Statement> mGetValueStmt;
     std::unique_ptr<sqlite3::Statement> mGetKeyExistsStmt;
+    std::unique_ptr<sqlite3::Statement> mGetKeyPrefixExistsStmt;
     std::unique_ptr<sqlite3::Statement> mGetIsEmptyStmt;
     std::unique_ptr<sqlite3::Statement> mGetValueListStmt;
     std::unique_ptr<sqlite3::Statement> mSetValueStmt;
@@ -178,180 +146,6 @@ private:
     void prepareStatements();
     void createFunctions();
 };
-
-namespace {
-template<typename T>
-std::string toString(const T& value)
-{
-    std::ostringstream oss;
-    oss << value;
-    return oss.str();
-}
-
-template<typename T>
-T fromString(const std::string& strValue)
-{
-    std::istringstream iss(strValue);
-    T value;
-    iss >> value;
-    return value;
-}
-
-} // namespace
-
-template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type>
-void KVStore::setInternal(const std::string& key, const T& value)
-{
-    setInternal(key, toString(value));
-}
-
-template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type>
-void KVStore::setInternal(const std::string& key, const T& value)
-{
-    setInternal(key,
-                static_cast<const typename std::underlying_type<T>::type>(value));
-}
-
-template<typename T>
-void KVStore::setInternal(const std::string& key, const std::vector<T>& values)
-{
-    std::vector<std::string> strValues(values.size());
-
-    std::transform(values.begin(),
-                   values.end(),
-                   strValues.begin(),
-                   toString<T>);
-
-    setInternal(key, strValues);
-}
-
-template<typename T, std::size_t N>
-void KVStore::setInternal(const std::string& key, const std::array<T, N>& values)
-{
-    std::vector<std::string> strValues(N);
-
-    std::transform(values.begin(),
-                   values.end(),
-                   strValues.begin(),
-                   toString<T>);
-
-    setInternal(key, strValues);
-}
-
-struct SetTupleVisitor
-{
-    template<typename T>
-    static void visit(std::vector<std::string>::iterator& it, const T& value)
-    {
-        *it = toString<T>(value);
-        ++it;
-    }
-};
-
-template<typename ... T>
-void KVStore::setInternal(const std::string& key, const std::pair<T...>& values)
-{
-    std::vector<std::string> strValues(std::tuple_size<std::pair<T...>>::value);
-
-    SetTupleVisitor visitor;
-    visitFields(values, &visitor, strValues.begin());
-    setInternal(key, strValues);
-}
-
-template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type>
-T KVStore::getInternal(const std::string& key, T*)
-{
-    return fromString<T>(getInternal(key, static_cast<std::string*>(nullptr)));
-}
-
-template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type>
-T KVStore::getInternal(const std::string& key, T*)
-{
-    return static_cast<T>(getInternal(key,
-                                      static_cast<typename std::underlying_type<T>::type*>(nullptr)));
-}
-
-template<typename T, std::size_t N>
-std::array<T, N> KVStore::getInternal(const std::string& key, std::array<T, N>*)
-{
-    std::vector<std::string> strValues = getInternal(key, static_cast<std::vector<std::string>*>(nullptr));
-    std::array<T, N> values;
-
-    std::transform(strValues.begin(),
-                   strValues.end(),
-                   values.begin(),
-                   fromString<T>);
-
-    return values;
-}
-
-template<typename T>
-std::vector<T> KVStore::getInternal(const std::string& key, std::vector<T>*)
-{
-    std::vector<std::string> strValues = getInternal(key, static_cast<std::vector<std::string>*>(nullptr));
-    std::vector<T> values(strValues.size());
-
-    std::transform(strValues.begin(),
-                   strValues.end(),
-                   values.begin(),
-                   fromString<T>);
-
-    return values;
-}
-
-struct GetTupleVisitor
-{
-    template<typename T>
-    static void visit(std::vector<std::string>::iterator& it, T& value)
-    {
-        value = fromString<T>(*it);
-        ++it;
-    }
-};
-
-template<typename ... T>
-std::pair<T...> KVStore::getInternal(const std::string& key, std::pair<T...>*)
-{
-    std::vector<std::string> strValues = getInternal(key, static_cast<std::vector<std::string>*>(nullptr));
-    std::pair<T...> values;
-
-    GetTupleVisitor visitor;
-    visitFields(values, &visitor, strValues.begin());
-
-    return values;
-}
-
-/**
- * Concatenates all parameters into one std::string.
- * Uses '.' to connect the terms.
- * @param args components of the string
- * @tparam delim optional delimiter
- * @tparam Args any type implementing str
- * @return string created from he args
- */
-template<char delim = '.', typename Arg1, typename ... Args>
-std::string key(const Arg1& a1, const Args& ... args)
-{
-    std::string ret = toString(a1);
-    std::initializer_list<std::string> strings {toString(args)...};
-    for (const std::string& s : strings) {
-        ret += delim + s;
-    }
-
-    return ret;
-}
-
-/**
- * Function added for key function completeness.
- *
- * @tparam delim = '.' parameter not used, added for consistency
- * @return empty string
- */
-template<char delim = '.'>
-std::string key()
-{
-    return std::string();
-}
 
 } // namespace config
 

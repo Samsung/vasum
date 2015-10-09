@@ -150,6 +150,43 @@ KVStore::~KVStore()
     assert(mTransactionDepth == 0);
 }
 
+void KVStore::set(const std::string& key, const std::string& value)
+{
+    Transaction transaction(*this);
+    ScopedReset scopedReset(mSetValueStmt);
+
+    ::sqlite3_bind_text(mSetValueStmt->get(), 1, key.c_str(), AUTO_DETERM_SIZE, SQLITE_STATIC);
+    ::sqlite3_bind_text(mSetValueStmt->get(), 2, value.c_str(), AUTO_DETERM_SIZE, SQLITE_STATIC);
+
+
+    if (::sqlite3_step(mSetValueStmt->get()) != SQLITE_DONE) {
+        throw ConfigException("Error during stepping: " + mConn.getErrorMessage());
+    }
+    transaction.commit();
+}
+
+std::string KVStore::get(const std::string& key)
+{
+    Transaction transaction(*this);
+    ScopedReset scopedReset(mGetValueStmt);
+
+    ::sqlite3_bind_text(mGetValueStmt->get(), 1, key.c_str(), AUTO_DETERM_SIZE, SQLITE_TRANSIENT);
+
+    int ret = ::sqlite3_step(mGetValueStmt->get());
+    if (ret == SQLITE_DONE) {
+        throw NoKeyException("No value corresponding to the key: " + key + "@" + mPath);
+    }
+    if (ret != SQLITE_ROW) {
+        throw ConfigException("Error during stepping: " + mConn.getErrorMessage());
+    }
+
+    std::string value = reinterpret_cast<const char*>(
+            sqlite3_column_text(mGetValueStmt->get(), FIRST_COLUMN));
+
+    transaction.commit();
+    return value;
+}
+
 void KVStore::setupDb()
 {
     // called only from ctor, transaction is not needed
@@ -161,9 +198,9 @@ void KVStore::prepareStatements()
     mGetValueStmt.reset(
         new sqlite3::Statement(mConn, "SELECT value FROM data WHERE key = ? LIMIT 1"));
     mGetKeyExistsStmt.reset(
-        // following line left in comment to have example of any subkey matching
-        //new sqlite3::Statement(mConn, "SELECT 1 FROM data WHERE key = ?1 OR key GLOB escapeStr(?1) || '.*' LIMIT 1"));
-        new sqlite3::Statement(mConn, "SELECT 1 FROM data WHERE key = ?1  LIMIT 1"));
+        new sqlite3::Statement(mConn, "SELECT 1 FROM data WHERE key = ?1 LIMIT 1"));
+    mGetKeyPrefixExistsStmt.reset(
+        new sqlite3::Statement(mConn, "SELECT 1 FROM data WHERE key = ?1 OR key GLOB escapeStr(?1) || '.*' LIMIT 1"));
     mGetIsEmptyStmt.reset(
         new sqlite3::Statement(mConn, "SELECT 1 FROM data LIMIT 1"));
     mSetValueStmt.reset(
@@ -219,6 +256,22 @@ bool KVStore::exists(const std::string& key)
     return ret == SQLITE_ROW;
 }
 
+bool KVStore::prefixExists(const std::string& key)
+{
+    Transaction transaction(*this);
+    ScopedReset scopedReset(mGetKeyPrefixExistsStmt);
+
+    ::sqlite3_bind_text(mGetKeyPrefixExistsStmt->get(), 1, key.c_str(), AUTO_DETERM_SIZE, SQLITE_TRANSIENT);
+
+    int ret = ::sqlite3_step(mGetKeyPrefixExistsStmt->get());
+    if (ret != SQLITE_DONE && ret != SQLITE_ROW) {
+        throw ConfigException("Error during stepping: " + mConn.getErrorMessage());
+    }
+
+    transaction.commit();
+    return ret == SQLITE_ROW;
+}
+
 void KVStore::remove(const std::string& key)
 {
     Transaction transaction(*this);
@@ -230,122 +283,6 @@ void KVStore::remove(const std::string& key)
         throw ConfigException("Error during stepping: " + mConn.getErrorMessage());
     }
     transaction.commit();
-}
-
-void KVStore::setInternal(const std::string& key, const char* value)
-{
-    Transaction transaction(*this);
-    ScopedReset scopedReset(mSetValueStmt);
-
-    ::sqlite3_bind_text(mSetValueStmt->get(), 1, key.c_str(), AUTO_DETERM_SIZE, SQLITE_STATIC);
-    ::sqlite3_bind_text(mSetValueStmt->get(), 2, value, AUTO_DETERM_SIZE, SQLITE_STATIC);
-
-
-    if (::sqlite3_step(mSetValueStmt->get()) != SQLITE_DONE) {
-        throw ConfigException("Error during stepping: " + mConn.getErrorMessage());
-    }
-    transaction.commit();
-}
-
-void KVStore::setInternal(const std::string& key, const std::string& value)
-{
-    setInternal(key, value.c_str());
-}
-
-void KVStore::setInternal(const std::string& key, const std::initializer_list<std::string>& values)
-{
-    setInternal(key, std::vector<std::string>(values));
-}
-
-void KVStore::setInternal(const std::string& key, const std::vector<std::string>& values)
-{
-    if (values.size() > std::numeric_limits<unsigned int>::max()) {
-        throw ConfigException("Too many values to insert");
-    }
-
-    Transaction transaction(*this);
-
-    remove(key);
-
-    // Save vector's capacity
-    setInternal(key, values.size());
-
-    // Save vector's elements
-    for (unsigned int i = 0; i < values.size(); ++i) {
-        setInternal(config::key(key, std::to_string(i)),
-                    values[i]);
-    }
-    transaction.commit();
-}
-
-std::string KVStore::getInternal(const std::string& key, std::string*)
-{
-    Transaction transaction(*this);
-    ScopedReset scopedReset(mGetValueStmt);
-
-    ::sqlite3_bind_text(mGetValueStmt->get(), 1, key.c_str(), AUTO_DETERM_SIZE, SQLITE_TRANSIENT);
-
-    int ret = ::sqlite3_step(mGetValueStmt->get());
-    if (ret == SQLITE_DONE) {
-        throw ConfigException("No value corresponding to the key: " + key + "@" + mPath);
-    }
-    if (ret != SQLITE_ROW) {
-        throw ConfigException("Error during stepping: " + mConn.getErrorMessage());
-    }
-
-    std::string value = reinterpret_cast<const char*>(
-            sqlite3_column_text(mGetValueStmt->get(), FIRST_COLUMN));
-
-    transaction.commit();
-    return value;
-}
-
-char* KVStore::getInternal(const std::string& key, char**)
-{
-    Transaction transaction(*this);
-    ScopedReset scopedReset(mGetValueStmt);
-
-    ::sqlite3_bind_text(mGetValueStmt->get(), 1, key.c_str(), AUTO_DETERM_SIZE, SQLITE_TRANSIENT);
-
-    int ret = ::sqlite3_step(mGetValueStmt->get());
-    if (ret == SQLITE_DONE) {
-        throw ConfigException("No value corresponding to the key: " + key + "@" + mPath);
-    }
-    if (ret != SQLITE_ROW) {
-        throw ConfigException("Error during stepping: " + mConn.getErrorMessage());
-    }
-
-    const char* source = reinterpret_cast<const char*>(sqlite3_column_text(mGetValueStmt->get(), FIRST_COLUMN));
-
-    size_t length = std::strlen(source);
-    char* value = new char[length + 1];
-
-    std::strncpy(value, source, length);
-    value[length] = '\0';
-
-    transaction.commit();
-    return value;
-}
-
-std::vector<std::string> KVStore::getInternal(const std::string& key, std::vector<std::string>*)
-{
-    Transaction transaction(*this);
-
-    unsigned int valuesSize = get<unsigned int>(key);
-    std::vector<std::string> values(valuesSize);
-    if (valuesSize == 0) {
-        transaction.commit();
-        return values;
-    }
-
-    for (unsigned int i = 0; i < values.size(); ++i) {
-        values[i] = getInternal(config::key(key, std::to_string(i)),
-                                static_cast<std::string*>(nullptr));
-
-    }
-
-    transaction.commit();
-    return values;
 }
 
 std::vector<std::string> KVStore::getKeys()

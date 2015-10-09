@@ -39,6 +39,22 @@ struct ConfigException: public std::runtime_error {
     ConfigException(const std::string& error) : std::runtime_error(error) {}
 };
 
+/**
+ * No such key in the config error.
+ */
+struct NoKeyException: public ConfigException {
+
+    NoKeyException(const std::string& error) : ConfigException(error) {}
+};
+
+/**
+ * Container size does not match the config.
+ */
+struct ContainerSizeException: public ConfigException {
+
+    ContainerSizeException(const std::string& error): ConfigException(error) {}
+};
+
 } // namespace config
 
 #endif // COMMON_CONFIG_EXCEPTION_HPP

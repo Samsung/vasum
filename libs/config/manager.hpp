@@ -98,8 +98,8 @@
 #include "config/from-gvariant-visitor.hpp"
 #include "config/from-json-visitor.hpp"
 #include "config/from-kvstore-visitor.hpp"
+#include "config/from-kvstore-ignoring-visitor.hpp"
 #include "config/from-fdstore-visitor.hpp"
-#include "config/from-kvjson-visitor.hpp"
 #include "config/fs-utils.hpp"
 #include "config/is-union.hpp"
 
@@ -260,8 +260,10 @@ void loadFromKVStoreWithJson(const std::string& kvfile,
 
     KVStore store(kvfile);
     KVStore::Transaction transaction(store);
-    FromKVJsonVisitor visitor(store, json, kvConfigName);
-    config.accept(visitor);
+    FromJsonVisitor fromJsonVisitor(json);
+    FromKVStoreIgnoringVisitor fromKVStoreVisitor(store, kvConfigName);
+    config.accept(fromJsonVisitor);
+    config.accept(fromKVStoreVisitor);
     transaction.commit();
 }
 

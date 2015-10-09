@@ -29,8 +29,6 @@
 #include "utils/scoped-dir.hpp"
 #include "config/manager.hpp"
 
-#include "config/from-kvjson-visitor.hpp"
-
 namespace {
 
 using namespace utils;
@@ -70,12 +68,12 @@ void checkJsonConfig(const TestConfig& cfg, const std::string& json)
 void checkKVConfig(const TestConfig& cfg, const std::string& db)
 {
     KVStore store(db);
-    BOOST_CHECK_EQUAL(store.get<int>("conf.intVal"), cfg.intVal);
-    BOOST_CHECK_EQUAL(store.get<int64_t>("conf.int64Val"), cfg.int64Val);
-    BOOST_CHECK_EQUAL(store.get<bool>("conf.boolVal"), cfg.boolVal);
-    BOOST_CHECK_EQUAL(store.get<std::string>("conf.stringVal"), cfg.stringVal);
-    BOOST_CHECK_EQUAL(store.get<int>("conf.intVector"), cfg.intVector.size());
-    BOOST_CHECK_EQUAL(store.get<int>("conf.subObj.intVal"), cfg.subObj.intVal);
+    BOOST_CHECK_EQUAL(store.get("conf.intVal"), std::to_string(cfg.intVal));
+    BOOST_CHECK_EQUAL(store.get("conf.int64Val"), std::to_string(cfg.int64Val));
+    BOOST_CHECK_EQUAL(store.get("conf.boolVal"), std::to_string(cfg.boolVal));
+    BOOST_CHECK_EQUAL(store.get("conf.stringVal"), cfg.stringVal);
+    BOOST_CHECK_EQUAL(store.get("conf.intVector"), std::to_string(cfg.intVector.size()));
+    BOOST_CHECK_EQUAL(store.get("conf.subObj.intVal"), std::to_string(cfg.subObj.intVal));
 }
 
 BOOST_AUTO_TEST_CASE(ReadConfigDefaults)

@@ -27,6 +27,7 @@
 
 #include "config/is-visitable.hpp"
 #include "config/kvstore.hpp"
+#include "config/kvstore-visitor-utils.hpp"
 
 namespace config {
 
@@ -57,10 +58,12 @@ private:
     {
     }
 
-    template<typename T, typename std::enable_if<!isVisitable<T>::value, int>::type = 0>
+    template<typename T,
+             typename std::enable_if<!isVisitable<T>::value
+                                  && !std::is_enum<T>::value, int>::type = 0>
     void setInternal(const std::string& name, const T& value)
     {
-        mStore.set(name, value);
+        mStore.set(name, toString(value));
     }
 
     template<typename T, typename std::enable_if<isVisitable<T>::value, int>::type = 0>
@@ -70,14 +73,59 @@ private:
         value.accept(visitor);
     }
 
-    template<typename T, typename std::enable_if<isVisitable<T>::value, int>::type = 0>
+    template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+    void setInternal(const std::string& name, const T& value)
+    {
+        setInternal(name, static_cast<const typename std::underlying_type<T>::type>(value));
+    }
+
+    template <typename I>
+    void setRangeInternal(const std::string& name,
+                          const I& begin,
+                          const I& end,
+                          const size_t size) {
+        if (size > std::numeric_limits<unsigned int>::max()) {
+            throw ConfigException("Too many values to insert");
+        }
+
+        KVStore::Transaction transaction(mStore);
+
+        mStore.remove(name);
+        setInternal(name, size);
+        size_t i = 0;
+        for (auto it = begin; it != end; ++it) {
+            const std::string k = key(name, std::to_string(i));
+            setInternal(k, *it);
+            ++i;
+        }
+        transaction.commit();
+    }
+
+    template<typename T>
     void setInternal(const std::string& name, const std::vector<T>& values)
     {
-        mStore.remove(name);
-        mStore.set(name, values.size());
-        for (size_t i = 0; i < values.size(); ++i) {
-            setInternal(key(name, std::to_string(i)), values[i]);
-        }
+        setRangeInternal(name, values.begin(), values.end(), values.size());
+    }
+
+    template<typename T, std::size_t N>
+    void setInternal(const std::string& name, const std::array<T, N>& values) {
+        setRangeInternal(name, values.begin(), values.end(), N);
+    }
+
+    template<typename T>
+    void setInternal(const std::string& name, const std::initializer_list<T>& values)
+    {
+        setRangeInternal(name, values.begin(), values.end(), values.size());
+    }
+
+    template<typename ... T>
+    void setInternal(const std::string& key, const std::pair<T...>& values)
+    {
+        std::vector<std::string> strValues(std::tuple_size<std::pair<T...>>::value);
+
+        SetTupleVisitor visitor;
+        visitFields(values, &visitor, strValues.begin());
+        setInternal(key, strValues);
     }
 };
 

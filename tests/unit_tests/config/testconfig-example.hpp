@@ -93,7 +93,6 @@ struct TestConfig {
     std::uint32_t uint32Val;
     std::uint64_t uint64Val;
     std::string stringVal;
-    char* cstringVal;
     double doubleVal;
     bool boolVal;
     TestEnum enumVal;
@@ -121,7 +120,6 @@ struct TestConfig {
         uint32Val,
         uint64Val,
         stringVal,
-        cstringVal,
         doubleVal,
         boolVal,
         enumVal,
@@ -167,7 +165,6 @@ const std::string jsonTestString =
     "\"uint32Val\": 123456, "
     "\"uint64Val\": 1234567890123456789, "
     "\"stringVal\": \"blah\", "
-    "\"cstringVal\": \"blah\", "
     "\"doubleVal\": -1.234000, "
     "\"boolVal\": true, "
     "\"enumVal\": 12, "
@@ -194,15 +191,15 @@ const std::string jsonEmptyTestString =
     "\"uint32Val\": 0, "
     "\"uint64Val\": 0, "
     "\"stringVal\": \"\", "
-    "\"cstringVal\": \"\", "
+    "\"doubleVal\": 0.0, "
     "\"boolVal\": false, "
     "\"enumVal\": 0, "
     "\"emptyIntVector\": [ ], "
     "\"intVector\": [ ], "
     "\"stringVector\": [ ], "
     "\"doubleVector\": [ ], "
-    "\"intArray\": [ ], "
-    "\"intIntPair\": [ ], "
+    "\"intArray\": [ 0, 0 ], "
+    "\"intIntPair\": [ 0, 0 ], "
     "\"subObj\": { \"intVal\": 0, \"intVector\": [ ], \"subSubObj\": { \"intVal\": 0 } }, "
     "\"subVector\": [ ], "
     "\"union1\": { \"type\": \"int\", \"value\": 0 }, "

@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Jan Olszak (j.olszak@samsung.com)
+ *  Contact: Pawel Kubik (p.kubik@samsung.com)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,72 +18,32 @@
 
 /**
  * @file
- * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Visitor for loading from KVStore
+ * @author  Pawel Kubik (p.kubik@samsung.com)
+ * @brief   Default visitor for loading from KVStore
  */
 
 #ifndef COMMON_CONFIG_FROM_KVSTORE_VISITOR_HPP
 #define COMMON_CONFIG_FROM_KVSTORE_VISITOR_HPP
 
-#include "config/is-visitable.hpp"
-#include "config/kvstore.hpp"
+#include "config/from-kvstore-visitor-base.hpp"
+
 
 namespace config {
 
-class FromKVStoreVisitor {
+/**
+ * Default KVStore visitor.
+ */
+class FromKVStoreVisitor : public FromKVStoreVisitorBase<FromKVStoreVisitor> {
 public:
     FromKVStoreVisitor(KVStore& store, const std::string& prefix)
-        : mStore(store),
-          mKeyPrefix(prefix)
+        : FromKVStoreVisitorBase<FromKVStoreVisitor>(store, prefix)
     {
     }
 
-    FromKVStoreVisitor& operator=(const FromKVStoreVisitor&) = delete;
-
-    template<typename T>
-    void visit(const std::string& name, T& value)
+    FromKVStoreVisitor(const FromKVStoreVisitorBase<FromKVStoreVisitor>& visitor,
+                       const std::string& prefix)
+        : FromKVStoreVisitorBase<FromKVStoreVisitor>(visitor, prefix)
     {
-        getInternal(key(mKeyPrefix, name), value);
-    }
-
-private:
-    KVStore& mStore;
-    std::string mKeyPrefix;
-
-    FromKVStoreVisitor(const FromKVStoreVisitor& visitor, const std::string& prefix)
-        : mStore(visitor.mStore),
-          mKeyPrefix(prefix)
-    {
-    }
-
-    template<typename T, typename std::enable_if<!isVisitable<T>::value, int>::type = 0>
-    void getInternal(const std::string& name, T& value)
-    {
-        value = mStore.get<T>(name);
-    }
-
-    template<typename T, typename std::enable_if<isVisitable<T>::value, int>::type = 0>
-    void getInternal(const std::string& name, T& value)
-    {
-        FromKVStoreVisitor visitor(*this, name);
-        value.accept(visitor);
-    }
-
-    template<typename T, typename std::enable_if<isVisitable<T>::value, int>::type = 0>
-    void getInternal(const std::string& name, std::vector<T>& values)
-    {
-        values.clear();
-
-        size_t vectorSize = mStore.get<size_t>(name);
-        if (vectorSize == 0) {
-            return;
-        }
-
-        values.resize(vectorSize);
-        for (size_t i = 0; i < vectorSize; ++i) {
-            const std::string k = key(name, std::to_string(i));
-            getInternal(k, values[i]);
-        }
     }
 };
 
