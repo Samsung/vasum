@@ -31,14 +31,14 @@ namespace utils {
 
 enum class Color : unsigned int {
     DEFAULT     = 0,
-    BLACK       = 90,
-    RED         = 91,
-    GREEN       = 92,
-    YELLOW      = 93,
-    BLUE        = 94,
-    MAGENTA     = 95,
-    CYAN        = 96,
-    WHITE       = 97
+    BLACK       = 30,
+    RED         = 31,
+    GREEN       = 32,
+    YELLOW      = 33,
+    BLUE        = 34,
+    MAGENTA     = 35,
+    CYAN        = 36,
+    WHITE       = 37
 };
 
 enum class Attributes : unsigned int {
