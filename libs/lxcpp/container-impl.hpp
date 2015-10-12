@@ -56,6 +56,7 @@ public:
     void setTerminalCount(const unsigned int count);
 
     const std::vector<Namespace>& getNamespaces() const;
+    void setNamespaces(const int namespaces);
 
     // Execution actions
     void start();

@@ -26,6 +26,7 @@
 
 #include "lxcpp/network-config.hpp"
 #include "lxcpp/logger-config.hpp"
+
 #include <sys/types.h>
 
 #include <string>
@@ -62,6 +63,7 @@ public:
                            const std::string &arg = "") = 0;
 
     virtual void setTerminalCount(const unsigned int count) = 0;
+    virtual void setNamespaces(const int namespaces) = 0;
 
     // Execution actions
     virtual void start() = 0;

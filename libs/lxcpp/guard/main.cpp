@@ -35,8 +35,6 @@ int main(int argc, char *argv[])
         ::_exit(EXIT_FAILURE);
     }
 
-    int channelFD = std::stoi(argv[1]);
-
     // NOTE: this might not be required now, but I leave it here not to forget.
     // We need to investigate this with vasum and think about possibility of
     // poorly written software that leaks file descriptors and might use LXCPP.
@@ -48,5 +46,12 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    return lxcpp::startGuard(channelFD);
+    try {
+        int fd = std::stoi(argv[1]);
+        lxcpp::Guard guard(fd);
+        return guard.execute();
+    } catch(std::exception& e) {
+        // LOGE("Unexpected: " << utils::getTypeName(e) << ": " << e.what());
+        return EXIT_FAILURE;
+    }
 }

@@ -28,11 +28,20 @@
 #include "lxcpp/container-config.hpp"
 #include "utils/channel.hpp"
 
+
 namespace lxcpp {
 
+class Guard {
+public:
+    Guard(const int channelFD);
+    ~Guard();
 
-int startGuard(int channelFD);
+    int execute();
 
+private:
+    utils::Channel mChannel;
+    ContainerConfig mConfig;
+};
 
 } // namespace lxcpp
 

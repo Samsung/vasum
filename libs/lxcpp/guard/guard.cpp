@@ -32,64 +32,71 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-
 namespace lxcpp {
 
+namespace {
 
-void startContainer(const ContainerConfig &cfg)
+int startContainer(void* data)
 {
-    lxcpp::execve(cfg.mInit);
+    ContainerConfig& config = *static_cast<ContainerConfig*>(data);
+
+    // TODO: container preparation part 2
+
+    PrepGuestTerminal terminals(config.mTerminals);
+    terminals.execute();
+
+    lxcpp::execve(config.mInit);
+
+    return EXIT_FAILURE;
 }
 
-int startGuard(int channelFD)
+} // namespace
+
+
+Guard::Guard(const int channelFD)
+    : mChannel(channelFD)
 {
-    ContainerConfig cfg;
-    utils::Channel channel(channelFD);
-    channel.setCloseOnExec(true);
-    config::loadFromFD(channel.getFD(), cfg);
+    mChannel.setCloseOnExec(true);
+    config::loadFromFD(mChannel.getFD(), mConfig);
 
-    logger::setupLogger(cfg.mLogger.getType(),
-                        cfg.mLogger.getLevel(),
-                        cfg.mLogger.getArg());
+    logger::setupLogger(mConfig.mLogger.getType(),
+                        mConfig.mLogger.getLevel(),
+                        mConfig.mLogger.getArg());
 
-    LOGD("Guard started, config & logging restored");
+    LOGD("Config & logging restored");
 
     try {
         LOGD("Setting the guard process title");
-        const std::string title = "[LXCPP] " + cfg.mName + " " + cfg.mRootPath;
+        const std::string title = "[LXCPP] " + mConfig.mName + " " + mConfig.mRootPath;
         setProcTitle(title);
     } catch (std::exception &e) {
         // Ignore, this is optional
         LOGW("Failed to set the guard process title: " << e.what());
     }
+}
 
+Guard::~Guard()
+{
+}
+
+int Guard::execute()
+{
     // TODO: container preparation part 1
 
-    // TODO: switch to clone
-    LOGD("Forking container's init process");
-    pid_t pid = lxcpp::fork();
+    const pid_t initPid = lxcpp::clone(startContainer,
+                                       &mConfig,
+                                       mConfig.mNamespaces);
 
-    if (pid == 0) {
-        // TODO: container preparation part 2
+    mConfig.mGuardPid = ::getpid();
+    mConfig.mInitPid = initPid;
 
-        PrepGuestTerminal terminals(cfg.mTerminals);
-        terminals.execute();
+    mChannel.write(mConfig.mGuardPid);
+    mChannel.write(mConfig.mInitPid);
+    mChannel.shutdown();
 
-        startContainer(cfg);
-        ::_exit(EXIT_FAILURE);
-    }
-
-    cfg.mGuardPid = ::getpid();
-    cfg.mInitPid = pid;
-
-    channel.write(cfg.mGuardPid);
-    channel.write(cfg.mInitPid);
-    channel.shutdown();
-
-    int status = lxcpp::waitpid(pid);
+    int status = lxcpp::waitpid(initPid);
     LOGD("Init exited with status: " << status);
     return status;
 }
-
 
 } // namespace lxcpp

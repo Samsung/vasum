@@ -109,7 +109,15 @@ struct ContainerConfig {
      */
     TerminalsConfig mTerminals;
 
-    ContainerConfig() : mGuardPid(-1), mInitPid(-1) {}
+    /**
+     * Namespace types used to create the container
+     *
+     * Set: setNamespaces()
+     * Get: none
+     */
+    int mNamespaces;
+
+    ContainerConfig() : mGuardPid(-1), mInitPid(-1), mNamespaces(0) {}
 
     CONFIG_REGISTER
     (
@@ -119,7 +127,8 @@ struct ContainerConfig {
         mInitPid,
         mInit,
         mLogger,
-        mTerminals
+        mTerminals,
+        mNamespaces
     )
 };
 

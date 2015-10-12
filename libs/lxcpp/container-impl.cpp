@@ -25,7 +25,6 @@
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"
 #include "lxcpp/filesystem.hpp"
-#include "lxcpp/namespace.hpp"
 #include "lxcpp/capability.hpp"
 #include "lxcpp/commands/attach.hpp"
 #include "lxcpp/commands/start.hpp"
@@ -167,6 +166,11 @@ void ContainerImpl::setTerminalCount(const unsigned int count)
     }
 
     mConfig.mTerminals.count = count;
+}
+
+void ContainerImpl::setNamespaces(const int namespaces)
+{
+    mConfig.mNamespaces = namespaces;
 }
 
 void ContainerImpl::start()
