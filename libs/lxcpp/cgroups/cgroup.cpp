@@ -24,6 +24,7 @@
 #include "lxcpp/cgroups/cgroup.hpp"
 #include "lxcpp/exception.hpp"
 #include "utils/fs.hpp"
+#include "utils/text.hpp"
 #include "logger/logger.hpp"
 
 namespace fs = boost::filesystem;
@@ -31,24 +32,28 @@ namespace fs = boost::filesystem;
 namespace lxcpp {
 
 namespace {
-std::string getSubsysName(const std::string& s) {
+std::string getSubsysName(const std::string& s)
+{
     auto p = s.find(':');
     if (p == std::string::npos) {
-        const std::string msg = "wgrong cgroup format";
+        const std::string msg = "wrong subsys format " + s;
         LOGE(msg);
         throw CGroupException(msg);
     }
     return s.substr(0, p);
 }
-std::string getCGroupName(const std::string& s) {
+
+std::string getCGroupName(const std::string& s)
+{
     auto p = s.find(':');
     if (p == std::string::npos) {
-        const std::string msg = "wgrong cgroup format";
+        const std::string msg = "wrong cgroup format " + s;
         LOGE(msg);
         throw CGroupException(msg);
     }
     return s.substr(p + 1);
 }
+
 } // namespace
 
 CGroup::CGroup(const std::string& subsysAndCgroup) :
@@ -72,25 +77,85 @@ void CGroup::create()
 void CGroup::destroy()
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName;
-    fs::remove_all(path);
+    //remove_all is not good for cgroup filesystem
+    fs::remove(path);
+}
+
+void CGroup::setCommonValue(const std::string& param, const std::string& value)
+{
+    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / ("cgroup." + param);
+    if (!utils::saveFileContent(path.string(), value)) {
+        const std::string msg = "Invalid param " + param;
+        LOGE(msg);
+        throw CGroupException(msg);
+    }
+}
+
+std::string CGroup::getCommonValue(const std::string& param) const
+{
+    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / ("cgroup." + param);
+    return utils::readFileStream(path.string());
 }
 
 void CGroup::setValue(const std::string& param, const std::string& value)
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / (mSubsys.getName() + "." + param);
-    utils::saveFileContent(path.string(), value);
+    if (!utils::saveFileContent(path.string(), value)) {
+        const std::string msg = "Invalid param " + param;
+        LOGE(msg);
+        throw CGroupException(msg);
+    }
 }
 
 std::string CGroup::getValue(const std::string& param) const
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / (mSubsys.getName() + "." + param);
-    return utils::readFileContent(path.string());
+    return utils::readFileStream(path.string());
 }
 
-void CGroup::assignProcess(pid_t pid)
+void CGroup::assignGroup(pid_t pid)
+{
+    setCommonValue("procs", std::to_string(pid));
+}
+
+void CGroup::assignPid(pid_t pid)
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / "tasks";
     utils::saveFileContent(path.string(),  std::to_string(pid));
+}
+
+std::vector<pid_t> CGroup::getPids() const
+{
+    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / "tasks";
+    std::ifstream fileStream(path.string());
+    if (!fileStream.good()) {
+        const std::string msg = "Failed to open " + path.string();
+        LOGE(msg);
+        throw CGroupException(msg);
+    }
+
+    std::vector<pid_t> pids;
+    while (fileStream.good()) {
+        int pid;
+        fileStream >> pid;
+        pids.push_back(pid);
+    }
+
+    return pids;
+}
+
+CGroup CGroup::getCGroup(const std::string& subsys, pid_t pid)
+{
+    std::vector<std::string> cgroups = Subsystem::getCGroups(pid);
+    for (const auto& i : cgroups) {
+        if (utils::beginsWith(i, subsys + ":")) {
+            return CGroup(i);
+        }
+    }
+
+    const std::string msg = "cgroup not found for pid " + std::to_string(pid);
+    LOGE(msg);
+    throw CGroupException(msg);
 }
 
 } //namespace lxcpp

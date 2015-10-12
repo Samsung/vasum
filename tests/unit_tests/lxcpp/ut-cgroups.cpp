@@ -25,7 +25,9 @@
 #include "ut.hpp"
 #include "logger/logger.hpp"
 
-#include "lxcpp/cgroups/subsystem.hpp"
+#include "lxcpp/cgroups/devices.hpp"
+#include "lxcpp/exception.hpp"
+#include "utils/text.hpp"
 
 namespace {
 
@@ -45,10 +47,10 @@ BOOST_AUTO_TEST_CASE(GetAvailable)
 {
     std::vector<std::string> subs;
     BOOST_CHECK_NO_THROW(subs = Subsystem::availableSubsystems());
-    BOOST_CHECK(subs.size() > 0);
+    BOOST_CHECK_MESSAGE(subs.size() > 0, "Control groups not supported");
     for (auto n : subs){
         Subsystem s(n);
-        LOGD(s.getName() << ": " << (s.isAttached()?s.getMountPoint():"[not attached]"));
+        LOGD(s.getName() << ": " << (s.isAttached() ? s.getMountPoint() : "[not attached]"));
     }
 }
 
@@ -59,24 +61,66 @@ BOOST_AUTO_TEST_CASE(GetCGroupsByPid)
     BOOST_CHECK(cg.size() > 0);
 }
 
+BOOST_AUTO_TEST_CASE(GetPidsByCGroup)
+{
+    CGroup cg = CGroup::getCGroup("memory", ::getpid());
+    std::vector<pid_t> pids;
+    BOOST_CHECK_NO_THROW(pids = cg.getPids());
+    BOOST_CHECK(pids.size() > 0);
+}
+
 BOOST_AUTO_TEST_CASE(SubsysAttach)
 {
     Subsystem sub("freezer");
-    BOOST_CHECK_MESSAGE(sub.getName() == "freezer", "freezer not equal");
     BOOST_CHECK_MESSAGE(sub.isAvailable(), "freezer not found");
 
     if (!sub.isAvailable()) return ;
 
-
     if (sub.isAttached()) {
         std::string mp = sub.getMountPoint();
         BOOST_CHECK_NO_THROW(Subsystem::detach(mp));
+        BOOST_CHECK(Subsystem(sub.getName()).isAttached()==false);
         BOOST_CHECK_NO_THROW(Subsystem::attach(mp, {sub.getName()}));
+        BOOST_CHECK(Subsystem(sub.getName()).isAttached()==true);
     }
     else {
         std::string mp = "/sys/fs/cgroup/" + sub.getName();
         BOOST_CHECK_NO_THROW(Subsystem::attach(mp, {sub.getName()}));
+        BOOST_CHECK(Subsystem(sub.getName()).isAttached()==true);
         BOOST_CHECK_NO_THROW(Subsystem::detach(mp));
+        BOOST_CHECK(Subsystem(sub.getName()).isAttached()==false);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(ControlGroupParams)
+{
+    CGroup memg("memory:/ut-params");
+    BOOST_CHECK(memg.exists() == false);
+    BOOST_CHECK_NO_THROW(memg.create());
+    BOOST_CHECK(memg.exists() == true);
+
+    if (!memg.exists()) return ;
+
+    memg.assignPid(::getpid());
+    memg.setValue("limit_in_bytes", "10k");
+    memg.setValue("soft_limit_in_bytes", "10k");
+    BOOST_CHECK_THROW(memg.setValue("non-existing-name", "xxx"), CGroupException);
+
+    LOGD("limit_in_bytes: " << memg.getValue("limit_in_bytes"));
+    LOGD("soft_limit_in_bytes: " << memg.getValue("soft_limit_in_bytes"));
+    LOGD("max_usage_in_bytes: " << memg.getValue("max_usage_in_bytes"));
+
+    CGroup("memory:/").assignPid(::getpid());
+    BOOST_CHECK_NO_THROW(memg.destroy());
+}
+
+BOOST_AUTO_TEST_CASE(DevicesParams)
+{
+    DevicesCGroup devcg("/");
+    std::vector<DevicePermission> list = devcg.list();
+    for (const auto& i : list) {
+        LOGD(std::string("perm = ") + i.type + " " +
+             std::to_string(i.major) + ":" + std::to_string(i.minor) + " " + i.permission);
     }
 }
 

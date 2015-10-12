@@ -22,7 +22,6 @@
  */
 
 #include "utils/text.hpp"
-#include <sstream>
 
 namespace utils {
 namespace {
@@ -39,18 +38,6 @@ std::string toHexString(const void *data, unsigned len)
         s[2 * i + 1] = hexmap[d[i] & 0x0F];
     }
     return s;
-}
-
-std::string join(const std::vector<std::string>& vec, const char *delim)
-{
-    std::stringstream res;
-    for (const auto& s : vec) {
-        if (res.tellp() > 0) {
-            res << delim;
-        }
-        res << s;
-    }
-    return res.str();
 }
 
 std::vector<std::string> split(const std::string& str, const std::string& delim)

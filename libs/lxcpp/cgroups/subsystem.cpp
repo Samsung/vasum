@@ -45,7 +45,6 @@ Subsystem::Subsystem(const std::string& name) : mName(name)
         throw CGroupException(msg);
     }
 
-    std::vector<std::string> av = availableSubsystems();
     //find mount point for a name
     std::ifstream fileStream("/proc/mounts");
     if (!fileStream.good()) {

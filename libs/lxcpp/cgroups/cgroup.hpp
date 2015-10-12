@@ -65,6 +65,18 @@ public:
     void destroy();
 
     /**
+     * Set common 'cgroup' paramter
+     * Equivalent of: echo value > mSubsys_path/mName/cgroup.param
+     */
+    void setCommonValue(const std::string& param, const std::string& value);
+
+    /**
+     * Get common 'cgroup' paramter
+     * Equivalent of: cat mSubsys_path/mName/cgroup.param
+     */
+    std::string getCommonValue(const std::string& param) const;
+
+    /**
      * Set cgroup parameter to value (name validity depends on subsystem)
      * Equivalent of: echo value > mSubsys_path/mName/mSubsys_name.param
      */
@@ -77,10 +89,27 @@ public:
     std::string getValue(const std::string& param) const;
 
     /**
-     * Assign process to this cgroup (will be removed from previous cgroup automatically)
+     * Assign all processes in threadgroup of pid to this cgroup
+     * Equivalent of: echo pid > mSubsys_path/mName/cgroup.procs
+     */
+    void assignGroup(pid_t pid);
+
+    /**
+     * Assign single process to this cgroup (will be removed from previous cgroup automatically)
      * Equivalent of: echo pid > mSubsys_path/mName/tasks
      */
-    void assignProcess(pid_t pid);
+    void assignPid(pid_t pid);
+
+    /**
+     * Get list of pid assigned to this group
+     * Equivalent of: cat mSubsys_path/mName/tasks
+     */
+    std::vector<pid_t> getPids() const;
+
+    /**
+     * Get cgroup of process pid in given subsystem
+     */
+    static CGroup getCGroup(const std::string& subsys, pid_t pid);
 
 private:
     const Subsystem mSubsys; // referred subsystem

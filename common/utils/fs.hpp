@@ -34,7 +34,12 @@
 namespace utils {
 
 /**
- * Reads the content of a file; Throws exception on error
+ * Reads the content of file stream (no seek); Throws exception on error
+ */
+std::string readFileStream(const std::string& path);
+
+/**
+ * Reads the content of a file (performs seek); Throws exception on error
  */
 std::string readFileContent(const std::string& path);
 

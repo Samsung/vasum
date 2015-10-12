@@ -26,6 +26,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 namespace utils {
 
@@ -50,7 +51,19 @@ inline bool endsWith(std::string const &value, std::string const &part)
  */
 std::string toHexString(const void *data, unsigned len);
 
-std::string join(const std::vector<std::string>& vec, const char *delim);
+template<typename T>
+std::string join(const std::vector<T>& vec, const char *delim)
+{
+    std::stringstream res;
+    for (const auto& s : vec) {
+        if (res.tellp()>0) {
+            res << delim;
+        }
+        res << s;
+    }
+    return res.str();
+}
+
 std::vector<std::string> split(const std::string& str, const std::string& delim);
 
 } // namespace utils

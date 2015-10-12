@@ -47,6 +47,11 @@ namespace fs = boost::filesystem;
 
 namespace utils {
 
+std::string readFileStream(const std::string& path)
+{
+    std::ifstream is(path);
+    return std::string(std::istreambuf_iterator<char>(is), std::istreambuf_iterator<char>());
+}
 
 std::string readFileContent(const std::string& path)
 {
