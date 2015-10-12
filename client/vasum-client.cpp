@@ -33,8 +33,6 @@
 #define API __attribute__((visibility("default")))
 #endif // API
 
-using namespace std;
-
 namespace {
 
 Client& getClient(VsmClient client)
@@ -77,7 +75,7 @@ API VsmStatus vsm_get_dispatcher_type(VsmClient client, VsmDispacherType* dispac
 
 API VsmClient vsm_client_create()
 {
-    Client* clientPtr = new(nothrow) Client();
+    Client* clientPtr = new(std::nothrow) Client();
     return reinterpret_cast<VsmClient>(clientPtr);
 }
 

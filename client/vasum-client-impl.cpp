@@ -49,7 +49,6 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
-using namespace std;
 using namespace utils;
 using namespace vasum;
 
@@ -103,7 +102,7 @@ void convert(const api::ZoneInfoOut& info, Zone& zone)
     zone = vsmZone;
 }
 
-string toString(const in_addr* addr)
+std::string toString(const in_addr* addr)
 {
     char buf[INET_ADDRSTRLEN];
     const char* ret = inet_ntop(AF_INET, addr, buf, INET_ADDRSTRLEN);
@@ -113,7 +112,7 @@ string toString(const in_addr* addr)
     return ret;
 }
 
-string toString(const in6_addr* addr)
+std::string toString(const in6_addr* addr)
 {
     char buf[INET6_ADDRSTRLEN];
     const char* ret = inet_ntop(AF_INET6, addr, buf, INET6_ADDRSTRLEN);
@@ -123,9 +122,9 @@ string toString(const in6_addr* addr)
     return ret;
 }
 
-bool readFirstLineOfFile(const string& path, string& ret)
+bool readFirstLineOfFile(const std::string& path, std::string& ret)
 {
-    ifstream file(path);
+    std::ifstream file(path);
     if (!file) {
         return false;
     }
@@ -146,7 +145,7 @@ Client::Status::Status()
 {
 }
 
-Client::Status::Status(VsmStatus status, const string& msg)
+Client::Status::Status(VsmStatus status, const std::string& msg)
     : mVsmStatus(status), mMsg(msg)
 {
 }
@@ -182,7 +181,7 @@ ipc::epoll::EventPoll& Client::getEventPoll() const
     }
 }
 
-VsmStatus Client::coverException(const function<void(void)>& worker) noexcept
+VsmStatus Client::coverException(const std::function<void(void)>& worker) noexcept
 {
     try {
         worker();
@@ -202,7 +201,7 @@ VsmStatus Client::coverException(const function<void(void)>& worker) noexcept
         mStatus = Status(VSMCLIENT_CUSTOM_ERROR, ex.what());
     } catch (const ipc::IPCException& ex) {
         mStatus = Status(VSMCLIENT_IO_ERROR, ex.what());
-    } catch (const exception& ex) {
+    } catch (const std::exception& ex) {
         mStatus = Status(VSMCLIENT_CUSTOM_ERROR, ex.what());
     }
     VsmStatus ret = mStatus.mVsmStatus;
@@ -295,7 +294,7 @@ const char* Client::vsm_get_status_message() const noexcept
 
 VsmStatus Client::vsm_get_status() const noexcept
 {
-    lock_guard<mutex> lock(mStatusMutex);
+    std::lock_guard<std::mutex> lock(mStatusMutex);
     return mStatus.mVsmStatus;
 }
 
@@ -354,14 +353,14 @@ VsmStatus Client::vsm_lookup_zone_by_pid(int pid, VsmString* id) noexcept
     return coverException([&] {
         IS_SET(id);
 
-        const string path = "/proc/" + to_string(pid) + "/cpuset";
+        const std::string path = "/proc/" + std::to_string(pid) + "/cpuset";
 
-        string cpuset;
+        std::string cpuset;
         if (!readFirstLineOfFile(path, cpuset)) {
             throw InvalidArgumentException("Process not found");
         }
 
-        string zoneId;
+        std::string zoneId;
         if (!parseZoneIdFromCpuSet(cpuset, zoneId)) {
             throw OperationFailedException("unknown format of cpuset");
         }
@@ -407,7 +406,7 @@ VsmStatus Client::vsm_create_zone(const char* id, const char* tname) noexcept
     return coverException([&] {
         IS_SET(id);
 
-        string template_name = tname ? tname : "default";
+        std::string template_name = tname ? tname : "default";
         mClient->callSync<api::CreateZoneIn, api::Void>(
             api::ipc::METHOD_CREATE_ZONE,
             std::make_shared<api::CreateZoneIn>(api::CreateZoneIn{ id, template_name }),
@@ -552,7 +551,7 @@ VsmStatus Client::vsm_netdev_get_ip_addr(const char* id,
             std::vector<std::string> addrAttrs;
             for(const auto& addrAttr : split(addrAttrs, attr.second, is_any_of(","))) {
                 size_t pos = addrAttr.find(":");
-                if (pos == string::npos) continue;
+                if (pos == std::string::npos) continue;
 
                 if (addrAttr.substr(0, pos) == "prefixlen") {
                     addr.prefix = atoi(addrAttr.substr(pos + 1).c_str());
@@ -610,7 +609,7 @@ VsmStatus Client::vsm_netdev_add_ipv4_addr(const char* id,
         IS_SET(netdevId);
         IS_SET(addr);
 
-        string value = "ip:" + toString(addr) + ",""prefixlen:" + to_string(prefix);
+        std::string value = "ip:" + toString(addr) + ",""prefixlen:" + std::to_string(prefix);
         mClient->callSync<api::SetNetDevAttrsIn, api::Void>(
             api::ipc::METHOD_SET_NETDEV_ATTRS,
             std::make_shared<api::SetNetDevAttrsIn>(
@@ -628,7 +627,7 @@ VsmStatus Client::vsm_netdev_add_ipv6_addr(const char* id,
         IS_SET(netdevId);
         IS_SET(addr);
 
-        string value = "ip:" + toString(addr) + ",""prefixlen:" + to_string(prefix);
+        std::string value = "ip:" + toString(addr) + ",""prefixlen:" + std::to_string(prefix);
         mClient->callSync<api::SetNetDevAttrsIn, api::Void>(
             api::ipc::METHOD_SET_NETDEV_ATTRS,
             std::make_shared<api::SetNetDevAttrsIn>(
@@ -647,7 +646,7 @@ VsmStatus Client::vsm_netdev_del_ipv4_addr(const char* id,
         IS_SET(addr);
 
         //CIDR notation
-        string ip = toString(addr) + "/" + to_string(prefix);
+        std::string ip = toString(addr) + "/" + std::to_string(prefix);
         mClient->callSync<api::DeleteNetdevIpAddressIn, api::Void>(
             api::ipc::METHOD_DELETE_NETDEV_IP_ADDRESS,
             std::make_shared<api::DeleteNetdevIpAddressIn>(
@@ -666,7 +665,7 @@ VsmStatus Client::vsm_netdev_del_ipv6_addr(const char* id,
         IS_SET(addr);
 
         //CIDR notation
-        string ip = toString(addr) + "/" + to_string(prefix);
+        std::string ip = toString(addr) + "/" + std::to_string(prefix);
         mClient->callSync<api::DeleteNetdevIpAddressIn, api::Void>(
             api::ipc::METHOD_DELETE_NETDEV_IP_ADDRESS,
             std::make_shared<api::DeleteNetdevIpAddressIn>(
@@ -684,8 +683,8 @@ VsmStatus Client::vsm_netdev_up(const char* id, const char* netdevId) noexcept
         mClient->callSync<api::SetNetDevAttrsIn, api::Void>(
             api::ipc::METHOD_SET_NETDEV_ATTRS,
             std::make_shared<api::SetNetDevAttrsIn>(
-                api::SetNetDevAttrsIn{ id, netdevId, { { "flags", to_string(IFF_UP) },
-                                                       { "change", to_string(IFF_UP) }  }  }));
+                api::SetNetDevAttrsIn{ id, netdevId, { { "flags", std::to_string(IFF_UP) },
+                                                       { "change", std::to_string(IFF_UP) }  }  }));
     });
 }
 
@@ -698,8 +697,8 @@ VsmStatus Client::vsm_netdev_down(const char* id, const char* netdevId) noexcept
         mClient->callSync<api::SetNetDevAttrsIn, api::Void>(
             api::ipc::METHOD_SET_NETDEV_ATTRS,
             std::make_shared<api::SetNetDevAttrsIn>(
-                api::SetNetDevAttrsIn{ id, netdevId, { { "flags", to_string(~IFF_UP) },
-                                                       { "change", to_string(IFF_UP) }  }  }));
+                api::SetNetDevAttrsIn{ id, netdevId, { { "flags", std::to_string(~IFF_UP) },
+                                                       { "change", std::to_string(IFF_UP) }  }  }));
     });
 }
 

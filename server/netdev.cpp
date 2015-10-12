@@ -63,18 +63,18 @@
 #define BRIDGE_FLAGS_MASTER 1
 #endif
 
-using namespace std;
 using namespace utils;
 using namespace vasum::netlink;
+using std::get;
 
 namespace vasum {
 namespace netdev {
 
 namespace {
 
-string getUniqueVethName()
+std::string getUniqueVethName()
 {
-    auto find = [](const ifaddrs* ifaddr, const string& name) -> bool {
+    auto find = [](const ifaddrs* ifaddr, const std::string& name) -> bool {
         for (const ifaddrs* ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
             if (name == ifa->ifa_name) {
                 return true;
@@ -85,17 +85,17 @@ string getUniqueVethName()
 
     ifaddrs* ifaddr;
     getifaddrs(&ifaddr);
-    string newName;
+    std::string newName;
     int i = 0;
     do {
-        newName = "veth0" + to_string(++i);
+        newName = "veth0" + std::to_string(++i);
     } while (find(ifaddr, newName));
 
     freeifaddrs(ifaddr);
     return newName;
 }
 
-uint32_t getInterfaceIndex(const string& name) {
+uint32_t getInterfaceIndex(const std::string& name) {
     uint32_t index = if_nametoindex(name.c_str());
     if (!index) {
         const std::string msg = "Can't get " + name + " interface index (" + getSystemErrorMessage() + ")";
@@ -105,7 +105,7 @@ uint32_t getInterfaceIndex(const string& name) {
     return index;
 }
 
-uint32_t getInterfaceIndex(const string& name, pid_t nsPid) {
+uint32_t getInterfaceIndex(const std::string& name, pid_t nsPid) {
     NetlinkMessage nlm(RTM_GETLINK, NLM_F_REQUEST | NLM_F_ACK);
     ifinfomsg infoPeer = utils::make_clean<ifinfomsg>();
     infoPeer.ifi_family = AF_UNSPEC;
@@ -126,14 +126,14 @@ int getIpFamily(const std::string& ip)
     return ip.find(':') == std::string::npos ? AF_INET : AF_INET6;
 }
 
-void validateNetdevName(const string& name)
+void validateNetdevName(const std::string& name)
 {
     if (name.size() <= 1 || name.size() >= IFNAMSIZ) {
         throw ZoneOperationException("Invalid netdev name format");
     }
 }
 
-void createPipedNetdev(const string& netdev1, const string& netdev2)
+void createPipedNetdev(const std::string& netdev1, const std::string& netdev2)
 {
     validateNetdevName(netdev1);
     validateNetdevName(netdev2);
@@ -156,7 +156,7 @@ void createPipedNetdev(const string& netdev1, const string& netdev2)
     send(nlm);
 }
 
-void attachToBridge(const string& bridge, const string& netdev)
+void attachToBridge(const std::string& bridge, const std::string& netdev)
 {
     validateNetdevName(bridge);
     validateNetdevName(netdev);
@@ -184,7 +184,7 @@ void attachToBridge(const string& bridge, const string& netdev)
     close(fd);
 }
 
-int setFlags(const string& name, uint32_t mask, uint32_t flags)
+int setFlags(const std::string& name, uint32_t mask, uint32_t flags)
 {
     uint32_t index = getInterfaceIndex(name);
     NetlinkMessage nlm(RTM_NEWLINK, NLM_F_REQUEST | NLM_F_ACK);
@@ -199,12 +199,12 @@ int setFlags(const string& name, uint32_t mask, uint32_t flags)
     return 0;
 }
 
-void up(const string& netdev)
+void up(const std::string& netdev)
 {
     setFlags(netdev, IFF_UP, IFF_UP);
 }
 
-void moveToNS(const string& netdev, pid_t pid)
+void moveToNS(const std::string& netdev, pid_t pid)
 {
     uint32_t index = getInterfaceIndex(netdev);
     NetlinkMessage nlm(RTM_NEWLINK, NLM_F_REQUEST | NLM_F_ACK);
@@ -216,7 +216,7 @@ void moveToNS(const string& netdev, pid_t pid)
     send(nlm);
 }
 
-void createMacvlan(const string& master, const string& slave, const macvlan_mode& mode)
+void createMacvlan(const std::string& master, const std::string& slave, const macvlan_mode& mode)
 {
     validateNetdevName(master);
     validateNetdevName(slave);
@@ -283,7 +283,7 @@ std::vector<Attrs> getIpAddresses(const pid_t nsPid, int family, uint32_t index)
                             LOGE(msg);
                             throw VasumException(msg);
                         }
-                        attrs.push_back(make_tuple("ip", buf));
+                        attrs.push_back(std::make_tuple("ip", buf));
                         break;
                     default:
                         response.skipAttribute();
@@ -372,19 +372,19 @@ void deleteIpAddress(const pid_t nsPid,
 
 } // namespace
 
-void createVeth(const pid_t& nsPid, const string& nsDev, const string& hostDev)
+void createVeth(const pid_t& nsPid, const std::string& nsDev, const std::string& hostDev)
 {
-    string hostVeth = getUniqueVethName();
+    std::string hostVeth = getUniqueVethName();
     LOGT("Creating veth: bridge: " << hostDev << ", port: " << hostVeth << ", zone: " << nsDev);
     createPipedNetdev(nsDev, hostVeth);
     try {
         attachToBridge(hostDev, hostVeth);
         up(hostVeth);
         moveToNS(nsDev, nsPid);
-    } catch(const exception& ex) {
+    } catch(const std::exception& ex) {
         try {
             destroyNetdev(hostVeth);
-        } catch (const exception& ex) {
+        } catch (const std::exception& ex) {
             LOGE("Can't destroy netdev pipe: " << hostVeth << ", " << nsDev);
         }
         throw;
@@ -392,8 +392,8 @@ void createVeth(const pid_t& nsPid, const string& nsDev, const string& hostDev)
 }
 
 void createMacvlan(const pid_t& nsPid,
-                   const string& nsDev,
-                   const string& hostDev,
+                   const std::string& nsDev,
+                   const std::string& hostDev,
                    const macvlan_mode& mode)
 {
     LOGT("Creating macvlan: host: " << hostDev << ", zone: " << nsDev << ", mode: " << mode);
@@ -401,17 +401,17 @@ void createMacvlan(const pid_t& nsPid,
     try {
         up(nsDev);
         moveToNS(nsDev, nsPid);
-    } catch(const exception& ex) {
+    } catch(const std::exception& ex) {
         try {
             destroyNetdev(nsDev);
-        } catch (const exception& ex) {
+        } catch (const std::exception& ex) {
             LOGE("Can't destroy netdev: " << nsDev);
         }
         throw;
     }
 }
 
-void movePhys(const pid_t& nsPid, const string& devId)
+void movePhys(const pid_t& nsPid, const std::string& devId)
 {
     LOGT("Creating phys: dev: " << devId);
     moveToNS(devId, nsPid);
@@ -437,7 +437,7 @@ std::vector<std::string> listNetdev(const pid_t& nsPid)
     return interfaces;
 }
 
-void destroyNetdev(const string& netdev, const pid_t pid)
+void destroyNetdev(const std::string& netdev, const pid_t pid)
 {
     LOGT("Destroying netdev: " << netdev);
     validateNetdevName(netdev);
@@ -451,7 +451,7 @@ void destroyNetdev(const string& netdev, const pid_t pid)
     send(nlm, pid);
 }
 
-void createBridge(const string& netdev)
+void createBridge(const std::string& netdev)
 {
     LOGT("Creating bridge: " << netdev);
     validateNetdevName(netdev);
@@ -477,7 +477,7 @@ Attrs getAttrs(const pid_t nsPid, const std::string& netdev)
 {
     auto joinAddresses = [](const Attrs& attrs) -> std::string {
         bool first = true;
-        stringstream ss;
+        std::stringstream ss;
         for (const auto& attr : attrs) {
             ss << (first ? "" : ",") << get<0>(attr) << ":" << get<1>(attr);
             first = false;
@@ -539,7 +539,7 @@ Attrs getAttrs(const pid_t nsPid, const std::string& netdev)
 
 void setAttrs(const pid_t nsPid, const std::string& netdev, const Attrs& attrs)
 {
-    const set<string> supportedAttrs{"flags", "change", "type", "mtu", "link", "ipv4", "ipv6"};
+    const std::set<std::string> supportedAttrs{"flags", "change", "type", "mtu", "link", "ipv4", "ipv6"};
 
     LOGT("Setting network device informations: " << netdev);
     validateNetdevName(netdev);
@@ -581,8 +581,8 @@ void setAttrs(const pid_t nsPid, const std::string& netdev, const Attrs& attrs)
     }
 
     //TODO: Multiple addresses should be set at once (add support NLM_F_MULTI to NetlinkMessage).
-    vector<string> ipv4;
-    vector<string> ipv6;
+    std::vector<std::string> ipv4;
+    std::vector<std::string> ipv6;
     for (const auto& attr : attrs) {
         if (get<0>(attr) == "ipv4") {
             ipv4.push_back(get<1>(attr));
@@ -592,14 +592,14 @@ void setAttrs(const pid_t nsPid, const std::string& netdev, const Attrs& attrs)
         }
     }
 
-    auto setIp = [nsPid](const vector<string>& ips, uint32_t index, int family) -> void {
+    auto setIp = [nsPid](const std::vector<std::string>& ips, uint32_t index, int family) -> void {
         using namespace boost::algorithm;
         for (const auto& ip : ips) {
             Attrs attrs;
-            vector<string> params;
+            std::vector<std::string> params;
             for (const auto& addrAttr : split(params, ip, is_any_of(","))) {
                 size_t pos = addrAttr.find(":");
-                if (pos == string::npos || pos == addrAttr.length()) {
+                if (pos == std::string::npos || pos == addrAttr.length()) {
                     const std::string msg = "Wrong input data format: ill formed address attribute: " + addrAttr;
                     LOGE(msg);
                     throw VasumException(msg);
@@ -620,7 +620,7 @@ void deleteIpAddress(const pid_t nsPid,
 {
     uint32_t index = getInterfaceIndex(netdev, nsPid);
     size_t slash = ip.find('/');
-    if (slash == string::npos) {
+    if (slash == std::string::npos) {
         const std::string msg = "Wrong address format: it is not CIDR notation: can't find '/'";
         LOGE(msg);
         throw VasumException(msg);
@@ -639,4 +639,3 @@ void deleteIpAddress(const pid_t nsPid,
 
 } //namespace netdev
 } //namespace vasum
-

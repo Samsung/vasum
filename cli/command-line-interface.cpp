@@ -44,8 +44,6 @@
 #include <unistd.h>
 #include <string.h>
 
-using namespace std;
-
 namespace vasum {
 namespace cli {
 
@@ -92,23 +90,23 @@ std::string netdevToString(const VsmNetdev& netdev)
     return out;
 }
 
-typedef vector<vector<string>> Table;
+typedef std::vector<std::vector<std::string>> Table;
 
-ostream& operator<<(ostream& out, const Table& table)
+std::ostream& operator<<(std::ostream& out, const Table& table)
 {
-    vector<size_t> sizes;
+    std::vector<size_t> sizes;
     for (const auto& row : table) {
         if (sizes.size() < row.size()) {
             sizes.resize(row.size());
         }
         for (size_t i = 0; i < row.size(); ++i) {
-            sizes[i] = max(sizes[i], row[i].length());
+            sizes[i] = std::max(sizes[i], row[i].length());
         }
     }
 
     for (const auto& row : table) {
         for (size_t i = 0; i < row.size(); ++i) {
-            out << left << setw(sizes[i]+2) << row[i];
+            out << std::left << std::setw(sizes[i]+2) << row[i];
         }
         out << "\n";
     }
@@ -129,7 +127,7 @@ enum macvlan_mode macvlanFromString(const std::string& mode) {
     if (mode == "passthru") {
         return MACVLAN_MODE_PASSTHRU;
     }
-    throw runtime_error("Unsupported macvlan mode");
+    throw std::runtime_error("Unsupported macvlan mode");
 }
 
 void buildZoneList(std::vector<std::string>& list)
@@ -144,7 +142,7 @@ void buildZoneList(std::vector<std::string>& list)
     vsm_array_string_free(ids);
 }
 
-void buildNetdevList(const std::string& zone,std::vector<std::string>& list)
+void buildNetdevList(const std::string& zone, std::vector<std::string>& list)
 {
     using namespace std::placeholders;
     VsmArrayString ids;
@@ -167,9 +165,9 @@ const std::vector<std::string> CommandLineInterface::buildCompletionList(const A
     }
 
     ArgSpec as = mArgsSpec[a.size() - 2];
-    string::size_type s = 0U;
-    string::size_type e = s;
-    while (e != string::npos) {
+    std::string::size_type s = 0U;
+    std::string::size_type e = s;
+    while (e != std::string::npos) {
         e = as.format.find('|', s);
         std::string ss = as.format.substr(s, e - s);
         s = e + 1;
@@ -197,12 +195,12 @@ void CommandLineInterface::connect()
 
     CommandLineInterface::client = vsm_client_create();
     if (CommandLineInterface::client == nullptr) {
-        throw runtime_error("Can't create client");
+        throw std::runtime_error("Can't create client");
     }
 
     status = vsm_connect(client);
     if (VSMCLIENT_SUCCESS != status) {
-        string msg = vsm_get_status_message(CommandLineInterface::client);
+        std::string msg = vsm_get_status_message(CommandLineInterface::client);
         vsm_client_free(CommandLineInterface::client);
         CommandLineInterface::client = nullptr;
         throw IOException(msg);
@@ -211,7 +209,7 @@ void CommandLineInterface::connect()
 
 void CommandLineInterface::disconnect()
 {
-    string msg;
+    std::string msg;
     VsmStatus status;
 
     if (CommandLineInterface::client == nullptr) {
@@ -227,17 +225,17 @@ void CommandLineInterface::disconnect()
     CommandLineInterface::client = nullptr;
 
     if (VSMCLIENT_SUCCESS != status) {
-        throw runtime_error(msg);
+        throw std::runtime_error(msg);
     }
 }
 
-void CommandLineInterface::executeCallback(const function<VsmStatus(VsmClient)>& fun)
+void CommandLineInterface::executeCallback(const std::function<VsmStatus(VsmClient)>& fun)
 {
     CommandLineInterface::connect();
 
     VsmStatus status = fun(CommandLineInterface::client);
     if (VSMCLIENT_SUCCESS != status) {
-        throw runtime_error(vsm_get_status_message(CommandLineInterface::client));
+        throw std::runtime_error(vsm_get_status_message(CommandLineInterface::client));
     }
 }
 
@@ -306,7 +304,7 @@ void set_active_zone(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 2) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
 
     CommandLineInterface::executeCallback(bind(vsm_set_active_zone, _1, argv[1].c_str()));
@@ -317,7 +315,7 @@ void create_zone(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 2) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
 
     if (argv.size() >= 3 && !argv[2].empty()) {
@@ -332,7 +330,7 @@ void destroy_zone(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 2) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
 
     CommandLineInterface::executeCallback(bind(vsm_destroy_zone, _1, argv[1].c_str(), 1));
@@ -343,7 +341,7 @@ void shutdown_zone(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 2) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
 
     CommandLineInterface::executeCallback(bind(vsm_shutdown_zone, _1, argv[1].c_str()));
@@ -354,7 +352,7 @@ void start_zone(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 2) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
 
     CommandLineInterface::executeCallback(bind(vsm_start_zone, _1, argv[1].c_str()));
@@ -365,7 +363,7 @@ void console_zone(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 2) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
 
     VsmZone zone;
@@ -373,7 +371,7 @@ void console_zone(const Args& argv)
 
     if (zoneStateToString(vsm_zone_get_state(zone)) != "RUNNING") {
         vsm_zone_free(zone);
-        throw runtime_error("Zone '" + argv[1] + "' is not running");
+        throw std::runtime_error("Zone '" + argv[1] + "' is not running");
     }
 
     std::string zonesPath = vsm_zone_get_rootfs(zone);
@@ -389,7 +387,7 @@ void console_zone(const Args& argv)
         .add("-P").add(zonesPath.c_str());
 
     if (!execv("/usr/bin/lxc-console", const_cast<char* const*>(args.c_array()))) {
-        throw runtime_error("Could not log into zone");
+        throw std::runtime_error("Could not log into zone");
     }
 }
 
@@ -398,7 +396,7 @@ void lock_zone(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 2) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
 
     CommandLineInterface::executeCallback(bind(vsm_lock_zone, _1, argv[1].c_str()));
@@ -409,7 +407,7 @@ void unlock_zone(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 2) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
 
     CommandLineInterface::executeCallback(bind(vsm_unlock_zone, _1, argv[1].c_str()));
@@ -439,17 +437,17 @@ void get_zones_status(const Args& argv)
     for (VsmString* id = ids; *id; ++id) {
         VsmZone zone;
         CommandLineInterface::executeCallback(bind(vsm_lookup_zone_by_id, _1, *id, &zone));
-        assert(string(vsm_zone_get_id(zone)) == string(*id));
-        table.push_back({string(vsm_zone_get_id(zone)) == string(activeId) ? "YES" : "NO",
+        assert(std::string(vsm_zone_get_id(zone)) == std::string(*id));
+        table.push_back({std::string(vsm_zone_get_id(zone)) == std::string(activeId) ? "YES" : "NO",
                          vsm_zone_get_id(zone),
                          zoneStateToString(vsm_zone_get_state(zone)),
-                         to_string(vsm_zone_get_terminal(zone)),
+                         std::to_string(vsm_zone_get_terminal(zone)),
                          vsm_zone_get_rootfs(zone)});
         vsm_zone_free(zone);
     }
     vsm_string_free(activeId);
     vsm_array_string_free(ids);
-    cout << table << endl;
+    std::cout << table << std::endl;
 }
 
 void get_zone_ids(const Args& /*argv*/)
@@ -458,12 +456,12 @@ void get_zone_ids(const Args& /*argv*/)
 
     VsmArrayString ids;
     CommandLineInterface::executeCallback(bind(vsm_get_zone_ids, _1, &ids));
-    string delim;
+    std::string delim;
     for (VsmString* id = ids; *id; ++id) {
-        cout << delim << *id;
+        std::cout << delim << *id;
         delim = ", ";
     }
-    cout << endl;
+    std::cout << std::endl;
     vsm_array_string_free(ids);
 }
 
@@ -473,7 +471,7 @@ void get_active_zone(const Args& /*argv*/)
 
     VsmString id;
     CommandLineInterface::executeCallback(bind(vsm_get_active_zone_id, _1, &id));
-    cout << id << endl;
+    std::cout << id << std::endl;
     vsm_string_free(id);
 }
 
@@ -482,7 +480,7 @@ void grant_device(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 3) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
 
     uint32_t flags = O_RDWR;
@@ -494,7 +492,7 @@ void revoke_device(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 3) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
 
     CommandLineInterface::executeCallback(bind(vsm_revoke_device, _1, argv[1].c_str(), argv[2].c_str()));
@@ -505,13 +503,13 @@ void create_netdev(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 3) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
 
     std::string nettype = argv[2];
     if (nettype == "phys") {
         if (argv.size() < 4) {
-            throw runtime_error("Not enough parameters");
+            throw std::runtime_error("Not enough parameters");
         }
         CommandLineInterface::executeCallback(bind(vsm_create_netdev_phys,
                   _1,
@@ -520,7 +518,7 @@ void create_netdev(const Args& argv)
     }
     else if (nettype == "veth") {
         if (argv.size() < 5) {
-            throw runtime_error("Not enough parameters");
+            throw std::runtime_error("Not enough parameters");
         }
         CommandLineInterface::executeCallback(bind(vsm_create_netdev_veth,
                   _1,
@@ -530,7 +528,7 @@ void create_netdev(const Args& argv)
     }
     else if (nettype == "macvlan") {
         if (argv.size() < 6) {
-            throw runtime_error("Not enough parameters");
+            throw std::runtime_error("Not enough parameters");
         }
         CommandLineInterface::executeCallback(bind(vsm_create_netdev_macvlan,
                   _1,
@@ -540,7 +538,7 @@ void create_netdev(const Args& argv)
                   macvlanFromString(argv[5].c_str())));
     }
     else
-        throw runtime_error("Wrong nettype option " + nettype);
+        throw std::runtime_error("Wrong nettype option " + nettype);
 }
 
 void destroy_netdev(const Args& argv)
@@ -548,7 +546,7 @@ void destroy_netdev(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 3) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
     CommandLineInterface::executeCallback(bind(vsm_destroy_netdev,
                   _1,
@@ -561,7 +559,7 @@ void netdev_list(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 2) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
     if (argv.size() < 3) {
         VsmArrayString ids;
@@ -569,15 +567,15 @@ void netdev_list(const Args& argv)
                   _1,
                   argv[1].c_str(),
                   &ids));
-        string delim;
+        std::string delim;
         for (VsmString* id = ids; *id; ++id) {
-            cout << delim << *id;
+            std::cout << delim << *id;
             delim = ", ";
         }
         if (delim.empty()) {
-            cout << "There is no network device in zone";
+            std::cout << "There is no network device in zone";
         }
-        cout << endl;
+        std::cout << std::endl;
         vsm_array_string_free(ids);
     }
     else {
@@ -588,7 +586,7 @@ void netdev_list(const Args& argv)
                   argv[1].c_str(),
                   argv[2].c_str(),
                   &netdev));
-        cout << netdevToString(netdev) << endl;
+        std::cout << netdevToString(netdev) << std::endl;
         vsm_netdev_free(netdev);
 
         VsmAddrList addrs = NULL;
@@ -601,9 +599,9 @@ void netdev_list(const Args& argv)
         for (unsigned i=0; i < listsize; ++i) {
             int type=vsm_addrlist_get_type(addrs, i);
             if (inet_ntop(type, vsm_addrlist_get_addr(addrs, i), buf, INET6_ADDRSTRLEN) == NULL) {
-                throw runtime_error("Wrong address received ["+std::to_string(i)+"] type="+std::to_string(type));
+                throw std::runtime_error("Wrong address received ["+std::to_string(i)+"] type="+std::to_string(type));
             }
-            cout << buf << "/" << vsm_addrlist_get_prefix(addrs, i) << endl;
+            std::cout << buf << "/" << vsm_addrlist_get_prefix(addrs, i) << std::endl;
         }
         vsm_addrlist_free(addrs);
     }
@@ -613,31 +611,31 @@ void netdev_add_ip_addr(const Args& argv)
 {
     using namespace std::placeholders;
     if (argv.size() < 5) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
     if (argv[3].find(':') == std::string::npos) {
         in_addr addr;
         if (inet_pton(AF_INET, argv[3].c_str(), &addr) != 1) {
-            throw runtime_error("Wrong address format");
+            throw std::runtime_error("Wrong address format");
         };
         CommandLineInterface::executeCallback(bind(vsm_netdev_add_ipv4_addr,
                   _1,
                   argv[1].c_str(),
                   argv[2].c_str(),
                   &addr,
-                  stoi(argv[4].c_str())));
+                  std::stoi(argv[4].c_str())));
     }
     else {
         in6_addr addr;
         if (inet_pton(AF_INET6, argv[3].c_str(), &addr) != 1) {
-            throw runtime_error("Wrong address format");
+            throw std::runtime_error("Wrong address format");
         };
         CommandLineInterface::executeCallback(bind(vsm_netdev_add_ipv6_addr,
                   _1,
                   argv[1].c_str(),
                   argv[2].c_str(),
                   &addr,
-                  stoi(argv[4].c_str())));
+                  std::stoi(argv[4].c_str())));
     }
 }
 
@@ -645,31 +643,31 @@ void netdev_del_ip_addr(const Args& argv)
 {
     using namespace std::placeholders;
     if (argv.size() < 5) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
     if (argv[3].find(':') == std::string::npos) {
         in_addr addr;
         if (inet_pton(AF_INET, argv[3].c_str(), &addr) != 1) {
-            throw runtime_error("Wrong address format");
+            throw std::runtime_error("Wrong address format");
         };
         CommandLineInterface::executeCallback(bind(vsm_netdev_del_ipv4_addr,
                   _1,
                   argv[1].c_str(),
                   argv[2].c_str(),
                   &addr,
-                  stoi(argv[4].c_str())));
+                  std::stoi(argv[4].c_str())));
     }
     else {
         in6_addr addr;
         if (inet_pton(AF_INET6, argv[3].c_str(), &addr) != 1) {
-            throw runtime_error("Wrong address format");
+            throw std::runtime_error("Wrong address format");
         };
         CommandLineInterface::executeCallback(bind(vsm_netdev_del_ipv6_addr,
                   _1,
                   argv[1].c_str(),
                   argv[2].c_str(),
                   &addr,
-                  stoi(argv[4].c_str())));
+                  std::stoi(argv[4].c_str())));
     }
 }
 
@@ -678,7 +676,7 @@ void netdev_up(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 3) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
     CommandLineInterface::executeCallback(bind(vsm_netdev_up,
                   _1,
@@ -691,7 +689,7 @@ void netdev_down(const Args& argv)
     using namespace std::placeholders;
 
     if (argv.size() < 3) {
-        throw runtime_error("Not enough parameters");
+        throw std::runtime_error("Not enough parameters");
     }
     CommandLineInterface::executeCallback(bind(vsm_netdev_down,
                   _1,

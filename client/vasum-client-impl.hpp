@@ -81,7 +81,7 @@ typedef struct {
  *
  * Client uses dbus API.
  */
-class Client {
+class Client final {
 public:
     Client() noexcept;
     ~Client() noexcept;
