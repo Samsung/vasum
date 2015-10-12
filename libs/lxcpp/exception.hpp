@@ -91,6 +91,11 @@ struct NetworkException : public Exception {
         : Exception(message) {}
 };
 
+struct CGroupException : public Exception {
+    explicit CGroupException (const std::string& message = "Error during setting up a cgroup")
+        : Exception(message) {}
+};
+
 struct ConfigureException: public Exception {
     explicit ConfigureException(const std::string& message = "Error while configuring a container")
         : Exception(message) {}

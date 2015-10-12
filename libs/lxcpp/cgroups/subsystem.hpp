@@ -29,6 +29,8 @@
 #include <string>
 #include <vector>
 
+namespace lxcpp {
+
 class Subsystem {
 public:
     /**
@@ -36,23 +38,35 @@ public:
      */
     Subsystem(const std::string& name);
 
+    const std::string& getName() const
+    {
+        return mName;
+    }
+
     /**
      * Check if named subsystem is supported by the kernel
      * @return true if subsystem is listed in /proc/cgroups
      */
-    bool isAvailable();
+    bool isAvailable() const;
 
     /**
      * Check if named subsystem is mounted (added to hierarchy)
      * @return true if subsystem has a mount point (as read from /proc/mounts)
      */
-    bool isAttached();
+    bool isAttached() const;
+
+    /**
+     * Get mount point of this subsystem
+     * @return subsystem mount point (as read from /proc/mounts)
+     */
+    const std::string& getMountPoint() const;
 
     /**
      * Attach subsystem hierarchy to filesystem
-     * Equivalent of: mount -t cgroup -o subs(coma-sep) subs(underln-sep) path
+     * Equivalent of: mount -t cgroup -o subs(coma-sep) cgroup path
+     * Note: cgroup root must be already mounted (eg. /sys/fs/cgroup) as tmpfs
      */
-    static void attach(const std::string& path, std::vector<std::string> subs);
+    static void attach(const std::string& path, const std::vector<std::string>& subs);
 
     /**
      * Detach subsstem hierarchy from filesystem
@@ -74,8 +88,10 @@ public:
     static std::vector<std::string> getCGroups(pid_t pid);
 
 private:
-    const std::string& mName;
+    std::string mName;
     std::string mPath;
 };
+
+} //namespace lxcpp
 
 #endif // LXCPP_CGROUPS_SUBSYSTEM_HPP

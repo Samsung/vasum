@@ -22,5 +22,75 @@
  */
 
 #include "lxcpp/cgroups/cgroup.hpp"
+#include "lxcpp/exception.hpp"
+#include "utils/fs.hpp"
+#include "logger/logger.hpp"
 
-// added this file now, to make hpp go through compilation
+namespace fs = boost::filesystem;
+
+namespace lxcpp {
+
+namespace {
+std::string getSubsysName(const std::string& s) {
+    auto p = s.find(':');
+    if (p == std::string::npos) {
+        const std::string msg = "wgrong cgroup format";
+        LOGE(msg);
+        throw CGroupException(msg);
+    }
+    return s.substr(0, p);
+}
+std::string getCGroupName(const std::string& s) {
+    auto p = s.find(':');
+    if (p == std::string::npos) {
+        const std::string msg = "wgrong cgroup format";
+        LOGE(msg);
+        throw CGroupException(msg);
+    }
+    return s.substr(p + 1);
+}
+} // namespace
+
+CGroup::CGroup(const std::string& subsysAndCgroup) :
+    mSubsys(std::move(getSubsysName(subsysAndCgroup))),
+    mName(std::move(getCGroupName(subsysAndCgroup)))
+{
+}
+
+bool CGroup::exists() const
+{
+    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName;
+    return fs::is_directory(path);
+}
+
+void CGroup::create()
+{
+    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName;
+    fs::create_directory(path);
+}
+
+void CGroup::destroy()
+{
+    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName;
+    fs::remove_all(path);
+}
+
+void CGroup::setValue(const std::string& param, const std::string& value)
+{
+    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / (mSubsys.getName() + "." + param);
+    utils::saveFileContent(path.string(), value);
+}
+
+std::string CGroup::getValue(const std::string& param) const
+{
+    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / (mSubsys.getName() + "." + param);
+    return utils::readFileContent(path.string());
+}
+
+void CGroup::assignProcess(pid_t pid)
+{
+    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / "tasks";
+    utils::saveFileContent(path.string(),  std::to_string(pid));
+}
+
+} //namespace lxcpp

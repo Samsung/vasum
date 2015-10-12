@@ -220,7 +220,7 @@ bool mount(const std::string& source,
 bool umount(const std::string& path)
 {
     if (::umount(path.c_str()) != 0) {
-        LOGD("Umount failed for '" << path << "': " << getSystemErrorMessage());
+        LOGE("Umount failed for '" << path << "': " << getSystemErrorMessage());
         return false;
     }
     return true;

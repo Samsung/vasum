@@ -30,7 +30,6 @@
 #include "ut.hpp"
 
 #include <iostream>
-#include <sched.h>
 
 #include <net/if.h>
 

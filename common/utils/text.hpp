@@ -25,13 +25,9 @@
 #define COMMON_UTILS_TEXT_HPP
 
 #include <string>
+#include <vector>
 
 namespace utils {
-
-/**
- * Convert binary bytes array to hex string representation
- */
-std::string toHexString(const void *data, unsigned len);
 
 inline bool beginsWith(std::string const &value, std::string const &part)
 {
@@ -48,6 +44,14 @@ inline bool endsWith(std::string const &value, std::string const &part)
      }
      return std::equal(part.rbegin(), part.rend(), value.rbegin());
 }
+
+/**
+ * Convert binary bytes array to hex string representation
+ */
+std::string toHexString(const void *data, unsigned len);
+
+std::string join(const std::vector<std::string>& vec, const char *delim);
+std::vector<std::string> split(const std::string& str, const std::string& delim);
 
 } // namespace utils
 

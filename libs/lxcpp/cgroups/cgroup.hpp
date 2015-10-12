@@ -26,23 +26,30 @@
 
 #include "lxcpp/cgroups/subsystem.hpp"
 
+namespace lxcpp {
+
 class CGroup {
 
 public:
     /**
      * Define control-group object
      */
-    CGroup(const Subsystem& subsys, const std::string& name) :
+    CGroup(const std::string& subsys, const std::string& name) :
         mSubsys(subsys),
         mName(name)
     {
     }
 
     /**
+     * Define control-group object (format "subsys:cgroup_path")
+     */
+    CGroup(const std::string& subsysAndCgroup);
+
+    /**
      * Check if cgroup exists
      * @return true if cgroup path (subsys.path / mName) exists
      */
-    bool exists();
+    bool exists() const;
 
     /**
      * Create cgroup directory
@@ -67,17 +74,19 @@ public:
      * Get cgroup parameter
      * Equivalent of: cat mSubsys_path/mName/mSubsys_name.param
      */
-    std::string getValue(const std::string& key);
+    std::string getValue(const std::string& param) const;
 
     /**
-     * Move process to this cgroup (process can't be removed from a cgroup)
+     * Assign process to this cgroup (will be removed from previous cgroup automatically)
      * Equivalent of: echo pid > mSubsys_path/mName/tasks
      */
-    void moveProcess(pid_t pid);
+    void assignProcess(pid_t pid);
 
 private:
-    const Subsystem& mSubsys; // referred subsystem
-    const std::string& mName; // path relative to subsystem "root"
+    const Subsystem mSubsys; // referred subsystem
+    const std::string mName; // path relative to subsystem "root"
 };
+
+} //namespace lxcpp
 
 #endif // LXCPP_CGROUPS_CGROUP_HPP
