@@ -54,8 +54,8 @@ void setProcTitle(const std::string &title)
 
     // Skip the first 47 fields, entries 48-49 are ARG_START and ARG_END.
     std::advance(it, 47);
-    unsigned long argStart = std::stol(*it++);
-    unsigned long argEnd = std::stol(*it++);
+    unsigned long argStart = std::stoul(*it++);
+    unsigned long argEnd = std::stoul(*it);
 
     f.close();
 

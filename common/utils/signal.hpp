@@ -36,6 +36,7 @@ void signalBlockAllExcept(const std::initializer_list<int>& signals);
 void signalBlock(const int sigNum);
 void signalUnblock(const int sigNum);
 void signalIgnore(const std::initializer_list<int>& signals);
+void sendSignal(const pid_t pid, const int sigNum);
 
 } // namespace utils
 

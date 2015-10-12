@@ -133,6 +133,17 @@ void signalIgnore(const std::initializer_list<int>& signals)
     }
 }
 
+void sendSignal(const pid_t pid, const int sigNum)
+{
+    if (-1 == ::kill(pid, sigNum)) {
+        const std::string msg = "Error during killing pid: " + std::to_string(pid) +
+                                " sigNum: " + std::to_string(sigNum) +
+                                ": "  + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+}
+
 } // namespace utils
 
 

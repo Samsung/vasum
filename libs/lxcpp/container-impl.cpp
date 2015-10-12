@@ -29,6 +29,7 @@
 #include "lxcpp/capability.hpp"
 #include "lxcpp/commands/attach.hpp"
 #include "lxcpp/commands/start.hpp"
+#include "lxcpp/commands/stop.hpp"
 #include "lxcpp/commands/prep-host-terminal.hpp"
 
 #include "logger/logger.hpp"
@@ -187,7 +188,8 @@ void ContainerImpl::stop()
     // TODO: things to do when shuttting down the container:
     // - close PTY master FDs from the config so we won't keep PTYs open
 
-    throw NotImplementedException();
+    Stop stop(mConfig);
+    stop.execute();
 }
 
 void ContainerImpl::freeze()

@@ -109,14 +109,15 @@ BOOST_AUTO_TEST_CASE(SetLogger)
                       BadArgument);
 }
 
-// BOOST_AUTO_TEST_CASE(StartStop)
-// {
-//     auto c = std::unique_ptr<Container>(createContainer("StartStop", "/"));
-//     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
-//     BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
-//                                       logger::LogLevel::DEBUG,
-//                                       LOGGER_FILE));
-//     BOOST_CHECK_NO_THROW(c->start());
-// }
+BOOST_AUTO_TEST_CASE(StartStop)
+{
+    auto c = std::unique_ptr<Container>(createContainer("StartStop", "/"));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
+    BOOST_CHECK_NO_THROW(c->start());
+    BOOST_CHECK_NO_THROW(c->stop());
+}
 
 BOOST_AUTO_TEST_SUITE_END()
