@@ -45,7 +45,7 @@ struct AttachConfig {
     pid_t initPid;
 
     /// Namespaces to which we'll attach
-    std::vector<Namespace> namespaces;
+    int namespaces;
 
     /// User ID to set
     uid_t uid;
@@ -75,7 +75,7 @@ struct AttachConfig {
 
     AttachConfig(const std::vector<std::string>& argv,
                  const pid_t initPid,
-                 const std::vector<Namespace>& namespaces,
+                 const int namespaces,
                  const uid_t uid,
                  const gid_t gid,
                  const std::vector<gid_t>& supplementaryGids,
@@ -98,7 +98,6 @@ struct AttachConfig {
 
     CONFIG_REGISTER
     (
-        //TODO: Uncomment and fix cstring serialization
         argv,
         initPid,
         namespaces,

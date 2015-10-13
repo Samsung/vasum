@@ -43,21 +43,14 @@ BOOST_FIXTURE_TEST_SUITE(LxcppNamespaceSuite, Fixture)
 
 using namespace lxcpp;
 
-const std::array<Namespace, 6> NAMESPACES  {{
-        Namespace::USER,
-        Namespace::MNT,
-        Namespace::PID,
-        Namespace::UTS,
-        Namespace::IPC,
-        Namespace::NET
+static const std::array<int, 6> NAMESPACES {{
+        CLONE_NEWUSER,
+        CLONE_NEWNS,
+        CLONE_NEWPID,
+        CLONE_NEWUTS,
+        CLONE_NEWIPC,
+        CLONE_NEWNET
     }};
-
-BOOST_AUTO_TEST_CASE(OR)
-{
-    Namespace a = Namespace::USER;
-    Namespace b = Namespace::MNT;
-    BOOST_CHECK_EQUAL(CLONE_NEWUSER | CLONE_NEWNS, static_cast<int>(a | b));
-}
 
 BOOST_AUTO_TEST_CASE(GetPath)
 {
@@ -69,7 +62,7 @@ BOOST_AUTO_TEST_CASE(GetPath)
 BOOST_AUTO_TEST_CASE(ToString)
 {
     for(const auto ns: NAMESPACES) {
-        toString(ns);
+        nsToString(ns);
     }
 }
 

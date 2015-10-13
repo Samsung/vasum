@@ -26,30 +26,14 @@
 
 #include <sched.h>
 #include <string>
-#include <vector>
 
 namespace lxcpp {
 
-enum class Namespace : int {
-    USER = CLONE_NEWUSER,
-    MNT = CLONE_NEWNS,
-    PID = CLONE_NEWPID,
-    UTS = CLONE_NEWUTS,
-    IPC = CLONE_NEWIPC,
-    NET = CLONE_NEWNET
-};
-
-Namespace operator |(const Namespace a, const Namespace b);
-
-std::string toString(const Namespace ns);
+std::string nsToString(const int ns);
 
 std::string getNsPath(const pid_t pid);
 
-std::string getPath(const pid_t pid, const Namespace ns);
-
-int toFlag(const Namespace ns);
-
-int toFlag(const std::vector<Namespace>& namespaces);
+std::string getPath(const pid_t pid, const int ns);
 
 } // namespace lxcpp
 

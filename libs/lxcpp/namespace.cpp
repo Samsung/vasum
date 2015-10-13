@@ -25,31 +25,22 @@
 #include "lxcpp/exception.hpp"
 #include "logger/logger.hpp"
 
-#include <numeric>
-#include <functional>
-
 namespace lxcpp {
 
-Namespace operator|(const Namespace a, const Namespace b)
-{
-    return static_cast<Namespace>(static_cast<std::underlying_type<Namespace>::type>(a) |
-                                  static_cast<std::underlying_type<Namespace>::type>(b));
-}
-
-std::string toString(const Namespace ns)
+std::string nsToString(const int ns)
 {
     switch(ns) {
-    case Namespace::USER:
+    case CLONE_NEWUSER:
         return "user";
-    case Namespace::MNT:
+    case CLONE_NEWNS:
         return "mnt";
-    case Namespace::PID:
+    case CLONE_NEWPID:
         return "pid";
-    case Namespace::UTS:
+    case CLONE_NEWUTS:
         return "uts";
-    case Namespace::IPC:
+    case CLONE_NEWIPC:
         return "ipc";
-    case Namespace::NET:
+    case CLONE_NEWNET:
         return "net";
     default:
         const std::string msg = "Bad namespace passed to the function";
@@ -58,28 +49,14 @@ std::string toString(const Namespace ns)
     }
 }
 
-int toFlag(const std::vector<Namespace>& namespaces)
-{
-    Namespace flag = std::accumulate(namespaces.begin(),
-                                     namespaces.end(),
-                                     static_cast<Namespace>(0),
-                                     std::bit_or<Namespace>());
-    return static_cast<int>(flag);
-}
-
-int toFlag(const Namespace ns)
-{
-    return static_cast<int>(ns);
-}
-
 std::string getNsPath(const pid_t pid)
 {
     return "/proc/" + std::to_string(pid) + "/ns";
 }
 
-std::string getPath(const pid_t pid, const Namespace ns)
+std::string getPath(const pid_t pid, const int ns)
 {
-    return getNsPath(pid) + "/" + toString(ns);
+    return getNsPath(pid) + "/" + nsToString(ns);
 }
 
 } // namespace lxcpp

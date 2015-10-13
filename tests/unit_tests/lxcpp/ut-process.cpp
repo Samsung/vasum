@@ -42,7 +42,7 @@ struct Fixture {
     ~Fixture() {}
 };
 
-int clonefn(void* /*args*/) {
+int clonefn(void*) {
     return 0;
 }
 
@@ -52,19 +52,12 @@ BOOST_FIXTURE_TEST_SUITE(LxcppProcessSuite, Fixture)
 
 using namespace lxcpp;
 
-const std::vector<Namespace> NAMESPACES  {{
-        Namespace::USER,
-        Namespace::MNT,
-        Namespace::PID,
-        Namespace::UTS,
-        Namespace::IPC,
-        Namespace::NET
-    }};
-
 BOOST_AUTO_TEST_CASE(Clone)
 {
-    BOOST_CHECK_NO_THROW(lxcpp::clone(clonefn, nullptr, NAMESPACES));
-    BOOST_CHECK_NO_THROW(lxcpp::clone(clonefn, nullptr, {Namespace::MNT}));
+    BOOST_CHECK_NO_THROW(lxcpp::clone(clonefn,
+                                      nullptr,
+                                      CLONE_NEWUSER | CLONE_NEWNS | CLONE_NEWPID | CLONE_NEWUTS | CLONE_NEWIPC | CLONE_NEWNET));
+    BOOST_CHECK_NO_THROW(lxcpp::clone(clonefn, nullptr, CLONE_NEWNS));
 }
 
 BOOST_AUTO_TEST_CASE(Setns)
@@ -75,12 +68,8 @@ BOOST_AUTO_TEST_CASE(Setns)
     pid_t pid = lxcpp::fork();
     if (pid == 0) {
         try {
-            lxcpp::setns(::getpid(), {Namespace::MNT,
-                                      Namespace::PID,
-                                      Namespace::UTS,
-                                      Namespace::IPC,
-                                      Namespace::NET
-                                     });
+            lxcpp::setns(::getpid(),
+                         CLONE_NEWNS | CLONE_NEWPID | CLONE_NEWUTS | CLONE_NEWIPC | CLONE_NEWNET);
             ::_exit(TEST_PASSED);
         } catch(...) {
             ::_exit(ERROR);
@@ -100,7 +89,7 @@ BOOST_AUTO_TEST_CASE(SetnsUserNamespace)
     pid_t pid = lxcpp::fork();
     if (pid == 0) {
         try {
-            lxcpp::setns(::getpid(), {Namespace::USER});
+            lxcpp::setns(::getpid(), CLONE_NEWUSER);
             ::_exit(ERROR);
         } catch(ProcessSetupException) {
             ::_exit(TEST_PASSED);

@@ -63,7 +63,9 @@ public:
                            const std::string &arg = "") = 0;
 
     virtual void setTerminalCount(const unsigned int count) = 0;
+
     virtual void setNamespaces(const int namespaces) = 0;
+    virtual int getNamespaces() const = 0;
 
     // Execution actions
     virtual void start() = 0;

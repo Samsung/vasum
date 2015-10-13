@@ -55,8 +55,8 @@ public:
 
     void setTerminalCount(const unsigned int count);
 
-    const std::vector<Namespace>& getNamespaces() const;
     void setNamespaces(const int namespaces);
+    int getNamespaces() const;
 
     // Execution actions
     void start();
@@ -98,9 +98,6 @@ public:
 
 private:
     ContainerConfig mConfig;
-
-    // TODO: convert to ContainerConfig struct
-    std::vector<Namespace> mNamespaces;
 };
 
 } // namespace lxcpp

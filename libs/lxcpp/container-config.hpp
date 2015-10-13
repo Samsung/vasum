@@ -113,7 +113,7 @@ struct ContainerConfig {
      * Namespace types used to create the container
      *
      * Set: setNamespaces()
-     * Get: none
+     * Get: getNamespaces()
      */
     int mNamespaces;
 

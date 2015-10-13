@@ -34,6 +34,8 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
+#include <array>
+
 namespace lxcpp {
 
 pid_t fork()
@@ -69,40 +71,44 @@ pid_t clone(int (*function)(void *),
     return pid;
 }
 
-pid_t clone(int (*function)(void *),
-            void *args,
-            const std::vector<Namespace>& namespaces,
-            const int additionalFlags)
-{
-    return clone(function, args, toFlag(namespaces) | additionalFlags);
-}
-
-void setns(const pid_t pid, const std::vector<Namespace>& namespaces)
+void setns(const pid_t pid, int requestedNamespaces)
 {
     int dirFD = utils::open(getNsPath(pid), O_DIRECTORY | O_CLOEXEC);
 
+    static const std::array<int, 6> NAMESPACES {{
+            CLONE_NEWUSER, CLONE_NEWNS, CLONE_NEWPID, CLONE_NEWUTS, CLONE_NEWIPC, CLONE_NEWNET
+        }};
+
     // Open FDs connected with the requested namespaces
-    std::vector<int> fds(namespaces.size(), -1);
-    for(size_t i = 0; i < namespaces.size(); ++i) {
-        fds[i] = ::openat(dirFD,
-                          toString(namespaces[i]).c_str(),
+    std::vector<int> fds;
+    for(const int ns: NAMESPACES) {
+        if (!(ns & requestedNamespaces)) {
+            // This namespace wasn't requested
+            continue;
+        }
+
+        int fd = ::openat(dirFD,
+                          nsToString(ns).c_str(),
                           O_RDONLY | O_CLOEXEC);
-        if(fds[i] < 0) {
+        if(fd < 0) {
             const std::string msg = "openat() failed: " + utils::getSystemErrorMessage();
 
-            for (size_t j = 0; j < i; ++j) {
-                utils::close(fds[j]);
+            // Cleanup file descriptors
+            for (const int d: fds) {
+                utils::close(d);
             }
             utils::close(dirFD);
 
             LOGE(msg);
             throw ProcessSetupException(msg);
         }
+
+        fds.push_back(fd);
     }
 
-    // Setns for every namespace
+    // Setns to every requested namespace
     for(size_t i = 0; i < fds.size(); ++i) {
-        if(-1 == ::setns(fds[i], toFlag(namespaces[i]))) {
+        if(-1 == ::setns(fds[i], 0 /* we're sure it's a fd of the right namespace*/)) {
             const std::string msg = "setns() failed: " + utils::getSystemErrorMessage();
 
             for (size_t j = i; j < fds.size(); ++j) {
@@ -148,9 +154,9 @@ int waitpid(const pid_t pid)
     throw ProcessSetupException(msg);
 }
 
-void unshare(const Namespace ns)
+void unshare(const int ns)
 {
-    if(-1 == ::unshare(toFlag(ns))) {
+    if(-1 == ::unshare(ns)) {
         const std::string msg = "unshare() failed: " + utils::getSystemErrorMessage();
         LOGE(msg);
         throw ProcessSetupException(msg);

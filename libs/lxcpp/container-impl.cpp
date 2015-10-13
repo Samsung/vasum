@@ -151,6 +151,12 @@ void ContainerImpl::setNamespaces(const int namespaces)
     mConfig.mNamespaces = namespaces;
 }
 
+
+int ContainerImpl::getNamespaces() const
+{
+    return mConfig.mNamespaces;
+}
+
 void ContainerImpl::start()
 {
     // TODO: check config consistency and completeness somehow
@@ -207,11 +213,6 @@ void ContainerImpl::console()
 {
     Console console(mConfig.mTerminals);
     console.execute();
-}
-
-const std::vector<Namespace>& ContainerImpl::getNamespaces() const
-{
-    return mNamespaces;
 }
 
 void ContainerImpl::addInterfaceConfig(const std::string& hostif,

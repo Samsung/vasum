@@ -37,17 +37,11 @@ pid_t clone(int (*function)(void *),
             void *args,
             const int flags);
 
-pid_t clone(int (*function)(void *),
-            void *args,
-            const std::vector<Namespace>& namespaces,
-            const int additionalFlags = 0);
-
-void setns(const pid_t pid,
-           const std::vector<Namespace>& namespaces);
+void setns(const pid_t pid, const int namespaces);
 
 int waitpid(const pid_t pid);
 
-void unshare(const Namespace ns);
+void unshare(const int ns);
 
 void execve(const std::vector<std::string>& argv);
 
