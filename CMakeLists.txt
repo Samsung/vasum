@@ -35,7 +35,9 @@ INCLUDE(GNUInstallDirs)
 IF (( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9))
       OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" ))
 
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
+    IF (VASUM_BUILD_FORCE_COMPILER_COLORS)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
+    ENDIF()
 ENDIF()
 
 ## Compiler flags, depending on the build type #################################
