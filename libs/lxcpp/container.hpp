@@ -25,6 +25,7 @@
 #define LXCPP_CONTAINER_HPP
 
 #include "lxcpp/network-config.hpp"
+#include "lxcpp/provision-config.hpp"
 #include "lxcpp/logger-config.hpp"
 
 #include <sys/types.h>
@@ -78,6 +79,7 @@ public:
     virtual void attach(const std::vector<std::string>& argv,
                         const std::string& cwdInContainer) = 0;
     virtual void console() = 0;
+    virtual bool isRunning() const = 0;
 
     // Network interfaces setup/config
     virtual void addInterfaceConfig(const std::string& hostif,
@@ -100,6 +102,27 @@ public:
     virtual void setDown(const std::string& ifname) = 0;
     virtual void addInetAddr(const std::string& ifname, const InetAddr& addr) = 0;
     virtual void delInetAddr(const std::string& ifname, const InetAddr& addr) = 0;
+
+    // Provisioning
+    virtual void declareFile(const provision::File::Type type,
+                             const std::string& path,
+                             const int32_t flags,
+                             const int32_t mode) = 0;
+    virtual const FileVector& getFiles() const = 0;
+    virtual void removeFile(const provision::File& item) = 0;
+
+    virtual void declareMount(const std::string& source,
+                              const std::string& target,
+                              const std::string& type,
+                              const int64_t flags,
+                              const std::string& data) = 0;
+    virtual const MountVector& getMounts() const = 0;
+    virtual void removeMount(const provision::Mount& item) = 0;
+
+    virtual void declareLink(const std::string& source,
+                             const std::string& target) = 0;
+    virtual const LinkVector& getLinks() const = 0;
+    virtual void removeLink(const provision::Link& item) = 0;
 };
 
 } // namespace lxcpp

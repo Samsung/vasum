@@ -28,7 +28,11 @@ namespace lxcpp {
 
 class Command {
 public:
+    // do sth [mandatory]
     virtual void execute() = 0;
+
+    // roll-back execute() action [optional]
+    virtual void revert() {}
 };
 
 } // namespace lxcpp

@@ -69,6 +69,7 @@ public:
     void attach(const std::vector<std::string>& argv,
                 const std::string& cwdInContainer);
     void console();
+    bool isRunning() const;
 
     // Network interfaces setup/config
     /**
@@ -95,6 +96,27 @@ public:
     void setDown(const std::string& ifname);
     void addInetAddr(const std::string& ifname, const InetAddr& addr);
     void delInetAddr(const std::string& ifname, const InetAddr& addr);
+
+    // Provisioning
+    void declareFile(const provision::File::Type type,
+                     const std::string& path,
+                     const int32_t flags,
+                     const int32_t mode);
+    const FileVector& getFiles() const;
+    void removeFile(const provision::File& item);
+
+    void declareMount(const std::string& source,
+                      const std::string& target,
+                      const std::string& type,
+                      const int64_t flags,
+                      const std::string& data);
+    const MountVector& getMounts() const;
+    void removeMount(const provision::Mount& item);
+
+    void declareLink(const std::string& source,
+                     const std::string& target);
+    const LinkVector& getLinks() const;
+    void removeLink(const provision::Link& item);
 
 private:
     ContainerConfig mConfig;

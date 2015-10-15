@@ -25,6 +25,7 @@
 #include "lxcpp/guard/guard.hpp"
 #include "lxcpp/process.hpp"
 #include "lxcpp/commands/prep-guest-terminal.hpp"
+#include "lxcpp/commands/provision.hpp"
 
 #include "config/manager.hpp"
 #include "logger/logger.hpp"
@@ -41,6 +42,9 @@ int startContainer(void* data)
     ContainerConfig& config = *static_cast<ContainerConfig*>(data);
 
     // TODO: container preparation part 2
+
+    Provisions provisions(config);
+    provisions.execute();
 
     PrepGuestTerminal terminals(config.mTerminals);
     terminals.execute();
@@ -96,6 +100,11 @@ int Guard::execute()
 
     int status = lxcpp::waitpid(initPid);
     LOGD("Init exited with status: " << status);
+
+    // TODO: cleanup after child exits
+    Provisions provisions(mConfig);
+    provisions.revert();
+
     return status;
 }
 

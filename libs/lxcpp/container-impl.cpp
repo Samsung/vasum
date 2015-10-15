@@ -31,6 +31,7 @@
 #include "lxcpp/commands/start.hpp"
 #include "lxcpp/commands/stop.hpp"
 #include "lxcpp/commands/prep-host-terminal.hpp"
+#include "lxcpp/commands/provision.hpp"
 
 #include "logger/logger.hpp"
 #include "utils/exception.hpp"
@@ -170,7 +171,7 @@ void ContainerImpl::start()
 
 void ContainerImpl::stop()
 {
-    // TODO: things to do when shuttting down the container:
+    // TODO: things to do when shutting down the container:
     // - close PTY master FDs from the config so we won't keep PTYs open
 
     Stop stop(mConfig);
@@ -213,6 +214,12 @@ void ContainerImpl::console()
 {
     Console console(mConfig.mTerminals);
     console.execute();
+}
+
+bool ContainerImpl::isRunning() const
+{
+    // TODO: race condition may occur, sync needed
+    return getInitPid() != -1;
 }
 
 void ContainerImpl::addInterfaceConfig(const std::string& hostif,
@@ -303,6 +310,95 @@ void ContainerImpl::delInetAddr(const std::string& ifname, const InetAddr& addr)
 {
     NetworkInterface ni(ifname, getInitPid());
     ni.delInetAddr(addr);
+}
+
+void ContainerImpl::declareFile(const provision::File::Type type,
+                                const std::string& path,
+                                const int32_t flags,
+                                const int32_t mode)
+{
+    provision::File newFile({type, path, flags, mode});
+    mConfig.mProvisions.addFile(newFile);
+    // TODO: update guard config
+
+    if (isRunning()) {
+        ProvisionFile fileCmd(mConfig, newFile);
+        fileCmd.execute();
+    }
+}
+
+const FileVector& ContainerImpl::getFiles() const
+{
+    return mConfig.mProvisions.getFiles();
+}
+
+void ContainerImpl::removeFile(const provision::File& item)
+{
+    mConfig.mProvisions.removeFile(item);
+
+    if (isRunning()) {
+        ProvisionFile fileCmd(mConfig, item);
+        fileCmd.revert();
+    }
+}
+
+void ContainerImpl::declareMount(const std::string& source,
+                                 const std::string& target,
+                                 const std::string& type,
+                                 const int64_t flags,
+                                 const std::string& data)
+{
+    provision::Mount newMount({source, target, type, flags, data});
+    mConfig.mProvisions.addMount(newMount);
+    // TODO: update guard config
+
+    if (isRunning()) {
+        ProvisionMount mountCmd(mConfig, newMount);
+        mountCmd.execute();
+    }
+}
+
+const MountVector& ContainerImpl::getMounts() const
+{
+    return mConfig.mProvisions.getMounts();
+}
+
+void ContainerImpl::removeMount(const provision::Mount& item)
+{
+    mConfig.mProvisions.removeMount(item);
+
+    if (isRunning()) {
+        ProvisionMount mountCmd(mConfig, item);
+        mountCmd.revert();
+    }
+}
+
+void ContainerImpl::declareLink(const std::string& source,
+                                const std::string& target)
+{
+    provision::Link newLink({source, target});
+    mConfig.mProvisions.addLink(newLink);
+    // TODO: update guard config
+
+    if (isRunning()) {
+        ProvisionLink linkCmd(mConfig, newLink);
+        linkCmd.execute();
+    }
+}
+
+const LinkVector& ContainerImpl::getLinks() const
+{
+    return mConfig.mProvisions.getLinks();
+}
+
+void ContainerImpl::removeLink(const provision::Link& item)
+{
+    mConfig.mProvisions.removeLink(item);
+
+    if (isRunning()) {
+        ProvisionLink linkCmd(mConfig, item);
+        linkCmd.revert();
+    }
 }
 
 } // namespace lxcpp

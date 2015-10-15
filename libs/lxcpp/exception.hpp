@@ -96,6 +96,11 @@ struct ConfigureException: public Exception {
         : Exception(message) {}
 };
 
+struct ProvisionException: public Exception {
+    explicit ProvisionException(const std::string& message = "Provision error")
+        : Exception(message) {}
+};
+
 } // namespace lxcpp
 
 #endif // LXCPP_EXCEPTION_HPP

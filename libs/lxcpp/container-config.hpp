@@ -27,6 +27,7 @@
 #include "lxcpp/logger-config.hpp"
 #include "lxcpp/network-config.hpp"
 #include "lxcpp/terminal-config.hpp"
+#include "lxcpp/provision-config.hpp"
 
 #include <config/config.hpp>
 #include <config/fields.hpp>
@@ -117,6 +118,14 @@ struct ContainerConfig {
      */
     int mNamespaces;
 
+    /**
+     * available files/dirs/mounts/links
+     *
+     * Set: by container provision manipulation methods
+     * Get: getFiles(), getMounts(), getLinks()
+     */
+    ProvisionConfig mProvisions;
+
     ContainerConfig() : mGuardPid(-1), mInitPid(-1), mNamespaces(0) {}
 
     CONFIG_REGISTER
@@ -128,7 +137,8 @@ struct ContainerConfig {
         mInit,
         mLogger,
         mTerminals,
-        mNamespaces
+        mNamespaces,
+        mProvisions
     )
 };
 
