@@ -31,7 +31,7 @@ class EventFD {
 public:
 
     EventFD();
-    ~EventFD();
+    virtual ~EventFD();
 
     EventFD(const EventFD& eventfd) = delete;
     EventFD& operator=(const EventFD&) = delete;

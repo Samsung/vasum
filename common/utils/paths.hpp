@@ -87,7 +87,7 @@ inline void removeTrailingSlash(std::string& path)
     }
 }
 
-} // anonymous namespace
+} // namespace
 
 /*
  * Gets the dir name of a file path, analogous to dirname(1)
@@ -117,7 +117,6 @@ inline std::string getAbsolutePath(const std::string& path, const std::string& b
         return utils::createFilePath(base, "/", path);
     }
 }
-
 
 } // namespace utils
 

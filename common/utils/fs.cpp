@@ -135,6 +135,35 @@ bool isCharDevice(const std::string& path)
     return ::stat(path.c_str(), &s) == 0 && S_IFCHR == (s.st_mode & S_IFMT);
 }
 
+void assertIsDir(const std::string& path)
+{
+    if (path.empty()) {
+        const std::string msg = "Empty path";
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+
+    struct stat s;
+    if (::stat(path.c_str(), &s)) {
+        const std::string msg = "Error in stat() " + path + ": " + getSystemErrorMessage();
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+
+    if(!(s.st_mode & S_IFDIR)) {
+        const std::string msg = "Not a directory";
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+
+    if(::access(path.c_str(), X_OK) < 0) {
+        const std::string msg = "Not a traversable directory";
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+}
+
+
 namespace {
 // NOTE: Should be the same as in systemd/src/core/mount-setup.c
 const std::string RUN_MOUNT_POINT_OPTIONS = "mode=755,smackfstransmute=System::Run";
@@ -270,8 +299,8 @@ bool copyDirContentsRec(const boost::filesystem::path& src, const boost::filesys
 {
     try {
         for (fs::directory_iterator file(src);
-             file != fs::directory_iterator();
-             ++file) {
+                file != fs::directory_iterator();
+                ++file) {
             fs::path current(file->path());
             fs::path destination = dst / current.filename();
 
@@ -400,7 +429,7 @@ bool createDirs(const std::string& path, mode_t mode)
                     fs::remove(*iter, errorCode);
                     if (errorCode) {
                         LOGE("Error during cleaning: dir: " << *iter
-                            << ", msg: " << errorCode.message());
+                             << ", msg: " << errorCode.message());
                     }
                 }
                 return false;
@@ -455,12 +484,12 @@ bool createFile(const std::string& path, int flags, mode_t mode)
 
 bool createFifo(const std::string& path, mode_t mode)
 {
-   int ret = ::mkfifo(path.c_str(), mode);
-   if (ret < 0) {
-       LOGE("Failed to make fifo: path=host:" << path);
-       return false;
-   }
-   return true;
+    int ret = ::mkfifo(path.c_str(), mode);
+    if (ret < 0) {
+        LOGE("Failed to make fifo: path=host:" << path);
+        return false;
+    }
+    return true;
 }
 
 bool copyFile(const std::string& src, const std::string& dest)
@@ -510,9 +539,9 @@ bool createLink(const std::string& src, const std::string& dest)
     bool retSmack = copySmackLabel(src, dest);
     if (!retSmack) {
         LOGE("Failed to copy smack label: path=host:"
-              << src
-              << ", path=host:"
-              << dest);
+             << src
+             << ", path=host:"
+             << dest);
         boost::system::error_code ec;
         fs::remove(dest, ec);
         if (!ec) {

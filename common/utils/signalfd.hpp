@@ -19,7 +19,7 @@
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Eventfd wrapper
+ * @brief   Signalfd wrapper
  */
 
 #ifndef COMMON_UTILS_SIGNALFD_HPP
@@ -49,7 +49,7 @@ public:
     typedef std::function<void(const int sigNum)> Callback;
 
     SignalFD(ipc::epoll::EventPoll& eventPoll);
-    ~SignalFD();
+    virtual ~SignalFD();
 
     SignalFD(const SignalFD& signalfd) = delete;
     SignalFD& operator=(const SignalFD&) = delete;

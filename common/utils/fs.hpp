@@ -65,6 +65,11 @@ bool removeFile(const std::string& path);
 bool isCharDevice(const std::string& path);
 
 /**
+ * Checks if a path exists and points to a directory
+ */
+void assertIsDir(const std::string& path);
+
+/**
  * List all (including '.' and '..' entries) dir entries
  */
 bool listDir(const std::string& path, std::vector<std::string>& files);
