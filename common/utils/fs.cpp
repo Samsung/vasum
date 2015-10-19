@@ -163,6 +163,15 @@ void assertIsDir(const std::string& path)
     }
 }
 
+void assertIsAbsolute(const std::string& path)
+{
+    if (!fs::path(path).is_absolute()) {
+        const std::string msg = "Given path '" + path + "' must be absolute!";
+        LOGE(msg);
+        throw UtilsException(msg);
+    }
+}
+
 
 namespace {
 // NOTE: Should be the same as in systemd/src/core/mount-setup.c

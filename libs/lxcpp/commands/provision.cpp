@@ -24,8 +24,16 @@
 #include "lxcpp/commands/provision.hpp"
 #include "lxcpp/container.hpp"
 #include "lxcpp/provision-config.hpp"
+#include "lxcpp/filesystem.hpp"
+#include "utils/fs.hpp"
+#include <boost/filesystem.hpp>
+#include <sys/mount.h>
+
+// TODO: Cleanup file/path handling
 
 namespace lxcpp {
+
+namespace fs = boost::filesystem;
 
 void Provisions::execute()
 {
@@ -56,34 +64,97 @@ void Provisions::revert()
     }
 }
 
+ProvisionFile::ProvisionFile(ContainerConfig &config, const provision::File &file)
+    : mConfig(config), mFile(file)
+{
+    utils::assertIsAbsolute(file.path);
+}
 
 void ProvisionFile::execute()
 {
-    // MJK TODO: add file
+    using namespace provision;
+    const fs::path hostPath = fs::path(mConfig.mRootPath) / fs::path(mFile.path);
+
+    switch (mFile.type) {
+    case File::Type::DIRECTORY:
+        if (!utils::createDirs(hostPath.string(), mFile.mode)) {
+            const std::string msg = "Can't create dir: " + hostPath.string();
+            LOGE(msg);
+            throw ProvisionException(msg);
+        }
+        break;
+
+    case File::Type::FIFO:
+        if (!utils::createFifo(hostPath.string(), mFile.mode)) {
+            const std::string msg = "Failed to make fifo: " + mFile.path;
+            LOGE(msg);
+            throw ProvisionException(msg);
+        }
+        break;
+
+    case File::Type::REGULAR:
+        if ((mFile.flags & O_CREAT)) {
+            if (!utils::createFile(hostPath.string(), mFile.flags, mFile.mode)) {
+                const std::string msg = "Failed to create file: " + mFile.path;
+                LOGE(msg);
+                throw ProvisionException(msg);
+            }
+        } else {
+            if (!utils::copyFile(mFile.path, hostPath.string())) {
+                const std::string msg = "Failed to copy file: " + mFile.path;
+                LOGE(msg);
+                throw ProvisionException(msg);
+            }
+        }
+        break;
+    }
 }
 void ProvisionFile::revert()
 {
-    // MJK TODO: remove file from container
+    // TODO decision: should remove the file?
 }
 
+
+ProvisionMount::ProvisionMount(ContainerConfig &config, const provision::Mount &mount)
+    : mConfig(config), mMount(mount)
+{
+    utils::assertIsAbsolute(mount.target);
+}
 
 void ProvisionMount::execute()
 {
-    // MJK TODO: add mount
+    const fs::path hostPath = fs::path(mConfig.mRootPath) / fs::path(mMount.target);
+
+    lxcpp::mount(mMount.source, hostPath.string(), mMount.type, mMount.flags, mMount.data);
 }
 void ProvisionMount::revert()
 {
-    // MJK TODO: remove mount from container
+    const fs::path hostPath = fs::path(mConfig.mRootPath) / fs::path(mMount.target);
+
+    lxcpp::umount(hostPath.string(), MNT_DETACH);
 }
 
+
+ProvisionLink::ProvisionLink(ContainerConfig &config, const provision::Link &link)
+    : mConfig(config), mLink(link)
+{
+    utils::assertIsAbsolute(link.target);
+}
 
 void ProvisionLink::execute()
 {
-    // MJK TODO: add link
+    const std::string srcHostPath = fs::path(mLink.source).normalize().string();
+    const fs::path destHostPath = fs::path(mConfig.mRootPath) / fs::path(mLink.target);
+
+    if (!utils::createLink(srcHostPath, destHostPath.string())) {
+        const std::string msg = "Failed to create hard link: " +  mLink.source;
+        LOGE(msg);
+        throw ProvisionException(msg);
+    }
 }
 void ProvisionLink::revert()
 {
-    // MJK TODO: remove link from container
+    // TODO decision: should remove the link?
 }
 
 } // namespace lxcpp

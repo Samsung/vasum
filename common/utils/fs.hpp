@@ -70,6 +70,11 @@ bool isCharDevice(const std::string& path);
 void assertIsDir(const std::string& path);
 
 /**
+ * Checks if path is absolute
+ */
+void assertIsAbsolute(const std::string& path);
+
+/**
  * List all (including '.' and '..' entries) dir entries
  */
 bool listDir(const std::string& path, std::vector<std::string>& files);
