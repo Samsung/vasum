@@ -39,8 +39,8 @@ void LoggerConfig::set(const logger::LogType type,
         }
     }
 
-    mType = static_cast<int>(type);
-    mLevel = static_cast<int>(level);
+    mType = type;
+    mLevel = level;
     mArg = arg;
 }
 

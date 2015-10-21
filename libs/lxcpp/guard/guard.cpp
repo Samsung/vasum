@@ -63,9 +63,9 @@ Guard::Guard(const int channelFD)
     mChannel.setCloseOnExec(true);
     config::loadFromFD(mChannel.getFD(), mConfig);
 
-    logger::setupLogger(mConfig.mLogger.getType(),
-                        mConfig.mLogger.getLevel(),
-                        mConfig.mLogger.getArg());
+    logger::setupLogger(mConfig.mLogger.mType,
+                        mConfig.mLogger.mLevel,
+                        mConfig.mLogger.mArg);
 
     LOGD("Config & logging restored");
 

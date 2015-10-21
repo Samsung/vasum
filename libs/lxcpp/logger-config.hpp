@@ -35,20 +35,15 @@ namespace lxcpp {
 /**
  * Logger configuration
  */
-struct LoggerConfig {
-private:
-    int mType;
-    int mLevel;
+struct LoggerConfig
+{
+    logger::LogType mType;
+    logger::LogLevel mLevel;
     std::string mArg;
 
-public:
     void set(const logger::LogType type,
              const logger::LogLevel level,
              const std::string &arg = "");
-
-    logger::LogType getType() const {return static_cast<logger::LogType>(mType);}
-    logger::LogLevel getLevel() const {return static_cast<logger::LogLevel>(mLevel);}
-    std::string getArg() const {return mArg;}
 
     CONFIG_REGISTER
     (
