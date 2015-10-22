@@ -44,6 +44,9 @@ For now Vasum uses [LXC](https://linuxcontainers.org/lxc/introduction/) for Linu
 
 Vasum's development takes place on [review.tizen.org/gerrit/](http://review.tizen.org/gerrit/) (registration on [tizen.org](http://tizen.org) is required).
 
+## Vasum demo @youtube
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/hsNvI9kHTvI/0.jpg)](http://www.youtube.com/watch?v=hsNvI9kHTvI "Vasum demo - Fedora 22 Desktop running in Linux container ")
+
 ## Installation and usage
 The installation process and simple verification is described [here](https://wiki.tizen.org/wiki/Security:Vasum:Usage).
 
@@ -64,3 +67,4 @@ You can find the options file in the root of the project.
 For example to format all .cpp and .hpp files run in the project directory:
 
     astyle --options=./astylerc --recursive ./*.cpp ./*.hpp
+
