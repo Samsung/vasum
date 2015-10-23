@@ -418,4 +418,17 @@ void ContainerImpl::removeLink(const provision::Link& item)
     }
 }
 
+void ContainerImpl::addSubsystem(const std::string& name, const std::string& path)
+{
+    mConfig.mCgroups.subsystems.push_back(SubsystemConfig{name, path});
+}
+
+void ContainerImpl::addCGroup(const std::string& subsys,
+                              const std::string& grpname,
+                              const std::vector<CGroupParam>& comm,
+                              const std::vector<CGroupParam>& params)
+{
+    mConfig.mCgroups.cgroups.push_back(CGroupConfig{subsys, grpname, comm, params});
+}
+
 } // namespace lxcpp

@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(NetworkConfigSerialization)
     config::saveToJsonFile(tmpConfigFile, cfg);
 
     NetworkConfig cfg2;
-    config::loadFromJsonFile(tmpConfigFile, cfg2);
+    BOOST_CHECK_NO_THROW(config::loadFromJsonFile(tmpConfigFile, cfg2));
 
     int ifnum = cfg.getInterfaces().size();
     for (int i = 0; i < ifnum; ++i) {

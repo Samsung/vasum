@@ -29,6 +29,7 @@
 #include "lxcpp/terminal-config.hpp"
 #include "lxcpp/provision-config.hpp"
 #include "lxcpp/userns-config.hpp"
+#include "lxcpp/cgroups/cgroup-config.hpp"
 
 #include <config/config.hpp>
 #include <config/fields.hpp>
@@ -134,6 +135,11 @@ struct ContainerConfig {
      * Get: none
      */
     UserNSConfig mUserNSConfig;
+
+    /*
+     * CGropus configuration
+     */
+    CGroupsConfig mCgroups;
 
     ContainerConfig() : mGuardPid(-1), mInitPid(-1), mNamespaces(0) {}
 

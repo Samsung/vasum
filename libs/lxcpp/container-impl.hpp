@@ -118,6 +118,13 @@ public:
     const LinkVector& getLinks() const;
     void removeLink(const provision::Link& item);
 
+    // CGroups
+    void addSubsystem(const std::string& name, const std::string& path);
+    void addCGroup(const std::string& subsys,
+                   const std::string& grpname,
+                   const std::vector<CGroupParam>& comm,
+                   const std::vector<CGroupParam>& params);
+
 private:
     ContainerConfig mConfig;
 };

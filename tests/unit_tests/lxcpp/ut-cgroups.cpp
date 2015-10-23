@@ -22,10 +22,15 @@
  */
 
 #include "config.hpp"
+#include "config/manager.hpp"
 #include "ut.hpp"
 #include "logger/logger.hpp"
 
 #include "lxcpp/cgroups/devices.hpp"
+#include "lxcpp/cgroups/cgroup-config.hpp"
+
+#include "lxcpp/commands/cgroups.hpp"
+
 #include "lxcpp/exception.hpp"
 #include "utils/text.hpp"
 
@@ -46,6 +51,7 @@ using namespace lxcpp;
 BOOST_AUTO_TEST_CASE(GetAvailable)
 {
     std::vector<std::string> subs;
+
     BOOST_CHECK_NO_THROW(subs = Subsystem::availableSubsystems());
     BOOST_CHECK_MESSAGE(subs.size() > 0, "Control groups not supported");
     for (auto n : subs){
@@ -57,6 +63,7 @@ BOOST_AUTO_TEST_CASE(GetAvailable)
 BOOST_AUTO_TEST_CASE(GetCGroupsByPid)
 {
     std::vector<std::string> cg;
+
     BOOST_CHECK_NO_THROW(cg=Subsystem::getCGroups(::getpid()));
     BOOST_CHECK(cg.size() > 0);
 }
@@ -65,6 +72,7 @@ BOOST_AUTO_TEST_CASE(GetPidsByCGroup)
 {
     CGroup cg = CGroup::getCGroup("memory", ::getpid());
     std::vector<pid_t> pids;
+
     BOOST_CHECK_NO_THROW(pids = cg.getPids());
     BOOST_CHECK(pids.size() > 0);
 }
@@ -72,6 +80,7 @@ BOOST_AUTO_TEST_CASE(GetPidsByCGroup)
 BOOST_AUTO_TEST_CASE(SubsysAttach)
 {
     Subsystem sub("freezer");
+
     BOOST_CHECK_MESSAGE(sub.isAvailable(), "freezer not found");
 
     if (!sub.isAvailable()) return ;
@@ -95,33 +104,84 @@ BOOST_AUTO_TEST_CASE(SubsysAttach)
 BOOST_AUTO_TEST_CASE(ControlGroupParams)
 {
     CGroup memg("memory:/ut-params");
-    BOOST_CHECK(memg.exists() == false);
+
+    // this test can fail if prev. test round left unexpected
+    BOOST_CHECK_MESSAGE(memg.exists() == false, "Cgroup alredy exists");
     BOOST_CHECK_NO_THROW(memg.create());
     BOOST_CHECK(memg.exists() == true);
 
-    if (!memg.exists()) return ;
+    if (!memg.exists()) {
+        return ;
+    }
 
-    memg.assignPid(::getpid());
-    memg.setValue("limit_in_bytes", "10k");
-    memg.setValue("soft_limit_in_bytes", "10k");
+    BOOST_CHECK_NO_THROW(memg.assignPid(::getpid()));
+    BOOST_CHECK_NO_THROW(memg.assignGroup(::getpid()));
+
+    BOOST_CHECK_NO_THROW(memg.setValue("limit_in_bytes", "10k"));
+    BOOST_CHECK_NO_THROW(memg.setValue("soft_limit_in_bytes", "10k"));
+    BOOST_CHECK_THROW(memg.getValue("non-existing-name"), CGroupException);
     BOOST_CHECK_THROW(memg.setValue("non-existing-name", "xxx"), CGroupException);
 
     LOGD("limit_in_bytes: " << memg.getValue("limit_in_bytes"));
     LOGD("soft_limit_in_bytes: " << memg.getValue("soft_limit_in_bytes"));
     LOGD("max_usage_in_bytes: " << memg.getValue("max_usage_in_bytes"));
 
-    CGroup("memory:/").assignPid(::getpid());
+    CGroup memtop("memory:/");
+    memtop.assignPid(::getpid());
+    memtop.setCommonValue("procs", std::to_string(::getpid()));
+
     BOOST_CHECK_NO_THROW(memg.destroy());
 }
 
 BOOST_AUTO_TEST_CASE(DevicesParams)
 {
-    DevicesCGroup devcg("/");
-    std::vector<DevicePermission> list = devcg.list();
+    DevicesCGroup devgrp("/tmp");
+
+    BOOST_CHECK_NO_THROW(devgrp.create());
+
+    std::vector<DevicePermission> list;
+    BOOST_CHECK_NO_THROW(list = devgrp.list());
     for (__attribute__((unused)) const auto& i : list) {
         LOGD(std::string("perm = ") + i.type + " " +
              std::to_string(i.major) + ":" + std::to_string(i.minor) + " " + i.permission);
     }
+
+    BOOST_CHECK_NO_THROW(devgrp.destroy());
+}
+
+BOOST_AUTO_TEST_CASE(CGroupConfigSerialization)
+{
+    CGroupsConfig cfg;
+    std::string tmpConfigFile = "/tmp/cgconfig.conf";
+
+    BOOST_CHECK_NO_THROW(config::saveToJsonString(cfg));
+
+    cfg.subsystems.push_back(SubsystemConfig{"cpu", "/tmp/cgroup/cpu"});
+
+    CGroupConfig cpucfg = {"cpu", "/testcpu", {}, {}};
+    cfg.cgroups.push_back(cpucfg);
+    config::saveToJsonFile(tmpConfigFile, cfg);
+
+    CGroupsConfig cfg2;
+    BOOST_CHECK_NO_THROW(config::loadFromJsonFile(tmpConfigFile, cfg2));
+    BOOST_CHECK(cfg2.subsystems.size()==cfg.subsystems.size());
+}
+
+BOOST_AUTO_TEST_CASE(CGroupCommands)
+{
+    CGroupsConfig cfg;
+    Subsystem sub("cpu");
+    std::string mp = sub.isAttached() ? sub.getMountPoint() : "/tmp/cgroup/cpu";
+
+    cfg.subsystems.push_back(SubsystemConfig{"cpu", mp});
+    CGroupConfig cpucfg = {"cpu", "/testcpu", {}, {}};
+    cfg.cgroups.push_back(cpucfg);
+
+    CGroupMakeAll cmd(cfg);
+    BOOST_CHECK_NO_THROW(cmd.execute());
+
+    CGroup cpugrp("cpu", "/testcpu");
+    BOOST_CHECK_NO_THROW(cpugrp.destroy());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

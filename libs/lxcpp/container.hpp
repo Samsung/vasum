@@ -26,6 +26,7 @@
 
 #include "lxcpp/network-config.hpp"
 #include "lxcpp/provision-config.hpp"
+#include "lxcpp/cgroups/cgroup-config.hpp"
 #include "lxcpp/logger-config.hpp"
 
 #include <sys/types.h>
@@ -123,6 +124,13 @@ public:
                              const std::string& target) = 0;
     virtual const LinkVector& getLinks() const = 0;
     virtual void removeLink(const provision::Link& item) = 0;
+
+    // CGroups
+    virtual void addSubsystem(const std::string& name, const std::string& path) = 0;
+    virtual void addCGroup(const std::string& subsys,
+                           const std::string& grpname,
+                           const std::vector<CGroupParam>& comm,
+                           const std::vector<CGroupParam>& params) = 0;
 };
 
 } // namespace lxcpp

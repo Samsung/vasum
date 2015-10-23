@@ -23,6 +23,7 @@
 
 #include "lxcpp/cgroups/cgroup.hpp"
 #include "lxcpp/exception.hpp"
+#include "utils/exception.hpp"
 #include "utils/fs.hpp"
 #include "utils/text.hpp"
 #include "logger/logger.hpp"
@@ -35,6 +36,7 @@ namespace {
 std::string getSubsysName(const std::string& s)
 {
     auto p = s.find(':');
+
     if (p == std::string::npos) {
         const std::string msg = "wrong subsys format " + s;
         LOGE(msg);
@@ -46,6 +48,7 @@ std::string getSubsysName(const std::string& s)
 std::string getCGroupName(const std::string& s)
 {
     auto p = s.find(':');
+
     if (p == std::string::npos) {
         const std::string msg = "wrong cgroup format " + s;
         LOGE(msg);
@@ -65,6 +68,7 @@ CGroup::CGroup(const std::string& subsysAndCgroup) :
 bool CGroup::exists() const
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName;
+
     return fs::is_directory(path);
 }
 
@@ -84,6 +88,7 @@ void CGroup::destroy()
 void CGroup::setCommonValue(const std::string& param, const std::string& value)
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / ("cgroup." + param);
+
     if (!utils::saveFileContent(path.string(), value)) {
         const std::string msg = "Invalid param " + param;
         LOGE(msg);
@@ -94,12 +99,20 @@ void CGroup::setCommonValue(const std::string& param, const std::string& value)
 std::string CGroup::getCommonValue(const std::string& param) const
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / ("cgroup." + param);
-    return utils::readFileStream(path.string());
+
+    try {
+        return utils::readFileStream(path.string());
+    } catch (const utils::UtilsException& e) {
+        const std::string msg = "Invalid param " + param;
+        LOGE(msg);
+        throw CGroupException(msg);
+    }
 }
 
 void CGroup::setValue(const std::string& param, const std::string& value)
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / (mSubsys.getName() + "." + param);
+
     if (!utils::saveFileContent(path.string(), value)) {
         const std::string msg = "Invalid param " + param;
         LOGE(msg);
@@ -110,7 +123,14 @@ void CGroup::setValue(const std::string& param, const std::string& value)
 std::string CGroup::getValue(const std::string& param) const
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / (mSubsys.getName() + "." + param);
-    return utils::readFileStream(path.string());
+
+    try {
+        return utils::readFileStream(path.string());
+    } catch (const utils::UtilsException& e) {
+        const std::string msg = "Invalid param " + param;
+        LOGE(msg);
+        throw CGroupException(msg);
+    }
 }
 
 void CGroup::assignGroup(pid_t pid)
@@ -128,6 +148,7 @@ std::vector<pid_t> CGroup::getPids() const
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / "tasks";
     std::ifstream fileStream(path.string());
+
     if (!fileStream.good()) {
         const std::string msg = "Failed to open " + path.string();
         LOGE(msg);
@@ -147,6 +168,7 @@ std::vector<pid_t> CGroup::getPids() const
 CGroup CGroup::getCGroup(const std::string& subsys, pid_t pid)
 {
     std::vector<std::string> cgroups = Subsystem::getCGroups(pid);
+
     for (const auto& i : cgroups) {
         if (utils::beginsWith(i, subsys + ":")) {
             return CGroup(i);

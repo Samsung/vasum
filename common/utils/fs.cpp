@@ -49,13 +49,34 @@ namespace utils {
 
 std::string readFileStream(const std::string& path)
 {
-    std::ifstream is(path);
-    return std::string(std::istreambuf_iterator<char>(is), std::istreambuf_iterator<char>());
+    std::ifstream file(path);
+
+    if (!file) {
+        throw UtilsException("Read failed");
+    }
+    // 2 x faster then std::istreambuf_iterator
+    std::stringstream content;
+    content << file.rdbuf();
+    return content.str();
+}
+
+bool readFileStream(const std::string& path, std::string& result)
+{
+    std::ifstream file(path);
+
+    if (!file) {
+        return false;
+    }
+    std::stringstream content;
+    content << file.rdbuf();
+    result = content.str();
+    return true;
 }
 
 std::string readFileContent(const std::string& path)
 {
     std::string result;
+
     if (!readFileContent(path, result)) {
         throw UtilsException("Read failed");
     }
