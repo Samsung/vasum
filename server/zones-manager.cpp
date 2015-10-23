@@ -463,6 +463,10 @@ void ZonesManager::restoreAll()
 
     for (auto& zone : mZones) {
         zone->restore();
+        // FIXME wait until zone is started and stable
+        // there is problem (with lxc-start) when starting zones too fast
+        // here or in zone.cpp after start
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
     refocus();

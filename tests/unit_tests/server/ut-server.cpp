@@ -59,6 +59,7 @@ struct Fixture {
     Fixture()
         : mZonesPathGuard(ZONES_PATH)
     {
+        LOGI("------------ ServerSuite fixture -----------");
         prepare();
         LOGI("------------ setup complete -----------");
     }

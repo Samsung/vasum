@@ -204,7 +204,9 @@ void Zone::start()
     }
 
     if (!mZone.start(args.c_array())) {
-        throw ZoneOperationException("Could not start zone");
+        std::string msg = "Could not start zone " + mZone.getName();
+        LOGE(msg);
+        throw ZoneOperationException(msg);
     }
 
     // Wait until the full platform launch with graphical stack.

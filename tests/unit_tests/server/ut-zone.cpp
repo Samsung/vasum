@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(StartBuggyInit)
     auto c = create(BUGGY_INIT_CONFIG_PATH);
     BOOST_REQUIRE_EXCEPTION(c->start(),
                             ZoneOperationException,
-                            WhatEquals("Could not start zone"));
+                            WhatEquals("Could not start zone " + c->getId()));
 }
 
 BOOST_AUTO_TEST_CASE(StopShutdown)

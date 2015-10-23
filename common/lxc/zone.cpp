@@ -208,7 +208,7 @@ bool LxcZone::start(const char* const* argv)
     }
 
     if (!utils::executeAndWait("/usr/bin/lxc-start", args.c_array())) {
-        LOGE("Could not start zone " << getName());
+        LOGE("Could not start zone (lxc-start) " << getName());
         return false;
     }
 
@@ -230,7 +230,7 @@ bool LxcZone::start(const char* const* argv)
         return false;
     }
     if (!mLxcContainer->start(mLxcContainer, false, const_cast<char* const*>(argv))) {
-        LOGE("Could not start zone " << getName());
+        LOGE("Could not start zone (intern) " << getName());
         return false;
     }
     return true;
