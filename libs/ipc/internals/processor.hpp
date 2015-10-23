@@ -117,8 +117,11 @@ public:
      * Constructs the Processor, but doesn't start it.
      * The object is ready to add methods.
      *
+     * @param eventPoll event poll
+     * @param logName log name
      * @param newPeerCallback called when a new peer arrives
      * @param removedPeerCallback called when the Processor stops listening for this peer
+     * @param maxNumberOfPeers maximal number of peers
      */
     Processor(epoll::EventPoll& eventPoll,
               const std::string& logName = "",

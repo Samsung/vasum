@@ -8,6 +8,9 @@ For now Vasum uses [LXC](https://linuxcontainers.org/lxc/introduction/) for Linu
 
 Vasum's development takes place on [review.tizen.org/gerrit/](http://review.tizen.org/gerrit/) (registration on [tizen.org](http://tizen.org) is required).
 
+## Vasum demo
+Fedora 22 Desktop running in Linux container on [youtube](http://www.youtube.com/watch?v=hsNvI9kHTvI)
+
 ## Installation and usage
 
 The installation process and simple verification is described [here](https://wiki.tizen.org/wiki/Security:Vasum:Usage "Vasum on Tizen").
