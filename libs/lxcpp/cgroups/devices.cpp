@@ -26,7 +26,13 @@
 #include "utils/text.hpp"
 #include "logger/logger.hpp"
 
+#ifdef USE_BOOST_REGEX
+#include <boost/regex.hpp>
+namespace rgx = boost;
+#else
 #include <regex>
+namespace rgx = std;
+#endif
 
 namespace lxcpp {
 
@@ -39,10 +45,10 @@ std::string devString(int n)
 DevicePermission& parsePerms(DevicePermission& p,const std::string& line)
 {
     std::string re = "^([a-z]) ([0-9]+|\\*):([0-9]+|\\*) ([a-z]+)$";
-    std::smatch match;
+    rgx::smatch match;
     try {
-        std::regex rgx(re);
-        if (!std::regex_search(line, match, rgx)) {
+        rgx::regex rgex(re);
+        if (!rgx::regex_search(line, match, rgex)) {
             throw CGroupException("wrong input: " + line);
         }
     } catch (CGroupException) {

@@ -43,9 +43,16 @@
 #include <unistd.h>
 
 #include <boost/filesystem.hpp>
-#include <boost/regex.hpp>
 #include <vector>
 #include <functional>
+
+#ifdef USE_BOOST_REGEX
+#include <boost/regex.hpp>
+namespace rgx = boost;
+#else
+#include <regex>
+namespace rgx = std;
+#endif
 
 using namespace utils;
 namespace fs = boost::filesystem;
@@ -115,7 +122,7 @@ void InputMonitor::stop()
 
 namespace {
 
-bool isDeviceWithName(const boost::regex& deviceNameRegex,
+bool isDeviceWithName(const rgx::regex& deviceNameRegex,
                       const fs::directory_entry& directoryEntry)
 {
     std::string path = directoryEntry.path().string();
@@ -144,7 +151,7 @@ bool isDeviceWithName(const boost::regex& deviceNameRegex,
     }
 
     LOGD("Checking device: " << name);
-    if (boost::regex_match(name, deviceNameRegex)) {
+    if (rgx::regex_match(name, deviceNameRegex)) {
         LOGI("Device file found under: " << path);
         return true;
     }
@@ -167,7 +174,7 @@ std::string InputMonitor::getDevicePath() const
     LOGT("Determining, which device node is assigned to '" << device << "'");
     using namespace std::placeholders;
     fs::directory_iterator end;
-    boost::regex deviceNameRegex(".*" + device + ".*");
+    rgx::regex deviceNameRegex(".*" + device + ".*");
     const auto it = std::find_if(fs::directory_iterator(DEVICE_DIR),
                                  end,
                                  std::bind(isDeviceWithName, deviceNameRegex, _1));

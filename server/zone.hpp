@@ -36,7 +36,6 @@
 #include <string>
 #include <memory>
 #include <thread>
-#include <boost/regex.hpp>
 
 
 namespace vasum {

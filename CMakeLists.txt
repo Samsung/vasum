@@ -59,6 +59,14 @@ else()
     SET(CXX_11_STD "c++11")
 endif()
 
+# special case for a GCC < 4.9, use boost for regex
+IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
+    SET(USE_BOOST_REGEX "regex")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_BOOST_REGEX")
+else()
+    SET(USE_BOOST_REGEX "")
+endif()
+
 SET(CMAKE_C_FLAGS_PROFILING    "-O0 -pg")
 SET(CMAKE_CXX_FLAGS_PROFILING  "-std=${CXX_11_STD} -O0 -pg")
 SET(CMAKE_C_FLAGS_DEBUG        "-O0 -ggdb")

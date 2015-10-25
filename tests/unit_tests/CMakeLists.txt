@@ -56,7 +56,7 @@ ADD_EXECUTABLE(${SOCKET_TEST_CODENAME} ${socket_test_SRCS} ${client_SRCS})
 ENDIF(NOT WITHOUT_SYSTEMD)
 
 ## Link libraries ##############################################################
-FIND_PACKAGE (Boost COMPONENTS unit_test_framework system filesystem regex)
+FIND_PACKAGE (Boost COMPONENTS unit_test_framework system filesystem ${USE_BOOST_REGEX})
 
 PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED lxc gio-2.0)
 INCLUDE_DIRECTORIES(${COMMON_FOLDER} ${SERVER_FOLDER} ${UNIT_TESTS_FOLDER} ${CLIENT_FOLDER}

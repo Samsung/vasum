@@ -29,7 +29,7 @@ ADD_EXECUTABLE(${SERVER_CODENAME} ${project_SRCS})
 ADD_DEPENDENCIES(${SERVER_CODENAME} Common Logger Config Ipc)
 
 ## Link libraries ##############################################################
-FIND_PACKAGE(Boost COMPONENTS program_options system filesystem regex)
+FIND_PACKAGE(Boost COMPONENTS program_options system filesystem ${USE_BOOST_REGEX})
 PKG_CHECK_MODULES(SERVER_DEPS REQUIRED lxc glib-2.0 gio-2.0)
 
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})

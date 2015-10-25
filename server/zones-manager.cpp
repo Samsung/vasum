@@ -41,7 +41,6 @@
 #include "api/messages.hpp"
 
 #include <boost/filesystem.hpp>
-#include <boost/regex.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <cassert>
 #include <string>
@@ -49,6 +48,13 @@
 #include <cctype>
 #include <set>
 
+#ifdef USE_BOOST_REGEX
+#include <boost/regex.hpp>
+namespace rgx = boost;
+#else
+#include <regex>
+namespace rgx = std;
+#endif
 
 namespace vasum {
 
@@ -59,8 +65,8 @@ namespace {
 const std::string HOST_ID = "host";
 const std::string ENABLED_FILE_NAME = "enabled";
 
-const boost::regex ZONE_NAME_REGEX("~NAME~");
-const boost::regex ZONE_IP_THIRD_OCTET_REGEX("~IP~");
+const rgx::regex ZONE_NAME_REGEX("~NAME~");
+const rgx::regex ZONE_IP_THIRD_OCTET_REGEX("~IP~");
 
 const unsigned int ZONE_IP_BASE_THIRD_OCTET = 100;
 
@@ -1148,7 +1154,7 @@ void ZonesManager::generateNewConfig(const std::string& id,
     config::loadFromKVStoreWithJsonFile(mConfig.dbPath, templatePath, dynamicConfig, dbPrefix);
 
     // update mount point path
-    dynamicConfig.runMountPoint = boost::regex_replace(dynamicConfig.runMountPoint,
+    dynamicConfig.runMountPoint = rgx::regex_replace(dynamicConfig.runMountPoint,
                                                        ZONE_NAME_REGEX,
                                                        id);
 
@@ -1162,10 +1168,10 @@ void ZonesManager::generateNewConfig(const std::string& id,
             // generate third IP octet for network config
             std::string thirdOctetStr = std::to_string(ZONE_IP_BASE_THIRD_OCTET + freeVT);
             LOGD("IP third octet: " << thirdOctetStr);
-            dynamicConfig.ipv4Gateway = boost::regex_replace(dynamicConfig.ipv4Gateway,
+            dynamicConfig.ipv4Gateway = rgx::regex_replace(dynamicConfig.ipv4Gateway,
                                                              ZONE_IP_THIRD_OCTET_REGEX,
                                                              thirdOctetStr);
-            dynamicConfig.ipv4 = boost::regex_replace(dynamicConfig.ipv4,
+            dynamicConfig.ipv4 = rgx::regex_replace(dynamicConfig.ipv4,
                                                       ZONE_IP_THIRD_OCTET_REGEX,
                                                       thirdOctetStr);
         }

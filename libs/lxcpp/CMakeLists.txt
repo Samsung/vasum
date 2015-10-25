@@ -54,7 +54,7 @@ TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME}
 ADD_DEPENDENCIES(${PROJECT_NAME} Common Logger Config Ipc)
 
 ## Link libraries ##############################################################
-FIND_PACKAGE(Boost COMPONENTS system filesystem)
+FIND_PACKAGE(Boost COMPONENTS system filesystem ${USE_BOOST_REGEX})
 PKG_CHECK_MODULES(LXCPP_DEPS REQUIRED glib-2.0)
 
 INCLUDE_DIRECTORIES(${LIBS_FOLDER} ${COMMON_FOLDER})
