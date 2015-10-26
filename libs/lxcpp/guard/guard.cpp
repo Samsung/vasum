@@ -24,8 +24,10 @@
 #include "lxcpp/utils.hpp"
 #include "lxcpp/guard/guard.hpp"
 #include "lxcpp/process.hpp"
+#include "lxcpp/credentials.hpp"
 #include "lxcpp/commands/prep-guest-terminal.hpp"
 #include "lxcpp/commands/provision.hpp"
+#include "lxcpp/commands/setup-userns.hpp"
 
 #include "config/manager.hpp"
 #include "logger/logger.hpp"
@@ -35,13 +37,17 @@
 
 namespace lxcpp {
 
-namespace {
-
-int startContainer(void* data)
+int Guard::startContainer(void* data)
 {
-    ContainerConfig& config = *static_cast<ContainerConfig*>(data);
+    ContainerConfig& config = static_cast<ContainerData*>(data)->mConfig;
+    utils::Channel& channel = static_cast<ContainerData*>(data)->mChannel;
 
-    // TODO: container preparation part 2
+    // wait for continue sync from guard
+    channel.setRight();
+    channel.read<bool>();
+    channel.shutdown();
+
+    // TODO: container preparation part 3: things to do in the container process
 
     Provisions provisions(config);
     provisions.execute();
@@ -49,13 +55,17 @@ int startContainer(void* data)
     PrepGuestTerminal terminals(config.mTerminals);
     terminals.execute();
 
+    if (config.mUserNSConfig.mUIDMaps.size()) {
+        lxcpp::setreuid(0, 0);
+    }
+    if (config.mUserNSConfig.mGIDMaps.size()) {
+        lxcpp::setregid(0, 0);
+    }
+
     lxcpp::execve(config.mInit);
 
     return EXIT_FAILURE;
 }
-
-} // namespace
-
 
 Guard::Guard(const int channelFD)
     : mChannel(channelFD)
@@ -85,10 +95,13 @@ Guard::~Guard()
 
 int Guard::execute()
 {
-    // TODO: container preparation part 1
+    // TODO: container preparation part 1: things to do before clone
 
-    const pid_t initPid = lxcpp::clone(startContainer,
-                                       &mConfig,
+    utils::Channel channel;
+    ContainerData data(mConfig, channel);
+
+    const pid_t initPid = lxcpp::clone(Guard::startContainer,
+                                       &data,
                                        mConfig.mNamespaces);
 
     mConfig.mGuardPid = ::getpid();
@@ -98,10 +111,21 @@ int Guard::execute()
     mChannel.write(mConfig.mInitPid);
     mChannel.shutdown();
 
+    // TODO: container preparation part 2: things to do immediately after clone
+
+    SetupUserNS userNS(mConfig.mUserNSConfig, mConfig.mInitPid);
+    userNS.execute();
+
+    // send continue sync to container once userns, netns, cgroups, etc, are configured
+    channel.setLeft();
+    channel.write(true);
+    channel.shutdown();
+
     int status = lxcpp::waitpid(initPid);
     LOGD("Init exited with status: " << status);
 
-    // TODO: cleanup after child exits
+    // TODO: container (de)preparation part 4: cleanup after container quits
+
     Provisions provisions(mConfig);
     provisions.revert();
 

@@ -61,9 +61,9 @@ int child(void* data)
     setenv(config.envToSet);
 
     // Set uid/gids
-    lxcpp::setgid(config.gid);
+    lxcpp::setregid(config.gid, config.gid);
     setgroups(config.supplementaryGids);
-    lxcpp::setuid(config.uid);
+    lxcpp::setreuid(config.uid, config.uid);
 
     // Set control TTY
     if(!setupControlTTY(config.ttyFD)) {

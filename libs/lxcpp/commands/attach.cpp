@@ -33,7 +33,7 @@
 
 namespace lxcpp {
 
-Attach::Attach(const lxcpp::ContainerImpl& container,
+Attach::Attach(const ContainerConfig& config,
                const std::vector<std::string>& argv,
                const uid_t uid,
                const gid_t gid,
@@ -45,8 +45,8 @@ Attach::Attach(const lxcpp::ContainerImpl& container,
                const std::vector<std::pair<std::string, std::string>>& envToSet)
     : mIntermChannel(false),
       mConfig(argv,
-              container.getInitPid(),
-              container.getNamespaces(),
+              config.mInitPid,
+              config.mNamespaces,
               uid,
               gid,
               supplementaryGids,

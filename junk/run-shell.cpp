@@ -61,12 +61,16 @@ int main(int argc, char *argv[])
         c->setInit(args);
         c->setLogger(logger::LogType::LOG_FILE, logger::LogLevel::TRACE, "/tmp/lxcpp-shell.txt");
         c->setTerminalCount(4);
+        // make my own user root in a new namespace
+        c->addUIDMap(0, 1000, 1);
+        c->addGIDMap(0, 1000, 1);
+        // make root and system users non privileged ones
+        c->addUIDMap(1000, 0, 999);
+        c->addGIDMap(1000, 0, 999);
         c->start();
         c->console();
         // You could run the console for the second time to see if it can be reattached
         //c->console();
-
-        initPid = c->getInitPid();
 
         delete c;
     }

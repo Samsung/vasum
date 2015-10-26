@@ -42,20 +42,20 @@ void setgroups(const std::vector<gid_t>& gids)
     }
 }
 
-void setgid(const gid_t gid)
+void setregid(const gid_t rgid, const gid_t egid)
 {
-    if(-1 == ::setgid(gid)) {
-        const std::string msg = "setgid() failed: " +
+    if(-1 == ::setregid(rgid, egid)) {
+        const std::string msg = "setregid() failed: " +
                                 utils::getSystemErrorMessage();
         LOGE(msg);
         throw CredentialSetupException(msg);
     }
 }
 
-void setuid(const uid_t uid)
+void setreuid(const uid_t ruid, const uid_t euid)
 {
-    if(-1 == ::setuid(uid)) {
-        const std::string msg = "setuid() failed: " +
+    if(-1 == ::setreuid(ruid, euid)) {
+        const std::string msg = "setreuid() failed: " +
                                 utils::getSystemErrorMessage();
         LOGE(msg);
         throw CredentialSetupException(msg);

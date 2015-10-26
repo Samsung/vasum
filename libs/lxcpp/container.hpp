@@ -65,8 +65,8 @@ public:
 
     virtual void setTerminalCount(const unsigned int count) = 0;
 
-    virtual void setNamespaces(const int namespaces) = 0;
-    virtual int getNamespaces() const = 0;
+    virtual void addUIDMap(unsigned min, unsigned max, unsigned num) = 0;
+    virtual void addGIDMap(unsigned min, unsigned max, unsigned num) = 0;
 
     // Execution actions
     virtual void start() = 0;

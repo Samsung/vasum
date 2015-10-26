@@ -55,8 +55,8 @@ public:
 
     void setTerminalCount(const unsigned int count);
 
-    void setNamespaces(const int namespaces);
-    int getNamespaces() const;
+    void addUIDMap(unsigned min, unsigned max, unsigned num);
+    void addGIDMap(unsigned min, unsigned max, unsigned num);
 
     // Execution actions
     void start();

@@ -17,27 +17,39 @@
 
 /**
  * @file
- * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Process credentials handling
+ * @author  Lukasz Pawelczyk (l.pawelczyk@samsung.com)
+ * @brief   Headers of user namespace setup
  */
 
-#ifndef LXCPP_CREDENTIALS_HPP
-#define LXCPP_CREDENTIALS_HPP
+#ifndef LXCPP_COMMANDS_SETUP_USERNS_HPP
+#define LXCPP_COMMANDS_SETUP_USERNS_HPP
 
-#include <sys/types.h>
+#include "lxcpp/commands/command.hpp"
+#include "lxcpp/container-config.hpp"
 
-#include <vector>
 
 namespace lxcpp {
 
-void setgroups(const std::vector<gid_t>& groups);
 
-void setregid(const gid_t rgid, const gid_t egid);
+class SetupUserNS final: Command {
+public:
+    /**
+     * Setups the user namespace by filling UID/GID mappings
+     *
+     * @param userNSConfig  A config containing UID and GID mappings
+     */
+    SetupUserNS(UserNSConfig &userNSConfig, pid_t initPid);
+    ~SetupUserNS();
 
-void setreuid(const uid_t ruid, const uid_t euid);
+    void execute();
 
-pid_t setsid();
+private:
+    UserNSConfig &mUserNSConfig;
+    pid_t mInitPid;
+};
+
 
 } // namespace lxcpp
 
-#endif // LXCPP_CREDENTIALS_HPP
+
+#endif // LXCPP_COMMANDS_SETUP_USERNS_HPP

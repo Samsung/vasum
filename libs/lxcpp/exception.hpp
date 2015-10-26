@@ -106,6 +106,11 @@ struct ProvisionException: public Exception {
         : Exception(message) {}
 };
 
+struct UserNSException: public Exception {
+    explicit UserNSException(const std::string& message = "User namespace error")
+        : Exception(message) {}
+};
+
 } // namespace lxcpp
 
 #endif // LXCPP_EXCEPTION_HPP

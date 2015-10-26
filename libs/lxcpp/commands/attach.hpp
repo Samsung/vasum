@@ -44,7 +44,7 @@ public:
      * Object attach should be used immediately after creation.
      * It will not be stored for future use like most other commands.
      *
-     * @param container container to which it attaches
+     * @param config config of a container to which it attaches
      * @param argv path and arguments for the user's executable
      * @param uid uid in the container
      * @param gid gid in the container
@@ -55,7 +55,7 @@ public:
      * @param envToKeep environment variables that will be kept
      * @param envToSet new environment variables that will be set
      */
-    Attach(const lxcpp::ContainerImpl& container,
+    Attach(const ContainerConfig& config,
            const std::vector<std::string>& argv,
            const uid_t uid,
            const gid_t gid,

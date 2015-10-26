@@ -72,6 +72,7 @@ ContainerImpl::ContainerImpl(const std::string &name, const std::string &path)
 
     mConfig.mName = name;
     mConfig.mRootPath = path;
+    mConfig.mNamespaces = CLONE_NEWIPC | CLONE_NEWNS | CLONE_NEWPID | CLONE_NEWUTS;
 }
 
 // TODO: the aim of this constructor is to create a new ContainerImpl based on an already
@@ -147,15 +148,30 @@ void ContainerImpl::setTerminalCount(const unsigned int count)
     mConfig.mTerminals.count = count;
 }
 
-void ContainerImpl::setNamespaces(const int namespaces)
+void ContainerImpl::addUIDMap(unsigned min, unsigned max, unsigned num)
 {
-    mConfig.mNamespaces = namespaces;
+    mConfig.mNamespaces |= CLONE_NEWUSER;
+
+    if (mConfig.mUserNSConfig.mUIDMaps.size() >= 5) {
+        const std::string msg = "Max number of 5 UID mappings has been already reached";
+        LOGE(msg);
+        throw ConfigureException(msg);
+    }
+
+    mConfig.mUserNSConfig.mUIDMaps.emplace_back(min, max, num);
 }
 
-
-int ContainerImpl::getNamespaces() const
+void ContainerImpl::addGIDMap(unsigned min, unsigned max, unsigned num)
 {
-    return mConfig.mNamespaces;
+    mConfig.mNamespaces |= CLONE_NEWUSER;
+
+    if (mConfig.mUserNSConfig.mGIDMaps.size() >= 5) {
+        const std::string msg = "Max number of 5 GID mappings has been already reached";
+        LOGE(msg);
+        throw ConfigureException(msg);
+    }
+
+    mConfig.mUserNSConfig.mGIDMaps.emplace_back(min, max, num);
 }
 
 void ContainerImpl::start()
@@ -196,7 +212,7 @@ void ContainerImpl::reboot()
 void ContainerImpl::attach(const std::vector<std::string>& argv,
                            const std::string& cwdInContainer)
 {
-    Attach attach(*this,
+    Attach attach(mConfig,
                   argv,
                   /*uid in container*/ 0,
                   /*gid in container*/ 0,
@@ -228,6 +244,7 @@ void ContainerImpl::addInterfaceConfig(const std::string& hostif,
                                        const std::vector<InetAddr>& addrs,
                                        MacVLanMode mode)
 {
+    mConfig.mNamespaces |= CLONE_NEWNET;
     mConfig.mNetwork.addInterfaceConfig(hostif, zoneif, type, addrs, mode);
 }
 

@@ -28,6 +28,7 @@
 #include "lxcpp/network-config.hpp"
 #include "lxcpp/terminal-config.hpp"
 #include "lxcpp/provision-config.hpp"
+#include "lxcpp/userns-config.hpp"
 
 #include <config/config.hpp>
 #include <config/fields.hpp>
@@ -126,6 +127,14 @@ struct ContainerConfig {
      */
     ProvisionConfig mProvisions;
 
+    /**
+     * User namespace config (uid and gid mappings)
+     *
+     * Set: addUIDMap(), addGIDMap()
+     * Get: none
+     */
+    UserNSConfig mUserNSConfig;
+
     ContainerConfig() : mGuardPid(-1), mInitPid(-1), mNamespaces(0) {}
 
     CONFIG_REGISTER
@@ -138,7 +147,8 @@ struct ContainerConfig {
         mLogger,
         mTerminals,
         mNamespaces,
-        mProvisions
+        mProvisions,
+        mUserNSConfig
     )
 };
 

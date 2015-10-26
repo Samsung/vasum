@@ -39,6 +39,16 @@ public:
     int execute();
 
 private:
+    struct ContainerData {
+        ContainerConfig &mConfig;
+        utils::Channel &mChannel;
+
+        ContainerData(ContainerConfig &config, utils::Channel &channel)
+            : mConfig(config), mChannel(channel) {}
+    };
+
+    static int startContainer(void *data);
+
     utils::Channel mChannel;
     ContainerConfig mConfig;
 };

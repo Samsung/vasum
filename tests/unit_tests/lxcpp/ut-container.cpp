@@ -116,7 +116,6 @@ BOOST_AUTO_TEST_CASE(StartStop)
     BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
                                       logger::LogLevel::DEBUG,
                                       LOGGER_FILE));
-    BOOST_CHECK_NO_THROW(c->setNamespaces(CLONE_NEWIPC | CLONE_NEWNET | CLONE_NEWPID | CLONE_NEWUTS));
     BOOST_CHECK_NO_THROW(c->start());
     BOOST_CHECK_NO_THROW(c->stop());
 }
