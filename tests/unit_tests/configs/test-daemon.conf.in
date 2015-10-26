@@ -7,7 +7,7 @@
     "zoneTemplateDir" : "@VSM_TEST_CONFIG_INSTALL_DIR@/templates/",
     "runMountPointPrefix" : "",
     "defaultId" : "",
-    "hostVT" : 2,
+    "hostVT" : -1,
     "availableVTs" : [],
     "inputConfig" : {"enabled" : false,
                      "device" : "gpio-keys.4",

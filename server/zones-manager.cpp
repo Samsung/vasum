@@ -392,8 +392,10 @@ void ZonesManager::focusInternal(Zones::iterator iter)
     // assume mutex is locked
     if (iter == mZones.end()) {
         if (!mActiveZoneId.empty()) {
-            LOGI("Focus to: host");
-            utils::activateVT(mConfig.hostVT);
+            if (mConfig.hostVT > 0) {
+                LOGI("Focus to: host");
+                utils::activateVT(mConfig.hostVT);
+            }
             mActiveZoneId.clear();
         }
         return;
