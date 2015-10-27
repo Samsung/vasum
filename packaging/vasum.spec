@@ -44,7 +44,7 @@ Requires:       lxc-templates
 Requires:       iproute
 Requires(post): libcap
 %endif
-Obsoletes:      vasum-daemon < 1:0
+Conflicts:      vasum-daemon < 1:0
 
 %description
 This package provides a daemon used to manage zones - start, stop and switch
@@ -154,7 +154,7 @@ fi
 Summary:          Vasum Client
 Group:            Development/Libraries
 Requires:         vasum = %{epoch}:%{version}-%{release}
-Obsoletes:        vasum < 1:0
+Conflicts:        vasum < 1:0
 Requires(post):   /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
@@ -172,9 +172,6 @@ Library interface to the vasum daemon
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libvasum-client.so.%{version}
 %{_libdir}/libvasum-client.so.0
-%attr(755,root,root) %{_libdir}/libvasum.so.%{version}
-%{_libdir}/libvasum.so.0
-
 
 ## Devel Package ###############################################################
 %package devel
@@ -192,10 +189,8 @@ Development package including the header files for the client library
 %endif
 %defattr(644,root,root,755)
 %{_libdir}/libvasum-client.so
-%{_libdir}/libvasum.so
 %{_includedir}/vasum
 %{_libdir}/pkgconfig/vasum-client.pc
-%{_libdir}/pkgconfig/vasum.pc
 
 %if !%{without_dbus}
 ## Zone Support Package ###################################################

@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(DevicesParams)
 {
     DevicesCGroup devcg("/");
     std::vector<DevicePermission> list = devcg.list();
-    for (const auto& i : list) {
+    for (__attribute__((unused)) const auto& i : list) {
         LOGD(std::string("perm = ") + i.type + " " +
              std::to_string(i.major) + ":" + std::to_string(i.minor) + " " + i.permission);
     }

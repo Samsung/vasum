@@ -257,8 +257,6 @@ typedef enum {
     VSMDISPATCHER_INTERNAL          /**< Library will take care of dispatching messages */
 } VsmDispacherType;
 
-#ifndef __VASUM_WRAPPER_SOURCE__
-
 /**
  * Get file descriptor associated with event dispatcher of zone client
  *
@@ -985,8 +983,6 @@ const void *vsm_addrlist_get_addr(VsmAddrList addrs, unsigned int i);
  * @return adress prefix (mask bits count)
  */
 unsigned int vsm_addrlist_get_prefix(VsmAddrList addrs, unsigned int i);
-
-#endif /* __VASUM_WRAPPER_SOURCE__ */
 
 #ifdef __cplusplus
 }

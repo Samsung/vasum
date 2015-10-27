@@ -1,6 +1,4 @@
 // public API functions (or write tests to use them all)
-unusedFunction:wrapper/wrapper-compatibility.cpp
-unusedFunction:wrapper/wrapper.cpp
 unusedFunction:libs/config/kvstore.cpp
 unusedFunction:libs/ipc/internals/processor.cpp
 unusedFunction:server/zones-manager.cpp
