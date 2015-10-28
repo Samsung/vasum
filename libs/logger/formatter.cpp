@@ -40,7 +40,8 @@ namespace {
 
 const int TIME_COLUMN_LENGTH = 12;
 const int SEVERITY_COLUMN_LENGTH = 8;
-const int PROCESS_COLUMN_LENGTH = 8;
+const int PID_COLUMN_LENGTH = 8;
+const int TID_COLUMN_LENGTH = 2;
 const int FILE_COLUMN_LENGTH = 60;
 
 std::atomic<unsigned int> gNextThreadId(1);
@@ -123,7 +124,8 @@ std::string LogFormatter::getHeader(LogLevel logLevel,
     std::ostringstream logLine;
     logLine << getCurrentTime() << ' '
             << std::left << std::setw(SEVERITY_COLUMN_LENGTH) << '[' + toString(logLevel) + ']'
-            << std::right << std::setw(PROCESS_COLUMN_LENGTH) << ::getpid() << "/" << getCurrentThread() << ": "
+            << std::right << std::setw(PID_COLUMN_LENGTH) << ::getpid() << "/"
+            << std::right << std::setw(TID_COLUMN_LENGTH) << getCurrentThread() << ": "
             << std::left << std::setw(FILE_COLUMN_LENGTH)
             << file + ':' + std::to_string(line) + ' ' + func + ':';
     return logLine.str();
