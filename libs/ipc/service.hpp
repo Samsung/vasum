@@ -210,7 +210,13 @@ public:
     void callAsync(const MethodID methodID,
                    const PeerID& peerID,
                    const std::shared_ptr<SentDataType>& data,
-                   const typename ResultHandler<ReceivedDataType>::type& resultCallback);
+                   const typename ResultHandler<ReceivedDataType>::type& resultCallback =  nullptr);
+
+    template<typename SentDataType, typename ReceivedDataType>
+    void callAsyncFromCallback(const MethodID methodID,
+                               const PeerID& peerID,
+                               const std::shared_ptr<SentDataType>& data,
+                               const typename ResultHandler<ReceivedDataType>::type& resultCallback  =  nullptr);
 
     /**
     * Send a signal to the peer.
@@ -274,6 +280,21 @@ void Service::callAsync(const MethodID methodID,
                                            data,
                                            resultCallback);
 }
+
+template<typename SentDataType, typename ReceivedDataType>
+void Service::callAsyncFromCallback(const MethodID methodID,
+                                    const PeerID& peerID,
+                                    const std::shared_ptr<SentDataType>& data,
+                                    const typename ResultHandler<ReceivedDataType>::type& resultCallback)
+{
+    LOGS("Service callAsyncFromCallback, methodID: " << methodID << ", peerID: " << peerID);
+    mProcessor.callAsyncNonBlock<SentDataType,
+                                 ReceivedDataType>(methodID,
+                                                   peerID,
+                                                   data,
+                                                   resultCallback);
+}
+
 
 template<typename SentDataType>
 void Service::signal(const MethodID methodID,

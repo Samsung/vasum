@@ -190,7 +190,13 @@ public:
     template<typename SentDataType, typename ReceivedDataType>
     void callAsync(const MethodID methodID,
                    const std::shared_ptr<SentDataType>& data,
-                   const typename ResultHandler<ReceivedDataType>::type& resultCallback);
+                   const typename ResultHandler<ReceivedDataType>::type& resultCallback = nullptr);
+
+
+    template<typename SentDataType, typename ReceivedDataType>
+    void callAsyncFromCallback(const MethodID methodID,
+                               const std::shared_ptr<SentDataType>& data,
+                               const typename ResultHandler<ReceivedDataType>::type& resultCallback = nullptr);
 
     /**
     * Send a signal to the peer.
@@ -251,6 +257,19 @@ void Client::callAsync(const MethodID methodID,
                                            mServiceID,
                                            data,
                                            resultCallback);
+}
+
+template<typename SentDataType, typename ReceivedDataType>
+void Client::callAsyncFromCallback(const MethodID methodID,
+                                   const std::shared_ptr<SentDataType>& data,
+                                   const typename ResultHandler<ReceivedDataType>::type& resultCallback)
+{
+    LOGS("Client callAsyncFromCallback, methodID: " << methodID);
+    mProcessor.callAsyncNonBlock<SentDataType,
+                                 ReceivedDataType>(methodID,
+                                                   mServiceID,
+                                                   data,
+                                                   resultCallback);
 }
 
 template<typename SentDataType>

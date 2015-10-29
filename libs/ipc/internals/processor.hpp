@@ -290,7 +290,21 @@ public:
                         const std::shared_ptr<SentDataType>& data,
                         const typename ResultHandler<ReceivedDataType>::type& process);
 
-
+    /**
+     * The same as callAsync, but not blocking on the state mutex.
+     *
+     * @param methodID API dependent id of the method
+     * @param peerID id of the peer
+     * @param data data to sent
+     * @param process callback processing the return data
+     * @tparam SentDataType data type to send
+     * @tparam ReceivedDataType data type to receive
+     */
+    template<typename SentDataType, typename ReceivedDataType>
+    MessageID callAsyncNonBlock(const MethodID methodID,
+                                const PeerID& peerID,
+                                const std::shared_ptr<SentDataType>& data,
+                                const typename ResultHandler<ReceivedDataType>::type& process);
     /**
      * Send a signal to the peer.
      * There is no return value from the peer
@@ -463,12 +477,6 @@ private:
     unsigned int mMaxNumberOfPeers;
 
     template<typename SentDataType, typename ReceivedDataType>
-    MessageID callAsyncInternal(const MethodID methodID,
-                                const PeerID& peerID,
-                                const std::shared_ptr<SentDataType>& data,
-                                const typename ResultHandler<ReceivedDataType>::type& process);
-
-    template<typename SentDataType, typename ReceivedDataType>
     void setMethodHandlerInternal(const MethodID methodID,
                                   const typename MethodHandler<SentDataType, ReceivedDataType>::type& process);
 
@@ -581,7 +589,6 @@ void Processor::setSignalHandlerInternal(const MethodID methodID,
     mSignalsCallbacks[methodID] = std::make_shared<SignalHandlers>(std::move(signalCall));
 }
 
-
 template<typename ReceivedDataType>
 void Processor::setSignalHandler(const MethodID methodID,
                                  const typename SignalHandler<ReceivedDataType>::type& handler)
@@ -624,11 +631,11 @@ MessageID Processor::callAsync(const MethodID methodID,
                                const typename ResultHandler<ReceivedDataType>::type& process)
 {
     Lock lock(mStateMutex);
-    return callAsyncInternal<SentDataType, ReceivedDataType>(methodID, peerID, data, process);
+    return callAsyncNonBlock<SentDataType, ReceivedDataType>(methodID, peerID, data, process);
 }
 
 template<typename SentDataType, typename ReceivedDataType>
-MessageID Processor::callAsyncInternal(const MethodID methodID,
+MessageID Processor::callAsyncNonBlock(const MethodID methodID,
                                        const PeerID& peerID,
                                        const std::shared_ptr<SentDataType>& data,
                                        const typename ResultHandler<ReceivedDataType>::type& process)
@@ -655,7 +662,7 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
     };
 
     Lock lock(mStateMutex);
-    MessageID messageID = callAsyncInternal<SentDataType, ReceivedDataType>(methodID,
+    MessageID messageID = callAsyncNonBlock<SentDataType, ReceivedDataType>(methodID,
                                                                             peerID,
                                                                             data,
                                                                             process);

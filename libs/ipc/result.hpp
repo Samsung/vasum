@@ -44,11 +44,16 @@ public:
           mExceptionPtr(std::move(exceptionPtr))
     {}
 
-    std::shared_ptr<Data> get() const
+    void rethrow() const
     {
         if (mExceptionPtr) {
             std::rethrow_exception(mExceptionPtr);
         }
+    }
+
+    std::shared_ptr<Data> get() const
+    {
+        rethrow();
         return mData;
     }
 

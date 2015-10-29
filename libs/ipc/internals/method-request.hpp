@@ -84,10 +84,16 @@ std::shared_ptr<MethodRequest> MethodRequest::create(const MethodID methodID,
         return data;
     };
 
-    request->process = [process](ResultBuilder & resultBuilder) {
-        LOGS("Method process");
-        process(resultBuilder.build<ReceivedDataType>());
-    };
+    if(process == nullptr){
+        request->process = [](ResultBuilder & ) {
+            LOGT("No method to process result");
+        };
+    } else {
+        request->process = [process](ResultBuilder & resultBuilder) {
+            LOGS("Method process");
+            process(resultBuilder.build<ReceivedDataType>());
+        };
+    }
 
     return request;
 }
