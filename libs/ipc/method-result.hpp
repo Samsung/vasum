@@ -34,7 +34,11 @@ namespace ipc {
 class Processor;
 
 /**
- * @brief Class used to obtain method call result code.
+ * Class used to obtain method call result code.
+ * This class may be used to return value both:
+ * - synchronously in the MethodHandler
+ * - asynchronously, later outside MethodHandler
+ *
  * @ingroup Types
  */
 class MethodResult {

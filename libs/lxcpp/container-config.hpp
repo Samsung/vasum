@@ -54,10 +54,18 @@ struct ContainerConfig {
     /**
      * Path of the root directory of the container.
      *
-     * Set: by contstructor, cannot be changed afterwards.
+     * Set: by constructor, cannot be changed afterwards
      * Get: getRootPath()
      */
     std::string mRootPath;
+
+    /**
+     * Socket for communication with the Guard
+     *
+     * Set: by constructor, cannot be changed afterwards
+     * Get: none
+     */
+    std::string mSocketPath;
 
     /**
      * Pid of the guard process.

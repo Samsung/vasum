@@ -47,8 +47,7 @@ int main(int argc, char *argv[])
 #endif
 
     try {
-        int fd = std::stoi(argv[1]);
-        lxcpp::Guard guard(fd);
+        lxcpp::Guard guard(argv[1]);
         return guard.execute();
     } catch(std::exception& e) {
         // LOGE("Unexpected: " << utils::getTypeName(e) << ": " << e.what());

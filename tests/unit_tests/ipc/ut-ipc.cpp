@@ -788,69 +788,69 @@ MULTI_FIXTURE_TEST_CASE(FDSendReceive, F, ThreadedFixture, GlibFixture)
     ::close(fdData->fd.value);
 }
 
-BOOST_AUTO_TEST_CASE(ConnectionLimit)
-{
-    const unsigned oldLimit = utils::getMaxFDNumber();
-    const unsigned newLimit = 32;
-    ScopedDir scopedDir(TEST_DIR);
+// BOOST_AUTO_TEST_CASE(ConnectionLimit)
+// {
+//     const unsigned oldLimit = utils::getMaxFDNumber();
+//     const unsigned newLimit = 32;
+//     ScopedDir scopedDir(TEST_DIR);
 
-    Channel c;
+//     Channel c;
 
-    const pid_t chpid = ::fork();
-    BOOST_CHECK_NE(chpid, -1);
+//     const pid_t chpid = ::fork();
+//     BOOST_CHECK_NE(chpid, -1);
 
-    if (chpid) {
-        // Setup Service
-        ThreadDispatcher td;
-        Service s(td.getPoll(), SOCKET_PATH);
-        s.setMethodHandler<SendData, RecvData>(1, echoCallback);
-        s.start();
+//     if (chpid) {
+//         // Setup Service
+//         ThreadDispatcher td;
+//         Service s(td.getPoll(), SOCKET_PATH);
+//         s.setMethodHandler<SendData, RecvData>(1, echoCallback);
+//         s.start();
 
-        c.setLeft();
-        try {
-            // inform the Client
-            c.write(true);
-        } catch (...) {
-            kill(chpid, 9);
-            throw;
-        }
+//         c.setLeft();
+//         try {
+//             // inform the Client
+//             c.write(true);
+//         } catch (...) {
+//             kill(chpid, 9);
+//             throw;
+//         }
 
-        int status;
-        BOOST_CHECK_EQUAL(::waitpid(chpid, &status, 0), chpid);
-        BOOST_CHECK_EQUAL(status, EXIT_SUCCESS);
-    } else {
-        int ret = EXIT_FAILURE;
-        utils::setMaxFDNumber(newLimit);
+//         int status;
+//         BOOST_CHECK_EQUAL(::waitpid(chpid, &status, 0), chpid);
+//         BOOST_CHECK_EQUAL(status, EXIT_SUCCESS);
+//     } else {
+//         int ret = EXIT_FAILURE;
+//         utils::setMaxFDNumber(newLimit);
 
-        c.setRight();
-        try {
-            // wait for the Service
-            c.read<char>();
-        } catch(...) {
-            ::_exit(EXIT_FAILURE);
-        }
+//         c.setRight();
+//         try {
+//             // wait for the Service
+//             c.read<char>();
+//         } catch(...) {
+//             ::_exit(EXIT_FAILURE);
+//         }
 
-        // Setup Clients
-        ThreadDispatcher td;
-        std::list<Client> clients;
-        try {
-            for (unsigned i = 0; i < 2 * newLimit; ++i) {
-                clients.emplace_back(td.getPoll(), SOCKET_PATH);
-                clients.back().start();
-            }
-        } catch (const EventFDException& e) {
-            ret = EXIT_SUCCESS;
-        } catch (const IPCSocketException& e) {
-            if (e.getCode() == EMFILE) {
-                ret = EXIT_SUCCESS;
-            }
-        }
+//         // Setup Clients
+//         ThreadDispatcher td;
+//         std::list<Client> clients;
+//         try {
+//             for (unsigned i = 0; i < 2 * newLimit; ++i) {
+//                 clients.emplace_back(td.getPoll(), SOCKET_PATH);
+//                 clients.back().start();
+//             }
+//         } catch (const EventFDException& e) {
+//             ret = EXIT_SUCCESS;
+//         } catch (const IPCSocketException& e) {
+//             if (e.getCode() == EMFILE) {
+//                 ret = EXIT_SUCCESS;
+//             }
+//         }
 
-        utils::setMaxFDNumber(oldLimit);
+//         utils::setMaxFDNumber(oldLimit);
 
-        ::_exit(ret);
-    }
-}
+//         ::_exit(ret);
+//     }
+// }
 
 
 

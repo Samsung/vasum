@@ -40,6 +40,7 @@
 #include <unistd.h>
 #include <cerrno>
 #include <cstring>
+#include <thread>
 
 using namespace utils;
 
@@ -47,6 +48,7 @@ namespace ipc {
 
 namespace {
 const int MAX_QUEUE_LENGTH = 1000;
+const int RETRY_CONNECT_STEP_MS = 10;
 
 void setFdOptions(int fd)
 {
@@ -56,6 +58,52 @@ void setFdOptions(int fd)
         LOGE(msg);
         throw IPCException(msg);
     }
+}
+
+void connect(int socket, const std::string& path, const unsigned int timeoutMS)
+{
+    auto deadline = std::chrono::steady_clock::now() +
+                    std::chrono::milliseconds(timeoutMS);
+
+    // Isn't the path too long?
+    if (path.size() >= sizeof(::sockaddr_un::sun_path)) {
+        const std::string msg = "Socket's path too long";
+        LOGE(msg);
+        throw IPCException(msg);
+    }
+
+    // Fill address
+    struct ::sockaddr_un serverAddress;
+    serverAddress.sun_family = AF_UNIX;
+    ::strncpy(serverAddress.sun_path, path.c_str(), sizeof(::sockaddr_un::sun_path));
+
+    // There's a race between connect() in one peer and listen() in the other.
+    // We'll retry connect if no one is listening.
+    do {
+        if (-1 != ::connect(socket,
+                            reinterpret_cast<struct sockaddr*>(&serverAddress),
+                            sizeof(struct ::sockaddr_un))) {
+            return;
+        }
+
+        if (errno == ECONNREFUSED || errno == EAGAIN || errno == EINTR) {
+            // No one is listening, so sleep and retry
+            LOGW("No one listening on the socket, retrying");
+            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_CONNECT_STEP_MS));
+            continue;
+        }
+
+        // Error
+        utils::close(socket);
+        const std::string msg = "Error in connect: " + getSystemErrorMessage();
+        LOGE(msg);
+        throw IPCException(msg);
+
+    } while (std::chrono::steady_clock::now() < deadline);
+
+    const std::string msg = "Timeout in connect";
+    LOGE(msg);
+    throw IPCException(msg);
 }
 
 } // namespace
@@ -157,10 +205,10 @@ int Socket::createSocketInternal(const std::string& path)
     ::sockaddr_un serverAddress;
     serverAddress.sun_family = AF_UNIX;
     ::strncpy(serverAddress.sun_path, path.c_str(), sizeof(sockaddr_un::sun_path));
-    unlink(serverAddress.sun_path);
 
-    // Everybody can access the socket
-    // TODO: Use SMACK to guard the socket
+    // Ensure address doesn't exist before bind() to avoid errors
+    ::unlink(serverAddress.sun_path);
+
     if (-1 == ::bind(sockfd,
                      reinterpret_cast<struct sockaddr*>(&serverAddress),
                      sizeof(struct sockaddr_un))) {
@@ -188,7 +236,7 @@ Socket Socket::createSocket(const std::string& path)
 #ifdef HAVE_SYSTEMD
     fd = getSystemdSocketInternal(path);
     if (fd == -1) {
-       fd = createSocketInternal(path);
+        fd = createSocketInternal(path);
     }
 #else
     fd = createSocketInternal(path);
@@ -197,16 +245,9 @@ Socket Socket::createSocket(const std::string& path)
     return Socket(fd);
 }
 
-Socket Socket::connectSocket(const std::string& path)
+Socket Socket::connectSocket(const std::string& path, const int timeoutMs)
 {
-    // Isn't the path too long?
-    if (path.size() >= sizeof(sockaddr_un::sun_path)) {
-        const std::string msg = "Socket's path too long";
-        LOGE(msg);
-        throw IPCException(msg);
-    }
-
-    int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    int fd = ::socket(AF_UNIX, SOCK_STREAM, 0);
     if (fd == -1) {
         const std::string msg = "Error in socket: " + getSystemErrorMessage();
         LOGE(msg);
@@ -214,22 +255,11 @@ Socket Socket::connectSocket(const std::string& path)
     }
     setFdOptions(fd);
 
-    sockaddr_un serverAddress;
-    serverAddress.sun_family = AF_UNIX;
-    strncpy(serverAddress.sun_path, path.c_str(), sizeof(sockaddr_un::sun_path));
+    connect(fd, path, timeoutMs);
 
-    if (-1 == connect(fd,
-                      reinterpret_cast<struct sockaddr*>(&serverAddress),
-                      sizeof(struct sockaddr_un))) {
-        utils::close(fd);
-        const std::string msg = "Error in connect: " + getSystemErrorMessage();
-        LOGE(msg);
-        throw IPCException(msg);
-    }
-
-    // Nonblock socket
-    int flags = fcntl(fd, F_GETFL, 0);
-    if (-1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
+    // Nonblocking socket
+    int flags = ::fcntl(fd, F_GETFL, 0);
+    if (-1 == ::fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
         utils::close(fd);
         const std::string msg = "Error in fcntl: " + getSystemErrorMessage();
         LOGE(msg);

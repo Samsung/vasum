@@ -37,17 +37,26 @@ using namespace lxcpp;
 using namespace config;
 using namespace provision;
 
-const std::string TEST_DIR            = "/tmp/ut-provisioning";
-const std::string ROOT_DIR            = TEST_DIR + "/root";
+const std::string TEST_DIR = "/tmp/ut-provisioning";
+const std::string ROOT_DIR = TEST_DIR + "/root";
+const std::string WORK_DIR = TEST_DIR + "/work";
 
 struct Fixture {
-    Fixture() : mTestPath(ROOT_DIR) {
-        container = std::unique_ptr<Container>(createContainer("ProvisioningTester", ROOT_DIR));
+
+    Fixture()
+        : mTestPath(ROOT_DIR),
+          mRoot(ROOT_DIR),
+          mWork(WORK_DIR)
+    {
+        container = std::unique_ptr<Container>(createContainer("ProvisioningTester", ROOT_DIR, WORK_DIR));
     }
     ~Fixture() {}
 
     std::unique_ptr<Container> container;
+
     utils::ScopedDir mTestPath;
+    utils::ScopedDir mRoot;
+    utils::ScopedDir mWork;
 };
 
 } // namespace

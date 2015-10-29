@@ -22,6 +22,7 @@
  */
 
 #include "lxcpp/commands/stop.hpp"
+#include "lxcpp/guard/api.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"
 
@@ -30,8 +31,10 @@
 
 namespace lxcpp {
 
-Stop::Stop(ContainerConfig &config)
-    : mConfig(config)
+Stop::Stop(std::shared_ptr<ContainerConfig>& config,
+           std::shared_ptr<ipc::Client>& client)
+    : mConfig(config),
+      mClient(client)
 {
 }
 
@@ -41,11 +44,17 @@ Stop::~Stop()
 
 void Stop::execute()
 {
-    LOGD("Stopping container: " << mConfig.mName);
+    std::string containerName = mConfig->mName;
+    LOGD("Stopping container: " << containerName);
+    auto callback = [containerName](ipc::Result<api::Void>&& result) {
+        // TODO: Collect the returned init process status
+        if (result.isValid()) {
+            LOGI("Stopped container: " << containerName);
+        }
+    };
+    mClient->callAsync<api::Void, api::Void>(api::METHOD_STOP, std::make_shared<api::Void>(), callback);
 
-    // TODO: Use initctl/systemd-initctl if available in container
-
-    utils::sendSignal(mConfig.mInitPid, SIGTERM);
+    // TODO: Wait till init stopped
 }
 
 } // namespace lxcpp

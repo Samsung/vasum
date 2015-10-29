@@ -29,6 +29,9 @@
 
 #include "logger/logger.hpp"
 #include "config/manager.hpp"
+#include "utils/file-wait.hpp"
+#include "ipc/epoll/thread-dispatcher.cpp"
+#include "ipc/client.hpp"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -38,11 +41,11 @@
 namespace lxcpp {
 
 
-Start::Start(ContainerConfig &config)
+Start::Start(std::shared_ptr<ContainerConfig>& config,
+             std::shared_ptr<ipc::Client>& client)
     : mConfig(config),
-      mChannel(false),
       mGuardPath(GUARD_PATH),
-      mChannelFD(std::to_string(mChannel.getRightFD()))
+      mClient(client)
 {
 }
 
@@ -55,44 +58,54 @@ void Start::execute()
     LOGD("Forking daemonize and guard processes. Execing guard libexec binary.");
     LOGD("Logging will cease now. It should be restored using some new facility in the guard process.");
     const pid_t pid = lxcpp::fork();
-
     if (pid > 0) {
-        mChannel.setLeft();
         parent(pid);
     } else {
         // Below this point only safe functions mentioned in signal(7) are allowed.
-        mChannel.setRight();
         daemonize();
         ::_exit(EXIT_FAILURE);
     }
 }
 
+void Start::onGuardReady(const ipc::PeerID,
+                         std::shared_ptr<api::Void>&,
+                         ipc::MethodResult::Pointer methodResult,
+                         std::shared_ptr<ipc::Client> client,
+                         const std::shared_ptr<ContainerConfig>& config)
+{
+    // TODO: Maybe replace this method handler with onNewPeer callback?
+
+    // ipc::Client connected with Guard and run this callback
+    client->callAsyncFromCallback<ContainerConfig, api::Void>(api::METHOD_SET_CONFIG, config);
+
+    auto initStarted = [config](ipc::Result<api::Pid>&& result) {
+        if (result.isValid()) {
+            auto initPid = result.get();
+            config->mInitPid = initPid->value;
+            LOGI("Init PID: " << initPid->value);
+            if (config->mInitPid <= 0) {
+                // TODO: Handle the error
+                LOGE("Bad Init PID");
+            }
+        } else {
+            LOGE("Failed to get init's PID");
+            result.rethrow();
+        }
+    };
+    client->callAsyncFromCallback<api::Void, api::Pid>(api::METHOD_START, std::shared_ptr<api::Void>(), initStarted);
+
+    methodResult->setVoid();
+}
+
 void Start::parent(const pid_t pid)
 {
+    // Collect a helper process
     int status = lxcpp::waitpid(pid);
     if (status != EXIT_SUCCESS) {
         const std::string msg = "Problem with a daemonize process";
         LOGE(msg);
         throw ProcessSetupException(msg);
     }
-
-    // Send the config to the guard process
-    config::saveToFD(mChannel.getFD(), mConfig);
-
-    // Read the pids from the guard process
-    mConfig.mGuardPid = mChannel.read<pid_t>();
-    mConfig.mInitPid = mChannel.read<pid_t>();
-
-    mChannel.shutdown();
-
-    if (mConfig.mGuardPid <= 0 || mConfig.mInitPid <= 0) {
-        const std::string msg = "Problem with receiving pids";
-        LOGE(msg);
-        throw ProcessSetupException(msg);
-    }
-
-    LOGD("Guard PID: " << mConfig.mGuardPid);
-    LOGD("Init PID: " << mConfig.mInitPid);
 }
 
 void Start::daemonize()
@@ -129,10 +142,11 @@ void Start::daemonize()
     // identify the container in the process list in case setProcTitle() fails
     // and will guarantee we have enough argv memory to write the title we want.
     const char *argv[] = {mGuardPath.c_str(),
-                          mChannelFD.c_str(),
-                          mConfig.mName.c_str(),
-                          mConfig.mRootPath.c_str(),
-                          NULL};
+                          mConfig->mSocketPath.c_str(),
+                          mConfig->mName.c_str(),
+                          mConfig->mRootPath.c_str(),
+                          NULL
+                         };
     ::execve(argv[0], const_cast<char *const*>(argv), NULL);
     ::_exit(EXIT_FAILURE);
 }

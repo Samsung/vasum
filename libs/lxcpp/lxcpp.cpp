@@ -25,9 +25,11 @@
 
 namespace lxcpp {
 
-Container* createContainer(const std::string& name, const std::string& path)
+Container* createContainer(const std::string& name,
+                           const std::string& rootPath,
+                           const std::string& workPath)
 {
-    return new ContainerImpl(name, path);
+    return new ContainerImpl(name, rootPath, workPath);
 }
 
 } // namespace lxcpp

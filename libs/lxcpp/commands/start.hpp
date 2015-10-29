@@ -26,9 +26,13 @@
 
 #include "lxcpp/commands/command.hpp"
 #include "lxcpp/container-config.hpp"
+#include "lxcpp/guard/api.hpp"
+
 #include "utils/channel.hpp"
+#include "ipc/client.hpp"
 
 #include <sys/types.h>
+#include <memory>
 
 
 namespace lxcpp {
@@ -37,23 +41,38 @@ namespace lxcpp {
 class Start final: Command {
 public:
     /**
-     * Starts the container
+     * Starts the container. Assumes container isn't already running.
      *
      * In more details it prepares an environment for a guard process,
      * starts it, and passes it the configuration through a file descriptor.
      *
      * @param config container's config
+     * @param client IPC connection to the Guard process
      */
-    Start(ContainerConfig &config);
+    Start(std::shared_ptr<ContainerConfig>& config,
+          std::shared_ptr<ipc::Client>& client);
     ~Start();
 
     void execute();
 
+    /**
+     * Guards tells that it's ready to receive commands.
+     *
+     * This is a method handler, not signal to avoid races.
+     *
+     * @param client IPC connection to the Guard process
+     * @param config container's config
+     */
+    static void onGuardReady(const ipc::PeerID,
+                             std::shared_ptr<api::Void>&,
+                             ipc::MethodResult::Pointer,
+                             std::shared_ptr<ipc::Client> client,
+                             const std::shared_ptr<ContainerConfig>& config);
+
 private:
-    ContainerConfig &mConfig;
-    utils::Channel mChannel;
+    std::shared_ptr<ContainerConfig> mConfig;
     std::string mGuardPath;
-    std::string mChannelFD;
+    std::shared_ptr<ipc::Client> mClient;
 
     void parent(const pid_t pid);
     void daemonize();

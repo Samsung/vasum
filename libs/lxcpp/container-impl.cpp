@@ -34,6 +34,8 @@
 #include "lxcpp/commands/provision.hpp"
 
 #include "logger/logger.hpp"
+#include "utils/fs.hpp"
+#include "utils/paths.hpp"
 #include "utils/exception.hpp"
 
 #include <unistd.h>
@@ -50,55 +52,85 @@
 
 namespace lxcpp {
 
-ContainerImpl::ContainerImpl(const std::string &name, const std::string &path)
+ContainerImpl::ContainerImpl(const std::string &name,
+                             const std::string &rootPath,
+                             const std::string &workPath)
+    : mConfig(new ContainerConfig()),
+      mInotify(mDispatcher.getPoll())
 {
+    // Validate arguments
     if (name.empty()) {
         const std::string msg = "Name cannot be empty";
         LOGE(msg);
         throw ConfigureException(msg);
     }
 
-    if (path.empty()) {
-        const std::string msg = "Path cannot be empty";
-        LOGE(msg);
-        throw ConfigureException(msg);
-    }
+    utils::assertIsDir(rootPath);
+    utils::assertIsDir(workPath);
 
-    if(::access(path.c_str(), X_OK) < 0) {
-        const std::string msg = "Path must point to a traversable directory";
-        LOGE(msg);
-        throw ConfigureException(msg);
-    }
+    // Fill known configuration
+    mConfig->mName = name;
+    mConfig->mRootPath = rootPath;
+    mConfig->mNamespaces = CLONE_NEWIPC | CLONE_NEWNS | CLONE_NEWPID | CLONE_NEWUTS;
+    mConfig->mSocketPath = utils::createFilePath(workPath, name, ".socket");
 
-    mConfig.mName = name;
-    mConfig.mRootPath = path;
-    mConfig.mNamespaces = CLONE_NEWIPC | CLONE_NEWNS | CLONE_NEWPID | CLONE_NEWUTS;
-}
+    using namespace std::placeholders;
 
-// TODO: the aim of this constructor is to create a new ContainerImpl based on an already
-// running container. It should talk to its guard and receive its current config.
-ContainerImpl::ContainerImpl(pid_t /*guardPid*/)
-{
-    throw NotImplementedException();
+    // IPC with the Guard process
+    mClient.reset(new ipc::Client(mDispatcher.getPoll(), mConfig->mSocketPath));
+    mClient->setMethodHandler<api::Void, api::Void>(api::METHOD_GUARD_READY, std::bind(Start::onGuardReady, _1, _2, _3, mClient, mConfig));
+
+    // TODO: Connect to a running Guard with something like this:
+    // try {
+    //     // If there's a container running try to connect.
+    //     // TODO: this might need some named semaphore to prevent races between two processes using this library.
+    //     mClient->start();
+    //     // TODO: Get the configuration from the running Guard
+    // } catch(const ipc::IPCException&) {
+    //     // It's OK, container isn't yet started.
+    // }
+
+    // Watch the workdir for filesystem events
+    mInotify.setHandler(workPath, IN_CREATE | IN_DELETE | IN_ISDIR, std::bind(&ContainerImpl::onWorkFileEvent, this, _1, _2));
 }
 
 ContainerImpl::~ContainerImpl()
 {
+    try {
+        stop();
+    } catch(...) {
+        LOGW("Discarding an error during stopping");
+    }
+    mClient->stop(true);
+}
+
+void ContainerImpl::onWorkFileEvent(const std::string& name, const uint32_t mask)
+{
+    if(mask & IN_CREATE) {
+        if (name == mConfig->mName + ".socket") {
+            mClient->start();
+        }
+    } else if (mask & IN_DELETE) {
+        if (name == mConfig->mName + ".socket") {
+            // TODO: Second stop?!
+            mClient->stop(false);
+        }
+    }
 }
 
 const std::string& ContainerImpl::getName() const
 {
-    return mConfig.mName;
+    return mConfig->mName;
 }
 
 const std::string& ContainerImpl::getRootPath() const
 {
-    return mConfig.mRootPath;
+    return mConfig->mRootPath;
 }
 
 const std::vector<std::string>& ContainerImpl::getInit()
 {
-    return mConfig.mInit;
+    return mConfig->mInit;
 }
 
 void ContainerImpl::setInit(const std::vector<std::string> &init)
@@ -109,7 +141,7 @@ void ContainerImpl::setInit(const std::vector<std::string> &init)
         throw ConfigureException(msg);
     }
 
-    std::string path = mConfig.mRootPath + "/" + init[0];
+    std::string path = mConfig->mRootPath + "/" + init[0];
 
     if (::access(path.c_str(), X_OK) < 0) {
         const std::string msg = "Init path must point to an executable file";
@@ -117,24 +149,24 @@ void ContainerImpl::setInit(const std::vector<std::string> &init)
         throw ConfigureException(msg);
     }
 
-    mConfig.mInit = init;
+    mConfig->mInit = init;
 }
 
 pid_t ContainerImpl::getGuardPid() const
 {
-    return mConfig.mGuardPid;
+    return mConfig->mGuardPid;
 }
 
 pid_t ContainerImpl::getInitPid() const
 {
-    return mConfig.mInitPid;
+    return mConfig->mInitPid;
 }
 
 void ContainerImpl::setLogger(const logger::LogType type,
                               const logger::LogLevel level,
                               const std::string &arg)
 {
-    mConfig.mLogger.set(type, level, arg);
+    mConfig->mLogger.set(type, level, arg);
 }
 
 void ContainerImpl::setTerminalCount(const unsigned int count)
@@ -145,43 +177,43 @@ void ContainerImpl::setTerminalCount(const unsigned int count)
         throw ConfigureException(msg);
     }
 
-    mConfig.mTerminals.count = count;
+    mConfig->mTerminals.count = count;
 }
 
 void ContainerImpl::addUIDMap(unsigned min, unsigned max, unsigned num)
 {
-    mConfig.mNamespaces |= CLONE_NEWUSER;
+    mConfig->mNamespaces |= CLONE_NEWUSER;
 
-    if (mConfig.mUserNSConfig.mUIDMaps.size() >= 5) {
+    if (mConfig->mUserNSConfig.mUIDMaps.size() >= 5) {
         const std::string msg = "Max number of 5 UID mappings has been already reached";
         LOGE(msg);
         throw ConfigureException(msg);
     }
 
-    mConfig.mUserNSConfig.mUIDMaps.emplace_back(min, max, num);
+    mConfig->mUserNSConfig.mUIDMaps.emplace_back(min, max, num);
 }
 
 void ContainerImpl::addGIDMap(unsigned min, unsigned max, unsigned num)
 {
-    mConfig.mNamespaces |= CLONE_NEWUSER;
+    mConfig->mNamespaces |= CLONE_NEWUSER;
 
-    if (mConfig.mUserNSConfig.mGIDMaps.size() >= 5) {
+    if (mConfig->mUserNSConfig.mGIDMaps.size() >= 5) {
         const std::string msg = "Max number of 5 GID mappings has been already reached";
         LOGE(msg);
         throw ConfigureException(msg);
     }
 
-    mConfig.mUserNSConfig.mGIDMaps.emplace_back(min, max, num);
+    mConfig->mUserNSConfig.mGIDMaps.emplace_back(min, max, num);
 }
 
 void ContainerImpl::start()
 {
     // TODO: check config consistency and completeness somehow
 
-    PrepHostTerminal terminal(mConfig.mTerminals);
+    PrepHostTerminal terminal(mConfig->mTerminals);
     terminal.execute();
 
-    Start start(mConfig);
+    Start start(mConfig, mClient);
     start.execute();
 }
 
@@ -190,7 +222,7 @@ void ContainerImpl::stop()
     // TODO: things to do when shutting down the container:
     // - close PTY master FDs from the config so we won't keep PTYs open
 
-    Stop stop(mConfig);
+    Stop stop(mConfig, mClient);
     stop.execute();
 }
 
@@ -212,7 +244,7 @@ void ContainerImpl::reboot()
 void ContainerImpl::attach(const std::vector<std::string>& argv,
                            const std::string& cwdInContainer)
 {
-    Attach attach(mConfig,
+    Attach attach(*mConfig,
                   argv,
                   /*uid in container*/ 0,
                   /*gid in container*/ 0,
@@ -222,14 +254,14 @@ void ContainerImpl::attach(const std::vector<std::string>& argv,
                   cwdInContainer,
                   /*envToKeep*/ {},
                   /*envInContainer*/ {{"container","lxcpp"}},
-                  mConfig.mLogger);
+                  mConfig->mLogger);
     // TODO: Env variables should agree with the ones already in the container
     attach.execute();
 }
 
 void ContainerImpl::console()
 {
-    Console console(mConfig.mTerminals);
+    Console console(mConfig->mTerminals);
     console.execute();
 }
 
@@ -245,13 +277,13 @@ void ContainerImpl::addInterfaceConfig(const std::string& hostif,
                                        const std::vector<InetAddr>& addrs,
                                        MacVLanMode mode)
 {
-    mConfig.mNamespaces |= CLONE_NEWNET;
-    mConfig.mNetwork.addInterfaceConfig(hostif, zoneif, type, addrs, mode);
+    mConfig->mNamespaces |= CLONE_NEWNET;
+    mConfig->mNetwork.addInterfaceConfig(hostif, zoneif, type, addrs, mode);
 }
 
 void ContainerImpl::addInetConfig(const std::string& ifname, const InetAddr& addr)
 {
-    mConfig.mNetwork.addInetConfig(ifname, addr);
+    mConfig->mNetwork.addInetConfig(ifname, addr);
 }
 
 std::vector<std::string> ContainerImpl::getInterfaces() const
@@ -336,26 +368,26 @@ void ContainerImpl::declareFile(const provision::File::Type type,
                                 const int32_t mode)
 {
     provision::File newFile({type, path, flags, mode});
-    mConfig.mProvisions.addFile(newFile);
+    mConfig->mProvisions.addFile(newFile);
     // TODO: update guard config
 
     if (isRunning()) {
-        ProvisionFile fileCmd(mConfig, newFile);
+        ProvisionFile fileCmd(*mConfig, newFile);
         fileCmd.execute();
     }
 }
 
 const FileVector& ContainerImpl::getFiles() const
 {
-    return mConfig.mProvisions.getFiles();
+    return mConfig->mProvisions.getFiles();
 }
 
 void ContainerImpl::removeFile(const provision::File& item)
 {
-    mConfig.mProvisions.removeFile(item);
+    mConfig->mProvisions.removeFile(item);
 
     if (isRunning()) {
-        ProvisionFile fileCmd(mConfig, item);
+        ProvisionFile fileCmd(*mConfig, item);
         fileCmd.revert();
     }
 }
@@ -367,26 +399,26 @@ void ContainerImpl::declareMount(const std::string& source,
                                  const std::string& data)
 {
     provision::Mount newMount({source, target, type, flags, data});
-    mConfig.mProvisions.addMount(newMount);
+    mConfig->mProvisions.addMount(newMount);
     // TODO: update guard config
 
     if (isRunning()) {
-        ProvisionMount mountCmd(mConfig, newMount);
+        ProvisionMount mountCmd(*mConfig, newMount);
         mountCmd.execute();
     }
 }
 
 const MountVector& ContainerImpl::getMounts() const
 {
-    return mConfig.mProvisions.getMounts();
+    return mConfig->mProvisions.getMounts();
 }
 
 void ContainerImpl::removeMount(const provision::Mount& item)
 {
-    mConfig.mProvisions.removeMount(item);
+    mConfig->mProvisions.removeMount(item);
 
     if (isRunning()) {
-        ProvisionMount mountCmd(mConfig, item);
+        ProvisionMount mountCmd(*mConfig, item);
         mountCmd.revert();
     }
 }
@@ -395,33 +427,33 @@ void ContainerImpl::declareLink(const std::string& source,
                                 const std::string& target)
 {
     provision::Link newLink({source, target});
-    mConfig.mProvisions.addLink(newLink);
+    mConfig->mProvisions.addLink(newLink);
     // TODO: update guard config
 
     if (isRunning()) {
-        ProvisionLink linkCmd(mConfig, newLink);
+        ProvisionLink linkCmd(*mConfig, newLink);
         linkCmd.execute();
     }
 }
 
 const LinkVector& ContainerImpl::getLinks() const
 {
-    return mConfig.mProvisions.getLinks();
+    return mConfig->mProvisions.getLinks();
 }
 
 void ContainerImpl::removeLink(const provision::Link& item)
 {
-    mConfig.mProvisions.removeLink(item);
+    mConfig->mProvisions.removeLink(item);
 
     if (isRunning()) {
-        ProvisionLink linkCmd(mConfig, item);
+        ProvisionLink linkCmd(*mConfig, item);
         linkCmd.revert();
     }
 }
 
 void ContainerImpl::addSubsystem(const std::string& name, const std::string& path)
 {
-    mConfig.mCgroups.subsystems.push_back(SubsystemConfig{name, path});
+    mConfig->mCgroups.subsystems.push_back(SubsystemConfig{name, path});
 }
 
 void ContainerImpl::addCGroup(const std::string& subsys,
@@ -429,7 +461,7 @@ void ContainerImpl::addCGroup(const std::string& subsys,
                               const std::vector<CGroupParam>& comm,
                               const std::vector<CGroupParam>& params)
 {
-    mConfig.mCgroups.cgroups.push_back(CGroupConfig{subsys, grpname, comm, params});
+    mConfig->mCgroups.cgroups.push_back(CGroupConfig{subsys, grpname, comm, params});
 }
 
 } // namespace lxcpp

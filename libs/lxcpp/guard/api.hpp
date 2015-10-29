@@ -18,44 +18,45 @@
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Implementation of stopping a container
+ * @brief   IPC messages declaration
  */
 
-#ifndef LXCPP_COMMANDS_STOP_HPP
-#define LXCPP_COMMANDS_STOP_HPP
 
-#include "lxcpp/commands/command.hpp"
-#include "lxcpp/container-config.hpp"
+#ifndef LXCPP_GUARD_API_HPP
+#define LXCPP_GUARD_API_HPP
 
-#include "ipc/client.hpp"
+#include "ipc/types.hpp"
 
-#include <sys/types.h>
-#include <memory>
+#include "config/fields.hpp"
 
+#include <string>
+#include <vector>
 
 namespace lxcpp {
+namespace api {
 
+const ::ipc::MethodID METHOD_SET_CONFIG  = 1;
+const ::ipc::MethodID METHOD_GET_CONFIG  = 2;
+const ::ipc::MethodID METHOD_START       = 3;
+const ::ipc::MethodID METHOD_STOP        = 4;
+const ::ipc::MethodID METHOD_GUARD_READY = 5;
 
-class Stop final: Command {
-public:
-    /**
-     * Stops the container
-     *
-     * @param config container's config
-     */
-    Stop(std::shared_ptr<ContainerConfig>& config,
-         std::shared_ptr<ipc::Client>& client);
-    ~Stop();
-
-    void execute();
-
-private:
-    std::shared_ptr<ContainerConfig> mConfig;
-    std::shared_ptr<ipc::Client> mClient;
+struct Void {
+    CONFIG_REGISTER_EMPTY
 };
 
+struct Pid {
+    int value;
 
+    Pid(int v = -1): value(v) {}
+
+    CONFIG_REGISTER
+    (
+        value
+    )
+};
+
+} // namespace api
 } // namespace lxcpp
 
-
-#endif // LXCPP_COMMANDS_STOP_HPP
+#endif // LXCPP_GUARD_API_HPP

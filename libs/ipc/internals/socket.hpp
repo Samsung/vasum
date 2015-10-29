@@ -102,7 +102,7 @@ public:
      * @param path path to the socket
      * @return connected socket
      */
-    static Socket connectSocket(const std::string& path);
+    static Socket connectSocket(const std::string& path, const int timeoutMs = 1000);
 
 private:
     int mFD;

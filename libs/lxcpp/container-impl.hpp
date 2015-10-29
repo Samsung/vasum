@@ -30,13 +30,21 @@
 #include "lxcpp/container-config.hpp"
 #include "lxcpp/container.hpp"
 #include "lxcpp/namespace.hpp"
+#include "lxcpp/guard/api.hpp"
+
+#include "utils/inotify.hpp"
+
+#include "ipc/epoll/thread-dispatcher.hpp"
+#include "ipc/client.hpp"
+#include "ipc/exception.hpp"
 
 namespace lxcpp {
 
 class ContainerImpl : public virtual Container {
 public:
-    ContainerImpl(const std::string &name, const std::string &path);
-    ContainerImpl(pid_t guardPid);
+    ContainerImpl(const std::string &name,
+                  const std::string &rootPath,
+                  const std::string &workPath);
     ~ContainerImpl();
 
     // Configuration
@@ -126,7 +134,14 @@ public:
                    const std::vector<CGroupParam>& params);
 
 private:
-    ContainerConfig mConfig;
+    std::shared_ptr<ContainerConfig> mConfig;
+
+    ipc::epoll::ThreadDispatcher mDispatcher;
+
+    std::shared_ptr<ipc::Client> mClient;
+    utils::Inotify mInotify;
+
+    void onWorkFileEvent(const std::string& name, const uint32_t mask);
 };
 
 } // namespace lxcpp

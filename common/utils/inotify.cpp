@@ -29,6 +29,7 @@
 #include "utils/exception.hpp"
 
 #include "logger/logger.hpp"
+#include "logger/logger-scope.hpp"
 
 #include <sys/ioctl.h>
 
@@ -52,13 +53,17 @@ Inotify::Inotify(ipc::epoll::EventPoll& eventPoll)
 
 Inotify::~Inotify()
 {
-    Lock lock(mMutex);
+    LOGS("~Inotify");
+    {
+        Lock lock(mMutex);
 
-    for(const auto& handler: mHandlers) {
-        if (-1 == ::inotify_rm_watch(mFD, handler.watchID)) {
-            LOGE("Error in inotify_rm_watch: " + getSystemErrorMessage());
+        for(const auto& handler: mHandlers) {
+            if (-1 == ::inotify_rm_watch(mFD, handler.watchID)) {
+                LOGE("Error in inotify_rm_watch: " + getSystemErrorMessage());
+            }
         }
     }
+
     mEventPoll.removeFD(mFD);
 }
 
@@ -71,6 +76,7 @@ void Inotify::setHandler(const std::string& path,
                          const uint32_t eventMask,
                          const Callback&& callback)
 {
+    LOGT("Added inotify for: " << path);
     Lock lock(mMutex);
 
     removeHandlerInternal(path);
@@ -108,6 +114,7 @@ void Inotify::removeHandlerInternal(const std::string& path)
 
 void Inotify::removeHandler(const std::string& path)
 {
+    LOGT("Removed inotify for: " << path);
     Lock lock(mMutex);
     removeHandlerInternal(path);
 }
@@ -144,6 +151,7 @@ void Inotify::handleInternal()
             continue;
         }
 
+        LOGT("Handling inotify: " << event->name);
         it->call(event->name, event->mask);
     }
 }
