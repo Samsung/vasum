@@ -23,34 +23,54 @@
  */
 
 #include "config.hpp"
-#include "utils/exception.hpp"
+
 #include "utils/file-wait.hpp"
+#include "utils/exception.hpp"
+#include "utils/inotify.hpp"
+#include "utils/paths.hpp"
+#include "utils/fs.hpp"
+
+#include "ipc/epoll/event-poll.hpp"
 
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdexcept>
+#include <chrono>
+#include <thread>
+#include "logger/logger.hpp"
 
 namespace utils {
 
-
-const unsigned int GRANULARITY = 100;
-
-void waitForFile(const std::string& filename, const unsigned int timeoutMs)
+void waitForFile(const std::string& file, const unsigned int timeoutMs)
 {
-    //TODO this is a temporary solution, use inotify instead of sleep
-    struct stat s;
-    unsigned int loops = 0;
-    while (stat(filename.c_str(), &s) == -1) {
-        if (errno != ENOENT) {
-            throw UtilsException("file access error: " + filename);
+    std::string dir = dirName(file);
+    assertIsDir(dir);
+
+    ipc::epoll::EventPoll poll;
+    Inotify inotify(poll);
+
+    std::string filename = file.substr(dir.size() + 1);
+    bool isWaiting = true;
+    inotify.setHandler(dir, IN_CREATE | IN_ISDIR, [&isWaiting, &filename](const std::string& name, uint32_t) {
+        if (name == filename) {
+            isWaiting = false;
+
+            // There's a race between inotify event and filesystem update.
+            ::sync();
         }
-        ++ loops;
-        if (loops * GRANULARITY > timeoutMs) {
-            throw UtilsException("timeout on waiting for: " + filename);
-        }
-        usleep(GRANULARITY * 1000);
+    });
+
+    auto deadline = std::chrono::steady_clock::now() +
+                    std::chrono::milliseconds(timeoutMs);
+
+    while (isWaiting && std::chrono::steady_clock::now() < deadline ) {
+        auto duration = deadline - std::chrono::steady_clock::now();
+        poll.dispatchIteration(std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
+    }
+
+    if(isWaiting) {
+        throw UtilsException("No such file: " + file);
     }
 }
-
 
 } // namespace utils
