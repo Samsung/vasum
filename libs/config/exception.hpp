@@ -48,6 +48,14 @@ struct NoKeyException: public ConfigException {
 };
 
 /**
+ * Invalid integral type integrity error.
+ */
+struct InternalIntegrityException: public ConfigException {
+
+    InternalIntegrityException(const std::string& error) : ConfigException(error) {}
+};
+
+/**
  * Container size does not match the config.
  */
 struct ContainerSizeException: public ConfigException {

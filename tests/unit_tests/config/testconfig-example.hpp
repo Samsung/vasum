@@ -26,12 +26,18 @@
 #ifndef TESTCONFIG_EXAMPLE_HPP
 #define TESTCONFIG_EXAMPLE_HPP
 
+#include <array>
+#include <cstdint>
+#include <string>
+#include <vector>
+
 #include "config/fields.hpp"
 #include "config/fields-union.hpp"
 
 enum class TestEnum: int {
     FIRST = 0,
-    SECOND = 12
+    SECOND = 12,
+    THIRD = 13
 };
 
 struct TestConfig {
@@ -90,6 +96,7 @@ struct TestConfig {
 
     int intVal;
     std::int64_t int64Val;
+    std::uint8_t uint8Val;
     std::uint32_t uint32Val;
     std::uint64_t uint64Val;
     std::string stringVal;
@@ -117,6 +124,7 @@ struct TestConfig {
     (
         intVal,
         int64Val,
+        uint8Val,
         uint32Val,
         uint64Val,
         stringVal,
@@ -143,14 +151,58 @@ struct TestConfig {
 };
 
 struct PartialTestConfig {
+    // subtree class
+    struct SubConfig {
+        // a subset of TestConfig::SubConfig fields
+        int intVal = 64;
+
+        CONFIG_REGISTER
+        (
+            intVal
+        )
+    };
+
+    struct SubConfigOption {
+        CONFIG_DECLARE_UNION
+        (
+            SubConfig,
+            int
+        )
+    };
+
     // a subset of TestConfig fields
-    std::string stringVal;
-    std::vector<int> intVector;
+    std::string stringVal = "partialConfig";
+    std::vector<int> intVector = {1, 2, 4, 8, 16};
+    TestEnum enumVal = TestEnum::THIRD;
+    std::vector<SubConfig> subVector = {SubConfig()};
+    SubConfigOption union1;
+
+    PartialTestConfig() {
+        union1.set(SubConfig());
+    }
 
     CONFIG_REGISTER
     (
         stringVal,
-        intVector
+        intVector,
+        enumVal,
+        subVector,
+        union1
+    )
+};
+
+struct IncompatibleTestConfig: public PartialTestConfig {
+    // FIXME: implement cleaner Visitable inheritance
+    std::array<int, 3> intArray = {{1, 2 ,4}};
+
+    CONFIG_REGISTER
+    (
+        stringVal,
+        intVector,
+        enumVal,
+        subVector,
+        union1,
+        intArray
     )
 };
 
@@ -162,6 +214,7 @@ struct PartialTestConfig {
 const std::string jsonTestString =
     "{ \"intVal\": 12345, "
     "\"int64Val\": -1234567890123456789, "
+    "\"uint8Val\": 42, "
     "\"uint32Val\": 123456, "
     "\"uint64Val\": 1234567890123456789, "
     "\"stringVal\": \"blah\", "
@@ -188,6 +241,7 @@ const std::string jsonTestString =
 const std::string jsonEmptyTestString =
     "{ \"intVal\": 0, "
     "\"int64Val\": 0, "
+    "\"uint8Val\": 0, "
     "\"uint32Val\": 0, "
     "\"uint64Val\": 0, "
     "\"stringVal\": \"\", "

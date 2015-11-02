@@ -339,6 +339,33 @@ BOOST_AUTO_TEST_CASE(FromKVWithDefaults)
     BOOST_CHECK_EQUAL(out2, jsonTestString);
 }
 
+BOOST_AUTO_TEST_CASE(FromIncompleteKVWithDefaults)
+{
+    IncompatibleTestConfig partialConfig;
+    saveToKVStore(DB_PATH, partialConfig, DB_PREFIX);
+
+    TestConfig outConfig;
+    loadFromKVStoreWithJson(DB_PATH, jsonTestString, outConfig, DB_PREFIX);
+
+    BOOST_CHECK_EQUAL(outConfig.stringVal, partialConfig.stringVal);
+    BOOST_CHECK(outConfig.intVector == partialConfig.intVector);
+
+    // array from KV is not compatible, should default to JSON
+    std::array<int, 2> defaultIntArray = {{0, 1}};
+    BOOST_CHECK(outConfig.intArray == defaultIntArray);
+
+    BOOST_CHECK(outConfig.enumVal == TestEnum::THIRD);
+
+    BOOST_CHECK_EQUAL(outConfig.subVector[0].intVal, partialConfig.subVector[0].intVal);
+
+    BOOST_CHECK_EQUAL(outConfig.union1.as<TestConfig::SubConfig>().intVal,
+                      partialConfig.union1.as<IncompatibleTestConfig::SubConfig>().intVal);
+
+    // values missing from partial config
+    BOOST_CHECK_EQUAL(outConfig.intVal, 12345);
+    BOOST_CHECK_EQUAL(outConfig.subObj.subSubObj.intVal, 234);
+}
+
 BOOST_AUTO_TEST_CASE(PartialConfig)
 {
     // check if partial config is fully supported
@@ -388,6 +415,22 @@ BOOST_AUTO_TEST_CASE(PartialConfig)
                                                                 g_variant_unref);
         BOOST_CHECK_THROW(loadFromGVariant(v.get(), partialConfig), ConfigException);
     }
+}
+
+BOOST_AUTO_TEST_CASE(CorruptedVector)
+{
+    KVStore store(DB_PATH);
+
+    TestConfig config;
+    loadFromJsonString(jsonTestString, config);
+
+    saveToKVStore(DB_PATH, config, DB_PREFIX);
+    KVStore::Transaction transaction(store);
+    store.set(DB_PREFIX + ".intVector", "8");
+    transaction.commit();
+
+    TestConfig outConfig;
+    BOOST_CHECK_THROW(loadFromKVStore(DB_PATH, outConfig, DB_PREFIX), InternalIntegrityException);
 }
 
 BOOST_AUTO_TEST_CASE(ConfigUnion)

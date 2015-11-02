@@ -25,6 +25,10 @@
 #ifndef COMMON_CONFIG_KVSTORE_VISITOR_UTILS_HPP
 #define COMMON_CONFIG_KVSTORE_VISITOR_UTILS_HPP
 
+#include <vector>
+#include <string>
+#include <sstream>
+
 namespace config {
 
 template<typename T>

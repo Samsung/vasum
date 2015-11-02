@@ -101,6 +101,12 @@ private:
         value = g_variant_get_int64(object);
     }
 
+    static void fromGVariant(GVariant* object, std::uint8_t& value)
+    {
+        checkType(object, G_VARIANT_TYPE_BYTE);
+        value = g_variant_get_byte(object);
+    }
+
     static void fromGVariant(GVariant* object, std::uint32_t& value)
     {
         checkType(object, G_VARIANT_TYPE_UINT32);

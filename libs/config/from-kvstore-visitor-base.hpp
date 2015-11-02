@@ -25,6 +25,7 @@
 #ifndef COMMON_CONFIG_FROM_KVSTORE_VISITOR_BASE_HPP
 #define COMMON_CONFIG_FROM_KVSTORE_VISITOR_BASE_HPP
 
+#include "config/exception.hpp"
 #include "config/is-visitable.hpp"
 #include "config/kvstore.hpp"
 #include "config/kvstore-visitor-utils.hpp"
@@ -115,7 +116,7 @@ private:
         for (size_t i = 0; i < storedSize; ++i) {
             const std::string k = key(name, std::to_string(i));
             if (!mStore.prefixExists(k)) {
-                throw ConfigException("Corrupted list serialization.");
+                throw InternalIntegrityException("Corrupted list serialization.");
             }
             static_cast<RecursiveVisitor*>(this)->visitImpl(k, values[i]);
         }
@@ -134,7 +135,7 @@ private:
         for (size_t i = 0; i < storedSize; ++i) {
             const std::string k = key(name, std::to_string(i));
             if (!mStore.prefixExists(k)) {
-                throw ConfigException("Corrupted list serialization.");
+                throw InternalIntegrityException("Corrupted list serialization.");
             }
             static_cast<RecursiveVisitor*>(this)->visitImpl(k, values[i]);
         }

@@ -85,6 +85,9 @@ private:
     void writeInternal(std::int64_t value) {
         add("x", value);
     };
+    void writeInternal(std::uint8_t value) {
+        add("y", value);
+    };
     void writeInternal(std::uint32_t value) {
         add("u", value);
     };
