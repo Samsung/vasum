@@ -26,12 +26,13 @@
 #include "ut.hpp"
 #include "logger/logger.hpp"
 
+#include "lxcpp/exception.hpp"
+#include "lxcpp/process.hpp"
 #include "lxcpp/cgroups/devices.hpp"
 #include "lxcpp/cgroups/cgroup-config.hpp"
 
 #include "lxcpp/commands/cgroups.hpp"
 
-#include "lxcpp/exception.hpp"
 #include "utils/text.hpp"
 
 namespace {
@@ -101,9 +102,12 @@ BOOST_AUTO_TEST_CASE(SubsysAttach)
     }
 }
 
-BOOST_AUTO_TEST_CASE(ControlGroupParams)
+BOOST_AUTO_TEST_CASE(ModifyCGroupParams)
 {
     CGroup memg("memory:/ut-params");
+    if (memg.exists()) {
+        memg.destroy();
+    }
 
     // this test can fail if prev. test round left unexpected
     BOOST_CHECK_MESSAGE(memg.exists() == false, "Cgroup alredy exists");
@@ -114,26 +118,30 @@ BOOST_AUTO_TEST_CASE(ControlGroupParams)
         return ;
     }
 
-    BOOST_CHECK_NO_THROW(memg.assignPid(::getpid()));
-    BOOST_CHECK_NO_THROW(memg.assignGroup(::getpid()));
+    pid_t pid = lxcpp::fork();
+    if (pid == 0) {
+        BOOST_CHECK_NO_THROW(memg.assignPid(::getpid()));
+        BOOST_CHECK_NO_THROW(memg.assignGroup(::getpid()));
 
-    BOOST_CHECK_NO_THROW(memg.setValue("limit_in_bytes", "10k"));
-    BOOST_CHECK_NO_THROW(memg.setValue("soft_limit_in_bytes", "10k"));
-    BOOST_CHECK_THROW(memg.getValue("non-existing-name"), CGroupException);
-    BOOST_CHECK_THROW(memg.setValue("non-existing-name", "xxx"), CGroupException);
+        BOOST_CHECK_NO_THROW(memg.setValue("limit_in_bytes", "10k"));
+        BOOST_CHECK_NO_THROW(memg.setValue("soft_limit_in_bytes", "10k"));
+        BOOST_CHECK_THROW(memg.getValue("non-existing-name"), CGroupException);
+        BOOST_CHECK_THROW(memg.setValue("non-existing-name", "xxx"), CGroupException);
 
-    LOGD("limit_in_bytes: " << memg.getValue("limit_in_bytes"));
-    LOGD("soft_limit_in_bytes: " << memg.getValue("soft_limit_in_bytes"));
-    LOGD("max_usage_in_bytes: " << memg.getValue("max_usage_in_bytes"));
+        LOGD("limit_in_bytes: " << memg.getValue("limit_in_bytes"));
+        LOGD("soft_limit_in_bytes: " << memg.getValue("soft_limit_in_bytes"));
+        LOGD("max_usage_in_bytes: " << memg.getValue("max_usage_in_bytes"));
 
-    CGroup memtop("memory:/");
-    memtop.assignPid(::getpid());
-    memtop.setCommonValue("procs", std::to_string(::getpid()));
-
+        CGroup memtop("memory:/");
+        memtop.assignPid(::getpid());
+        memtop.setCommonValue("procs", std::to_string(::getpid()));
+        ::_exit(EXIT_SUCCESS);
+    }
+    lxcpp::waitpid(pid);
     BOOST_CHECK_NO_THROW(memg.destroy());
 }
 
-BOOST_AUTO_TEST_CASE(DevicesParams)
+BOOST_AUTO_TEST_CASE(LisDevicesPermissions)
 {
     DevicesCGroup devgrp("/tmp");
 
