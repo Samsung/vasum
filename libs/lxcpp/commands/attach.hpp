@@ -54,6 +54,7 @@ public:
      * @param workDirInContainer work directory set for the new process
      * @param envToKeep environment variables that will be kept
      * @param envToSet new environment variables that will be set
+     * @param logger logging configuration that will be set (parent process)
      */
     Attach(const ContainerConfig& config,
            const std::vector<std::string>& argv,
@@ -64,7 +65,8 @@ public:
            const int capsToKeep,
            const std::string& workDirInContainer,
            const std::vector<std::string>& envToKeep,
-           const std::vector<std::pair<std::string, std::string>>& envToSet);
+           const std::vector<std::pair<std::string, std::string>>& envToSet,
+           const LoggerConfig & logger);
     ~Attach();
 
     void execute();

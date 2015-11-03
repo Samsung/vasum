@@ -221,7 +221,8 @@ void ContainerImpl::attach(const std::vector<std::string>& argv,
                   /*capsToKeep*/ 0,
                   cwdInContainer,
                   /*envToKeep*/ {},
-    /*envInContainer*/ {{"container","lxcpp"}});
+                  /*envInContainer*/ {{"container","lxcpp"}},
+                  mConfig.mLogger);
     // TODO: Env variables should agree with the ones already in the container
     attach.execute();
 }

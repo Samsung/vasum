@@ -26,8 +26,7 @@
 #include "utils/fd-utils.hpp"
 #include "utils/typeinfo.hpp"
 
-// TODO: Implement passing logger configuration and uncomment this.
-// #include "logger/logger.hpp"
+#include "logger/logger.hpp"
 
 #include <iostream>
 #include <unistd.h>
@@ -56,8 +55,7 @@ int main(int argc, char *argv[])
         attachHelper.execute();
         return EXIT_SUCCESS;
     } catch(std::exception& e) {
-        // TODO: Implement passing logger configuration and uncomment this.
-        // LOGE("Unexpected: " << utils::getTypeName(e) << ": " << e.what());
+        LOGE("Unexpected: " << utils::getTypeName(e) << ": " << e.what());
         return EXIT_FAILURE;
     }
 }

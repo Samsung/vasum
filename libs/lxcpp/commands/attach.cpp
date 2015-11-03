@@ -42,7 +42,8 @@ Attach::Attach(const ContainerConfig& config,
                const int capsToKeep,
                const std::string& workDirInContainer,
                const std::vector<std::string>& envToKeep,
-               const std::vector<std::pair<std::string, std::string>>& envToSet)
+               const std::vector<std::pair<std::string, std::string>>& envToSet,
+               const LoggerConfig & logger)
     : mIntermChannel(false),
       mConfig(argv,
               config.mInitPid,
@@ -53,7 +54,8 @@ Attach::Attach(const ContainerConfig& config,
               capsToKeep,
               workDirInContainer,
               envToKeep,
-              envToSet)
+              envToSet,
+              logger)
 {
     // Set TTY
     if (ttyPath.empty()) {

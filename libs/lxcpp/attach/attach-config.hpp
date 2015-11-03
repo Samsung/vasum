@@ -28,7 +28,7 @@
 
 #include <config/config.hpp>
 #include <config/fields.hpp>
-
+#include "lxcpp/logger-config.hpp"
 #include <sys/types.h>
 
 #include <string>
@@ -71,6 +71,9 @@ struct AttachConfig {
     /// Environment variables that will be set/updated for the attached process
     std::vector<std::pair<std::string, std::string>> envToSet;
 
+    /// Logging on the attached process side
+    LoggerConfig logger;
+
     AttachConfig() = default;
 
     AttachConfig(const std::vector<std::string>& argv,
@@ -82,7 +85,8 @@ struct AttachConfig {
                  const int capsToKeep,
                  const std::string& workDirInContainer,
                  const std::vector<std::string>& envToKeep,
-                 const std::vector<std::pair<std::string, std::string>>& envToSet)
+                 const std::vector<std::pair<std::string, std::string>>& envToSet,
+                 const LoggerConfig & logger)
         : argv(argv),
           initPid(initPid),
           namespaces(namespaces),
@@ -93,7 +97,8 @@ struct AttachConfig {
           capsToKeep(capsToKeep),
           workDirInContainer(workDirInContainer),
           envToKeep(envToKeep),
-          envToSet(envToSet)
+          envToSet(envToSet),
+          logger(logger)
     {}
 
     CONFIG_REGISTER
@@ -108,7 +113,8 @@ struct AttachConfig {
         capsToKeep,
         workDirInContainer,
         envToKeep,
-        envToSet
+        envToSet,
+        logger
     )
 };
 

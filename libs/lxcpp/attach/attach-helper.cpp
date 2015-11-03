@@ -82,6 +82,10 @@ AttachHelper::AttachHelper(const int channelFD)
 {
     mChannel.setCloseOnExec(true);
     config::loadFromFD(mChannel.getFD(), mConfig);
+    logger::setupLogger(mConfig.logger.mType,
+                        mConfig.logger.mLevel,
+                        mConfig.logger.mArg);
+    LOGD("Config & logging restored");
 }
 
 AttachHelper::~AttachHelper()
