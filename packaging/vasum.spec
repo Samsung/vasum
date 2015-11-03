@@ -306,7 +306,9 @@ systemctl daemon-reload || :
 %config /etc/vasum/tests/provision/*.conf
 %config /etc/vasum/tests/templates/*.conf
 %attr(755,root,root) /etc/vasum/tests/templates/*.sh
+%dir /etc/vasum/tests/utils
 %config /etc/vasum/tests/utils/*.txt
+%attr(755,root,root) /etc/vasum/tests/utils/*.sh
 %{python_sitelib}/vsm_integration_tests
 %if !%{without_systemd}
 %{_unitdir}/vasum-socket-test.socket

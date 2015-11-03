@@ -65,6 +65,9 @@ INSTALL(FILES        provision/test-provision.conf
 INSTALL(FILES        utils/file.txt
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/utils)
 
+INSTALL(FILES        utils/random.sh
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/utils
+        PERMISSIONS  OWNER_READ OWNER_EXECUTE)
 
 IF(NOT WITHOUT_SYSTEMD)
 INSTALL(FILES        systemd/vasum-socket-test.socket

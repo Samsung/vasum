@@ -24,7 +24,7 @@
 #include "lxcpp/commands/attach.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"
-
+#include "config/manager.hpp"
 #include "utils/exception.hpp"
 #include "utils/fd-utils.hpp"
 #include "logger/logger.hpp"
@@ -93,6 +93,9 @@ void Attach::execute()
 
 void Attach::parent(const pid_t interPid)
 {
+    // save the configuration
+    config::saveToFD(mIntermChannel.getFD(), mConfig);
+
     // TODO: Setup cgroups etc
     const pid_t childPid = mIntermChannel.read<pid_t>();
 

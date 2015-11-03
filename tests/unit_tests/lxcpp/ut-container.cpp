@@ -30,6 +30,7 @@
 #include "lxcpp/exception.hpp"
 
 #include "utils/scoped-dir.hpp"
+#include "utils/fs.hpp"
 
 #include <memory>
 
@@ -39,6 +40,10 @@ const std::string TEST_DIR            = "/tmp/ut-zones";
 const std::string ROOT_DIR            = TEST_DIR + "/root";
 const std::string NON_EXISTANT_BINARY = TEST_DIR + "/nonexistantpath/bash";
 const std::string LOGGER_FILE         = TEST_DIR + "/loggerFile";
+
+const std::string TESTS_CMD_ROOT            = VSM_TEST_CONFIG_INSTALL_DIR "/utils/";
+const std::string TEST_CMD_RANDOM           = "random.sh";
+const std::string TEST_CMD_RANDOM_PRODUCT   = "random_product.txt";
 
 const std::vector<std::string> COMMAND = {"/bin/bash",
                                           "-c", "trap exit SIGTERM; while true; do sleep 0.1; done"
@@ -118,6 +123,22 @@ BOOST_AUTO_TEST_CASE(StartStop)
                                       LOGGER_FILE));
     BOOST_CHECK_NO_THROW(c->start());
     BOOST_CHECK_NO_THROW(c->stop());
+}
+
+BOOST_AUTO_TEST_CASE(Attach)
+{
+    auto c = std::unique_ptr<Container>(createContainer("Attach", "/"));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
+    BOOST_CHECK_NO_THROW(c->start());
+    BOOST_CHECK_NO_THROW(c->attach({TESTS_CMD_ROOT + TEST_CMD_RANDOM, TEST_CMD_RANDOM_PRODUCT}, TEST_DIR));
+    BOOST_CHECK_NO_THROW(c->stop());
+
+    std::string random;
+    BOOST_REQUIRE_NO_THROW(utils::readFileContent(TEST_DIR + "/" + TEST_CMD_RANDOM_PRODUCT, random));
+    BOOST_ASSERT(random.size() > 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
