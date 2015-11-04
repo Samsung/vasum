@@ -127,9 +127,9 @@ void getAddressList(pid_t pid, std::vector<InetAddr>& addrs, int family, const s
         if (addrmsg.ifa_index == index) {
             InetAddr a;
             if (addrmsg.ifa_family == AF_INET6) {
-                a.setType(InetAddrType::IPV6);
+                a.type = InetAddrType::IPV6;
             } else if (addrmsg.ifa_family == AF_INET) {
-                a.setType(InetAddrType::IPV4);
+                a.type = InetAddrType::IPV4;
             } else {
                 const std::string msg = "Unsupported inet family";
                 LOGE(msg);
@@ -265,10 +265,10 @@ void fromString(const std::string& s, in6_addr& addr)
 
 std::string toString(const InetAddr& a) {
     std::string opts = "/" + std::to_string(a.prefix);
-    if (a.getType() == InetAddrType::IPV6) {
+    if (a.type == InetAddrType::IPV6) {
         return toString(a.getAddr<in6_addr>()) + opts;
     }
-    if (a.getType() == InetAddrType::IPV4) {
+    if (a.type == InetAddrType::IPV4) {
         return toString(a.getAddr<in_addr>()) + opts;
     }
     return "";
@@ -279,10 +279,10 @@ InetAddr::InetAddr(const std::string& a, unsigned p, uint32_t f) :
     flags(f)
 {
     if (a.find(":") != std::string::npos) {
-        setType(InetAddrType::IPV6);
+        type = InetAddrType::IPV6;
         fromString(a, getAddr<in6_addr>());
     } else {
-        setType(InetAddrType::IPV4);
+        type = InetAddrType::IPV4;
         fromString(a, getAddr<in_addr>());
     }
 }
@@ -551,15 +551,15 @@ void NetworkInterface::addInetAddr(const InetAddr& addr)
     NetlinkMessage nlm(RTM_NEWADDR, NLM_F_CREATE | NLM_F_REQUEST | NLM_F_ACK);
     ifaddrmsg infoAddr = utils::make_clean<ifaddrmsg>();
     infoAddr.ifa_index = getInterfaceIndex(mContainerPid, mIfname);
-    infoAddr.ifa_family = addr.getType() == InetAddrType::IPV4 ? AF_INET : AF_INET6;
+    infoAddr.ifa_family = addr.type == InetAddrType::IPV4 ? AF_INET : AF_INET6;
     infoAddr.ifa_prefixlen = addr.prefix;
     infoAddr.ifa_flags = addr.flags;
     nlm.put(infoAddr);
 
-    if (addr.getType() == InetAddrType::IPV6) {
+    if (addr.type == InetAddrType::IPV6) {
         nlm.put(IFA_ADDRESS, addr.getAddr<in6_addr>());
         nlm.put(IFA_LOCAL, addr.getAddr<in6_addr>());
-    } else if (addr.getType() == InetAddrType::IPV4) {
+    } else if (addr.type == InetAddrType::IPV4) {
         nlm.put(IFA_ADDRESS, addr.getAddr<in_addr>());
         nlm.put(IFA_LOCAL, addr.getAddr<in_addr>());
     }
@@ -572,15 +572,15 @@ void NetworkInterface::delInetAddr(const InetAddr& addr)
     NetlinkMessage nlm(RTM_DELADDR, NLM_F_REQUEST | NLM_F_ACK);
     ifaddrmsg infoAddr = utils::make_clean<ifaddrmsg>();
     infoAddr.ifa_index = getInterfaceIndex(mContainerPid, mIfname);
-    infoAddr.ifa_family = addr.getType() == InetAddrType::IPV4 ? AF_INET : AF_INET6;
+    infoAddr.ifa_family = addr.type == InetAddrType::IPV4 ? AF_INET : AF_INET6;
     infoAddr.ifa_prefixlen = addr.prefix;
     infoAddr.ifa_flags = addr.flags;
     nlm.put(infoAddr);
 
-    if (addr.getType() == InetAddrType::IPV6) {
+    if (addr.type == InetAddrType::IPV6) {
         nlm.put(IFA_ADDRESS, addr.getAddr<in6_addr>());
         nlm.put(IFA_LOCAL, addr.getAddr<in6_addr>());
-    } else if (addr.getType() == InetAddrType::IPV4) {
+    } else if (addr.type == InetAddrType::IPV4) {
         nlm.put(IFA_ADDRESS, addr.getAddr<in_addr>());
         nlm.put(IFA_LOCAL, addr.getAddr<in_addr>());
     }
@@ -632,8 +632,8 @@ static RoutingTable getRoutingTable(unsigned tbl)
 
 void NetworkInterface::addRoute(const Route& route, const RoutingTable rt)
 {
-    InetAddrType type = route.dst.getType();
-    if (route.src.getType() != type) {
+    InetAddrType type = route.dst.type;
+    if (route.src.type != type) {
         const std::string msg = "Family type must be the same";
         LOGE(msg);
         throw NetworkException(msg);
@@ -683,8 +683,8 @@ void NetworkInterface::addRoute(const Route& route, const RoutingTable rt)
 
 void NetworkInterface::delRoute(const Route& route, const RoutingTable rt)
 {
-    InetAddrType type = route.dst.getType();
-    if (route.src.getType() != type) {
+    InetAddrType type = route.dst.type;
+    if (route.src.type != type) {
         const std::string msg = "Family type must be the same";
         LOGE(msg);
         throw NetworkException(msg);
@@ -753,11 +753,11 @@ static std::vector<Route> getRoutesImpl(pid_t pid, rt_class_t tbl, const std::st
         route.table = getRoutingTable(rt.rtm_table);
 
         if (rt.rtm_family == AF_INET6) {
-            route.dst.setType(InetAddrType::IPV6);
-            route.src.setType(InetAddrType::IPV6);
+            route.dst.type = InetAddrType::IPV6;
+            route.src.type = InetAddrType::IPV6;
         } else if (rt.rtm_family == AF_INET) {
-            route.dst.setType(InetAddrType::IPV4);
-            route.src.setType(InetAddrType::IPV4);
+            route.dst.type = InetAddrType::IPV4;
+            route.src.type = InetAddrType::IPV4;
         } else {
             const std::string msg = "Unsupported inet family";
             LOGE(msg);
@@ -773,7 +773,7 @@ static std::vector<Route> getRoutesImpl(pid_t pid, rt_class_t tbl, const std::st
             switch (attrType) {
             case RTA_DST:    // 1
             case RTA_GATEWAY:// 5
-                if (route.dst.getType() == InetAddrType::IPV6) {
+                if (route.dst.type == InetAddrType::IPV6) {
                     response.fetch(attrType, route.dst.getAddr<in6_addr>());
                 } else {
                     response.fetch(attrType, route.dst.getAddr<in_addr>());
@@ -781,7 +781,7 @@ static std::vector<Route> getRoutesImpl(pid_t pid, rt_class_t tbl, const std::st
                 break;
             case RTA_SRC:    // 2
             case RTA_PREFSRC:// 7
-                if (route.src.getType() == InetAddrType::IPV6) {
+                if (route.src.type == InetAddrType::IPV6) {
                     response.fetch(attrType, route.src.getAddr<in6_addr>());
                     route.src.prefix = 128;
                 } else {

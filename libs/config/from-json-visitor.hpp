@@ -87,6 +87,16 @@ private:
         }
     }
 
+    static void fromJsonObject(json_object* object, std::uint8_t& value)
+    {
+        checkType(object, json_type_int);
+        std::int64_t value64 = json_object_get_int64(object);
+        if (value64 > UINT8_MAX || value64 < 0) {
+            throw ConfigException("Value out of range");
+        }
+        value = static_cast<std::int8_t>(value64);
+    }
+
     static void fromJsonObject(json_object* object, std::int32_t& value)
     {
         checkType(object, json_type_int);

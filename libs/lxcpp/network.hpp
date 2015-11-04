@@ -30,6 +30,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <array>
 #include <ostream>
 
 #include <arpa/inet.h>
@@ -57,26 +58,18 @@ public:
     InetAddr() = default;
     InetAddr(const std::string& addr, unsigned prefix, uint32_t flags=0);
 
-    InetAddrType getType() const {
-        return static_cast<InetAddrType>(type);
-    }
-    void setType(InetAddrType t) {
-        type = static_cast<int>(t);
-    }
-
     template<typename T>
     T& getAddr() {
-        //FIXME return union field after fix of addr type
-        char *v = addr;
+        std::uint8_t *v = addr.data();
         return *(reinterpret_cast<T*>(v));
     }
     template<typename T>
     const T& getAddr() const {
-        //FIXME return union field after fix of addr type
-        const char *v = addr;
+        const std::uint8_t *v = addr.data();
         return *(reinterpret_cast<const T*>(v));
     }
 
+    InetAddrType type;
     unsigned prefix;
     uint32_t flags;
 
@@ -84,16 +77,12 @@ public:
     (
         type,
         flags,
-        prefix
-        //FIXME add when visitor can serialize char[SIZE]
-        //addr
+        prefix,
+        addr
     )
 
 private:
- //FIXME change to union when visitor can serialize type by istream ostream operators
-    char addr[sizeof(in6_addr)];
- //FIXME: change to enum when visitor can serialize type by istream ostream operators
-    int type;
+    std::array<std::uint8_t,sizeof(in6_addr)> addr;
 };
 
 static inline bool operator==(const in_addr& a, const in_addr& b)
@@ -108,8 +97,8 @@ static inline bool operator==(const in6_addr& a, const in6_addr& b)
 
 static inline bool operator==(const InetAddr& a, const InetAddr& b)
 {
-    if (a.getType() == b.getType() && a.prefix == b.prefix) {
-        if (a.getType() == InetAddrType::IPV6)
+    if (a.type == b.type && a.prefix == b.prefix) {
+        if (a.type == InetAddrType::IPV6)
             return a.getAddr<in6_addr>() == b.getAddr<in6_addr>();
         else
             return a.getAddr<in_addr>() == b.getAddr<in_addr>();

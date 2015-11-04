@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(ModifyCGroupParams)
     BOOST_CHECK_NO_THROW(memg.destroy());
 }
 
-BOOST_AUTO_TEST_CASE(LisDevicesPermissions)
+BOOST_AUTO_TEST_CASE(ListDevicesPermissions)
 {
     DevicesCGroup devgrp("/tmp");
 

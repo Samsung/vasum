@@ -139,6 +139,8 @@ BOOST_AUTO_TEST_CASE(NetworkListInterfaces)
 BOOST_AUTO_TEST_CASE(NetworkConfigSerialization)
 {
     std::string tmpConfigFile = "/tmp/netconfig.conf";
+    ::unlink(tmpConfigFile.c_str());
+
     NetworkConfig cfg;
     BOOST_CHECK_NO_THROW(config::saveToJsonString(cfg));
 
@@ -153,8 +155,10 @@ BOOST_AUTO_TEST_CASE(NetworkConfigSerialization)
     NetworkConfig cfg2;
     BOOST_CHECK_NO_THROW(config::loadFromJsonFile(tmpConfigFile, cfg2));
 
-    int ifnum = cfg.getInterfaces().size();
-    for (int i = 0; i < ifnum; ++i) {
+    int ifn1 = cfg.getInterfaces().size();
+    int ifn2 = cfg2.getInterfaces().size();
+    BOOST_CHECK_EQUAL(ifn1, ifn2);
+    for (int i = 0; i < ifn2; ++i) {
         const NetworkInterfaceConfig& ni1 = cfg.getInterface(i);
         const NetworkInterfaceConfig& ni2 = cfg2.getInterface(i);
 

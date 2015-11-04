@@ -102,6 +102,7 @@
 #include "config/from-fdstore-visitor.hpp"
 #include "config/fs-utils.hpp"
 #include "config/is-union.hpp"
+#include "logger/logger.hpp"
 
 namespace config {
 
@@ -180,12 +181,16 @@ void loadFromJsonFile(const std::string& filename, Config& config)
 {
     std::string content;
     if (!fsutils::readFileContent(filename, content)) {
-        throw ConfigException("Could not load " + filename);
+        const std::string& msg = "Could not load " + filename;
+        LOGE(msg);
+        throw ConfigException(msg);
     }
     try {
         loadFromJsonString(content, config);
     } catch (ConfigException& e) {
-        throw ConfigException("Error in " + filename + ": " + e.what());
+        const std::string& msg = "Error in " + filename + ": " + e.what();
+        LOGE(msg);
+        throw ConfigException(msg);
     }
 }
 

@@ -79,6 +79,11 @@ private:
         return ret;
     }
 
+    static json_object* toJsonObject(std::uint8_t value)
+    {
+        return json_object_new_int(value);
+    }
+
     static json_object* toJsonObject(std::int32_t value)
     {
         return json_object_new_int(value);
