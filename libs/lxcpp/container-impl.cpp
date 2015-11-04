@@ -78,7 +78,6 @@ ContainerImpl::ContainerImpl(const std::string &name,
 
     // IPC with the Guard process
     mClient.reset(new cargo::ipc::Client(mDispatcher.getPoll(), mConfig->mSocketPath));
-    mClient->setMethodHandler<api::Void, api::Void>(api::METHOD_GUARD_READY, std::bind(Start::onGuardReady, _1, _2, _3, mClient, mConfig));
 
     // TODO: Connect to a running Guard with something like this:
     // try {
@@ -213,8 +212,8 @@ void ContainerImpl::start()
     PrepHostTerminal terminal(mConfig->mTerminals);
     terminal.execute();
 
-    Start start(mConfig, mClient);
-    start.execute();
+    auto command = std::make_shared<Start>(mConfig, mClient);
+    command->execute();
 }
 
 void ContainerImpl::stop()

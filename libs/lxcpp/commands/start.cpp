@@ -26,6 +26,7 @@
 #include "lxcpp/process.hpp"
 #include "lxcpp/utils.hpp"
 #include "lxcpp/terminal.hpp"
+#include "lxcpp/guard/api.hpp"
 
 #include "logger/logger.hpp"
 #include "cargo/manager.hpp"
@@ -55,6 +56,10 @@ Start::~Start()
 
 void Start::execute()
 {
+    using namespace std::placeholders;
+    mClient->setMethodHandler<api::Void, api::Void>(api::METHOD_GUARD_READY,
+            std::bind(&Start::onGuardReady, shared_from_this(), _1, _2, _3));
+
     LOGD("Forking daemonize and guard processes. Execing guard libexec binary.");
     LOGD("Logging will cease now. It should be restored using some new facility in the guard process.");
     const pid_t pid = lxcpp::fork();
@@ -69,21 +74,19 @@ void Start::execute()
 
 bool Start::onGuardReady(const cargo::ipc::PeerID,
                          std::shared_ptr<api::Void>&,
-                         cargo::ipc::MethodResult::Pointer methodResult,
-                         std::shared_ptr<cargo::ipc::Client> client,
-                         const std::shared_ptr<ContainerConfig>& config)
+                         cargo::ipc::MethodResult::Pointer methodResult)
 {
     // TODO: Maybe replace this method handler with onNewPeer callback?
 
     // cargo::ipc::Client connected with Guard and run this callback
-    client->callAsyncFromCallback<ContainerConfig, api::Void>(api::METHOD_SET_CONFIG, config);
+    mClient->callAsyncFromCallback<ContainerConfig, api::Void>(api::METHOD_SET_CONFIG, mConfig);
 
-    auto initStarted = [config](cargo::ipc::Result<api::Pid>&& result) {
+    auto initStarted = [this](cargo::ipc::Result<api::Pid>&& result) {
         if (result.isValid()) {
             auto initPid = result.get();
-            config->mInitPid = initPid->value;
+            mConfig->mInitPid = initPid->value;
             LOGI("Init PID: " << initPid->value);
-            if (config->mInitPid <= 0) {
+            if (mConfig->mInitPid <= 0) {
                 // TODO: Handle the error
                 LOGE("Bad Init PID");
             }
@@ -92,10 +95,11 @@ bool Start::onGuardReady(const cargo::ipc::PeerID,
             result.rethrow();
         }
     };
-    client->callAsyncFromCallback<api::Void, api::Pid>(api::METHOD_START, std::shared_ptr<api::Void>(), initStarted);
+    mClient->callAsyncFromCallback<api::Void, api::Pid>(api::METHOD_START, std::shared_ptr<api::Void>(), initStarted);
 
     methodResult->setVoid();
-    return true;
+
+    return false;
 }
 
 void Start::parent(const pid_t pid)

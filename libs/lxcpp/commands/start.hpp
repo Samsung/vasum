@@ -37,15 +37,18 @@
 
 namespace lxcpp {
 
-
-class Start final: Command {
+/**
+ * Starts the container. Assumes container isn't already running.
+ *
+ * Prepares an environment for a guard process,
+ * starts it, and controls it with RPC.
+ *
+ * After execute() object will live till all it's callbacks are run.
+ */
+class Start final: public Command, public std::enable_shared_from_this<Start> {
 public:
+
     /**
-     * Starts the container. Assumes container isn't already running.
-     *
-     * In more details it prepares an environment for a guard process,
-     * starts it, and passes it the configuration through a file descriptor.
-     *
      * @param config container's config
      * @param client IPC connection to the Guard process
      */
@@ -63,11 +66,9 @@ public:
      * @param client IPC connection to the Guard process
      * @param config container's config
      */
-    static bool onGuardReady(const cargo::ipc::PeerID,
-                             std::shared_ptr<api::Void>&,
-                             cargo::ipc::MethodResult::Pointer,
-                             std::shared_ptr<cargo::ipc::Client> client,
-                             const std::shared_ptr<ContainerConfig>& config);
+    bool onGuardReady(const cargo::ipc::PeerID,
+                      std::shared_ptr<api::Void>&,
+                      cargo::ipc::MethodResult::Pointer);
 
 private:
     std::shared_ptr<ContainerConfig> mConfig;

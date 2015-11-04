@@ -124,7 +124,7 @@ void Guard::onInitExit()
         mStopResult->setVoid();
     }
 
-    mService->stop();
+    mService->stop(false);
 }
 
 bool Guard::onSetConfig(const cargo::ipc::PeerID, std::shared_ptr<ContainerConfig>& data, cargo::ipc::MethodResult::Pointer result)
