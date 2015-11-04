@@ -69,6 +69,10 @@ INSTALL(FILES        utils/random.sh
         DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/utils
         PERMISSIONS  OWNER_READ OWNER_EXECUTE)
 
+INSTALL(FILES        utils/list_files.sh
+        DESTINATION  ${VSM_TEST_CONFIG_INSTALL_DIR}/utils
+        PERMISSIONS  OWNER_READ OWNER_EXECUTE)
+
 IF(NOT WITHOUT_SYSTEMD)
 INSTALL(FILES        systemd/vasum-socket-test.socket
                      ${CMAKE_BINARY_DIR}/systemd/vasum-socket-test.service

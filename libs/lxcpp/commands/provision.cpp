@@ -73,19 +73,18 @@ ProvisionFile::ProvisionFile(ContainerConfig &config, const provision::File &fil
 void ProvisionFile::execute()
 {
     using namespace provision;
-    const fs::path hostPath = fs::path(mConfig.mRootPath) / fs::path(mFile.path);
 
     switch (mFile.type) {
     case File::Type::DIRECTORY:
-        if (!utils::createDirs(hostPath.string(), mFile.mode)) {
-            const std::string msg = "Can't create dir: " + hostPath.string();
+        if (!utils::createDirs(mFile.path, mFile.mode)) {
+            const std::string msg = "Can't create dir: " + mFile.path;
             LOGE(msg);
             throw ProvisionException(msg);
         }
         break;
 
     case File::Type::FIFO:
-        if (!utils::createFifo(hostPath.string(), mFile.mode)) {
+        if (!utils::createFifo(mFile.path, mFile.mode)) {
             const std::string msg = "Failed to make fifo: " + mFile.path;
             LOGE(msg);
             throw ProvisionException(msg);
@@ -94,13 +93,13 @@ void ProvisionFile::execute()
 
     case File::Type::REGULAR:
         if ((mFile.flags & O_CREAT)) {
-            if (!utils::createFile(hostPath.string(), mFile.flags, mFile.mode)) {
+            if (!utils::createFile(mFile.path, mFile.flags, mFile.mode)) {
                 const std::string msg = "Failed to create file: " + mFile.path;
                 LOGE(msg);
                 throw ProvisionException(msg);
             }
         } else {
-            if (!utils::copyFile(mFile.path, hostPath.string())) {
+            if (!utils::copyFile(mFile.path, mFile.path)) {
                 const std::string msg = "Failed to copy file: " + mFile.path;
                 LOGE(msg);
                 throw ProvisionException(msg);
@@ -123,15 +122,11 @@ ProvisionMount::ProvisionMount(ContainerConfig &config, const provision::Mount &
 
 void ProvisionMount::execute()
 {
-    const fs::path hostPath = fs::path(mConfig.mRootPath) / fs::path(mMount.target);
-
-    lxcpp::mount(mMount.source, hostPath.string(), mMount.type, mMount.flags, mMount.data);
+    lxcpp::mount(mMount.source, mMount.target, mMount.type, mMount.flags, mMount.data);
 }
 void ProvisionMount::revert()
 {
-    const fs::path hostPath = fs::path(mConfig.mRootPath) / fs::path(mMount.target);
-
-    lxcpp::umount(hostPath.string(), MNT_DETACH);
+    lxcpp::umount(mMount.target, MNT_DETACH);
 }
 
 
@@ -144,9 +139,8 @@ ProvisionLink::ProvisionLink(ContainerConfig &config, const provision::Link &lin
 void ProvisionLink::execute()
 {
     const std::string srcHostPath = fs::path(mLink.source).normalize().string();
-    const fs::path destHostPath = fs::path(mConfig.mRootPath) / fs::path(mLink.target);
 
-    if (!utils::createLink(srcHostPath, destHostPath.string())) {
+    if (!utils::createLink(srcHostPath, mLink.target)) {
         const std::string msg = "Failed to create hard link: " +  mLink.source;
         LOGE(msg);
         throw ProvisionException(msg);

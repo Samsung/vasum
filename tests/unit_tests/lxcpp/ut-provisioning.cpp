@@ -30,6 +30,9 @@
 #include "lxcpp/provision-config.hpp"
 #include "ut.hpp"
 #include "utils/scoped-dir.hpp"
+#include "utils/exception.hpp"
+#include "utils/fs.hpp"
+#include <sys/mount.h>
 #include <iostream>
 
 namespace {
@@ -38,26 +41,81 @@ using namespace lxcpp;
 using namespace cargo;
 using namespace provision;
 
-const std::string TEST_DIR = "/tmp/ut-provisioning";
-const std::string ROOT_DIR = TEST_DIR + "/root";
-const std::string WORK_DIR = TEST_DIR + "/work";
+const std::string ROOT_DIR            = "/";
+const std::string TEST_DIR            = "/tmp/ut-provisioning/";
+const std::string WORK_DIR            = "/tmp/ut-work/";
+const std::string EXTERNAL_DIR        = "/tmp/ut-temporary/";
+const std::string USR_BIN_DIR         = "/usr/bin/";
+const std::string TEST_MOUNT_VIRT_DIR = TEST_DIR + "bin";
+const std::string LOGGER_FILE         = TEST_DIR + "provision.log";
+const std::string TEST_FILE           = "test_file";
+const std::string TEST_EXT_FILE       = "bash";
+
+const std::string TESTS_CMD_ROOT      = VSM_TEST_CONFIG_INSTALL_DIR "/utils/";
+const std::string TEST_CMD_LIST       = "list_files.sh";
+const std::string TEST_CMD_LIST_RET   = "/tmp/list_files_ret.txt";
+
+const std::vector<std::string> COMMAND = {"/bin/bash",
+                                          "-c", "trap exit SIGTERM; while true; do sleep 0.1; done"
+                                         };
 
 struct Fixture {
-
-    Fixture()
-        : mTestPath(ROOT_DIR),
-          mRoot(ROOT_DIR),
-          mWork(WORK_DIR)
+    Fixture() : mTestPath(TEST_DIR), mWork(WORK_DIR)
     {
+        // setup test
         container = std::unique_ptr<Container>(createContainer("ProvisioningTester", ROOT_DIR, WORK_DIR));
+        container->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                             logger::LogLevel::DEBUG,
+                             LOGGER_FILE);
+        container->setInit(COMMAND);
+
+        // cleanup
+        utils::removeFile(TEST_DIR + TEST_FILE);
     }
     ~Fixture() {}
+
+    bool attachListFiles(const std::string& dir, const std::string& lookupItem) {
+        bool found = false;
+        container->attach({TESTS_CMD_ROOT + TEST_CMD_LIST, dir, TEST_CMD_LIST_RET}, TEST_DIR);
+        std::string file_list = utils::readFileContent(TEST_CMD_LIST_RET);
+        if(file_list.find(lookupItem) != std::string::npos)
+            found = true;
+        utils::removeFile(TEST_CMD_LIST_RET);
+        return found;
+    }
 
     std::unique_ptr<Container> container;
 
     utils::ScopedDir mTestPath;
-    utils::ScopedDir mRoot;
     utils::ScopedDir mWork;
+};
+
+struct MountFixture : Fixture {
+    MountFixture() :  mExternalPath(EXTERNAL_DIR),
+                      mItem({EXTERNAL_DIR, TEST_MOUNT_VIRT_DIR, "tmpfs", MS_BIND | MS_RDONLY, ""})
+    {
+        // cleanup
+        utils::removeFile(TEST_DIR + TEST_EXT_FILE);
+
+        // setup test
+        utils::createDirs(mItem.target, 0777);
+        utils::copyFile(USR_BIN_DIR + TEST_EXT_FILE, EXTERNAL_DIR + TEST_EXT_FILE);
+    }
+    ~MountFixture() {
+        // race: who does the umount first? stopping container or test?
+        // no matter who - we have to have it unmounted before ScopedDir is deleted.
+        utils::umount(mItem.target);
+    }
+
+    void declareMount() {
+        container->declareMount(mItem.source,
+                                mItem.target,
+                                mItem.type,
+                                mItem.flags,
+                                mItem.data);
+    }
+    utils::ScopedDir mExternalPath;
+    Mount mItem;
 };
 
 } // namespace
@@ -147,7 +205,7 @@ BOOST_AUTO_TEST_CASE(AddDeclareLink)
     BOOST_REQUIRE_EQUAL(container->getLinks().size(), 0);
 }
 
-BOOST_AUTO_TEST_CASE(ProvisioningConfigSerialization)
+BOOST_AUTO_TEST_CASE(ConfigSerialization)
 {
     std::string tmpConfigFile = "/tmp/fileconfig.conf";
     std::string tmpConfigMount = "/tmp/mountconfig.conf";
@@ -169,6 +227,101 @@ BOOST_AUTO_TEST_CASE(ProvisioningConfigSerialization)
     BOOST_REQUIRE(saved_file == loaded_file);
     BOOST_REQUIRE(saved_mount == loaded_mount);
     BOOST_REQUIRE(saved_link == loaded_link);
+}
+
+BOOST_AUTO_TEST_CASE(CreateFileOnStartup)
+{
+    BOOST_REQUIRE_THROW(utils::readFileContent(TEST_DIR + TEST_FILE), utils::UtilsException);
+
+    container->declareFile(File::Type::REGULAR, TEST_DIR + TEST_FILE, 0747, 0777);
+    std::vector<File> fileList = container->getFiles();
+    BOOST_REQUIRE_EQUAL(fileList.size(), 1);
+
+    BOOST_REQUIRE_NO_THROW(container->start());
+    sleep(2); // FIXME: Remove the sleep
+    BOOST_ASSERT(attachListFiles(TEST_DIR, TEST_FILE));
+    BOOST_REQUIRE_NO_THROW(container->stop());
+    sleep(2); // FIXME: Remove the sleep
+
+    // file already exists, let's start again
+    // to check what happens if file already exists
+    BOOST_REQUIRE_NO_THROW(container->start());
+    sleep(2); // FIXME: Remove the sleep
+    BOOST_REQUIRE_NO_THROW(container->stop());
+    sleep(2); // FIXME: Remove the sleep
+    BOOST_REQUIRE_NO_THROW(utils::readFileContent(TEST_DIR + TEST_FILE));
+}
+
+BOOST_AUTO_TEST_CASE(CreateFileWhileRunning)
+{
+    BOOST_REQUIRE_THROW(utils::readFileContent(TEST_DIR + TEST_FILE), utils::UtilsException);
+    BOOST_REQUIRE_EQUAL(container->getFiles().size(), 0);
+
+    BOOST_REQUIRE_NO_THROW(container->start());
+    sleep(2); // FIXME: Remove the sleep
+    BOOST_ASSERT(attachListFiles(TEST_DIR, TEST_FILE) == false);
+    container->declareFile(File::Type::REGULAR, TEST_DIR + TEST_FILE, 0747, 0777);
+    BOOST_REQUIRE_EQUAL(container->getFiles().size(), 1);
+    BOOST_ASSERT(attachListFiles(TEST_DIR, TEST_FILE));
+    BOOST_REQUIRE_NO_THROW(container->stop());
+    sleep(2); // FIXME: Remove the sleep
+}
+
+BOOST_FIXTURE_TEST_CASE(MountDirectory, MountFixture)
+{
+    BOOST_REQUIRE_NO_THROW(declareMount());
+    BOOST_REQUIRE_NO_THROW(container->start());
+    sleep(2); // FIXME: Remove the sleep
+    BOOST_REQUIRE(attachListFiles(TEST_MOUNT_VIRT_DIR, TEST_EXT_FILE));
+    BOOST_REQUIRE_NO_THROW(container->stop());
+    sleep(2); // FIXME: Remove the sleep
+}
+
+BOOST_FIXTURE_TEST_CASE(MountUnmountDirectoryWhileRunning, MountFixture)
+{
+    std::vector<Mount> mountList = container->getMounts();
+    BOOST_REQUIRE_EQUAL(mountList.size(), 0);
+
+    BOOST_REQUIRE_NO_THROW(container->start());
+    sleep(2); // FIXME: Remove the sleep
+
+    // mount
+    BOOST_REQUIRE_NO_THROW(declareMount());
+    BOOST_REQUIRE(attachListFiles(TEST_MOUNT_VIRT_DIR, TEST_EXT_FILE));
+
+    // unmount
+    BOOST_REQUIRE_NO_THROW(container->removeMount(mItem));
+    BOOST_REQUIRE(attachListFiles(TEST_MOUNT_VIRT_DIR, TEST_EXT_FILE) == false);
+
+    BOOST_REQUIRE_NO_THROW(container->stop());
+    sleep(2); // FIXME: Remove the sleep
+}
+
+BOOST_FIXTURE_TEST_CASE(LinkFile, Fixture)
+{
+    container->declareFile(File::Type::REGULAR, TEST_DIR + TEST_FILE, 0747, 0777);
+    BOOST_REQUIRE_NO_THROW(container->declareLink(TEST_DIR + TEST_FILE,
+                                                  TEST_DIR + TEST_EXT_FILE));
+    BOOST_REQUIRE_NO_THROW(container->start());
+    sleep(2); // FIXME: Remove the sleep
+    BOOST_ASSERT(attachListFiles(TEST_DIR, TEST_EXT_FILE));
+    BOOST_REQUIRE_NO_THROW(container->stop());
+    sleep(2); // FIXME: Remove the sleep
+}
+
+BOOST_AUTO_TEST_CASE(LinkFileWhileRunning)
+{
+    std::vector<Link> linkList = container->getLinks();
+    BOOST_REQUIRE_EQUAL(linkList.size(), 0);
+
+    BOOST_REQUIRE_NO_THROW(container->start());
+    sleep(2); // FIXME: Remove the sleep
+    container->declareFile(File::Type::REGULAR, TEST_DIR + TEST_FILE, 0747, 0777);
+    BOOST_REQUIRE_NO_THROW(container->declareLink(TEST_DIR + TEST_FILE,
+                                                  TEST_DIR + TEST_EXT_FILE));
+    BOOST_ASSERT(attachListFiles(TEST_DIR, TEST_EXT_FILE));
+    BOOST_REQUIRE_NO_THROW(container->stop());
+    sleep(2); // FIXME: Remove the sleep
 }
 
 BOOST_AUTO_TEST_SUITE_END()
