@@ -55,7 +55,8 @@ Attach::Attach(const ContainerConfig& config,
               workDirInContainer,
               envToKeep,
               envToSet,
-              logger)
+              logger),
+      mExitCode(EXIT_FAILURE)
 {
     // Set TTY
     if (ttyPath.empty()) {
@@ -103,7 +104,12 @@ void Attach::parent(const pid_t interPid)
 
     // Wait for all processes
     lxcpp::waitpid(interPid);
-    lxcpp::waitpid(childPid);
+    mExitCode = lxcpp::waitpid(childPid);
+}
+
+int Attach::getExitCode() const
+{
+    return mExitCode;
 }
 
 } // namespace lxcpp

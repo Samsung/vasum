@@ -77,8 +77,8 @@ public:
     virtual void reboot() = 0;
 
     // Other
-    virtual void attach(const std::vector<std::string>& argv,
-                        const std::string& cwdInContainer) = 0;
+    virtual int attach(const std::vector<std::string>& argv,
+                       const std::string& cwdInContainer) = 0;
     virtual void console() = 0;
     virtual bool isRunning() const = 0;
 

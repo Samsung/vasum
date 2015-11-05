@@ -148,7 +148,7 @@ int waitpid(const pid_t pid)
     if (WIFSIGNALED(status)) {
         msg = "Child killed by signal " + std::to_string(WTERMSIG(status));
     } else {
-        msg = "Unknown eror in child process";
+        msg = "Unknown error in child process";
     }
     LOGE(msg);
     throw ProcessSetupException(msg);

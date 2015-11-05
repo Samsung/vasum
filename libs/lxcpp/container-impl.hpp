@@ -74,8 +74,8 @@ public:
     void reboot();
 
     // Other
-    void attach(const std::vector<std::string>& argv,
-                const std::string& cwdInContainer);
+    int attach(const std::vector<std::string>& argv,
+               const std::string& cwdInContainer);
     void console();
     bool isRunning() const;
 

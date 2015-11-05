@@ -123,27 +123,11 @@ BOOST_AUTO_TEST_CASE(StartStop)
     BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
                                       logger::LogLevel::DEBUG,
                                       LOGGER_FILE));
-    c->start();
+    BOOST_CHECK_NO_THROW(c->start());
     // FIXME: Remove the sleep
     sleep(3);
     BOOST_CHECK_NO_THROW(c->stop());
     sleep(2);
 }
-
-// BOOST_AUTO_TEST_CASE(Attach)
-// {
-//     auto c = std::unique_ptr<Container>(createContainer("Attach", "/", WORK_DIR));
-//     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
-//     BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
-//                                       logger::LogLevel::DEBUG,
-//                                       LOGGER_FILE));
-//     BOOST_CHECK_NO_THROW(c->start());
-//     BOOST_CHECK_NO_THROW(c->attach({TESTS_CMD_ROOT + TEST_CMD_RANDOM, TEST_CMD_RANDOM_PRODUCT}, TEST_DIR));
-//     BOOST_CHECK_NO_THROW(c->stop());
-
-//     std::string random;
-//     BOOST_REQUIRE_NO_THROW(utils::readFileContent(TEST_DIR + "/" + TEST_CMD_RANDOM_PRODUCT, random));
-//     BOOST_ASSERT(random.size() > 0);
-// }
 
 BOOST_AUTO_TEST_SUITE_END()

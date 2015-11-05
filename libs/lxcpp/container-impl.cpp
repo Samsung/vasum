@@ -240,8 +240,8 @@ void ContainerImpl::reboot()
     throw NotImplementedException();
 }
 
-void ContainerImpl::attach(const std::vector<std::string>& argv,
-                           const std::string& cwdInContainer)
+int ContainerImpl::attach(const std::vector<std::string>& argv,
+                          const std::string& cwdInContainer)
 {
     Attach attach(*mConfig,
                   argv,
@@ -256,6 +256,7 @@ void ContainerImpl::attach(const std::vector<std::string>& argv,
                   mConfig->mLogger);
     // TODO: Env variables should agree with the ones already in the container
     attach.execute();
+    return attach.getExitCode();
 }
 
 void ContainerImpl::console()

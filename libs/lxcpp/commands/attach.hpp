@@ -71,9 +71,11 @@ public:
 
     void execute();
 
+    int getExitCode() const;
 private:
     utils::Channel mIntermChannel;
     AttachConfig mConfig;
+    int mExitCode;
 
     void parent(const pid_t pid);
 
