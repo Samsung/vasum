@@ -60,12 +60,20 @@ void CGroupMake::execute()
         cgroup.create();
     }
 
-    for (const auto p : mCgroup.common) {
+    for (const auto& p : mCgroup.common) {
         cgroup.setCommonValue(p.name, p.value);
     }
 
-    for (const auto p : mCgroup.params) {
+    for (const auto& p : mCgroup.params) {
         cgroup.setValue(p.name, p.value);
+    }
+}
+
+void CGroupAssignPidAll::execute()
+{
+    for (const auto& cgconf : mCgroups.cgroups) {
+        CGroup cgroup(cgconf.subsystem, cgconf.name);
+        cgroup.assignPid(mPid);
     }
 }
 

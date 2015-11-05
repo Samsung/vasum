@@ -28,6 +28,7 @@
 #include "lxcpp/commands/prep-guest-terminal.hpp"
 #include "lxcpp/commands/provision.hpp"
 #include "lxcpp/commands/setup-userns.hpp"
+#include "lxcpp/commands/cgroups.hpp"
 
 #include "cargo/manager.hpp"
 #include "logger/logger.hpp"
@@ -166,18 +167,25 @@ bool Guard::onGetConfig(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, c
 bool Guard::onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
 {
     LOGI("Starting...");
+    // TODO: container preparation part 1: things to do before clone
+
+    CGroupMakeAll cgroups(mConfig->mCgroups);
+    cgroups.execute();
+
     utils::Channel channel;
     ContainerData data(*mConfig, channel);
 
-    const pid_t initPid = lxcpp::clone(startContainer,
-                                       &data,
-                                       mConfig->mNamespaces);
-    mConfig->mInitPid = initPid;
+    mConfig->mInitPid = lxcpp::clone(startContainer,
+                                     &data,
+                                     mConfig->mNamespaces);
 
     // TODO: container preparation part 2: things to do immediately after clone
 
     SetupUserNS userNS(mConfig->mUserNSConfig, mConfig->mInitPid);
     userNS.execute();
+
+    CGroupAssignPidAll cgroupAssignPid(mConfig->mCgroups, mConfig->mInitPid);
+    cgroupAssignPid.execute();
 
     // send continue sync to container once userns, netns, cgroups, etc, are configured
     channel.setLeft();
@@ -185,7 +193,7 @@ bool Guard::onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo
     channel.shutdown();
 
     // Configuration succeed, return the init's PID
-    auto ret = std::make_shared<api::Pid>(initPid);
+    auto ret = std::make_shared<api::Pid>(mConfig->mInitPid);
     result->set(ret);
     return true;
 }
@@ -203,8 +211,6 @@ bool Guard::onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo:
 
 int Guard::execute()
 {
-    // TODO: container preparation part 1: things to do before clone
-
     // Polling loop
     while (mService->isStarted()) {
         mEventPoll.dispatchIteration(-1);

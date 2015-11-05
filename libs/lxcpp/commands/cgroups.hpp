@@ -78,10 +78,28 @@ private:
     const CGroupConfig& mCgroup;
 };
 
+class CGroupAssignPidAll final: Command {
+public:
+   /**
+    * Assign pid to all configured cgroups
+    */
+    CGroupAssignPidAll(const CGroupsConfig& cfg, pid_t pid) :
+        mCgroups(cfg),
+        mPid(pid)
+    {
+    }
+
+    void execute();
+
+private:
+    const CGroupsConfig& mCgroups;
+    pid_t mPid;
+};
+
 class CGroupAssignPid final: Command {
 public:
    /**
-    * Add pid to existng group.
+    * Assign pid to existing group.
     */
     CGroupAssignPid(const std::string& subsys, const std::string& cgroup, pid_t pid) :
         mSubsysName(subsys),

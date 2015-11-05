@@ -162,7 +162,8 @@ struct ContainerConfig {
         mTerminals,
         mNamespaces,
         mProvisions,
-        mUserNSConfig
+        mUserNSConfig,
+        mCgroups
     )
 };
 
