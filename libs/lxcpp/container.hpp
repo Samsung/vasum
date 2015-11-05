@@ -87,7 +87,7 @@ public:
                                     const std::string& zoneif,
                                     InterfaceType type,
                                     const std::vector<InetAddr>& addrs,
-                                    MacVLanMode mode) = 0;
+                                    MacVLanMode mode = MacVLanMode::PRIVATE) = 0;
     virtual void addInetConfig(const std::string& ifname, const InetAddr& addr) = 0;
 
     // Network interfaces (runtime)

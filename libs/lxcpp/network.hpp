@@ -55,7 +55,7 @@ enum class InetAddrType {
  */
 class InetAddr {
 public:
-    InetAddr() = default;
+    InetAddr() : InetAddr("", 0) {}
     InetAddr(const std::string& addr, unsigned prefix, uint32_t flags=0);
 
     template<typename T>
@@ -204,7 +204,7 @@ std::string toString(const InetAddr& a);
  * operates on netlink device
  */
 class NetworkInterface {
-    //TODO implement Netlink singleton per pid
+    //TODO: remove pid from NetworkInterface (and from netlink)
 public:
     /**
      * Create network interface object for the @b ifname in the container (network namespace)
@@ -216,6 +216,8 @@ public:
     }
 
     const std::string& getName() const { return mIfname; }
+
+    bool exists() const noexcept;
 
     /**
      * Retrieve network interface status (UP or DOWN)

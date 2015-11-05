@@ -334,13 +334,13 @@ BOOST_AUTO_TEST_CASE(NetworkNamespaceVETH)
 
     // add veth1 to bridge
     BOOST_CHECK_NO_THROW(v1.addToBridge(br.getName()));
+    v1.up();
 
     // move veth2 to network namespace (container)
     BOOST_CHECK_NO_THROW(v2.moveToContainer(pid));
+
     v2.up();
     v2.addInetAddr(InetAddr("10.0.0.2", 24));
-
-    v1.up(); // after v2 up and configured
 
     // add default route
     v2.addRoute(Route{

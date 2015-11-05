@@ -26,7 +26,6 @@
 
 #include "config.hpp"
 #include "cargo/fields.hpp"
-//#include "cargo/fields-union.hpp"
 #include "lxcpp/network.hpp"
 #include "lxcpp/exception.hpp"
 

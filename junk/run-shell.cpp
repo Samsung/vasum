@@ -3,6 +3,7 @@
 #include <vector>
 #include <lxcpp/lxcpp.hpp>
 #include <lxcpp/logger-config.hpp>
+#include <lxcpp/network.hpp>
 #include <logger/logger.hpp>
 #include <sys/types.h>
 #include <unistd.h>
@@ -72,12 +73,24 @@ int main(int argc, char *argv[])
         // make root and system users non privileged ones
         c->addUIDMap(1000, 0, 999);
         c->addGIDMap(1000, 0, 999);
+
+        // TODO masquarade container network (hook or network API)
+        // iptables -P FORWARD ACCEPT
+        // iptables -A POSTROUTING -t nat -j MASQUERADE -s 10.0.0.0/24;
+
+        // configure network
+        c->addInterfaceConfig("lxcpp-br0", "", InterfaceType::BRIDGE, {InetAddr("10.0.0.1", 24)});
+        c->addInterfaceConfig("lxcpp-br0", "veth0", InterfaceType::VETH, {InetAddr("10.0.0.2", 24)});
+
         c->start();
         // not needed per se, but let things settle for a second, e.g. the logs
         sleep(1);
         c->console();
         // You could run the console for the second time to see if it can be reattached
         //c->console();
+
+        // TODO masquarade cleanup
+        // iptables -D POSTROUTING -t nat -j MASQUERADE -s 10.0.0.0/24
 
         delete c;
     }

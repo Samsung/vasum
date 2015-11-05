@@ -160,6 +160,7 @@ struct ContainerConfig {
         mInit,
         mLogger,
         mTerminals,
+        mNetwork,
         mNamespaces,
         mProvisions,
         mUserNSConfig,

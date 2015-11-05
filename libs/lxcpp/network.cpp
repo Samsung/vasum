@@ -21,7 +21,6 @@
  * @brief   Actions on network interace in the container
  */
 
-
 #include "lxcpp/network.hpp"
 #include "lxcpp/container.hpp"
 #include "lxcpp/exception.hpp"
@@ -48,6 +47,9 @@
  *
  * But this FLAG is available since some kernel version
  *  check if one of extended flags id defined
+ *
+ * possible to get network stats via filesystem
+ * /sys/class/net/<ifname>/statistics/
  */
 #ifndef IFA_F_MANAGETEMPADDR
 #define IFA_FLAGS IFA_UNSPEC
@@ -302,7 +304,7 @@ void NetworkInterface::create(InterfaceType type,
             createMacVLan(peerif, mode);
             break;
         default:
-            throw NetworkException("Unsuported interface type");
+            throw NetworkException("Unsupported interface type");
     }
 }
 
@@ -387,6 +389,15 @@ void NetworkInterface::destroy()
     nlm.put(info)
         .put(IFLA_IFNAME, mIfname);
     send(nlm, mContainerPid);
+}
+
+bool NetworkInterface::exists() const noexcept
+{
+    try {
+        return getInterfaceIndex(mContainerPid, mIfname) > 0;
+    } catch (...) {
+        return false;
+    }
 }
 
 NetStatus NetworkInterface::status() const
@@ -633,7 +644,7 @@ static RoutingTable getRoutingTable(unsigned tbl)
 void NetworkInterface::addRoute(const Route& route, const RoutingTable rt)
 {
     InetAddrType type = route.dst.type;
-    if (route.src.type != type) {
+    if (route.src.prefix > 0 && route.src.type != type) {
         const std::string msg = "Family type must be the same";
         LOGE(msg);
         throw NetworkException(msg);

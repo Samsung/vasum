@@ -29,6 +29,7 @@
 #include "lxcpp/commands/provision.hpp"
 #include "lxcpp/commands/setup-userns.hpp"
 #include "lxcpp/commands/cgroups.hpp"
+#include "lxcpp/commands/netcreate.hpp"
 
 #include "cargo/manager.hpp"
 #include "logger/logger.hpp"
@@ -62,6 +63,11 @@ int Guard::startContainer(void* data)
     }
     if (config.mUserNSConfig.mGIDMaps.size()) {
         lxcpp::setregid(0, 0);
+    }
+
+    if (config.mNamespaces & CLONE_NEWNET) {
+        NetConfigureAll network(config.mNetwork);
+        network.execute();
     }
 
     lxcpp::execve(config.mInit);
@@ -167,10 +173,15 @@ bool Guard::onGetConfig(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, c
 bool Guard::onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
 {
     LOGI("Starting...");
+
     // TODO: container preparation part 1: things to do before clone
 
     CGroupMakeAll cgroups(mConfig->mCgroups);
     cgroups.execute();
+
+    // NOTE: to enable conneting outside the host, one need to configure in upper layer:
+    //    1. enable ip forwarding (sysctl net.ipv4.....forwarding=1)
+    //    2. create iptables NAT/MASQ if required for that container
 
     utils::Channel channel;
     ContainerData data(*mConfig, channel);
@@ -180,6 +191,12 @@ bool Guard::onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo
                                      mConfig->mNamespaces);
 
     // TODO: container preparation part 2: things to do immediately after clone
+
+    if (mConfig->mNamespaces & CLONE_NEWNET) {
+        LOGD("Creating network");
+        NetCreateAll network(mConfig->mNetwork, mConfig->mInitPid);
+        network.execute();
+    }
 
     SetupUserNS userNS(mConfig->mUserNSConfig, mConfig->mInitPid);
     userNS.execute();

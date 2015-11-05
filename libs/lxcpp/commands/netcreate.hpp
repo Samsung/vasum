@@ -35,12 +35,27 @@ namespace lxcpp {
 class NetCreateAll final: Command {
 public:
    /**
-    * Runs call in the container's context
-    *
-    * Creates and configures network interfaces in the container
+    * Creates network interfaces for use in container (exec in host context)
     */
-    NetCreateAll(const Container& container, const NetworkConfig& network) :
-        mContainer(container),
+    NetCreateAll(const NetworkConfig& network, pid_t pid) :
+        mNetwork(network),
+        mPid(pid)
+    {
+    }
+
+    void execute();
+
+private:
+    const NetworkConfig& mNetwork;
+    pid_t mPid;
+};
+
+class NetConfigureAll final: Command {
+public:
+   /**
+    * Configures network interfaces (exec in container process context)
+    */
+    NetConfigureAll(const NetworkConfig& network) :
         mNetwork(network)
     {
     }
@@ -48,18 +63,15 @@ public:
     void execute();
 
 private:
-    const Container& mContainer;
     const NetworkConfig& mNetwork;
 };
 
 class NetInteraceCreate final: Command {
 public:
-    NetInteraceCreate(const Container& container,
-                      const std::string& zoneif,
+    NetInteraceCreate(const std::string& zoneif,
                       const std::string& hostif,
                       InterfaceType type,
                       MacVLanMode mode=MacVLanMode::PRIVATE) :
-        mContainer(container),
         mZoneIf(zoneif),
         mHostIf(hostif),
         mType(type),
@@ -70,7 +82,6 @@ public:
     void execute();
 
 private:
-    const Container& mContainer;
     const std::string& mZoneIf;
     const std::string& mHostIf;
     InterfaceType mType;
@@ -79,10 +90,8 @@ private:
 
 class NetInterfaceSetAttrs final: Command {
 public:
-    NetInterfaceSetAttrs(const Container& container,
-                         const std::string& ifname,
+    NetInterfaceSetAttrs(const std::string& ifname,
                          const Attrs& attrs) :
-        mContainer(container),
         mIfname(ifname),
         mAttrs(attrs)
     {
@@ -91,17 +100,14 @@ public:
     void execute();
 
 private:
-    const Container& mContainer;
     const std::string& mIfname;
     const Attrs& mAttrs;
 };
 
 class NetInterfaceAddInetAddr final: Command {
 public:
-    NetInterfaceAddInetAddr(const Container& container,
-                            const std::string& ifname,
+    NetInterfaceAddInetAddr(const std::string& ifname,
                             const std::vector<InetAddr>& addrList) :
-        mContainer(container),
         mIfname(ifname),
         mAddrList(addrList)
     {
@@ -110,7 +116,6 @@ public:
     void execute();
 
 private:
-    const Container& mContainer;
     const std::string& mIfname;
     const std::vector<InetAddr>& mAddrList;
 };

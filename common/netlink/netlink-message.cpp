@@ -314,7 +314,7 @@ NetlinkResponse send(const NetlinkMessage& msg, int pid)
         nl.send(&hdr);
         data = nl.rcv(hdr.nlmsg_seq);
     } catch (const std::exception& ex) {
-        LOGE("Sending failed (" << ex.what() << ")");
+        LOGE("Sending failed (" << ex.what() << "), pid=" + std::to_string(pid));
         nl.close();
         throw;
     }
