@@ -192,16 +192,10 @@ struct PartialTestConfig {
 };
 
 struct IncompatibleTestConfig: public PartialTestConfig {
-    // FIXME: implement cleaner Visitable inheritance
     std::array<int, 3> intArray = {{1, 2 ,4}};
 
-    CONFIG_REGISTER
+    CONFIG_EXTEND(PartialTestConfig)
     (
-        stringVal,
-        intVector,
-        enumVal,
-        subVector,
-        union1,
         intArray
     )
 };

@@ -81,6 +81,63 @@
         GENERATE_ELEMENTS__(__VA_ARGS__)                           \
     }                                                              \
 
+/**
+ * @ingroup libConfig
+ *
+ * Registers new config fields within child class.
+ *
+ * CONFIG_REGISTER doesn't preserve config fields registered
+ * in the base class. Use this macro instead.
+ *
+ * Example:
+ * @code
+ *   struct Foo
+ *   {
+ *       std::string bar;
+ *       std::vector<int> tab;
+ *
+ *       // SubConfigA must also register config fields
+ *       SubConfigA sub_a;
+ *
+ *       // SubConfigB must also register config fields
+ *       std::vector<SubConfigB> tab_sub;
+ *
+ *       CONFIG_REGISTER
+ *       (
+ *           bar,
+ *           tab,
+ *           sub_a
+ *       )
+ *   };
+ *
+ *   struct FooChild : Foo
+ *   {
+ *       std::string newField;
+ *
+ *       CONFIG_EXTEND(Foo)
+ *       (
+ *           newField
+ *       )
+ *   };
+ *
+ * @endcode
+ */
+#define CONFIG_EXTEND(BASE)                                        \
+    typedef BASE ParentVisitor;                                    \
+    __CONFIG_EXTEND                                                \
+
+#define __CONFIG_EXTEND(...)                                       \
+    template<typename Visitor>                                     \
+    void accept(Visitor v) {                                       \
+        GENERATE_ELEMENTS__(__VA_ARGS__)                           \
+        ParentVisitor::accept(v);                                  \
+    }                                                              \
+    template<typename Visitor>                                     \
+    void accept(Visitor v) const {                                 \
+        GENERATE_ELEMENTS__(__VA_ARGS__)                           \
+        ParentVisitor::accept(v);                                  \
+    }                                                              \
+
 #define GENERATE_ELEMENTS__(...)                                   \
     BOOST_PP_LIST_FOR_EACH(GENERATE_ELEMENT__,                     \
                            _,                                      \
