@@ -69,7 +69,7 @@ namespace ipc {
  * myService.start(); // start the service, clients may connect via /tmp/example_service.socket
  * @endcode
  *
- * @see libConfig
+ * @see libCargo
  * @see ipc::Processor
  *
  * @ingroup libIpc

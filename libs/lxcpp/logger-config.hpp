@@ -24,8 +24,8 @@
 #ifndef LXCPP_LOGGER_CONFIG_HPP
 #define LXCPP_LOGGER_CONFIG_HPP
 
-#include "config/config.hpp"
-#include "config/fields.hpp"
+#include "config.hpp"
+#include "cargo/fields.hpp"
 #include "logger/logger.hpp"
 
 
@@ -45,7 +45,7 @@ struct LoggerConfig
              const logger::LogLevel level,
              const std::string &arg = "");
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         mType,
         mLevel,

@@ -22,7 +22,7 @@
  * @brief   Syslog backend for logger
  */
 
-#include "logger/config.hpp"
+#include "config.hpp"
 #include "logger/formatter.hpp"
 #include "logger/backend-syslog.hpp"
 

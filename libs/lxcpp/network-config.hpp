@@ -24,9 +24,9 @@
 #ifndef LXCPP_NETWORK_CONFIG_HPP
 #define LXCPP_NETWORK_CONFIG_HPP
 
-#include "config/config.hpp"
-#include "config/fields.hpp"
-//#include "config/fields-union.hpp"
+#include "config.hpp"
+#include "cargo/fields.hpp"
+//#include "cargo/fields-union.hpp"
 #include "lxcpp/network.hpp"
 #include "lxcpp/exception.hpp"
 
@@ -83,7 +83,7 @@ public:
 
     void addInetAddr(const InetAddr& addr);
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         mHostIf,
         mZoneIf,
@@ -133,7 +133,7 @@ public:
     const std::vector<NetworkInterfaceConfig>& getInterfaces() const { return mInterfaces; }
     const NetworkInterfaceConfig& getInterface(int i) const { return mInterfaces.at(i); }
 
-    CONFIG_REGISTER(
+    CARGO_REGISTER(
         mInterfaces
     )
 

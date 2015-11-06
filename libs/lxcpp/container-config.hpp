@@ -31,8 +31,8 @@
 #include "lxcpp/userns-config.hpp"
 #include "lxcpp/cgroups/cgroup-config.hpp"
 
-#include <config/config.hpp>
-#include <config/fields.hpp>
+#include "config.hpp"
+#include <cargo/fields.hpp>
 
 #include <string>
 #include <vector>
@@ -151,7 +151,7 @@ struct ContainerConfig {
 
     ContainerConfig() : mGuardPid(-1), mInitPid(-1), mNamespaces(0) {}
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         mName,
         mRootPath,

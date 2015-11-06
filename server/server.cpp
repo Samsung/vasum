@@ -27,7 +27,7 @@
 #include "server.hpp"
 #include "exception.hpp"
 
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 #include "logger/logger.hpp"
 #include "utils/environment.hpp"
 #include "utils/fs.hpp"
@@ -210,7 +210,7 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
 
     // TODO: currently this config is loaded twice: here and in ZonesManager
     ZonesManagerConfig config;
-    config::loadFromJsonFile(configPath, config);
+    cargo::loadFromJsonFile(configPath, config);
 
     struct passwd* pwd = ::getpwnam(VASUM_USER);
     if (pwd == NULL) {

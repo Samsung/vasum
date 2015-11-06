@@ -26,8 +26,8 @@
 
 #include "ipc/exception.hpp"
 #include "ipc/internals/processor.hpp"
-#include "config/manager.hpp"
-#include "config/exception.hpp"
+#include "cargo/manager.hpp"
+#include "cargo/exception.hpp"
 
 #include <cerrno>
 #include <cstring>
@@ -297,8 +297,8 @@ bool Processor::handleInput(const FileDescriptor fd)
             // Read information about the incoming data
             Socket& socket = *peerIt->socketPtr;
             Socket::Guard guard = socket.getGuard();
-            config::loadFromFD<MessageHeader>(socket.getFD(), hdr);
-        } catch (const config::ConfigException& e) {
+            cargo::loadFromFD<MessageHeader>(socket.getFD(), hdr);
+        } catch (const cargo::CargoException& e) {
             LOGE(mLogPrefix + "Error during reading the socket");
             removePeerInternal(peerIt,
                                std::make_exception_ptr(IPCNaughtyPeerException()));
@@ -508,7 +508,7 @@ bool Processor::onMethodRequest(MethodRequest& request)
         Socket::Guard guard = socket.getGuard();
         hdr.methodID = request.methodID;
         hdr.messageID = request.messageID;
-        config::saveToFD<MessageHeader>(socket.getFD(), hdr);
+        cargo::saveToFD<MessageHeader>(socket.getFD(), hdr);
         LOGT(mLogPrefix + "Serializing the message");
         request.serialize(socket.getFD(), request.data);
     } catch (const std::exception& e) {
@@ -547,7 +547,7 @@ bool Processor::onSignalRequest(SignalRequest& request)
         Socket::Guard guard = socket.getGuard();
         hdr.methodID = request.methodID;
         hdr.messageID = request.messageID;
-        config::saveToFD<MessageHeader>(socket.getFD(), hdr);
+        cargo::saveToFD<MessageHeader>(socket.getFD(), hdr);
         request.serialize(socket.getFD(), request.data);
     } catch (const std::exception& e) {
         LOGE(mLogPrefix + "Error during sending a signal: " << e.what());
@@ -636,7 +636,7 @@ bool Processor::onSendResultRequest(SendResultRequest& request)
         Socket::Guard guard = socket.getGuard();
         hdr.methodID = RETURN_METHOD_ID;
         hdr.messageID = request.messageID;
-        config::saveToFD<MessageHeader>(socket.getFD(), hdr);
+        cargo::saveToFD<MessageHeader>(socket.getFD(), hdr);
         LOGT(mLogPrefix + "Serializing the message");
         methodCallbacks->serialize(socket.getFD(), request.data);
     } catch (const std::exception& e) {

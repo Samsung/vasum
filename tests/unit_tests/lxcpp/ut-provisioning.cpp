@@ -22,7 +22,7 @@
  */
 
 #include "config.hpp"
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 #include "lxcpp/lxcpp.hpp"
 #include "lxcpp/container.hpp"
 #include "lxcpp/container-config.hpp"
@@ -34,7 +34,7 @@
 namespace {
 
 using namespace lxcpp;
-using namespace config;
+using namespace cargo;
 using namespace provision;
 
 const std::string TEST_DIR = "/tmp/ut-provisioning";
@@ -155,16 +155,16 @@ BOOST_AUTO_TEST_CASE(ProvisioningConfigSerialization)
     File  saved_file ({File::Type::REGULAR, "path", 0747, 0777});
     Mount saved_mount({"/fake/path1", "/fake/path2", "tmpfs", 077, "fake"});
     Link  saved_link ({"/fake/path1", "/fake/path2"});
-    config::saveToJsonFile(tmpConfigFile, saved_file);
-    config::saveToJsonFile(tmpConfigMount, saved_mount);
-    config::saveToJsonFile(tmpConfigLink, saved_link);
+    cargo::saveToJsonFile(tmpConfigFile, saved_file);
+    cargo::saveToJsonFile(tmpConfigMount, saved_mount);
+    cargo::saveToJsonFile(tmpConfigLink, saved_link);
 
     File loaded_file;
     Mount loaded_mount;
     Link loaded_link;
-    config::loadFromJsonFile(tmpConfigFile, loaded_file);
-    config::loadFromJsonFile(tmpConfigMount, loaded_mount);
-    config::loadFromJsonFile(tmpConfigLink, loaded_link);
+    cargo::loadFromJsonFile(tmpConfigFile, loaded_file);
+    cargo::loadFromJsonFile(tmpConfigMount, loaded_mount);
+    cargo::loadFromJsonFile(tmpConfigLink, loaded_link);
     BOOST_REQUIRE(saved_file == loaded_file);
     BOOST_REQUIRE(saved_mount == loaded_mount);
     BOOST_REQUIRE(saved_link == loaded_link);

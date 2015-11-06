@@ -26,7 +26,7 @@
 #ifndef SERVER_ZONES_MANAGER_CONFIG_HPP
 #define SERVER_ZONES_MANAGER_CONFIG_HPP
 
-#include "config/fields.hpp"
+#include "cargo/fields.hpp"
 #include "input-monitor-config.hpp"
 #include "proxy-call-config.hpp"
 
@@ -89,7 +89,7 @@ struct ZonesManagerConfig {
      */
     std::vector<ProxyCallRule> proxyCallRules;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         dbPath,
         zonesPath,
@@ -116,7 +116,7 @@ struct ZonesManagerDynamicConfig {
      */
     std::string defaultId;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         zoneIds,
         defaultId

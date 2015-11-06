@@ -33,8 +33,8 @@
 #include "utils/exception.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/scoped-dir.hpp"
-#include "config/manager.hpp"
-#include "config/exception.hpp"
+#include "cargo/manager.hpp"
+#include "cargo/exception.hpp"
 #include "netdev.hpp"
 
 #include <memory>
@@ -47,7 +47,7 @@
 using namespace utils;
 using namespace vasum;
 using namespace vasum::netdev;
-using namespace config;
+using namespace cargo;
 
 namespace {
 
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(BuggyConfig)
 BOOST_AUTO_TEST_CASE(MissingConfig)
 {
     BOOST_REQUIRE_EXCEPTION(create(MISSING_CONFIG_PATH),
-                            ConfigException,
+                            CargoException,
                             WhatEquals("Could not load " + MISSING_CONFIG_PATH));
 }
 
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(ForegroundBackgroundSchedulerLevel)
 {
     auto c = create(TEST_CONFIG_PATH);
     ZoneConfig refConfig;
-    config::loadFromJsonFile(TEST_CONFIG_PATH, refConfig);
+    cargo::loadFromJsonFile(TEST_CONFIG_PATH, refConfig);
 
     BOOST_REQUIRE(refConfig.cpuQuotaForeground != refConfig.cpuQuotaBackground);
 

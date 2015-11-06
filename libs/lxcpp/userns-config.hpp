@@ -24,8 +24,8 @@
 #ifndef LXCPP_USERNS_CONFIG_HPP
 #define LXCPP_USERNS_CONFIG_HPP
 
-#include "config/config.hpp"
-#include "config/fields.hpp"
+#include "config.hpp"
+#include "cargo/fields.hpp"
 
 #include <vector>
 #include <string>
@@ -45,7 +45,7 @@ struct UserNSConfig {
         UserNSMap(unsigned min, unsigned max, unsigned num)
             : min(min), max(max), num(num) {}
 
-        CONFIG_REGISTER
+        CARGO_REGISTER
         (
             min,
             max,
@@ -56,7 +56,7 @@ struct UserNSConfig {
     std::vector<UserNSMap> mUIDMaps;
     std::vector<UserNSMap> mGIDMaps;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         mUIDMaps,
         mGIDMaps

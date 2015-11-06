@@ -31,7 +31,7 @@
 #include "api/method-result-builder.hpp"
 
 #include "dbus/connection.hpp"
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 
 #include <memory>
 #include <functional>
@@ -62,7 +62,7 @@ DbusMethodResultBuilder<Data>::DbusMethodResultBuilder(const ::dbus::MethodResul
     : mMethodResultBuilderPtr(methodResultBuilderPtr)
 {
     mSerialize = [](const std::shared_ptr<void> data)->GVariant* {
-        return config::saveToGVariant(*std::static_pointer_cast<Data>(data));
+        return cargo::saveToGVariant(*std::static_pointer_cast<Data>(data));
     };
 }
 

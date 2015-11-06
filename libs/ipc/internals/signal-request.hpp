@@ -26,7 +26,7 @@
 #define COMMON_IPC_INTERNALS_SIGNAL_REQUEST_HPP
 
 #include "ipc/types.hpp"
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 #include "logger/logger-scope.hpp"
 
 namespace ipc {
@@ -67,7 +67,7 @@ std::shared_ptr<SignalRequest> SignalRequest::create(const MethodID methodID,
 
     request->serialize = [](const int fd, std::shared_ptr<void>& data)->void {
         LOGS("Signal serialize, peerID: " << fd);
-        config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
+        cargo::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
     };
 
     return request;

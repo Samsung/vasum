@@ -22,7 +22,7 @@
  */
 
 #include "config.hpp"
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 #include "logger/logger.hpp"
 #include "lxcpp/network-config.hpp"
 #include "lxcpp/process.hpp"
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(NetworkConfigSerialization)
     ::unlink(tmpConfigFile.c_str());
 
     NetworkConfig cfg;
-    BOOST_CHECK_NO_THROW(config::saveToJsonString(cfg));
+    BOOST_CHECK_NO_THROW(cargo::saveToJsonString(cfg));
 
     cfg.addInterfaceConfig("host-veth0", "zone-eth0", InterfaceType::VETH);
     cfg.addInterfaceConfig("host-veth1", "zone-eth1", InterfaceType::BRIDGE);
@@ -150,10 +150,10 @@ BOOST_AUTO_TEST_CASE(NetworkConfigSerialization)
 
     cfg.addInetConfig("zone-eth0", InetAddr("1.2.3.4", 24));
 
-    config::saveToJsonFile(tmpConfigFile, cfg);
+    cargo::saveToJsonFile(tmpConfigFile, cfg);
 
     NetworkConfig cfg2;
-    BOOST_CHECK_NO_THROW(config::loadFromJsonFile(tmpConfigFile, cfg2));
+    BOOST_CHECK_NO_THROW(cargo::loadFromJsonFile(tmpConfigFile, cfg2));
 
     int ifn1 = cfg.getInterfaces().size();
     int ifn2 = cfg2.getInterfaces().size();

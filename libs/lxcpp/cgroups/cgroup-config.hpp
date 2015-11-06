@@ -24,8 +24,8 @@
 #ifndef LXCPP_CGROUPS_CGROUP_CONFIG_HPP
 #define LXCPP_CGROUPS_CGROUP_CONFIG_HPP
 
-#include "config/config.hpp"
-#include "config/fields.hpp"
+#include "config.hpp"
+#include "cargo/fields.hpp"
 
 #include <string>
 #include <vector>
@@ -36,7 +36,7 @@ struct SubsystemConfig {
     std::string name;
     std::string path;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         name,
         path
@@ -47,7 +47,7 @@ struct CGroupParam {
     std::string name;
     std::string value;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         name,
         value
@@ -60,7 +60,7 @@ struct CGroupConfig {
     std::vector<CGroupParam> common; // cgroup.*
     std::vector<CGroupParam> params; // {name}.*
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         subsystem,
         name,
@@ -73,7 +73,7 @@ struct CGroupsConfig {
     std::vector<SubsystemConfig> subsystems;
     std::vector<CGroupConfig> cgroups;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         subsystems,
         cgroups

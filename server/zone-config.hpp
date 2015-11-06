@@ -26,7 +26,7 @@
 #ifndef SERVER_ZONE_CONFIG_HPP
 #define SERVER_ZONE_CONFIG_HPP
 
-#include "config/fields.hpp"
+#include "cargo/fields.hpp"
 
 #include <string>
 #include <vector>
@@ -82,7 +82,7 @@ struct ZoneConfig {
      */
     int shutdownTimeout;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         zoneTemplate,
         initWithArgs,
@@ -122,7 +122,7 @@ struct ZoneDynamicConfig {
      */
     std::string runMountPoint;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         requestedState,
         ipv4Gateway,
@@ -138,7 +138,7 @@ struct ZoneTemplatePathConfig {
      */
     std::string zoneTemplatePath;
 
-    CONFIG_REGISTER(zoneTemplatePath)
+    CARGO_REGISTER(zoneTemplatePath)
 };
 
 } // namespace vasum

@@ -24,8 +24,8 @@
 #ifndef LXCPP_TERMINAL_CONFIG_HPP
 #define LXCPP_TERMINAL_CONFIG_HPP
 
-#include "config/config.hpp"
-#include "config/fields.hpp"
+#include "config.hpp"
+#include "cargo/fields.hpp"
 
 #include <vector>
 #include <string>
@@ -35,7 +35,7 @@ namespace lxcpp {
 
 
 struct TerminalConfig {
-    config::FileDescriptor masterFD;
+    cargo::FileDescriptor masterFD;
     std::string ptsName;
 
     TerminalConfig()
@@ -47,7 +47,7 @@ struct TerminalConfig {
           ptsName(ptsName)
     {}
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         masterFD,
         ptsName
@@ -62,7 +62,7 @@ struct TerminalsConfig {
         : count(count)
     {}
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         count,
         PTYs

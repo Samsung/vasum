@@ -29,7 +29,7 @@
 #include "utils/scoped-dir.hpp"
 #include "utils/exception.hpp"
 #include "utils/fs.hpp"
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 #include "zone-provision.hpp"
 #include "zone-provision-config.hpp"
 #include "vasum-client.h"
@@ -43,7 +43,7 @@
 
 using namespace vasum;
 using namespace utils;
-using namespace config;
+using namespace cargo;
 
 namespace fs = boost::filesystem;
 
@@ -80,12 +80,12 @@ struct Fixture {
 
     static void load(ZoneProvisioningConfig& config)
     {
-        config::loadFromKVStoreWithJsonFile(DB_PATH.string(), TEST_CONFIG_PATH, config, DB_PREFIX);
+        cargo::loadFromKVStoreWithJsonFile(DB_PATH.string(), TEST_CONFIG_PATH, config, DB_PREFIX);
     }
 
     static void save(const ZoneProvisioningConfig& config)
     {
-        config::saveToKVStore(DB_PATH.string(), config, DB_PREFIX);
+        cargo::saveToKVStore(DB_PATH.string(), config, DB_PREFIX);
     }
 };
 

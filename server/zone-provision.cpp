@@ -30,7 +30,7 @@
 #include "logger/logger.hpp"
 #include "utils/fs.hpp"
 #include "utils/exception.hpp"
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 #include "vasum-client.h"
 
 #include <boost/filesystem.hpp>
@@ -55,7 +55,7 @@ ZoneProvision::ZoneProvision(const std::string& rootPath,
     , mDbPrefix(dbPrefix)
     , mValidLinkPrefixes(validLinkPrefixes)
 {
-    config::loadFromKVStoreWithJsonFile(dbPath, configPath, mProvisioningConfig, dbPrefix);
+    cargo::loadFromKVStoreWithJsonFile(dbPath, configPath, mProvisioningConfig, dbPrefix);
 }
 
 ZoneProvision::~ZoneProvision()
@@ -65,7 +65,7 @@ ZoneProvision::~ZoneProvision()
 
 void ZoneProvision::saveProvisioningConfig()
 {
-    config::saveToKVStore(mDbPath, mProvisioningConfig, mDbPrefix);
+    cargo::saveToKVStore(mDbPath, mProvisioningConfig, mDbPrefix);
 }
 
 std::string ZoneProvision::declareProvision(ZoneProvisioningConfig::Provision&& provision)

@@ -26,7 +26,7 @@
 #ifndef COMMON_API_MESSAGES
 #define COMMON_API_MESSAGES
 
-#include "config/fields.hpp"
+#include "cargo/fields.hpp"
 #include <string>
 #include <vector>
 
@@ -34,13 +34,13 @@ namespace vasum {
 namespace api {
 
 struct Void {
-    CONFIG_REGISTER_EMPTY
+    CARGO_REGISTER_EMPTY
 };
 
 struct String {
     std::string value;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         value
     )
@@ -50,7 +50,7 @@ struct StringPair {
     std::string first;
     std::string second;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         first,
         second
@@ -60,7 +60,7 @@ struct StringPair {
 struct VectorOfStrings {
     std::vector<std::string> values;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         values
     )
@@ -69,7 +69,7 @@ struct VectorOfStrings {
 struct VectorOfStringPairs {
     std::vector<api::StringPair> values;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         values
     )
@@ -96,7 +96,7 @@ struct ZoneInfoOut {
     std::string state;
     std::string rootPath;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         id,
         vt,
@@ -110,7 +110,7 @@ struct SetNetDevAttrsIn {
     std::string netDev;
     std::vector<StringPair> attrs;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         id,
         netDev,
@@ -123,7 +123,7 @@ struct CreateNetDevVethIn {
     std::string zoneDev;
     std::string hostDev;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         id,
         zoneDev,
@@ -137,7 +137,7 @@ struct CreateNetDevMacvlanIn {
     std::string hostDev;
     uint32_t mode;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         id,
         zoneDev,
@@ -151,7 +151,7 @@ struct DeleteNetdevIpAddressIn {
     std::string netdev;
     std::string ip;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         zone,
         netdev,
@@ -166,7 +166,7 @@ struct DeclareFileIn {
     int32_t flags;
     int32_t mode;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         zone,
         type,
@@ -184,7 +184,7 @@ struct DeclareMountIn {
     uint64_t flags;
     std::string data;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         source,
         zone,
@@ -200,7 +200,7 @@ struct DeclareLinkIn {
     std::string zone;
     std::string target;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         source,
         zone,
@@ -213,7 +213,7 @@ struct GrantDeviceIn {
     std::string device;
     uint32_t flags;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         id,
         device,
@@ -226,7 +226,7 @@ struct CreateFileIn {
     std::string path;
     int32_t flags;
     int32_t mode;
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         id,
         path,
@@ -236,8 +236,8 @@ struct CreateFileIn {
 };
 
 struct CreateFileOut {
-    config::FileDescriptor fd;
-    CONFIG_REGISTER
+    cargo::FileDescriptor fd;
+    CARGO_REGISTER
     (
         fd
     )

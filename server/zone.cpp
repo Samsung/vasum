@@ -33,7 +33,7 @@
 #include "utils/vt.hpp"
 #include "utils/c-array.hpp"
 #include "lxc/cgroup.hpp"
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 
 #include <boost/filesystem.hpp>
 
@@ -75,8 +75,8 @@ Zone::Zone(const std::string& zoneId,
     LOGD(mId << ": Instantiating Zone object");
 
     const std::string dbPrefix = getZoneDbPrefix(zoneId);
-    config::loadFromKVStoreWithJsonFile(dbPath, zoneTemplatePath, mConfig, dbPrefix);
-    config::loadFromKVStoreWithJsonFile(dbPath, zoneTemplatePath, mDynamicConfig, dbPrefix);
+    cargo::loadFromKVStoreWithJsonFile(dbPath, zoneTemplatePath, mConfig, dbPrefix);
+    cargo::loadFromKVStoreWithJsonFile(dbPath, zoneTemplatePath, mDynamicConfig, dbPrefix);
 
     if (!mDynamicConfig.runMountPoint.empty()) {
         mRunMountPoint = fs::absolute(mDynamicConfig.runMountPoint, baseRunMountPointPath).string();
@@ -147,7 +147,7 @@ int Zone::getPrivilege() const
 
 void Zone::saveDynamicConfig()
 {
-    config::saveToKVStore(mDbPath, mDynamicConfig, getZoneDbPrefix(mId));
+    cargo::saveToKVStore(mDbPath, mDynamicConfig, getZoneDbPrefix(mId));
 }
 
 void Zone::updateRequestedState(const std::string& state)

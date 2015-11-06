@@ -48,7 +48,7 @@ namespace chr = std::chrono;
 
 namespace utils {
 
-// TODO: Add here various fixes from config::FDStore
+// TODO: Add here various fixes from cargo::FDStore
 
 namespace {
 

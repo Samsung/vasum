@@ -34,7 +34,7 @@
 #include "utils/exception.hpp"
 #include "utils/fd-utils.hpp"
 #include "logger/logger.hpp"
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -81,7 +81,7 @@ AttachHelper::AttachHelper(const int channelFD)
     : mChannel(channelFD)
 {
     mChannel.setCloseOnExec(true);
-    config::loadFromFD(mChannel.getFD(), mConfig);
+    cargo::loadFromFD(mChannel.getFD(), mConfig);
     logger::setupLogger(mConfig.logger.mType,
                         mConfig.logger.mLevel,
                         mConfig.logger.mArg);

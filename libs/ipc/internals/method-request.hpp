@@ -29,7 +29,7 @@
 #include "ipc/types.hpp"
 #include "ipc/result.hpp"
 #include "logger/logger-scope.hpp"
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 #include <utility>
 
 namespace ipc {
@@ -74,13 +74,13 @@ std::shared_ptr<MethodRequest> MethodRequest::create(const MethodID methodID,
 
     request->serialize = [](const int fd, std::shared_ptr<void>& data)->void {
         LOGS("Method serialize, peerID: " << fd);
-        config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
+        cargo::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
     };
 
     request->parse = [](const int fd)->std::shared_ptr<void> {
         LOGS("Method parse, peerID: " << fd);
         std::shared_ptr<ReceivedDataType> data(new ReceivedDataType());
-        config::loadFromFD<ReceivedDataType>(fd, *data);
+        cargo::loadFromFD<ReceivedDataType>(fd, *data);
         return data;
     };
 

@@ -32,7 +32,7 @@
 #include "api/messages.hpp"
 
 #include "logger/logger.hpp"
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 #include "zones-manager.hpp"
 
 namespace vasum {
@@ -136,7 +136,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_SET_ACTIVE_ZONE) {
         api::ZoneId zoneId;
-        config::loadFromGVariant(parameters, zoneId);
+        cargo::loadFromGVariant(parameters, zoneId);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleSetActiveZoneCall(zoneId, rb);
@@ -198,7 +198,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_GET_ZONE_INFO) {
         api::ZoneId zoneId;
-        config::loadFromGVariant(parameters, zoneId);
+        cargo::loadFromGVariant(parameters, zoneId);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::ZoneInfoOut>>(result);
         mZonesManagerPtr->handleGetZoneInfoCall(zoneId, rb);
@@ -207,7 +207,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_SET_NETDEV_ATTRS) {
         api::SetNetDevAttrsIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleSetNetdevAttrsCall(data, rb);
@@ -216,7 +216,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_GET_NETDEV_ATTRS) {
         api::GetNetDevAttrsIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::GetNetDevAttrs>>(result);
         mZonesManagerPtr->handleGetNetdevAttrsCall(data, rb);
@@ -225,7 +225,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_GET_NETDEV_LIST) {
         api::ZoneId data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::NetDevList>>(result);
         mZonesManagerPtr->handleGetNetdevListCall(data, rb);
@@ -234,7 +234,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_CREATE_NETDEV_VETH) {
         api::CreateNetDevVethIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleCreateNetdevVethCall(data, rb);
@@ -243,7 +243,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_CREATE_NETDEV_MACVLAN) {
         api::CreateNetDevMacvlanIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleCreateNetdevMacvlanCall(data, rb);
@@ -252,7 +252,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_CREATE_NETDEV_PHYS) {
         api::CreateNetDevPhysIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleCreateNetdevPhysCall(data, rb);
@@ -261,7 +261,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_DESTROY_NETDEV) {
         api::DestroyNetDevIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleDestroyNetdevCall(data, rb);
@@ -270,7 +270,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_DELETE_NETDEV_IP_ADDRESS) {
         api::DeleteNetdevIpAddressIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleDeleteNetdevIpAddressCall(data, rb);
@@ -279,7 +279,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_DECLARE_FILE) {
         api::DeclareFileIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
         mZonesManagerPtr->handleDeclareFileCall(data, rb);
@@ -288,7 +288,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_DECLARE_MOUNT) {
         api::DeclareMountIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
         mZonesManagerPtr->handleDeclareMountCall(data, rb);
@@ -297,7 +297,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_DECLARE_LINK) {
         api::DeclareLinkIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declaration>>(result);
         mZonesManagerPtr->handleDeclareLinkCall(data, rb);
@@ -306,7 +306,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_GET_DECLARATIONS) {
         api::ZoneId data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Declarations>>(result);
         mZonesManagerPtr->handleGetDeclarationsCall(data, rb);
@@ -315,7 +315,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_REMOVE_DECLARATION) {
         api::RemoveDeclarationIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleRemoveDeclarationCall(data, rb);
@@ -324,7 +324,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_CREATE_ZONE) {
         api::CreateZoneIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleCreateZoneCall(data, rb);
@@ -333,7 +333,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_DESTROY_ZONE) {
         api::ZoneId data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleDestroyZoneCall(data, rb);
@@ -342,7 +342,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_SHUTDOWN_ZONE) {
         api::ZoneId data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleShutdownZoneCall(data, rb);
@@ -351,7 +351,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_START_ZONE) {
         api::ZoneId data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleStartZoneCall(data, rb);
@@ -359,7 +359,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_LOCK_ZONE) {
         api::ZoneId data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleLockZoneCall(data, rb);
@@ -368,7 +368,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_UNLOCK_ZONE) {
         api::ZoneId data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleUnlockZoneCall(data, rb);
@@ -377,7 +377,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_GRANT_DEVICE) {
         api::GrantDeviceIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleGrantDeviceCall(data, rb);
@@ -386,7 +386,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_REVOKE_DEVICE) {
         api::RevokeDeviceIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::Void>>(result);
         mZonesManagerPtr->handleRevokeDeviceCall(data, rb);
@@ -395,7 +395,7 @@ void HostDbusConnection::onMessageCall(const std::string& objectPath,
 
     if (methodName == api::dbus::METHOD_CREATE_FILE) {
         api::CreateFileIn data;
-        config::loadFromGVariant(parameters, data);
+        cargo::loadFromGVariant(parameters, data);
 
         auto rb = std::make_shared<api::DbusMethodResultBuilder<api::CreateFileOut>>(result);
         mZonesManagerPtr->handleCreateFileCall(data, rb);

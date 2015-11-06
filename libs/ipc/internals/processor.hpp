@@ -38,8 +38,8 @@
 #include "ipc/exception.hpp"
 #include "ipc/method-result.hpp"
 #include "ipc/types.hpp"
-#include "config/manager.hpp"
-#include "config/fields.hpp"
+#include "cargo/manager.hpp"
+#include "cargo/fields.hpp"
 #include "logger/logger.hpp"
 #include "logger/logger-scope.hpp"
 
@@ -353,14 +353,14 @@ private:
     typedef RequestQueue<Event>::Request Request;
 
     struct EmptyData {
-        CONFIG_REGISTER_EMPTY
+        CARGO_REGISTER_EMPTY
     };
 
     struct MessageHeader {
         MethodID methodID;
         MessageID messageID;
 
-        CONFIG_REGISTER
+        CARGO_REGISTER
         (
             methodID,
             messageID
@@ -374,7 +374,7 @@ private:
 
         std::vector<MethodID> ids;
 
-        CONFIG_REGISTER
+        CARGO_REGISTER
         (
             ids
         )
@@ -389,7 +389,7 @@ private:
         int code;
         std::string message;
 
-        CONFIG_REGISTER
+        CARGO_REGISTER
         (
             messageID,
             code,
@@ -531,12 +531,12 @@ void Processor::setMethodHandlerInternal(const MethodID methodID,
 
     methodCall.parse = [](const int fd)->std::shared_ptr<void> {
         std::shared_ptr<ReceivedDataType> data(new ReceivedDataType());
-        config::loadFromFD<ReceivedDataType>(fd, *data);
+        cargo::loadFromFD<ReceivedDataType>(fd, *data);
         return data;
     };
 
     methodCall.serialize = [](const int fd, std::shared_ptr<void>& data)->void {
-        config::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
+        cargo::saveToFD<SentDataType>(fd, *std::static_pointer_cast<SentDataType>(data));
     };
 
     methodCall.method = [method](const PeerID peerID, std::shared_ptr<void>& data, MethodResult::Pointer && methodResult) {
@@ -577,7 +577,7 @@ void Processor::setSignalHandlerInternal(const MethodID methodID,
 
     signalCall.parse = [](const int fd)->std::shared_ptr<void> {
         std::shared_ptr<ReceivedDataType> dataToFill(new ReceivedDataType());
-        config::loadFromFD<ReceivedDataType>(fd, *dataToFill);
+        cargo::loadFromFD<ReceivedDataType>(fd, *dataToFill);
         return dataToFill;
     };
 

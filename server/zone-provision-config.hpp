@@ -26,8 +26,8 @@
 #ifndef SERVER_PROVISIONING_CONFIG_HPP
 #define SERVER_PROVISIONING_CONFIG_HPP
 
-#include "config/fields.hpp"
-#include "config/fields-union.hpp"
+#include "cargo/fields.hpp"
+#include "cargo/fields-union.hpp"
 #include <string>
 #include <vector>
 
@@ -44,7 +44,7 @@ struct ZoneProvisioningConfig
         std::int32_t flags;
         std::int32_t mode;
 
-        CONFIG_REGISTER
+        CARGO_REGISTER
         (
             type,
             path,
@@ -61,7 +61,7 @@ struct ZoneProvisioningConfig
         std::int64_t flags;
         std::string data;
 
-        CONFIG_REGISTER
+        CARGO_REGISTER
         (
             source,
             target,
@@ -76,7 +76,7 @@ struct ZoneProvisioningConfig
         std::string source;
         std::string target;
 
-        CONFIG_REGISTER
+        CARGO_REGISTER
         (
             source,
             target
@@ -85,7 +85,7 @@ struct ZoneProvisioningConfig
 
     struct Provision
     {
-        CONFIG_DECLARE_UNION
+        CARGO_DECLARE_UNION
         (
             File,
             Mount,
@@ -95,7 +95,7 @@ struct ZoneProvisioningConfig
 
     std::vector<Provision> provisions;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         provisions
     )

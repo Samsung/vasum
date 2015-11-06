@@ -38,7 +38,7 @@ namespace ipc {
 
 /**
  * @brief This class wraps communication via UX sockets for client applications.
- * It uses serialization mechanism from Config.
+ * It uses serialization mechanism from Cargo.
  *
  * @code
  * // eventPoll - epoll wrapper class
@@ -63,7 +63,7 @@ namespace ipc {
  *                            asyncResult);
  * @endcode
  *
- * @see libConfig
+ * @see libCargo
  * @see ipc::Processor
  * @see ipc::epoll::EventPoll
  *

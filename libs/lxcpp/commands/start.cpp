@@ -28,7 +28,7 @@
 #include "lxcpp/terminal.hpp"
 
 #include "logger/logger.hpp"
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 #include "utils/file-wait.hpp"
 #include "ipc/epoll/thread-dispatcher.cpp"
 #include "ipc/client.hpp"

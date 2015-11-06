@@ -27,7 +27,7 @@
 
 #include "ipc/types.hpp"
 
-#include "config/fields.hpp"
+#include "cargo/fields.hpp"
 
 #include <string>
 #include <vector>
@@ -42,7 +42,7 @@ const ::ipc::MethodID METHOD_STOP        = 4;
 const ::ipc::MethodID METHOD_GUARD_READY = 5;
 
 struct Void {
-    CONFIG_REGISTER_EMPTY
+    CARGO_REGISTER_EMPTY
 };
 
 struct Pid {
@@ -50,7 +50,7 @@ struct Pid {
 
     Pid(int v = -1): value(v) {}
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         value
     )

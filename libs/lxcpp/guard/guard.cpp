@@ -29,7 +29,7 @@
 #include "lxcpp/commands/provision.hpp"
 #include "lxcpp/commands/setup-userns.hpp"
 
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 #include "logger/logger.hpp"
 #include "utils/signal.hpp"
 

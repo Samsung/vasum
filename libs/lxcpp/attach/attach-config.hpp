@@ -26,8 +26,8 @@
 
 #include "lxcpp/namespace.hpp"
 
-#include <config/config.hpp>
-#include <config/fields.hpp>
+#include "config.hpp"
+#include <cargo/fields.hpp>
 #include "lxcpp/logger-config.hpp"
 #include <sys/types.h>
 
@@ -101,7 +101,7 @@ struct AttachConfig {
           logger(logger)
     {}
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         argv,
         initPid,

@@ -21,7 +21,7 @@ PROJECT(Logger)
 
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the libLogger...")
-FILE(GLOB HEADERS *.hpp)
+FILE(GLOB HEADERS *.hpp ${COMMON_FOLDER}/config.hpp)
 FILE(GLOB SRCS    *.cpp *.hpp)
 
 SET(_LIB_VERSION_ "${VERSION}")

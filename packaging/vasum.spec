@@ -384,9 +384,9 @@ The package provides libSimpleDbus development tools and libs.
 %{_libdir}/pkgconfig/libSimpleDbus.pc
 %endif
 
-## libConfig Package ##########################################################
-%package -n libConfig
-Summary:            Config library
+## libCargo Package ##########################################################
+%package -n libCargo
+Summary:            C++ object serialization library
 Group:              Security/Other
 %if %{platform_type} == "TIZEN"
 Requires:           libjson >= 0.10
@@ -396,22 +396,22 @@ Requires:           json-c
 Requires(post):     /sbin/ldconfig
 Requires(postun):   /sbin/ldconfig
 
-%description -n libConfig
-The package provides libConfig library.
+%description -n libCargo
+The package provides libCargo library.
 
-%post -n libConfig -p /sbin/ldconfig
+%post -n libCargo -p /sbin/ldconfig
 
-%postun -n libConfig -p /sbin/ldconfig
+%postun -n libCargo -p /sbin/ldconfig
 
-%files -n libConfig
+%files -n libCargo
 %defattr(644,root,root,755)
-%{_libdir}/libConfig.so.0
-%attr(755,root,root) %{_libdir}/libConfig.so.%{version}
+%{_libdir}/libCargo.so.0
+%attr(755,root,root) %{_libdir}/libCargo.so.%{version}
 
-%package -n libConfig-devel
-Summary:        Development Config library
+%package -n libCargo-devel
+Summary:        Development C++ object serialization library
 Group:          Development/Libraries
-Requires:       libConfig = %{epoch}:%{version}-%{release}
+Requires:       libCargo = %{epoch}:%{version}-%{release}
 Requires:       boost-devel
 Requires:       pkgconfig(libLogger)
 %if %{platform_type} == "TIZEN"
@@ -420,20 +420,20 @@ Requires:       libjson-devel >= 0.10
 Requires:       json-c-devel
 %endif
 
-%description -n libConfig-devel
-The package provides libConfig development tools and libs.
+%description -n libCargo-devel
+The package provides libCargo development tools and libs.
 
-%files -n libConfig-devel
+%files -n libCargo-devel
 %defattr(644,root,root,755)
-%{_libdir}/libConfig.so
-%{_includedir}/vasum-tools/config
-%{_libdir}/pkgconfig/libConfig.pc
+%{_libdir}/libCargo.so
+%{_includedir}/vasum-tools/cargo
+%{_libdir}/pkgconfig/libCargo.pc
 
 ## libIpc Package #######################################################
 %package -n libIpc
 Summary:            IPC library
 Group:              Security/Other
-Requires:           libConfig
+Requires:           libCargo
 Requires:           libuuid
 BuildRequires:      libuuid-devel
 Requires(post):     /sbin/ldconfig
@@ -456,7 +456,7 @@ Summary:        Development IPC library
 Group:          Development/Libraries
 Requires:       libIpc = %{epoch}:%{version}-%{release}
 Requires:       pkgconfig(libLogger)
-Requires:       pkgconfig(libConfig)
+Requires:       pkgconfig(libCargo)
 
 %description -n libIpc-devel
 The package provides libIpc development tools and libs.

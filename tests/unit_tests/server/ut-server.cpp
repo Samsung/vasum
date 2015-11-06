@@ -29,7 +29,7 @@
 #include "server.hpp"
 #include "zones-manager.hpp"
 #include "exception.hpp"
-#include "config/exception.hpp"
+#include "cargo/exception.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/scoped-dir.hpp"
 #include "logger/logger.hpp"
@@ -40,7 +40,7 @@
 
 using namespace utils;
 using namespace vasum;
-using namespace config;
+using namespace cargo;
 
 
 namespace {
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 BOOST_AUTO_TEST_CASE(MissingConfig)
 {
     BOOST_REQUIRE_EXCEPTION(Server(MISSING_CONFIG_PATH).run(AS_ROOT),
-                            ConfigException,
+                            CargoException,
                             WhatEquals("Could not load " + MISSING_CONFIG_PATH));
 }
 

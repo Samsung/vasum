@@ -43,7 +43,7 @@
 #include "utils/value-latch.hpp"
 #include "utils/scoped-dir.hpp"
 
-#include "config/fields.hpp"
+#include "cargo/fields.hpp"
 #include "logger/logger.hpp"
 
 #include <boost/filesystem.hpp>
@@ -110,7 +110,7 @@ struct SendData {
     int intVal;
     SendData(int i): intVal(i) {}
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         intVal
     )
@@ -120,17 +120,17 @@ struct RecvData {
     int intVal;
     RecvData(): intVal(-1) {}
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         intVal
     )
 };
 
 struct FDData {
-    config::FileDescriptor fd;
+    cargo::FileDescriptor fd;
     FDData(int fd = -1): fd(fd) {}
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         fd
     )
@@ -158,7 +158,7 @@ struct LongSendData {
 };
 
 struct EmptyData {
-    CONFIG_REGISTER_EMPTY
+    CARGO_REGISTER_EMPTY
 };
 
 struct ThrowOnAcceptData {

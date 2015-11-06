@@ -32,7 +32,7 @@
 
 #include "utils/paths.hpp"
 #include "logger/logger.hpp"
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 #include "dbus/exception.hpp"
 #include "utils/fs.hpp"
 #include "utils/img.hpp"
@@ -175,8 +175,8 @@ ZonesManager::ZonesManager(ipc::epoll::EventPoll& eventPoll, const std::string& 
 {
     LOGD("Instantiating ZonesManager object...");
 
-    config::loadFromJsonFile(configPath, mConfig);
-    config::loadFromKVStoreWithJsonFile(mConfig.dbPath,
+    cargo::loadFromJsonFile(configPath, mConfig);
+    cargo::loadFromKVStoreWithJsonFile(mConfig.dbPath,
                                         configPath,
                                         mDynamicConfig,
                                         getVasumDbPrefix());
@@ -278,7 +278,7 @@ Zone& ZonesManager::getZone(const std::string& id)
 
 void ZonesManager::saveDynamicConfig()
 {
-    config::saveToKVStore(mConfig.dbPath, mDynamicConfig, getVasumDbPrefix());
+    cargo::saveToKVStore(mConfig.dbPath, mDynamicConfig, getVasumDbPrefix());
 }
 
 void ZonesManager::updateDefaultId()
@@ -307,7 +307,7 @@ void ZonesManager::updateDefaultId()
 std::string ZonesManager::getTemplatePathForExistingZone(const std::string& id)
 {
     ZoneTemplatePathConfig config;
-    config::loadFromKVStore(mConfig.dbPath, config, getZoneDbPrefix(id));
+    cargo::loadFromKVStore(mConfig.dbPath, config, getZoneDbPrefix(id));
     return config.zoneTemplatePath;
 }
 
@@ -1016,7 +1016,7 @@ void ZonesManager::handleDeclareFileCall(const api::DeclareFileIn& data,
         } catch (const InvalidZoneIdException&) {
             LOGE("No zone with id=" << data.zone);
             result->setError(api::ERROR_INVALID_ID, "No such zone id");
-        } catch (const config::ConfigException& ex) {
+        } catch (const cargo::CargoException& ex) {
             LOGE("Can't declare file: " << ex.what());
             result->setError(api::ERROR_INTERNAL, "Internal error");
         }
@@ -1039,7 +1039,7 @@ void ZonesManager::handleDeclareMountCall(const api::DeclareMountIn& data,
         } catch (const InvalidZoneIdException&) {
             LOGE("No zone with id=" << data.zone);
             result->setError(api::ERROR_INVALID_ID, "No such zone id");
-        } catch (const config::ConfigException& ex) {
+        } catch (const cargo::CargoException& ex) {
             LOGE("Can't declare mount: " << ex.what());
             result->setError(api::ERROR_INTERNAL, "Internal error");
         }
@@ -1062,7 +1062,7 @@ void ZonesManager::handleDeclareLinkCall(const api::DeclareLinkIn& data,
         } catch (const InvalidZoneIdException&) {
             LOGE("No zone with id=" << data.zone);
             result->setError(api::ERROR_INVALID_ID, "No such zone id");
-        } catch (const config::ConfigException& ex) {
+        } catch (const cargo::CargoException& ex) {
             LOGE("Can't declare link: " << ex.what());
             result->setError(api::ERROR_INTERNAL, "Internal error");
         }
@@ -1151,7 +1151,7 @@ void ZonesManager::generateNewConfig(const std::string& id,
 {
     const std::string dbPrefix = getZoneDbPrefix(id);
     ZoneDynamicConfig dynamicConfig;
-    config::loadFromKVStoreWithJsonFile(mConfig.dbPath, templatePath, dynamicConfig, dbPrefix);
+    cargo::loadFromKVStoreWithJsonFile(mConfig.dbPath, templatePath, dynamicConfig, dbPrefix);
 
     // update mount point path
     dynamicConfig.runMountPoint = rgx::regex_replace(dynamicConfig.runMountPoint,
@@ -1178,12 +1178,12 @@ void ZonesManager::generateNewConfig(const std::string& id,
     }
 
     // save dynamic config
-    config::saveToKVStore(mConfig.dbPath, dynamicConfig, dbPrefix);
+    cargo::saveToKVStore(mConfig.dbPath, dynamicConfig, dbPrefix);
 
     // save zone template path
     ZoneTemplatePathConfig templatePathConfig;
     templatePathConfig.zoneTemplatePath = templatePath;
-    config::saveToKVStore(mConfig.dbPath, templatePathConfig, dbPrefix);
+    cargo::saveToKVStore(mConfig.dbPath, templatePathConfig, dbPrefix);
 
 }
 

@@ -24,9 +24,9 @@
 #ifndef LXCPP_PROVISION_CONFIG_HPP
 #define LXCPP_PROVISION_CONFIG_HPP
 
-#include "config/config.hpp"
-#include "config/fields.hpp"
-#include "config/fields-union.hpp"
+#include "config.hpp"
+#include "cargo/fields.hpp"
+#include "cargo/fields-union.hpp"
 
 #include <vector>
 #include <string>
@@ -63,7 +63,7 @@ struct File
     std::int32_t flags;
     std::int32_t mode;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         type,
         path,
@@ -96,7 +96,7 @@ struct Mount
     std::int64_t flags;
     std::string data;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         source,
         target,
@@ -122,7 +122,7 @@ struct Link
     std::string source;
     std::string target;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         source,
         target
@@ -157,7 +157,7 @@ struct ProvisionConfig
     const LinkVector& getLinks() const;
     void removeLink(const provision::Link& item);
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         files,
         mounts,

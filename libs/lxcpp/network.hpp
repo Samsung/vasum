@@ -24,8 +24,8 @@
 #ifndef LXCPP_NETWORK_HPP
 #define LXCPP_NETWORK_HPP
 
-#include <config/config.hpp>
-#include <config/fields.hpp>
+#include "config.hpp"
+#include <cargo/fields.hpp>
 
 #include <cstring>
 #include <string>
@@ -73,7 +73,7 @@ public:
     unsigned prefix;
     uint32_t flags;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         type,
         flags,

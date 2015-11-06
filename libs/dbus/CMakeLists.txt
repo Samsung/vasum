@@ -21,7 +21,7 @@ PROJECT(SimpleDbus)
 
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the libSimpleDbus...")
-FILE(GLOB HEADERS       *.hpp)
+FILE(GLOB HEADERS *.hpp ${COMMON_FOLDER}/config.hpp)
 FILE(GLOB HEADERS_UTILS ${COMMON_FOLDER}/utils/callback-guard.hpp)
 FILE(GLOB SRCS          *.cpp *.hpp)
 

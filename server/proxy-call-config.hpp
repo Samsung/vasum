@@ -27,7 +27,7 @@
 #define SERVER_PROXY_CALL_CONFIG_HPP
 
 
-#include "config/fields.hpp"
+#include "cargo/fields.hpp"
 
 #include <string>
 
@@ -46,7 +46,7 @@ struct ProxyCallRule {
     std::string targetInterface; ///< target dbus interface
     std::string targetMethod; ///< target dbus method
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         caller,
         target,

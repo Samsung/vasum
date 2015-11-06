@@ -40,7 +40,7 @@
 #include "ipc/client.hpp"
 #include "exception.hpp"
 #include "utils/glib-loop.hpp"
-#include "config/exception.hpp"
+#include "cargo/exception.hpp"
 #include "utils/latch.hpp"
 #include "utils/fs.hpp"
 #include "utils/img.hpp"
@@ -61,7 +61,7 @@
 #include <sys/stat.h>
 
 using namespace vasum;
-using namespace config;
+using namespace cargo;
 using namespace utils;
 #ifdef DBUS_CONNECTION
 using namespace dbus;
@@ -653,7 +653,7 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 BOOST_AUTO_TEST_CASE(MissingConfig)
 {
     BOOST_REQUIRE_EXCEPTION((ZonesManager(dispatcher.getPoll(), MISSING_CONFIG_PATH)),
-                            ConfigException,
+                            CargoException,
                             WhatEquals("Could not load " + MISSING_CONFIG_PATH));
 }
 

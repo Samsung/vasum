@@ -27,7 +27,7 @@
 #define SERVER_INPUT_MONITOR_CONFIG_HPP
 
 
-#include "config/fields.hpp"
+#include "cargo/fields.hpp"
 
 #include <string>
 
@@ -62,7 +62,7 @@ struct InputConfig {
      */
     int timeWindowMs;
 
-    CONFIG_REGISTER
+    CARGO_REGISTER
     (
         enabled,
         device,

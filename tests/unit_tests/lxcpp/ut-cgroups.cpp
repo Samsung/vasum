@@ -22,7 +22,7 @@
  */
 
 #include "config.hpp"
-#include "config/manager.hpp"
+#include "cargo/manager.hpp"
 #include "ut.hpp"
 #include "logger/logger.hpp"
 
@@ -162,16 +162,16 @@ BOOST_AUTO_TEST_CASE(CGroupConfigSerialization)
     CGroupsConfig cfg;
     std::string tmpConfigFile = "/tmp/cgconfig.conf";
 
-    BOOST_CHECK_NO_THROW(config::saveToJsonString(cfg));
+    BOOST_CHECK_NO_THROW(cargo::saveToJsonString(cfg));
 
     cfg.subsystems.push_back(SubsystemConfig{"cpu", "/tmp/cgroup/cpu"});
 
     CGroupConfig cpucfg = {"cpu", "/testcpu", {}, {}};
     cfg.cgroups.push_back(cpucfg);
-    config::saveToJsonFile(tmpConfigFile, cfg);
+    cargo::saveToJsonFile(tmpConfigFile, cfg);
 
     CGroupsConfig cfg2;
-    BOOST_CHECK_NO_THROW(config::loadFromJsonFile(tmpConfigFile, cfg2));
+    BOOST_CHECK_NO_THROW(cargo::loadFromJsonFile(tmpConfigFile, cfg2));
     BOOST_CHECK(cfg2.subsystems.size()==cfg.subsystems.size());
 }
 

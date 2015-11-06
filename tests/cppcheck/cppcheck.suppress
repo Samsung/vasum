@@ -1,5 +1,5 @@
 // public API functions (or write tests to use them all)
-unusedFunction:libs/config/kvstore.cpp
+unusedFunction:libs/cargo/kvstore.cpp
 unusedFunction:libs/ipc/internals/processor.cpp
 unusedFunction:server/zones-manager.cpp
 unusedFunction:libs/lxcpp/container-impl.cpp
