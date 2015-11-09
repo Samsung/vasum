@@ -40,6 +40,11 @@ void sighandler(int signal)
 
 int main(int argc, char *argv[])
 {
+    if (getuid() != 0) {
+        printf("Due to user namespace this program has to be run as root.\n");
+        return 1;
+    }
+
     signal(SIGINT, &sighandler);
 
     logger::setupLogger(logger::LogType::LOG_STDERR, logger::LogLevel::TRACE);
@@ -68,6 +73,8 @@ int main(int argc, char *argv[])
         c->addUIDMap(1000, 0, 999);
         c->addGIDMap(1000, 0, 999);
         c->start();
+        // not needed per se, but let things settle for a second, e.g. the logs
+        sleep(1);
         c->console();
         // You could run the console for the second time to see if it can be reattached
         //c->console();

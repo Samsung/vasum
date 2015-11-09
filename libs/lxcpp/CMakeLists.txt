@@ -29,6 +29,7 @@ MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the liblxcpp...")
 FILE(GLOB HEADERS          *.hpp)
 FILE(GLOB HEADERS_UTILS    ${COMMON_FOLDER}/utils/channel.hpp)
+FILE(GLOB HEADERS_CGROUPS  cgroups/*.hpp)
 FILE(GLOB HEADERS_COMMANDS commands/*.hpp)
 
 FILE(GLOB SRCS          *.cpp *.hpp)
@@ -76,5 +77,7 @@ INSTALL(FILES       ${HEADERS}
         DESTINATION ${INCLUDE_INSTALL_DIR}/lxcpp)
 INSTALL(FILES       ${HEADERS_UTILS}
         DESTINATION ${INCLUDE_INSTALL_DIR}/lxcpp/utils)
+INSTALL(FILES       ${HEADERS_CGROUPS}
+        DESTINATION ${INCLUDE_INSTALL_DIR}/lxcpp/cgroups)
 INSTALL(FILES       ${HEADERS_COMMANDS}
         DESTINATION ${INCLUDE_INSTALL_DIR}/lxcpp/commands)
