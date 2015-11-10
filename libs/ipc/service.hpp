@@ -22,8 +22,8 @@
  * @brief   Declaration of the IPC handling class
  */
 
-#ifndef COMMON_IPC_SERVICE_HPP
-#define COMMON_IPC_SERVICE_HPP
+#ifndef IPC_SERVICE_HPP
+#define IPC_SERVICE_HPP
 
 #include "ipc/internals/processor.hpp"
 #include "ipc/internals/acceptor.hpp"
@@ -306,4 +306,4 @@ void Service::signal(const MethodID methodID,
 
 } // namespace ipc
 
-#endif // COMMON_IPC_SERVICE_HPP
+#endif // IPC_SERVICE_HPP

@@ -22,8 +22,8 @@
  * @brief   Default visitor for loading from KVStore
  */
 
-#ifndef COMMON_CARGO_FROM_KVSTORE_VISITOR_HPP
-#define COMMON_CARGO_FROM_KVSTORE_VISITOR_HPP
+#ifndef CARGO_FROM_KVSTORE_VISITOR_HPP
+#define CARGO_FROM_KVSTORE_VISITOR_HPP
 
 #include "cargo/from-kvstore-visitor-base.hpp"
 
@@ -49,4 +49,4 @@ public:
 
 } // namespace cargo
 
-#endif // COMMON_CARGO_FROM_KVSTORE_VISITOR_HPP
+#endif // CARGO_FROM_KVSTORE_VISITOR_HPP

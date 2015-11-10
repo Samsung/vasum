@@ -22,8 +22,8 @@
  * @brief   Processor's request to send the result of a method
  */
 
-#ifndef COMMON_IPC_INTERNALS_SEND_RESULT_REQUEST_HPP
-#define COMMON_IPC_INTERNALS_SEND_RESULT_REQUEST_HPP
+#ifndef IPC_INTERNALS_SEND_RESULT_REQUEST_HPP
+#define IPC_INTERNALS_SEND_RESULT_REQUEST_HPP
 
 #include "ipc/types.hpp"
 #include "logger/logger-scope.hpp"
@@ -53,4 +53,4 @@ public:
 
 } // namespace ipc
 
-#endif // COMMON_IPC_INTERNALS_SEND_RESULT_REQUEST_HPP
+#endif // IPC_INTERNALS_SEND_RESULT_REQUEST_HPP

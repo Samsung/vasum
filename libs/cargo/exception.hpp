@@ -22,8 +22,8 @@
  * @brief   Exceptions for libCargo
  */
 
-#ifndef COMMON_CARGO_EXCEPTION_HPP
-#define COMMON_CARGO_EXCEPTION_HPP
+#ifndef CARGO_EXCEPTION_HPP
+#define CARGO_EXCEPTION_HPP
 
 #include <stdexcept>
 
@@ -63,4 +63,4 @@ struct ContainerSizeException: public CargoException {
 
 } // namespace cargo
 
-#endif // COMMON_CARGO_EXCEPTION_HPP
+#endif // CARGO_EXCEPTION_HPP

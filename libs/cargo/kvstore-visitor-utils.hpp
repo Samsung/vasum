@@ -22,8 +22,8 @@
  * @brief   KVStore visitors utilities
  */
 
-#ifndef COMMON_CARGO_KVSTORE_VISITOR_UTILS_HPP
-#define COMMON_CARGO_KVSTORE_VISITOR_UTILS_HPP
+#ifndef CARGO_KVSTORE_VISITOR_UTILS_HPP
+#define CARGO_KVSTORE_VISITOR_UTILS_HPP
 
 #include <vector>
 #include <string>
@@ -104,4 +104,4 @@ struct SetTupleVisitor
 
 } // namespace cargo
 
-#endif // COMMON_CARGO_KVSTORE_VISITOR_UTILS_HPP
+#endif // CARGO_KVSTORE_VISITOR_UTILS_HPP

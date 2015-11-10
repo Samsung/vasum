@@ -22,8 +22,8 @@
  * @brief   Internal configuration helper
  */
 
-#ifndef COMMON_CARGO_IS_UNION_HPP
-#define COMMON_CARGO_IS_UNION_HPP
+#ifndef CARGO_IS_UNION_HPP
+#define CARGO_IS_UNION_HPP
 
 #include "cargo/is-visitable.hpp"
 
@@ -66,5 +66,5 @@ struct isUnion : has_member<T, check_union<T>> {};
 
 } // namespace cargo
 
-#endif // COMMON_CARGO_IS_UNION_HPP
+#endif // CARGO_IS_UNION_HPP
 

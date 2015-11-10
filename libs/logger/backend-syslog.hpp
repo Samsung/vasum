@@ -22,8 +22,8 @@
  * @brief   Syslog backend for logger
  */
 
-#ifndef COMMON_LOGGER_BACKEND_SYSLOG_HPP
-#define COMMON_LOGGER_BACKEND_SYSLOG_HPP
+#ifndef LOGGER_BACKEND_SYSLOG_HPP
+#define LOGGER_BACKEND_SYSLOG_HPP
 
 #include "logger/backend.hpp"
 
@@ -40,4 +40,4 @@ public:
 
 } // namespace logger
 
-#endif // COMMON_LOGGER_BACKEND_SYSLOG_HPP
+#endif // LOGGER_BACKEND_SYSLOG_HPP

@@ -22,8 +22,8 @@
  * @brief   Managing the queue with requests
  */
 
-#ifndef COMMON_IPC_INTERNALS_FINISH_REQUEST_HPP
-#define COMMON_IPC_INTERNALS_FINISH_REQUEST_HPP
+#ifndef IPC_INTERNALS_FINISH_REQUEST_HPP
+#define IPC_INTERNALS_FINISH_REQUEST_HPP
 
 #include <condition_variable>
 
@@ -43,4 +43,4 @@ public:
 
 } // namespace ipc
 
-#endif // COMMON_IPC_INTERNALS_FINISH_REQUEST_HPP
+#endif // IPC_INTERNALS_FINISH_REQUEST_HPP

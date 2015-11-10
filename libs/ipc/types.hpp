@@ -22,8 +22,8 @@
  * @brief   Types definitions
  */
 
-#ifndef COMMON_IPC_TYPES_HPP
-#define COMMON_IPC_TYPES_HPP
+#ifndef IPC_TYPES_HPP
+#define IPC_TYPES_HPP
 
 #include <functional>
 #include <memory>
@@ -100,4 +100,4 @@ struct SignalHandler {
 
 } // namespace ipc
 
-#endif // COMMON_IPC_TYPES_HPP
+#endif // IPC_TYPES_HPP

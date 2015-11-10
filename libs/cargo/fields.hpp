@@ -23,8 +23,8 @@
  * @brief      C++ library for handling serialization
  */
 
-#ifndef COMMON_CARGO_FIELDS_HPP
-#define COMMON_CARGO_FIELDS_HPP
+#ifndef CARGO_FIELDS_HPP
+#define CARGO_FIELDS_HPP
 
 #include <boost/preprocessor/variadic/to_list.hpp>
 #include <boost/preprocessor/list/for_each.hpp>
@@ -146,4 +146,4 @@
 #define GENERATE_ELEMENT__(r, _, element)                          \
     v.visit(#element, element);                                    \
 
-#endif // COMMON_CARGO_FIELDS_HPP
+#endif // CARGO_FIELDS_HPP

@@ -22,8 +22,8 @@
  * @brief   Class for storing result of a method - data or exception
  */
 
-#ifndef COMMON_IPC_RESULT_BUILDER_HPP
-#define COMMON_IPC_RESULT_BUILDER_HPP
+#ifndef IPC_RESULT_BUILDER_HPP
+#define IPC_RESULT_BUILDER_HPP
 
 #include "ipc/result.hpp"
 #include <functional>
@@ -67,4 +67,4 @@ typedef std::function<void(ResultBuilder&)> ResultBuilderHandler;
 
 } // namespace ipc
 
-#endif // COMMON_IPC_RESULT_BUILDER_HPP
+#endif // IPC_RESULT_BUILDER_HPP

@@ -22,8 +22,8 @@
  * @brief   src/cargo/manager.hpp
  */
 
-#ifndef COMMON_CARGO_FS_UTILS_HPP
-#define COMMON_CARGO_FS_UTILS_HPP
+#ifndef CARGO_FS_UTILS_HPP
+#define CARGO_FS_UTILS_HPP
 
 #include <string>
 
@@ -40,4 +40,4 @@ inline std::string readFileContent(const std::string& path) {
 } // namespace fsutils
 } // namespace cargo
 
-#endif // COMMON_CARGO_FS_UTILS_HPP
+#endif // CARGO_FS_UTILS_HPP

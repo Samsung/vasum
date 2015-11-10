@@ -22,8 +22,8 @@
  * @brief   Processor's request to call a method
  */
 
-#ifndef COMMON_IPC_INTERNALS_METHOD_REQUEST_HPP
-#define COMMON_IPC_INTERNALS_METHOD_REQUEST_HPP
+#ifndef IPC_INTERNALS_METHOD_REQUEST_HPP
+#define IPC_INTERNALS_METHOD_REQUEST_HPP
 
 #include "ipc/internals/result-builder.hpp"
 #include "ipc/types.hpp"
@@ -100,4 +100,4 @@ std::shared_ptr<MethodRequest> MethodRequest::create(const MethodID methodID,
 
 } // namespace ipc
 
-#endif // COMMON_IPC_INTERNALS_METHOD_REQUEST_HPP
+#endif // IPC_INTERNALS_METHOD_REQUEST_HPP

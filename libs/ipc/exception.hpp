@@ -23,8 +23,8 @@
  */
 
 
-#ifndef COMMON_IPC_EXCEPTION_HPP
-#define COMMON_IPC_EXCEPTION_HPP
+#ifndef IPC_EXCEPTION_HPP
+#define IPC_EXCEPTION_HPP
 
 #include <stdexcept>
 
@@ -143,4 +143,4 @@ private:
 
 } // namespace ipc
 
-#endif // COMMON_IPC_EXCEPTION_HPP
+#endif // IPC_EXCEPTION_HPP

@@ -22,8 +22,8 @@
  * @brief   Helper formatter for logger
  */
 
-#ifndef COMMON_LOGGER_FORMATTER_HPP
-#define COMMON_LOGGER_FORMATTER_HPP
+#ifndef LOGGER_FORMATTER_HPP
+#define LOGGER_FORMATTER_HPP
 
 #include "logger/level.hpp"
 
@@ -47,4 +47,4 @@ public:
 
 } // namespace logger
 
-#endif // COMMON_LOGGER_FORMATTER_HPP
+#endif // LOGGER_FORMATTER_HPP

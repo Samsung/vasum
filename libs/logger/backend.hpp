@@ -22,8 +22,8 @@
  * @brief   Logging backend
  */
 
-#ifndef COMMON_LOGGER_BACKEND_HPP
-#define COMMON_LOGGER_BACKEND_HPP
+#ifndef LOGGER_BACKEND_HPP
+#define LOGGER_BACKEND_HPP
 
 #include "logger/level.hpp"
 
@@ -47,4 +47,4 @@ public:
 
 } // namespace logger
 
-#endif // COMMON_LOGGER_BACKEND_HPP
+#endif // LOGGER_BACKEND_HPP

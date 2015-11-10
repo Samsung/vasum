@@ -22,8 +22,8 @@
  * @brief   Systemd journal backend for logger
  */
 
-#ifndef COMMON_LOGGER_BACKEND_JOURNAL_HPP
-#define COMMON_LOGGER_BACKEND_JOURNAL_HPP
+#ifndef LOGGER_BACKEND_JOURNAL_HPP
+#define LOGGER_BACKEND_JOURNAL_HPP
 
 #include "logger/backend.hpp"
 
@@ -43,4 +43,4 @@ public:
 
 } // namespace logger
 
-#endif // COMMON_LOGGER_BACKEND_JOURNAL_HPP
+#endif // LOGGER_BACKEND_JOURNAL_HPP

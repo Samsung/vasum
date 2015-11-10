@@ -22,8 +22,8 @@
  * @brief   GVariant visitor
  */
 
-#ifndef COMMON_CARGO_TO_GVARIANT_VISITOR_HPP
-#define COMMON_CARGO_TO_GVARIANT_VISITOR_HPP
+#ifndef CARGO_TO_GVARIANT_VISITOR_HPP
+#define CARGO_TO_GVARIANT_VISITOR_HPP
 
 #include "cargo/is-visitable.hpp"
 #include "cargo/is-union.hpp"
@@ -178,4 +178,4 @@ private:
 
 } // namespace cargo
 
-#endif // COMMON_CARGO_TO_GVARIANT_VISITOR_HPP
+#endif // CARGO_TO_GVARIANT_VISITOR_HPP

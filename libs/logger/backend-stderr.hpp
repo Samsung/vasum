@@ -22,8 +22,8 @@
  * @brief   Stderr backend for logger
  */
 
-#ifndef COMMON_LOGGER_BACKEND_STDERR_HPP
-#define COMMON_LOGGER_BACKEND_STDERR_HPP
+#ifndef LOGGER_BACKEND_STDERR_HPP
+#define LOGGER_BACKEND_STDERR_HPP
 
 #include "logger/backend.hpp"
 
@@ -46,4 +46,4 @@ private:
 
 } // namespace logger
 
-#endif // COMMON_LOGGER_BACKEND_STDERR_HPP
+#endif // LOGGER_BACKEND_STDERR_HPP

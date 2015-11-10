@@ -22,8 +22,8 @@
  * @brief   Linux socket wrapper
  */
 
-#ifndef COMMON_IPC_INTERNALS_SOCKET_HPP
-#define COMMON_IPC_INTERNALS_SOCKET_HPP
+#ifndef IPC_INTERNALS_SOCKET_HPP
+#define IPC_INTERNALS_SOCKET_HPP
 
 #include <string>
 #include <mutex>
@@ -114,4 +114,4 @@ private:
 
 } // namespace ipc
 
-#endif // COMMON_IPC_INTERNALS_SOCKET_HPP
+#endif // IPC_INTERNALS_SOCKET_HPP

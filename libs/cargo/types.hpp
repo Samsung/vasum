@@ -22,8 +22,8 @@
  * @brief  Types declarations
  */
 
-#ifndef COMMON_CARGO_TYPES_HPP
-#define COMMON_CARGO_TYPES_HPP
+#ifndef CARGO_TYPES_HPP
+#define CARGO_TYPES_HPP
 
 namespace cargo {
 
@@ -41,4 +41,4 @@ struct FileDescriptor {
 
 } // cargo
 
-#endif //COMMON_CARGO_TYPES_HPP
+#endif //CARGO_TYPES_HPP

@@ -22,8 +22,8 @@
  * @brief   Dbus connection class
  */
 
-#ifndef COMMON_DBUS_CONNECTION_HPP
-#define COMMON_DBUS_CONNECTION_HPP
+#ifndef DBUS_CONNECTION_HPP
+#define DBUS_CONNECTION_HPP
 
 #include "utils/callback-guard.hpp"
 
@@ -246,4 +246,4 @@ private:
 
 } // namespace dbus
 
-#endif // COMMON_DBUS_CONNECTION_HPP
+#endif // DBUS_CONNECTION_HPP

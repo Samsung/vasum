@@ -22,8 +22,8 @@
  * @brief  Declaration of a class for writing and reading data from a file descriptor
  */
 
-#ifndef COMMON_CARGO_FDSTORE_HPP
-#define COMMON_CARGO_FDSTORE_HPP
+#ifndef CARGO_FDSTORE_HPP
+#define CARGO_FDSTORE_HPP
 
 #include <cstddef>
 
@@ -75,6 +75,6 @@ private:
 
 } // namespace cargo
 
-#endif // COMMON_CARGO_FDSTORE_HPP
+#endif // CARGO_FDSTORE_HPP
 
 

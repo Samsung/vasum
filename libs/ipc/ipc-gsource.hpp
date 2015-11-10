@@ -22,8 +22,8 @@
  * @brief    Class for creating a dedicated GSource
  */
 
-#ifndef COMMON_IPC_IPC_GSOURCE_HPP
-#define COMMON_IPC_IPC_GSOURCE_HPP
+#ifndef IPC_IPC_GSOURCE_HPP
+#define IPC_IPC_GSOURCE_HPP
 
 #include <glib.h>
 #include "ipc/types.hpp"
@@ -143,4 +143,4 @@ private:
 
 } // namespace ipc
 
-#endif // COMMON_IPC_IPC_GSOURCE_HPP
+#endif // IPC_IPC_GSOURCE_HPP

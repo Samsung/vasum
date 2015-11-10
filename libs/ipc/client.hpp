@@ -23,8 +23,8 @@
  * @brief   Handling client connections
  */
 
-#ifndef COMMON_IPC_CLIENT_HPP
-#define COMMON_IPC_CLIENT_HPP
+#ifndef IPC_CLIENT_HPP
+#define IPC_CLIENT_HPP
 
 #include "ipc/internals/processor.hpp"
 #include "ipc/types.hpp"
@@ -282,4 +282,4 @@ void Client::signal(const MethodID methodID,
 
 } // namespace ipc
 
-#endif // COMMON_IPC_CLIENT_HPP
+#endif // IPC_CLIENT_HPP

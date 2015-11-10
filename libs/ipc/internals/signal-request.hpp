@@ -22,8 +22,8 @@
  * @brief   Processor's request to send a signal
  */
 
-#ifndef COMMON_IPC_INTERNALS_SIGNAL_REQUEST_HPP
-#define COMMON_IPC_INTERNALS_SIGNAL_REQUEST_HPP
+#ifndef IPC_INTERNALS_SIGNAL_REQUEST_HPP
+#define IPC_INTERNALS_SIGNAL_REQUEST_HPP
 
 #include "ipc/types.hpp"
 #include "cargo/manager.hpp"
@@ -75,4 +75,4 @@ std::shared_ptr<SignalRequest> SignalRequest::create(const MethodID methodID,
 
 } // namespace ipc
 
-#endif // COMMON_IPC_INTERNALS_SIGNAL_REQUEST_HPP
+#endif // IPC_INTERNALS_SIGNAL_REQUEST_HPP

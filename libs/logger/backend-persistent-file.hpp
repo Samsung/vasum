@@ -22,8 +22,8 @@
  * @brief   Persistent file backend for logger
  */
 
-#ifndef COMMON_LOGGER_BACKEND_PERSISTENT_FILE_HPP
-#define COMMON_LOGGER_BACKEND_PERSISTENT_FILE_HPP
+#ifndef LOGGER_BACKEND_PERSISTENT_FILE_HPP
+#define LOGGER_BACKEND_PERSISTENT_FILE_HPP
 
 #include "logger/backend.hpp"
 
@@ -56,4 +56,4 @@ private:
 
 } // namespace logger
 
-#endif // COMMON_LOGGER_BACKEND_PERSISTENT_FILE_HPP
+#endif // LOGGER_BACKEND_PERSISTENT_FILE_HPP

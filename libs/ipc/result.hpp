@@ -22,8 +22,8 @@
  * @brief   Class for storing result of a method - data or exception
  */
 
-#ifndef COMMON_IPC_RESULT_HPP
-#define COMMON_IPC_RESULT_HPP
+#ifndef IPC_RESULT_HPP
+#define IPC_RESULT_HPP
 
 #include <functional>
 #include <exception>
@@ -74,4 +74,4 @@ struct ResultHandler {
 
 } // namespace ipc
 
-#endif // COMMON_IPC_RESULT_HPP
+#endif // IPC_RESULT_HPP

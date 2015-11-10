@@ -22,8 +22,8 @@
  * @brief   Visitor for loading from KVStore that doesn't fail on missing values
  */
 
-#ifndef COMMON_CARGO_FROM_KVSTORE_IGNORING_VISITOR_HPP
-#define COMMON_CARGO_FROM_KVSTORE_IGNORING_VISITOR_HPP
+#ifndef CARGO_FROM_KVSTORE_IGNORING_VISITOR_HPP
+#define CARGO_FROM_KVSTORE_IGNORING_VISITOR_HPP
 
 #include "cargo/from-kvstore-visitor.hpp"
 
@@ -94,4 +94,4 @@ private:
 
 } // namespace cargo
 
-#endif // COMMON_CARGO_FROM_KVSTORE_IGNORING_VISITOR_HPP
+#endif // CARGO_FROM_KVSTORE_IGNORING_VISITOR_HPP

@@ -22,8 +22,8 @@
  * @brief   Class for accepting new connections
  */
 
-#ifndef COMMON_IPC_INTERNALS_ACCEPTOR_HPP
-#define COMMON_IPC_INTERNALS_ACCEPTOR_HPP
+#ifndef IPC_INTERNALS_ACCEPTOR_HPP
+#define IPC_INTERNALS_ACCEPTOR_HPP
 
 #include "config.hpp"
 
@@ -72,4 +72,4 @@ private:
 
 } // namespace ipc
 
-#endif // COMMON_IPC_INTERNALS_ACCEPTOR_HPP
+#endif // IPC_INTERNALS_ACCEPTOR_HPP

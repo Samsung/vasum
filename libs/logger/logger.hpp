@@ -57,8 +57,8 @@
  */
 
 
-#ifndef COMMON_LOGGER_LOGGER_HPP
-#define COMMON_LOGGER_LOGGER_HPP
+#ifndef LOGGER_LOGGER_HPP
+#define LOGGER_LOGGER_HPP
 
 #include "logger/level.hpp"
 #include "logger/backend-null.hpp"
@@ -160,6 +160,6 @@ public:
 #define LOGT(MESSAGE) do {} while (0)
 #endif
 
-#endif // COMMON_LOGGER_LOGGER_HPP
+#endif // LOGGER_LOGGER_HPP
 
 /*@}*/

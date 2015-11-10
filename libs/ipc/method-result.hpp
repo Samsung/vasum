@@ -22,8 +22,8 @@
  * @brief   Class for sending the result of a method
  */
 
-#ifndef COMMON_IPC_METHOD_RESULT_HPP
-#define COMMON_IPC_METHOD_RESULT_HPP
+#ifndef IPC_METHOD_RESULT_HPP
+#define IPC_METHOD_RESULT_HPP
 
 #include "ipc/types.hpp"
 #include "logger/logger.hpp"
@@ -79,4 +79,4 @@ struct MethodHandler {
 
 } // namespace ipc
 
-#endif // COMMON_IPC_METHOD_RESULT_HPP
+#endif // IPC_METHOD_RESULT_HPP

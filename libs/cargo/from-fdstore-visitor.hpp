@@ -22,8 +22,8 @@
  * @brief   Visitor for loading from FDStore
  */
 
-#ifndef COMMON_CARGO_FROM_FDSTORE_VISITOR_HPP
-#define COMMON_CARGO_FROM_FDSTORE_VISITOR_HPP
+#ifndef CARGO_FROM_FDSTORE_VISITOR_HPP
+#define CARGO_FROM_FDSTORE_VISITOR_HPP
 
 #include "cargo/is-visitable.hpp"
 #include "cargo/fdstore.hpp"
@@ -128,4 +128,4 @@ private:
 
 } // namespace cargo
 
-#endif // COMMON_CARGO_FROM_FDSTORE_VISITOR_HPP
+#endif // CARGO_FROM_FDSTORE_VISITOR_HPP

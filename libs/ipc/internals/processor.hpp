@@ -22,8 +22,8 @@
  * @brief   Data and event processing thread
  */
 
-#ifndef COMMON_IPC_INTERNALS_PROCESSOR_HPP
-#define COMMON_IPC_INTERNALS_PROCESSOR_HPP
+#ifndef IPC_INTERNALS_PROCESSOR_HPP
+#define IPC_INTERNALS_PROCESSOR_HPP
 
 #include "ipc/internals/result-builder.hpp"
 #include "ipc/internals/socket.hpp"
@@ -729,4 +729,4 @@ void Processor::signal(const MethodID methodID,
 
 } // namespace ipc
 
-#endif // COMMON_IPC_INTERNALS_PROCESSOR_HPP
+#endif // IPC_INTERNALS_PROCESSOR_HPP

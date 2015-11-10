@@ -22,8 +22,8 @@
  * @brief   C++ epoll wrapper
  */
 
-#ifndef COMMON_EPOLL_EVENT_POLL_HPP
-#define COMMON_EPOLL_EVENT_POLL_HPP
+#ifndef EPOLL_EVENT_POLL_HPP
+#define EPOLL_EVENT_POLL_HPP
 
 #include "ipc/epoll/events.hpp"
 
@@ -120,4 +120,4 @@ private:
 } // namespace epoll
 } // namespace ipc
 
-#endif // COMMON_EPOLL_EVENT_POLL_HPP
+#endif // EPOLL_EVENT_POLL_HPP

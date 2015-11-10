@@ -22,8 +22,8 @@
  * @brief   LogLevel
  */
 
-#ifndef COMMON_LOGGER_LEVEL_HPP
-#define COMMON_LOGGER_LEVEL_HPP
+#ifndef LOGGER_LEVEL_HPP
+#define LOGGER_LEVEL_HPP
 
 #include <string>
 
@@ -56,4 +56,4 @@ LogLevel parseLogLevel(const std::string& level);
 
 } // namespace logger
 
-#endif // COMMON_LOGGER_LEVEL_HPP
+#endif // LOGGER_LEVEL_HPP

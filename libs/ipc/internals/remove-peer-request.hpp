@@ -22,8 +22,8 @@
  * @brief   Processor's request to remove a peer
  */
 
-#ifndef COMMON_IPC_INTERNALS_REMOVE_PEER_REQUEST_HPP
-#define COMMON_IPC_INTERNALS_REMOVE_PEER_REQUEST_HPP
+#ifndef IPC_INTERNALS_REMOVE_PEER_REQUEST_HPP
+#define IPC_INTERNALS_REMOVE_PEER_REQUEST_HPP
 
 #include "ipc/types.hpp"
 #include "ipc/internals/socket.hpp"
@@ -50,4 +50,4 @@ public:
 
 } // namespace ipc
 
-#endif // COMMON_IPC_INTERNALS_REMOVE_PEER_REQUEST_HPP
+#endif // IPC_INTERNALS_REMOVE_PEER_REQUEST_HPP

@@ -22,8 +22,8 @@
  * @brief   Thread epoll dispatcher
  */
 
-#ifndef COMMON_EPOLL_THREAD_DISPATCHER_HPP
-#define COMMON_EPOLL_THREAD_DISPATCHER_HPP
+#ifndef EPOLL_THREAD_DISPATCHER_HPP
+#define EPOLL_THREAD_DISPATCHER_HPP
 
 #include "ipc/epoll/event-poll.hpp"
 #include "utils/eventfd.hpp"
@@ -53,4 +53,4 @@ private:
 } // namespace epoll
 } // namespace ipc
 
-#endif // COMMON_EPOLL_THREAD_DISPATCHER_HPP
+#endif // EPOLL_THREAD_DISPATCHER_HPP

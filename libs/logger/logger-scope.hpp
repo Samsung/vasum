@@ -22,8 +22,8 @@
  * @brief   Scope logger class declaration
  */
 
-#ifndef COMMON_LOGGER_LOGGER_SCOPE_HPP
-#define COMMON_LOGGER_LOGGER_SCOPE_HPP
+#ifndef LOGGER_LOGGER_SCOPE_HPP
+#define LOGGER_LOGGER_SCOPE_HPP
 
 #include <string>
 #include <sstream>
@@ -82,4 +82,4 @@ private:
 #define LOGS(MSG) do {} while (0)
 #endif
 
-#endif // COMMON_LOGGER_LOGGER_SCOPE_HPP
+#endif // LOGGER_LOGGER_SCOPE_HPP

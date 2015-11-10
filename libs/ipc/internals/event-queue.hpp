@@ -22,8 +22,8 @@
  * @brief   Class for passing events using eventfd mechanism
  */
 
-#ifndef COMMON_IPC_INTERNALS_EVENT_QUEUE_HPP
-#define COMMON_IPC_INTERNALS_EVENT_QUEUE_HPP
+#ifndef IPC_INTERNALS_EVENT_QUEUE_HPP
+#define IPC_INTERNALS_EVENT_QUEUE_HPP
 
 #include "ipc/exception.hpp"
 #include "utils/eventfd.hpp"
@@ -119,4 +119,4 @@ bool EventQueue<MessageType>::isEmpty()
 
 } // namespace ipc
 
-#endif // COMMON_IPC_INTERNALS_EVENT_QUEUE_HPP
+#endif // IPC_INTERNALS_EVENT_QUEUE_HPP

@@ -22,8 +22,8 @@
  * @brief   Base of visitors for loading from KVStore
  */
 
-#ifndef COMMON_CARGO_FROM_KVSTORE_VISITOR_BASE_HPP
-#define COMMON_CARGO_FROM_KVSTORE_VISITOR_BASE_HPP
+#ifndef CARGO_FROM_KVSTORE_VISITOR_BASE_HPP
+#define CARGO_FROM_KVSTORE_VISITOR_BASE_HPP
 
 #include "cargo/exception.hpp"
 #include "cargo/is-visitable.hpp"
@@ -162,4 +162,4 @@ private:
 
 } // namespace cargo
 
-#endif // COMMON_CARGO_FROM_KVSTORE_VISITOR_BASE_HPP
+#endif // CARGO_FROM_KVSTORE_VISITOR_BASE_HPP

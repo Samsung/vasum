@@ -22,8 +22,8 @@
  * @brief   Dbus exceptions
  */
 
-#ifndef COMMON_DBUS_EXCEPTION_HPP
-#define COMMON_DBUS_EXCEPTION_HPP
+#ifndef DBUS_EXCEPTION_HPP
+#define DBUS_EXCEPTION_HPP
 
 #include <stdexcept>
 
@@ -71,4 +71,4 @@ struct DbusInvalidArgumentException: public DbusException {
 
 } // namespace dbus
 
-#endif // COMMON_DBUS_EXCEPTION_HPP
+#endif // DBUS_EXCEPTION_HPP

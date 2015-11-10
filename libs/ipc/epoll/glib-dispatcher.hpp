@@ -22,8 +22,8 @@
  * @brief   glib epoll dispatcher
  */
 
-#ifndef COMMON_EPOLL_GLIB_DISPATCHER_HPP
-#define COMMON_EPOLL_GLIB_DISPATCHER_HPP
+#ifndef EPOLL_GLIB_DISPATCHER_HPP
+#define EPOLL_GLIB_DISPATCHER_HPP
 
 #include "ipc/epoll/event-poll.hpp"
 #include "utils/callback-guard.hpp"
@@ -53,4 +53,4 @@ private:
 } // namespace epoll
 } // namespace ipc
 
-#endif // COMMON_UTILS_GLIB_DISPATCHER_HPP
+#endif // UTILS_GLIB_DISPATCHER_HPP

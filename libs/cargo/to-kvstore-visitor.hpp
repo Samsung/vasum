@@ -22,8 +22,8 @@
  * @brief   Visitor for saving to KVStore
  */
 
-#ifndef COMMON_CARGO_TO_KVSTORE_VISITOR_HPP
-#define COMMON_CARGO_TO_KVSTORE_VISITOR_HPP
+#ifndef CARGO_TO_KVSTORE_VISITOR_HPP
+#define CARGO_TO_KVSTORE_VISITOR_HPP
 
 #include "cargo/is-visitable.hpp"
 #include "cargo/kvstore.hpp"
@@ -131,4 +131,4 @@ private:
 
 } // namespace cargo
 
-#endif // COMMON_CARGO_TO_KVSTORE_VISITOR_HPP
+#endif // CARGO_TO_KVSTORE_VISITOR_HPP

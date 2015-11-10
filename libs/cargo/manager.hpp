@@ -88,8 +88,8 @@
  * @endcode
  */
 
-#ifndef COMMON_CARGO_MANAGER_HPP
-#define COMMON_CARGO_MANAGER_HPP
+#ifndef CARGO_MANAGER_HPP
+#define CARGO_MANAGER_HPP
 
 #include "cargo/to-gvariant-visitor.hpp"
 #include "cargo/to-json-visitor.hpp"
@@ -331,4 +331,4 @@ void saveToFD(const int fd, const Cargo& visitable)
 
 /*@}*/
 
-#endif // COMMON_CARGO_MANAGER_HPP
+#endif // CARGO_MANAGER_HPP

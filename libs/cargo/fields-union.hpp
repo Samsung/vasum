@@ -22,8 +22,8 @@
  * @brief   Macros for declare Cargo fields
  */
 
-#ifndef COMMON_CARGO_FIELDS_UNION_HPP
-#define COMMON_CARGO_FIELDS_UNION_HPP
+#ifndef CARGO_FIELDS_UNION_HPP
+#define CARGO_FIELDS_UNION_HPP
 
 #include "cargo/fields.hpp"
 #include "cargo/exception.hpp"
@@ -197,4 +197,4 @@ public:                                                                         
         return #TYPE_;                                                                          \
     }
 
-#endif // COMMON_CARGO_FIELDS_UNION_HPP
+#endif // CARGO_FIELDS_UNION_HPP
