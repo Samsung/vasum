@@ -50,6 +50,7 @@ public:
     // Configuration
     const std::string& getName() const;
     const std::string& getRootPath() const;
+    void setHostName(const std::string& hostname);
 
     pid_t getGuardPid() const;
     pid_t getInitPid() const;
@@ -111,8 +112,8 @@ public:
                          MacVLanMode mode);
     void moveInterface(const std::string& ifname);
     void destroyInterface(const std::string& ifname);
-    void setUp(const std::string& ifname);
-    void setDown(const std::string& ifname);
+    void setUpInterface(const std::string& ifname);
+    void setDownInterface(const std::string& ifname);
     void addInetAddr(const std::string& ifname, const InetAddr& addr);
     void delInetAddr(const std::string& ifname, const InetAddr& addr);
 
@@ -143,6 +144,40 @@ public:
                    const std::string& grpname,
                    const std::vector<CGroupParam>& comm,
                    const std::vector<CGroupParam>& params);
+
+    // Environment variables
+    void setEnv(const std::vector<std::pair<std::string, std::string>>& variables);
+
+    // Linux capabilities
+    void setCaps(const int caps);
+
+    // System Property (sysctl)
+    void setSystemProperty(const std::string& name, const std::string& value);
+
+    // Rlimit
+    void setRlimit(const std::string& type, const uint64_t hard, const uint64_t soft);
+
+    // Namespaces
+    void setNamespaces(const int namespaces);
+
+    // UID/GIDS
+    void setUser(const int uid, const int gid, const std::vector<int> additionalGids);
+
+    // Device
+    void addDevice(const std::string& path,
+                   const char type,
+                   const int64_t major,
+                   const int64_t minor,
+                   const std::string& permissions,
+                   const uint32_t fileMode,
+                   const uint32_t uid,
+                   const uint32_t gid);
+
+    // Hooks
+    void addHook(const std::string& type,
+                 const std::vector<std::string>& hook,
+                 const std::vector<std::pair<std::string, std::string>>& env);
+
 
 private:
     typedef std::unique_lock<std::mutex> Lock;

@@ -137,6 +137,11 @@ const std::string& ContainerImpl::getRootPath() const
     return mConfig->mRootPath;
 }
 
+void ContainerImpl::setHostName(const std::string& /*hostname*/)
+{
+    throw NotImplementedException();
+}
+
 const std::vector<std::string>& ContainerImpl::getInit()
 {
     Lock lock(mStateMutex);
@@ -492,7 +497,7 @@ void ContainerImpl::moveInterface(const std::string& ifname)
     ni.moveToContainer(mConfig->mInitPid);
 }
 
-void ContainerImpl::setUp(const std::string& ifname)
+void ContainerImpl::setUpInterface(const std::string& ifname)
 {
     Lock lock(mStateMutex);
 
@@ -500,7 +505,7 @@ void ContainerImpl::setUp(const std::string& ifname)
     ni.up();
 }
 
-void ContainerImpl::setDown(const std::string& ifname)
+void ContainerImpl::setDownInterface(const std::string& ifname)
 {
     Lock lock(mStateMutex);
 
@@ -646,6 +651,55 @@ void ContainerImpl::addCGroup(const std::string& subsys,
     Lock lock(mStateMutex);
 
     mConfig->mCgroups.cgroups.push_back(CGroupConfig{subsys, grpname, comm, params});
+}
+
+void ContainerImpl::setEnv(const std::vector<std::pair<std::string, std::string>>& /*variables*/)
+{
+    throw NotImplementedException();
+}
+
+void ContainerImpl::setCaps(const int /*caps*/)
+{
+    throw NotImplementedException();
+}
+
+void ContainerImpl::setSystemProperty(const std::string& /*name*/, const std::string& /*value*/)
+{
+    throw NotImplementedException();
+}
+
+void ContainerImpl::setRlimit(const std::string& /*type*/, const uint64_t /*hard*/, const uint64_t /*soft*/)
+{
+    throw NotImplementedException();
+}
+
+void ContainerImpl::setNamespaces(const int /*namespaces*/)
+{
+    throw NotImplementedException();
+}
+
+void ContainerImpl::setUser(const int /*uid*/, const int /*gid*/, const std::vector<int> /*additionalGids*/)
+{
+    throw NotImplementedException();
+}
+
+void ContainerImpl::addDevice(const std::string& /*path*/,
+                              const char /*type*/,
+                              const int64_t /*major*/,
+                              const int64_t /*minor*/,
+                              const std::string& /*permissions*/,
+                              const uint32_t /*fileMode*/,
+                              const uint32_t /*uid*/,
+                              const uint32_t /*gid*/)
+{
+    throw NotImplementedException();
+}
+
+void ContainerImpl::addHook(const std::string& /*type*/,
+                            const std::vector<std::string>& /*hook*/,
+                            const std::vector<std::pair<std::string, std::string>>& /*env*/)
+{
+    throw NotImplementedException();
 }
 
 } // namespace lxcpp

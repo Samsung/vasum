@@ -59,9 +59,12 @@ public:
 
     virtual ~Container() {};
 
-    // Configuration
+    /**
+     * Configuration
+     */
     virtual const std::string& getName() const = 0;
     virtual const std::string& getRootPath() const = 0;
+    virtual void setHostName(const std::string& hostname) = 0;
 
     virtual pid_t getGuardPid() const = 0;
     virtual pid_t getInitPid() const = 0;
@@ -78,19 +81,25 @@ public:
     virtual void addUIDMap(unsigned min, unsigned max, unsigned num) = 0;
     virtual void addGIDMap(unsigned min, unsigned max, unsigned num) = 0;
 
-    // Execution actions
+    /**
+     * Execution actions
+     */
     virtual void start() = 0;
     virtual void stop() = 0;
     virtual void freeze() = 0;
     virtual void unfreeze() = 0;
     virtual void reboot() = 0;
 
-    // States
+    /**
+     * States
+     */
     virtual State getState() = 0;
     virtual void setStartedCallback(const Callback& callback) = 0;
     virtual void setStoppedCallback(const Callback& callback) = 0;
 
-    // Other
+    /**
+     * Other
+     */
     virtual int attach(const std::vector<std::string>& argv,
                        const uid_t uid,
                        const gid_t gid,
@@ -102,7 +111,9 @@ public:
                        const std::vector<std::pair<std::string, std::string>>& envToSet) = 0;
     virtual void console() = 0;
 
-    // Network interfaces setup/config
+    /**
+     * Network interfaces setup/config
+     */
     virtual void addInterfaceConfig(const std::string& hostif,
                                     const std::string& zoneif,
                                     InterfaceType type,
@@ -110,7 +121,9 @@ public:
                                     MacVLanMode mode = MacVLanMode::PRIVATE) = 0;
     virtual void addInetConfig(const std::string& ifname, const InetAddr& addr) = 0;
 
-    // Network interfaces (runtime)
+    /**
+     * Network interfaces (runtime)
+     */
     virtual std::vector<std::string> getInterfaces() const = 0;
     virtual NetworkInterfaceInfo getInterfaceInfo(const std::string& ifname) const = 0;
     virtual void createInterface(const std::string& hostif,
@@ -119,12 +132,14 @@ public:
                                  MacVLanMode mode) = 0;
     virtual void destroyInterface(const std::string& ifname) = 0;
     virtual void moveInterface(const std::string& ifname) = 0;
-    virtual void setUp(const std::string& ifname) = 0;
-    virtual void setDown(const std::string& ifname) = 0;
+    virtual void setUpInterface(const std::string& ifname) = 0;
+    virtual void setDownInterface(const std::string& ifname) = 0;
     virtual void addInetAddr(const std::string& ifname, const InetAddr& addr) = 0;
     virtual void delInetAddr(const std::string& ifname, const InetAddr& addr) = 0;
 
-    // Provisioning
+    /**
+     * Provisioning
+     */
     virtual void declareFile(const provision::File::Type type,
                              const std::string& path,
                              const int32_t flags,
@@ -145,12 +160,66 @@ public:
     virtual const LinkVector& getLinks() const = 0;
     virtual void removeLink(const provision::Link& item) = 0;
 
-    // CGroups
+    /**
+     * CGroups
+     */
     virtual void addSubsystem(const std::string& name, const std::string& path) = 0;
     virtual void addCGroup(const std::string& subsys,
                            const std::string& grpname,
                            const std::vector<CGroupParam>& comm,
                            const std::vector<CGroupParam>& params) = 0;
+
+    /**
+     * Environment variables
+     */
+    virtual void setEnv(const std::vector<std::pair<std::string, std::string>>& variables) = 0;
+
+    /**
+     * Linux capabilities
+     */
+    virtual void setCaps(const int caps) = 0;
+
+    /**
+     * System Property (sysctl)
+     */
+    virtual void setSystemProperty(const std::string& name, const std::string& value) = 0;
+
+    /**
+     * Rlimit
+     */
+    virtual void setRlimit(const std::string& type, const uint64_t hard, const uint64_t soft) = 0;
+
+    /**
+     * Namespaces
+     * TODO Needed to implement application container.
+     */
+    virtual void setNamespaces(const int namespaces) = 0;
+
+    /**
+     * UID/GIDS
+     * TODO Needed to implement application container.
+     */
+    virtual void setUser(const int uid, const int gid, const std::vector<int> additionalGids) = 0;
+
+    /**
+     * Device
+     */
+    virtual void addDevice(const std::string& path,
+                           const char type,
+                           const int64_t major,
+                           const int64_t minor,
+                           const std::string& permissions,
+                           const uint32_t fileMode,
+                           const uint32_t uid,
+                           const uint32_t gid) = 0;
+
+    /**
+     * Hooks
+     */
+    virtual void addHook(const std::string& type,
+                         const std::vector<std::string>& hook,
+                         const std::vector<std::pair<std::string, std::string>>& env) = 0;
+
 };
 
 } // namespace lxcpp
