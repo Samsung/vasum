@@ -35,6 +35,7 @@
 #include <vector>
 #include <array>
 #include <utility>
+#include <limits>
 
 namespace cargo {
 
@@ -87,50 +88,17 @@ private:
         }
     }
 
-    static void fromJsonObject(json_object* object, std::uint8_t& value)
+    template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+    static void fromJsonObject(json_object* object, T& value)
     {
         checkType(object, json_type_int);
-        std::int64_t value64 = json_object_get_int64(object);
-        if (value64 > UINT8_MAX || value64 < 0) {
+        typedef typename std::conditional<std::is_signed<T>::value,
+                                          std::int64_t, std::uint64_t>::type BufferType;
+        BufferType value64 = json_object_get_int64(object);
+        if (value64 > std::numeric_limits<T>::max() || value64 < std::numeric_limits<T>::min()) {
             throw CargoException("Value out of range");
         }
-        value = static_cast<std::int8_t>(value64);
-    }
-
-    static void fromJsonObject(json_object* object, std::int32_t& value)
-    {
-        checkType(object, json_type_int);
-        std::int64_t value64 = json_object_get_int64(object);
-        if (value64 > INT32_MAX || value64 < INT32_MIN) {
-            throw CargoException("Value out of range");
-        }
-        value = static_cast<std::int32_t>(value64);
-    }
-
-    static void fromJsonObject(json_object* object, std::uint32_t& value)
-    {
-        checkType(object, json_type_int);
-        std::int64_t value64 = json_object_get_int64(object);
-        if (value64 > UINT32_MAX || value64 < 0) {
-            throw CargoException("Value out of range");
-        }
-        value = static_cast<std::uint32_t>(value64);
-    }
-
-    static void fromJsonObject(json_object* object, std::int64_t& value)
-    {
-        checkType(object, json_type_int);
-        value = json_object_get_int64(object);
-    }
-
-    static void fromJsonObject(json_object* object, std::uint64_t& value)
-    {
-        checkType(object, json_type_int);
-        std::int64_t value64 = json_object_get_int64(object);
-        if (value64 < 0) {
-            throw CargoException("Value out of range");
-        }
-        value = static_cast<std::uint64_t>(value64);
+        value = static_cast<T>(value64);
     }
 
     static void fromJsonObject(json_object* object, bool& value)

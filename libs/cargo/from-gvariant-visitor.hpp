@@ -36,6 +36,7 @@
 #include <array>
 #include <utility>
 #include <memory>
+#include <cstring>
 #include <cassert>
 
 #include <glib.h>
@@ -89,6 +90,18 @@ private:
         }
     }
 
+    static void fromGVariant(GVariant* object, std::int8_t& value)
+    {
+        checkType(object, G_VARIANT_TYPE_BYTE);
+        value = static_cast<std::int8_t>(g_variant_get_byte(object));
+    }
+
+    static void fromGVariant(GVariant* object, std::int16_t& value)
+    {
+        checkType(object, G_VARIANT_TYPE_INT16);
+        value = g_variant_get_int16(object);
+    }
+
     static void fromGVariant(GVariant* object, std::int32_t& value)
     {
         checkType(object, G_VARIANT_TYPE_INT32);
@@ -105,6 +118,12 @@ private:
     {
         checkType(object, G_VARIANT_TYPE_BYTE);
         value = g_variant_get_byte(object);
+    }
+
+    static void fromGVariant(GVariant* object, std::uint16_t& value)
+    {
+        checkType(object, G_VARIANT_TYPE_UINT16);
+        value = g_variant_get_uint16(object);
     }
 
     static void fromGVariant(GVariant* object, std::uint32_t& value)

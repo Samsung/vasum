@@ -136,6 +136,8 @@ BOOST_AUTO_TEST_CASE(StartStop)
     BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
     const char* argv[] = {
         "/bin/bash",
+        "-c",
+        "trap exit SIGTERM; while true; do sleep 0.1; done",
         NULL
     };
     BOOST_CHECK(lxc.start(argv));

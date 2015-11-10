@@ -94,6 +94,8 @@ struct TestConfig {
         )
     };
 
+    std::int8_t int8Val;
+    std::int16_t int16Val;
     int intVal;
     std::int64_t int64Val;
     std::uint8_t uint8Val;
@@ -122,6 +124,8 @@ struct TestConfig {
 
     CARGO_REGISTER
     (
+        int8Val,
+        int16Val,
         intVal,
         int64Val,
         uint8Val,
@@ -206,7 +210,9 @@ struct IncompatibleTestConfig: public PartialTestConfig {
  * has to be equal to the above REGISTER order
  */
 const std::string jsonTestString =
-    "{ \"intVal\": 12345, "
+    "{ \"int8Val\": 5, "
+    "\"int16Val\": 11235, "
+    "\"intVal\": 12345, "
     "\"int64Val\": -1234567890123456789, "
     "\"uint8Val\": 42, "
     "\"uint32Val\": 123456, "
@@ -233,7 +239,9 @@ const std::string jsonTestString =
     "\"subSubObj\": { \"intVal\": 234 } } } ] }";
 
 const std::string jsonEmptyTestString =
-    "{ \"intVal\": 0, "
+    "{ \"int8Val\": 0, "
+    "\"int16Val\": 0, "
+    "\"intVal\": 0, "
     "\"int64Val\": 0, "
     "\"uint8Val\": 0, "
     "\"uint32Val\": 0, "

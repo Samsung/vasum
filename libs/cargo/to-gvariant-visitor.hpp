@@ -79,6 +79,12 @@ public:
 private:
     GVariantBuilder* mBuilder;
 
+    void writeInternal(std::int8_t value) {
+        add("y", value);
+    };
+    void writeInternal(std::int16_t value) {
+        add("n", value);
+    };
     void writeInternal(std::int32_t value) {
         add("i", value);
     };
@@ -87,6 +93,9 @@ private:
     };
     void writeInternal(std::uint8_t value) {
         add("y", value);
+    };
+    void writeInternal(std::uint16_t value) {
+        add("q", value);
     };
     void writeInternal(std::uint32_t value) {
         add("u", value);

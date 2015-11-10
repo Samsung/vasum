@@ -79,27 +79,15 @@ private:
         return ret;
     }
 
-    static json_object* toJsonObject(std::uint8_t value)
+    template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+    static json_object* toJsonObject(T value)
     {
-        return json_object_new_int(value);
-    }
-
-    static json_object* toJsonObject(std::int32_t value)
-    {
-        return json_object_new_int(value);
+        return toJsonObject(static_cast<int64_t>(value));
     }
 
     static json_object* toJsonObject(std::int64_t value)
     {
         return json_object_new_int64(value);
-    }
-
-    static json_object* toJsonObject(std::uint32_t value)
-    {
-        if (value > INT32_MAX) {
-            throw CargoException("Value out of range");
-        }
-        return json_object_new_int(value);
     }
 
     static json_object* toJsonObject(std::uint64_t value)
