@@ -30,6 +30,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "cargo/fields.hpp"
 #include "cargo/fields-union.hpp"
@@ -38,6 +39,25 @@ enum class TestEnum: int {
     FIRST = 0,
     SECOND = 12,
     THIRD = 13
+};
+
+struct TestMapStruct
+{
+    std::string type;
+    std::string source;
+    std::vector<std::string> options;
+
+    bool operator==(const TestMapStruct& m) const
+    {
+        return ((m.type == type) && (m.source == source) && (m.options == options));
+    }
+
+    CARGO_REGISTER
+    (
+        type,
+        source,
+        options
+    )
 };
 
 struct TestConfig {
@@ -121,6 +141,9 @@ struct TestConfig {
     SubConfigOption union1;
     SubConfigOption union2;
     std::vector<SubConfigOption> unions;
+    std::map<std::string, std::string> simpleMap;
+    std::map<std::string, TestMapStruct> map;
+
 
     CARGO_REGISTER
     (
@@ -150,7 +173,10 @@ struct TestConfig {
 
         union1,
         union2,
-        unions
+        unions,
+
+        simpleMap,
+        map
     )
 };
 
@@ -236,7 +262,11 @@ const std::string jsonTestString =
     "\"unions\": [ "
     "{ \"type\": \"int\", \"value\": 2 }, "
     "{ \"type\": \"SubConfig\", \"value\": { \"intVal\": 54321, \"intVector\": [ 1 ], "
-    "\"subSubObj\": { \"intVal\": 234 } } } ] }";
+    "\"subSubObj\": { \"intVal\": 234 } } } ], "
+    "\"simpleMap\": { \"key\": \"value\", \"key2\": \"value2\" }, "
+    "\"map\": { \"dev\": { \"type\": \"tmpfs\", \"source\": \"tmpfs\", \"options\": "
+                               "[ \"nosuid\", \"strictatime\", \"mode=755\", \"size=65536k\" ] }, "
+               "\"proc\": { \"type\": \"proc\", \"source\": \"proc\", \"options\": [ ] } } }";
 
 const std::string jsonEmptyTestString =
     "{ \"int8Val\": 0, "
@@ -260,6 +290,8 @@ const std::string jsonEmptyTestString =
     "\"subVector\": [ ], "
     "\"union1\": { \"type\": \"int\", \"value\": 0 }, "
     "\"union2\": { \"type\": \"int\", \"value\": 0 }, "
-    "\"unions\": [ ] }";
+    "\"unions\": [ ], "
+    "\"simpleMap\": { }, "
+    "\"map\": { } }";
 
 #endif

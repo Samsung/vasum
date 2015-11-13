@@ -34,6 +34,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <map>
 #include <utility>
 
 
@@ -110,6 +111,15 @@ private:
     void writeInternal(const std::array<T, N>& values)
     {
         for (const T& value: values) {
+            writeInternal(value);
+        }
+    }
+
+    template<typename V>
+    void writeInternal(const std::map<std::string, V>& values)
+    {
+        writeInternal(values.size());
+        for (const auto& value: values) {
             writeInternal(value);
         }
     }

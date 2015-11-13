@@ -112,6 +112,21 @@ private:
         setRangeInternal(name, values.begin(), values.end(), N);
     }
 
+    template<typename V>
+    void setInternal(const std::string& name, const std::map<std::string, V>& values) {
+        KVStore::Transaction transaction(mStore);
+
+        mStore.remove(name);
+        setInternal(name, values.size());
+        size_t i = 0;
+        for (const auto& it : values) {
+            const std::string k = key(name, i++);
+            setInternal(k, it.first);
+            setInternal(k + ".val", it.second);
+        }
+        transaction.commit();
+    }
+
     template<typename T>
     void setInternal(const std::string& name, const std::initializer_list<T>& values)
     {

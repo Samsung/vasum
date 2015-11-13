@@ -142,6 +142,16 @@ private:
         return array;
     }
 
+    template<typename V>
+    static json_object* toJsonObject(const std::map<std::string, V>& values)
+    {
+        json_object* newMap = json_object_new_object();
+        for (const auto& item : values) {
+            json_object_object_add(newMap, item.first.c_str(), toJsonObject(item.second));
+        }
+        return newMap;
+    }
+
     struct HelperVisitor
     {
         template<typename T>

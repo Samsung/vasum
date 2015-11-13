@@ -30,6 +30,7 @@
 #include "cargo/kvstore.hpp"
 #include "cargo/kvstore-visitor-utils.hpp"
 #include "cargo/visit-fields.hpp"
+#include <map>
 
 
 namespace cargo {
@@ -157,6 +158,22 @@ private:
 
         GetTupleVisitor visitor;
         visitFields(values, &visitor, strValues.begin());
+    }
+
+    template<typename V>
+    void getInternal(const std::string& name, std::map<std::string, V>& values)
+    {
+        size_t storedSize = 0;
+        getInternal(name, storedSize);
+
+        for (size_t i = 0; i < storedSize; ++i) {
+            std::string mapKey, k = key(name, i);
+            if (!mStore.prefixExists(k)) {
+                throw InternalIntegrityException("Corrupted map serialization.");
+            }
+            static_cast<RecursiveVisitor*>(this)->visitImpl(k, mapKey);
+            static_cast<RecursiveVisitor*>(this)->visitImpl(k + ".val", values[mapKey]);
+        }
     }
 };
 

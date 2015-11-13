@@ -203,6 +203,22 @@ private:
         }
     }
 
+    template<typename V>
+    static void fromGVariant(GVariant* object, std::map<std::string, V>& values)
+    {
+        checkType(object, G_VARIANT_TYPE_TUPLE);
+        GVariantIter iter;
+        g_variant_iter_init(&iter, object);
+        const int length = g_variant_iter_n_children(&iter);
+        for (int i = 0; i < length; ++i) {
+            auto child = makeUnique(g_variant_iter_next_value(&iter));
+            assert(child);
+            std::pair<std::string, V> val;
+            fromGVariant(child.get(), val);
+            values.insert(std::move(val));
+        }
+    }
+
     struct HelperVisitor
     {
         template<typename T>
@@ -216,7 +232,7 @@ private:
     template<typename ... T>
     static void fromGVariant(GVariant* object, std::pair<T...>& values)
     {
-        checkType(object, G_VARIANT_TYPE_ARRAY);
+        checkType(object, G_VARIANT_TYPE_TUPLE);
 
         GVariantIter iter;
         g_variant_iter_init(&iter, object);

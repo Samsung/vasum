@@ -125,6 +125,15 @@ BOOST_AUTO_TEST_CASE(FromJsonString)
     BOOST_REQUIRE_EQUAL(1,   testConfig.unions[1].as<TestConfig::SubConfig>().intVector.size());
     BOOST_CHECK_EQUAL(1,     testConfig.unions[1].as<TestConfig::SubConfig>().intVector[0]);
     BOOST_CHECK_EQUAL(234,   testConfig.unions[1].as<TestConfig::SubConfig>().subSubObj.intVal);
+
+    BOOST_REQUIRE_EQUAL(2, testConfig.simpleMap.size());
+    BOOST_CHECK(testConfig.simpleMap["key"] == "value");
+    BOOST_CHECK(testConfig.simpleMap["key2"] == "value2");
+    BOOST_REQUIRE_EQUAL(2, testConfig.map.size());
+    TestMapStruct mnt_proc({"proc", "proc", {}});
+    TestMapStruct mnt_dev = {"tmpfs", "tmpfs", {"nosuid", "strictatime", "mode=755", "size=65536k"}};
+    BOOST_CHECK(mnt_proc == testConfig.map["proc"]);
+    BOOST_CHECK(mnt_dev == testConfig.map["dev"]);
 }
 
 

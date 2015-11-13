@@ -150,5 +150,3 @@ private:
 } // namespace cargo
 
 #endif // CARGO_KVSTORE_HPP
-
-

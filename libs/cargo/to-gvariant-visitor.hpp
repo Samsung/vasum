@@ -33,6 +33,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <map>
 #include <glib.h>
 #include <utility>
 
@@ -147,10 +148,24 @@ private:
         }
     }
 
+    template<typename V>
+    void writeInternal(const std::map<std::string, V>& values)
+    {
+        if (!values.empty()) {
+            g_variant_builder_open(mBuilder, G_VARIANT_TYPE_TUPLE);
+            for (const auto& v : values) {
+                writeInternal(v);
+            }
+            g_variant_builder_close(mBuilder);
+        } else {
+            g_variant_builder_add(mBuilder, "as", NULL);
+        }
+    }
+
     template<typename ... T>
     void writeInternal(const std::pair<T...>& values)
     {
-        g_variant_builder_open(mBuilder, G_VARIANT_TYPE_ARRAY);
+        g_variant_builder_open(mBuilder, G_VARIANT_TYPE_TUPLE);
         visitFields(values, this, std::string());
         g_variant_builder_close(mBuilder);
     }

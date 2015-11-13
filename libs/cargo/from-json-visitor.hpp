@@ -150,6 +150,16 @@ private:
         }
     }
 
+    template<typename V>
+    static void fromJsonObject(json_object* object, std::map<std::string, V>& values)
+    {
+        checkType(object, json_type_object);
+
+        json_object_object_foreach(object, key, val) {
+            fromJsonObject(val, values[key]);
+        }
+    }
+
     struct HelperVisitor
     {
         template<typename T>

@@ -119,6 +119,19 @@ private:
         }
     }
 
+    template<typename V>
+    void readInternal(std::map<std::string, V>& values)
+    {
+        size_t mapSize;
+        readInternal(mapSize);
+
+        for (size_t i = 0; i < mapSize; ++i) {
+            std::pair<std::string, V> val;
+            readInternal(val);
+            values.insert(std::move(val));
+        }
+    }
+
     template<typename ... T>
     void readInternal(std::pair<T...>& values)
     {
