@@ -31,7 +31,7 @@
 #include "zones-manager.hpp"
 #include "host-ipc-connection.hpp"
 #include "host-ipc-definitions.hpp"
-#include "ipc/epoll/thread-dispatcher.hpp"
+#include "cargo-ipc/epoll/thread-dispatcher.hpp"
 #include "logger/logger.hpp"
 
 #ifdef DBUS_CONNECTION
@@ -62,7 +62,7 @@ const int EVENT_TIMEOUT = 500; // ms
 struct Fixture {
     utils::ScopedDir mZonesPathGuard;
     utils::ScopedDir mRunGuard;
-    ipc::epoll::ThreadDispatcher mDispatcher;
+    cargo::ipc::epoll::ThreadDispatcher mDispatcher;
 #ifdef DBUS_CONNECTION
     utils::ScopedGlibLoop mLoop;
 #endif //DBUS_CONNECTION
@@ -133,7 +133,7 @@ public:
         if (VSMCLIENT_SUCCESS != ret) {
             return ret;
         }
-        mEventPoll.addFD(fd, EPOLLIN | EPOLLHUP | EPOLLRDHUP, [client] (int, ipc::epoll::Events) {
+        mEventPoll.addFD(fd, EPOLLIN | EPOLLHUP | EPOLLRDHUP, [client] (int, cargo::ipc::epoll::Events) {
             vsm_enter_eventloop(client, 0, 0);
         });
         mFds.push_back(fd);
@@ -142,7 +142,7 @@ public:
 private:
     std::atomic_bool mIsProcessing;
     std::thread mThread;
-    ipc::epoll::EventPoll mEventPoll;
+    cargo::ipc::epoll::EventPoll mEventPoll;
     std::vector<int> mFds;
 
     void loop() {

@@ -25,7 +25,7 @@
 #ifndef COMMON_UTILS_INOTIFY_HPP
 #define COMMON_UTILS_INOTIFY_HPP
 
-#include "ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
 
 #include <functional>
 #include <mutex>
@@ -44,7 +44,7 @@ class Inotify {
 public:
     typedef std::function<void(const std::string&, const uint32_t)> Callback;
 
-    Inotify(ipc::epoll::EventPoll& eventPoll);
+    Inotify(cargo::ipc::epoll::EventPoll& eventPoll);
     virtual ~Inotify();
 
     Inotify(const Inotify&) = delete;
@@ -76,7 +76,7 @@ private:
     std::recursive_mutex mMutex;
 
     int mFD;
-    ipc::epoll::EventPoll& mEventPoll;
+    cargo::ipc::epoll::EventPoll& mEventPoll;
     std::vector<Handler> mHandlers;
 
     void handleInternal();

@@ -163,7 +163,7 @@ void cleanUpUnknownsFromRoot(const boost::filesystem::path& zonesPath,
 } // namespace
 
 
-ZonesManager::ZonesManager(ipc::epoll::EventPoll& eventPoll, const std::string& configPath)
+ZonesManager::ZonesManager(cargo::ipc::epoll::EventPoll& eventPoll, const std::string& configPath)
     : mIsRunning(true)
     , mWorker(utils::Worker::create())
     , mDetachOnExit(false)

@@ -29,7 +29,7 @@
 #include "lxcpp/guard/api.hpp"
 
 #include "utils/channel.hpp"
-#include "ipc/client.hpp"
+#include "cargo-ipc/client.hpp"
 
 #include <sys/types.h>
 #include <memory>
@@ -50,7 +50,7 @@ public:
      * @param client IPC connection to the Guard process
      */
     Start(std::shared_ptr<ContainerConfig>& config,
-          std::shared_ptr<ipc::Client>& client);
+          std::shared_ptr<cargo::ipc::Client>& client);
     ~Start();
 
     void execute();
@@ -63,16 +63,16 @@ public:
      * @param client IPC connection to the Guard process
      * @param config container's config
      */
-    static void onGuardReady(const ipc::PeerID,
+    static void onGuardReady(const cargo::ipc::PeerID,
                              std::shared_ptr<api::Void>&,
-                             ipc::MethodResult::Pointer,
-                             std::shared_ptr<ipc::Client> client,
+                             cargo::ipc::MethodResult::Pointer,
+                             std::shared_ptr<cargo::ipc::Client> client,
                              const std::shared_ptr<ContainerConfig>& config);
 
 private:
     std::shared_ptr<ContainerConfig> mConfig;
     std::string mGuardPath;
-    std::shared_ptr<ipc::Client> mClient;
+    std::shared_ptr<cargo::ipc::Client> mClient;
 
     void parent(const pid_t pid);
     void daemonize();

@@ -29,7 +29,7 @@
 #include "config.hpp"
 
 #include "api/method-result-builder.hpp"
-#include "ipc/method-result.hpp"
+#include "cargo-ipc/method-result.hpp"
 
 #include <memory>
 
@@ -40,7 +40,7 @@ const std::string IPC_CONNECTION_PREFIX = "ipc://";
 
 class IPCMethodResultBuilder: public MethodResultBuilder {
 public:
-    explicit IPCMethodResultBuilder(const ipc::MethodResult::Pointer& methodResult);
+    explicit IPCMethodResultBuilder(const cargo::ipc::MethodResult::Pointer& methodResult);
     ~IPCMethodResultBuilder() {}
 
 private:
@@ -49,7 +49,7 @@ private:
     void setError(const std::string& name, const std::string& message) override;
     std::string getID() const override;
 
-    ipc::MethodResult::Pointer mMethodResultPtr;
+    cargo::ipc::MethodResult::Pointer mMethodResultPtr;
 };
 
 

@@ -25,7 +25,7 @@
 #ifndef LXCPP_GUARD_API_HPP
 #define LXCPP_GUARD_API_HPP
 
-#include "ipc/types.hpp"
+#include "cargo-ipc/types.hpp"
 
 #include "cargo/fields.hpp"
 
@@ -35,11 +35,11 @@
 namespace lxcpp {
 namespace api {
 
-const ::ipc::MethodID METHOD_SET_CONFIG  = 1;
-const ::ipc::MethodID METHOD_GET_CONFIG  = 2;
-const ::ipc::MethodID METHOD_START       = 3;
-const ::ipc::MethodID METHOD_STOP        = 4;
-const ::ipc::MethodID METHOD_GUARD_READY = 5;
+const ::cargo::ipc::MethodID METHOD_SET_CONFIG  = 1;
+const ::cargo::ipc::MethodID METHOD_GET_CONFIG  = 2;
+const ::cargo::ipc::MethodID METHOD_START       = 3;
+const ::cargo::ipc::MethodID METHOD_STOP        = 4;
+const ::cargo::ipc::MethodID METHOD_GUARD_READY = 5;
 
 struct Void {
     CARGO_REGISTER_EMPTY

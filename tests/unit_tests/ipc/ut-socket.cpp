@@ -25,10 +25,10 @@
 #ifdef HAVE_SYSTEMD
 #include "config.hpp"
 #include "ut.hpp"
-#include "ipc/internals/socket.hpp"
+#include "cargo-ipc/internals/socket.hpp"
 #include "socket-test.hpp"
 
-using namespace ipc;
+using namespace cargo::ipc;
 
 BOOST_AUTO_TEST_SUITE(SocketSuite)
 

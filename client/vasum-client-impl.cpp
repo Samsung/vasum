@@ -35,7 +35,7 @@
 #include "utils/exception.hpp"
 #include "logger/logger.hpp"
 #include "host-ipc-definitions.hpp"
-#include "ipc/client.hpp"
+#include "cargo-ipc/client.hpp"
 #include "api/messages.hpp"
 
 #include <algorithm>
@@ -168,7 +168,7 @@ bool Client::isInternalDispatcherEnabled() const
     return static_cast<bool>(mInternalDispatcher);
 }
 
-ipc::epoll::EventPoll& Client::getEventPoll() const
+cargo::ipc::epoll::EventPoll& Client::getEventPoll() const
 {
     if ((mInternalDispatcher && mEventPoll) || (!mInternalDispatcher && !mEventPoll)) {
         throw OperationFailedException("Can't determine dispatcher method");
@@ -197,9 +197,9 @@ VsmStatus Client::coverException(const std::function<void(void)>& worker) noexce
         mStatus = Status(VSMCLIENT_OTHER_ERROR, ex.what());
     } catch (const ClientException& ex) {
         mStatus = Status(VSMCLIENT_CUSTOM_ERROR, ex.what());
-    } catch (const ipc::IPCUserException& ex) {
+    } catch (const cargo::ipc::IPCUserException& ex) {
         mStatus = Status(VSMCLIENT_CUSTOM_ERROR, ex.what());
-    } catch (const ipc::IPCException& ex) {
+    } catch (const cargo::ipc::IPCException& ex) {
         mStatus = Status(VSMCLIENT_IO_ERROR, ex.what());
     } catch (const std::exception& ex) {
         mStatus = Status(VSMCLIENT_CUSTOM_ERROR, ex.what());
@@ -220,7 +220,7 @@ VsmStatus Client::connect(const std::string& address) noexcept
         if (!mInternalDispatcher && !mEventPoll) {
             vsm_set_dispatcher_type(VSMDISPATCHER_INTERNAL);
         }
-        mClient.reset(new ipc::Client(getEventPoll(), address));
+        mClient.reset(new cargo::ipc::Client(getEventPoll(), address));
         mClient->start();
     });
 }
@@ -261,11 +261,11 @@ VsmStatus Client::vsm_set_dispatcher_type(VsmDispacherType dispacher) noexcept
         }
         switch (dispacher) {
             case VSMDISPATCHER_INTERNAL:
-                mInternalDispatcher.reset(new ipc::epoll::ThreadDispatcher());
+                mInternalDispatcher.reset(new cargo::ipc::epoll::ThreadDispatcher());
                 mEventPoll.reset();
                 break;
             case VSMDISPATCHER_EXTERNAL:
-                mEventPoll.reset(new ipc::epoll::EventPoll());
+                mEventPoll.reset(new cargo::ipc::epoll::EventPoll());
                 mInternalDispatcher.reset();
                 break;
             default:
@@ -310,7 +310,7 @@ VsmStatus Client::vsm_lock_queue() noexcept
 {
     return coverException([&] {
         *mClient->callSync<api::Void, api::Void>(
-            vasum::api::ipc::METHOD_LOCK_QUEUE,
+            vasum::api::cargo::ipc::METHOD_LOCK_QUEUE,
             std::make_shared<api::Void>());
     });
 }
@@ -319,7 +319,7 @@ VsmStatus Client::vsm_unlock_queue() noexcept
 {
     return coverException([&] {
         *mClient->callSync<api::Void, api::Void>(
-            vasum::api::ipc::METHOD_UNLOCK_QUEUE,
+            vasum::api::cargo::ipc::METHOD_UNLOCK_QUEUE,
             std::make_shared<api::Void>());
     });
 }
@@ -330,7 +330,7 @@ VsmStatus Client::vsm_get_zone_ids(VsmArrayString* array) noexcept
         IS_SET(array);
 
         api::ZoneIds zoneIds = *mClient->callSync<api::Void, api::ZoneIds>(
-            vasum::api::ipc::METHOD_GET_ZONE_ID_LIST,
+            vasum::api::cargo::ipc::METHOD_GET_ZONE_ID_LIST,
             std::make_shared<api::Void>());
         convert(zoneIds, *array);
     });
@@ -342,7 +342,7 @@ VsmStatus Client::vsm_get_active_zone_id(VsmString* id) noexcept
         IS_SET(id);
 
         api::ZoneId zoneId = *mClient->callSync<api::Void, api::ZoneId>(
-            api::ipc::METHOD_GET_ACTIVE_ZONE_ID,
+            api::cargo::ipc::METHOD_GET_ACTIVE_ZONE_ID,
             std::make_shared<api::Void>());
         *id = ::strdup(zoneId.value.c_str());
     });
@@ -376,7 +376,7 @@ VsmStatus Client::vsm_lookup_zone_by_id(const char* id, Zone* zone) noexcept
         IS_SET(zone);
 
         api::ZoneInfoOut info = *mClient->callSync<api::ZoneId, api::ZoneInfoOut>(
-            api::ipc::METHOD_GET_ZONE_INFO,
+            api::cargo::ipc::METHOD_GET_ZONE_INFO,
             std::make_shared<api::ZoneId>(api::ZoneId{ id }));
         convert(info, *zone);
     });
@@ -396,7 +396,7 @@ VsmStatus Client::vsm_set_active_zone(const char* id) noexcept
         IS_SET(id);
 
         mClient->callSync<api::ZoneId, api::Void>(
-            api::ipc::METHOD_SET_ACTIVE_ZONE,
+            api::cargo::ipc::METHOD_SET_ACTIVE_ZONE,
             std::make_shared<api::ZoneId>(api::ZoneId{ id }));
     });
 }
@@ -408,7 +408,7 @@ VsmStatus Client::vsm_create_zone(const char* id, const char* tname) noexcept
 
         std::string template_name = tname ? tname : "default";
         mClient->callSync<api::CreateZoneIn, api::Void>(
-            api::ipc::METHOD_CREATE_ZONE,
+            api::cargo::ipc::METHOD_CREATE_ZONE,
             std::make_shared<api::CreateZoneIn>(api::CreateZoneIn{ id, template_name }),
             TIMEOUT_INFINITE);
     });
@@ -419,7 +419,7 @@ VsmStatus Client::vsm_destroy_zone(const char* id) noexcept
     return coverException([&] {
         IS_SET(id);
         mClient->callSync<api::ZoneId, api::Void>(
-            api::ipc::METHOD_DESTROY_ZONE,
+            api::cargo::ipc::METHOD_DESTROY_ZONE,
             std::make_shared<api::ZoneId>(api::ZoneId{ id }),
             TIMEOUT_INFINITE);
     });
@@ -430,7 +430,7 @@ VsmStatus Client::vsm_shutdown_zone(const char* id) noexcept
     return coverException([&] {
         IS_SET(id);
         mClient->callSync<api::ZoneId, api::Void>(
-            api::ipc::METHOD_SHUTDOWN_ZONE,
+            api::cargo::ipc::METHOD_SHUTDOWN_ZONE,
             std::make_shared<api::ZoneId>(api::ZoneId{ id }),
             TIMEOUT_INFINITE);
     });
@@ -441,7 +441,7 @@ VsmStatus Client::vsm_start_zone(const char* id) noexcept
     return coverException([&] {
         IS_SET(id);
         mClient->callSync<api::ZoneId, api::Void>(
-            api::ipc::METHOD_START_ZONE,
+            api::cargo::ipc::METHOD_START_ZONE,
             std::make_shared<api::ZoneId>(api::ZoneId{ id }),
             TIMEOUT_INFINITE);
     });
@@ -452,7 +452,7 @@ VsmStatus Client::vsm_lock_zone(const char* id) noexcept
     return coverException([&] {
         IS_SET(id);
         mClient->callSync<api::ZoneId, api::Void>(
-            api::ipc::METHOD_LOCK_ZONE,
+            api::cargo::ipc::METHOD_LOCK_ZONE,
             std::make_shared<api::ZoneId>(api::ZoneId{ id }),
             TIMEOUT_INFINITE);
     });
@@ -463,7 +463,7 @@ VsmStatus Client::vsm_unlock_zone(const char* id) noexcept
     return coverException([&] {
         IS_SET(id);
         mClient->callSync<api::ZoneId, api::Void>(
-            api::ipc::METHOD_UNLOCK_ZONE,
+            api::cargo::ipc::METHOD_UNLOCK_ZONE,
             std::make_shared<api::ZoneId>(api::ZoneId{ id }));
     });
 }
@@ -492,7 +492,7 @@ VsmStatus Client::vsm_grant_device(const char* id, const char* device, uint32_t 
         IS_SET(device);
 
         mClient->callSync<api::GrantDeviceIn, api::Void>(
-            api::ipc::METHOD_GRANT_DEVICE,
+            api::cargo::ipc::METHOD_GRANT_DEVICE,
             std::make_shared<api::GrantDeviceIn>(api::GrantDeviceIn{ id, device, flags }));
     });
 }
@@ -504,7 +504,7 @@ VsmStatus Client::vsm_revoke_device(const char* id, const char* device) noexcept
         IS_SET(device);
 
         mClient->callSync<api::RevokeDeviceIn, api::Void>(
-            api::ipc::METHOD_REVOKE_DEVICE,
+            api::cargo::ipc::METHOD_REVOKE_DEVICE,
             std::make_shared<api::RevokeDeviceIn>(api::RevokeDeviceIn{ id, device }));
     });
 }
@@ -516,7 +516,7 @@ VsmStatus Client::vsm_zone_get_netdevs(const char* id, VsmArrayString* netdevIds
         IS_SET(netdevIds);
 
         api::NetDevList netdevs = *mClient->callSync<api::ZoneId, api::NetDevList>(
-            api::ipc::METHOD_GET_NETDEV_LIST,
+            api::cargo::ipc::METHOD_GET_NETDEV_LIST,
             std::make_shared<api::ZoneId>(api::ZoneId{ id }));
         convert(netdevs, *netdevIds);
     });
@@ -535,7 +535,7 @@ VsmStatus Client::vsm_netdev_get_ip_addr(const char* id,
         addrs.clear();
 
         api::GetNetDevAttrs attrs = *mClient->callSync<api::GetNetDevAttrsIn, api::GetNetDevAttrs>(
-            api::ipc::METHOD_GET_NETDEV_ATTRS,
+            api::cargo::ipc::METHOD_GET_NETDEV_ATTRS,
             std::make_shared<api::GetNetDevAttrsIn>(api::GetNetDevAttrsIn{ id, netdevId }));
 
         for (const auto &attr : attrs.values) {
@@ -611,7 +611,7 @@ VsmStatus Client::vsm_netdev_add_ipv4_addr(const char* id,
 
         std::string value = "ip:" + toString(addr) + ",""prefixlen:" + std::to_string(prefix);
         mClient->callSync<api::SetNetDevAttrsIn, api::Void>(
-            api::ipc::METHOD_SET_NETDEV_ATTRS,
+            api::cargo::ipc::METHOD_SET_NETDEV_ATTRS,
             std::make_shared<api::SetNetDevAttrsIn>(
                 api::SetNetDevAttrsIn{ id, netdevId, { { "ipv4", value } }  }));
     });
@@ -629,7 +629,7 @@ VsmStatus Client::vsm_netdev_add_ipv6_addr(const char* id,
 
         std::string value = "ip:" + toString(addr) + ",""prefixlen:" + std::to_string(prefix);
         mClient->callSync<api::SetNetDevAttrsIn, api::Void>(
-            api::ipc::METHOD_SET_NETDEV_ATTRS,
+            api::cargo::ipc::METHOD_SET_NETDEV_ATTRS,
             std::make_shared<api::SetNetDevAttrsIn>(
                 api::SetNetDevAttrsIn{ id, netdevId, { { "ipv6", value } }  }));
     });
@@ -648,7 +648,7 @@ VsmStatus Client::vsm_netdev_del_ipv4_addr(const char* id,
         //CIDR notation
         std::string ip = toString(addr) + "/" + std::to_string(prefix);
         mClient->callSync<api::DeleteNetdevIpAddressIn, api::Void>(
-            api::ipc::METHOD_DELETE_NETDEV_IP_ADDRESS,
+            api::cargo::ipc::METHOD_DELETE_NETDEV_IP_ADDRESS,
             std::make_shared<api::DeleteNetdevIpAddressIn>(
                 api::DeleteNetdevIpAddressIn{ id, netdevId, ip }));
     });
@@ -667,7 +667,7 @@ VsmStatus Client::vsm_netdev_del_ipv6_addr(const char* id,
         //CIDR notation
         std::string ip = toString(addr) + "/" + std::to_string(prefix);
         mClient->callSync<api::DeleteNetdevIpAddressIn, api::Void>(
-            api::ipc::METHOD_DELETE_NETDEV_IP_ADDRESS,
+            api::cargo::ipc::METHOD_DELETE_NETDEV_IP_ADDRESS,
             std::make_shared<api::DeleteNetdevIpAddressIn>(
                 api::DeleteNetdevIpAddressIn{ id, netdevId, ip }));
     });
@@ -681,7 +681,7 @@ VsmStatus Client::vsm_netdev_up(const char* id, const char* netdevId) noexcept
         IS_SET(netdevId);
 
         mClient->callSync<api::SetNetDevAttrsIn, api::Void>(
-            api::ipc::METHOD_SET_NETDEV_ATTRS,
+            api::cargo::ipc::METHOD_SET_NETDEV_ATTRS,
             std::make_shared<api::SetNetDevAttrsIn>(
                 api::SetNetDevAttrsIn{ id, netdevId, { { "flags", std::to_string(IFF_UP) },
                                                        { "change", std::to_string(IFF_UP) }  }  }));
@@ -695,7 +695,7 @@ VsmStatus Client::vsm_netdev_down(const char* id, const char* netdevId) noexcept
         IS_SET(netdevId);
 
         mClient->callSync<api::SetNetDevAttrsIn, api::Void>(
-            api::ipc::METHOD_SET_NETDEV_ATTRS,
+            api::cargo::ipc::METHOD_SET_NETDEV_ATTRS,
             std::make_shared<api::SetNetDevAttrsIn>(
                 api::SetNetDevAttrsIn{ id, netdevId, { { "flags", std::to_string(~IFF_UP) },
                                                        { "change", std::to_string(IFF_UP) }  }  }));
@@ -712,7 +712,7 @@ VsmStatus Client::vsm_create_netdev_veth(const char* id,
         IS_SET(hostDev);
 
         mClient->callSync<api::CreateNetDevVethIn, api::Void>(
-            api::ipc::METHOD_CREATE_NETDEV_VETH,
+            api::cargo::ipc::METHOD_CREATE_NETDEV_VETH,
             std::make_shared<api::CreateNetDevVethIn>(
                 api::CreateNetDevVethIn{ id, zoneDev, hostDev }));
     });
@@ -729,7 +729,7 @@ VsmStatus Client::vsm_create_netdev_macvlan(const char* id,
         IS_SET(hostDev);
 
         mClient->callSync<api::CreateNetDevMacvlanIn, api::Void>(
-            api::ipc::METHOD_CREATE_NETDEV_MACVLAN,
+            api::cargo::ipc::METHOD_CREATE_NETDEV_MACVLAN,
             std::make_shared<api::CreateNetDevMacvlanIn>(
                 api::CreateNetDevMacvlanIn{ id, zoneDev, hostDev, mode }));
     });
@@ -742,7 +742,7 @@ VsmStatus Client::vsm_create_netdev_phys(const char* id, const char* devId) noex
         IS_SET(devId);
 
         mClient->callSync<api::CreateNetDevPhysIn, api::Void>(
-            api::ipc::METHOD_CREATE_NETDEV_PHYS,
+            api::cargo::ipc::METHOD_CREATE_NETDEV_PHYS,
             std::make_shared<api::CreateNetDevPhysIn>(
                 api::CreateNetDevPhysIn{ id, devId }));
     });
@@ -760,7 +760,7 @@ VsmStatus Client::vsm_lookup_netdev_by_name(const char* id,
         IS_SET(netdev);
 
         api::GetNetDevAttrs attrs = *mClient->callSync<api::GetNetDevAttrsIn, api::GetNetDevAttrs>(
-            api::ipc::METHOD_GET_NETDEV_ATTRS,
+            api::cargo::ipc::METHOD_GET_NETDEV_ATTRS,
             std::make_shared<api::GetNetDevAttrsIn>(api::GetNetDevAttrsIn{ id, netdevId }));
         auto it = find_if(attrs.values.begin(),
                           attrs.values.end(),
@@ -793,7 +793,7 @@ VsmStatus Client::vsm_destroy_netdev(const char* id, const char* devId) noexcept
         IS_SET(devId);
 
         mClient->callSync<api::DestroyNetDevIn, api::Void>(
-            api::ipc::METHOD_DESTROY_NETDEV,
+            api::cargo::ipc::METHOD_DESTROY_NETDEV,
             std::make_shared<api::DestroyNetDevIn>(api::DestroyNetDevIn{ id, devId }));
     });
 }
@@ -810,7 +810,7 @@ VsmStatus Client::vsm_declare_file(const char* id,
         IS_SET(path);
 
         api::Declaration declaration = *mClient->callSync<api::DeclareFileIn, api::Declaration>(
-            api::ipc::METHOD_DECLARE_FILE,
+            api::cargo::ipc::METHOD_DECLARE_FILE,
             std::make_shared<api::DeclareFileIn>(
                 api::DeclareFileIn{ id, type, path, flags, (int)mode }));
         if (declarationId != NULL) {
@@ -837,7 +837,7 @@ VsmStatus Client::vsm_declare_mount(const char *source,
         }
 
         api::Declaration declaration = *mClient->callSync<api::DeclareMountIn, api::Declaration>(
-            api::ipc::METHOD_DECLARE_MOUNT,
+            api::cargo::ipc::METHOD_DECLARE_MOUNT,
             std::make_shared<api::DeclareMountIn>(
                 api::DeclareMountIn{ source, id, target, type, flags, data }));
         if (declarationId != NULL) {
@@ -857,7 +857,7 @@ VsmStatus Client::vsm_declare_link(const char* source,
         IS_SET(target);
 
         api::Declaration declaration = *mClient->callSync<api::DeclareLinkIn, api::Declaration>(
-            api::ipc::METHOD_DECLARE_LINK,
+            api::cargo::ipc::METHOD_DECLARE_LINK,
             std::make_shared<api::DeclareLinkIn>(api::DeclareLinkIn{ source, id, target }));
         if (declarationId != NULL) {
             *declarationId = ::strdup(declaration.value.c_str());
@@ -872,7 +872,7 @@ VsmStatus Client::vsm_list_declarations(const char* id, VsmArrayString* declarat
         IS_SET(declarations);
 
         api::Declarations declarationsOut = *mClient->callSync<api::ZoneId, api::Declarations>(
-            api::ipc::METHOD_GET_DECLARATIONS,
+            api::cargo::ipc::METHOD_GET_DECLARATIONS,
             std::make_shared<api::ZoneId>(api::ZoneId{ id }));
         convert(declarationsOut, *declarations);
     });
@@ -885,7 +885,7 @@ VsmStatus Client::vsm_remove_declaration(const char* id, VsmString declaration) 
         IS_SET(declaration);
 
         mClient->callSync<api::RemoveDeclarationIn, api::Void>(
-            api::ipc::METHOD_REMOVE_DECLARATION,
+            api::cargo::ipc::METHOD_REMOVE_DECLARATION,
             std::make_shared<api::RemoveDeclarationIn>(api::RemoveDeclarationIn{ id, declaration }));
     });
 }
@@ -894,7 +894,7 @@ VsmStatus Client::vsm_clean_up_zones_root() noexcept
 {
     return coverException([&] {
         mClient->callSync<api::Void, api::Void>(
-            api::ipc::METHOD_CLEAN_UP_ZONES_ROOT,
+            api::cargo::ipc::METHOD_CLEAN_UP_ZONES_ROOT,
             std::make_shared<api::Void>());
     });
 }

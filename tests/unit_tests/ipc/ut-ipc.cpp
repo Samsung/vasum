@@ -30,13 +30,13 @@
 #include "config.hpp"
 #include "ut.hpp"
 
-#include "ipc/service.hpp"
-#include "ipc/client.hpp"
-#include "ipc/types.hpp"
-#include "ipc/unique-id.hpp"
-#include "ipc/result.hpp"
-#include "ipc/epoll/thread-dispatcher.hpp"
-#include "ipc/epoll/glib-dispatcher.hpp"
+#include "cargo-ipc/service.hpp"
+#include "cargo-ipc/client.hpp"
+#include "cargo-ipc/types.hpp"
+#include "cargo-ipc/unique-id.hpp"
+#include "cargo-ipc/result.hpp"
+#include "cargo-ipc/epoll/thread-dispatcher.hpp"
+#include "cargo-ipc/epoll/glib-dispatcher.hpp"
 #include "utils/channel.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
@@ -61,7 +61,7 @@
 #include <fcntl.h>
 
 
-using namespace ipc;
+using namespace cargo::ipc;
 using namespace epoll;
 using namespace utils;
 using namespace std::placeholders;
@@ -228,7 +228,7 @@ PeerID connectPeer(Service& s, Client& c)
 
     PeerID peerID = peerIDLatch.get(TIMEOUT);
     s.setNewPeerCallback(nullptr);
-    BOOST_REQUIRE_NE(peerID, static_cast<std::string>(ipc::UniqueID()));
+    BOOST_REQUIRE_NE(peerID, static_cast<std::string>(cargo::ipc::UniqueID()));
     return peerID;
 }
 

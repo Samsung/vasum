@@ -34,9 +34,9 @@
 
 #include "utils/inotify.hpp"
 
-#include "ipc/epoll/thread-dispatcher.hpp"
-#include "ipc/client.hpp"
-#include "ipc/exception.hpp"
+#include "cargo-ipc/epoll/thread-dispatcher.hpp"
+#include "cargo-ipc/client.hpp"
+#include "cargo-ipc/exception.hpp"
 
 namespace lxcpp {
 
@@ -136,9 +136,9 @@ public:
 private:
     std::shared_ptr<ContainerConfig> mConfig;
 
-    ipc::epoll::ThreadDispatcher mDispatcher;
+    cargo::ipc::epoll::ThreadDispatcher mDispatcher;
 
-    std::shared_ptr<ipc::Client> mClient;
+    std::shared_ptr<cargo::ipc::Client> mClient;
     utils::Inotify mInotify;
 
     void onWorkFileEvent(const std::string& name, const uint32_t mask);

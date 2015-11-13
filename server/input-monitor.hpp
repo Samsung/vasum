@@ -26,7 +26,7 @@
 #define SERVER_INPUT_MONITOR_HPP
 
 #include "input-monitor-config.hpp"
-#include "ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
 
 #include <linux/input.h>
 #include <sys/time.h>
@@ -42,7 +42,7 @@ class ZonesManager;
 
 class InputMonitor {
 public:
-    InputMonitor(ipc::epoll::EventPoll& eventPoll,
+    InputMonitor(cargo::ipc::epoll::EventPoll& eventPoll,
                  const InputConfig& inputConfig,
                  ZonesManager* zonesManager);
     ~InputMonitor();
@@ -55,14 +55,14 @@ private:
     InputConfig mConfig;
     ZonesManager* mZonesManager;
     int mFd;
-    ipc::epoll::EventPoll& mEventPoll;
+    cargo::ipc::epoll::EventPoll& mEventPoll;
     std::list<struct timeval> mEventTimes;
     std::string mDevicePath;
     Mutex mMutex;
 
     std::string getDevicePath() const;
     void setHandler(const std::string& devicePath);
-    void handleInternal(int fd, ipc::epoll::Events events);
+    void handleInternal(int fd, cargo::ipc::epoll::Events events);
     void leaveDevice();
     bool isExpectedEventSequence(const struct input_event&);
 };

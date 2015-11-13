@@ -30,8 +30,8 @@
 #include "logger/logger.hpp"
 #include "cargo/manager.hpp"
 #include "utils/file-wait.hpp"
-#include "ipc/epoll/thread-dispatcher.cpp"
-#include "ipc/client.hpp"
+#include "cargo-ipc/epoll/thread-dispatcher.cpp"
+#include "cargo-ipc/client.hpp"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -42,7 +42,7 @@ namespace lxcpp {
 
 
 Start::Start(std::shared_ptr<ContainerConfig>& config,
-             std::shared_ptr<ipc::Client>& client)
+             std::shared_ptr<cargo::ipc::Client>& client)
     : mConfig(config),
       mGuardPath(GUARD_PATH),
       mClient(client)
@@ -67,18 +67,18 @@ void Start::execute()
     }
 }
 
-void Start::onGuardReady(const ipc::PeerID,
+void Start::onGuardReady(const cargo::ipc::PeerID,
                          std::shared_ptr<api::Void>&,
-                         ipc::MethodResult::Pointer methodResult,
-                         std::shared_ptr<ipc::Client> client,
+                         cargo::ipc::MethodResult::Pointer methodResult,
+                         std::shared_ptr<cargo::ipc::Client> client,
                          const std::shared_ptr<ContainerConfig>& config)
 {
     // TODO: Maybe replace this method handler with onNewPeer callback?
 
-    // ipc::Client connected with Guard and run this callback
+    // cargo::ipc::Client connected with Guard and run this callback
     client->callAsyncFromCallback<ContainerConfig, api::Void>(api::METHOD_SET_CONFIG, config);
 
-    auto initStarted = [config](ipc::Result<api::Pid>&& result) {
+    auto initStarted = [config](cargo::ipc::Result<api::Pid>&& result) {
         if (result.isValid()) {
             auto initPid = result.get();
             config->mInitPid = initPid->value;

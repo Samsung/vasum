@@ -35,17 +35,17 @@
 
 namespace vasum {
 
-HostIPCConnection::HostIPCConnection(ipc::epoll::EventPoll& eventPoll, ZonesManager* zonesManagerPtr)
+HostIPCConnection::HostIPCConnection(cargo::ipc::epoll::EventPoll& eventPoll, ZonesManager* zonesManagerPtr)
     : mZonesManagerPtr(zonesManagerPtr)
 {
     LOGT("Connecting to host IPC socket");
 
-    ipc::PeerCallback removedCallback = [this](const ipc::PeerID peerID,
-                                               const ipc::FileDescriptor) {
+    cargo::ipc::PeerCallback removedCallback = [this](const cargo::ipc::PeerID peerID,
+                                               const cargo::ipc::FileDescriptor) {
         std::string id = api::IPC_CONNECTION_PREFIX + peerID;
         mZonesManagerPtr->disconnectedCallback(id);
     };
-    mService.reset(new ipc::Service(eventPoll, HOST_IPC_SOCKET,
+    mService.reset(new cargo::ipc::Service(eventPoll, HOST_IPC_SOCKET,
                                     nullptr, removedCallback));
 
     using namespace std::placeholders;
@@ -166,7 +166,7 @@ void HostIPCConnection::setLockQueueCallback(const Method<api::Void>::type& call
 {
     typedef IPCMethodWrapper<api::Void> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_LOCK_QUEUE,
+        api::cargo::ipc::METHOD_LOCK_QUEUE,
         Callback::getWrapper(callback));
 }
 
@@ -174,7 +174,7 @@ void HostIPCConnection::setUnlockQueueCallback(const Method<api::Void>::type& ca
 {
     typedef IPCMethodWrapper<api::Void> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_UNLOCK_QUEUE,
+        api::cargo::ipc::METHOD_UNLOCK_QUEUE,
         Callback::getWrapper(callback));
 }
 
@@ -182,7 +182,7 @@ void HostIPCConnection::setGetZoneIdsCallback(const Method<api::ZoneIds>::type& 
 {
     typedef IPCMethodWrapper<api::ZoneIds> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_GET_ZONE_ID_LIST,
+        api::cargo::ipc::METHOD_GET_ZONE_ID_LIST,
         Callback::getWrapper(callback));
 }
 
@@ -190,7 +190,7 @@ void HostIPCConnection::setGetActiveZoneIdCallback(const Method<api::ZoneId>::ty
 {
     typedef IPCMethodWrapper<api::ZoneId> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_GET_ACTIVE_ZONE_ID,
+        api::cargo::ipc::METHOD_GET_ACTIVE_ZONE_ID,
         Callback::getWrapper(callback));
 }
 
@@ -198,7 +198,7 @@ void HostIPCConnection::setGetZoneInfoCallback(const Method<const api::ZoneId, a
 {
     typedef IPCMethodWrapper<const api::ZoneId, api::ZoneInfoOut> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_GET_ZONE_INFO,
+        api::cargo::ipc::METHOD_GET_ZONE_INFO,
         Callback::getWrapper(callback));
 }
 
@@ -206,7 +206,7 @@ void HostIPCConnection::setSetNetdevAttrsCallback(const Method<const api::SetNet
 {
     typedef IPCMethodWrapper<const api::SetNetDevAttrsIn> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_SET_NETDEV_ATTRS,
+        api::cargo::ipc::METHOD_SET_NETDEV_ATTRS,
         Callback::getWrapper(callback));
 }
 
@@ -214,7 +214,7 @@ void HostIPCConnection::setGetNetdevAttrsCallback(const Method<const api::GetNet
 {
     typedef IPCMethodWrapper<const api::GetNetDevAttrsIn, api::GetNetDevAttrs> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_GET_NETDEV_ATTRS,
+        api::cargo::ipc::METHOD_GET_NETDEV_ATTRS,
         Callback::getWrapper(callback));
 }
 
@@ -222,7 +222,7 @@ void HostIPCConnection::setGetNetdevListCallback(const Method<const api::ZoneId,
 {
     typedef IPCMethodWrapper<const api::ZoneId, api::NetDevList> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_GET_NETDEV_LIST,
+        api::cargo::ipc::METHOD_GET_NETDEV_LIST,
         Callback::getWrapper(callback));
 }
 
@@ -230,7 +230,7 @@ void HostIPCConnection::setCreateNetdevVethCallback(const Method<const api::Crea
 {
     typedef IPCMethodWrapper<const api::CreateNetDevVethIn> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_CREATE_NETDEV_VETH,
+        api::cargo::ipc::METHOD_CREATE_NETDEV_VETH,
         Callback::getWrapper(callback));
 }
 
@@ -238,7 +238,7 @@ void HostIPCConnection::setCreateNetdevMacvlanCallback(const Method<const api::C
 {
     typedef IPCMethodWrapper<const api::CreateNetDevMacvlanIn> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_CREATE_NETDEV_MACVLAN,
+        api::cargo::ipc::METHOD_CREATE_NETDEV_MACVLAN,
         Callback::getWrapper(callback));
 }
 
@@ -246,7 +246,7 @@ void HostIPCConnection::setCreateNetdevPhysCallback(const Method<const api::Crea
 {
     typedef IPCMethodWrapper<const api::CreateNetDevPhysIn> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_CREATE_NETDEV_PHYS,
+        api::cargo::ipc::METHOD_CREATE_NETDEV_PHYS,
         Callback::getWrapper(callback));
 }
 
@@ -254,7 +254,7 @@ void HostIPCConnection::setDestroyNetdevCallback(const Method<const api::Destroy
 {
     typedef IPCMethodWrapper<const api::DestroyNetDevIn> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_DESTROY_NETDEV,
+        api::cargo::ipc::METHOD_DESTROY_NETDEV,
         Callback::getWrapper(callback));
 }
 
@@ -262,7 +262,7 @@ void HostIPCConnection::setDeleteNetdevIpAddressCallback(const Method<const api:
 {
     typedef IPCMethodWrapper<const api::DeleteNetdevIpAddressIn> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_DELETE_NETDEV_IP_ADDRESS,
+        api::cargo::ipc::METHOD_DELETE_NETDEV_IP_ADDRESS,
         Callback::getWrapper(callback));
 }
 
@@ -270,7 +270,7 @@ void HostIPCConnection::setDeclareFileCallback(const Method<const api::DeclareFi
 {
     typedef IPCMethodWrapper<const api::DeclareFileIn, api::Declaration> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_DECLARE_FILE,
+        api::cargo::ipc::METHOD_DECLARE_FILE,
         Callback::getWrapper(callback));
 }
 
@@ -278,7 +278,7 @@ void HostIPCConnection::setDeclareMountCallback(const Method<const api::DeclareM
 {
     typedef IPCMethodWrapper<const api::DeclareMountIn, api::Declaration> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_DECLARE_MOUNT,
+        api::cargo::ipc::METHOD_DECLARE_MOUNT,
         Callback::getWrapper(callback));
 }
 
@@ -286,7 +286,7 @@ void HostIPCConnection::setDeclareLinkCallback(const Method<const api::DeclareLi
 {
     typedef IPCMethodWrapper<const api::DeclareLinkIn, api::Declaration> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_DECLARE_LINK,
+        api::cargo::ipc::METHOD_DECLARE_LINK,
         Callback::getWrapper(callback));
 }
 
@@ -294,7 +294,7 @@ void HostIPCConnection::setGetDeclarationsCallback(const Method<const api::ZoneI
 {
     typedef IPCMethodWrapper<const api::ZoneId, api::Declarations> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_GET_DECLARATIONS,
+        api::cargo::ipc::METHOD_GET_DECLARATIONS,
         Callback::getWrapper(callback));
 }
 
@@ -302,7 +302,7 @@ void HostIPCConnection::setRemoveDeclarationCallback(const Method<const api::Rem
 {
     typedef IPCMethodWrapper<const api::RemoveDeclarationIn> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_REMOVE_DECLARATION,
+        api::cargo::ipc::METHOD_REMOVE_DECLARATION,
         Callback::getWrapper(callback));
 }
 
@@ -310,7 +310,7 @@ void HostIPCConnection::setSetActiveZoneCallback(const Method<const api::ZoneId>
 {
     typedef IPCMethodWrapper<const api::ZoneId> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_SET_ACTIVE_ZONE,
+        api::cargo::ipc::METHOD_SET_ACTIVE_ZONE,
         Callback::getWrapper(callback));
 }
 
@@ -318,7 +318,7 @@ void HostIPCConnection::setCreateZoneCallback(const Method<const api::CreateZone
 {
     typedef IPCMethodWrapper<const api::CreateZoneIn> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_CREATE_ZONE,
+        api::cargo::ipc::METHOD_CREATE_ZONE,
         Callback::getWrapper(callback));
 }
 
@@ -326,7 +326,7 @@ void HostIPCConnection::setDestroyZoneCallback(const Method<const api::ZoneId>::
 {
     typedef IPCMethodWrapper<const api::ZoneId> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_DESTROY_ZONE,
+        api::cargo::ipc::METHOD_DESTROY_ZONE,
         Callback::getWrapper(callback));
 }
 
@@ -334,7 +334,7 @@ void HostIPCConnection::setShutdownZoneCallback(const Method<const api::ZoneId>:
 {
     typedef IPCMethodWrapper<const api::ZoneId> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_SHUTDOWN_ZONE,
+        api::cargo::ipc::METHOD_SHUTDOWN_ZONE,
         Callback::getWrapper(callback));
 }
 
@@ -342,7 +342,7 @@ void HostIPCConnection::setStartZoneCallback(const Method<const api::ZoneId>::ty
 {
     typedef IPCMethodWrapper<const api::ZoneId> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_START_ZONE,
+        api::cargo::ipc::METHOD_START_ZONE,
         Callback::getWrapper(callback));
 }
 
@@ -350,7 +350,7 @@ void HostIPCConnection::setLockZoneCallback(const Method<const api::ZoneId>::typ
 {
     typedef IPCMethodWrapper<const api::ZoneId> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_LOCK_ZONE,
+        api::cargo::ipc::METHOD_LOCK_ZONE,
         Callback::getWrapper(callback));
 }
 
@@ -358,7 +358,7 @@ void HostIPCConnection::setUnlockZoneCallback(const Method<const api::ZoneId>::t
 {
     typedef IPCMethodWrapper<const api::ZoneId> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_UNLOCK_ZONE,
+        api::cargo::ipc::METHOD_UNLOCK_ZONE,
         Callback::getWrapper(callback));
 }
 
@@ -366,7 +366,7 @@ void HostIPCConnection::setGrantDeviceCallback(const Method<const api::GrantDevi
 {
     typedef IPCMethodWrapper<const api::GrantDeviceIn> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_GRANT_DEVICE,
+        api::cargo::ipc::METHOD_GRANT_DEVICE,
         Callback::getWrapper(callback));
 }
 
@@ -374,7 +374,7 @@ void HostIPCConnection::setRevokeDeviceCallback(const Method<const api::RevokeDe
 {
     typedef IPCMethodWrapper<const api::RevokeDeviceIn> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_REVOKE_DEVICE,
+        api::cargo::ipc::METHOD_REVOKE_DEVICE,
         Callback::getWrapper(callback));
 }
 
@@ -382,7 +382,7 @@ void HostIPCConnection::setSwitchToDefaultCallback(const Method<api::Void>::type
 {
     typedef IPCMethodWrapper<api::Void> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_SWITCH_TO_DEFAULT,
+        api::cargo::ipc::METHOD_SWITCH_TO_DEFAULT,
         Callback::getWrapper(callback));
 }
 
@@ -391,7 +391,7 @@ void HostIPCConnection::setCreateFileCallback(const Method<const api::CreateFile
 {
     typedef IPCMethodWrapper<const api::CreateFileIn, api::CreateFileOut> Method;
     mService->setMethodHandler<Method::out, Method::in>(
-        api::ipc::METHOD_CREATE_FILE,
+        api::cargo::ipc::METHOD_CREATE_FILE,
         Method::getWrapper(callback));
 }
 
@@ -399,7 +399,7 @@ void HostIPCConnection::setCleanUpZonesRootCallback(const Method<api::Void>::typ
 {
     typedef IPCMethodWrapper<api::Void> Callback;
     mService->setMethodHandler<Callback::out, Callback::in>(
-        api::ipc::METHOD_CLEAN_UP_ZONES_ROOT,
+        api::cargo::ipc::METHOD_CLEAN_UP_ZONES_ROOT,
         Callback::getWrapper(callback));
 }
 

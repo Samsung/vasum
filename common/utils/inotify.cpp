@@ -38,7 +38,7 @@
 
 namespace utils {
 
-Inotify::Inotify(ipc::epoll::EventPoll& eventPoll)
+Inotify::Inotify(cargo::ipc::epoll::EventPoll& eventPoll)
     :mEventPoll(eventPoll)
 {
     mFD = ::inotify_init1(IN_CLOEXEC);

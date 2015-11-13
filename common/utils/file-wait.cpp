@@ -30,7 +30,7 @@
 #include "utils/paths.hpp"
 #include "utils/fs.hpp"
 
-#include "ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -46,7 +46,7 @@ void waitForFile(const std::string& file, const unsigned int timeoutMs)
     std::string dir = dirName(file);
     assertIsDir(dir);
 
-    ipc::epoll::EventPoll poll;
+    cargo::ipc::epoll::EventPoll poll;
     Inotify inotify(poll);
 
     std::string filename = file.substr(dir.size() + 1);

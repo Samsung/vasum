@@ -33,7 +33,7 @@
 #include "utils/glib-loop.hpp"
 #include "utils/scoped-dir.hpp"
 #include "logger/logger.hpp"
-#include "ipc/epoll/thread-dispatcher.hpp"
+#include "cargo-ipc/epoll/thread-dispatcher.hpp"
 
 #include <string>
 #include <future>
@@ -67,7 +67,7 @@ struct Fixture {
     static void prepare()
     {
         ScopedGlibLoop loop;
-        ipc::epoll::ThreadDispatcher mDispatcher;
+        cargo::ipc::epoll::ThreadDispatcher mDispatcher;
         ZonesManager manager(mDispatcher.getPoll(), TEST_CONFIG_PATH);
         manager.start();
         manager.createZone("zone1", TEMPLATE_NAME);

@@ -34,7 +34,7 @@
 #include "utils/glib-loop.hpp"
 #include "utils/latch.hpp"
 #include "utils/scoped-dir.hpp"
-#include "ipc/epoll/thread-dispatcher.hpp"
+#include "cargo-ipc/epoll/thread-dispatcher.hpp"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -72,7 +72,7 @@ struct Fixture {
     ScopedDir mZonesPathGuard;
     InputConfig inputConfig;
     struct input_event ie;
-    ipc::epoll::ThreadDispatcher dispatcher;
+    cargo::ipc::epoll::ThreadDispatcher dispatcher;
 
     Fixture()
         : mTestPathGuard(TEST_DIR)
@@ -94,7 +94,7 @@ struct Fixture {
         BOOST_CHECK(::mkfifo(TEST_INPUT_DEVICE.c_str(), S_IWUSR | S_IRUSR) >= 0);
     }
 
-    ipc::epoll::EventPoll& getPoll() {
+    cargo::ipc::epoll::EventPoll& getPoll() {
         return dispatcher.getPoll();
     }
 };

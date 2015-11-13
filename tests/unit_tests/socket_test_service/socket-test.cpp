@@ -26,17 +26,17 @@
 #include "socket-test.hpp"
 #include "logger/logger.hpp"
 #include "logger/backend-journal.hpp"
-#include "ipc/internals/socket.hpp"
-#include "ipc/exception.hpp"
+#include "cargo-ipc/internals/socket.hpp"
+#include "cargo-ipc/exception.hpp"
 
 #include <cstring>
 #include <memory>
 
 using namespace vasum::socket_test;
-using namespace ipc;
+using namespace cargo::ipc;
 using namespace logger;
 
-// NOTE this is a single-usage program, only meant to test vasum::ipc::Socket module.
+// NOTE this is a single-usage program, only meant to test vasum::cargo::ipc::Socket module.
 //      It's purpose is to be activated when needed by systemd socket activation mechanism.
 int main()
 {

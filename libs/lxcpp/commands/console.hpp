@@ -28,7 +28,7 @@
 #include "lxcpp/terminal-config.hpp"
 #include "lxcpp/terminal.hpp"
 
-#include "ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
 #include "utils/signalfd.hpp"
 
 #include <signal.h>
@@ -68,7 +68,7 @@ private:
     int mTerminalNum;
     bool mServiceMode;
     ConsoleQuitReason mQuitReason;
-    ipc::epoll::EventPoll mEventPoll;
+    cargo::ipc::epoll::EventPoll mEventPoll;
     utils::SignalFD mSignalFD;
     std::vector<std::pair<int, struct ::sigaction>> mSignalStates;
     struct termios mTTYState;
@@ -81,10 +81,10 @@ private:
     void setupTTY();
     void restoreTTY();
     void resizePTY();
-    void onPTY(int fd, ipc::epoll::Events events);
-    void onStdInput(int fd, ipc::epoll::Events events);
-    void onStdOutput(int fd, ipc::epoll::Events events);
-    void checkForError(ipc::epoll::Events events);
+    void onPTY(int fd, cargo::ipc::epoll::Events events);
+    void onStdInput(int fd, cargo::ipc::epoll::Events events);
+    void onStdOutput(int fd, cargo::ipc::epoll::Events events);
+    void checkForError(cargo::ipc::epoll::Events events);
     bool handleSpecial(char key);
     void consoleChange(ConsoleChange direction);
     int getCurrentFD() const;

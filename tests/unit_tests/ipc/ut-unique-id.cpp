@@ -26,7 +26,7 @@
 #include "config.hpp"
 #include "ut.hpp"
 
-#include "ipc/unique-id.hpp"
+#include "cargo-ipc/unique-id.hpp"
 
 #include <string>
 #include <sstream>
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_SUITE(UniqueIDSuite)
 // constructor should provide empty timestamp and UUID
 BOOST_AUTO_TEST_CASE(Constructor)
 {
-    ipc::UniqueID uid;
+    cargo::ipc::UniqueID uid;
 
     BOOST_CHECK_EQUAL(static_cast<std::int64_t>(uid.mTime.tv_sec), 0);
     BOOST_CHECK_EQUAL(uid.mTime.tv_nsec, 0);
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(Constructor)
 // generate one UID and compare with empty
 BOOST_AUTO_TEST_CASE(Generate)
 {
-    ipc::UniqueID uid, emptyuid;
+    cargo::ipc::UniqueID uid, emptyuid;
     uid.generate();
 
     BOOST_CHECK_NE(uid, emptyuid);
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(Generate)
 // generate two UIDs and compare them
 BOOST_AUTO_TEST_CASE(DoubleGenerate)
 {
-    ipc::UniqueID uid1, uid2;
+    cargo::ipc::UniqueID uid1, uid2;
 
     uid1.generate();
     uid2.generate();
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(DoubleGenerate)
 // compare two empty UIDs
 BOOST_AUTO_TEST_CASE(EmptyCompare)
 {
-    ipc::UniqueID uid1, uid2;
+    cargo::ipc::UniqueID uid1, uid2;
 
     BOOST_CHECK_EQUAL(uid1, uid2);
 }
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(EmptyCompare)
 // pass empty UID to a stream
 BOOST_AUTO_TEST_CASE(StreamOperator)
 {
-    ipc::UniqueID uid;
+    cargo::ipc::UniqueID uid;
     std::stringstream ss;
 
     ss << uid;

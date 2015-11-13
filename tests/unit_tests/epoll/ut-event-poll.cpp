@@ -26,17 +26,17 @@
 #include "config.hpp"
 #include "ut.hpp"
 
-#include "ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
 #include "logger/logger.hpp"
-#include "ipc/internals/socket.hpp"
+#include "cargo-ipc/internals/socket.hpp"
 #include "utils/value-latch.hpp"
 #include "utils/glib-loop.hpp"
-#include "ipc/epoll/glib-dispatcher.hpp"
-#include "ipc/epoll/thread-dispatcher.hpp"
+#include "cargo-ipc/epoll/glib-dispatcher.hpp"
+#include "cargo-ipc/epoll/thread-dispatcher.hpp"
 
 using namespace utils;
-using namespace ipc;
-using namespace ipc::epoll;
+using namespace cargo::ipc;
+using namespace cargo::ipc::epoll;
 
 namespace {
 

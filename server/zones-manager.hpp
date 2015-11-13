@@ -34,7 +34,7 @@
 #include "api/method-result-builder.hpp"
 
 #include "host-ipc-connection.hpp"
-#include "ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
 #ifdef DBUS_CONNECTION
 #include "host-dbus-connection.hpp"
 #include "proxy-call-policy.hpp"
@@ -51,7 +51,7 @@ const std::string INVALID_CONNECTION_ID = "invalid://";
 class ZonesManager final {
 
 public:
-    ZonesManager(ipc::epoll::EventPoll& eventPoll, const std::string& managerConfigPath);
+    ZonesManager(cargo::ipc::epoll::EventPoll& eventPoll, const std::string& managerConfigPath);
     ~ZonesManager();
 
     /**

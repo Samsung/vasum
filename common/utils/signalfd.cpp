@@ -32,7 +32,7 @@
 
 namespace utils {
 
-SignalFD::SignalFD(ipc::epoll::EventPoll& eventPoll)
+SignalFD::SignalFD(cargo::ipc::epoll::EventPoll& eventPoll)
     :mEventPoll(eventPoll)
 {
     int error = ::sigemptyset(&mSet);

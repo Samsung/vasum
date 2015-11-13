@@ -32,7 +32,7 @@
 namespace lxcpp {
 
 Stop::Stop(std::shared_ptr<ContainerConfig>& config,
-           std::shared_ptr<ipc::Client>& client)
+           std::shared_ptr<cargo::ipc::Client>& client)
     : mConfig(config),
       mClient(client)
 {
@@ -46,7 +46,7 @@ void Stop::execute()
 {
     std::string containerName = mConfig->mName;
     LOGD("Stopping container: " << containerName);
-    auto callback = [containerName](ipc::Result<api::Void>&& result) {
+    auto callback = [containerName](cargo::ipc::Result<api::Void>&& result) {
         // TODO: Collect the returned init process status
         if (result.isValid()) {
             LOGI("Stopped container: " << containerName);

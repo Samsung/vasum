@@ -27,7 +27,7 @@
 namespace vasum {
 namespace api {
 
-IPCMethodResultBuilder::IPCMethodResultBuilder(const ipc::MethodResult::Pointer& methodResultPtr)
+IPCMethodResultBuilder::IPCMethodResultBuilder(const cargo::ipc::MethodResult::Pointer& methodResultPtr)
     : mMethodResultPtr(methodResultPtr)
 {
 }

@@ -175,7 +175,7 @@ void attachToBridge(const std::string& bridge, const std::string& netdev)
     int err = ioctl(fd, SIOCBRADDIF, &ifr);
     if (err < 0) {
         int error = errno;
-        //TODO: Close can be interrupted. Move util functions from ipc
+        // TODO: Close can be interrupted. Move util functions from cargo::ipc
         ::close(fd);
         const std::string msg = "Can't attach to bridge (" + getSystemErrorMessage(error) + ")";
         LOGE(msg);

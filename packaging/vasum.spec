@@ -429,9 +429,9 @@ The package provides libCargo development tools and libs.
 %{_includedir}/vasum-tools/cargo
 %{_libdir}/pkgconfig/libCargo.pc
 
-## libIpc Package #######################################################
-%package -n libIpc
-Summary:            IPC library
+## libCargoIpc Package #######################################################
+%package -n libCargoIpc
+Summary:            Cargo IPC library
 Group:              Security/Other
 Requires:           libCargo
 Requires:           libuuid
@@ -439,33 +439,33 @@ BuildRequires:      libuuid-devel
 Requires(post):     /sbin/ldconfig
 Requires(postun):   /sbin/ldconfig
 
-%description -n libIpc
-The package provides libIpc library.
+%description -n libCargoIpc
+The package provides libCargoIpc library.
 
-%post -n libIpc -p /sbin/ldconfig
+%post -n libCargoIpc -p /sbin/ldconfig
 
-%postun -n libIpc -p /sbin/ldconfig
+%postun -n libCargoIpc -p /sbin/ldconfig
 
-%files -n libIpc
+%files -n libCargoIpc
 %defattr(644,root,root,755)
-%{_libdir}/libIpc.so.0
-%attr(755,root,root) %{_libdir}/libIpc.so.%{version}
+%{_libdir}/libCargoIpc.so.0
+%attr(755,root,root) %{_libdir}/libCargoIpc.so.%{version}
 
-%package -n libIpc-devel
-Summary:        Development IPC library
+%package -n libCargoIpc-devel
+Summary:        Development Cargo IPC library
 Group:          Development/Libraries
-Requires:       libIpc = %{epoch}:%{version}-%{release}
+Requires:       libCargoIpc = %{epoch}:%{version}-%{release}
 Requires:       pkgconfig(libLogger)
 Requires:       pkgconfig(libCargo)
 
-%description -n libIpc-devel
-The package provides libIpc development tools and libs.
+%description -n libCargoIpc-devel
+The package provides libCargoIpc development tools and libs.
 
-%files -n libIpc-devel
+%files -n libCargoIpc-devel
 %defattr(644,root,root,755)
-%{_libdir}/libIpc.so
-%{_includedir}/vasum-tools/ipc
-%{_libdir}/pkgconfig/libIpc.pc
+%{_libdir}/libCargoIpc.so
+%{_includedir}/vasum-tools/cargo-ipc
+%{_libdir}/pkgconfig/libCargoIpc.pc
 
 ## liblxcpp Package ###########################################################
 %package -n liblxcpp

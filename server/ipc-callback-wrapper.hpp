@@ -40,9 +40,9 @@ public:
     typedef typename std::remove_cv<ArgIn>::type in;
     typedef std::function<void(const in&)> type;
 
-    static typename ipc::SignalHandler<in>::type
+    static typename cargo::ipc::SignalHandler<in>::type
     getWrapper(const type& callback) {
-        return [callback](const ipc::PeerID, const std::shared_ptr<in>& argIn)
+        return [callback](const cargo::ipc::PeerID, const std::shared_ptr<in>& argIn)
         {
             callback(*argIn);
         };
@@ -55,9 +55,9 @@ public:
     typedef api::Void in;
     typedef std::function<void()> type;
 
-    static typename ipc::SignalHandler<in>::type
+    static typename cargo::ipc::SignalHandler<in>::type
     getWrapper(const type& callback) {
-        return [callback](const ipc::PeerID, const std::shared_ptr<in>& /* argIn */)
+        return [callback](const cargo::ipc::PeerID, const std::shared_ptr<in>& /* argIn */)
         {
             callback();
         };
@@ -71,11 +71,11 @@ public:
     typedef ArgOut out;
     typedef std::function<void(const in&, api::MethodResultBuilder::Pointer)> type;
 
-    static typename ipc::MethodHandler<out, in>::type
+    static typename cargo::ipc::MethodHandler<out, in>::type
     getWrapper(const type& callback) {
-        return [callback](const ipc::PeerID,
+        return [callback](const cargo::ipc::PeerID,
                           const std::shared_ptr<in>& argIn,
-                          ipc::MethodResult::Pointer&& argOut)
+                          cargo::ipc::MethodResult::Pointer&& argOut)
         {
             auto rb = std::make_shared<api::IPCMethodResultBuilder>(argOut);
             callback(*argIn, rb);
@@ -90,11 +90,11 @@ public:
     typedef ArgOut out;
     typedef std::function<void(api::MethodResultBuilder::Pointer)> type;
 
-    static typename ipc::MethodHandler<out, in>::type
+    static typename cargo::ipc::MethodHandler<out, in>::type
     getWrapper(const type& callback) {
-        return [callback](const ipc::PeerID,
+        return [callback](const cargo::ipc::PeerID,
                           const std::shared_ptr<in>& /* argIn */,
-                          ipc::MethodResult::Pointer&& argOut)
+                          cargo::ipc::MethodResult::Pointer&& argOut)
         {
             auto rb = std::make_shared<api::IPCMethodResultBuilder>(argOut);
             callback(rb);

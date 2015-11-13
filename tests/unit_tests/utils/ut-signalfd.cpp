@@ -27,7 +27,7 @@
 #include "ut.hpp"
 
 #include "utils/signalfd.hpp"
-#include "ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
 #include <atomic>
 #include <chrono>
 #include <thread>
@@ -71,13 +71,13 @@ const int TIMEOUT = 100;
 
 BOOST_AUTO_TEST_CASE(ConstructorDesctructor)
 {
-    ipc::epoll::EventPoll poll;
+    cargo::ipc::epoll::EventPoll poll;
     SignalFD s(poll);
 }
 
 BOOST_AUTO_TEST_CASE(BlockingSignalHandler)
 {
-    ipc::epoll::EventPoll poll;
+    cargo::ipc::epoll::EventPoll poll;
     SignalFD s(poll);
     s.setHandler(SIGUSR1, [](const int) {});
     s.setHandler(SIGINT, [](const int) {});
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(BlockingSignalHandler)
 
 BOOST_AUTO_TEST_CASE(SignalHandler)
 {
-    ipc::epoll::EventPoll poll;
+    cargo::ipc::epoll::EventPoll poll;
     SignalFD s(poll);
 
     bool isSignalCalled = false;

@@ -27,7 +27,7 @@
 #include "lxcpp/commands/command.hpp"
 #include "lxcpp/container-config.hpp"
 
-#include "ipc/client.hpp"
+#include "cargo-ipc/client.hpp"
 
 #include <sys/types.h>
 #include <memory>
@@ -44,14 +44,14 @@ public:
      * @param config container's config
      */
     Stop(std::shared_ptr<ContainerConfig>& config,
-         std::shared_ptr<ipc::Client>& client);
+         std::shared_ptr<cargo::ipc::Client>& client);
     ~Stop();
 
     void execute();
 
 private:
     std::shared_ptr<ContainerConfig> mConfig;
-    std::shared_ptr<ipc::Client> mClient;
+    std::shared_ptr<cargo::ipc::Client> mClient;
 };
 
 

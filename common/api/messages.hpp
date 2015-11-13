@@ -236,7 +236,7 @@ struct CreateFileIn {
 };
 
 struct CreateFileOut {
-    cargo::FileDescriptor fd;
+    ::cargo::FileDescriptor fd;
     CARGO_REGISTER
     (
         fd

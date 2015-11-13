@@ -31,8 +31,8 @@
 #include "utils/channel.hpp"
 #include "utils/signalfd.hpp"
 
-#include "ipc/service.hpp"
-#include "ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/service.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
 
 
 namespace lxcpp {
@@ -61,15 +61,15 @@ private:
             : mConfig(config), mChannel(channel) {}
     };
 
-    ipc::epoll::EventPoll mEventPoll;
-    ipc::PeerID mPeerID;
+    cargo::ipc::epoll::EventPoll mEventPoll;
+    cargo::ipc::PeerID mPeerID;
     utils::SignalFD mSignalFD;
-    std::unique_ptr<ipc::Service> mService;
+    std::unique_ptr<cargo::ipc::Service> mService;
 
     std::shared_ptr<ContainerConfig> mConfig;
 
     // NOTE: Create a map if more async results needed
-    ipc::MethodResult::Pointer mStopResult;
+    cargo::ipc::MethodResult::Pointer mStopResult;
 
     /**
      * Setups the init process and executes the init.
@@ -82,7 +82,7 @@ private:
      *
      * @param peerID peerID of the connected client
      */
-    void onConnection(const ipc::PeerID& peerID, const ipc::FileDescriptor);
+    void onConnection(const cargo::ipc::PeerID& peerID, const cargo::ipc::FileDescriptor);
 
     /**
      * Called each time a connection to host is lost.
@@ -90,7 +90,7 @@ private:
      *
      * @param peerID peerID of the connected client
      */
-    void onDisconnection(const ipc::PeerID& peerID, const ipc::FileDescriptor);
+    void onDisconnection(const cargo::ipc::PeerID& peerID, const cargo::ipc::FileDescriptor);
 
     /**
      * Called when the init process exits.
@@ -103,25 +103,25 @@ private:
      *
      * @param data new config value
      */
-    void onSetConfig(const ipc::PeerID, std::shared_ptr<ContainerConfig>& data, ipc::MethodResult::Pointer result);
+    void onSetConfig(const cargo::ipc::PeerID, std::shared_ptr<ContainerConfig>& data, cargo::ipc::MethodResult::Pointer result);
 
     /**
     * Called when synchronizing configuration with the host
     *
     * @param result new config value
     */
-    void onGetConfig(const ipc::PeerID, std::shared_ptr<api::Void>&, ipc::MethodResult::Pointer result);
+    void onGetConfig(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result);
 
     /**
      * Host -> Guard: Start init in a container described by the configuration
      */
-    void onStart(const ipc::PeerID, std::shared_ptr<api::Void>&, ipc::MethodResult::Pointer result);
+    void onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result);
 
     /**
      * Host -> Guard: Stop the init process and return its exit status.
      * Returns the status asynchronously (outside onStop), when init dies.
      */
-    void onStop(const ipc::PeerID, std::shared_ptr<api::Void>&, ipc::MethodResult::Pointer result);
+    void onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result);
 
 };
 

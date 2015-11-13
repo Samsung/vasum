@@ -77,7 +77,7 @@ ContainerImpl::ContainerImpl(const std::string &name,
     using namespace std::placeholders;
 
     // IPC with the Guard process
-    mClient.reset(new ipc::Client(mDispatcher.getPoll(), mConfig->mSocketPath));
+    mClient.reset(new cargo::ipc::Client(mDispatcher.getPoll(), mConfig->mSocketPath));
     mClient->setMethodHandler<api::Void, api::Void>(api::METHOD_GUARD_READY, std::bind(Start::onGuardReady, _1, _2, _3, mClient, mConfig));
 
     // TODO: Connect to a running Guard with something like this:
@@ -86,7 +86,7 @@ ContainerImpl::ContainerImpl(const std::string &name,
     //     // TODO: this might need some named semaphore to prevent races between two processes using this library.
     //     mClient->start();
     //     // TODO: Get the configuration from the running Guard
-    // } catch(const ipc::IPCException&) {
+    // } catch(const cargo::ipc::IPCException&) {
     //     // It's OK, container isn't yet started.
     // }
 

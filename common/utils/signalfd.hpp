@@ -25,7 +25,7 @@
 #ifndef COMMON_UTILS_SIGNALFD_HPP
 #define COMMON_UTILS_SIGNALFD_HPP
 
-#include "ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
 
 #include <csignal>
 #include <sys/signalfd.h>
@@ -48,7 +48,7 @@ class SignalFD {
 public:
     typedef std::function<void(const int sigNum)> Callback;
 
-    SignalFD(ipc::epoll::EventPoll& eventPoll);
+    SignalFD(cargo::ipc::epoll::EventPoll& eventPoll);
     virtual ~SignalFD();
 
     SignalFD(const SignalFD& signalfd) = delete;
@@ -74,7 +74,7 @@ private:
     int mFD;
     ::sigset_t mSet;
     std::mutex mMutex;
-    ipc::epoll::EventPoll& mEventPoll;
+    cargo::ipc::epoll::EventPoll& mEventPoll;
     std::unordered_map<int, Callback> mCallbacks;
     std::vector<int> mBlockedSignals;
 

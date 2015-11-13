@@ -26,7 +26,7 @@
 #include "lxcpp/terminal.hpp"
 #include "lxcpp/credentials.hpp"
 
-#include "ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
 #include "logger/logger.hpp"
 #include "utils/fd-utils.hpp"
 #include "utils/signal.hpp"
@@ -147,7 +147,7 @@ void Console::restoreTTY()
     lxcpp::tcsetattr(STDIN_FILENO, TCSAFLUSH, &mTTYState);
 }
 
-void Console::onPTY(int fd, ipc::epoll::Events events)
+void Console::onPTY(int fd, cargo::ipc::epoll::Events events)
 {
     if ((events & EPOLLIN) == EPOLLIN) {
         const size_t avail = IO_BUFFER_SIZE - appToTermOffset;
@@ -174,7 +174,7 @@ void Console::onPTY(int fd, ipc::epoll::Events events)
     checkForError(events);
 }
 
-void Console::onStdInput(int fd, ipc::epoll::Events events)
+void Console::onStdInput(int fd, cargo::ipc::epoll::Events events)
 {
     if ((events & EPOLLIN) == EPOLLIN) {
         const size_t avail = IO_BUFFER_SIZE - termToAppOffset;
@@ -195,7 +195,7 @@ void Console::onStdInput(int fd, ipc::epoll::Events events)
     checkForError(events);
 }
 
-void Console::onStdOutput(int fd, ipc::epoll::Events events)
+void Console::onStdOutput(int fd, cargo::ipc::epoll::Events events)
 {
     if ((events & EPOLLOUT) == EPOLLOUT && appToTermOffset) {
         const ssize_t written = ::write(fd, appToTerm, appToTermOffset);
@@ -210,7 +210,7 @@ void Console::onStdOutput(int fd, ipc::epoll::Events events)
     checkForError(events);
 }
 
-void Console::checkForError(ipc::epoll::Events events)
+void Console::checkForError(cargo::ipc::epoll::Events events)
 {
     // TODO: ignore EPOLLHUP for now, this allows us to cycle through not
     // connected terminals. When we can handle full containers with getty()

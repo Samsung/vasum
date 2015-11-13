@@ -27,9 +27,9 @@
 #define VASUM_CLIENT_IMPL_HPP
 
 #include "vasum-client.h"
-#include "ipc/epoll/thread-dispatcher.hpp"
-#include "ipc/epoll/event-poll.hpp"
-#include "ipc/client.hpp"
+#include "cargo-ipc/epoll/thread-dispatcher.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/client.hpp"
 
 #include <mutex>
 #include <memory>
@@ -385,13 +385,13 @@ private:
     Status mStatus;
 
     mutable std::mutex mStatusMutex;
-    std::unique_ptr<ipc::epoll::ThreadDispatcher> mInternalDispatcher;
-    std::unique_ptr<ipc::epoll::EventPoll> mEventPoll;
-    std::unique_ptr<ipc::Client> mClient;
+    std::unique_ptr<cargo::ipc::epoll::ThreadDispatcher> mInternalDispatcher;
+    std::unique_ptr<cargo::ipc::epoll::EventPoll> mEventPoll;
+    std::unique_ptr<cargo::ipc::Client> mClient;
 
     bool isConnected() const;
     bool isInternalDispatcherEnabled() const;
-    ipc::epoll::EventPoll& getEventPoll() const;
+    cargo::ipc::epoll::EventPoll& getEventPoll() const;
     VsmStatus coverException(const std::function<void(void)>& worker) noexcept;
 };
 

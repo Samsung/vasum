@@ -27,8 +27,8 @@
 #define SERVER_HOST_IPC_CONNECTION_HPP
 
 #include "api/messages.hpp"
-#include "ipc/epoll/event-poll.hpp"
-#include "ipc/service.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/service.hpp"
 #include "ipc-callback-wrapper.hpp"
 
 namespace vasum {
@@ -48,7 +48,7 @@ public:
         typedef typename IPCSignalWrapper<ArgIn>::type type;
     };
 
-    HostIPCConnection(ipc::epoll::EventPoll& eventPoll, ZonesManager* zm);
+    HostIPCConnection(cargo::ipc::epoll::EventPoll& eventPoll, ZonesManager* zm);
     ~HostIPCConnection();
 
     void start();
@@ -89,7 +89,7 @@ private:
     void setCreateFileCallback(const Method<const api::CreateFileIn, api::CreateFileOut>::type& callback);
     void setCleanUpZonesRootCallback(const Method<api::Void>::type& callback);
 
-    std::unique_ptr<ipc::Service> mService;
+    std::unique_ptr<cargo::ipc::Service> mService;
     ZonesManager* mZonesManagerPtr;
 };
 

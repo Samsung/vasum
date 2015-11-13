@@ -25,7 +25,7 @@ FILE(GLOB cli_SRCS *.cpp *.hpp)
 SET(CLI_CODENAME "vsm")
 ADD_EXECUTABLE(${CLI_CODENAME} ${cli_SRCS})
 
-ADD_DEPENDENCIES(${CLI_CODENAME} Common ${PROJECT_NAME}-client Ipc)
+ADD_DEPENDENCIES(${CLI_CODENAME} Common ${PROJECT_NAME}-client CargoIpc)
 
 ## Readline detection ##########################################################
 
@@ -48,7 +48,7 @@ TARGET_LINK_LIBRARIES(${CLI_CODENAME} ${READLINE_LIBRARIES})
 ## Link libraries ##############################################################
 INCLUDE_DIRECTORIES(${CLIENT_FOLDER})
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
-TARGET_LINK_LIBRARIES(${CLI_CODENAME} Common ${PROJECT_NAME}-client ${LIB_DEPS_LIBRARIES} Ipc)
+TARGET_LINK_LIBRARIES(${CLI_CODENAME} Common ${PROJECT_NAME}-client ${LIB_DEPS_LIBRARIES} CargoIpc)
 
 CONFIGURE_FILE(support/vsm-completion.sh.in
                ${CMAKE_BINARY_DIR}/vsm-completion.sh

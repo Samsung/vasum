@@ -31,7 +31,7 @@
 #include "utils/latch.hpp"
 #include "utils/signalfd.hpp"
 #include "utils/glib-loop.hpp"
-#include "ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
 
 #include <atomic>
 #include <string>
@@ -71,7 +71,7 @@ private:
     bool mIsUpdate;
     std::string mConfigPath;
     utils::ScopedGlibLoop loop;
-    ipc::epoll::EventPoll mEventPoll;
+    cargo::ipc::epoll::EventPoll mEventPoll;
     utils::SignalFD mSignalFD;
     ZonesManager mZonesManager;
     ::pthread_t mDispatchingThread;

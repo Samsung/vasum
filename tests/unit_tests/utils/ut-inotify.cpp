@@ -33,8 +33,8 @@
 
 #include "logger/logger.hpp"
 
-#include "ipc/epoll/event-poll.hpp"
-#include "ipc/epoll/thread-dispatcher.hpp"
+#include "cargo-ipc/epoll/event-poll.hpp"
+#include "cargo-ipc/epoll/thread-dispatcher.hpp"
 
 #include <boost/filesystem.hpp>
 
@@ -66,13 +66,13 @@ BOOST_FIXTURE_TEST_SUITE(InotifySuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(ConstructorDesctructor)
 {
-    ipc::epoll::EventPoll poll;
+    cargo::ipc::epoll::EventPoll poll;
     Inotify i(poll);
 }
 
 BOOST_AUTO_TEST_CASE(CreateDeleteFileHandler)
 {
-    ipc::epoll::ThreadDispatcher dispatcher;
+    cargo::ipc::epoll::ThreadDispatcher dispatcher;
     Inotify i(dispatcher.getPoll());
 
     // Callback on creation
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(CreateDeleteFileHandler)
 
 BOOST_AUTO_TEST_CASE(CreateDeleteDirHandler)
 {
-    ipc::epoll::ThreadDispatcher dispatcher;
+    cargo::ipc::epoll::ThreadDispatcher dispatcher;
     Inotify i(dispatcher.getPoll());
 
     // Callback on creation
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(CreateDeleteDirHandler)
 
 BOOST_AUTO_TEST_CASE(NoFalseEventHandler)
 {
-    ipc::epoll::ThreadDispatcher dispatcher;
+    cargo::ipc::epoll::ThreadDispatcher dispatcher;
     Inotify i(dispatcher.getPoll());
 
     utils::createFile(FILE_PATH, O_WRONLY | O_CREAT, 0666);
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(NoFalseEventHandler)
 
 BOOST_AUTO_TEST_CASE(RemoveHandler)
 {
-    ipc::epoll::ThreadDispatcher dispatcher;
+    cargo::ipc::epoll::ThreadDispatcher dispatcher;
     Inotify i(dispatcher.getPoll());
 
     // Callback on creation

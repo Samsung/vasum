@@ -36,8 +36,8 @@
 #endif //DBUS_CONNECTION
 #include "host-ipc-definitions.hpp"
 #include "api/messages.hpp"
-#include "ipc/epoll/thread-dispatcher.hpp"
-#include "ipc/client.hpp"
+#include "cargo-ipc/epoll/thread-dispatcher.hpp"
+#include "cargo-ipc/client.hpp"
 #include "exception.hpp"
 #include "utils/glib-loop.hpp"
 #include "cargo/exception.hpp"
@@ -472,21 +472,21 @@ public:
 
     std::vector<std::string> callMethodGetZoneIds()
     {
-        const auto out = mClient.callSync<api::Void, api::ZoneIds>(api::ipc::METHOD_GET_ZONE_ID_LIST,
+        const auto out = mClient.callSync<api::Void, api::ZoneIds>(api::cargo::ipc::METHOD_GET_ZONE_ID_LIST,
                                                                     std::make_shared<api::Void>());
         return out->values;
     }
 
     std::string callMethodGetActiveZoneId()
     {
-        const auto out = mClient.callSync<api::Void, api::ZoneId>(api::ipc::METHOD_GET_ACTIVE_ZONE_ID,
+        const auto out = mClient.callSync<api::Void, api::ZoneId>(api::cargo::ipc::METHOD_GET_ACTIVE_ZONE_ID,
                                                                   std::make_shared<api::Void>());
         return out->value;
     }
 
     void callMethodSetActiveZone(const std::string& id)
     {
-        mClient.callSync<api::ZoneId, api::Void>(api::ipc::METHOD_SET_ACTIVE_ZONE,
+        mClient.callSync<api::ZoneId, api::Void>(api::cargo::ipc::METHOD_SET_ACTIVE_ZONE,
                                                  std::make_shared<api::ZoneId>(api::ZoneId{id}));
     }
 
@@ -494,12 +494,12 @@ public:
                                    const std::string& templateName,
                                    const VoidResultCallback& result)
     {
-        auto asyncResult = [result](ipc::Result<api::Void>&& out) {
+        auto asyncResult = [result](cargo::ipc::Result<api::Void>&& out) {
             if (out.isValid()) {
                 result();
             }
         };
-        mClient.callAsync<api::CreateZoneIn, api::Void>(api::ipc::METHOD_CREATE_ZONE,
+        mClient.callAsync<api::CreateZoneIn, api::Void>(api::cargo::ipc::METHOD_CREATE_ZONE,
                            std::make_shared<api::CreateZoneIn>(api::CreateZoneIn{id, templateName}),
                            asyncResult);
     }
@@ -507,12 +507,12 @@ public:
     void callAsyncMethodDestroyZone(const std::string& id,
                                     const VoidResultCallback& result)
     {
-        auto asyncResult = [result](ipc::Result<api::Void>&& out) {
+        auto asyncResult = [result](cargo::ipc::Result<api::Void>&& out) {
             if (out.isValid()) {
                 result();
             }
         };
-        mClient.callAsync<api::ZoneId, api::Void>(api::ipc::METHOD_DESTROY_ZONE,
+        mClient.callAsync<api::ZoneId, api::Void>(api::cargo::ipc::METHOD_DESTROY_ZONE,
                            std::make_shared<api::ZoneId>(api::ZoneId{id}),
                            asyncResult);
     }
@@ -520,12 +520,12 @@ public:
     void callAsyncMethodShutdownZone(const std::string& id,
                                      const VoidResultCallback& result)
     {
-        auto asyncResult = [result](ipc::Result<api::Void>&& out) {
+        auto asyncResult = [result](cargo::ipc::Result<api::Void>&& out) {
             if (out.isValid()) {
                 result();
             }
         };
-        mClient.callAsync<api::ZoneId, api::Void>(api::ipc::METHOD_SHUTDOWN_ZONE,
+        mClient.callAsync<api::ZoneId, api::Void>(api::cargo::ipc::METHOD_SHUTDOWN_ZONE,
                            std::make_shared<api::ZoneId>(api::ZoneId{id}),
                            asyncResult);
     }
@@ -533,33 +533,33 @@ public:
     void callAsyncMethodStartZone(const std::string& id,
                                   const VoidResultCallback& result)
     {
-        auto asyncResult = [result](ipc::Result<api::Void>&& out) {
+        auto asyncResult = [result](cargo::ipc::Result<api::Void>&& out) {
             if (out.isValid()) {
                 result();
             }
         };
-        mClient.callAsync<api::ZoneId, api::Void>(api::ipc::METHOD_START_ZONE,
+        mClient.callAsync<api::ZoneId, api::Void>(api::cargo::ipc::METHOD_START_ZONE,
                            std::make_shared<api::ZoneId>(api::ZoneId{id}),
                            asyncResult);
     }
 
     void callMethodLockZone(const std::string& id)
     {
-        mClient.callSync<api::ZoneId, api::Void>(api::ipc::METHOD_LOCK_ZONE,
+        mClient.callSync<api::ZoneId, api::Void>(api::cargo::ipc::METHOD_LOCK_ZONE,
                                                   std::make_shared<api::ZoneId>(api::ZoneId{id}),
                                                   EVENT_TIMEOUT*10); //Prevent from IPCTimeoutException see LockUnlockZone
     }
 
     void callMethodUnlockZone(const std::string& id)
     {
-        mClient.callSync<api::ZoneId, api::Void>(api::ipc::METHOD_UNLOCK_ZONE,
+        mClient.callSync<api::ZoneId, api::Void>(api::cargo::ipc::METHOD_UNLOCK_ZONE,
                                                   std::make_shared<api::ZoneId>(api::ZoneId{id}),
                                                   EVENT_TIMEOUT*10); //Prevent from IPCTimeoutException see LockUnlockZone
     }
 
     void callSwitchToDefault()
     {
-        mClient.callSync<api::Void, api::Void>(api::ipc::METHOD_SWITCH_TO_DEFAULT,
+        mClient.callSync<api::Void, api::Void>(api::cargo::ipc::METHOD_SWITCH_TO_DEFAULT,
                                                std::make_shared<api::Void>(),
                                                EVENT_TIMEOUT*10); //Prevent from IPCTimeoutException see LockUnlockZone
     }
@@ -570,7 +570,7 @@ public:
                              const std::int32_t& mode)
     {
         auto result = mClient.callSync<api::CreateFileIn, api::CreateFileOut>(
-            api::ipc::METHOD_CREATE_FILE,
+            api::cargo::ipc::METHOD_CREATE_FILE,
             std::make_shared<api::CreateFileIn>(api::CreateFileIn{id, path, flags, mode}),
             EVENT_TIMEOUT*10);
         return result->fd.value;
@@ -579,7 +579,7 @@ public:
     void callMethodLockQueue()
     {
         auto result = mClient.callSync<api::Void, api::Void>(
-            api::ipc::METHOD_LOCK_QUEUE,
+            api::cargo::ipc::METHOD_LOCK_QUEUE,
             nullptr,
             EVENT_TIMEOUT*10);
     }
@@ -587,14 +587,14 @@ public:
     void callMethodUnlockQueue()
     {
         auto result = mClient.callSync<api::Void, api::Void>(
-            api::ipc::METHOD_UNLOCK_QUEUE,
+            api::cargo::ipc::METHOD_UNLOCK_QUEUE,
             nullptr,
             EVENT_TIMEOUT*10);
     }
 
 private:
-    ipc::epoll::ThreadDispatcher mDispatcher;
-    ipc::Client mClient;
+    cargo::ipc::epoll::ThreadDispatcher mDispatcher;
+    cargo::ipc::Client mClient;
 };
 
 template<class Predicate>
@@ -614,7 +614,7 @@ bool spinWaitFor(int timeoutMs, Predicate pred)
 
 struct Fixture {
     ScopedGlibLoop mLoop;
-    ipc::epoll::ThreadDispatcher dispatcher;
+    cargo::ipc::epoll::ThreadDispatcher dispatcher;
     ScopedDir mZonesPathGuard;
     ScopedDir mRunGuard;
 

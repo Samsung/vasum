@@ -69,7 +69,7 @@ const std::string DEVICE_DIR = "/dev/input/";
 } // namespace
 
 
-InputMonitor::InputMonitor(ipc::epoll::EventPoll& eventPoll,
+InputMonitor::InputMonitor(cargo::ipc::epoll::EventPoll& eventPoll,
                            const InputConfig& inputConfig,
                            ZonesManager* zonesManager)
     : mConfig(inputConfig)
@@ -202,7 +202,7 @@ void InputMonitor::setHandler(const std::string& devicePath)
     mEventPoll.addFD(mFd, EPOLLIN, std::bind(&InputMonitor::handleInternal, this, _1, _2));
 }
 
-void InputMonitor::handleInternal(int /* fd */, ipc::epoll::Events events)
+void InputMonitor::handleInternal(int /* fd */, cargo::ipc::epoll::Events events)
 {
     struct input_event ie;
     try {

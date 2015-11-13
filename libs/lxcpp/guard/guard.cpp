@@ -74,7 +74,7 @@ Guard::Guard(const std::string& socketPath)
     mSignalFD.setHandler(SIGCHLD, std::bind(&Guard::onInitExit, this));
 
     // Setup socket communication
-    mService.reset(new ipc::Service(mEventPoll, socketPath));
+    mService.reset(new cargo::ipc::Service(mEventPoll, socketPath));
 
     using namespace std::placeholders;
     mService->setNewPeerCallback(std::bind(&Guard::onConnection, this, _1, _2));
@@ -96,7 +96,7 @@ Guard::~Guard()
 {
 }
 
-void Guard::onConnection(const ipc::PeerID& peerID, const ipc::FileDescriptor)
+void Guard::onConnection(const cargo::ipc::PeerID& peerID, const cargo::ipc::FileDescriptor)
 {
     if (!mPeerID.empty()) {
         // FIXME: Refuse connection
@@ -106,7 +106,7 @@ void Guard::onConnection(const ipc::PeerID& peerID, const ipc::FileDescriptor)
     mService->callAsyncFromCallback<api::Void, api::Void>(api::METHOD_GUARD_READY, mPeerID, std::shared_ptr<api::Void>());
 }
 
-void Guard::onDisconnection(const ipc::PeerID& peerID, const ipc::FileDescriptor)
+void Guard::onDisconnection(const cargo::ipc::PeerID& peerID, const cargo::ipc::FileDescriptor)
 {
     if(mPeerID != peerID) {
         LOGE("Unknown peerID: " << peerID);
@@ -127,7 +127,7 @@ void Guard::onInitExit()
     mService->stop();
 }
 
-void Guard::onSetConfig(const ipc::PeerID, std::shared_ptr<ContainerConfig>& data, ipc::MethodResult::Pointer result)
+void Guard::onSetConfig(const cargo::ipc::PeerID, std::shared_ptr<ContainerConfig>& data, cargo::ipc::MethodResult::Pointer result)
 {
     mConfig = data;
 
@@ -150,13 +150,13 @@ void Guard::onSetConfig(const ipc::PeerID, std::shared_ptr<ContainerConfig>& dat
     result->setVoid();
 }
 
-void Guard::onGetConfig(const ipc::PeerID, std::shared_ptr<api::Void>&, ipc::MethodResult::Pointer result)
+void Guard::onGetConfig(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
 {
     LOGD("Sending out the config");
     result->set(mConfig);
 }
 
-void Guard::onStart(const ipc::PeerID, std::shared_ptr<api::Void>&, ipc::MethodResult::Pointer result)
+void Guard::onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
 {
     LOGI("Starting...");
     utils::Channel channel;
@@ -182,7 +182,7 @@ void Guard::onStart(const ipc::PeerID, std::shared_ptr<api::Void>&, ipc::MethodR
     result->set(ret);
 }
 
-void Guard::onStop(const ipc::PeerID, std::shared_ptr<api::Void>&, ipc::MethodResult::Pointer result)
+void Guard::onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
 {
     LOGI("Stopping...");
 
