@@ -127,7 +127,7 @@ void Guard::onInitExit()
     mService->stop();
 }
 
-void Guard::onSetConfig(const cargo::ipc::PeerID, std::shared_ptr<ContainerConfig>& data, cargo::ipc::MethodResult::Pointer result)
+bool Guard::onSetConfig(const cargo::ipc::PeerID, std::shared_ptr<ContainerConfig>& data, cargo::ipc::MethodResult::Pointer result)
 {
     mConfig = data;
 
@@ -148,15 +148,17 @@ void Guard::onSetConfig(const cargo::ipc::PeerID, std::shared_ptr<ContainerConfi
     }
 
     result->setVoid();
+    return true;
 }
 
-void Guard::onGetConfig(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
+bool Guard::onGetConfig(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
 {
     LOGD("Sending out the config");
     result->set(mConfig);
+    return true;
 }
 
-void Guard::onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
+bool Guard::onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
 {
     LOGI("Starting...");
     utils::Channel channel;
@@ -180,9 +182,10 @@ void Guard::onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo
     // Configuration succeed, return the init's PID
     auto ret = std::make_shared<api::Pid>(initPid);
     result->set(ret);
+    return true;
 }
 
-void Guard::onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
+bool Guard::onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
 {
     LOGI("Stopping...");
 
@@ -190,6 +193,7 @@ void Guard::onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo:
     utils::sendSignal(mConfig->mInitPid, SIGTERM);
 
     mStopResult = result;
+    return true;
 }
 
 int Guard::execute()

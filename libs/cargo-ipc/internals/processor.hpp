@@ -33,6 +33,7 @@
 #include "cargo-ipc/internals/add-peer-request.hpp"
 #include "cargo-ipc/internals/remove-peer-request.hpp"
 #include "cargo-ipc/internals/send-result-request.hpp"
+#include "cargo-ipc/internals/remove-method-request.hpp"
 #include "cargo-ipc/internals/finish-request.hpp"
 #include "cargo-ipc/epoll/event-poll.hpp"
 #include "cargo-ipc/exception.hpp"
@@ -78,7 +79,6 @@ const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
 *  - API for removing signals
 *  - implement CallbackStore - thread safe calling/setting callbacks
 *  - helper function for removing from unordered map
-*  - new way to generate UIDs
 *  - callbacks for serialization/parsing
 *  - store Sockets in a vector, maybe SocketStore?
 *  - waiting till the EventQueue is empty before leaving stop()
@@ -93,7 +93,8 @@ private:
         SIGNAL,      // New signal call in the queue
         ADD_PEER,    // New peer in the queue
         REMOVE_PEER, // Remove peer
-        SEND_RESULT  // Send the result of a method's call
+        SEND_RESULT,  // Send the result of a method's call
+        REMOVE_METHOD  // Remove method handler
     };
 
 public:
@@ -257,6 +258,12 @@ public:
      * @see setSignalHandler()
      */
     void removeMethod(const MethodID methodID);
+
+    /**
+     * @param methodID MethodID defined in the user's API
+     * @return is methodID handled by a signal or method
+     */
+    bool isHandled(const MethodID methodID);
 
     /**
      * Synchronous method call.
@@ -496,6 +503,7 @@ private:
     bool onAddPeerRequest(AddPeerRequest& request);
     bool onRemovePeerRequest(RemovePeerRequest& request);
     bool onSendResultRequest(SendResultRequest& request);
+    bool onRemoveMethodRequest(RemoveMethodRequest& request);
     bool onFinishRequest(FinishRequest& request);
 
     bool onReturnValue(Peers::iterator& peerIt,
@@ -513,10 +521,10 @@ private:
                             const std::exception_ptr& exceptionPtr);
     void removePeerSyncInternal(const PeerID& peerID, Lock& lock);
 
-    void onNewSignals(const PeerID& peerID,
+    bool onNewSignals(const PeerID& peerID,
                       std::shared_ptr<RegisterSignalsProtocolMessage>& data);
 
-    void onErrorSignal(const PeerID& peerID,
+    bool onErrorSignal(const PeerID& peerID,
                        std::shared_ptr<ErrorProtocolMessage>& data);
 
     Peers::iterator getPeerInfoIterator(const FileDescriptor fd);
@@ -542,7 +550,7 @@ void Processor::setMethodHandlerInternal(const MethodID methodID,
 
     methodCall.method = [method](const PeerID peerID, std::shared_ptr<void>& data, MethodResult::Pointer && methodResult) {
         std::shared_ptr<ReceivedDataType> tmpData = std::static_pointer_cast<ReceivedDataType>(data);
-        method(peerID, tmpData, std::forward<MethodResult::Pointer>(methodResult));
+        return method(peerID, tmpData, std::forward<MethodResult::Pointer>(methodResult));
     };
 
     mMethodsCallbacks[methodID] = std::make_shared<MethodHandlers>(std::move(methodCall));
@@ -584,7 +592,7 @@ void Processor::setSignalHandlerInternal(const MethodID methodID,
 
     signalCall.signal = [handler](const PeerID peerID, std::shared_ptr<void>& dataReceived) {
         std::shared_ptr<ReceivedDataType> tmpData = std::static_pointer_cast<ReceivedDataType>(dataReceived);
-        handler(peerID, tmpData);
+        return handler(peerID, tmpData);
     };
 
     mSignalsCallbacks[methodID] = std::make_shared<SignalHandlers>(std::move(signalCall));

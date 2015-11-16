@@ -103,25 +103,25 @@ private:
      *
      * @param data new config value
      */
-    void onSetConfig(const cargo::ipc::PeerID, std::shared_ptr<ContainerConfig>& data, cargo::ipc::MethodResult::Pointer result);
+    bool onSetConfig(const cargo::ipc::PeerID, std::shared_ptr<ContainerConfig>& data, cargo::ipc::MethodResult::Pointer result);
 
     /**
     * Called when synchronizing configuration with the host
     *
     * @param result new config value
     */
-    void onGetConfig(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result);
+    bool onGetConfig(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result);
 
     /**
      * Host -> Guard: Start init in a container described by the configuration
      */
-    void onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result);
+    bool onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result);
 
     /**
      * Host -> Guard: Stop the init process and return its exit status.
      * Returns the status asynchronously (outside onStop), when init dies.
      */
-    void onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result);
+    bool onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result);
 
 };
 

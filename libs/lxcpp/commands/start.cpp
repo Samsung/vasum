@@ -67,7 +67,7 @@ void Start::execute()
     }
 }
 
-void Start::onGuardReady(const cargo::ipc::PeerID,
+bool Start::onGuardReady(const cargo::ipc::PeerID,
                          std::shared_ptr<api::Void>&,
                          cargo::ipc::MethodResult::Pointer methodResult,
                          std::shared_ptr<cargo::ipc::Client> client,
@@ -95,6 +95,7 @@ void Start::onGuardReady(const cargo::ipc::PeerID,
     client->callAsyncFromCallback<api::Void, api::Pid>(api::METHOD_START, std::shared_ptr<api::Void>(), initStarted);
 
     methodResult->setVoid();
+    return true;
 }
 
 void Start::parent(const pid_t pid)

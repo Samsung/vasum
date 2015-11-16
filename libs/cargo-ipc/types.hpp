@@ -95,7 +95,7 @@ PeerID getNextPeerID();
  */
 template<typename ReceivedDataType>
 struct SignalHandler {
-    typedef std::function<void(PeerID peerID,
+    typedef std::function<bool(PeerID peerID,
                                std::shared_ptr<ReceivedDataType>& data)> type;
 };
 

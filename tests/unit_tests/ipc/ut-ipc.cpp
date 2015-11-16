@@ -169,45 +169,50 @@ struct ThrowOnAcceptData {
     }
 };
 
-void returnEmptyCallback(const PeerID,
+bool returnEmptyCallback(const PeerID,
                          std::shared_ptr<EmptyData>&,
                          MethodResult::Pointer methodResult)
 {
     methodResult->setVoid();
+    return true;
 }
 
-void returnDataCallback(const PeerID,
+bool returnDataCallback(const PeerID,
                         std::shared_ptr<RecvData>&,
                         MethodResult::Pointer methodResult)
 {
     auto returnData = std::make_shared<SendData>(1);
     methodResult->set(returnData);
+    return true;
 }
 
-void echoCallback(const PeerID,
+bool echoCallback(const PeerID,
                   std::shared_ptr<RecvData>& data,
                   MethodResult::Pointer methodResult)
 {
     auto returnData = std::make_shared<SendData>(data->intVal);
     methodResult->set(returnData);
+    return true;
 }
 
-void longEchoCallback(const PeerID,
+bool longEchoCallback(const PeerID,
                       std::shared_ptr<RecvData>& data,
                       MethodResult::Pointer methodResult)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(LONG_OPERATION_TIME));
     auto returnData = std::make_shared<SendData>(data->intVal);
     methodResult->set(returnData);
+    return true;
 }
 
-void shortEchoCallback(const PeerID,
+bool shortEchoCallback(const PeerID,
                        std::shared_ptr<RecvData>& data,
                        MethodResult::Pointer methodResult)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(SHORT_OPERATION_TIME));
     auto returnData = std::make_shared<SendData>(data->intVal);
     methodResult->set(returnData);
+    return true;
 }
 
 PeerID connectPeer(Service& s, Client& c)
@@ -308,16 +313,17 @@ MULTI_FIXTURE_TEST_CASE(MethodResultGetPeerID, F, ThreadedFixture, GlibFixture)
         1,
         [&peerID](const PeerID,
                   std::shared_ptr<RecvData>&,
-                  MethodResult::Pointer methodResult) {
-            methodResult->setVoid();
-            BOOST_CHECK_EQUAL(peerID, methodResult->getPeerID());
-        }
+    MethodResult::Pointer methodResult) {
+        methodResult->setVoid();
+        BOOST_CHECK_EQUAL(peerID, methodResult->getPeerID());
+        return true;
+    }
     );
 
     std::shared_ptr<SendData> sentData(new SendData(32));
     std::shared_ptr<RecvData> recvData = c.callSync<SendData, RecvData>(1,
-                                                                        sentData,
-                                                                        TIMEOUT);
+                                         sentData,
+                                         TIMEOUT);
 }
 
 MULTI_FIXTURE_TEST_CASE(ServiceStartStop, F, ThreadedFixture, GlibFixture)
@@ -503,6 +509,7 @@ MULTI_FIXTURE_TEST_CASE(DisconnectedPeerError, F, ThreadedFixture, GlibFixture)
     auto method = [](const PeerID, std::shared_ptr<ThrowOnAcceptData>&, MethodResult::Pointer methodResult) {
         auto resultData = std::make_shared<SendData>(1);
         methodResult->set<SendData>(resultData);
+        return true;
     };
 
     // Method will throw during serialization and disconnect automatically
@@ -535,6 +542,7 @@ MULTI_FIXTURE_TEST_CASE(ReadTimeout, F, ThreadedFixture, GlibFixture)
     auto longEchoCallback = [](const PeerID, std::shared_ptr<RecvData>& data, MethodResult::Pointer methodResult) {
         auto resultData = std::make_shared<LongSendData>(data->intVal, LONG_OPERATION_TIME);
         methodResult->set<LongSendData>(resultData);
+        return true;
     };
     s.setMethodHandler<LongSendData, RecvData>(1, longEchoCallback);
 
@@ -579,10 +587,12 @@ MULTI_FIXTURE_TEST_CASE(AddSignalInRuntime, F, ThreadedFixture, GlibFixture)
 
     auto handlerA = [&recvDataLatchA](const PeerID, std::shared_ptr<RecvData>& data) {
         recvDataLatchA.set(data);
+        return true;
     };
 
     auto handlerB = [&recvDataLatchB](const PeerID, std::shared_ptr<RecvData>& data) {
         recvDataLatchB.set(data);
+        return true;
     };
 
     c.setSignalHandler<RecvData>(1, handlerA);
@@ -614,10 +624,12 @@ MULTI_FIXTURE_TEST_CASE(AddSignalOffline, F, ThreadedFixture, GlibFixture)
 
     auto handlerA = [&recvDataLatchA](const PeerID, std::shared_ptr<RecvData>& data) {
         recvDataLatchA.set(data);
+        return true;
     };
 
     auto handlerB = [&recvDataLatchB](const PeerID, std::shared_ptr<RecvData>& data) {
         recvDataLatchB.set(data);
+        return true;
     };
 
     c.setSignalHandler<RecvData>(1, handlerA);
@@ -651,10 +663,12 @@ MULTI_FIXTURE_TEST_CASE(UsersError, F, ThreadedFixture, GlibFixture)
 
     auto throwingMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>&, MethodResult::Pointer) {
         throw IPCUserException(TEST_ERROR_CODE, TEST_ERROR_MESSAGE);
+        return true;
     };
 
     auto sendErrorMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>&, MethodResult::Pointer methodResult) {
         methodResult->setError(TEST_ERROR_CODE, TEST_ERROR_MESSAGE);
+        return true;
     };
 
     s.setMethodHandler<SendData, RecvData>(1, throwingMethodHandler);
@@ -688,6 +702,7 @@ MULTI_FIXTURE_TEST_CASE(AsyncResult, F, ThreadedFixture, GlibFixture)
             std::this_thread::sleep_for(std::chrono::milliseconds(SHORT_OPERATION_TIME));
             methodResult->setError(TEST_ERROR_CODE, TEST_ERROR_MESSAGE);
         });
+        return true;
     };
 
     auto voidMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>&, MethodResult::Pointer methodResult) {
@@ -695,6 +710,7 @@ MULTI_FIXTURE_TEST_CASE(AsyncResult, F, ThreadedFixture, GlibFixture)
             std::this_thread::sleep_for(std::chrono::milliseconds(SHORT_OPERATION_TIME));
             methodResult->setVoid();
         });
+        return true;
     };
 
     auto dataMethodHandler = [&](const PeerID, std::shared_ptr<RecvData>& data, MethodResult::Pointer methodResult) {
@@ -702,6 +718,7 @@ MULTI_FIXTURE_TEST_CASE(AsyncResult, F, ThreadedFixture, GlibFixture)
             std::this_thread::sleep_for(std::chrono::milliseconds(SHORT_OPERATION_TIME));
             methodResult->set(data);
         });
+        return true;
     };
 
     s.setMethodHandler<SendData, RecvData>(1, errorMethodHandler);
@@ -736,6 +753,7 @@ MULTI_FIXTURE_TEST_CASE(MixOperations, F, ThreadedFixture, GlibFixture)
 
     auto signalHandler = [&l](const PeerID, std::shared_ptr<RecvData>&) {
         l.set();
+        return true;
     };
 
     Service s(F::getPoll(), SOCKET_PATH);
@@ -769,6 +787,7 @@ MULTI_FIXTURE_TEST_CASE(FDSendReceive, F, ThreadedFixture, GlibFixture)
         int fd = ::open(TEST_FILE.c_str(), O_RDONLY);
         auto returnData = std::make_shared<FDData>(fd);
         methodResult->set(returnData);
+        return true;
     };
 
     Service s(F::getPoll(), SOCKET_PATH);
@@ -786,6 +805,50 @@ MULTI_FIXTURE_TEST_CASE(FDSendReceive, F, ThreadedFixture, GlibFixture)
     BOOST_REQUIRE(::read(fdData->fd.value, buffer, sizeof(buffer))>0);
     BOOST_REQUIRE(strncmp(DATA, buffer, strlen(DATA))==0);
     ::close(fdData->fd.value);
+}
+
+MULTI_FIXTURE_TEST_CASE(OneShotMethodHandler, F, ThreadedFixture, GlibFixture)
+{
+    auto methodHandler = [&](const PeerID, std::shared_ptr<EmptyData>&, MethodResult::Pointer methodResult) {
+        methodResult->setVoid();
+        return false;
+    };
+
+    Service s(F::getPoll(), SOCKET_PATH);
+    s.setMethodHandler<EmptyData, EmptyData>(1, methodHandler);
+
+    Client c(F::getPoll(), SOCKET_PATH);
+    connectPeer(s, c);
+
+    std::shared_ptr<EmptyData> sentData(new EmptyData());
+    c.callSync<EmptyData, EmptyData>(1, sentData, TIMEOUT);
+    BOOST_REQUIRE_THROW((c.callSync<EmptyData, EmptyData>(1, sentData, TIMEOUT)), IPCNaughtyPeerException);
+}
+
+MULTI_FIXTURE_TEST_CASE(OneShotSignalHandler, F, ThreadedFixture, GlibFixture)
+{
+    utils::Latch latch;
+
+    auto signalHandler = [&latch](const PeerID, std::shared_ptr<EmptyData>&) {
+        latch.set();
+        return false;
+    };
+
+    Service s(F::getPoll(), SOCKET_PATH);
+    s.setSignalHandler<EmptyData>(1, signalHandler);
+
+    Client c(F::getPoll(), SOCKET_PATH);
+    connectPeer(s, c);
+
+    // Wait for the signals to propagate to the Service
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT));
+
+    std::shared_ptr<EmptyData> sentData(new EmptyData());
+    c.signal<EmptyData>(1, sentData);
+
+    // Wait for the signal
+    BOOST_REQUIRE(latch.wait(TIMEOUT));
+    BOOST_REQUIRE(!s.isHandled(1));
 }
 
 // BOOST_AUTO_TEST_CASE(ConnectionLimit)

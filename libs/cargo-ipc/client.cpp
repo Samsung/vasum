@@ -133,5 +133,10 @@ void Client::removeMethod(const MethodID methodID)
     mProcessor.removeMethod(methodID);
 }
 
+bool Client::isHandled(const MethodID methodID)
+{
+    return mProcessor.isHandled(methodID);
+}
+
 } // namespace ipc
 } // namespace cargo

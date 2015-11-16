@@ -63,7 +63,7 @@ public:
      * @param client IPC connection to the Guard process
      * @param config container's config
      */
-    static void onGuardReady(const cargo::ipc::PeerID,
+    static bool onGuardReady(const cargo::ipc::PeerID,
                              std::shared_ptr<api::Void>&,
                              cargo::ipc::MethodResult::Pointer,
                              std::shared_ptr<cargo::ipc::Client> client,

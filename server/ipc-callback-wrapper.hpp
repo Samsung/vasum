@@ -45,6 +45,7 @@ public:
         return [callback](const cargo::ipc::PeerID, const std::shared_ptr<in>& argIn)
         {
             callback(*argIn);
+            return true;
         };
     }
 };
@@ -60,6 +61,7 @@ public:
         return [callback](const cargo::ipc::PeerID, const std::shared_ptr<in>& /* argIn */)
         {
             callback();
+            return true;
         };
     }
 };
@@ -79,6 +81,7 @@ public:
         {
             auto rb = std::make_shared<api::IPCMethodResultBuilder>(argOut);
             callback(*argIn, rb);
+            return true;
         };
     }
 };
@@ -98,6 +101,7 @@ public:
         {
             auto rb = std::make_shared<api::IPCMethodResultBuilder>(argOut);
             callback(rb);
+            return true;
         };
     }
 };

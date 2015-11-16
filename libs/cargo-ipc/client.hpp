@@ -164,6 +164,12 @@ public:
     void removeMethod(const MethodID methodID);
 
     /**
+     * @param methodID MethodID defined in the user's API
+     * @return is methodID handled by a signal or method
+     */
+    bool isHandled(const MethodID methodID);
+
+    /**
      * Synchronous method call.
      *
      * @param methodID              API dependent id of the method
