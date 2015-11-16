@@ -164,11 +164,16 @@ BOOST_AUTO_TEST_CASE(StartHasStopped)
     const char* argv[] = {
         "/bin/bash",
         "-c",
-        "echo",
+        "sleep 0.4",
         NULL
     };
     BOOST_CHECK(lxc.start(argv));
+
     waitForInit();
+    BOOST_CHECK(lxc.getState() == LxcZone::State::RUNNING);
+
+    // wait for the zone process to exit (200ms of time reserve)
+    std::this_thread::sleep_for(std::chrono::milliseconds(400));
     BOOST_CHECK(lxc.getState() == LxcZone::State::STOPPED);
 
     BOOST_CHECK(lxc.destroy());
