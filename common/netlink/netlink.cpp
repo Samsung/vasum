@@ -75,9 +75,9 @@ void vsm_sendmsg(int fd, const struct msghdr *msg, int flags)
 {
     int ret = sendmsg(fd, msg, flags);
     if (ret < 0) {
-        const std::string msg = "Can't send netlink message: " + getSystemErrorMessage();
-        LOGE(msg);
-        throw VasumException(msg);
+        const std::string message = "Can't send netlink message: " + getSystemErrorMessage();
+        LOGE(message);
+        throw VasumException(message);
     }
 }
 

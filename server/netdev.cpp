@@ -595,7 +595,7 @@ void setAttrs(const pid_t nsPid, const std::string& netdev, const Attrs& attrs)
     auto setIp = [nsPid](const std::vector<std::string>& ips, uint32_t index, int family) -> void {
         using namespace boost::algorithm;
         for (const auto& ip : ips) {
-            Attrs attrs;
+            Attrs attributes;
             std::vector<std::string> params;
             for (const auto& addrAttr : split(params, ip, is_any_of(","))) {
                 size_t pos = addrAttr.find(":");
@@ -604,9 +604,9 @@ void setAttrs(const pid_t nsPid, const std::string& netdev, const Attrs& attrs)
                     LOGE(msg);
                     throw VasumException(msg);
                 }
-                attrs.push_back(make_tuple(addrAttr.substr(0, pos), addrAttr.substr(pos + 1)));
+                attributes.push_back(make_tuple(addrAttr.substr(0, pos), addrAttr.substr(pos + 1)));
             }
-            setIpAddresses(nsPid, index, attrs, family);
+            setIpAddresses(nsPid, index, attributes, family);
         }
     };
 
