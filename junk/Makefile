@@ -1,8 +1,25 @@
-C=clang
-CPP=clang++
-NAME1=run-shell
-CPPFLAGS=$(shell PKG_CONFIG_PATH='/usr/local/lib/pkgconfig/:/usr/local/lib64/pkgconfig/' pkg-config --cflags liblxcpp libLogger) -g -std=c++11
-LDFLAGS=$(shell PKG_CONFIG_PATH='/usr/local/lib/pkgconfig/:/usr/local/lib64/pkgconfig/' pkg-config --libs liblxcpp libLogger) -g
+# usage:
+# make - builds target with default compiler (clang)
+# COMPILER=gcc make - builds target with selected compiler
+
+ifndef COMPILER
+    COMPILER=clang
+endif
+
+ifeq ($(COMPILER),clang)
+    C=clang
+    CPP=clang++
+else
+    C=gcc
+    CPP=g++
+endif
+
+NAME1:=run-shell
+CPPFLAGS+=-g -std=c++11
+LDFLAGS+=-g
+
+CPPFLAGS+=$(shell PKG_CONFIG_PATH='/usr/local/lib/pkgconfig/:/usr/local/lib64/pkgconfig/' pkg-config --cflags liblxcpp libLogger)
+LDFLAGS+=$(shell PKG_CONFIG_PATH='/usr/local/lib/pkgconfig/:/usr/local/lib64/pkgconfig/' pkg-config --libs liblxcpp libLogger)
 
 OBJECTS1=$(NAME1).o
 HEADERS=

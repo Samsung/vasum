@@ -24,7 +24,6 @@
 #ifndef LXCPP_CGROUPS_CGROUP_CONFIG_HPP
 #define LXCPP_CGROUPS_CGROUP_CONFIG_HPP
 
-#include "config.hpp"
 #include "cargo/fields.hpp"
 
 #include <string>
