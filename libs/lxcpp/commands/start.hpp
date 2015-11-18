@@ -62,9 +62,6 @@ public:
      * Guards tells that it's ready to receive commands.
      *
      * This is a method handler, not signal to avoid races.
-     *
-     * @param client IPC connection to the Guard process
-     * @param config container's config
      */
     bool onGuardReady(const cargo::ipc::PeerID,
                       std::shared_ptr<api::Void>&,

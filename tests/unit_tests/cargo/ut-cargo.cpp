@@ -51,7 +51,7 @@ struct Fixture {
 
 } // namespace
 
-BOOST_FIXTURE_TEST_SUITE(ConfigurationSuite, Fixture)
+BOOST_FIXTURE_TEST_SUITE(CargoSuite, Fixture)
 
 BOOST_AUTO_TEST_CASE(FromJsonString)
 {
@@ -90,6 +90,23 @@ BOOST_AUTO_TEST_CASE(FromJsonString)
 
     BOOST_CHECK_EQUAL(8, testConfig.intIntPair.first);
     BOOST_CHECK_EQUAL(9, testConfig.intIntPair.second);
+
+    BOOST_CHECK_EQUAL("tuple",   std::get<0>(testConfig.complexTuple));
+    BOOST_CHECK_EQUAL(54,        std::get<1>(testConfig.complexTuple).first);
+    BOOST_CHECK_EQUAL(-1.234000, std::get<1>(testConfig.complexTuple).second);
+
+    BOOST_CHECK_EQUAL(54321,     std::get<0>(testConfig.subObjTuple).intVal);
+    BOOST_CHECK_EQUAL(2,         std::get<0>(testConfig.subObjTuple).intVector.size());
+    BOOST_CHECK_EQUAL(1,         std::get<0>(testConfig.subObjTuple).intVector[0]);
+    BOOST_CHECK_EQUAL(2,         std::get<0>(testConfig.subObjTuple).intVector[1]);
+    BOOST_CHECK_EQUAL(234,       std::get<0>(testConfig.subObjTuple).subSubObj.intVal);
+
+    BOOST_CHECK_EQUAL(54321, testConfig.subObjIntPair.first.intVal);
+    BOOST_CHECK_EQUAL(2,     testConfig.subObjIntPair.first.intVector.size());
+    BOOST_CHECK_EQUAL(1,     testConfig.subObjIntPair.first.intVector[0]);
+    BOOST_CHECK_EQUAL(2,     testConfig.subObjIntPair.first.intVector[1]);
+    BOOST_CHECK_EQUAL(234,   testConfig.subObjIntPair.first.subSubObj.intVal);
+    BOOST_CHECK_EQUAL(50,    testConfig.subObjIntPair.second);
 
     BOOST_CHECK_EQUAL(54321, testConfig.subObj.intVal);
     BOOST_CHECK_EQUAL(2,     testConfig.subObj.intVector.size());

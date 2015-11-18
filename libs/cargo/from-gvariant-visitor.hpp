@@ -26,6 +26,7 @@
 #define CARGO_FROM_GVARIANT_VISITOR_HPP
 
 #include "cargo/is-visitable.hpp"
+#include "cargo/is-like-tuple.hpp"
 #include "cargo/exception.hpp"
 #include "cargo/is-union.hpp"
 #include "cargo/types.hpp"
@@ -229,8 +230,8 @@ private:
         }
     };
 
-    template<typename ... T>
-    static void fromGVariant(GVariant* object, std::pair<T...>& values)
+    template<typename T, typename std::enable_if<isLikeTuple<T>::value, int>::type = 0>
+    static void fromGVariant(GVariant* object, T& values)
     {
         checkType(object, G_VARIANT_TYPE_TUPLE);
 

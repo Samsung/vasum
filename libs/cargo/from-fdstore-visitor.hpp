@@ -132,8 +132,8 @@ private:
         }
     }
 
-    template<typename ... T>
-    void readInternal(std::pair<T...>& values)
+    template<typename T, typename std::enable_if<isLikeTuple<T>::value, int>::type = 0>
+    void readInternal(T& values)
     {
         visitFields(values, this, std::string());
     }

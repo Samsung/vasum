@@ -26,6 +26,7 @@
 #define CARGO_TO_JSON_VISITOR_HPP
 
 #include "cargo/is-visitable.hpp"
+#include "cargo/is-like-tuple.hpp"
 #include "cargo/exception.hpp"
 #include "cargo/visit-fields.hpp"
 
@@ -161,8 +162,8 @@ private:
         }
     };
 
-    template<typename ... T>
-    static json_object* toJsonObject(const std::pair<T...>& values)
+    template<typename T, typename std::enable_if<isLikeTuple<T>::value, int>::type = 0>
+    static json_object* toJsonObject(const T& values)
     {
         json_object* array = json_object_new_array();
 

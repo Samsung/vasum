@@ -26,8 +26,12 @@
 #define CARGO_TO_KVSTORE_VISITOR_HPP
 
 #include "cargo/is-visitable.hpp"
+#include "cargo/is-like-tuple.hpp"
 #include "cargo/kvstore.hpp"
 #include "cargo/kvstore-visitor-utils.hpp"
+#include "cargo/exception.hpp"
+
+#include <map>
 
 namespace cargo {
 
@@ -59,8 +63,8 @@ private:
     }
 
     template<typename T,
-             typename std::enable_if<!isVisitable<T>::value
-                                  && !std::is_enum<T>::value, int>::type = 0>
+             typename std::enable_if<std::is_arithmetic<T>::value
+                                  || std::is_same<T, std::string>::value, int>::type = 0>
     void setInternal(const std::string& name, const T& value)
     {
         mStore.set(name, toString(value));
@@ -84,10 +88,6 @@ private:
                           const I& begin,
                           const I& end,
                           const size_t size) {
-        if (size > std::numeric_limits<unsigned int>::max()) {
-            throw CargoException("Too many values to insert");
-        }
-
         KVStore::Transaction transaction(mStore);
 
         mStore.remove(name);
@@ -133,15 +133,36 @@ private:
         setRangeInternal(name, values.begin(), values.end(), values.size());
     }
 
-    template<typename ... T>
-    void setInternal(const std::string& key, const std::pair<T...>& values)
+    template<typename T, typename std::enable_if<isLikeTuple<T>::value, int>::type = 0>
+    void setInternal(const std::string& name, const T& values)
     {
-        std::vector<std::string> strValues(std::tuple_size<std::pair<T...>>::value);
+        KVStore::Transaction transaction(mStore);
 
-        SetTupleVisitor visitor;
-        visitFields(values, &visitor, strValues.begin());
-        setInternal(key, strValues);
+        setInternal(name, std::tuple_size<T>::value);
+
+        ToKVStoreVisitor recursiveVisitor(*this, name);
+        SetTupleVisitor visitor(recursiveVisitor);
+        visitFields(values, &visitor);
+
+        transaction.commit();
     }
+
+    struct SetTupleVisitor
+    {
+    public:
+        SetTupleVisitor(ToKVStoreVisitor& visitor) : mVisitor(visitor) {}
+
+        template<typename T>
+        void visit(T& value)
+        {
+            mVisitor.visit(std::to_string(idx), value);
+            ++idx;
+        }
+
+    private:
+        ToKVStoreVisitor& mVisitor;
+        size_t idx = 0;
+    };
 };
 
 } // namespace cargo

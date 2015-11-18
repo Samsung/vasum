@@ -26,6 +26,7 @@
 #define CARGO_TO_FDSTORE_VISITOR_HPP
 
 #include "cargo/is-visitable.hpp"
+#include "cargo/is-like-tuple.hpp"
 #include "cargo/fdstore.hpp"
 #include "cargo/types.hpp"
 #include "cargo/visit-fields.hpp"
@@ -124,8 +125,8 @@ private:
         }
     }
 
-    template<typename ... T>
-    void writeInternal(const std::pair<T...>& values)
+    template<typename T, typename std::enable_if<isLikeTuple<T>::value, int>::type = 0>
+    void writeInternal(const T& values)
     {
         visitFields(values, this, std::string());
     }

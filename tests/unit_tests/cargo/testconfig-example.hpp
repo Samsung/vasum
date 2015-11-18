@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <tuple>
 
 #include "cargo/fields.hpp"
 #include "cargo/fields-union.hpp"
@@ -114,6 +115,8 @@ struct TestConfig {
         )
     };
 
+    typedef std::tuple<std::string, std::pair<int, double>> ComplexTuple;
+
     std::int8_t int8Val;
     std::int16_t int16Val;
     int intVal;
@@ -134,6 +137,9 @@ struct TestConfig {
     std::array<int, 2> intArray;
 
     std::pair<int, int> intIntPair;
+    ComplexTuple complexTuple;
+    std::tuple<SubConfig> subObjTuple;
+    std::pair<SubConfig, int> subObjIntPair;
 
     SubConfig subObj;
     std::vector<SubConfig> subVector;
@@ -167,6 +173,9 @@ struct TestConfig {
         intArray,
 
         intIntPair,
+        complexTuple,
+        subObjTuple,
+        subObjIntPair,
 
         subObj,
         subVector,
@@ -253,6 +262,9 @@ const std::string jsonTestString =
     "\"doubleVector\": [ 0.000000, 1.000000, 2.000000 ], "
     "\"intArray\": [ 0, 1 ], "
     "\"intIntPair\": [ 8, 9 ], "
+    "\"complexTuple\": [ \"tuple\", [ 54, -1.234000 ] ], "
+    "\"subObjTuple\": [ { \"intVal\": 54321, \"intVector\": [ 1, 2 ], \"subSubObj\": { \"intVal\": 234 } } ], "
+    "\"subObjIntPair\": [ { \"intVal\": 54321, \"intVector\": [ 1, 2 ], \"subSubObj\": { \"intVal\": 234 } }, 50 ], "
     "\"subObj\": { \"intVal\": 54321, \"intVector\": [ 1, 2 ], \"subSubObj\": { \"intVal\": 234 } }, "
     "\"subVector\": [ { \"intVal\": 123, \"intVector\": [ 3, 4 ], \"subSubObj\": { \"intVal\": 345 } }, "
     "{ \"intVal\": 456, \"intVector\": [ 5, 6 ], \"subSubObj\": { \"intVal\": 567 } } ], "
@@ -286,6 +298,9 @@ const std::string jsonEmptyTestString =
     "\"doubleVector\": [ ], "
     "\"intArray\": [ 0, 0 ], "
     "\"intIntPair\": [ 0, 0 ], "
+    "\"complexTuple\": [ \"\", [ 0, 0.0 ] ], "
+    "\"subObjTuple\": [ { \"intVal\": 0, \"intVector\": [ 0, 0 ], \"subSubObj\": { \"intVal\": 0 } } ], "
+    "\"subObjIntPair\": [ { \"intVal\": 0, \"intVector\": [ 0, 0 ], \"subSubObj\": { \"intVal\": 0 } }, 0 ], "
     "\"subObj\": { \"intVal\": 0, \"intVector\": [ ], \"subSubObj\": { \"intVal\": 0 } }, "
     "\"subVector\": [ ], "
     "\"union1\": { \"type\": \"int\", \"value\": 0 }, "

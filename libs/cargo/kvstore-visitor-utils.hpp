@@ -80,28 +80,6 @@ std::string key()
     return std::string();
 }
 
-struct GetTupleVisitor
-{
-    template<typename T>
-    static void visit(std::vector<std::string>::iterator& it, T& value)
-    {
-        if (!it->empty()) {
-            value = fromString<T>(*it);
-        }
-        ++it;
-    }
-};
-
-struct SetTupleVisitor
-{
-    template<typename T>
-    static void visit(std::vector<std::string>::iterator& it, const T& value)
-    {
-        *it = toString<T>(value);
-        ++it;
-    }
-};
-
 } // namespace cargo
 
 #endif // CARGO_KVSTORE_VISITOR_UTILS_HPP

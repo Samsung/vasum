@@ -27,6 +27,7 @@
 
 #include "cargo/exception.hpp"
 #include "cargo/is-visitable.hpp"
+#include "cargo/is-like-tuple.hpp"
 #include "cargo/kvstore.hpp"
 #include "cargo/kvstore-visitor-utils.hpp"
 #include "cargo/visit-fields.hpp"
@@ -80,8 +81,8 @@ protected:
 
 private:
     template<typename T,
-             typename std::enable_if<!isVisitable<T>::value
-                                  && !std::is_enum<T>::value, int>::type = 0>
+             typename std::enable_if<std::is_arithmetic<T>::value
+                                  || std::is_same<T, std::string>::value, int>::type = 0>
     void getInternal(const std::string& name, T& value)
     {
         value = fromString<T>(mStore.get(name));
@@ -142,24 +143,6 @@ private:
         }
     }
 
-    template<typename ... T>
-    void getInternal(const std::string& key, std::pair<T...>& values)
-    {
-        std::vector<std::string> strValues;
-
-        getInternal(key, strValues);
-        if (strValues.empty()) {
-            return;
-        }
-
-        if (strValues.size() != sizeof...(T)) {
-            throw ContainerSizeException("Size of stored tuple doesn't match provided one.");
-        }
-
-        GetTupleVisitor visitor;
-        visitFields(values, &visitor, strValues.begin());
-    }
-
     template<typename V>
     void getInternal(const std::string& name, std::map<std::string, V>& values)
     {
@@ -175,6 +158,43 @@ private:
             static_cast<RecursiveVisitor*>(this)->visitImpl(k + ".val", values[mapKey]);
         }
     }
+
+    template<typename T, typename std::enable_if<isLikeTuple<T>::value, int>::type = 0>
+    void getInternal(const std::string& name, T& values)
+    {
+        size_t storedSize = 0;
+        getInternal(name, storedSize);
+
+        if (storedSize != std::tuple_size<T>::value) {
+            throw ContainerSizeException("Size of stored array doesn't match provided one.");
+        }
+
+        RecursiveVisitor recursiveVisitor(*this, name);
+        GetTupleVisitor visitor(recursiveVisitor);
+        visitFields(values, &visitor);
+    }
+
+    class GetTupleVisitor
+    {
+    public:
+        GetTupleVisitor(RecursiveVisitor& visitor) : mVisitor(visitor) {}
+
+        template<typename T>
+        void visit(T& value)
+        {
+            const std::string k = key(mVisitor.mKeyPrefix, idx);
+            if (!mVisitor.mStore.prefixExists(k)) {
+                throw InternalIntegrityException("Corrupted list serialization.");
+            }
+            mVisitor.visitImpl(k, value);
+
+            ++idx;
+        }
+
+    private:
+        RecursiveVisitor& mVisitor;
+        size_t idx = 0;
+    };
 };
 
 } // namespace cargo
