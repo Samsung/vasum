@@ -71,12 +71,12 @@ int Guard::startContainer(void* data)
 Guard::Guard(const std::string& socketPath)
     : mSignalFD(mEventPoll)
 {
-    mSignalFD.setHandler(SIGCHLD, std::bind(&Guard::onInitExit, this));
+    using namespace std::placeholders;
+    mSignalFD.setHandler(SIGCHLD, std::bind(&Guard::onInitExit, this, _1));
 
     // Setup socket communication
     mService.reset(new cargo::ipc::Service(mEventPoll, socketPath));
 
-    using namespace std::placeholders;
     mService->setNewPeerCallback(std::bind(&Guard::onConnection, this, _1, _2));
     mService->setRemovedPeerCallback(std::bind(&Guard::onDisconnection, this, _1, _2));
 
@@ -114,14 +114,19 @@ void Guard::onDisconnection(const cargo::ipc::PeerID& peerID, const cargo::ipc::
     mPeerID.clear();
 }
 
-void Guard::onInitExit()
+void Guard::onInitExit(struct ::signalfd_siginfo& sigInfo)
 {
+    if(sigInfo.ssi_pid != static_cast<unsigned int>(mConfig->mInitPid)) {
+        return;
+    }
+
     // TODO: Check PID if it's really init that died
     LOGD("Init died");
 
     if(mStopResult) {
         // TODO: Return the process's status if stop was initiated by calling stop()
-        mStopResult->setVoid();
+        auto data = std::make_shared<api::ExitStatus>(sigInfo.ssi_status);
+        mStopResult->set(data);
     }
 
     mService->stop(false);

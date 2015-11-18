@@ -114,7 +114,7 @@ void SignalFD::setHandler(const int sigNum, const Callback&& callback)
 
 void SignalFD::handleInternal()
 {
-    signalfd_siginfo sigInfo;
+    struct ::signalfd_siginfo sigInfo;
     utils::read(mFD, &sigInfo, sizeof(sigInfo));
 
     LOGT("Got signal: " << sigInfo.ssi_signo);
@@ -128,7 +128,7 @@ void SignalFD::handleInternal()
             return;
         }
 
-        it->second(sigInfo.ssi_signo);
+        it->second(sigInfo);
     }
 }
 

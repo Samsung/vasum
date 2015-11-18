@@ -95,8 +95,10 @@ private:
     /**
      * Called when the init process exits.
      * Sends the exit status to the host.
+     *
+     * @param sigInfo info about the received signal
      */
-    void onInitExit();
+    void onInitExit(struct ::signalfd_siginfo& sigInfo);
 
     /**
      * Called when synchronizing configuration with the host

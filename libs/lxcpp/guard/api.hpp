@@ -45,16 +45,19 @@ struct Void {
     CARGO_REGISTER_EMPTY
 };
 
-struct Pid {
+struct Int {
     int value;
 
-    Pid(int v = -1): value(v) {}
+    Int(int v = -1): value(v) {}
 
     CARGO_REGISTER
     (
         value
     )
 };
+
+typedef Int Pid;
+typedef Int ExitStatus;
 
 } // namespace api
 } // namespace lxcpp

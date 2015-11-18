@@ -46,7 +46,7 @@ namespace utils {
  */
 class SignalFD {
 public:
-    typedef std::function<void(const int sigNum)> Callback;
+    typedef std::function<void(struct ::signalfd_siginfo&)> Callback;
 
     SignalFD(cargo::ipc::epoll::EventPoll& eventPoll);
     virtual ~SignalFD();

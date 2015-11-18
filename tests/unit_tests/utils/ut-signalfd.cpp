@@ -79,8 +79,8 @@ BOOST_AUTO_TEST_CASE(BlockingSignalHandler)
 {
     cargo::ipc::epoll::EventPoll poll;
     SignalFD s(poll);
-    s.setHandler(SIGUSR1, [](const int) {});
-    s.setHandler(SIGINT, [](const int) {});
+    s.setHandler(SIGUSR1, [](struct ::signalfd_siginfo&) {});
+    s.setHandler(SIGINT, [](struct ::signalfd_siginfo&) {});
 
     ::raise(SIGINT);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT));
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(SignalHandler)
     SignalFD s(poll);
 
     bool isSignalCalled = false;
-    s.setHandler(SIGINT, [&](const int) {
+    s.setHandler(SIGINT, [&](struct ::signalfd_siginfo&) {
         isSignalCalled = true;
     });
 

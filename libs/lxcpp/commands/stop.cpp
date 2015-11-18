@@ -46,15 +46,16 @@ void Stop::execute()
 {
     std::string containerName = mConfig->mName;
     LOGD("Stopping container: " << containerName);
-    auto callback = [containerName](cargo::ipc::Result<api::Void>&& result) {
+    auto callback = [containerName](cargo::ipc::Result<api::ExitStatus>&& result) {
         // TODO: Collect the returned init process status
-        if (result.isValid()) {
-            LOGI("Stopped container: " << containerName);
+        if (!result.isValid()) {
+            LOGE("Failed to get the exit status");
+            result.rethrow();
         }
-    };
-    mClient->callAsync<api::Void, api::Void>(api::METHOD_STOP, std::make_shared<api::Void>(), callback);
 
-    // TODO: Wait till init stopped
+        LOGI("Stopped container: " << containerName << ". Exit status: " << result.get()->value);
+    };
+    mClient->callAsync<api::Void, api::ExitStatus>(api::METHOD_STOP, std::make_shared<api::Void>(), callback);
 }
 
 } // namespace lxcpp
