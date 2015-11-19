@@ -27,6 +27,7 @@
 
 #include "cargo/is-visitable.hpp"
 #include "cargo/is-like-tuple.hpp"
+#include "cargo/is-streamable.hpp"
 #include "cargo/kvstore.hpp"
 #include "cargo/kvstore-visitor-utils.hpp"
 #include "cargo/exception.hpp"
@@ -62,9 +63,7 @@ private:
     {
     }
 
-    template<typename T,
-             typename std::enable_if<std::is_arithmetic<T>::value
-                                  || std::is_same<T, std::string>::value, int>::type = 0>
+    template<typename T, typename std::enable_if<isStreamableOut<T>::value, int>::type = 0>
     void setInternal(const std::string& name, const T& value)
     {
         mStore.set(name, toString(value));

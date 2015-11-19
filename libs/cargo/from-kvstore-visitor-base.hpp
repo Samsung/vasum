@@ -28,6 +28,7 @@
 #include "cargo/exception.hpp"
 #include "cargo/is-visitable.hpp"
 #include "cargo/is-like-tuple.hpp"
+#include "cargo/is-streamable.hpp"
 #include "cargo/kvstore.hpp"
 #include "cargo/kvstore-visitor-utils.hpp"
 #include "cargo/visit-fields.hpp"
@@ -80,9 +81,7 @@ protected:
     }
 
 private:
-    template<typename T,
-             typename std::enable_if<std::is_arithmetic<T>::value
-                                  || std::is_same<T, std::string>::value, int>::type = 0>
+    template<typename T, typename std::enable_if<isStreamableIn<T>::value, int>::type = 0>
     void getInternal(const std::string& name, T& value)
     {
         value = fromString<T>(mStore.get(name));
