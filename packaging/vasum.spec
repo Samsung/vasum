@@ -17,7 +17,7 @@
 
 Name:           vasum
 Epoch:          1
-Version:        0.1.1
+Version:        0.1.2
 Release:        0
 Source0:        %{name}-%{version}.tar.gz
 License:        Apache-2.0
