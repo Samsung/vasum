@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Jan Olszak(j.olszak@samsung.com)
+ *  Contact: Jan Olszak (j.olszak@samsung.com)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
  *  limitations under the License
  */
 
-
 /**
  * @file
- * @author  Jan Olszak(j.olszak@samsung.com)
+ * @author  Jan Olszak (j.olszak@samsung.com)
  * @brief   Unit tests of lxcpp Container class
  */
 
