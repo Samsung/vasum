@@ -73,11 +73,15 @@ public:
     void unfreeze();
     void reboot();
 
+    // State
+    Container::State getState();
+    void setStartedCallback(const Container::Callback& callback);
+    void setStoppedCallback(const Container::Callback& callback);
+
     // Other
     int attach(const std::vector<std::string>& argv,
                const std::string& cwdInContainer);
     void console();
-    bool isRunning() const;
 
     // Network interfaces setup/config
     /**
@@ -134,6 +138,9 @@ public:
                    const std::vector<CGroupParam>& params);
 
 private:
+    typedef std::unique_lock<std::mutex> Lock;
+    mutable std::mutex mStateMutex;
+
     std::shared_ptr<ContainerConfig> mConfig;
 
     cargo::ipc::epoll::ThreadDispatcher mDispatcher;
@@ -141,7 +148,33 @@ private:
     std::shared_ptr<cargo::ipc::Client> mClient;
     utils::Inotify mInotify;
 
+    // Callbacks
+    Container::Callback mStartedCallback;
+    Container::Callback mStoppedCallback;
+
     void onWorkFileEvent(const std::string& name, const uint32_t mask);
+
+    /**
+     * Guards tells that it's ready to receive commands.
+     *
+     * This is a method handler, not signal to avoid races.
+     */
+    bool onGuardReady(const cargo::ipc::PeerID,
+                      std::shared_ptr<api::Void>&,
+                      cargo::ipc::MethodResult::Pointer);
+
+    /**
+     * Guards tells that Init exited with some status.
+     * Init could have been:
+     * - stopped with stop()
+     * - exited by itself
+     */
+    bool onInitStopped(const cargo::ipc::PeerID,
+                       std::shared_ptr<api::ExitStatus>& data,
+                       cargo::ipc::MethodResult::Pointer);
+
+    bool isRunning() const;
+
 };
 
 } // namespace lxcpp

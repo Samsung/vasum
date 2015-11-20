@@ -123,18 +123,14 @@ void Guard::onDisconnection(const cargo::ipc::PeerID& peerID, const cargo::ipc::
 
 void Guard::onInitExit(struct ::signalfd_siginfo& sigInfo)
 {
-    if(sigInfo.ssi_pid != static_cast<unsigned int>(mConfig->mInitPid)) {
+    if(mConfig->mInitPid != static_cast<int>(sigInfo.ssi_pid)) {
         return;
     }
 
-    // TODO: Check PID if it's really init that died
     LOGD("Init died");
 
-    if(mStopResult) {
-        // TODO: Return the process's status if stop was initiated by calling stop()
-        auto data = std::make_shared<api::ExitStatus>(sigInfo.ssi_status);
-        mStopResult->set(data);
-    }
+    auto data = std::make_shared<api::ExitStatus>(sigInfo.ssi_status);
+    mService->callAsync<api::ExitStatus, api::Void>(api::METHOD_INIT_STOPPED, mPeerID, data);
 
     mService->stop(false);
 }
@@ -215,14 +211,13 @@ bool Guard::onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo
     return true;
 }
 
-bool Guard::onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
+bool Guard::onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer)
 {
     LOGI("Stopping...");
 
     // TODO: Use initctl/systemd-initctl if available in container
     utils::sendSignal(mConfig->mInitPid, SIGTERM);
 
-    mStopResult = result;
     return true;
 }
 

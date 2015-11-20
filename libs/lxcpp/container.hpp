@@ -48,6 +48,15 @@ struct NetworkInterfaceInfo {
 
 class Container {
 public:
+    typedef std::function<void(void)> Callback;
+
+    enum class State {
+        STOPPED,
+        STOPPING,
+        STARTING,
+        RUNNING
+    };
+
     virtual ~Container() {};
 
     // Configuration
@@ -76,11 +85,15 @@ public:
     virtual void unfreeze() = 0;
     virtual void reboot() = 0;
 
+    // States
+    virtual State getState() = 0;
+    virtual void setStartedCallback(const Callback& callback) = 0;
+    virtual void setStoppedCallback(const Callback& callback) = 0;
+
     // Other
     virtual int attach(const std::vector<std::string>& argv,
                        const std::string& cwdInContainer) = 0;
     virtual void console() = 0;
-    virtual bool isRunning() const = 0;
 
     // Network interfaces setup/config
     virtual void addInterfaceConfig(const std::string& hostif,

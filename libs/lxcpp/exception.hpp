@@ -111,6 +111,11 @@ struct UserNSException: public Exception {
         : Exception(message) {}
 };
 
+struct ForbiddenActionException: public Exception {
+    explicit ForbiddenActionException(const std::string& message = "Forbidden action")
+        : Exception(message) {}
+};
+
 } // namespace lxcpp
 
 #endif // LXCPP_EXCEPTION_HPP

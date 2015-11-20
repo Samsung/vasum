@@ -36,7 +36,7 @@
 namespace lxcpp {
 
 
-class Stop final: Command {
+class Stop final: public Command {
 public:
     /**
      * Stops the container

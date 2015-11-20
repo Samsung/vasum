@@ -24,6 +24,7 @@
 #ifndef LXCPP_CONTAINER_CONFIG_HPP
 #define LXCPP_CONTAINER_CONFIG_HPP
 
+#include "lxcpp/container.hpp"
 #include "lxcpp/logger-config.hpp"
 #include "lxcpp/network-config.hpp"
 #include "lxcpp/terminal-config.hpp"
@@ -38,6 +39,11 @@
 #include <vector>
 #include <sys/types.h>
 
+namespace {
+
+const int DEFAULT_EXIT_STATUS = -27182;
+
+} // namespace
 
 namespace lxcpp {
 
@@ -82,6 +88,22 @@ struct ContainerConfig {
      * Get: getInitPid()
      */
     pid_t mInitPid;
+
+    /**
+     * State of the container
+     *
+     * Set: automatically on state transitions
+     * Get: getState() and callbacks
+     */
+    Container::State mState;
+
+    /**
+     * Exit status of the stopped container
+     *
+     * Set: onGuardReady() onInitStopped() start() stop()
+     * Get: getState() and callbacks
+     */
+    int mExitStatus;
 
     /**
      * Container network configration
@@ -149,7 +171,12 @@ struct ContainerConfig {
      */
     CGroupsConfig mCgroups;
 
-    ContainerConfig() : mGuardPid(-1), mInitPid(-1), mNamespaces(0) {}
+    ContainerConfig():
+        mGuardPid(-1),
+        mInitPid(-1),
+        mState(Container::State::STOPPED),
+        mExitStatus(DEFAULT_EXIT_STATUS),
+        mNamespaces(0) {}
 
     CARGO_REGISTER
     (

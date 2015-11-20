@@ -68,9 +68,6 @@ private:
 
     std::shared_ptr<ContainerConfig> mConfig;
 
-    // NOTE: Create a map if more async results needed
-    cargo::ipc::MethodResult::Pointer mStopResult;
-
     /**
      * Setups the init process and executes the init.
      */

@@ -45,32 +45,20 @@ namespace lxcpp {
  *
  * After execute() object will live till all it's callbacks are run.
  */
-class Start final: public Command, public std::enable_shared_from_this<Start> {
+class Start final: public Command {
 public:
 
     /**
      * @param config container's config
-     * @param client IPC connection to the Guard process
      */
-    Start(std::shared_ptr<ContainerConfig>& config,
-          std::shared_ptr<cargo::ipc::Client>& client);
+    Start(std::shared_ptr<ContainerConfig>& config);
     ~Start();
 
     void execute();
 
-    /**
-     * Guards tells that it's ready to receive commands.
-     *
-     * This is a method handler, not signal to avoid races.
-     */
-    bool onGuardReady(const cargo::ipc::PeerID,
-                      std::shared_ptr<api::Void>&,
-                      cargo::ipc::MethodResult::Pointer);
-
 private:
     std::shared_ptr<ContainerConfig> mConfig;
     std::string mGuardPath;
-    std::shared_ptr<cargo::ipc::Client> mClient;
 
     void parent(const pid_t pid);
     void daemonize();

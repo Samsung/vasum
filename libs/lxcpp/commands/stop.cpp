@@ -22,9 +22,9 @@
  */
 
 #include "lxcpp/commands/stop.hpp"
-#include "lxcpp/guard/api.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"
+#include "lxcpp/guard/api.hpp"
 
 #include "logger/logger.hpp"
 #include "utils/signal.hpp"
@@ -44,18 +44,9 @@ Stop::~Stop()
 
 void Stop::execute()
 {
-    std::string containerName = mConfig->mName;
-    LOGD("Stopping container: " << containerName);
-    auto callback = [containerName](cargo::ipc::Result<api::ExitStatus>&& result) {
-        // TODO: Collect the returned init process status
-        if (!result.isValid()) {
-            LOGE("Failed to get the exit status");
-            result.rethrow();
-        }
-
-        LOGI("Stopped container: " << containerName << ". Exit status: " << result.get()->value);
-    };
-    mClient->callAsync<api::Void, api::ExitStatus>(api::METHOD_STOP, std::make_shared<api::Void>(), callback);
+    LOGD("Stopping container: " << mConfig->mName);
+    mClient->callAsync<api::Void, api::ExitStatus>(api::METHOD_STOP,
+            std::make_shared<api::Void>());
 }
 
 } // namespace lxcpp

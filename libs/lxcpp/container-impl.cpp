@@ -78,6 +78,10 @@ ContainerImpl::ContainerImpl(const std::string &name,
 
     // IPC with the Guard process
     mClient.reset(new cargo::ipc::Client(mDispatcher.getPoll(), mConfig->mSocketPath));
+    mClient->setMethodHandler<api::Void, api::ExitStatus>(api::METHOD_INIT_STOPPED,
+            std::bind(&ContainerImpl::onInitStopped, this, _1, _2, _3));
+    mClient->setMethodHandler<api::Void, api::Void>(api::METHOD_GUARD_READY,
+            std::bind(&ContainerImpl::onGuardReady, this, _1, _2, _3));
 
     // TODO: Connect to a running Guard with something like this:
     // try {
@@ -97,14 +101,16 @@ ContainerImpl::~ContainerImpl()
 {
     try {
         stop();
-    } catch(...) {
-        LOGW("Discarding an error during stopping");
+    } catch(std::exception& e) {
+        LOGW("Discarding an error during stopping: " << e.what());
     }
     mClient->stop(true);
 }
 
 void ContainerImpl::onWorkFileEvent(const std::string& name, const uint32_t mask)
 {
+    Lock lock(mStateMutex);
+
     if(mask & IN_CREATE) {
         if (name == mConfig->mName + ".socket") {
             mClient->start();
@@ -119,21 +125,29 @@ void ContainerImpl::onWorkFileEvent(const std::string& name, const uint32_t mask
 
 const std::string& ContainerImpl::getName() const
 {
+    Lock lock(mStateMutex);
+
     return mConfig->mName;
 }
 
 const std::string& ContainerImpl::getRootPath() const
 {
+    Lock lock(mStateMutex);
+
     return mConfig->mRootPath;
 }
 
 const std::vector<std::string>& ContainerImpl::getInit()
 {
+    Lock lock(mStateMutex);
+
     return mConfig->mInit;
 }
 
 void ContainerImpl::setInit(const std::vector<std::string> &init)
 {
+    Lock lock(mStateMutex);
+
     if (init.empty() || init[0].empty()) {
         const std::string msg = "Init path cannot be empty";
         LOGE(msg);
@@ -153,11 +167,15 @@ void ContainerImpl::setInit(const std::vector<std::string> &init)
 
 pid_t ContainerImpl::getGuardPid() const
 {
+    Lock lock(mStateMutex);
+
     return mConfig->mGuardPid;
 }
 
 pid_t ContainerImpl::getInitPid() const
 {
+    Lock lock(mStateMutex);
+
     return mConfig->mInitPid;
 }
 
@@ -165,11 +183,15 @@ void ContainerImpl::setLogger(const logger::LogType type,
                               const logger::LogLevel level,
                               const std::string &arg)
 {
+    Lock lock(mStateMutex);
+
     mConfig->mLogger.set(type, level, arg);
 }
 
 void ContainerImpl::setTerminalCount(const unsigned int count)
 {
+    Lock lock(mStateMutex);
+
     if (count == 0) {
         const std::string msg = "Container needs at least one terminal";
         LOGE(msg);
@@ -181,6 +203,8 @@ void ContainerImpl::setTerminalCount(const unsigned int count)
 
 void ContainerImpl::addUIDMap(unsigned min, unsigned max, unsigned num)
 {
+    Lock lock(mStateMutex);
+
     mConfig->mNamespaces |= CLONE_NEWUSER;
 
     if (mConfig->mUserNSConfig.mUIDMaps.size() >= 5) {
@@ -194,6 +218,8 @@ void ContainerImpl::addUIDMap(unsigned min, unsigned max, unsigned num)
 
 void ContainerImpl::addGIDMap(unsigned min, unsigned max, unsigned num)
 {
+    Lock lock(mStateMutex);
+
     mConfig->mNamespaces |= CLONE_NEWUSER;
 
     if (mConfig->mUserNSConfig.mGIDMaps.size() >= 5) {
@@ -207,42 +233,148 @@ void ContainerImpl::addGIDMap(unsigned min, unsigned max, unsigned num)
 
 void ContainerImpl::start()
 {
+    Lock lock(mStateMutex);
+
     // TODO: check config consistency and completeness somehow
+    if(mConfig->mState != Container::State::STOPPED) {
+        throw ForbiddenActionException("Container isn't stopped, can't start");
+    }
+    mConfig->mState = Container::State::STARTING;
 
     PrepHostTerminal terminal(mConfig->mTerminals);
     terminal.execute();
 
-    auto command = std::make_shared<Start>(mConfig, mClient);
-    command->execute();
+    Start start(mConfig);
+    start.execute();
+}
+
+bool ContainerImpl::onGuardReady(const cargo::ipc::PeerID,
+                                 std::shared_ptr<api::Void>&,
+                                 cargo::ipc::MethodResult::Pointer methodResult)
+{
+    Lock lock(mStateMutex);
+
+    // Guard is up
+
+    mClient->callAsyncFromCallback<ContainerConfig, api::Void>(api::METHOD_SET_CONFIG, mConfig);
+
+    auto initStarted = [this](cargo::ipc::Result<api::Pid>&& result) {
+        Lock lock(mStateMutex);
+
+        if (!result.isValid()) {
+            LOGE("Failed to get init's PID");
+            result.rethrow();
+        }
+
+        auto initPid = result.get();
+        mConfig->mInitPid = initPid->value;
+        LOGI("Init PID: " << initPid->value);
+        if (mConfig->mInitPid <= 0) {
+            // TODO: Handle the error
+            LOGE("Bad Init PID");
+            return;
+        }
+
+        mConfig->mState = Container::State::RUNNING;
+        if (mStartedCallback) {
+            mStartedCallback();
+        }
+    };
+
+    mClient->callAsyncFromCallback<api::Void, api::Pid>(api::METHOD_START, std::shared_ptr<api::Void>(), initStarted);
+
+    methodResult->setVoid();
+
+    return true;
 }
 
 void ContainerImpl::stop()
 {
+    Lock lock(mStateMutex);
+
     // TODO: things to do when shutting down the container:
     // - close PTY master FDs from the config so we won't keep PTYs open
+    if(mConfig->mState != Container::State::RUNNING) {
+        throw ForbiddenActionException("Container isn't running, can't stop");
+    }
+    mConfig->mState = Container::State::STOPPING;
 
     Stop stop(mConfig, mClient);
     stop.execute();
 }
 
+bool ContainerImpl::onInitStopped(const cargo::ipc::PeerID,
+                                  std::shared_ptr<api::ExitStatus>& data,
+                                  cargo::ipc::MethodResult::Pointer methodResult)
+{
+    Lock lock(mStateMutex);
+
+    // Guard detected that Init exited
+    mConfig->mExitStatus = data->value;
+    LOGI("STOPPED " << mConfig->mName << " Exit status: " << mConfig->mExitStatus);
+
+    mConfig->mState = Container::State::STOPPED;
+    if (mStoppedCallback) {
+        mStoppedCallback();
+    }
+
+    methodResult->setVoid();
+    return true;
+}
+
 void ContainerImpl::freeze()
 {
+    Lock lock(mStateMutex);
+
+    // TODO: Add a FREEZED, FREEZING state
     throw NotImplementedException();
 }
 
 void ContainerImpl::unfreeze()
 {
+    Lock lock(mStateMutex);
+
     throw NotImplementedException();
 }
 
 void ContainerImpl::reboot()
 {
+    Lock lock(mStateMutex);
+
+    // TODO: Handle container states
     throw NotImplementedException();
+}
+
+Container::State ContainerImpl::getState()
+{
+    Lock lock(mStateMutex);
+
+    return mConfig->mState;
+}
+
+void ContainerImpl::setStartedCallback(const Container::Callback& callback)
+{
+    Lock lock(mStateMutex);
+
+    mStartedCallback = callback;
+}
+
+void ContainerImpl::setStoppedCallback(const Container::Callback& callback)
+{
+    Lock lock(mStateMutex);
+
+    mStoppedCallback = callback;
 }
 
 int ContainerImpl::attach(const std::vector<std::string>& argv,
                           const std::string& cwdInContainer)
 {
+    Lock lock(mStateMutex);
+
+    if(mConfig->mState != Container::State::RUNNING) {
+        throw ForbiddenActionException("Container isn't running, can't attach");
+    }
+
     Attach attach(*mConfig,
                   argv,
                   /*uid in container*/ 0,
@@ -252,8 +384,8 @@ int ContainerImpl::attach(const std::vector<std::string>& argv,
                   /*capsToKeep*/ 0,
                   cwdInContainer,
                   /*envToKeep*/ {},
-                  /*envInContainer*/ {{"container","lxcpp"}},
-                  mConfig->mLogger);
+    /*envInContainer*/ {{"container","lxcpp"}},
+    mConfig->mLogger);
     // TODO: Env variables should agree with the ones already in the container
     attach.execute();
     return attach.getExitCode();
@@ -261,14 +393,15 @@ int ContainerImpl::attach(const std::vector<std::string>& argv,
 
 void ContainerImpl::console()
 {
+    Lock lock(mStateMutex);
+
     Console console(mConfig->mTerminals);
     console.execute();
 }
 
 bool ContainerImpl::isRunning() const
 {
-    // TODO: race condition may occur, sync needed
-    return getInitPid() != -1;
+    return mConfig->mState != Container::State::RUNNING;
 }
 
 void ContainerImpl::addInterfaceConfig(const std::string& hostif,
@@ -277,23 +410,31 @@ void ContainerImpl::addInterfaceConfig(const std::string& hostif,
                                        const std::vector<InetAddr>& addrs,
                                        MacVLanMode mode)
 {
+    Lock lock(mStateMutex);
+
     mConfig->mNamespaces |= CLONE_NEWNET;
     mConfig->mNetwork.addInterfaceConfig(hostif, zoneif, type, addrs, mode);
 }
 
 void ContainerImpl::addInetConfig(const std::string& ifname, const InetAddr& addr)
 {
+    Lock lock(mStateMutex);
+
     mConfig->mNetwork.addInetConfig(ifname, addr);
 }
 
 std::vector<std::string> ContainerImpl::getInterfaces() const
 {
-    return NetworkInterface::getInterfaces(getInitPid());
+    Lock lock(mStateMutex);
+
+    return NetworkInterface::getInterfaces(mConfig->mInitPid);
 }
 
 NetworkInterfaceInfo ContainerImpl::getInterfaceInfo(const std::string& ifname) const
 {
-    NetworkInterface ni(ifname, getInitPid());
+    Lock lock(mStateMutex);
+
+    NetworkInterface ni(ifname, mConfig->mInitPid);
     std::vector<InetAddr> addrs;
     std::string macaddr;
     int mtu = 0, flags = 0;
@@ -322,43 +463,57 @@ void ContainerImpl::createInterface(const std::string& hostif,
                                     InterfaceType type,
                                     MacVLanMode mode)
 {
-    NetworkInterface ni(zoneif, getInitPid());
+    Lock lock(mStateMutex);
+
+    NetworkInterface ni(zoneif, mConfig->mInitPid);
     ni.create(type, hostif, mode);
 }
 
 void ContainerImpl::destroyInterface(const std::string& ifname)
 {
-    NetworkInterface ni(ifname, getInitPid());
+    Lock lock(mStateMutex);
+
+    NetworkInterface ni(ifname, mConfig->mInitPid);
     ni.destroy();
 }
 
 void ContainerImpl::moveInterface(const std::string& ifname)
 {
+    Lock lock(mStateMutex);
+
     NetworkInterface ni(ifname);
-    ni.moveToContainer(getInitPid());
+    ni.moveToContainer(mConfig->mInitPid);
 }
 
 void ContainerImpl::setUp(const std::string& ifname)
 {
-    NetworkInterface ni(ifname, getInitPid());
+    Lock lock(mStateMutex);
+
+    NetworkInterface ni(ifname, mConfig->mInitPid);
     ni.up();
 }
 
 void ContainerImpl::setDown(const std::string& ifname)
 {
-    NetworkInterface ni(ifname, getInitPid());
+    Lock lock(mStateMutex);
+
+    NetworkInterface ni(ifname, mConfig->mInitPid);
     ni.down();
 }
 
 void ContainerImpl::addInetAddr(const std::string& ifname, const InetAddr& addr)
 {
-    NetworkInterface ni(ifname, getInitPid());
+    Lock lock(mStateMutex);
+
+    NetworkInterface ni(ifname, mConfig->mInitPid);
     ni.addInetAddr(addr);
 }
 
 void ContainerImpl::delInetAddr(const std::string& ifname, const InetAddr& addr)
 {
-    NetworkInterface ni(ifname, getInitPid());
+    Lock lock(mStateMutex);
+
+    NetworkInterface ni(ifname, mConfig->mInitPid);
     ni.delInetAddr(addr);
 }
 
@@ -367,6 +522,8 @@ void ContainerImpl::declareFile(const provision::File::Type type,
                                 const int32_t flags,
                                 const int32_t mode)
 {
+    Lock lock(mStateMutex);
+
     provision::File newFile({type, path, flags, mode});
     mConfig->mProvisions.addFile(newFile);
     // TODO: update guard config
@@ -379,11 +536,15 @@ void ContainerImpl::declareFile(const provision::File::Type type,
 
 const FileVector& ContainerImpl::getFiles() const
 {
+    Lock lock(mStateMutex);
+
     return mConfig->mProvisions.getFiles();
 }
 
 void ContainerImpl::removeFile(const provision::File& item)
 {
+    Lock lock(mStateMutex);
+
     mConfig->mProvisions.removeFile(item);
 
     if (isRunning()) {
@@ -398,6 +559,8 @@ void ContainerImpl::declareMount(const std::string& source,
                                  const int64_t flags,
                                  const std::string& data)
 {
+    Lock lock(mStateMutex);
+
     provision::Mount newMount({source, target, type, flags, data});
     mConfig->mProvisions.addMount(newMount);
     // TODO: update guard config
@@ -410,11 +573,15 @@ void ContainerImpl::declareMount(const std::string& source,
 
 const MountVector& ContainerImpl::getMounts() const
 {
+    Lock lock(mStateMutex);
+
     return mConfig->mProvisions.getMounts();
 }
 
 void ContainerImpl::removeMount(const provision::Mount& item)
 {
+    Lock lock(mStateMutex);
+
     mConfig->mProvisions.removeMount(item);
 
     if (isRunning()) {
@@ -426,6 +593,8 @@ void ContainerImpl::removeMount(const provision::Mount& item)
 void ContainerImpl::declareLink(const std::string& source,
                                 const std::string& target)
 {
+    Lock lock(mStateMutex);
+
     provision::Link newLink({source, target});
     mConfig->mProvisions.addLink(newLink);
     // TODO: update guard config
@@ -438,11 +607,15 @@ void ContainerImpl::declareLink(const std::string& source,
 
 const LinkVector& ContainerImpl::getLinks() const
 {
+    Lock lock(mStateMutex);
+
     return mConfig->mProvisions.getLinks();
 }
 
 void ContainerImpl::removeLink(const provision::Link& item)
 {
+    Lock lock(mStateMutex);
+
     mConfig->mProvisions.removeLink(item);
 
     if (isRunning()) {
@@ -453,6 +626,8 @@ void ContainerImpl::removeLink(const provision::Link& item)
 
 void ContainerImpl::addSubsystem(const std::string& name, const std::string& path)
 {
+    Lock lock(mStateMutex);
+
     mConfig->mCgroups.subsystems.push_back(SubsystemConfig{name, path});
 }
 
@@ -461,6 +636,8 @@ void ContainerImpl::addCGroup(const std::string& subsys,
                               const std::vector<CGroupParam>& comm,
                               const std::vector<CGroupParam>& params)
 {
+    Lock lock(mStateMutex);
+
     mConfig->mCgroups.cgroups.push_back(CGroupConfig{subsys, grpname, comm, params});
 }
 

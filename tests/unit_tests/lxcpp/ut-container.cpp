@@ -30,6 +30,8 @@
 
 #include "utils/scoped-dir.hpp"
 #include "utils/fs.hpp"
+#include "utils/latch.hpp"
+#include "utils/spin-wait-for.hpp"
 
 #include <memory>
 
@@ -48,6 +50,9 @@ const std::string TEST_CMD_RANDOM_PRODUCT   = "random_product.txt";
 const std::vector<std::string> COMMAND = {"/bin/bash",
                                           "-c", "trap exit SIGTERM; while true; do sleep 0.1; done"
                                          };
+
+const int TIMEOUT = 5000; // ms
+
 
 struct Fixture {
     utils::ScopedDir mTestDir;
@@ -123,11 +128,61 @@ BOOST_AUTO_TEST_CASE(StartStop)
     BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
                                       logger::LogLevel::DEBUG,
                                       LOGGER_FILE));
+
     BOOST_CHECK_NO_THROW(c->start());
-    // FIXME: Remove the sleep
-    sleep(3);
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
+
     BOOST_CHECK_NO_THROW(c->stop());
-    sleep(2);
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
+}
+
+BOOST_AUTO_TEST_CASE(StartCallback)
+{
+    auto c = std::unique_ptr<Container>(createContainer("StartCallback", "/", WORK_DIR));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
+
+    utils::Latch latch;
+    auto call = [&latch]() {
+        latch.set();
+    };
+    c->setStartedCallback(call);
+    BOOST_CHECK_NO_THROW(c->start());
+
+    BOOST_REQUIRE(latch.wait(TIMEOUT));
+
+    auto pred = [&] {return c->getState() == Container::State::RUNNING;};
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, pred));
+
+    BOOST_CHECK_NO_THROW(c->stop());
+    BOOST_REQUIRE(c->getState() != Container::State::RUNNING);
+
+    auto pred2 = [&] {return c->getState() == Container::State::STOPPING;};
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, pred2));
+}
+
+BOOST_AUTO_TEST_CASE(StopCallback)
+{
+    auto c = std::unique_ptr<Container>(createContainer("StopCallback", "/", WORK_DIR));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
+
+    BOOST_CHECK_NO_THROW(c->start());
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
+
+    utils::Latch latch;
+    auto call = [&latch]() {
+        latch.set();
+    };
+    c->setStoppedCallback(call);
+
+    BOOST_CHECK_NO_THROW(c->stop());
+    BOOST_REQUIRE(latch.wait(TIMEOUT));
+    BOOST_REQUIRE(c->getState() == Container::State::STOPPED);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
