@@ -38,34 +38,34 @@ namespace fs = boost::filesystem;
 void Provisions::execute()
 {
     for(const auto & file : mConfig.mProvisions.files) {
-        ProvisionFile(mConfig, file).execute();
+        ProvisionFile(file).execute();
     }
 
     for(const auto & mount : mConfig.mProvisions.mounts) {
-        ProvisionMount(mConfig, mount).execute();
+        ProvisionMount(mount).execute();
     }
 
     for(const auto & link : mConfig.mProvisions.links) {
-        ProvisionLink(mConfig, link).execute();
+        ProvisionLink(link).execute();
     }
 }
 void Provisions::revert()
 {
     for(const auto & file : mConfig.mProvisions.files) {
-        ProvisionFile(mConfig, file).revert();
+        ProvisionFile(file).revert();
     }
 
     for(const auto & mount : mConfig.mProvisions.mounts) {
-        ProvisionMount(mConfig, mount).revert();
+        ProvisionMount(mount).revert();
     }
 
     for(const auto & link : mConfig.mProvisions.links) {
-        ProvisionLink(mConfig, link).revert();
+        ProvisionLink(link).revert();
     }
 }
 
-ProvisionFile::ProvisionFile(ContainerConfig &config, const provision::File &file)
-    : mConfig(config), mFile(file)
+ProvisionFile::ProvisionFile(const provision::File &file)
+    : mFile(file)
 {
     utils::assertIsAbsolute(file.path);
 }
@@ -114,8 +114,8 @@ void ProvisionFile::revert()
 }
 
 
-ProvisionMount::ProvisionMount(ContainerConfig &config, const provision::Mount &mount)
-    : mConfig(config), mMount(mount)
+ProvisionMount::ProvisionMount(const provision::Mount &mount)
+    : mMount(mount)
 {
     utils::assertIsAbsolute(mount.target);
 }
@@ -130,8 +130,8 @@ void ProvisionMount::revert()
 }
 
 
-ProvisionLink::ProvisionLink(ContainerConfig &config, const provision::Link &link)
-    : mConfig(config), mLink(link)
+ProvisionLink::ProvisionLink(const provision::Link &link)
+    : mLink(link)
 {
     utils::assertIsAbsolute(link.target);
 }

@@ -58,13 +58,12 @@ public:
     *
     * Add/remove new file/fifo/dir provision to/from the container
     */
-    ProvisionFile(ContainerConfig &config, const provision::File &file);
+    ProvisionFile(const provision::File &file);
 
     void execute();
     void revert();
 
 private:
-    ContainerConfig& mConfig;
     const provision::File& mFile;
 };
 
@@ -75,13 +74,12 @@ public:
     *
     * Add/remove new mount provision to/from the container
     */
-    ProvisionMount(ContainerConfig &config, const provision::Mount &mount);
+    ProvisionMount(const provision::Mount &mount);
 
     void execute();
     void revert();
 
 private:
-    ContainerConfig& mConfig;
     const provision::Mount& mMount;
 };
 
@@ -92,13 +90,12 @@ public:
     *
     * Add/remove link provision to/from the container
     */
-    ProvisionLink(ContainerConfig &config, const provision::Link &link);
+    ProvisionLink(const provision::Link &link);
 
     void execute();
     void revert();
 
 private:
-    ContainerConfig& mConfig;
     const provision::Link& mLink;
 };
 

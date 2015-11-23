@@ -372,7 +372,7 @@ void ContainerImpl::declareFile(const provision::File::Type type,
     // TODO: update guard config
 
     if (isRunning()) {
-        ProvisionFile fileCmd(*mConfig, newFile);
+        ProvisionFile fileCmd(newFile);
         fileCmd.execute();
     }
 }
@@ -387,7 +387,7 @@ void ContainerImpl::removeFile(const provision::File& item)
     mConfig->mProvisions.removeFile(item);
 
     if (isRunning()) {
-        ProvisionFile fileCmd(*mConfig, item);
+        ProvisionFile fileCmd(item);
         fileCmd.revert();
     }
 }
@@ -403,7 +403,7 @@ void ContainerImpl::declareMount(const std::string& source,
     // TODO: update guard config
 
     if (isRunning()) {
-        ProvisionMount mountCmd(*mConfig, newMount);
+        ProvisionMount mountCmd(newMount);
         mountCmd.execute();
     }
 }
@@ -418,7 +418,7 @@ void ContainerImpl::removeMount(const provision::Mount& item)
     mConfig->mProvisions.removeMount(item);
 
     if (isRunning()) {
-        ProvisionMount mountCmd(*mConfig, item);
+        ProvisionMount mountCmd(item);
         mountCmd.revert();
     }
 }
@@ -431,7 +431,7 @@ void ContainerImpl::declareLink(const std::string& source,
     // TODO: update guard config
 
     if (isRunning()) {
-        ProvisionLink linkCmd(*mConfig, newLink);
+        ProvisionLink linkCmd(newLink);
         linkCmd.execute();
     }
 }
@@ -446,7 +446,7 @@ void ContainerImpl::removeLink(const provision::Link& item)
     mConfig->mProvisions.removeLink(item);
 
     if (isRunning()) {
-        ProvisionLink linkCmd(*mConfig, item);
+        ProvisionLink linkCmd(item);
         linkCmd.revert();
     }
 }
