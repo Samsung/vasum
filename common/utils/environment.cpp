@@ -301,24 +301,9 @@ bool dropRoot(uid_t uid, gid_t gid, const std::vector<unsigned int>& caps)
     return true;
 }
 
-bool launchAsRoot(const std::function<bool()>& func)
+bool launchAsRoot(const std::vector<std::string>& argv)
 {
-    if (::getuid() == 0) {
-        // we are already root, no need to fork
-        return func();
-    } else {
-        return executeAndWait([&func]() {
-            if (::setuid(0) < 0) {
-                LOGW("Failed to become root: " << getSystemErrorMessage());
-                _exit(EXIT_FAILURE);
-            }
-
-            if (!func()) {
-                LOGE("Failed to successfully execute func");
-                _exit(EXIT_FAILURE);
-            }
-        });
-    }
+    return executeAndWait(0, argv);
 }
 
 bool joinToNs(int nsPid, int ns)
@@ -344,6 +329,7 @@ bool joinToNs(int nsPid, int ns)
     return true;
 }
 
+// FIXME remove (not used in lxcpp)
 int passNamespacedFd(int nsPid, int ns, const std::function<int()>& fdFactory)
 {
     int fds[2];

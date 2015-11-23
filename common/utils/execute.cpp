@@ -36,6 +36,9 @@ namespace utils {
 
 namespace {
 
+const uid_t UNSPEC_UID = static_cast<uid_t>(-1);
+
+
 __attribute__((unused)) std::ostream& operator<< (std::ostream& out, const char* const* argv)
 {
     if (*argv) {
@@ -72,7 +75,7 @@ bool executeAndWait(const std::function<void()>& func, int& status)
 {
     LOGD("Execute child process");
 
-    pid_t pid = fork();
+    pid_t pid = ::fork();
     if (pid == -1) {
         LOGE("Fork failed: " << getSystemErrorMessage());
         return false;
@@ -93,26 +96,36 @@ bool executeAndWait(const std::function<void()>& func)
     return isExecutionSuccessful(status);
 }
 
-
-bool executeAndWait(const char* fname, const char* const* argv, int& status)
+bool executeAndWait(const uid_t uid, const char* fname, const char* const* argv, int& status)
 {
     LOGD("Execute " << fname << argv);
 
-    bool success = executeAndWait([=]() {
-        execv(fname, const_cast<char* const*>(argv));
-        LOGE("execv failed: " << getSystemErrorMessage());
-        _exit(EXIT_FAILURE);
-    }, status);
-    if (!success) {
-        LOGW("Process " << fname << " has exited abnormally");
+    pid_t pid = ::fork();
+    if (pid == -1) {
+        LOGE("Fork failed: " << getSystemErrorMessage());
+        return false;
     }
-    return success;
+    if (pid == 0) {
+        if (uid != UNSPEC_UID && ::setuid(uid) < 0) {
+            LOGW("Failed to become uid(" << uid << "): " << getSystemErrorMessage());
+            ::_exit(EXIT_FAILURE);
+        }
+        ::execv(fname, const_cast<char* const*>(argv));
+        LOGE("execv failed: " << getSystemErrorMessage());
+        ::_exit(EXIT_FAILURE);
+    }
+    return waitPid(pid, status);
+}
+
+bool executeAndWait(const char* fname, const char* const* argv, int& status)
+{
+    return executeAndWait(-1, fname, argv, status);
 }
 
 bool executeAndWait(const char* fname, const char* const* argv)
 {
     int status;
-    if (!executeAndWait(fname, argv, status)) {
+    if (!executeAndWait(UNSPEC_UID, fname, argv, status)) {
         return false;
     }
     return isExecutionSuccessful(status);
@@ -127,6 +140,33 @@ bool waitPid(pid_t pid, int& status)
         }
     }
     return true;
+}
+
+bool executeAndWait(const uid_t uid, const std::vector<std::string>& argv, int& status)
+{
+    std::vector<const char *> args;
+    args.reserve(argv.size() + 1);
+
+    for (const auto& arg : argv) {
+        args.push_back(arg.c_str());
+    }
+    args.push_back(nullptr);
+
+    return executeAndWait(uid, args[0], args.data(), status);
+}
+
+bool executeAndWait(const uid_t uid, const std::vector<std::string>& argv)
+{
+    int status;
+    if (!executeAndWait(uid, argv, status)) {
+        return false;
+    }
+    return isExecutionSuccessful(status);
+}
+
+bool executeAndWait(const std::vector<std::string>& argv)
+{
+    return executeAndWait(UNSPEC_UID, argv);
 }
 
 } // namespace utils

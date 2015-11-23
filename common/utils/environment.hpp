@@ -45,11 +45,11 @@ bool setSuppGroups(const std::vector<std::string>& groups);
 bool dropRoot(uid_t uid, gid_t gid, const std::vector<unsigned int>& caps);
 
 /**
- * Launch func as root user.
+ * Launch binary as root user
  *
- * This function forks, sets UID 0 to child process and calls func.
+ * This function forks, sets UID 0 to child process and calls binary.
  */
-bool launchAsRoot(const std::function<bool()>& func);
+bool launchAsRoot(const std::vector<std::string>& argv);
 
 /**
  * Join to namespace

@@ -1248,25 +1248,24 @@ void ZonesManager::createZone(const std::string& id,
     // copy zone image if config contains path to image
     LOGT("Image path: " << mConfig.zoneImagePath);
     if (!mConfig.zoneImagePath.empty()) {
-        auto copyImageContentsWrapper = std::bind(&utils::copyImageContents,
-                                                  mConfig.zoneImagePath,
-                                                  zonePathStr);
+        std::vector<std::string> args = {
+            LAUNCHER_PATH,
+            "copyimage",
+            mConfig.zoneImagePath,
+            zonePathStr
+        };
 
-        if (!utils::launchAsRoot(copyImageContentsWrapper)) {
+        if (!utils::launchAsRoot(args)) {
             const std::string msg = "Failed to copy zone image.";
             LOGE(msg);
             throw ZoneOperationException(msg);
         }
     }
 
-    auto removeAllWrapper = [](const std::string & path) -> bool {
-        try {
-            LOGD("Removing copied data");
-            fs::remove_all(fs::path(path));
-        } catch (const std::exception& e) {
-            LOGW("Failed to remove data: " << boost::diagnostic_information(e));
-        }
-        return true;
+    std::vector<std::string> removeAllArgs = {
+        LAUNCHER_PATH,
+        "removeall",
+        zonePathStr
     };
 
     std::string zoneTemplatePath = utils::createFilePath(mConfig.zoneTemplateDir,
@@ -1277,7 +1276,7 @@ void ZonesManager::createZone(const std::string& id,
         generateNewConfig(id, zoneTemplatePath);
     } catch (std::runtime_error& e) {
         LOGE("Generate config failed: " << e.what());
-        utils::launchAsRoot(std::bind(removeAllWrapper, zonePathStr));
+        utils::launchAsRoot(removeAllArgs);
         throw;
     }
 
@@ -1286,7 +1285,7 @@ void ZonesManager::createZone(const std::string& id,
         insertZone(id, zoneTemplatePath);
     } catch (std::runtime_error& e) {
         LOGE("Creating new zone failed: " << e.what());
-        utils::launchAsRoot(std::bind(removeAllWrapper, zonePathStr));
+        utils::launchAsRoot(removeAllArgs);
         throw;
     }
 

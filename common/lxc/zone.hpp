@@ -26,6 +26,7 @@
 #define COMMON_LXC_ZONE_HPP
 
 #include <string>
+#include <vector>
 #include <functional>
 #include <sys/types.h>
 
@@ -147,13 +148,13 @@ public:
     pid_t getInitPid() const;
 
     /**
-     * Attach to the Zone and run the call
+     * Attach to the Zone and run the command binary
      *
-     * This call will fork, so ensure the call object will withstand this
+     * This call will fork and execure binary
      *
-     * @param call function object to run
+     * @param argv command and its arguments
      */
-    bool runInZone(Call& call);
+    bool runInZone(const std::vector<std::string>& argv);
 
     /**
      * Create a file inside the zone and return it's file descriptor

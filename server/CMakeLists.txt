@@ -21,15 +21,15 @@ MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Server...")
 FILE(GLOB               project_SRCS *.cpp *.hpp)
 
-
 ## Setup target ################################################################
 SET(SERVER_CODENAME "${PROJECT_NAME}-server")
+SET(LAUNCHER_CODENAME "${PROJECT_NAME}-launcher")
 ADD_EXECUTABLE(${SERVER_CODENAME} ${project_SRCS})
 
 ADD_DEPENDENCIES(${SERVER_CODENAME} Common Logger cargo-json cargo-sqlite cargo-ipc)
 
 ## Link libraries ##############################################################
-FIND_PACKAGE(Boost COMPONENTS program_options system filesystem ${USE_BOOST_REGEX})
+FIND_PACKAGE(Boost COMPONENTS program_options system filesystem iostreams ${USE_BOOST_REGEX})
 PKG_CHECK_MODULES(SERVER_DEPS REQUIRED lxc glib-2.0 gio-2.0)
 
 INCLUDE_DIRECTORIES(${COMMON_FOLDER})
@@ -43,8 +43,13 @@ SET_TARGET_PROPERTIES(${SERVER_CODENAME} PROPERTIES
     LINK_FLAGS "-pthread"
 )
 
+TARGET_COMPILE_DEFINITIONS(${SERVER_CODENAME}
+    PRIVATE LAUNCHER_PATH="${LIBEXEC_DIR}/${LAUNCHER_CODENAME}"
+)
+
 TARGET_LINK_LIBRARIES(${SERVER_CODENAME} Common ${SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
                       Logger ${CARGO_GVARIANT_DEPS_LIBRARIES} cargo-json cargo-sqlite cargo-ipc)
+
 IF(NOT WITHOUT_DBUS)
 TARGET_LINK_LIBRARIES(${SERVER_CODENAME} SimpleDbus)
 ENDIF(NOT WITHOUT_DBUS)

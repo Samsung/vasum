@@ -26,26 +26,34 @@
 #define COMMON_UTILS_EXECUTE_HPP
 
 #include <sys/types.h>
+#include <vector>
 #include <functional>
 
 namespace utils {
 
 /**
- * Execute binary
+ * Execute function - deprecated
  */
-///@{
-bool executeAndWait(const char* fname, const char* const* argv);
-
-bool executeAndWait(const char* fname, const char* const* argv, int& status);
-///@}
-
-/**
- * Execute function in child process
- */
-///@{
 bool executeAndWait(const std::function<void()>& func, int& status);
 
 bool executeAndWait(const std::function<void()>& func);
+
+
+/**
+ * Execute binary
+ */
+///@{
+bool executeAndWait(uid_t uid, const char* fname, const char* const* argv, int& status);
+
+bool executeAndWait(const char* fname, const char* const* argv);
+
+bool executeAndWait(const char* fname, const char* const* argv, int& status);
+
+bool executeAndWait(uid_t uid, const std::vector<std::string>& argv, int& status);
+
+bool executeAndWait(uid_t uid, const std::vector<std::string>& argv);
+
+bool executeAndWait(const std::vector<std::string>& argv);
 ///@}
 
 /**

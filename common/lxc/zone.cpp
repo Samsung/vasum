@@ -42,6 +42,10 @@
 #include "utils/c-array.hpp"
 #endif
 #include "utils/initctl.hpp"
+#include "utils/channel.hpp"
+
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
 
 #include <lxc/lxccontainer.h>
 #include <sys/stat.h>
@@ -69,14 +73,21 @@ const std::map<std::string, LxcZone::State> STATE_MAP = {
 };
 #undef ITEM
 
-int execFunction(void* data) {
-    // Executed by C code, so catch all exceptions
-    try {
-        return (*static_cast<std::function<int()>*>(data))();
-    } catch(...) {
-        return -1; // Non-zero on failure
+struct RunBinaryPayload {
+    utils::Channel *channel;
+    const char **args;
+};
+
+int runBinaryInZone(void* payload)
+{
+    RunBinaryPayload *p = static_cast<RunBinaryPayload *>(payload);
+    if (!p || !p->channel || !p->args || !p->args[0]) {
+        errno = EINVAL;
+        return -1;
     }
-    return 0; // Success
+    p->channel->setRight();
+    utils::dup2(p->channel->getFD(), STDERR_FILENO);
+    return ::execvp(p->args[0], const_cast<char* const*>(p->args));
 }
 
 } // namespace
@@ -337,10 +348,12 @@ pid_t LxcZone::getInitPid() const
 
 bool LxcZone::setRunLevel(int runLevel)
 {
-    Call call = [runLevel]() -> int {
-        return utils::setRunLevel(static_cast<utils::RunLevel>(runLevel)) ? 0 : 1;
+    std::vector<std::string> args = {
+        LAUNCHER_PATH,
+        "setrunlevel",
+        std::to_string(runLevel)
     };
-    return runInZone(call);
+    return runInZone(args);
 }
 
 void LxcZone::refresh()
@@ -352,8 +365,16 @@ void LxcZone::refresh()
     mLxcContainer = lxc_container_new(zoneName.c_str(), lxcPath.c_str());
 }
 
-bool LxcZone::runInZone(Call& call)
+bool LxcZone::runInZone(const std::vector<std::string>& argv)
 {
+    std::vector<const char *> args;
+    args.reserve(argv.size() + 1);
+
+    for (const auto& arg : argv) {
+        args.push_back(arg.c_str());
+    }
+    args.push_back(nullptr);
+
     lxc_attach_options_t options = LXC_ATTACH_OPTIONS_DEFAULT;
     options.attach_flags = LXC_ATTACH_REMOUNT_PROC_SYS |
                            LXC_ATTACH_DROP_CAPABILITIES |
@@ -362,18 +383,40 @@ bool LxcZone::runInZone(Call& call)
                            LXC_ATTACH_LSM_NOW |
                            LXC_ATTACH_MOVE_TO_CGROUP;
 
+    // use Channel to catch stderr from binary
+    utils::Channel channel;
+    RunBinaryPayload payload{&channel, args.data()};
+
     pid_t pid;
     int ret = mLxcContainer->attach(mLxcContainer,
-                                    execFunction,
-                                    &call,
+                                    runBinaryInZone,
+                                    &payload,
                                     &options,
                                     &pid);
     if (ret != 0) {
         return false;
     }
+
+    channel.setLeft();
+    std::string msg;
+
+    do {
+        namespace io = boost::iostreams;
+        io::stream<io::file_descriptor_source> errstream(io::file_descriptor_source(channel.getFD(), io::never_close_handle));
+        std::string line;
+        while (std::getline(errstream, line).good()) msg += line + ";";
+    } while (false);
+
     int status;
     if (!utils::waitPid(pid, status)) {
+        LOGE("waitPid: " + utils::getSystemErrorMessage());
         return false;
+    }
+    channel.shutdown();
+    if (status) {
+        LOGE("[child err=" + std::to_string(status) + "] " + msg);
+    } else if (!msg.empty()) {
+        LOGI("[child]: " + msg);
     }
     return status == 0;
 }
@@ -391,22 +434,15 @@ bool LxcZone::createFile(const std::string& path,
         return false;
     }
 
-    lxc::LxcZone::Call call = [&]()->int{
-        utils::close(sockets[1]);
-
-        int fd = ::open(path.c_str(), O_CREAT | O_EXCL | flags, mode);
-        if (fd < 0) {
-            LOGE("Error during file creation: " << utils::getSystemErrorMessage());
-            utils::close(sockets[0]);
-            return -1;
-        }
-        LOGT("Created file in zone with fd " << fd);
-        utils::fdSend(sockets[0], fd);
-        utils::close(fd);
-        return 0;
+    std::vector<std::string> args = {
+        LAUNCHER_PATH,
+        "createfile",
+        std::to_string(sockets[0]),
+        path,
+        std::to_string(flags),
+        std::to_string(mode)
     };
-
-    runInZone(call);
+    runInZone(args);
 
     utils::close(sockets[0]);
     *fdPtr = utils::fdRecv(sockets[1]);

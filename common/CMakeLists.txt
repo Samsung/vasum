@@ -21,9 +21,18 @@ MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the libCommon...")
 FILE(GLOB_RECURSE SRCS *.cpp *.hpp)
 
+SET(LAUNCHER_CODENAME "${PROJECT_NAME}-launcher")
+
+ADD_SUBDIRECTORY(launcher)
+
 ## Setup target ################################################################
 ADD_LIBRARY(Common STATIC ${SRCS})
 
 PKG_CHECK_MODULES(COMMON_DEPS REQUIRED glib-2.0)
+
+TARGET_COMPILE_DEFINITIONS(Common
+    PRIVATE LAUNCHER_PATH="${LIBEXEC_DIR}/${LAUNCHER_CODENAME}"
+)
+
 
 INCLUDE_DIRECTORIES(SYSTEM ${COMMON_FOLDER} ${LIBS_FOLDER} ${COMMON_DEPS_INCLUDE_DIRS})

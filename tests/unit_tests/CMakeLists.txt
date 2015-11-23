@@ -31,6 +31,7 @@ LIST(REMOVE_ITEM server_SRCS ${main_SRC})
 # We must compile socket-test separately, exclude it from unit-test build
 LIST(REMOVE_ITEM project_SRCS ${socket_test_SRCS} ${lxcpp_test_SRCS})
 
+SET(LAUNCHER_CODENAME "${PROJECT_NAME}-launcher")
 
 ## Setup target ################################################################
 SET(UT_SERVER_CODENAME "${PROJECT_NAME}-server-unit-tests")
@@ -56,7 +57,7 @@ ADD_EXECUTABLE(${SOCKET_TEST_CODENAME} ${socket_test_SRCS} ${client_SRCS})
 ENDIF(NOT WITHOUT_SYSTEMD)
 
 ## Link libraries ##############################################################
-FIND_PACKAGE (Boost COMPONENTS unit_test_framework system filesystem ${USE_BOOST_REGEX})
+FIND_PACKAGE (Boost COMPONENTS unit_test_framework system filesystem iostreams ${USE_BOOST_REGEX})
 
 PKG_CHECK_MODULES(UT_SERVER_DEPS REQUIRED lxc gio-2.0)
 INCLUDE_DIRECTORIES(${COMMON_FOLDER} ${SERVER_FOLDER} ${UNIT_TESTS_FOLDER} ${CLIENT_FOLDER}
@@ -67,6 +68,9 @@ SET_TARGET_PROPERTIES(${UT_SERVER_CODENAME} PROPERTIES
     COMPILE_FLAGS "-pthread"
     COMPILE_DEFINITIONS HOST_IPC_SOCKET="${VSM_UNIT_TESTS_IPC_SOCKET_PATH}"
     LINK_FLAGS "-pthread"
+)
+TARGET_COMPILE_DEFINITIONS(${UT_SERVER_CODENAME}
+    PRIVATE LAUNCHER_PATH="${LIBEXEC_DIR}/${LAUNCHER_CODENAME}"
 )
 
 TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} Common ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
