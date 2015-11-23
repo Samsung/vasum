@@ -31,7 +31,7 @@
 #include "api/method-result-builder.hpp"
 
 #include "dbus/connection.hpp"
-#include "cargo/manager.hpp"
+#include "cargo-gvariant/cargo-gvariant.hpp"
 
 #include <memory>
 #include <functional>

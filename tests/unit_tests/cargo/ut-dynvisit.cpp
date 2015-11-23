@@ -27,7 +27,9 @@
 #include "ut.hpp"
 #include "testconfig-example.hpp"
 #include "utils/scoped-dir.hpp"
-#include "cargo/manager.hpp"
+#include "cargo-sqlite/cargo-sqlite.hpp"
+#include "cargo-json/cargo-json.hpp"
+#include "cargo-sqlite-json/cargo-sqlite-json.hpp"
 
 namespace {
 

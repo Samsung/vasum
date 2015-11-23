@@ -22,8 +22,8 @@
  * @brief   glib epoll dispatcher
  */
 
-#ifndef EPOLL_GLIB_DISPATCHER_HPP
-#define EPOLL_GLIB_DISPATCHER_HPP
+#ifndef CARGO_IPC_EPOLL_GLIB_DISPATCHER_HPP
+#define CARGO_IPC_EPOLL_GLIB_DISPATCHER_HPP
 
 #include "cargo-ipc/epoll/event-poll.hpp"
 #include "utils/callback-guard.hpp"
@@ -55,4 +55,4 @@ private:
 } // namespace ipc
 } // namespace cargo
 
-#endif // UTILS_GLIB_DISPATCHER_HPP
+#endif // CARGO_IPC_EPOLL_GLIB_DISPATCHER_HPP

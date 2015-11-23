@@ -31,7 +31,6 @@
 #include "lxcpp/commands/cgroups.hpp"
 #include "lxcpp/commands/netcreate.hpp"
 
-#include "cargo/manager.hpp"
 #include "logger/logger.hpp"
 #include "utils/signal.hpp"
 

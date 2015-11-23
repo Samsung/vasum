@@ -19,7 +19,7 @@
 /**
  * @file
  * @author  Lukasz Pawelczyk (l.pawelczyk@partner.samsung.com)
- * @brief   Exceptions for libCargo
+ * @brief   Exceptions for libcargo
  */
 
 #ifndef CARGO_EXCEPTION_HPP
@@ -30,7 +30,7 @@
 namespace cargo {
 
 /**
- * Base class for exceptions in libCargo.
+ * Base class for exceptions in libcargo.
  */
 struct CargoException: public std::runtime_error {
 

@@ -26,7 +26,7 @@
 #include "config.hpp"
 #include "ut.hpp"
 
-#include "cargo/kvstore.hpp"
+#include "cargo-sqlite/kvstore.hpp"
 #include "cargo/exception.hpp"
 #include "utils/scoped-dir.hpp"
 #include "utils/latch.hpp"

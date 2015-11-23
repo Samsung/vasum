@@ -19,7 +19,7 @@
 /**
  * @file
  * @author  Mateusz Malicki (m.malicki2@samsung.com)
- * @brief   Macros for declare Cargo fields
+ * @brief   Macros for declare cargo fields
  */
 
 #ifndef CARGO_FIELDS_UNION_HPP
@@ -47,7 +47,7 @@ class DisableMoveAnyWrapper : public boost::any
 /**
  * @ingroup libCargo
  *
- * Use this macro to declare and register Cargo fields.
+ * Use this macro to declare and register cargo fields.
  *
  * Example of fields registration:
  * @code

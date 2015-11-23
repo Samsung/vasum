@@ -26,7 +26,7 @@ FILE(GLOB               project_SRCS *.cpp *.hpp)
 SET(SERVER_CODENAME "${PROJECT_NAME}-server")
 ADD_EXECUTABLE(${SERVER_CODENAME} ${project_SRCS})
 
-ADD_DEPENDENCIES(${SERVER_CODENAME} Common Logger Cargo CargoIpc)
+ADD_DEPENDENCIES(${SERVER_CODENAME} Common Logger cargo-json cargo-sqlite CargoIpc)
 
 ## Link libraries ##############################################################
 FIND_PACKAGE(Boost COMPONENTS program_options system filesystem ${USE_BOOST_REGEX})
@@ -43,7 +43,8 @@ SET_TARGET_PROPERTIES(${SERVER_CODENAME} PROPERTIES
     LINK_FLAGS "-pthread"
 )
 
-TARGET_LINK_LIBRARIES(${SERVER_CODENAME} Common ${SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES} Logger Cargo CargoIpc)
+TARGET_LINK_LIBRARIES(${SERVER_CODENAME} Common ${SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
+                      Logger ${CARGO_GVARIANT_DEPS_LIBRARIES} cargo-json cargo-sqlite CargoIpc)
 IF(NOT WITHOUT_DBUS)
 TARGET_LINK_LIBRARIES(${SERVER_CODENAME} SimpleDbus)
 ENDIF(NOT WITHOUT_DBUS)

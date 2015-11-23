@@ -26,13 +26,14 @@
 
 #include "cargo-ipc/exception.hpp"
 #include "cargo-ipc/internals/processor.hpp"
-#include "cargo/manager.hpp"
+#include "cargo-fd/cargo-fd.hpp"
 #include "cargo/exception.hpp"
 
 #include <cerrno>
 #include <cstring>
 #include <csignal>
 #include <stdexcept>
+#include <cassert>
 
 #include <sys/socket.h>
 #include <limits>

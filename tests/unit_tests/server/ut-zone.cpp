@@ -33,7 +33,7 @@
 #include "utils/exception.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/scoped-dir.hpp"
-#include "cargo/manager.hpp"
+#include "cargo-json/cargo-json.hpp"
 #include "cargo/exception.hpp"
 #include "netdev.hpp"
 

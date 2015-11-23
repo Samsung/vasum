@@ -33,7 +33,8 @@
 #include "utils/vt.hpp"
 #include "utils/c-array.hpp"
 #include "lxc/cgroup.hpp"
-#include "cargo/manager.hpp"
+#include "cargo-sqlite/cargo-sqlite.hpp"
+#include "cargo-sqlite-json/cargo-sqlite-json.hpp"
 
 #include <boost/filesystem.hpp>
 

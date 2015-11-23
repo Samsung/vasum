@@ -29,7 +29,7 @@
 #include "cargo-ipc/types.hpp"
 #include "cargo-ipc/result.hpp"
 #include "logger/logger-scope.hpp"
-#include "cargo/manager.hpp"
+#include "cargo-fd/cargo-fd.hpp"
 #include <utility>
 
 namespace cargo {

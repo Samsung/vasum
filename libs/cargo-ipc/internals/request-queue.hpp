@@ -22,8 +22,8 @@
  * @brief   Managing the queue of messages carrying any kind of data
  */
 
-#ifndef CARGO_IPC_INTERNALS_MESSAGE_QUEUE_HPP
-#define CARGO_IPC_INTERNALS_MESSAGE_QUEUE_HPP
+#ifndef CARGO_IPC_INTERNALS_REQUEST_QUEUE_HPP
+#define CARGO_IPC_INTERNALS_REQUEST_QUEUE_HPP
 
 #include "cargo-ipc/exception.hpp"
 #include "utils/eventfd.hpp"
@@ -187,4 +187,4 @@ bool RequestQueue<RequestIdType>::removeIf(Predicate predicate)
 } // namespace ipc
 } // namespace cargo
 
-#endif // CARGO_IPC_INTERNALS_MESSAGE_QUEUE_HPP
+#endif // CARGO_IPC_INTERNALS_REQUEST_QUEUE_HPP

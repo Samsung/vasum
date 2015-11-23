@@ -29,7 +29,6 @@
 #include "lxcpp/guard/api.hpp"
 
 #include "logger/logger.hpp"
-#include "cargo/manager.hpp"
 #include "utils/file-wait.hpp"
 #include "cargo-ipc/epoll/thread-dispatcher.cpp"
 

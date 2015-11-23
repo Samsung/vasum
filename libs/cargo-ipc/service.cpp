@@ -19,7 +19,7 @@
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Implementation of the Cargo IPC handling class
+ * @brief   Implementation of the cargo IPC handling class
  */
 
 #include "config.hpp"

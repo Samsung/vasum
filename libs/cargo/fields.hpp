@@ -19,7 +19,7 @@
 /**
  * @file
  * @author     Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @addtogroup libCargo libCargo
+ * @addtogroup libcargo libcargo
  * @brief      C++ library for handling serialization
  */
 
@@ -36,8 +36,8 @@
 #endif
 
 /**
- * @ingroup libCargo
- * Register empty Cargo class
+ * @ingroup libcargo
+ * Register empty cargo class
  */
 #define CARGO_REGISTER_EMPTY                                       \
     template<typename Visitor>                                     \
@@ -45,9 +45,9 @@
     }                                                              \
 
 /**
- * @ingroup libCargo
+ * @ingroup libcargo
  *
- * Registers Cargo fields within class.
+ * Registers cargo fields within class.
  *
  * Example:
  * @code
@@ -82,11 +82,11 @@
     }                                                              \
 
 /**
- * @ingroup libCargo
+ * @ingroup libcargo
  *
- * Registers new Cargo fields within child class.
+ * Registers new cargo fields within child class.
  *
- * CARGO_REGISTER doesn't preserve Cargo fields registered
+ * CARGO_REGISTER doesn't preserve cargo fields registered
  * in the base class. Use this macro instead.
  *
  * Example:

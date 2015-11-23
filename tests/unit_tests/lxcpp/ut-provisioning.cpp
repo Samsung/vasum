@@ -24,8 +24,7 @@
 
 #include "ut.hpp"
 #include "config.hpp"
-
-#include "cargo/manager.hpp"
+#include "cargo-json/cargo-json.hpp"
 #include "lxcpp/lxcpp.hpp"
 #include "lxcpp/container.hpp"
 #include "lxcpp/container-config.hpp"

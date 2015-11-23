@@ -22,8 +22,8 @@
  * @brief   Thread epoll dispatcher
  */
 
-#ifndef EPOLL_THREAD_DISPATCHER_HPP
-#define EPOLL_THREAD_DISPATCHER_HPP
+#ifndef CARGO_IPC_EPOLL_THREAD_DISPATCHER_HPP
+#define CARGO_IPC_EPOLL_THREAD_DISPATCHER_HPP
 
 #include "cargo-ipc/epoll/event-poll.hpp"
 #include "utils/eventfd.hpp"
@@ -55,4 +55,4 @@ private:
 } // namespace ipc
 } // namespace cargo
 
-#endif // EPOLL_THREAD_DISPATCHER_HPP
+#endif // CARGO_IPC_EPOLL_THREAD_DISPATCHER_HPP

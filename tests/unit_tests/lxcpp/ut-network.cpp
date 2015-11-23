@@ -23,7 +23,7 @@
  */
 
 #include "config.hpp"
-#include "cargo/manager.hpp"
+#include "cargo-json/cargo-json.hpp"
 #include "logger/logger.hpp"
 #include "lxcpp/network-config.hpp"
 #include "lxcpp/process.hpp"

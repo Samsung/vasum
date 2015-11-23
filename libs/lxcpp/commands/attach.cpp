@@ -24,7 +24,7 @@
 #include "lxcpp/commands/attach.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"
-#include "cargo/manager.hpp"
+#include "cargo-fd/fdstore.hpp"
 #include "utils/exception.hpp"
 #include "utils/fd-utils.hpp"
 #include "logger/logger.hpp"

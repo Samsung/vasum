@@ -32,7 +32,9 @@
 
 #include "utils/paths.hpp"
 #include "logger/logger.hpp"
-#include "cargo/manager.hpp"
+#include "cargo-sqlite/cargo-sqlite.hpp"
+#include "cargo-json/cargo-json.hpp"
+#include "cargo-sqlite-json/cargo-sqlite-json.hpp"
 #include "dbus/exception.hpp"
 #include "utils/fs.hpp"
 #include "utils/img.hpp"

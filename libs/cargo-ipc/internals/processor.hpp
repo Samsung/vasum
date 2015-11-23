@@ -39,7 +39,7 @@
 #include "cargo-ipc/exception.hpp"
 #include "cargo-ipc/method-result.hpp"
 #include "cargo-ipc/types.hpp"
-#include "cargo/manager.hpp"
+#include "cargo-fd/cargo-fd.hpp"
 #include "cargo/fields.hpp"
 #include "logger/logger.hpp"
 #include "logger/logger-scope.hpp"

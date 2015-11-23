@@ -19,7 +19,7 @@
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Declaration of the Cargo IPC handling class
+ * @brief   Declaration of the cargo IPC handling class
  */
 
 #ifndef CARGO_IPC_SERVICE_HPP

@@ -22,8 +22,8 @@
  * @brief   Class for storing result of a method - data or exception
  */
 
-#ifndef CARGO_IPC_RESULT_BUILDER_HPP
-#define CARGO_IPC_RESULT_BUILDER_HPP
+#ifndef CARGO_IPC_INTERNALS_RESULT_BUILDER_HPP
+#define CARGO_IPC_INTERNALS_RESULT_BUILDER_HPP
 
 #include "cargo-ipc/result.hpp"
 #include <functional>
@@ -69,4 +69,4 @@ typedef std::function<void(ResultBuilder&)> ResultBuilderHandler;
 } // namespace ipc
 } // namespace cargo
 
-#endif // CARGO_IPC_RESULT_BUILDER_HPP
+#endif // CARGO_IPC_INTERNALS_RESULT_BUILDER_HPP

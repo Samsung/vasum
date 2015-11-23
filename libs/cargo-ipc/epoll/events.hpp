@@ -22,8 +22,8 @@
  * @brief   Epoll events
  */
 
-#ifndef EPOLL_EVENTS_HPP
-#define EPOLL_EVENTS_HPP
+#ifndef CARGO_IPC_EPOLL_EVENTS_HPP
+#define CARGO_IPC_EPOLL_EVENTS_HPP
 
 #include <string>
 #include <sys/epoll.h> // for EPOLL* constatnts
@@ -50,4 +50,4 @@ std::string eventsToString(Events events);
 } // namespace ipc
 } // namespace cargo
 
-#endif // EPOLL_EVENTS_HPP
+#endif // CARGO_IPC_EPOLL_EVENTS_HPP

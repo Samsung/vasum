@@ -384,9 +384,40 @@ The package provides libSimpleDbus development tools and libs.
 %{_libdir}/pkgconfig/libSimpleDbus.pc
 %endif
 
-## libCargo Package ##########################################################
-%package -n libCargo
-Summary:            C++ object serialization library
+## libcargo-devel Package ##########################################################
+%package -n libcargo-devel
+Summary:        Development C++ object serialization library
+Group:          Development/Libraries
+Requires:       boost-devel
+Requires:       pkgconfig(libLogger)
+
+%description -n libcargo-devel
+The package provides libcargo development tools and libs.
+
+%files -n libcargo-devel
+%defattr(644,root,root,755)
+%{_includedir}/vasum-tools/cargo
+%{_libdir}/pkgconfig/libcargo.pc
+
+## libcargo-gvariant Package ##################################################
+%package -n libcargo-gvariant-devel
+Summary:        Development cargo GVariant module
+Group:          Development/Libraries
+Requires:       libcargo-devel = %{epoch}:%{version}-%{release}
+Requires:       boost-devel
+Requires:       pkgconfig(libLogger)
+
+%description -n libcargo-gvariant-devel
+The package provides libcargo GVariant development module.
+
+%files -n libcargo-gvariant-devel
+%defattr(644,root,root,755)
+%{_includedir}/vasum-tools/cargo-gvariant
+%{_libdir}/pkgconfig/libcargo-gvariant.pc
+
+## libcargo-json Package ######################################################
+%package -n libcargo-json
+Summary:            Cargo Json module
 Group:              Security/Other
 %if %{platform_type} == "TIZEN"
 Requires:           libjson >= 0.10
@@ -396,22 +427,23 @@ Requires:           json-c
 Requires(post):     /sbin/ldconfig
 Requires(postun):   /sbin/ldconfig
 
-%description -n libCargo
-The package provides libCargo library.
+%description -n libcargo-json
+The package provides libcargo Json module.
 
-%post -n libCargo -p /sbin/ldconfig
+%post -n libcargo-json -p /sbin/ldconfig
 
-%postun -n libCargo -p /sbin/ldconfig
+%postun -n libcargo-json -p /sbin/ldconfig
 
-%files -n libCargo
+%files -n libcargo-json
 %defattr(644,root,root,755)
-%{_libdir}/libCargo.so.0
-%attr(755,root,root) %{_libdir}/libCargo.so.%{version}
+%{_libdir}/libcargo-json.so.0
+%attr(755,root,root) %{_libdir}/libcargo-json.so.%{version}
 
-%package -n libCargo-devel
-Summary:        Development C++ object serialization library
+%package -n libcargo-json-devel
+Summary:        Development cargo Json module
 Group:          Development/Libraries
-Requires:       libCargo = %{epoch}:%{version}-%{release}
+Requires:       libcargo-devel = %{epoch}:%{version}-%{release}
+Requires:       libcargo-json = %{epoch}:%{version}-%{release}
 Requires:       boost-devel
 Requires:       pkgconfig(libLogger)
 %if %{platform_type} == "TIZEN"
@@ -420,20 +452,107 @@ Requires:       libjson-devel >= 0.10
 Requires:       json-c-devel
 %endif
 
-%description -n libCargo-devel
-The package provides libCargo development tools and libs.
+%description -n libcargo-json-devel
+The package provides libcargo Json development module.
 
-%files -n libCargo-devel
+%files -n libcargo-json-devel
 %defattr(644,root,root,755)
-%{_libdir}/libCargo.so
-%{_includedir}/vasum-tools/cargo
-%{_libdir}/pkgconfig/libCargo.pc
+%{_libdir}/libcargo-json.so
+%{_includedir}/vasum-tools/cargo-json
+%{_libdir}/pkgconfig/libcargo-json.pc
+
+## libcargo-sqlite Package ##########################################################
+%package -n libcargo-sqlite
+Summary:            Cargo SQLite KVStore module
+Group:              Security/Other
+Requires(post):     /sbin/ldconfig
+Requires(postun):   /sbin/ldconfig
+
+%description -n libcargo-sqlite
+The package provides libcargo SQLite KVStore library.
+
+%post -n libcargo-sqlite -p /sbin/ldconfig
+
+%postun -n libcargo-sqlite -p /sbin/ldconfig
+
+%files -n libcargo-sqlite
+%defattr(644,root,root,755)
+%{_libdir}/libcargo-sqlite.so.0
+%attr(755,root,root) %{_libdir}/libcargo-sqlite.so.%{version}
+
+%package -n libcargo-sqlite-devel
+Summary:        Cargo SQLite KVStore development module
+Group:          Development/Libraries
+Requires:       libcargo-devel = %{epoch}:%{version}-%{release}
+Requires:       boost-devel
+Requires:       pkgconfig(libLogger)
+
+%description -n libcargo-sqlite-devel
+The package provides libcargo SQLite KVStore development module.
+
+%files -n libcargo-sqlite-devel
+%defattr(644,root,root,755)
+%{_libdir}/libcargo-sqlite.so
+%{_includedir}/vasum-tools/cargo-sqlite
+%{_libdir}/pkgconfig/libcargo-sqlite.pc
+
+## libcargo-fd Package ##########################################################
+%package -n libcargo-fd
+Summary:            Cargo file descriptor I/O module
+Group:              Security/Other
+Requires(post):     /sbin/ldconfig
+Requires(postun):   /sbin/ldconfig
+
+%description -n libcargo-fd
+The package provides libcargo file descriptor I/O module.
+
+%post -n libcargo-fd -p /sbin/ldconfig
+
+%postun -n libcargo-fd -p /sbin/ldconfig
+
+%files -n libcargo-fd
+%defattr(644,root,root,755)
+%{_libdir}/libcargo-fd.so.0
+%attr(755,root,root) %{_libdir}/libcargo-fd.so.%{version}
+
+%package -n libcargo-fd-devel
+Summary:        Development C++ object serialization library
+Group:          Development/Libraries
+Requires:       libcargo-devel = %{epoch}:%{version}-%{release}
+Requires:       boost-devel
+Requires:       pkgconfig(libLogger)
+
+%description -n libcargo-fd-devel
+The package provides libcargo file descriptor I/O module.
+
+%files -n libcargo-fd-devel
+%defattr(644,root,root,755)
+%{_libdir}/libcargo-fd.so
+%{_includedir}/vasum-tools/cargo-fd
+%{_libdir}/pkgconfig/libcargo-fd.pc
+
+## libcargo-sqlite-json Package ##########################################################
+%package -n libcargo-sqlite-json-devel
+Summary:        Cargo SQLite with Json defaults development module
+Group:          Development/Libraries
+Requires:       libcargo-sqlite-devel = %{epoch}:%{version}-%{release}
+Requires:       libcargo-json-devel = %{epoch}:%{version}-%{release}
+Requires:       boost-devel
+Requires:       pkgconfig(libLogger)
+
+%description -n libcargo-sqlite-json-devel
+The package provides libcargo SQLite with Json defaults development module.
+
+%files -n libcargo-sqlite-json-devel
+%defattr(644,root,root,755)
+%{_includedir}/vasum-tools/cargo-sqlite-json
+%{_libdir}/pkgconfig/libcargo-sqlite-json.pc
 
 ## libCargoIpc Package #######################################################
 %package -n libCargoIpc
 Summary:            Cargo IPC library
 Group:              Security/Other
-Requires:           libCargo
+Requires:           libcargo-fd
 Requires:           libuuid
 BuildRequires:      libuuid-devel
 Requires(post):     /sbin/ldconfig
@@ -452,11 +571,11 @@ The package provides libCargoIpc library.
 %attr(755,root,root) %{_libdir}/libCargoIpc.so.%{version}
 
 %package -n libCargoIpc-devel
-Summary:        Development Cargo IPC library
+Summary:        Development cargo IPC library
 Group:          Development/Libraries
 Requires:       libCargoIpc = %{epoch}:%{version}-%{release}
 Requires:       pkgconfig(libLogger)
-Requires:       pkgconfig(libCargo)
+Requires:       pkgconfig(libcargo)
 
 %description -n libCargoIpc-devel
 The package provides libCargoIpc development tools and libs.

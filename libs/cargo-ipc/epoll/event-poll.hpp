@@ -22,8 +22,8 @@
  * @brief   C++ epoll wrapper
  */
 
-#ifndef EPOLL_EVENT_POLL_HPP
-#define EPOLL_EVENT_POLL_HPP
+#ifndef CARGO_IPC_EPOLL_EVENT_POLL_HPP
+#define CARGO_IPC_EPOLL_EVENT_POLL_HPP
 
 #include "cargo-ipc/epoll/events.hpp"
 
@@ -122,4 +122,4 @@ private:
 } // namespace ipc
 } // namespace cargo
 
-#endif // EPOLL_EVENT_POLL_HPP
+#endif // CARGO_IPC_EPOLL_EVENT_POLL_HPP

@@ -1,0 +1,12 @@
+# Package Information for pkg-config
+
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@LIB_INSTALL_DIR@
+includedir=@INCLUDE_INSTALL_DIR@
+
+Name: lib@PROJECT_NAME@
+Description: cargo KVStore with Json extension library
+Version: @_LIB_VERSION_@
+Libs:
+Cflags: -I${includedir}/vasum-tools -I${includedir}/vasum-tools/@PROJECT_NAME@

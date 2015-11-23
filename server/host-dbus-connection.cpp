@@ -32,7 +32,7 @@
 #include "api/messages.hpp"
 
 #include "logger/logger.hpp"
-#include "cargo/manager.hpp"
+#include "cargo-gvariant/cargo-gvariant.hpp"
 #include "zones-manager.hpp"
 
 namespace vasum {

@@ -1,3 +1,4 @@
+
 /*
  *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
  *
@@ -30,7 +31,8 @@
 #include "logger/logger.hpp"
 #include "utils/fs.hpp"
 #include "utils/exception.hpp"
-#include "cargo/manager.hpp"
+#include "cargo-sqlite/cargo-sqlite.hpp"
+#include "cargo-sqlite-json/cargo-sqlite-json.hpp"
 #include "vasum-client.h"
 
 #include <boost/filesystem.hpp>
