@@ -586,6 +586,42 @@ The package provides libcargo-ipc development tools and libs.
 %{_includedir}/cargo-ipc
 %{_libdir}/pkgconfig/libcargo-ipc.pc
 
+## libcargo-validator Package #######################################################
+%package -n libcargo-validator
+Summary:            Cargo Validator library
+Group:              Security/Other
+Requires(post):     /sbin/ldconfig
+Requires(postun):   /sbin/ldconfig
+
+%description -n libcargo-validator
+The package provides libcargo-validator library.
+
+%post -n libcargo-validator -p /sbin/ldconfig
+
+%postun -n libcargo-validator -p /sbin/ldconfig
+
+%files -n libcargo-validator
+%defattr(644,root,root,755)
+%{_libdir}/libcargo-validator.so.0
+%{_libdir}/pkgconfig/libcargo-validator.pc
+%attr(755,root,root) %{_libdir}/libcargo-validator.so.%{version}
+
+%package -n libcargo-validator-devel
+Summary:        Development Cargo Validator library
+Group:          Development/Libraries
+Requires:       libcargo-validator = %{epoch}:%{version}-%{release}
+Requires:       pkgconfig(libLogger)
+Requires:       pkgconfig(libcargo)
+
+%description -n libcargo-validator-devel
+The package provides libcargo-validator development tools and libs.
+
+%files -n libcargo-validator-devel
+%defattr(644,root,root,755)
+%{_libdir}/libcargo-validator.so
+%{_includedir}/cargo-validator
+%{_libdir}/pkgconfig/libcargo-validator.pc
+
 ## liblxcpp Package ###########################################################
 %package -n liblxcpp
 Summary:            lxcpp library

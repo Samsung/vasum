@@ -71,7 +71,7 @@ SET_TARGET_PROPERTIES(${UT_SERVER_CODENAME} PROPERTIES
 
 TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} Common ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
                       ${CARGO_GVARIANT_DEPS_LIBRARIES} Logger cargo-json cargo-sqlite cargo-fd
-                      cargo-ipc lxcpp)
+                      cargo-ipc cargo-validator lxcpp)
 IF(NOT WITHOUT_DBUS)
 TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} SimpleDbus)
 ENDIF(NOT WITHOUT_DBUS)

@@ -35,6 +35,7 @@
 
 #include "cargo/fields.hpp"
 #include "cargo/fields-union.hpp"
+#include "cargo-validator/validator.hpp"
 
 enum class TestEnum: int {
     FIRST = 0,
@@ -149,7 +150,12 @@ struct TestConfig {
     std::vector<SubConfigOption> unions;
     std::map<std::string, std::string> simpleMap;
     std::map<std::string, TestMapStruct> map;
+    std::string dirPath;
+    std::string filePath;
 
+    static bool isShorter(const std::string &shorter, const std::string &longer) {
+        return shorter.size() < longer.size();
+    }
 
     CARGO_REGISTER
     (
@@ -185,7 +191,28 @@ struct TestConfig {
         unions,
 
         simpleMap,
-        map
+        map,
+        dirPath,
+        filePath
+    )
+
+    CARGO_VALIDATE
+    (
+        using namespace std::placeholders;
+
+        CARGO_CHECK(cargo::validator::isNonEmptyString, stringVal, dirPath)
+        CARGO_CHECK(std::bind(cargo::validator::isNonEmptyString, _1), filePath);
+
+        // custom validator
+        CARGO_CHECK([](const std::string & v)->bool { return v.compare("blah")==0; }, stringVal)
+
+        CARGO_COMPARE([](const std::uint32_t arg_A,
+                         const std::uint64_t arg_B) {
+                             return arg_A < arg_B;
+                         },
+                         int8Val,
+                         uint8Val)
+        CARGO_COMPARE(std::bind(isShorter, _1, _2), filePath, dirPath)
     )
 };
 
@@ -278,7 +305,9 @@ const std::string jsonTestString =
     "\"simpleMap\": { \"key\": \"value\", \"key2\": \"value2\" }, "
     "\"map\": { \"dev\": { \"type\": \"tmpfs\", \"source\": \"tmpfs\", \"options\": "
                                "[ \"nosuid\", \"strictatime\", \"mode=755\", \"size=65536k\" ] }, "
-               "\"proc\": { \"type\": \"proc\", \"source\": \"proc\", \"options\": [ ] } } }";
+               "\"proc\": { \"type\": \"proc\", \"source\": \"proc\", \"options\": [ ] } }, "
+    "\"dirPath\": \"\\/usr\\/local\\/lib\", "
+    "\"filePath\": \"\\/bin\\/bash\" }";
 
 const std::string jsonEmptyTestString =
     "{ \"int8Val\": 0, "
@@ -307,6 +336,8 @@ const std::string jsonEmptyTestString =
     "\"union2\": { \"type\": \"int\", \"value\": 0 }, "
     "\"unions\": [ ], "
     "\"simpleMap\": { }, "
-    "\"map\": { } }";
+    "\"map\": { }, "
+    "\"dirPath\": \"\", "
+    "\"filePath\": \"\" }";
 
 #endif

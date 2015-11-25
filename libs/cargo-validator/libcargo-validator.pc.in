@@ -1,0 +1,12 @@
+# Package Information for pkg-config
+
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@LIB_INSTALL_DIR@
+includedir=@INCLUDE_INSTALL_DIR@
+
+Name: lib@PROJECT_NAME@
+Description: Cargo Validator library
+Version: @_LIB_VERSION_@
+Libs: -L${libdir} -l@PROJECT_NAME@
+Cflags: -I${includedir} -I${includedir}/@PROJECT_NAME@
