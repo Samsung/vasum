@@ -71,6 +71,7 @@ ContainerImpl::ContainerImpl(const std::string &name,
 
     // Fill known configuration
     mConfig->mName = name;
+    mConfig->mHostName = name;
     mConfig->mRootPath = rootPath;
     mConfig->mNamespaces = CLONE_NEWIPC | CLONE_NEWNS | CLONE_NEWPID | CLONE_NEWUTS;
     mConfig->mSocketPath = utils::createFilePath(workPath, name, ".socket");
@@ -154,9 +155,17 @@ const std::string& ContainerImpl::getRootPath() const
     return mConfig->mRootPath;
 }
 
-void ContainerImpl::setHostName(const std::string& /*hostname*/)
+void ContainerImpl::setHostName(const std::string& hostname)
 {
-    throw NotImplementedException();
+    Lock lock(mStateMutex);
+
+    if (hostname.empty()) {
+        const std::string msg = "HostName cannot be empty";
+        LOGE(msg);
+        throw ConfigureException(msg);
+    }
+
+    mConfig->mHostName = hostname;
 }
 
 const std::vector<std::string>& ContainerImpl::getInit()

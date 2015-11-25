@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
     try
     {
         Container* c = createContainer("test", "/", "/tmp");
+        c->setHostName("junk");
         c->setInit(args);
         c->setLogger(logger::LogType::LOG_FILE, logger::LogLevel::TRACE, "/tmp/lxcpp-shell.txt");
         c->setTerminalCount(4);

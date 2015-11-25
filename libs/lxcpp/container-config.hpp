@@ -57,6 +57,13 @@ struct ContainerConfig {
     std::string mName;
 
     /**
+     * Container hostname.
+     * Set: by setHostName
+     * Get: none
+     */
+    std::string mHostName;
+
+    /**
      * Path of the root directory of the container.
      *
      * Set: by constructor, cannot be changed afterwards
@@ -180,6 +187,7 @@ struct ContainerConfig {
     CARGO_REGISTER
     (
         mName,
+        mHostName,
         mRootPath,
         mGuardPid,
         mInitPid,

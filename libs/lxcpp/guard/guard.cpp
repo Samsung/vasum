@@ -27,6 +27,7 @@
 #include "lxcpp/guard/guard.hpp"
 #include "lxcpp/process.hpp"
 #include "lxcpp/credentials.hpp"
+#include "lxcpp/hostname.hpp"
 #include "lxcpp/commands/prep-guest-terminal.hpp"
 #include "lxcpp/commands/provision.hpp"
 #include "lxcpp/commands/setup-userns.hpp"
@@ -52,6 +53,8 @@ int Guard::startContainer(void* data)
     channel.shutdown();
 
     // TODO: container preparation part 3: things to do in the container process
+
+    lxcpp::setHostName(config.mHostName);
 
     Provisions provisions(config);
     provisions.execute();
