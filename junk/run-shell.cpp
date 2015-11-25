@@ -5,6 +5,7 @@
 #include <lxcpp/logger-config.hpp>
 #include <lxcpp/network-config.hpp>
 #include <logger/logger.hpp>
+#include <sys/resource.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
@@ -93,6 +94,10 @@ int main(int argc, char *argv[])
         c->addInterfaceConfig(InterfaceConfigType::LOOPBACK, "lo");
         c->addInterfaceConfig(InterfaceConfigType::BRIDGE, "lxcpp-br0", "", {InetAddr("10.0.0.1", 24)});
         c->addInterfaceConfig(InterfaceConfigType::VETH_BRIDGED, "lxcpp-br0", "veth0", {InetAddr("10.0.0.2", 24)});
+
+        // configure resource limits
+        c->setRlimit(RLIMIT_CPU, 1024, 102400);
+        c->setRlimit(RLIMIT_DATA, 1024, 102400);
 
         c->start();
         // not needed per se, but let things settle for a second, e.g. the logs

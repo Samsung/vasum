@@ -716,9 +716,11 @@ void ContainerImpl::setSystemProperty(const std::string& /*name*/, const std::st
     throw NotImplementedException();
 }
 
-void ContainerImpl::setRlimit(const std::string& /*type*/, const uint64_t /*hard*/, const uint64_t /*soft*/)
+void ContainerImpl::setRlimit(const int type, const uint64_t soft, const uint64_t hard)
 {
-    throw NotImplementedException();
+    Lock lock(mStateMutex);
+
+    mConfig->mRlimits.emplace_back(type, soft, hard);
 }
 
 void ContainerImpl::setNamespaces(const int /*namespaces*/)

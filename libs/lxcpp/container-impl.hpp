@@ -157,7 +157,7 @@ public:
     void setSystemProperty(const std::string& name, const std::string& value);
 
     // Rlimit
-    void setRlimit(const std::string& type, const uint64_t hard, const uint64_t soft);
+    void setRlimit(const int type, const uint64_t soft, const uint64_t hard);
 
     // Namespaces
     void setNamespaces(const int namespaces);

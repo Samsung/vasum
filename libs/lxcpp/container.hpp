@@ -188,7 +188,7 @@ public:
     /**
      * Rlimit
      */
-    virtual void setRlimit(const std::string& type, const uint64_t hard, const uint64_t soft) = 0;
+    virtual void setRlimit(const int type, const uint64_t soft, const uint64_t hard) = 0;
 
     /**
      * Namespaces

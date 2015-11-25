@@ -172,10 +172,16 @@ struct ContainerConfig {
      */
     UserNSConfig mUserNSConfig;
 
-    /*
+    /**
      * CGropus configuration
      */
     CGroupsConfig mCgroups;
+
+    /**
+     * Rlimits configuration
+     * rlimit type, rlimit soft, rlimit hard
+     */
+    std::vector<std::tuple<int, uint64_t, uint64_t>> mRlimits;
 
     ContainerConfig():
         mGuardPid(-1),
@@ -199,7 +205,8 @@ struct ContainerConfig {
         mNamespaces,
         mProvisions,
         mUserNSConfig,
-        mCgroups
+        mCgroups,
+        mRlimits
     )
 };
 

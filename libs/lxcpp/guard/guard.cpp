@@ -28,6 +28,7 @@
 #include "lxcpp/process.hpp"
 #include "lxcpp/credentials.hpp"
 #include "lxcpp/hostname.hpp"
+#include "lxcpp/rlimit.hpp"
 #include "lxcpp/commands/prep-guest-terminal.hpp"
 #include "lxcpp/commands/provision.hpp"
 #include "lxcpp/commands/setup-userns.hpp"
@@ -62,15 +63,21 @@ int Guard::startContainer(void* data)
     PrepGuestTerminal terminals(config.mTerminals);
     terminals.execute();
 
-    if (config.mUserNSConfig.mUIDMaps.size()) {
+    if (!config.mUserNSConfig.mUIDMaps.empty()) {
         lxcpp::setreuid(0, 0);
     }
-    if (config.mUserNSConfig.mGIDMaps.size()) {
+    if (!config.mUserNSConfig.mGIDMaps.empty()) {
         lxcpp::setregid(0, 0);
     }
 
     NetConfigureAll network(config.mNetwork);
     network.execute();
+
+    if (!config.mRlimits.empty()) {
+        for (const auto& limit : config.mRlimits) {
+            lxcpp::setRlimit(std::get<0>(limit), std::get<1>(limit),std::get<2>(limit));
+        }
+    }
 
     utils::CArgsBuilder args;
     lxcpp::execve(args.add(config.mInit));
