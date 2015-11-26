@@ -60,7 +60,10 @@ namespace validator
 /**
  * pre-defined checks
  */
-bool isNonEmptyString(const std::string &);
+bool isNonEmptyString(const std::string &string);
+bool isAbsolutePath(const std::string &path);
+bool isFilePresent(const std::string &path);
+bool isDirectoryPresent(const std::string &path);
 // add more checks here..
 
 

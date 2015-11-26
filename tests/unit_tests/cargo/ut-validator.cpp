@@ -69,4 +69,49 @@ BOOST_AUTO_TEST_CASE(TwoFieldRelationship)
     BOOST_REQUIRE_THROW(validate(testConfig), VerificationException);
 }
 
+BOOST_AUTO_TEST_CASE(FileNotPresent)
+{
+    TestConfig testConfig;
+    BOOST_REQUIRE_NO_THROW(loadFromJsonString(jsonTestString, testConfig));
+    testConfig.filePath = std::string("coco jumbo");
+
+    BOOST_REQUIRE_THROW(validator::validate(testConfig), VerificationException);
+}
+
+BOOST_AUTO_TEST_CASE(FilePointsToDirectory)
+{
+    TestConfig testConfig;
+    BOOST_REQUIRE_NO_THROW(loadFromJsonString(jsonTestString, testConfig));
+    testConfig.filePath = std::string("/usr");
+
+    BOOST_REQUIRE_THROW(validator::validate(testConfig), VerificationException);
+}
+
+BOOST_AUTO_TEST_CASE(DirectoryNotPresent)
+{
+    TestConfig testConfig;
+    BOOST_REQUIRE_NO_THROW(loadFromJsonString(jsonTestString, testConfig));
+    testConfig.dirPath = std::string("/cocojumbo");
+
+    BOOST_REQUIRE_THROW(validator::validate(testConfig), VerificationException);
+}
+
+BOOST_AUTO_TEST_CASE(NotADirectory)
+{
+    TestConfig testConfig;
+    BOOST_REQUIRE_NO_THROW(loadFromJsonString(jsonTestString, testConfig));
+    testConfig.dirPath = std::string("/bin/bash");
+
+    BOOST_REQUIRE_THROW(validator::validate(testConfig), VerificationException);
+}
+
+BOOST_AUTO_TEST_CASE(RelativePath)
+{
+    TestConfig testConfig;
+    BOOST_REQUIRE_NO_THROW(loadFromJsonString(jsonTestString, testConfig));
+    testConfig.filePath = std::string("../myFile");
+
+    BOOST_REQUIRE_THROW(validator::validate(testConfig), VerificationException);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

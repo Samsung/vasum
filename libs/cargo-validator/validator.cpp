@@ -23,7 +23,27 @@
 */
 
 #include "cargo-validator/validator.hpp"
+#include "utils/fs.hpp"
+#include "utils/exception.hpp"
 
-bool cargo::validator::isNonEmptyString(const std::string &s) {
+using namespace utils;
+
+bool cargo::validator::isNonEmptyString(const std::string &s)
+{
     return !s.empty();
+}
+
+bool cargo::validator::isAbsolutePath(const std::string &s)
+{
+    return utils::isAbsolute(s);
+}
+
+bool cargo::validator::isFilePresent(const std::string &s)
+{
+    return utils::isRegularFile(s);
+}
+
+bool cargo::validator::isDirectoryPresent(const std::string &s)
+{
+    return utils::isDir(s);
 }

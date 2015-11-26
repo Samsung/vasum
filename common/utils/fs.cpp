@@ -156,13 +156,17 @@ bool removeFile(const std::string& path)
     return true;
 }
 
-bool isCharDevice(const std::string& path)
+bool exists(const std::string& path, int inodeType)
 {
-    struct stat s;
-    return ::stat(path.c_str(), &s) == 0 && S_IFCHR == (s.st_mode & S_IFMT);
+    try {
+        assertExists(path, inodeType);
+        return true;
+    } catch(...) {
+        return false;
+    }
 }
 
-void assertIsDir(const std::string& path)
+void assertExists(const std::string& path, int inodeType)
 {
     if (path.empty()) {
         const std::string msg = "Empty path";
@@ -177,22 +181,55 @@ void assertIsDir(const std::string& path)
         throw UtilsException(msg);
     }
 
-    if(!(s.st_mode & S_IFDIR)) {
-        const std::string msg = "Not a directory";
-        LOGE(msg);
-        throw UtilsException(msg);
-    }
+    if (inodeType != 0) {
+        if (!(s.st_mode & inodeType)) {
+            const std::string msg = "Not an expected inode type, expected: " + std::to_string(inodeType) +
+                                    ", while actual: " + std::to_string(s.st_mode);
+            LOGE(msg);
+            throw UtilsException(msg);
+        }
 
-    if(::access(path.c_str(), X_OK) < 0) {
-        const std::string msg = "Not a traversable directory";
-        LOGE(msg);
-        throw UtilsException(msg);
+        if (inodeType == S_IFDIR && ::access(path.c_str(), X_OK) < 0) {
+            const std::string msg = "Not a traversable directory";
+            LOGE(msg);
+            throw UtilsException(msg);
+        }
     }
+}
+
+bool isCharDevice(const std::string& path)
+{
+    return utils::exists(path, S_IFCHR);
+}
+
+bool isRegularFile(const std::string& path)
+{
+    return utils::exists(path, S_IFREG);
+}
+
+void assertIsRegularFile(const std::string& path)
+{
+    assertExists(path, S_IFREG);
+}
+
+bool isDir(const std::string& path)
+{
+    return utils::exists(path, S_IFDIR);
+}
+
+void assertIsDir(const std::string& path)
+{
+    assertExists(path, S_IFDIR);
+}
+
+bool isAbsolute(const std::string& path)
+{
+    return fs::path(path).is_absolute();
 }
 
 void assertIsAbsolute(const std::string& path)
 {
-    if (!fs::path(path).is_absolute()) {
+    if (!isAbsolute(path)) {
         const std::string msg = "Given path '" + path + "' must be absolute!";
         LOGE(msg);
         throw UtilsException(msg);

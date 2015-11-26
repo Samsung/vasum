@@ -70,14 +70,48 @@ bool readFirstLineOfFile(const std::string& path, std::string& ret);
 bool removeFile(const std::string& path);
 
 /**
+ * Checks if a path exists and points to an expected item type.
+ * @return: true if exists and is a directory, false otherwise
+ */
+bool exists(const std::string& path, int inodeType = 0);
+
+/**
+ * Checks if a path exists and points to an expected item type.
+ */
+void assertExists(const std::string& path, int inodeType = 0);
+
+/**
  * Checks if a char device exists
  */
 bool isCharDevice(const std::string& path);
 
 /**
  * Checks if a path exists and points to a directory
+ * @return: true if exists and is a directory, false otherwise
+ */
+bool isDir(const std::string& path);
+
+/**
+ * Checks if a path exists and points to a directory
  */
 void assertIsDir(const std::string& path);
+
+/**
+ * Checks if a path exists and points to a regular file or link
+ * @return: true if exists and is a regular file, false otherwise
+ */
+bool isRegularFile(const std::string& path);
+
+/**
+ * Checks if a path exists and points to a regular file or link
+ */
+void assertIsRegularFile(const std::string& path);
+
+/**
+ * Checks if path is absolute
+ * @return: true if path is valid absolute path, false otherwise
+ */
+bool isAbsolute(const std::string& path);
 
 /**
  * Checks if path is absolute

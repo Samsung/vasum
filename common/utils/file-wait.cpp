@@ -44,7 +44,7 @@ namespace utils {
 void waitForFile(const std::string& file, const unsigned int timeoutMs)
 {
     std::string dir = dirName(file);
-    assertIsDir(dir);
+    assertExists(dir, S_IFDIR);
 
     cargo::ipc::epoll::EventPoll poll;
     Inotify inotify(poll);

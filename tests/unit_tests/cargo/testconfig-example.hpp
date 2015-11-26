@@ -202,6 +202,9 @@ struct TestConfig {
 
         CARGO_CHECK(cargo::validator::isNonEmptyString, stringVal, dirPath)
         CARGO_CHECK(std::bind(cargo::validator::isNonEmptyString, _1), filePath);
+        CARGO_CHECK(cargo::validator::isAbsolutePath, dirPath, filePath)
+        CARGO_CHECK(cargo::validator::isFilePresent, filePath)
+        CARGO_CHECK(cargo::validator::isDirectoryPresent, dirPath)
 
         // custom validator
         CARGO_CHECK([](const std::string & v)->bool { return v.compare("blah")==0; }, stringVal)
