@@ -65,6 +65,8 @@ public:
      */
     virtual const std::string& getName() const = 0;
     virtual const std::string& getRootPath() const = 0;
+    virtual const std::string& getWorkPath() const = 0;
+
     virtual void setHostName(const std::string& hostname) = 0;
 
     virtual pid_t getGuardPid() const = 0;
@@ -79,8 +81,8 @@ public:
 
     virtual void setTerminalCount(const unsigned int count) = 0;
 
-    virtual void addUIDMap(unsigned min, unsigned max, unsigned num) = 0;
-    virtual void addGIDMap(unsigned min, unsigned max, unsigned num) = 0;
+    virtual void addUIDMap(uid_t contID, uid_t hostID, unsigned num) = 0;
+    virtual void addGIDMap(gid_t contID, gid_t hostID, unsigned num) = 0;
 
     /**
      * Execution actions

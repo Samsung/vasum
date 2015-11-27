@@ -32,11 +32,14 @@
 #include "lxcpp/sysctl.hpp"
 #include "lxcpp/capability.hpp"
 #include "lxcpp/environment.hpp"
+#include "lxcpp/filesystem.hpp"
 #include "lxcpp/commands/prep-guest-terminal.hpp"
 #include "lxcpp/commands/provision.hpp"
 #include "lxcpp/commands/setup-userns.hpp"
 #include "lxcpp/commands/cgroups.hpp"
 #include "lxcpp/commands/netcreate.hpp"
+#include "lxcpp/commands/prep-dev-fs.hpp"
+#include "lxcpp/commands/pivot-and-prep-root.hpp"
 
 #include "logger/logger.hpp"
 #include "utils/signal.hpp"
@@ -57,22 +60,20 @@ int Guard::startContainer(void* data)
         channel.setRight();
         channel.read<bool>();
 
+        lxcpp::setregid(0, 0);
+        lxcpp::setgroups(std::vector<gid_t>());
+        lxcpp::setreuid(0, 0);
+
         // TODO: container preparation part 3: things to do in the container process
 
         lxcpp::setHostName(config.mHostName);
 
-        Provisions provisions(config);
-        provisions.execute();
+        // After this command the previous root FS is still mounted in /.oldroot
+        PivotAndPrepRoot root(config);
+        root.execute();
 
         PrepGuestTerminal terminals(config.mTerminals);
         terminals.execute();
-
-        if (!config.mUserNSConfig.mUIDMaps.empty()) {
-            lxcpp::setreuid(0, 0);
-        }
-        if (!config.mUserNSConfig.mGIDMaps.empty()) {
-            lxcpp::setregid(0, 0);
-        }
 
         NetConfigureAll network(config.mNetwork);
         network.execute();
@@ -94,12 +95,15 @@ int Guard::startContainer(void* data)
         lxcpp::clearenv();
         lxcpp::setenv(config.mEnvToSet);
 
+        // Remove /.oldroot only after all the commands have finished, they might've needed it
+        lxcpp::umountSubtree(config.mOldRoot);
+        lxcpp::rmdir(config.mOldRoot);
+
         // Notify that Init's preparation is done
         channel.write(true);
         channel.shutdown();
     }
 
-    // Execute Init
     utils::CArgsBuilder args;
     lxcpp::execv(args.add(config.mInit));
 
@@ -173,9 +177,17 @@ void Guard::onInitExit(struct ::signalfd_siginfo& sigInfo)
         return;
     }
 
-    LOGD("Init died");
-    mConfig->mState = Container::State::STOPPED;
+    LOGD("Init died, cleaning up");
 
+    // TODO: container (de)preparation part 4: cleanup after container quits
+
+    Provisions provisions(*mConfig);
+    provisions.revert();
+
+    PrepDevFS devFS(*mConfig);
+    devFS.revert();
+
+    mConfig->mState = Container::State::STOPPED;
     auto data = std::make_shared<api::ExitStatus>(sigInfo.ssi_status);
     mService->callAsync<api::ExitStatus, api::Void>(api::METHOD_INIT_STOPPED, mPeerID, data);
 
@@ -233,6 +245,13 @@ cargo::ipc::HandlerExitCode Guard::onStart(const cargo::ipc::PeerID,
     }
 
     // TODO: container preparation part 1: things to do before clone
+
+    PrepDevFS devFS(*mConfig);
+    devFS.execute();
+
+    Provisions provisions(*mConfig);
+    provisions.execute();
+
     CGroupMakeAll cgroups(mConfig->mCgroups);
     cgroups.execute();
 
@@ -245,11 +264,11 @@ cargo::ipc::HandlerExitCode Guard::onStart(const cargo::ipc::PeerID,
 
     // TODO: container preparation part 2: things to do immediately after clone
 
-    NetCreateAll network(mConfig->mNetwork, mConfig->mInitPid);
-    network.execute();
-
     SetupUserNS userNS(mConfig->mUserNSConfig, mConfig->mInitPid);
     userNS.execute();
+
+    NetCreateAll network(mConfig->mNetwork, mConfig->mInitPid);
+    network.execute();
 
     CGroupAssignPidAll cgroupAssignPid(mConfig->mCgroups, mConfig->mInitPid);
     cgroupAssignPid.execute();
@@ -258,7 +277,7 @@ cargo::ipc::HandlerExitCode Guard::onStart(const cargo::ipc::PeerID,
     channel.setLeft();
     channel.write(true);
 
-    // Wait till Init is executed
+    // wait for continue sync from the container
     channel.read<bool>();
     channel.shutdown();
 
@@ -302,11 +321,6 @@ int Guard::execute()
 
     int status = lxcpp::waitpid(mConfig->mInitPid);
     LOGD("Init exited with status: " << status);
-
-    // TODO: container (de)preparation part 4: cleanup after container quits
-
-    Provisions provisions(*mConfig);
-    provisions.revert();
 
     return status;
 }

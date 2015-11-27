@@ -71,6 +71,11 @@ struct UtilityException: public Exception {
         : Exception(message) {}
 };
 
+struct SmackException: public Exception {
+    explicit SmackException(const std::string& message = "Error during a SMACK operation")
+        : Exception(message) {}
+};
+
 struct TerminalException: public Exception {
     explicit TerminalException(const std::string& message = "Error during a terminal operation")
         : Exception(message) {}

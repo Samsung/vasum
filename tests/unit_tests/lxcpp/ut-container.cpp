@@ -27,6 +27,7 @@
 
 #include "lxcpp/lxcpp.hpp"
 #include "lxcpp/exception.hpp"
+#include "lxcpp/filesystem.hpp"
 
 #include "utils/scoped-dir.hpp"
 #include "utils/fs.hpp"
@@ -37,19 +38,18 @@
 
 namespace {
 
+const std::string SIMPLE_INIT         = "/simple_init";
 const std::string TEST_DIR            = "/tmp/ut-zones";
 const std::string ROOT_DIR            = TEST_DIR + "/root";
+const std::string NON_EXISTENT_BINARY = ROOT_DIR + "/nonexistantpath/bash";
 const std::string WORK_DIR            = TEST_DIR + "/work";
-const std::string NON_EXISTANT_BINARY = TEST_DIR + "/nonexistantpath/bash";
 const std::string LOGGER_FILE         = TEST_DIR + "/loggerFile.txt";
 
 const std::string TESTS_CMD_ROOT            = VSM_TEST_CONFIG_INSTALL_DIR "/utils/";
 const std::string TEST_CMD_RANDOM           = "random.sh";
 const std::string TEST_CMD_RANDOM_PRODUCT   = "random_product.txt";
 
-const std::vector<std::string> COMMAND = {"/bin/bash",
-                                          "-c", "trap exit SIGTERM; while true; do sleep 0.1; done"
-                                         };
+const std::vector<std::string> COMMAND = {SIMPLE_INIT};
 
 const int TIMEOUT = 5000; // ms
 
@@ -57,13 +57,18 @@ const int TIMEOUT = 5000; // ms
 struct Fixture {
     utils::ScopedDir mTestDir;
     utils::ScopedDir mRoot;
+    utils::ScopedDir mRootDev;
+    utils::ScopedDir mRootProc;
+    utils::ScopedDir mRootSys;
     utils::ScopedDir mWork;
 
     Fixture()
         :mTestDir(TEST_DIR),
          mRoot(ROOT_DIR),
          mWork(WORK_DIR)
-    {}
+    {
+        BOOST_REQUIRE(utils::copyFile(SIMPLE_INIT_PATH, ROOT_DIR + SIMPLE_INIT));
+    }
 
     ~Fixture()
     {
@@ -90,11 +95,11 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 
 BOOST_AUTO_TEST_CASE(SetInit)
 {
-    auto c = std::unique_ptr<Container>(createContainer("SetInit", "/", WORK_DIR));
+    auto c = std::unique_ptr<Container>(createContainer("SetInit", ROOT_DIR, WORK_DIR));
 
     BOOST_CHECK_THROW(c->setInit({""}), ConfigureException);
     BOOST_CHECK_THROW(c->setInit({}), ConfigureException);
-    BOOST_CHECK_THROW(c->setInit({NON_EXISTANT_BINARY}), ConfigureException);
+    BOOST_CHECK_THROW(c->setInit({NON_EXISTENT_BINARY}), ConfigureException);
 
     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
 }
@@ -132,7 +137,7 @@ BOOST_AUTO_TEST_CASE(SetLogger)
 
 BOOST_AUTO_TEST_CASE(StartStop)
 {
-    auto c = std::unique_ptr<Container>(createContainer("StartStop", "/", WORK_DIR));
+    auto c = std::unique_ptr<Container>(createContainer("StartStop", ROOT_DIR, WORK_DIR));
     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
     BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
                                       logger::LogLevel::TRACE,
@@ -146,10 +151,10 @@ BOOST_AUTO_TEST_CASE(StartStop)
 BOOST_AUTO_TEST_CASE(ConnectRunning)
 {
     {
-        auto c = std::unique_ptr<Container>(createContainer("ConnectRunning", "/", WORK_DIR));
+        auto c = std::unique_ptr<Container>(createContainer("ConnectRunning", ROOT_DIR, WORK_DIR));
         BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
         BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
-                                          logger::LogLevel::TRACE,
+                                          logger::LogLevel::DEBUG,
                                           LOGGER_FILE));
 
         BOOST_CHECK_NO_THROW(c->start());
@@ -158,15 +163,16 @@ BOOST_AUTO_TEST_CASE(ConnectRunning)
         // Remove Container class, but don't stop the container
     }
     // Connect to a running container
-    auto c = std::unique_ptr<Container>(createContainer("ConnectRunning", "/", WORK_DIR));
+    auto c = std::unique_ptr<Container>(createContainer("ConnectRunning", ROOT_DIR, WORK_DIR));
     BOOST_CHECK_NO_THROW(c->connect());
+
     BOOST_CHECK_NO_THROW(c->stop(TIMEOUT));
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
 }
 
 BOOST_AUTO_TEST_CASE(StartCallback)
 {
-    auto c = std::unique_ptr<Container>(createContainer("StartCallback", "/", WORK_DIR));
+    auto c = std::unique_ptr<Container>(createContainer("StartCallback", ROOT_DIR, WORK_DIR));
     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
     BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
                                       logger::LogLevel::DEBUG,
@@ -184,13 +190,13 @@ BOOST_AUTO_TEST_CASE(StartCallback)
     BOOST_CHECK_NO_THROW(c->stop(TIMEOUT));
     BOOST_REQUIRE(c->getState() != Container::State::RUNNING);
 
-    auto pred2 = [&] {return c->getState() == Container::State::STOPPING;};
+    auto pred2 = [&] {return c->getState() == Container::State::STOPPED;};
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, pred2));
 }
 
 BOOST_AUTO_TEST_CASE(StopCallback)
 {
-    auto c = std::unique_ptr<Container>(createContainer("StopCallback", "/", WORK_DIR));
+    auto c = std::unique_ptr<Container>(createContainer("StopCallback", ROOT_DIR, WORK_DIR));
     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
     BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
                                       logger::LogLevel::DEBUG,
@@ -212,7 +218,7 @@ BOOST_AUTO_TEST_CASE(StopCallback)
 BOOST_AUTO_TEST_CASE(ConnectCallback)
 {
     {
-        auto c = std::unique_ptr<Container>(createContainer("ConnectCallback", "/", WORK_DIR));
+        auto c = std::unique_ptr<Container>(createContainer("ConnectCallback", ROOT_DIR, WORK_DIR));
         BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
         BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
                                           logger::LogLevel::TRACE,
@@ -224,7 +230,7 @@ BOOST_AUTO_TEST_CASE(ConnectCallback)
         // Remove Container class, but don't stop the container
     }
     // Connect to a running container
-    auto c = std::unique_ptr<Container>(createContainer("ConnectCallback", "/", WORK_DIR));
+    auto c = std::unique_ptr<Container>(createContainer("ConnectCallback", ROOT_DIR, WORK_DIR));
 
     utils::Latch latch;
     auto call = [&latch]() {
@@ -235,30 +241,24 @@ BOOST_AUTO_TEST_CASE(ConnectCallback)
     BOOST_CHECK_NO_THROW(c->connect());
     BOOST_REQUIRE(latch.wait(TIMEOUT));
     BOOST_REQUIRE(c->getState() == Container::State::RUNNING);
-}
 
-
-BOOST_AUTO_TEST_CASE(UIDGoodMapping)
-{
-    auto c = std::unique_ptr<Container>(createContainer("UIDGoodMapping", "/", WORK_DIR));
-    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
-    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_NULL, logger::LogLevel::DEBUG));
-
-    c->addUIDMap(0, 1000, 1);
-    c->addUIDMap(1000, 0, 999);
-
-    BOOST_CHECK_NO_THROW(c->start(TIMEOUT));
     BOOST_CHECK_NO_THROW(c->stop(TIMEOUT));
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
 }
 
-BOOST_AUTO_TEST_CASE(GIDGoodMapping)
+BOOST_AUTO_TEST_CASE(UIDGIDGoodMapping)
 {
-    auto c = std::unique_ptr<Container>(createContainer("GIDGoodMapping", "/", WORK_DIR));
-    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
-    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_NULL, logger::LogLevel::DEBUG));
+    BOOST_CHECK_NO_THROW(lxcpp::chown(ROOT_DIR, 1000, 1000));
 
-    c->addGIDMap(0, 1000, 1);
+    auto c = std::unique_ptr<Container>(createContainer("UIDGIDGoodMapping", ROOT_DIR, WORK_DIR));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
+
+    c->addUIDMap(0, 1000, 1000);
+    c->addUIDMap(1000, 0, 999);
+    c->addGIDMap(0, 1000, 1000);
     c->addGIDMap(1000, 0, 999);
 
     BOOST_CHECK_NO_THROW(c->start(TIMEOUT));
@@ -268,9 +268,11 @@ BOOST_AUTO_TEST_CASE(GIDGoodMapping)
 
 BOOST_AUTO_TEST_CASE(UIDBadMapping)
 {
-    auto c = std::unique_ptr<Container>(createContainer("UIDBadMapping", "/", WORK_DIR));
+    auto c = std::unique_ptr<Container>(createContainer("UIDBadMapping", ROOT_DIR, WORK_DIR));
     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
-    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_NULL, logger::LogLevel::DEBUG));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
 
     // At most 5 mappings allowed
     for(int i = 0; i < 5; ++i) {
@@ -282,9 +284,11 @@ BOOST_AUTO_TEST_CASE(UIDBadMapping)
 
 BOOST_AUTO_TEST_CASE(GIDBadMapping)
 {
-    auto c = std::unique_ptr<Container>(createContainer("GIDBadMapping", "/", WORK_DIR));
+    auto c = std::unique_ptr<Container>(createContainer("GIDBadMapping", ROOT_DIR, WORK_DIR));
     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
-    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_NULL, logger::LogLevel::DEBUG));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
 
     for(int i = 0; i < 5; ++i) {
         c->addGIDMap(0, 1000, 1);
@@ -292,5 +296,6 @@ BOOST_AUTO_TEST_CASE(GIDBadMapping)
 
     BOOST_REQUIRE_THROW(c->addGIDMap(0, 1000, 1),ConfigureException);
 }
+
 
 BOOST_AUTO_TEST_SUITE_END()

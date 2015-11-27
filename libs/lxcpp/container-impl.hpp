@@ -57,6 +57,8 @@ public:
     // Configuration
     const std::string& getName() const;
     const std::string& getRootPath() const;
+    const std::string& getWorkPath() const;
+
     void setHostName(const std::string& hostname);
 
     pid_t getGuardPid() const;
@@ -71,8 +73,8 @@ public:
 
     void setTerminalCount(const unsigned int count);
 
-    void addUIDMap(unsigned min, unsigned max, unsigned num);
-    void addGIDMap(unsigned min, unsigned max, unsigned num);
+    void addUIDMap(uid_t contID, uid_t hostID, unsigned num);
+    void addGIDMap(gid_t contID, gid_t hostID, unsigned num);
 
     // Execution actions
     void start(const unsigned int timeoutMS);

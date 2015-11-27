@@ -52,7 +52,7 @@ void SetupUserNS::execute()
     const std::string gid_map_path = proc + "/gid_map";
 
     std::string uid_map;
-    for (const auto map : mUserNSConfig.mUIDMaps) {
+    for (const auto &map : mUserNSConfig.mUIDMaps) {
         uid_map.append(std::to_string(std::get<0>(map)));
         uid_map.append(" ");
         uid_map.append(std::to_string(std::get<1>(map)));
@@ -67,7 +67,7 @@ void SetupUserNS::execute()
     }
 
     std::string gid_map;
-    for (const auto map : mUserNSConfig.mGIDMaps) {
+    for (const auto &map : mUserNSConfig.mGIDMaps) {
         gid_map.append(std::to_string(std::get<0>(map)));
         gid_map.append(" ");
         gid_map.append(std::to_string(std::get<1>(map)));

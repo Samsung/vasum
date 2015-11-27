@@ -26,6 +26,8 @@
 #include "lxcpp/guard/guard.hpp"
 
 #include "utils/fd-utils.hpp"
+#include "utils/typeinfo.hpp"
+#include "logger/logger.hpp"
 
 #include <iostream>
 #include <unistd.h>
@@ -52,7 +54,7 @@ int main(int argc, char *argv[])
         lxcpp::Guard guard(argv[1]);
         return guard.execute();
     } catch(std::exception& e) {
-        // LOGE("Unexpected: " << utils::getTypeName(e) << ": " << e.what());
+        LOGE("Unexpected: " << utils::getTypeName(e) << ": " << e.what());
         return EXIT_FAILURE;
     }
 }

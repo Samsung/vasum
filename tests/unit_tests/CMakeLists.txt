@@ -24,12 +24,13 @@ FILE(GLOB         server_SRCS ${SERVER_FOLDER}/*.cpp ${SERVER_FOLDER}/*.hpp)
 FILE(GLOB         client_SRCS ${CLIENT_FOLDER}/*.cpp ${CLIENT_FOLDER}/*.h)
 FILE(GLOB         socket_test_SRCS ${SOCKET_TEST_FOLDER}/*.cpp ${SOCKET_TEST_FOLDER}/*.hpp)
 FILE(GLOB         lxcpp_test_SRCS lxcpp/lxcpp-api-compile-test.cpp)
+FILE(GLOB         lxcpp_init_SRCS lxcpp/lxcpp-simple-init.c)
 
 FILE(GLOB         main_SRC ${SERVER_FOLDER}/main.cpp)
 LIST(REMOVE_ITEM server_SRCS ${main_SRC})
 
-# We must compile socket-test separately, exclude it from unit-test build
-LIST(REMOVE_ITEM project_SRCS ${socket_test_SRCS} ${lxcpp_test_SRCS})
+# We must compile some tests/tools separately, exclude them from unit-test build
+LIST(REMOVE_ITEM project_SRCS ${socket_test_SRCS} ${lxcpp_test_SRCS} ${lxcpp_init_SRCS})
 
 SET(LAUNCHER_CODENAME "${PROJECT_NAME}-launcher")
 
@@ -45,14 +46,18 @@ ADD_DEPENDENCIES(${CLIENT_C_API_COMPILE_TEST} ${PROJECT_NAME}-client)
 
 ## A fake target to test lxcpp API
 SET(LXCPP_API_COMPILE_TEST "lxcpp-api-compile-test")
-ADD_EXECUTABLE(${LXCPP_API_COMPILE_TEST} lxcpp/lxcpp-api-compile-test.cpp)
+ADD_EXECUTABLE(${LXCPP_API_COMPILE_TEST} ${lxcpp_test_SRCS})
 ADD_DEPENDENCIES(${LXCPP_API_COMPILE_TEST} lxcpp)
 TARGET_LINK_LIBRARIES(${LXCPP_API_COMPILE_TEST} lxcpp)
 
-IF(NOT WITHOUT_SYSTEMD)
-SET(SOCKET_TEST_CODENAME "${PROJECT_NAME}-socket-test")
+## A small init binary used by container tests
+SET(LXCPP_SIMPLE_INIT "lxcpp-simple-init")
+ADD_EXECUTABLE(${LXCPP_SIMPLE_INIT} ${lxcpp_init_SRCS})
+SET_TARGET_PROPERTIES(${LXCPP_SIMPLE_INIT} PROPERTIES LINK_FLAGS "-static")
 
 ## A stub mini-service to test socket functionality
+IF(NOT WITHOUT_SYSTEMD)
+SET(SOCKET_TEST_CODENAME "${PROJECT_NAME}-socket-test")
 ADD_EXECUTABLE(${SOCKET_TEST_CODENAME} ${socket_test_SRCS} ${client_SRCS})
 ENDIF(NOT WITHOUT_SYSTEMD)
 
@@ -71,6 +76,7 @@ SET_TARGET_PROPERTIES(${UT_SERVER_CODENAME} PROPERTIES
 )
 TARGET_COMPILE_DEFINITIONS(${UT_SERVER_CODENAME}
     PRIVATE LAUNCHER_PATH="${LIBEXEC_DIR}/${LAUNCHER_CODENAME}"
+    PRIVATE SIMPLE_INIT_PATH="${LIBEXEC_DIR}/${LXCPP_SIMPLE_INIT}"
 )
 
 TARGET_LINK_LIBRARIES(${UT_SERVER_CODENAME} Common ${UT_SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
@@ -109,3 +115,5 @@ INSTALL(TARGETS ${UT_SERVER_CODENAME} DESTINATION bin)
 IF(NOT WITHOUT_SYSTEMD)
 INSTALL(TARGETS ${SOCKET_TEST_CODENAME} DESTINATION bin)
 ENDIF(NOT WITHOUT_SYSTEMD)
+
+INSTALL(TARGETS ${LXCPP_SIMPLE_INIT} DESTINATION ${LIBEXEC_DIR})

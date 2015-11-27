@@ -73,6 +73,22 @@ struct ContainerConfig {
     std::string mRootPath;
 
     /**
+     * Path of the work directory of the container.
+     *
+     * Set: by constructor, cannot be changed afterwards
+     * Get: getWorkPath()
+     */
+    std::string mWorkPath;
+
+    /**
+     * Path of the old root after PivotRoot
+     *
+     * Set: by constructor, basically a const
+     * Get: none, only for internal use
+     */
+    std::string mOldRoot;
+
+    /**
      * Socket for communication with the Guard
      *
      * Set: by constructor, cannot be changed afterwards
@@ -200,6 +216,7 @@ struct ContainerConfig {
     std::map<std::string, std::string> mKernelParameters;
 
     ContainerConfig():
+        mOldRoot("/.oldroot"),
         mGuardPid(-1),
         mInitPid(-1),
         mState(Container::State::STOPPED),
@@ -211,6 +228,8 @@ struct ContainerConfig {
         mName,
         mHostName,
         mRootPath,
+        mWorkPath,
+        mOldRoot,
         mGuardPid,
         mInitPid,
         mInit,

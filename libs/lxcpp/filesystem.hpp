@@ -24,7 +24,10 @@
 #ifndef LXCPP_FILESYSTEM_HPP
 #define LXCPP_FILESYSTEM_HPP
 
+#include <sys/types.h>
 #include <string>
+#include <cstdio>
+#include <mntent.h>
 
 namespace lxcpp {
 
@@ -34,7 +37,9 @@ void mount(const std::string& source,
            unsigned long mountflags,
            const std::string& data);
 
-void umount(const std::string& path, const int flags);
+void umount(const std::string& path, const int flags = 0);
+
+bool exists(const std::string& path, mode_t mode = 0);
 
 bool isMountPoint(const std::string& path);
 
@@ -47,9 +52,33 @@ bool isMountPoint(const std::string& path);
  */
 bool isMountPointShared(const std::string& path);
 
+FILE *setmntent(const std::string& filename, const std::string& type);
+
+void umountSubtree(const std::string& prefix);
+
 void fchdir(int fd);
 
 void chdir(const std::string& path);
+
+void mkdir(const std::string& path, mode_t mode);
+
+void rmdir(const std::string& path);
+
+void mknod(const std::string& path, mode_t mode, dev_t dev);
+
+void chmod(const std::string& path, mode_t mode);
+
+void chown(const std::string& path, uid_t owner, gid_t group);
+
+void touch(const std::string& path, mode_t mode);
+
+void symlink(const std::string& target, const std::string& linkpath);
+
+void makeNode(const std::string& path, mode_t mode, dev_t dev);
+
+void pivotRoot(const std::string& new_root, const std::string& put_old);
+
+void containerChownRoot(const std::string& path, const struct UserNSConfig& config);
 
 } // namespace lxcpp
 

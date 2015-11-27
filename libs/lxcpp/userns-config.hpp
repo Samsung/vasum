@@ -27,7 +27,6 @@
 #include "cargo/fields.hpp"
 
 #include <vector>
-#include <string>
 
 
 namespace lxcpp {
@@ -43,6 +42,9 @@ struct UserNSConfig {
         mUIDMaps,
         mGIDMaps
     )
+
+    unsigned getContainerRootUID() const;
+    unsigned getContainerRootGID() const;
 };
 
 

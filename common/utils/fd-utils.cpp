@@ -138,7 +138,7 @@ int open(const std::string &path, int flags, mode_t mode)
                 LOGT("open() interrupted by a signal, retrying");
                 continue;
             }
-            const std::string msg = "open() failed: " + getSystemErrorMessage();
+            const std::string msg = "open() failed: " + path + ": " + getSystemErrorMessage();
             LOGE(msg);
             throw UtilsException(msg);
         }

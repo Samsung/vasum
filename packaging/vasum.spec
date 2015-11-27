@@ -1,3 +1,6 @@
+# Hardened build on fedora 22/23 fails because crtbeginT.o has not been compiled with fPIE
+%undefine _hardened_build
+
 %define script_dir %{_sbindir}
 # Vasum Server's user info - it should already exist in the system
 %define vsm_user          security-containers
@@ -35,10 +38,12 @@ BuildRequires:  pkgconfig(libsystemd-daemon)
 BuildRequires:  pkgconfig(libsystemd-journal)
 %endif
 %if %{platform_type} == "TIZEN"
+BuildRequires:  glibc-devel-static
 BuildRequires:  libjson-devel >= 0.10
 Requires:       iproute2
 Requires(post): libcap-tools
 %else
+BuildRequires:  glibc-static
 BuildRequires:  json-c-devel
 Requires:       lxc-templates
 Requires:       iproute
@@ -298,6 +303,7 @@ systemctl daemon-reload || :
 %attr(755,root,root) %{script_dir}/vsm_all_tests.py
 %attr(755,root,root) %{script_dir}/vsm_int_tests.py
 %attr(755,root,root) %{script_dir}/vsm_launch_test.py
+%attr(755,root,root) %{_libexecdir}/lxcpp-simple-init
 %{script_dir}/vsm_test_parser.py
 %config /etc/vasum/tests/*.conf
 %if !%{without_dbus}

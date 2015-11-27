@@ -68,11 +68,24 @@ ContainerImpl::ContainerImpl(const std::string &name,
     utils::assertIsDir(rootPath);
     utils::assertIsDir(workPath);
 
+    utils::assertIsAbsolute(rootPath);
+    utils::assertIsAbsolute(workPath);
+
+    if (utils::dirName(workPath).compare("/") == 0) {
+        const std::string msg = "Work path cannot be the root of the filesystem";
+        LOGE(msg);
+        throw ConfigureException(msg);
+    }
+
+    LOGD("Root path: " << rootPath);
+    LOGD("Work path: " << workPath);
+
     // Fill known configuration
     mConfig->mName = name;
     mConfig->mHostName = name;
     mConfig->mRootPath = rootPath;
-    mConfig->mNamespaces = CLONE_NEWIPC | CLONE_NEWNS | CLONE_NEWPID | CLONE_NEWUTS;
+    mConfig->mWorkPath = workPath;
+    mConfig->mNamespaces = CLONE_NEWNS | CLONE_NEWPID | CLONE_NEWIPC | CLONE_NEWUTS;
     mConfig->mSocketPath = utils::createFilePath(workPath, name, ".socket");
 
     // IPC with the Guard process
@@ -165,6 +178,13 @@ const std::string& ContainerImpl::getRootPath() const
     return mConfig->mRootPath;
 }
 
+const std::string& ContainerImpl::getWorkPath() const
+{
+    Lock lock(mStateMutex);
+
+    return mConfig->mWorkPath;
+}
+
 void ContainerImpl::setHostName(const std::string& hostname)
 {
     Lock lock(mStateMutex);
@@ -242,7 +262,7 @@ void ContainerImpl::setTerminalCount(const unsigned int count)
     mConfig->mTerminals.count = count;
 }
 
-void ContainerImpl::addUIDMap(unsigned min, unsigned max, unsigned num)
+void ContainerImpl::addUIDMap(uid_t contID, uid_t hostID, unsigned num)
 {
     Lock lock(mStateMutex);
 
@@ -254,10 +274,10 @@ void ContainerImpl::addUIDMap(unsigned min, unsigned max, unsigned num)
         throw ConfigureException(msg);
     }
 
-    mConfig->mUserNSConfig.mUIDMaps.emplace_back(min, max, num);
+    mConfig->mUserNSConfig.mUIDMaps.emplace_back(contID, hostID, num);
 }
 
-void ContainerImpl::addGIDMap(unsigned min, unsigned max, unsigned num)
+void ContainerImpl::addGIDMap(gid_t contID, gid_t hostID, unsigned num)
 {
     Lock lock(mStateMutex);
 
@@ -269,7 +289,7 @@ void ContainerImpl::addGIDMap(unsigned min, unsigned max, unsigned num)
         throw ConfigureException(msg);
     }
 
-    mConfig->mUserNSConfig.mGIDMaps.emplace_back(min, max, num);
+    mConfig->mUserNSConfig.mGIDMaps.emplace_back(contID, hostID, num);
 }
 
 void ContainerImpl::start(const unsigned int timeoutMS)
@@ -291,6 +311,27 @@ void ContainerImpl::start(const unsigned int timeoutMS)
 
     // Begin starting
     setState(Container::State::STARTING);
+
+    size_t uidMapSize = mConfig->mUserNSConfig.mUIDMaps.size();
+    size_t gidMapSize = mConfig->mUserNSConfig.mGIDMaps.size();
+    if (!uidMapSize != !gidMapSize) {
+        const std::string msg = "If using user namespace, both UIDs and GIDs need to be mapped";
+        LOGE(msg);
+        throw ConfigureException(msg);
+    }
+
+    // The following two functions throw in case the root is not mapped
+    __attribute__((unused)) uid_t rootUID = mConfig->mUserNSConfig.getContainerRootUID();
+    __attribute__((unused)) gid_t rootGID = mConfig->mUserNSConfig.getContainerRootGID();
+    LOGD("The root user in the container is UID: " << rootUID << " GID: " << rootGID);
+
+    if ((mConfig->mNamespaces & CLONE_NEWUSER) && (utils::dirName(mConfig->mRootPath).compare("/") == 0)) {
+        const std::string msg = "You cannot use user namespace on \"/\" root path";
+        LOGE(msg);
+        throw ConfigureException(msg);
+    }
+
+    // TODO: container preparation part 0: things to do on the host side
 
     PrepHostTerminal terminal(mConfig->mTerminals);
     terminal.execute();
@@ -613,11 +654,6 @@ void ContainerImpl::declareFile(const provision::File::Type type,
     provision::File newFile({type, path, flags, mode});
     mConfig->mProvisions.addFile(newFile);
     // TODO: update guard config
-
-    if (mConfig->mState == Container::State::RUNNING) {
-        ProvisionFile fileCmd(newFile);
-        fileCmd.execute();
-    }
 }
 
 const FileVector& ContainerImpl::getFiles() const
@@ -632,11 +668,6 @@ void ContainerImpl::removeFile(const provision::File& item)
     Lock lock(mStateMutex);
 
     mConfig->mProvisions.removeFile(item);
-
-    if (mConfig->mState == Container::State::RUNNING) {
-        ProvisionFile fileCmd(item);
-        fileCmd.revert();
-    }
 }
 
 void ContainerImpl::declareMount(const std::string& source,
@@ -650,11 +681,6 @@ void ContainerImpl::declareMount(const std::string& source,
     provision::Mount newMount({source, target, type, flags, data});
     mConfig->mProvisions.addMount(newMount);
     // TODO: update guard config
-
-    if (mConfig->mState == Container::State::RUNNING) {
-        ProvisionMount mountCmd(newMount);
-        mountCmd.execute();
-    }
 }
 
 const MountVector& ContainerImpl::getMounts() const
@@ -669,11 +695,6 @@ void ContainerImpl::removeMount(const provision::Mount& item)
     Lock lock(mStateMutex);
 
     mConfig->mProvisions.removeMount(item);
-
-    if (mConfig->mState == Container::State::RUNNING) {
-        ProvisionMount mountCmd(item);
-        mountCmd.revert();
-    }
 }
 
 void ContainerImpl::declareLink(const std::string& source,
@@ -684,11 +705,6 @@ void ContainerImpl::declareLink(const std::string& source,
     provision::Link newLink({source, target});
     mConfig->mProvisions.addLink(newLink);
     // TODO: update guard config
-
-    if (mConfig->mState == Container::State::RUNNING) {
-        ProvisionLink linkCmd(newLink);
-        linkCmd.execute();
-    }
 }
 
 const LinkVector& ContainerImpl::getLinks() const
@@ -703,11 +719,6 @@ void ContainerImpl::removeLink(const provision::Link& item)
     Lock lock(mStateMutex);
 
     mConfig->mProvisions.removeLink(item);
-
-    if (mConfig->mState == Container::State::RUNNING) {
-        ProvisionLink linkCmd(item);
-        linkCmd.revert();
-    }
 }
 
 void ContainerImpl::addSubsystem(const std::string& name, const std::string& path)

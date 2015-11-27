@@ -7,8 +7,16 @@
 #include <logger/logger.hpp>
 #include <sys/resource.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mount.h>
 #include <unistd.h>
 #include <signal.h>
+#include <libgen.h>
+#include <limits.h>
+#include <string.h>
+
+#define WORK_DIR "/run/lxcpp"
+
 
 using namespace lxcpp;
 
@@ -75,19 +83,27 @@ int main(int argc, char *argv[])
 
     std::vector<std::string> args;
     args.push_back("/bin/bash");
+    //args.push_back("/usr/lib/systemd/systemd");
+    //args.push_back("/usr/local/libexec/lxcpp-simple-init");
+
+    mkdir(WORK_DIR, 0755);
 
     try
     {
-        Container* c = createContainer("test", "/", "/tmp");
+        //Container *c = createContainer("test", "/", WORK_DIR);
+        Container *c = createContainer("test", "/var/cache/lxc/fedora/x86_64/22/rootfs", WORK_DIR);
+
         c->setHostName("junk");
         c->setInit(args);
         c->setEnv({{"TEST_VAR", "test_value"}, {"_TEST_VAR_", "_test_value_"}});
-        c->setLogger(logger::LogType::LOG_FILE, logger::LogLevel::TRACE, "/tmp/lxcpp-shell.txt");
+        c->setLogger(logger::LogType::LOG_PERSISTENT_FILE, logger::LogLevel::DEBUG, "/tmp/lxcpp-shell.txt");
         c->setTerminalCount(4);
+
         // make my own user root in a new namespace
-        c->addUIDMap(0, 1000, 1);
-        c->addGIDMap(0, 1000, 1);
-        // make root and system users non privileged ones
+        c->addUIDMap(0, 1000, 1000);
+        c->addGIDMap(0, 1000, 1000);
+        // if using USERNS this is a workaround to have host IDs mapped for /dev/pts
+        // This will not be needed after proper /dev/pts namespacing is implemented
         c->addUIDMap(1000, 0, 999);
         c->addGIDMap(1000, 0, 999);
 
@@ -109,6 +125,15 @@ int main(int argc, char *argv[])
         //c->console();
 
         //c->attach({"/usr/bin/sleep", "60"}, 0, 0, "", {}, 0, "/tmp", {}, {{"TEST_VAR","test_value"}});
+
+        // Test reconnect
+        c = createContainer("test", "/var/cache/lxc/fedora/x86_64/22/rootfs", WORK_DIR);
+        c->connect();
+        sleep(1);
+        c->console();
+
+        // Stop it now, as it doesn't automatically on destructor
+        c->stop();
 
         delete c;
     }

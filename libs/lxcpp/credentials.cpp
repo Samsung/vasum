@@ -77,4 +77,3 @@ pid_t setsid()
 }
 
 } // namespace lxcpp
-
