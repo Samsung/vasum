@@ -416,16 +416,16 @@ void ContainerImpl::console()
     console.execute();
 }
 
-void ContainerImpl::addInterfaceConfig(const std::string& hostif,
+void ContainerImpl::addInterfaceConfig(InterfaceConfigType type,
+                                       const std::string& hostif,
                                        const std::string& zoneif,
-                                       InterfaceType type,
                                        const std::vector<InetAddr>& addrs,
                                        MacVLanMode mode)
 {
     Lock lock(mStateMutex);
 
     mConfig->mNamespaces |= CLONE_NEWNET;
-    mConfig->mNetwork.addInterfaceConfig(hostif, zoneif, type, addrs, mode);
+    mConfig->mNetwork.addInterfaceConfig(type, hostif, zoneif, addrs, mode);
 }
 
 void ContainerImpl::addInetConfig(const std::string& ifname, const InetAddr& addr)

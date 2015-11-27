@@ -48,7 +48,7 @@ void createBridgeIfNeeded(const NetworkInterfaceConfig& interface) {
     }
 }
 
-void createVeth(const NetworkInterfaceConfig& interface, pid_t pid) {
+void createBridgedVeth(const NetworkInterfaceConfig& interface, pid_t pid) {
     NetworkInterface veth1(interface.getZoneIf() + "-br" + std::to_string(pid), 0);
     NetworkInterface veth2(interface.getZoneIf(), 0);
 
@@ -64,26 +64,26 @@ void NetCreateAll::execute()
 {
     for (const auto& interface : mNetwork.getInterfaces()) {
         LOGI("Creating interface " + interface.getHostIf());
-        if (interface.getType() == InterfaceType::BRIDGE) {
+        if (interface.getType() == InterfaceConfigType::LOOPBACK) {
+        } else if (interface.getType() == InterfaceConfigType::BRIDGE) {
             createBridgeIfNeeded(interface);
-        }
-        else if (interface.getType() == InterfaceType::VETH) {
-            createVeth(interface, mPid);
-        }
-        else { // generic
-            NetworkInterface(interface.getHostIf()).create(interface.getType(), interface.getZoneIf(), interface.getMode());
+        } else if (interface.getType() == InterfaceConfigType::VETH_BRIDGED) {
+            createBridgedVeth(interface, mPid);
+        } else {
         }
     }
 }
 
 void NetConfigureAll::execute()
 {
-    NetworkInterface("lo", 0).up();
-
     bool needDefaultRoute = true;
 
     for (const auto& interface : mNetwork.getInterfaces()) {
-        if (interface.getType() == InterfaceType::VETH) {
+        if (interface.getType() == InterfaceConfigType::LOOPBACK) {
+
+            NetworkInterface(interface.getHostIf(), 0).up();
+
+        } else if (interface.getType() == InterfaceConfigType::VETH_BRIDGED) {
             NetworkInterface networkInterface(interface.getZoneIf(), 0);
 
             Attrs attrs;

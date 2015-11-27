@@ -38,6 +38,12 @@
 
 namespace lxcpp {
 
+enum class InterfaceConfigType : int {
+    LOOPBACK,
+    BRIDGE,
+    VETH_BRIDGED
+};
+
 /**
  * Network interface configuration
  */
@@ -45,9 +51,9 @@ class NetworkInterfaceConfig {
 public:
     NetworkInterfaceConfig() = default;  // default constructor required by visitor
 
-    NetworkInterfaceConfig(const std::string& hostif,
+    NetworkInterfaceConfig(InterfaceConfigType type,
+                           const std::string& hostif,
                            const std::string& zoneif,
-                           InterfaceType type,
                            const std::vector<InetAddr>& addrs,
                            MacVLanMode mode) :
         mHostIf(hostif),
@@ -65,7 +71,7 @@ public:
 
     const std::string& getZoneIf() const;
 
-    InterfaceType getType() const;
+    InterfaceConfigType getType() const;
 
     MacVLanMode getMode() const;
 
@@ -122,9 +128,9 @@ public:
      * adds interface configuration.
      * throws NetworkException if zoneif name already on list
      */
-    void addInterfaceConfig(const std::string& hostif,
-                            const std::string& zoneif,
-                            InterfaceType type,
+    void addInterfaceConfig(InterfaceConfigType type,
+                            const std::string& hostif,
+                            const std::string& zoneif = "",
                             const std::vector<InetAddr>& addrs = std::vector<InetAddr>(),
                             MacVLanMode mode = MacVLanMode::PRIVATE);
     void addInetConfig(const std::string& ifname, const InetAddr& addr);

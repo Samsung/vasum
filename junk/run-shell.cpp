@@ -3,7 +3,7 @@
 #include <vector>
 #include <lxcpp/lxcpp.hpp>
 #include <lxcpp/logger-config.hpp>
-#include <lxcpp/network.hpp>
+#include <lxcpp/network-config.hpp>
 #include <logger/logger.hpp>
 #include <sys/types.h>
 #include <unistd.h>
@@ -38,6 +38,19 @@ void sighandler(int signal)
     wait();
     exit(0);
 }
+
+// NOTE: to enable connecting outside the host from container (to be configured in upper layer):
+// 1. enable ip forwarding (sysctl net.ipv4.....forwarding=1)
+// 2. create iptables NAT/MASQ if required for that container
+
+// For the example container configured in this file:
+// --------------------------------------------------
+// The commands issued on host to have internet access from container (masquarade)
+// iptables -P FORWARD ACCEPT
+// iptables -A POSTROUTING -t nat -j MASQUERADE -s 10.0.0.0/24
+// --------------------------------------------------
+// The commands issued on host to cleanup masquarade
+// iptables -D POSTROUTING -t nat -j MASQUERADE -s 10.0.0.0/24
 
 int main(int argc, char *argv[])
 {
@@ -75,13 +88,10 @@ int main(int argc, char *argv[])
         c->addUIDMap(1000, 0, 999);
         c->addGIDMap(1000, 0, 999);
 
-        // TODO masquarade container network (hook or network API)
-        // iptables -P FORWARD ACCEPT
-        // iptables -A POSTROUTING -t nat -j MASQUERADE -s 10.0.0.0/24;
-
         // configure network
-        c->addInterfaceConfig("lxcpp-br0", "", InterfaceType::BRIDGE, {InetAddr("10.0.0.1", 24)});
-        c->addInterfaceConfig("lxcpp-br0", "veth0", InterfaceType::VETH, {InetAddr("10.0.0.2", 24)});
+        c->addInterfaceConfig(InterfaceConfigType::LOOPBACK, "lo");
+        c->addInterfaceConfig(InterfaceConfigType::BRIDGE, "lxcpp-br0", "", {InetAddr("10.0.0.1", 24)});
+        c->addInterfaceConfig(InterfaceConfigType::VETH_BRIDGED, "lxcpp-br0", "veth0", {InetAddr("10.0.0.2", 24)});
 
         c->start();
         // not needed per se, but let things settle for a second, e.g. the logs
@@ -89,9 +99,6 @@ int main(int argc, char *argv[])
         c->console();
         // You could run the console for the second time to see if it can be reattached
         //c->console();
-
-        // TODO masquarade cleanup
-        // iptables -D POSTROUTING -t nat -j MASQUERADE -s 10.0.0.0/24
 
         delete c;
     }

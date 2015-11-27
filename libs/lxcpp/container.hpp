@@ -111,13 +111,11 @@ public:
                        const std::vector<std::pair<std::string, std::string>>& envToSet) = 0;
     virtual void console() = 0;
 
-    /**
-     * Network interfaces setup/config
-     */
-    virtual void addInterfaceConfig(const std::string& hostif,
-                                    const std::string& zoneif,
-                                    InterfaceType type,
-                                    const std::vector<InetAddr>& addrs,
+    // Network interfaces setup/config
+    virtual void addInterfaceConfig(InterfaceConfigType type,
+                                    const std::string& hostif,
+                                    const std::string& zoneif = "",
+                                    const std::vector<InetAddr>& addrs = std::vector<InetAddr>(),
                                     MacVLanMode mode = MacVLanMode::PRIVATE) = 0;
     virtual void addInetConfig(const std::string& ifname, const InetAddr& addr) = 0;
 

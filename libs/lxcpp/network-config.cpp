@@ -39,9 +39,9 @@ const std::string& NetworkInterfaceConfig::getZoneIf() const
     return mZoneIf;
 }
 
-InterfaceType NetworkInterfaceConfig::getType() const
+InterfaceConfigType NetworkInterfaceConfig::getType() const
 {
-    return static_cast<InterfaceType>(mType);
+    return static_cast<InterfaceConfigType>(mType);
 }
 
 MacVLanMode NetworkInterfaceConfig::getMode() const
@@ -94,15 +94,15 @@ void NetworkInterfaceConfig::addInetAddr(const InetAddr& addr)
     mIpAddrList.push_back(addr);
 }
 
-void NetworkConfig::addInterfaceConfig(const std::string& hostif,
+void NetworkConfig::addInterfaceConfig(InterfaceConfigType type,
+                                       const std::string& hostif,
                                        const std::string& zoneif,
-                                       InterfaceType type,
                                        const std::vector<InetAddr>& addrs,
                                        MacVLanMode mode)
 {
     auto it = std::find_if(mInterfaces.begin(), mInterfaces.end(),
-        [&zoneif](const NetworkInterfaceConfig& entry) {
-            return entry.getZoneIf() == zoneif;
+        [&hostif,&zoneif](const NetworkInterfaceConfig& entry) {
+            return entry.getHostIf() == hostif && entry.getZoneIf() == zoneif;
         }
     );
 
@@ -111,14 +111,14 @@ void NetworkConfig::addInterfaceConfig(const std::string& hostif,
         LOGE(msg);
         throw NetworkException(msg);
     }
-    mInterfaces.push_back(NetworkInterfaceConfig(hostif, zoneif, type, addrs, mode));
+    mInterfaces.push_back(NetworkInterfaceConfig(type, hostif, zoneif, addrs, mode));
 }
 
 void NetworkConfig::addInetConfig(const std::string& ifname, const InetAddr& addr)
 {
     auto it = std::find_if(mInterfaces.begin(), mInterfaces.end(),
         [&ifname](const NetworkInterfaceConfig& entry) {
-            return entry.getZoneIf() == ifname;
+            return entry.getZoneIf() == ifname || entry.getHostIf() == ifname;
         }
     );
 

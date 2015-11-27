@@ -96,9 +96,9 @@ public:
      * adds interface configration.
      * throws NetworkException if zoneif name already on list
      */
-    void addInterfaceConfig(const std::string& hostif,
+    void addInterfaceConfig(InterfaceConfigType type,
+                            const std::string& hostif,
                             const std::string& zoneif,
-                            InterfaceType type,
                             const std::vector<InetAddr>& addrs,
                             MacVLanMode mode);
     void addInetConfig(const std::string& ifname, const InetAddr& addr);

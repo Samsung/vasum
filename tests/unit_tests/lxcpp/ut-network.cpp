@@ -145,11 +145,11 @@ BOOST_AUTO_TEST_CASE(NetworkConfigSerialization)
     NetworkConfig cfg;
     BOOST_CHECK_NO_THROW(cargo::saveToJsonString(cfg));
 
-    cfg.addInterfaceConfig("host-veth0", "zone-eth0", InterfaceType::VETH);
-    cfg.addInterfaceConfig("host-veth1", "zone-eth1", InterfaceType::BRIDGE);
-    cfg.addInterfaceConfig("host-veth2", "zone-eth2", InterfaceType::MACVLAN);
+    cfg.addInterfaceConfig(InterfaceConfigType::BRIDGE, "host-br");
+    cfg.addInterfaceConfig(InterfaceConfigType::VETH_BRIDGED, "host-br", "zone-eth0");
+    cfg.addInterfaceConfig(InterfaceConfigType::LOOPBACK, "lo");
 
-    cfg.addInetConfig("zone-eth0", InetAddr("1.2.3.4", 24));
+    cfg.addInetConfig("host-br", InetAddr("1.2.3.4", 24));
 
     cargo::saveToJsonFile(tmpConfigFile, cfg);
 
