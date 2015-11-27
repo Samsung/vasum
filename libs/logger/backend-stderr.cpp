@@ -27,6 +27,7 @@
 #include "logger/backend-stderr.hpp"
 #include "logger/formatter.hpp"
 
+#include <iostream>
 #include <boost/tokenizer.hpp>
 
 namespace logger {
@@ -56,6 +57,20 @@ void StderrBackend::log(LogLevel logLevel,
                     messageLine.c_str(),
                     mUseColours ? defaultColor.c_str() : "");
         }
+    }
+}
+
+void StderrBackend::relog(LogLevel logLevel,
+                          const std::string& file,
+                          const unsigned int& line,
+                          const std::string& func,
+                          const std::istream& stream)
+{
+    const std::string header = LogFormatter::getHeader(logLevel, file, line, func);
+    if (stream.good()) {
+        std::cerr << "RELOG BEGIN: " << header << std::endl
+                  << stream.rdbuf()
+                  << "RELOG END: " << header  << std::endl;
     }
 }
 

@@ -145,13 +145,13 @@ bool readFirstLineOfFile(const std::string& path, std::string& ret)
 
 bool removeFile(const std::string& path)
 {
-    LOGD(path << ": exists, removing.");
     if (::remove(path.c_str())) {
         if (errno != ENOENT) {
             LOGE(path << ": failed to delete: " << getSystemErrorMessage());
             return false;
         }
     }
+    LOGD(path << ": successfuly removed.");
 
     return true;
 }

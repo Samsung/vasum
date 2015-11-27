@@ -71,7 +71,15 @@ struct Fixture {
 
         utils::signalBlock(SIGCHLD);
     }
-    ~Fixture() {
+
+    ~Fixture()
+    {
+        //grab log file
+        std::string log = LOGGER_FILE;
+        if (utils::exists(log)) {
+            RELOG(std::ifstream(log));
+            utils::removeFile(log);
+        }
         utils::signalUnblock(SIGCHLD);
     }
 

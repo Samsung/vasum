@@ -42,6 +42,12 @@ public:
                      const unsigned int& line,
                      const std::string& func,
                      const std::string& message) = 0;
+    virtual void relog(LogLevel /*logLevel*/,
+                     const std::string& /*file*/,
+                     const unsigned int& /*line*/,
+                     const std::string& /*func*/,
+                     const std::istream& /*stream*/) {}
+
     virtual ~LogBackend() {}
 };
 

@@ -223,6 +223,21 @@ public:
 
 };
 
+static inline std::ostream& operator<<(std::ostream& os, const Container::State& e)
+{
+    const char *name = "N/A";
+    switch (e) {
+        #define CASE(c,n) case (c): name = (n); break
+        CASE(Container::State::STOPPED, "STOPPED");
+        CASE(Container::State::STOPPING, "STOPPING");
+        CASE(Container::State::STARTING, "STARTING");
+        CASE(Container::State::RUNNING, "RUNNING");
+        CASE(Container::State::CONNECTING, "CONNECTING");
+        #undef CASE
+    }
+    return os << name;
+}
+
 } // namespace lxcpp
 
 #endif // LXCPP_CONTAINER_HPP

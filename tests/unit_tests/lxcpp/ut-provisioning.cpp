@@ -78,7 +78,16 @@ struct Fixture {
         // cleanup
         utils::removeFile(TEST_DIR + TEST_FILE);
     }
-    ~Fixture() {}
+
+    ~Fixture()
+    {
+        //grab log file
+        std::string log = LOGGER_FILE;
+        if (utils::exists(log)) {
+            RELOG(std::ifstream(log));
+            utils::removeFile(log);
+        }
+    }
 
     bool attachListFiles(const std::string& dir, const std::string& lookupItem) {
         bool found = false;

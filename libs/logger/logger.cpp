@@ -91,6 +91,18 @@ void Logger::logMessage(LogLevel logLevel,
     gLogBackendPtr->log(logLevel, sfile, line, func, message);
 }
 
+void Logger::logRelog(LogLevel logLevel,
+                      const std::istream& stream,
+                      const std::string& file,
+                      const unsigned int line,
+                      const std::string& func,
+                      const std::string& rootDir)
+{
+    std::string sfile = LogFormatter::stripProjectDir(file, rootDir);
+    std::unique_lock<std::mutex> lock(gLogMutex);
+    gLogBackendPtr->relog(logLevel, sfile, line, func, stream);
+}
+
 void Logger::setLogLevel(const LogLevel level)
 {
     gLogLevel = level;

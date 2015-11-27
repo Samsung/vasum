@@ -111,6 +111,13 @@ public:
                            const std::string& func,
                            const std::string& rootDir);
 
+    static void logRelog(LogLevel logLevel,
+                         const std::istream& stream,
+                         const std::string& file,
+                         const unsigned int line,
+                         const std::string& func,
+                         const std::string& rootDir);
+
     static void setLogLevel(const LogLevel level);
     static void setLogLevel(const std::string& level);
     static LogLevel getLogLevel(void);
@@ -154,10 +161,24 @@ public:
 
 /// Logging tracing information
 #define LOGT(MESSAGE) LOG(TRACE, MESSAGE)
+
+#define RELOG(ISTREAM)                                                     \
+    do {                                                                   \
+        if (logger::Logger::getLogLevel() <= logger::LogLevel::DEBUG) {    \
+            logger::Logger::logRelog(logger::LogLevel::DEBUG,              \
+                                     ISTREAM,                              \
+                                     __FILE__,                             \
+                                     __LINE__,                             \
+                                     __func__,                             \
+                                     PROJECT_SOURCE_DIR);                  \
+        }                                                                  \
+    } while (0)
+
 #else
 #define LOGD(MESSAGE) do {} while (0)
 #define LOGH(MESSAGE) do {} while (0)
 #define LOGT(MESSAGE) do {} while (0)
+#define RELOG(ISTREAM) do {} while (0)
 #endif
 
 #endif // LOGGER_LOGGER_HPP

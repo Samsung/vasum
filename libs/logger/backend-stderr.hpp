@@ -40,6 +40,11 @@ public:
              const unsigned int& line,
              const std::string& func,
              const std::string& message) override;
+    void relog(LogLevel logLevel,
+               const std::string& file,
+               const unsigned int& line,
+               const std::string& func,
+               const std::istream& stream) override;
 private:
     bool mUseColours;
 };

@@ -64,7 +64,16 @@ struct Fixture {
          mRoot(ROOT_DIR),
          mWork(WORK_DIR)
     {}
-    ~Fixture() {}
+
+    ~Fixture()
+    {
+        //grab log file
+        std::string log = LOGGER_FILE;
+        if (utils::exists(log)) {
+            RELOG(std::ifstream(log));
+            utils::removeFile(log);
+        }
+    }
 };
 
 } // namespace

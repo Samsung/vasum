@@ -97,6 +97,7 @@ ContainerImpl::~ContainerImpl()
 void ContainerImpl::setState(const Container::State state)
 {
     // Used with the mStateMutex locked
+    LOGD("setState to " << state);
     mConfig->mState = state;
     mStateCondition.notify_one();
 }
