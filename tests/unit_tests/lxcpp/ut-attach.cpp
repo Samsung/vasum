@@ -32,6 +32,7 @@
 #include "utils/scoped-dir.hpp"
 #include "utils/signal.hpp"
 #include "utils/fs.hpp"
+#include "utils/spin-wait-for.hpp"
 
 #include <signal.h>
 #include <memory>
@@ -47,6 +48,8 @@ const std::string TESTS_CMD_ROOT            = VSM_TEST_CONFIG_INSTALL_DIR "/util
 const std::string TEST_CMD_RANDOM           = "random.sh";
 const std::string TEST_CMD_RANDOM_PRODUCT   = "random_product.txt";
 const std::string TEST_CMD_FAILURE          = "failure.sh";
+
+const int TIMEOUT = 3000; //ms
 
 const std::vector<std::string> COMMAND = {"/bin/bash",
                                           "-c", "trap exit SIGTERM; while true; do sleep 0.1; done"
@@ -85,28 +88,27 @@ BOOST_FIXTURE_TEST_SUITE(LxcppContainerAttachSuite, Fixture)
 
 using namespace lxcpp;
 
-// FIXME: Uncomment
-// BOOST_AUTO_TEST_CASE(Attach)
-// {
-//     BOOST_CHECK_NO_THROW(container->start());
-//     sleep(2); // FIXME: Remove the sleep
-//     container->attach({TESTS_CMD_ROOT + TEST_CMD_RANDOM, TEST_CMD_RANDOM_PRODUCT}, TEST_DIR);
-//     BOOST_CHECK_NO_THROW(container->stop());
-//     sleep(2); // FIXME: Remove the sleep
+BOOST_AUTO_TEST_CASE(Attach)
+{
+    BOOST_REQUIRE_NO_THROW(container->start());
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return container->getState() == Container::State::RUNNING;}));
+    BOOST_REQUIRE_NO_THROW(container->attach({TESTS_CMD_ROOT + TEST_CMD_RANDOM, TEST_CMD_RANDOM_PRODUCT}, TEST_DIR));
+    BOOST_REQUIRE_NO_THROW(container->stop());
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return container->getState() == Container::State::STOPPED;}));
 
-//     std::string random;
-//     BOOST_REQUIRE_NO_THROW(utils::readFileContent(TEST_DIR + "/" + TEST_CMD_RANDOM_PRODUCT, random));
-//     BOOST_REQUIRE_GT(random.size(), 0);
-// }
+    std::string random;
+    BOOST_REQUIRE_NO_THROW(utils::readFileContent(TEST_DIR + "/" + TEST_CMD_RANDOM_PRODUCT, random));
+    BOOST_REQUIRE_GT(random.size(), 0);
+}
 
-// BOOST_AUTO_TEST_CASE(AttachGetResponseCode)
-// {
-//     BOOST_CHECK_NO_THROW(container->start());
-//     sleep(2); // FIXME: Remove the sleep
-//     BOOST_REQUIRE_EQUAL(container->attach({TESTS_CMD_ROOT + TEST_CMD_FAILURE, "0"}, TEST_DIR), 167);
-//     BOOST_REQUIRE_EQUAL(container->attach({TESTS_CMD_ROOT + TEST_CMD_FAILURE, "2"}, TEST_DIR), 167);
-//     BOOST_CHECK_NO_THROW(container->stop());
-//     sleep(2); // FIXME: Remove the sleep
-// }
+BOOST_AUTO_TEST_CASE(AttachGetResponseCode)
+{
+    BOOST_REQUIRE_NO_THROW(container->start());
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return container->getState() == Container::State::RUNNING;}));
+    BOOST_REQUIRE_EQUAL(container->attach({TESTS_CMD_ROOT + TEST_CMD_FAILURE, "0"}, TEST_DIR), 167);
+    BOOST_REQUIRE_EQUAL(container->attach({TESTS_CMD_ROOT + TEST_CMD_FAILURE, "2"}, TEST_DIR), 167);
+    BOOST_REQUIRE_NO_THROW(container->stop());
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return container->getState() == Container::State::STOPPED;}));
+}
 
 BOOST_AUTO_TEST_SUITE_END()
