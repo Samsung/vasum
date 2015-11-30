@@ -61,7 +61,7 @@ const std::string TEST_CMD_LIST_RET   = "/tmp/list_files_ret.txt";
 const std::vector<std::string> COMMAND = {"/bin/bash",
                                           "-c", "trap exit SIGTERM; while true; do sleep 0.1; done"
                                          };
-const int TIMEOUT = 3000; //ms
+// const int TIMEOUT = 3000; //ms
 
 struct Fixture {
     Fixture() : mTestPath(TEST_DIR), mWork(WORK_DIR)
