@@ -114,7 +114,7 @@ void setupMountPoints()
 
 bool setupControlTTY(const int ttyFD)
 {
-    if (ttyFD != -1) {
+    if (ttyFD == -1) {
         return true;
     }
 

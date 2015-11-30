@@ -79,6 +79,23 @@ struct Fixture {
         BOOST_REQUIRE_EQUAL(sigprocmask(SIG_SETMASK, &mask, NULL), 0);
     }
 
+    int attach(const std::vector<std::string>& args,
+               const std::string& cwdInContainer)
+    {
+        int ret;
+        BOOST_REQUIRE_NO_THROW(ret = container->attach(
+                                                 args,  // argv
+                                                 0, 0,  // uid, gid
+                                                 std::string(), // ttyPath
+                                                 {},    // supplementaryGids
+                                                 0,     // capsToKeep
+                                                 cwdInContainer,
+                                                 {},    // envToKeep
+                                                 {}     // envToSet
+                                                 ));
+        return ret;
+    }
+
     std::unique_ptr<lxcpp::Container> container;
 };
 
@@ -92,7 +109,7 @@ BOOST_AUTO_TEST_CASE(Attach)
 {
     BOOST_REQUIRE_NO_THROW(container->start());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return container->getState() == Container::State::RUNNING;}));
-    BOOST_REQUIRE_NO_THROW(container->attach({TESTS_CMD_ROOT + TEST_CMD_RANDOM, TEST_CMD_RANDOM_PRODUCT}, TEST_DIR));
+    attach({TESTS_CMD_ROOT + TEST_CMD_RANDOM, TEST_CMD_RANDOM_PRODUCT}, TEST_DIR);
     BOOST_REQUIRE_NO_THROW(container->stop());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return container->getState() == Container::State::STOPPED;}));
 
@@ -105,8 +122,8 @@ BOOST_AUTO_TEST_CASE(AttachGetResponseCode)
 {
     BOOST_REQUIRE_NO_THROW(container->start());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return container->getState() == Container::State::RUNNING;}));
-    BOOST_REQUIRE_EQUAL(container->attach({TESTS_CMD_ROOT + TEST_CMD_FAILURE, "0"}, TEST_DIR), 167);
-    BOOST_REQUIRE_EQUAL(container->attach({TESTS_CMD_ROOT + TEST_CMD_FAILURE, "2"}, TEST_DIR), 167);
+    BOOST_REQUIRE_EQUAL(attach({TESTS_CMD_ROOT + TEST_CMD_FAILURE, "0"}, TEST_DIR), 167);
+    BOOST_REQUIRE_EQUAL(attach({TESTS_CMD_ROOT + TEST_CMD_FAILURE, "2"}, TEST_DIR), 167);
     BOOST_REQUIRE_NO_THROW(container->stop());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return container->getState() == Container::State::STOPPED;}));
 }

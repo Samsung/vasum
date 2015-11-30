@@ -79,7 +79,16 @@ struct Fixture {
 
     bool attachListFiles(const std::string& dir, const std::string& lookupItem) {
         bool found = false;
-        c->attach({TESTS_CMD_ROOT + TEST_CMD_LIST, dir, TEST_CMD_LIST_RET}, TEST_DIR);
+
+        c->attach({TESTS_CMD_ROOT + TEST_CMD_LIST, dir, TEST_CMD_LIST_RET},
+                  0, 0,  // uid, gid
+                  std::string(), // ttyPath
+                  {},    // supplementaryGids
+                  0,     // capsToKeep
+                  TEST_DIR,
+                  {},    // envToKeep
+                  {}     // envToSet
+                  );
         std::string file_list = utils::readFileContent(TEST_CMD_LIST_RET);
         if(file_list.find(lookupItem) != std::string::npos)
             found = true;

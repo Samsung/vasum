@@ -367,7 +367,14 @@ void ContainerImpl::setStoppedCallback(const Container::Callback& callback)
 }
 
 int ContainerImpl::attach(const std::vector<std::string>& argv,
-                          const std::string& cwdInContainer)
+                          const uid_t uid,
+                          const gid_t gid,
+                          const std::string& ttyPath,
+                          const std::vector<gid_t>& supplementaryGids,
+                          const int capsToKeep,
+                          const std::string& workDirInContainer,
+                          const std::vector<std::string>& envToKeep,
+                          const std::vector<std::pair<std::string, std::string>>& envToSet)
 {
     Lock lock(mStateMutex);
 
@@ -375,17 +382,20 @@ int ContainerImpl::attach(const std::vector<std::string>& argv,
         throw ForbiddenActionException("Container isn't running, can't attach");
     }
 
+    std::vector<std::pair<std::string, std::string>> envToSetFinal = {{"container","lxcpp"}};
+    envToSetFinal.insert(envToSetFinal.end(), envToSet.begin(), envToSet.end());
+
     Attach attach(*mConfig,
                   argv,
-                  /*uid in container*/ 0,
-                  /*gid in container*/ 0,
-                  "/dev/tty",
-                  /*supplementary gids in container*/ {},
-                  /*capsToKeep*/ 0,
-                  cwdInContainer,
-                  /*envToKeep*/ {},
-    /*envInContainer*/ {{"container","lxcpp"}},
-    mConfig->mLogger);
+                  uid,
+                  gid,
+                  ttyPath,
+                  supplementaryGids,
+                  capsToKeep,
+                  workDirInContainer,
+                  envToKeep,
+                  envToSetFinal,
+                  mConfig->mLogger);
     // TODO: Env variables should agree with the ones already in the container
     attach.execute();
     return attach.getExitCode();

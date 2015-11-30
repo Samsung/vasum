@@ -92,7 +92,14 @@ public:
 
     // Other
     virtual int attach(const std::vector<std::string>& argv,
-                       const std::string& cwdInContainer) = 0;
+                       const uid_t uid,
+                       const gid_t gid,
+                       const std::string& ttyPath,
+                       const std::vector<gid_t>& supplementaryGids,
+                       const int capsToKeep,
+                       const std::string& workDirInContainer,
+                       const std::vector<std::string>& envToKeep,
+                       const std::vector<std::pair<std::string, std::string>>& envToSet) = 0;
     virtual void console() = 0;
 
     // Network interfaces setup/config
