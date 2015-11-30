@@ -399,11 +399,6 @@ void ContainerImpl::console()
     console.execute();
 }
 
-bool ContainerImpl::isRunning() const
-{
-    return mConfig->mState != Container::State::RUNNING;
-}
-
 void ContainerImpl::addInterfaceConfig(const std::string& hostif,
                                        const std::string& zoneif,
                                        InterfaceType type,
@@ -528,7 +523,7 @@ void ContainerImpl::declareFile(const provision::File::Type type,
     mConfig->mProvisions.addFile(newFile);
     // TODO: update guard config
 
-    if (isRunning()) {
+    if (mConfig->mState == Container::State::RUNNING) {
         ProvisionFile fileCmd(newFile);
         fileCmd.execute();
     }
@@ -547,7 +542,7 @@ void ContainerImpl::removeFile(const provision::File& item)
 
     mConfig->mProvisions.removeFile(item);
 
-    if (isRunning()) {
+    if (mConfig->mState == Container::State::RUNNING) {
         ProvisionFile fileCmd(item);
         fileCmd.revert();
     }
@@ -565,7 +560,7 @@ void ContainerImpl::declareMount(const std::string& source,
     mConfig->mProvisions.addMount(newMount);
     // TODO: update guard config
 
-    if (isRunning()) {
+    if (mConfig->mState == Container::State::RUNNING) {
         ProvisionMount mountCmd(newMount);
         mountCmd.execute();
     }
@@ -584,7 +579,7 @@ void ContainerImpl::removeMount(const provision::Mount& item)
 
     mConfig->mProvisions.removeMount(item);
 
-    if (isRunning()) {
+    if (mConfig->mState == Container::State::RUNNING) {
         ProvisionMount mountCmd(item);
         mountCmd.revert();
     }
@@ -599,7 +594,7 @@ void ContainerImpl::declareLink(const std::string& source,
     mConfig->mProvisions.addLink(newLink);
     // TODO: update guard config
 
-    if (isRunning()) {
+    if (mConfig->mState == Container::State::RUNNING) {
         ProvisionLink linkCmd(newLink);
         linkCmd.execute();
     }
@@ -618,7 +613,7 @@ void ContainerImpl::removeLink(const provision::Link& item)
 
     mConfig->mProvisions.removeLink(item);
 
-    if (isRunning()) {
+    if (mConfig->mState == Container::State::RUNNING) {
         ProvisionLink linkCmd(item);
         linkCmd.revert();
     }

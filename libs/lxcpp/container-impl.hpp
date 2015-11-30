@@ -172,9 +172,6 @@ private:
     bool onInitStopped(const cargo::ipc::PeerID,
                        std::shared_ptr<api::ExitStatus>& data,
                        cargo::ipc::MethodResult::Pointer);
-
-    bool isRunning() const;
-
 };
 
 } // namespace lxcpp

@@ -253,10 +253,12 @@ BOOST_AUTO_TEST_CASE(CreateFileOnStartup)
 
     // file already exists, let's start again
     // to check what happens if file already exists
-    BOOST_REQUIRE_NO_THROW(c->start());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
-    BOOST_REQUIRE_NO_THROW(c->stop());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
+    auto helper = std::unique_ptr<Container>(createContainer("ProvisioningTesterHelper", ROOT_DIR, WORK_DIR));
+    helper->setInit(COMMAND);
+    BOOST_REQUIRE_NO_THROW(helper->start());
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return helper->getState() == Container::State::RUNNING;}));
+    BOOST_REQUIRE_NO_THROW(helper->stop());
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return helper->getState() == Container::State::STOPPED;}));
     BOOST_REQUIRE_NO_THROW(utils::readFileContent(TEST_DIR + TEST_FILE));
 }
 
