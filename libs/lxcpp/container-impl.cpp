@@ -117,8 +117,7 @@ void ContainerImpl::onWorkFileEvent(const std::string& name, const uint32_t mask
         }
     } else if (mask & IN_DELETE) {
         if (name == mConfig->mName + ".socket") {
-            // TODO: Second stop?!
-            mClient->stop(false);
+            LOGW("Container's socket deleted");
         }
     }
 }
@@ -132,6 +131,7 @@ const std::string& ContainerImpl::getName() const
 
 const std::string& ContainerImpl::getRootPath() const
 {
+
     Lock lock(mStateMutex);
 
     return mConfig->mRootPath;
@@ -290,14 +290,16 @@ bool ContainerImpl::onGuardReady(const cargo::ipc::PeerID,
 
 void ContainerImpl::stop()
 {
-    Lock lock(mStateMutex);
+    {
+        Lock lock(mStateMutex);
 
-    // TODO: things to do when shutting down the container:
-    // - close PTY master FDs from the config so we won't keep PTYs open
-    if(mConfig->mState != Container::State::RUNNING) {
-        throw ForbiddenActionException("Container isn't running, can't stop");
+        // TODO: things to do when shutting down the container:
+        // - close PTY master FDs from the config so we won't keep PTYs open
+        if(mConfig->mState != Container::State::RUNNING) {
+            throw ForbiddenActionException("Container isn't running, can't stop");
+        }
+        mConfig->mState = Container::State::STOPPING;
     }
-    mConfig->mState = Container::State::STOPPING;
 
     Stop stop(mConfig, mClient);
     stop.execute();

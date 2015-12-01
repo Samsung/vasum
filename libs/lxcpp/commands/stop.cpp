@@ -45,7 +45,7 @@ Stop::~Stop()
 void Stop::execute()
 {
     LOGD("Stopping container: " << mConfig->mName);
-    mClient->callAsync<api::Void, api::ExitStatus>(api::METHOD_STOP,
+    mClient->callAsync<api::Void, api::Void>(api::METHOD_STOP,
             std::make_shared<api::Void>());
 }
 

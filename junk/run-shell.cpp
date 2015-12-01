@@ -56,7 +56,8 @@ int main(int argc, char *argv[])
     LOGE("Color test: ERROR");
 
     logger::setupLogger(logger::LogType::LOG_STDERR, logger::LogLevel::DEBUG);
-    //logger::setupLogger(logger::LogType::LOG_FILE, logger::LogLevel::TRACE, "/tmp/lxcpp-shell.txt");
+    // logger::setupLogger(logger::LogType::LOG_STDERR, logger::LogLevel::TRACE);
+    // logger::setupLogger(logger::LogType::LOG_FILE, logger::LogLevel::TRACE, "/tmp/lxcpp-shell.txt");
 
     std::vector<std::string> args;
     args.push_back("/bin/bash");
