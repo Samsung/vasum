@@ -103,6 +103,10 @@ BOOST_AUTO_TEST_CASE(SubsysAttach)
     }
 }
 
+#define CHILD_CHECK_NO_THROW(passed,code) try{code;}catch(...){passed=0;}
+#define CHILD_CHECK_THROW(passed,code,exception) try{code;passed=0;}catch(const exception& _ex){}catch(...){passed=0;}
+#define CHILD_CHECK(passed,cond) try{if (cond){}else passed=0;}catch(...){passed=0;}
+
 BOOST_AUTO_TEST_CASE(ModifyCGroupParams)
 {
     CGroup memg("memory:/ut-params");
@@ -121,24 +125,30 @@ BOOST_AUTO_TEST_CASE(ModifyCGroupParams)
 
     pid_t pid = lxcpp::fork();
     if (pid == 0) {
-        BOOST_CHECK_NO_THROW(memg.assignPid(::getpid()));
-        BOOST_CHECK_NO_THROW(memg.assignGroup(::getpid()));
+        try {
+            int status = 1;
+            CHILD_CHECK_NO_THROW(status, memg.assignPid(::getpid()));
+            CHILD_CHECK_NO_THROW(status, memg.assignGroup(::getpid()));
 
-        BOOST_CHECK_NO_THROW(memg.setValue("limit_in_bytes", "10k"));
-        BOOST_CHECK_NO_THROW(memg.setValue("soft_limit_in_bytes", "10k"));
-        BOOST_CHECK_THROW(memg.getValue("non-existing-name"), CGroupException);
-        BOOST_CHECK_THROW(memg.setValue("non-existing-name", "xxx"), CGroupException);
+            CHILD_CHECK_NO_THROW(status, memg.setValue("limit_in_bytes", "256k"));
+            CHILD_CHECK_NO_THROW(status, memg.setValue("soft_limit_in_bytes", "32k"));
+            CHILD_CHECK_THROW(status, memg.getValue("non-existing-name"), CGroupException);
+            CHILD_CHECK_THROW(status, memg.setValue("non-existing-name", "xxx"), CGroupException);
 
-        LOGD("limit_in_bytes: " << memg.getValue("limit_in_bytes"));
-        LOGD("soft_limit_in_bytes: " << memg.getValue("soft_limit_in_bytes"));
-        LOGD("max_usage_in_bytes: " << memg.getValue("max_usage_in_bytes"));
+            LOGD("limit_in_bytes = " + memg.getValue("limit_in_bytes"));
+            LOGD("soft_limit_in_bytes = " + memg.getValue("soft_limit_in_bytes"));
+            CHILD_CHECK(status, 256*1024 == std::stoul(memg.getValue("limit_in_bytes")));
+            CHILD_CHECK(status, 32*1024 == std::stoul(memg.getValue("soft_limit_in_bytes")));
 
-        CGroup memtop("memory:/");
-        memtop.assignPid(::getpid());
-        memtop.setCommonValue("procs", std::to_string(::getpid()));
-        ::_exit(EXIT_SUCCESS);
+            CGroup memtop("memory:/");
+            memtop.assignPid(::getpid());
+            memtop.setCommonValue("procs", std::to_string(::getpid()));
+            ::_exit(status ? EXIT_SUCCESS : EXIT_FAILURE);
+        } catch(...) {
+            ::_exit(EXIT_FAILURE);
+        }
     }
-    lxcpp::waitpid(pid);
+    BOOST_CHECK(lxcpp::waitpid(pid) == EXIT_SUCCESS);
     BOOST_CHECK_NO_THROW(memg.destroy());
 }
 
@@ -173,7 +183,7 @@ BOOST_AUTO_TEST_CASE(CGroupConfigSerialization)
 
     CGroupsConfig cfg2;
     BOOST_CHECK_NO_THROW(cargo::loadFromJsonFile(tmpConfigFile, cfg2));
-    BOOST_CHECK(cfg2.subsystems.size()==cfg.subsystems.size());
+    BOOST_CHECK(cfg2.subsystems.size() == cfg.subsystems.size());
 }
 
 BOOST_AUTO_TEST_CASE(CGroupCommands)
