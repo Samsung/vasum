@@ -711,6 +711,7 @@ bool Processor::onFinishRequest(FinishRequest& requestFinisher)
     LOGS(mLogPrefix + "Processor onFinishRequest");
 
     // Clean the mRequestQueue
+    std::vector<std::shared_ptr<FinishRequest>> remainingFinishRequests;
     while (!mRequestQueue.isEmpty()) {
         auto request = mRequestQueue.pop();
         LOGE(mLogPrefix + "Got: " << request.requestID << " after FINISH");
@@ -730,10 +731,12 @@ bool Processor::onFinishRequest(FinishRequest& requestFinisher)
             onSendResultRequest(*request.get<SendResultRequest>());
             break;
         }
+        case Event::FINISH:
+            remainingFinishRequests.push_back(request.get<FinishRequest>());
+            break;
         case Event::SIGNAL:
         case Event::ADD_PEER:
         case Event::REMOVE_METHOD:
-        case Event::FINISH:
             break;
         }
     }
@@ -746,8 +749,10 @@ bool Processor::onFinishRequest(FinishRequest& requestFinisher)
 
     mEventPoll.removeFD(mRequestQueue.getFD());
     mIsRunning = false;
-
     requestFinisher.conditionPtr->notify_all();
+    for(auto & c : remainingFinishRequests) {
+        c->conditionPtr->notify_all();
+    }
     return true;
 }
 
