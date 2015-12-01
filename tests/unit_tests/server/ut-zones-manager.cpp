@@ -36,15 +36,16 @@
 #endif //DBUS_CONNECTION
 #include "host-ipc-definitions.hpp"
 #include "api/messages.hpp"
+#include "cargo/exception.hpp"
 #include "cargo-ipc/epoll/thread-dispatcher.hpp"
 #include "cargo-ipc/client.hpp"
 #include "exception.hpp"
 #include "utils/glib-loop.hpp"
-#include "cargo/exception.hpp"
 #include "utils/latch.hpp"
 #include "utils/fs.hpp"
 #include "utils/img.hpp"
 #include "utils/scoped-dir.hpp"
+#include "utils/spin-wait-for.hpp"
 #include "logger/logger.hpp"
 
 #include <vector>
@@ -596,19 +597,6 @@ private:
     cargo::ipc::epoll::ThreadDispatcher mDispatcher;
     cargo::ipc::Client mClient;
 };
-
-template<class Predicate>
-bool spinWaitFor(int timeoutMs, Predicate pred)
-{
-    auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
-    while (!pred()) {
-        if (std::chrono::steady_clock::now() >= until) {
-            return false;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
-    return true;
-}
 
 } // namespace
 
@@ -1383,8 +1371,18 @@ BOOST_AUTO_TEST_CASE(IPCLockFromDbusAndDisconnectQueue)
         // leaving scope should simulate disconnect
     }
 
-    // should be able to call now
-    hostDbus.callMethodSetActiveZone("test2");
+    const auto& tryCall = [&] {
+        try {
+            hostDbus.callMethodSetActiveZone("test2");
+            return true;
+        } catch (...) {
+            return false;
+        }
+    };
+
+    // queue unlock call should be invoked soon
+    BOOST_REQUIRE(utils::spinWaitFor(1000, tryCall));
+
     BOOST_CHECK_EQUAL(hostDbus.callMethodGetActiveZoneId(), "test2");
 }
 
@@ -1410,7 +1408,17 @@ BOOST_AUTO_TEST_CASE(DbusLockFromIPCAndDisconnectQueue)
         BOOST_CHECK_EQUAL(hostIPC.callMethodGetActiveZoneId(), "test1");
     }
 
-    hostIPC.callMethodSetActiveZone("test2");
+    const auto& tryCall = [&] {
+        try {
+            hostIPC.callMethodSetActiveZone("test2");
+            return true;
+        } catch (...) {
+            return false;
+        }
+    };
+
+    BOOST_REQUIRE(utils::spinWaitFor(1000, tryCall));
+
     BOOST_CHECK_EQUAL(hostIPC.callMethodGetActiveZoneId(), "test2");
 }
 #endif
