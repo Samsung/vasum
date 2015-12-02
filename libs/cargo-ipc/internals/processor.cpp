@@ -540,9 +540,9 @@ bool Processor::onMethodRequest(MethodRequest& request)
     if (mReturnCallbacks.count(request.messageID) != 0) {
         LOGE(mLogPrefix + "There already was a return callback for messageID: " << request.messageID);
     }
-    mReturnCallbacks[request.messageID] = std::move(ReturnCallbacks(peerIt->peerID,
-                                          std::move(request.parse),
-                                          std::move(request.process)));
+    mReturnCallbacks[request.messageID] = ReturnCallbacks(peerIt->peerID,
+                                                          std::move(request.parse),
+                                                          std::move(request.process));
 
     MessageHeader hdr;
     try {

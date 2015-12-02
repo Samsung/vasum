@@ -61,7 +61,7 @@ std::string getCGroupName(const std::string& s)
 
 CGroup::CGroup(const std::string& subsysAndCgroup) :
     mSubsys(std::move(getSubsysName(subsysAndCgroup))),
-    mName(std::move(getCGroupName(subsysAndCgroup)))
+    mName(getCGroupName(subsysAndCgroup))
 {
 }
 
