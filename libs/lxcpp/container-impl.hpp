@@ -153,8 +153,8 @@ public:
     // Linux capabilities
     void setCaps(const int caps);
 
-    // System Property (sysctl)
-    void setSystemProperty(const std::string& name, const std::string& value);
+    // Kernel parameter (sysctl)
+    void setKernelParameter(const std::string& name, const std::string& value);
 
     // Rlimit
     void setRlimit(const int type, const uint64_t soft, const uint64_t hard);

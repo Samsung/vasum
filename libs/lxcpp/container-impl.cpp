@@ -711,9 +711,21 @@ void ContainerImpl::setCaps(const int /*caps*/)
     throw NotImplementedException();
 }
 
-void ContainerImpl::setSystemProperty(const std::string& /*name*/, const std::string& /*value*/)
+void ContainerImpl::setKernelParameter(const std::string& name, const std::string& value)
 {
-    throw NotImplementedException();
+    Lock lock(mStateMutex);
+
+    if (name.empty() || value.empty()) {
+        const std::string msg = "Kernel parameter name or value cannot be empty";
+        LOGE(msg);
+        throw ConfigureException(msg);
+    }
+
+    if (mConfig->mKernelParameters.count(name)) {
+        mConfig->mKernelParameters[name] = value;
+    } else {
+        mConfig->mKernelParameters.emplace(name, value);
+    }
 }
 
 void ContainerImpl::setRlimit(const int type, const uint64_t soft, const uint64_t hard)

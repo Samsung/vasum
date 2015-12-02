@@ -29,6 +29,7 @@
 #include "lxcpp/credentials.hpp"
 #include "lxcpp/hostname.hpp"
 #include "lxcpp/rlimit.hpp"
+#include "lxcpp/sysctl.hpp"
 #include "lxcpp/commands/prep-guest-terminal.hpp"
 #include "lxcpp/commands/provision.hpp"
 #include "lxcpp/commands/setup-userns.hpp"
@@ -76,6 +77,12 @@ int Guard::startContainer(void* data)
     if (!config.mRlimits.empty()) {
         for (const auto& limit : config.mRlimits) {
             lxcpp::setRlimit(std::get<0>(limit), std::get<1>(limit),std::get<2>(limit));
+        }
+    }
+
+    if (!config.mKernelParameters.empty()) {
+        for (const auto& sysctl : config.mKernelParameters) {
+            lxcpp::writeKernelParameter(sysctl.first, sysctl.second);
         }
     }
 

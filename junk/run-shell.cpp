@@ -95,9 +95,10 @@ int main(int argc, char *argv[])
         c->addInterfaceConfig(InterfaceConfigType::BRIDGE, "lxcpp-br0", "", {InetAddr("10.0.0.1", 24)});
         c->addInterfaceConfig(InterfaceConfigType::VETH_BRIDGED, "lxcpp-br0", "veth0", {InetAddr("10.0.0.2", 24)});
 
-        // configure resource limits
+        // configure resource limits and kernel parameters
         c->setRlimit(RLIMIT_CPU, 1024, 102400);
         c->setRlimit(RLIMIT_DATA, 1024, 102400);
+        c->setKernelParameter("net.ipv6.conf.veth0.disable_ipv6", "1");
 
         c->start();
         // not needed per se, but let things settle for a second, e.g. the logs

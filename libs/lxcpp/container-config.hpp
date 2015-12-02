@@ -37,6 +37,7 @@
 #include <string>
 #include <vector>
 #include <sys/types.h>
+#include <map>
 
 namespace {
 
@@ -183,6 +184,11 @@ struct ContainerConfig {
      */
     std::vector<std::tuple<int, uint64_t, uint64_t>> mRlimits;
 
+    /**
+     * Kernel parameters configuration
+     */
+    std::map<std::string, std::string> mKernelParameters;
+
     ContainerConfig():
         mGuardPid(-1),
         mInitPid(-1),
@@ -206,7 +212,8 @@ struct ContainerConfig {
         mProvisions,
         mUserNSConfig,
         mCgroups,
-        mRlimits
+        mRlimits,
+        mKernelParameters
     )
 };
 

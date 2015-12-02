@@ -181,9 +181,9 @@ public:
     virtual void setCaps(const int caps) = 0;
 
     /**
-     * System Property (sysctl)
+     * Kernel parameters (sysctl)
      */
-    virtual void setSystemProperty(const std::string& name, const std::string& value) = 0;
+    virtual void setKernelParameter(const std::string& name, const std::string& value) = 0;
 
     /**
      * Rlimit
