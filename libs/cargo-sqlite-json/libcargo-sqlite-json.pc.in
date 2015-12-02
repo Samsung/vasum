@@ -9,4 +9,4 @@ Name: lib@PROJECT_NAME@
 Description: cargo KVStore with Json extension library
 Version: @_LIB_VERSION_@
 Libs:
-Cflags: -I${includedir}/vasum-tools -I${includedir}/vasum-tools/@PROJECT_NAME@
+Cflags: -I${includedir} -I${includedir}/@PROJECT_NAME@

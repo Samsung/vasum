@@ -396,7 +396,7 @@ The package provides libcargo development tools and libs.
 
 %files -n libcargo-devel
 %defattr(644,root,root,755)
-%{_includedir}/vasum-tools/cargo
+%{_includedir}/cargo
 %{_libdir}/pkgconfig/libcargo.pc
 
 ## libcargo-gvariant Package ##################################################
@@ -412,7 +412,7 @@ The package provides libcargo GVariant development module.
 
 %files -n libcargo-gvariant-devel
 %defattr(644,root,root,755)
-%{_includedir}/vasum-tools/cargo-gvariant
+%{_includedir}/cargo-gvariant
 %{_libdir}/pkgconfig/libcargo-gvariant.pc
 
 ## libcargo-json Package ######################################################
@@ -458,7 +458,7 @@ The package provides libcargo Json development module.
 %files -n libcargo-json-devel
 %defattr(644,root,root,755)
 %{_libdir}/libcargo-json.so
-%{_includedir}/vasum-tools/cargo-json
+%{_includedir}/cargo-json
 %{_libdir}/pkgconfig/libcargo-json.pc
 
 ## libcargo-sqlite Package ##########################################################
@@ -493,7 +493,7 @@ The package provides libcargo SQLite KVStore development module.
 %files -n libcargo-sqlite-devel
 %defattr(644,root,root,755)
 %{_libdir}/libcargo-sqlite.so
-%{_includedir}/vasum-tools/cargo-sqlite
+%{_includedir}/cargo-sqlite
 %{_libdir}/pkgconfig/libcargo-sqlite.pc
 
 ## libcargo-fd Package ##########################################################
@@ -528,7 +528,7 @@ The package provides libcargo file descriptor I/O module.
 %files -n libcargo-fd-devel
 %defattr(644,root,root,755)
 %{_libdir}/libcargo-fd.so
-%{_includedir}/vasum-tools/cargo-fd
+%{_includedir}/cargo-fd
 %{_libdir}/pkgconfig/libcargo-fd.pc
 
 ## libcargo-sqlite-json Package ##########################################################
@@ -545,7 +545,7 @@ The package provides libcargo SQLite with Json defaults development module.
 
 %files -n libcargo-sqlite-json-devel
 %defattr(644,root,root,755)
-%{_includedir}/vasum-tools/cargo-sqlite-json
+%{_includedir}/cargo-sqlite-json
 %{_libdir}/pkgconfig/libcargo-sqlite-json.pc
 
 ## libcargo-ipc Package #######################################################
@@ -583,7 +583,7 @@ The package provides libcargo-ipc development tools and libs.
 %files -n libcargo-ipc-devel
 %defattr(644,root,root,755)
 %{_libdir}/libcargo-ipc.so
-%{_includedir}/vasum-tools/cargo-ipc
+%{_includedir}/cargo-ipc
 %{_libdir}/pkgconfig/libcargo-ipc.pc
 
 ## liblxcpp Package ###########################################################

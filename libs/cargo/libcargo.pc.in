@@ -9,4 +9,4 @@ Name: lib@PROJECT_NAME@
 Description: cargo library
 Version: @_LIB_VERSION_@
 Libs:
-Cflags: -I${includedir}/vasum-tools
+Cflags: -I${includedir} -I${includedir}/@PROJECT_NAME@
