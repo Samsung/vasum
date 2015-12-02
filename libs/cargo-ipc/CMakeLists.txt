@@ -17,10 +17,10 @@
 # @author Mateusz Malicki (m.malicki2@samsung.com)
 #
 
-PROJECT(CargoIpc)
+PROJECT(cargo-ipc)
 
 MESSAGE(STATUS "")
-MESSAGE(STATUS "Generating makefile for the libCargoIpc...")
+MESSAGE(STATUS "Generating makefile for the lib${PROJECT_NAME}...")
 
 FILE(GLOB HEADERS *.hpp ${COMMON_FOLDER}/config.hpp)
 FILE(GLOB HEADERS_INTERNALS internals/*.hpp)
@@ -69,13 +69,13 @@ INSTALL(TARGETS     ${PROJECT_NAME}
         COMPONENT   RuntimeLibraries)
 
 INSTALL(FILES       ${HEADERS}
-        DESTINATION ${INCLUDE_INSTALL_DIR}/vasum-tools/cargo-ipc)
+        DESTINATION ${INCLUDE_INSTALL_DIR}/vasum-tools/${PROJECT_NAME})
 
 INSTALL(FILES       ${HEADERS_INTERNALS}
-        DESTINATION ${INCLUDE_INSTALL_DIR}/vasum-tools/cargo-ipc/internals)
+        DESTINATION ${INCLUDE_INSTALL_DIR}/vasum-tools/${PROJECT_NAME}/internals)
 
 INSTALL(FILES       ${HEADERS_EPOLL}
-        DESTINATION ${INCLUDE_INSTALL_DIR}/vasum-tools/cargo-ipc/epoll)
+        DESTINATION ${INCLUDE_INSTALL_DIR}/vasum-tools/${PROJECT_NAME}/epoll)
 
 INSTALL(FILES       ${HEADERS_UTILS}
-        DESTINATION ${INCLUDE_INSTALL_DIR}/vasum-tools/cargo-ipc/utils)
+        DESTINATION ${INCLUDE_INSTALL_DIR}/vasum-tools/${PROJECT_NAME}/utils)

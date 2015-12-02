@@ -32,7 +32,7 @@ namespace cargo {
 namespace ipc {
 
 /**
- * @brief Base class for all exceptions in libCargoIpc.
+ * @brief Base class for all exceptions in libcargo-ipc.
  * @ingroup Types
  * @defgroup IPCException   IPCException
  */

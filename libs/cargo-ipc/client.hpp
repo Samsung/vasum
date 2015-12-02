@@ -19,7 +19,7 @@
 /**
  * @file
  * @author  Jan Olszak (j.olszak@samsung.com)
- * @defgroup libCargoIpc libCargoIpc
+ * @defgroup libcargo-ipc libcargo-ipc
  * @brief   Handling client connections
  */
 
@@ -68,7 +68,7 @@ namespace ipc {
  * @see cargo::ipc::Processor
  * @see cargo::ipc::epoll::EventPoll
  *
- * @ingroup libCargoIpc
+ * @ingroup libcargo-ipc
  */
 class Client {
 public:

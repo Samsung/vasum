@@ -73,7 +73,7 @@ namespace ipc {
  * @see libCargo
  * @see cargo::ipc::Processor
  *
- * @ingroup libCargoIpc
+ * @ingroup libcargo-ipc
  */
 class Service {
 public:

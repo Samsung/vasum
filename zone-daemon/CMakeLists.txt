@@ -25,7 +25,7 @@ FILE(GLOB project_SRCS *.cpp *.hpp)
 SET(ZONE_DAEMON_CODENAME "${PROJECT_NAME}-zone-daemon")
 ADD_EXECUTABLE(${ZONE_DAEMON_CODENAME} ${project_SRCS})
 
-ADD_DEPENDENCIES(${ZONE_DAEMON_CODENAME} Common Logger SimpleDbus CargoIpc)
+ADD_DEPENDENCIES(${ZONE_DAEMON_CODENAME} Common Logger SimpleDbus cargo-ipc)
 
 ## Link libraries ##############################################################
 FIND_PACKAGE (Boost COMPONENTS program_options system filesystem)
@@ -42,7 +42,7 @@ SET_TARGET_PROPERTIES(${ZONE_DAEMON_CODENAME} PROPERTIES
 )
 
 TARGET_LINK_LIBRARIES(${ZONE_DAEMON_CODENAME} Common ${ZONE_DAEMON_DEPS_LIBRARIES}
-                      ${Boost_LIBRARIES} Logger SimpleDbus CargoIpc)
+                      ${Boost_LIBRARIES} Logger SimpleDbus cargo-ipc)
 
 
 ## Install #####################################################################

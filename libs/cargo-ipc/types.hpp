@@ -33,10 +33,10 @@ namespace cargo {
 namespace ipc {
 
 /**
- * @brief Generic types used in libCargoIpc.
+ * @brief Generic types used in libcargo-ipc.
  *
- * @ingroup libCargoIpc
- * @defgroup Types libCargoIpc tools
+ * @ingroup libcargo-ipc
+ * @defgroup Types libcargo-ipc tools
  */
 
 typedef int FileDescriptor;
