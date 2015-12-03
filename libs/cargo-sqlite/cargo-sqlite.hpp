@@ -26,9 +26,9 @@
 #ifndef CARGO_SQLITE_CARGO_SQLITE_HPP
 #define CARGO_SQLITE_CARGO_SQLITE_HPP
 
-#include "cargo-sqlite/to-kvstore-visitor.hpp"
-#include "cargo-sqlite/from-kvstore-visitor.hpp"
-#include "cargo-sqlite/from-kvstore-ignoring-visitor.hpp"
+#include "cargo-sqlite/internals/to-kvstore-visitor.hpp"
+#include "cargo-sqlite/internals/from-kvstore-visitor.hpp"
+#include "cargo-sqlite/internals/from-kvstore-ignoring-visitor.hpp"
 
 namespace cargo {
 

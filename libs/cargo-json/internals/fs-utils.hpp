@@ -19,55 +19,25 @@
 /**
  * @file
  * @author  Piotr Bartosiewicz (p.bartosiewi@partner.samsung.com)
- * @brief   Filesystem helper functions
+ * @brief   src/cargo/manager.hpp
  */
 
-#include "cargo-json/fs-utils.hpp"
+#ifndef CARGO_JSON_INTERNALS_FS_UTILS_HPP
+#define CARGO_JSON_INTERNALS_FS_UTILS_HPP
 
-#include <fstream>
-#include <streambuf>
-
+#include <string>
 
 namespace cargo {
 namespace fsutils {
 
-bool readFileContent(const std::string& path, std::string& result)
-{
-    std::ifstream file(path);
+bool readFileContent(const std::string& path, std::string& result);
+bool saveFileContent(const std::string& path, const std::string& content);
 
-    if (!file) {
-        return false;
-    }
-
-    file.seekg(0, std::ios::end);
-    std::streampos length = file.tellg();
-    if (length < 0) {
-        return false;
-    }
-    result.resize(static_cast<size_t>(length));
-    file.seekg(0, std::ios::beg);
-
-    file.read(&result[0], length);
-    if (!file) {
-        result.clear();
-        return false;
-    }
-
-    return true;
+inline std::string readFileContent(const std::string& path) {
+    std::string content;
+    return readFileContent(path, content) ? content : std::string();
 }
-
-bool saveFileContent(const std::string& path, const std::string& content)
-{
-    std::ofstream file(path);
-    if (!file) {
-        return false;
-    }
-    file.write(content.data(), static_cast<std::streamsize>(content.size()));
-    if (!file) {
-        return false;
-    }
-    return true;
-}
-
 } // namespace fsutils
 } // namespace cargo
+
+#endif // CARGO_JSON_INTERNALS_FS_UTILS_HPP

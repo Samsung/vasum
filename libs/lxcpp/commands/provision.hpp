@@ -21,8 +21,8 @@
  * @brief   Add new provisioned file/dir/link/mount command
  */
 
-#ifndef LXCPP_COMMAND_PROVISION_HPP
-#define LXCPP_COMMAND_PROVISION_HPP
+#ifndef LXCPP_COMMANDS_PROVISION_HPP
+#define LXCPP_COMMANDS_PROVISION_HPP
 
 #include "lxcpp/commands/command.hpp"
 #include "lxcpp/container-config.hpp"
@@ -101,4 +101,4 @@ private:
 
 } // namespace lxcpp
 
-#endif // LXCPP_COMMAND_PROVISION_HPP
+#endif // LXCPP_COMMANDS_PROVISION_HPP

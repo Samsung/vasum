@@ -22,8 +22,8 @@
  * @brief   KVStore visitors utilities
  */
 
-#ifndef CARGO_SQLITE_KVSTORE_VISITOR_UTILS_HPP
-#define CARGO_SQLITE_KVSTORE_VISITOR_UTILS_HPP
+#ifndef CARGO_SQLITE_INTERNALS_KVSTORE_VISITOR_UTILS_HPP
+#define CARGO_SQLITE_INTERNALS_KVSTORE_VISITOR_UTILS_HPP
 
 #include <vector>
 #include <string>
@@ -82,4 +82,4 @@ std::string key()
 
 } // namespace cargo
 
-#endif // CARGO_SQLITE_KVSTORE_VISITOR_UTILS_HPP
+#endif // CARGO_SQLITE_INTERNALS_KVSTORE_VISITOR_UTILS_HPP

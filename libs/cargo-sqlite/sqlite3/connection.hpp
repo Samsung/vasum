@@ -22,8 +22,8 @@
  * @brief  Declaration of the class managing a sqlite3 database connection
  */
 
-#ifndef CARGO_SQLITE_SQLITE3_CARGO_SQLITE_SQLITE3_CONNECTION_HPP
-#define CARGO_SQLITE_SQLITE3_CARGO_SQLITE_SQLITE3_CONNECTION_HPP
+#ifndef CARGO_SQLITE_SQLITE3_CONNECTION_HPP
+#define CARGO_SQLITE_SQLITE3_CONNECTION_HPP
 
 #include <sqlite3.h>
 #include <string>
@@ -63,4 +63,4 @@ private:
 } // namespace sqlite3
 } // namespace cargo
 
-#endif // CARGO_SQLITE_SQLITE3_CARGO_SQLITE_SQLITE3_CONNECTION_HPP
+#endif // CARGO_SQLITE_SQLITE3_CONNECTION_HPP

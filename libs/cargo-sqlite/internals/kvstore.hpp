@@ -22,8 +22,8 @@
  * @brief  Declaration of a class for key-value storage in a sqlite3 database
  */
 
-#ifndef CARGO_SQLITE_KVSTORE_HPP
-#define CARGO_SQLITE_KVSTORE_HPP
+#ifndef CARGO_SQLITE_INTERNALS_KVSTORE_HPP
+#define CARGO_SQLITE_INTERNALS_KVSTORE_HPP
 
 #include "cargo-sqlite/sqlite3/connection.hpp"
 #include "cargo-sqlite/sqlite3/statement.hpp"
@@ -149,4 +149,4 @@ private:
 
 } // namespace cargo
 
-#endif // CARGO_SQLITE_KVSTORE_HPP
+#endif // CARGO_SQLITE_INTERNALS_KVSTORE_HPP

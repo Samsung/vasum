@@ -22,8 +22,7 @@ PROJECT(cargo-fd)
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the lib${PROJECT_NAME}...")
 
-FILE(GLOB HEADERS         *.hpp ${COMMON_FOLDER}/config.hpp)
-FILE(GLOB SRCS            *.cpp)
+FILE(GLOB SRCS internals/*.cpp)
 
 SET(_LIB_VERSION_ "${VERSION}")
 SET(_LIB_SOVERSION_ "0")
@@ -52,5 +51,9 @@ INSTALL(TARGETS     ${PROJECT_NAME}
         DESTINATION ${LIB_INSTALL_DIR}
         COMPONENT   RuntimeLibraries)
 
-INSTALL(FILES       ${HEADERS}
+INSTALL(DIRECTORY . DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}
+        FILES_MATCHING PATTERN "*.hpp"
+                       PATTERN "CMakeFiles" EXCLUDE)
+
+INSTALL(FILES       ${COMMON_FOLDER}/config.hpp
         DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME})

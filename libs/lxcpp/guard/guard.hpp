@@ -126,4 +126,4 @@ private:
 
 } // namespace lxcpp
 
-#endif // LXCPP_GUARD_HPP
+#endif // LXCPP_GUARD_GUARD_HPP

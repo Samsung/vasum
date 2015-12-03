@@ -22,10 +22,10 @@
  * @brief   Visitor for loading from FDStore
  */
 
-#ifndef CARGO_FD_FROM_FDSTORE_VISITOR_HPP
-#define CARGO_FD_FROM_FDSTORE_VISITOR_HPP
+#ifndef CARGO_FD_INTERNALS_FROM_FDSTORE_VISITOR_HPP
+#define CARGO_FD_INTERNALS_FROM_FDSTORE_VISITOR_HPP
 
-#include "cargo-fd/fdstore.hpp"
+#include "cargo-fd/internals/fdstore.hpp"
 #include "cargo/is-visitable.hpp"
 #include "cargo/types.hpp"
 #include "cargo/visit-fields.hpp"
@@ -141,4 +141,4 @@ private:
 
 } // namespace cargo
 
-#endif // CARGO_FD_FROM_FDSTORE_VISITOR_HPP
+#endif // CARGO_FD_INTERNALS_FROM_FDSTORE_VISITOR_HPP

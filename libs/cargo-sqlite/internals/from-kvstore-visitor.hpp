@@ -22,10 +22,10 @@
  * @brief   Default visitor for loading from KVStore
  */
 
-#ifndef CARGO_SQLITE_FROM_KVSTORE_VISITOR_HPP
-#define CARGO_SQLITE_FROM_KVSTORE_VISITOR_HPP
+#ifndef CARGO_SQLITE_INTERNALS_FROM_KVSTORE_VISITOR_HPP
+#define CARGO_SQLITE_INTERNALS_FROM_KVSTORE_VISITOR_HPP
 
-#include "cargo-sqlite/from-kvstore-visitor-base.hpp"
+#include "cargo-sqlite/internals/from-kvstore-visitor-base.hpp"
 
 
 namespace cargo {
@@ -49,4 +49,4 @@ public:
 
 } // namespace cargo
 
-#endif // CARGO_SQLITE_FROM_KVSTORE_VISITOR_HPP
+#endif // CARGO_SQLITE_INTERNALS_FROM_KVSTORE_VISITOR_HPP

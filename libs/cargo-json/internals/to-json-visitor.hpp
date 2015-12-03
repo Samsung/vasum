@@ -22,8 +22,8 @@
  * @brief   JSON visitor
  */
 
-#ifndef CARGO_JSON_TO_JSON_VISITOR_HPP
-#define CARGO_JSON_TO_JSON_VISITOR_HPP
+#ifndef CARGO_JSON_INTERNALS_TO_JSON_VISITOR_HPP
+#define CARGO_JSON_INTERNALS_TO_JSON_VISITOR_HPP
 
 #include "cargo/is-visitable.hpp"
 #include "cargo/is-like-tuple.hpp"
@@ -191,4 +191,4 @@ private:
 
 } // namespace cargo
 
-#endif // CARGO_JSON_TO_JSON_VISITOR_HPP
+#endif // CARGO_JSON_INTERNALS_TO_JSON_VISITOR_HPP

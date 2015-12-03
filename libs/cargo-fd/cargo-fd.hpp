@@ -26,8 +26,8 @@
 #ifndef CARGO_FD_CARGO_FD_HPP
 #define CARGO_FD_CARGO_FD_HPP
 
-#include "cargo-fd/to-fdstore-visitor.hpp"
-#include "cargo-fd/from-fdstore-visitor.hpp"
+#include "cargo-fd/internals/to-fdstore-visitor.hpp"
+#include "cargo-fd/internals/from-fdstore-visitor.hpp"
 
 
 namespace cargo {

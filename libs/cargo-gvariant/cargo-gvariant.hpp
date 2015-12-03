@@ -26,8 +26,8 @@
 #ifndef CARGO_GVARIANT_CARGO_GVARIANT_HPP
 #define CARGO_GVARIANT_CARGO_GVARIANT_HPP
 
-#include "cargo-gvariant/to-gvariant-visitor.hpp"
-#include "cargo-gvariant/from-gvariant-visitor.hpp"
+#include "cargo-gvariant/internals/to-gvariant-visitor.hpp"
+#include "cargo-gvariant/internals/from-gvariant-visitor.hpp"
 
 namespace cargo {
 

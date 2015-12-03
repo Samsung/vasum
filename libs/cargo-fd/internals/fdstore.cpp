@@ -24,7 +24,7 @@
 
 #include "config.hpp"
 
-#include "cargo-fd/fdstore.hpp"
+#include "cargo-fd/internals/fdstore.hpp"
 #include "cargo/exception.hpp"
 
 #include <cstring>

@@ -22,11 +22,11 @@
  * @brief   Base of visitors for loading from KVStore
  */
 
-#ifndef CARGO_SQLITE_FROM_KVSTORE_VISITOR_BASE_HPP
-#define CARGO_SQLITE_FROM_KVSTORE_VISITOR_BASE_HPP
+#ifndef CARGO_SQLITE_INTERNALS_FROM_KVSTORE_VISITOR_BASE_HPP
+#define CARGO_SQLITE_INTERNALS_FROM_KVSTORE_VISITOR_BASE_HPP
 
-#include "cargo-sqlite/kvstore.hpp"
-#include "cargo-sqlite/kvstore-visitor-utils.hpp"
+#include "cargo-sqlite/internals/kvstore.hpp"
+#include "cargo-sqlite/internals/kvstore-visitor-utils.hpp"
 #include "cargo/exception.hpp"
 #include "cargo/is-visitable.hpp"
 #include "cargo/is-like-tuple.hpp"
@@ -199,4 +199,4 @@ private:
 
 } // namespace cargo
 
-#endif // CARGO_SQLITE_FROM_KVSTORE_VISITOR_BASE_HPP
+#endif // CARGO_SQLITE_INTERNALS_FROM_KVSTORE_VISITOR_BASE_HPP

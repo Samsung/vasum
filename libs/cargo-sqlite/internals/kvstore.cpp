@@ -24,7 +24,7 @@
 
 #include "config.hpp"
 
-#include "cargo-sqlite/kvstore.hpp"
+#include "cargo-sqlite/internals/kvstore.hpp"
 #include "cargo/exception.hpp"
 
 #include <exception>

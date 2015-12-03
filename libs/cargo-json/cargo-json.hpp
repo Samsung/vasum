@@ -26,9 +26,9 @@
 #ifndef CARGO_JSON_CARGO_JSON_HPP
 #define CARGO_JSON_CARGO_JSON_HPP
 
-#include "cargo-json/to-json-visitor.hpp"
-#include "cargo-json/from-json-visitor.hpp"
-#include "cargo-json/fs-utils.hpp"
+#include "cargo-json/internals/to-json-visitor.hpp"
+#include "cargo-json/internals/from-json-visitor.hpp"
+#include "cargo-json/internals/fs-utils.hpp"
 #include "logger/logger.hpp"
 
 namespace cargo {

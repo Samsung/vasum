@@ -22,8 +22,8 @@
  * @brief   GVariant visitor
  */
 
-#ifndef CARGO_GVARIANT_FROM_GVARIANT_VISITOR_HPP
-#define CARGO_GVARIANT_FROM_GVARIANT_VISITOR_HPP
+#ifndef CARGO_GVARIANT_INTERNALS_FROM_GVARIANT_VISITOR_HPP
+#define CARGO_GVARIANT_INTERNALS_FROM_GVARIANT_VISITOR_HPP
 
 #include "cargo/is-visitable.hpp"
 #include "cargo/is-like-tuple.hpp"
@@ -272,4 +272,4 @@ private:
 
 } // namespace cargo
 
-#endif // CARGO_GVARIANT_FROM_GVARIANT_VISITOR_HPP
+#endif // CARGO_GVARIANT_INTERNALS_FROM_GVARIANT_VISITOR_HPP

@@ -50,4 +50,4 @@ public:
 
 } //namespace lxcpp
 
-#endif //LXCPP_CGROUPS_DEVICE_HPP
+#endif //LXCPP_CGROUPS_DEVICES_HPP

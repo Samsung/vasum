@@ -22,10 +22,10 @@
  * @brief   Visitor for loading from KVStore that doesn't fail on missing values
  */
 
-#ifndef CARGO_SQLITE_FROM_KVSTORE_IGNORING_VISITOR_HPP
-#define CARGO_SQLITE_FROM_KVSTORE_IGNORING_VISITOR_HPP
+#ifndef CARGO_SQLITE_INTERNALS_FROM_KVSTORE_IGNORING_VISITOR_HPP
+#define CARGO_SQLITE_INTERNALS_FROM_KVSTORE_IGNORING_VISITOR_HPP
 
-#include "cargo-sqlite/from-kvstore-visitor-base.hpp"
+#include "cargo-sqlite/internals/from-kvstore-visitor-base.hpp"
 
 
 namespace cargo {
@@ -94,4 +94,4 @@ private:
 
 } // namespace cargo
 
-#endif // CARGO_SQLITE_FROM_KVSTORE_IGNORING_VISITOR_HPP
+#endif // CARGO_SQLITE_INTERNALS_FROM_KVSTORE_IGNORING_VISITOR_HPP

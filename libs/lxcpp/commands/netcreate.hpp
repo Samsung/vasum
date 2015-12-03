@@ -21,8 +21,8 @@
  * @brief   Network configuration command
  */
 
-#ifndef LXCPP_COMMAND_NETCREATE_HPP
-#define LXCPP_COMMAND_NETCREATE_HPP
+#ifndef LXCPP_COMMANDS_NETCREATE_HPP
+#define LXCPP_COMMANDS_NETCREATE_HPP
 
 #include "lxcpp/commands/command.hpp"
 #include "lxcpp/network-config.hpp"
@@ -122,4 +122,4 @@ private:
 
 } // namespace lxcpp
 
-#endif // LXCPP_COMMAND_NETCREATE_HPP
+#endif // LXCPP_COMMANDS_NETCREATE_HPP

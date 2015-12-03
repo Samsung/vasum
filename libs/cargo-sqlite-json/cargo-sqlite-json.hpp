@@ -26,12 +26,13 @@
 #ifndef CARGO_SQLITE_JSON_CARGO_SQLITE_JSON_HPP
 #define CARGO_SQLITE_JSON_CARGO_SQLITE_JSON_HPP
 
-#include "cargo-json/to-json-visitor.hpp"
-#include "cargo-sqlite/to-kvstore-visitor.hpp"
-#include "cargo-json/from-json-visitor.hpp"
-#include "cargo-sqlite/from-kvstore-visitor.hpp"
-#include "cargo-sqlite/from-kvstore-ignoring-visitor.hpp"
-#include "cargo-json/fs-utils.hpp"
+#include "cargo-json/internals/to-json-visitor.hpp"
+#include "cargo-sqlite/internals/to-kvstore-visitor.hpp"
+#include "cargo-json/internals/from-json-visitor.hpp"
+#include "cargo-sqlite/internals/from-kvstore-visitor.hpp"
+#include "cargo-sqlite/internals/from-kvstore-ignoring-visitor.hpp"
+#include "cargo-json/internals/fs-utils.hpp"
+// TODO: remove dependencies to other libraries internals
 
 namespace cargo {
 

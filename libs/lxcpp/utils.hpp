@@ -45,4 +45,4 @@ bool setupControlTTY(const int ttyFD);
 } // namespace lxcpp
 
 
-#endif // LXCPP_START_HPP
+#endif // LXCPP_UTILS_HPP

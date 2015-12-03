@@ -22,10 +22,10 @@
  * @brief   Visitor for saving to FDStore
  */
 
-#ifndef CARGO_FD_TO_FDSTORE_VISITOR_HPP
-#define CARGO_FD_TO_FDSTORE_VISITOR_HPP
+#ifndef CARGO_FD_INTERNALS_TO_FDSTORE_VISITOR_HPP
+#define CARGO_FD_INTERNALS_TO_FDSTORE_VISITOR_HPP
 
-#include "cargo-fd/fdstore.hpp"
+#include "cargo-fd/internals/fdstore.hpp"
 #include "cargo/is-visitable.hpp"
 #include "cargo/is-like-tuple.hpp"
 #include "cargo/types.hpp"
@@ -135,4 +135,4 @@ private:
 
 } // namespace cargo
 
-#endif // CARGO_FD_TO_FDSTORE_VISITOR_HPP
+#endif // CARGO_FD_INTERNALS_TO_FDSTORE_VISITOR_HPP
