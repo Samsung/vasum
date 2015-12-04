@@ -51,11 +51,11 @@ void SetupUserNS::execute()
 
     std::string uid_map;
     for (const auto map : mUserNSConfig.mUIDMaps) {
-        uid_map.append(std::to_string(map.min));
+        uid_map.append(std::to_string(std::get<0>(map)));
         uid_map.append(" ");
-        uid_map.append(std::to_string(map.max));
+        uid_map.append(std::to_string(std::get<1>(map)));
         uid_map.append(" ");
-        uid_map.append(std::to_string(map.num));
+        uid_map.append(std::to_string(std::get<2>(map)));
         uid_map.append("\n");
     }
     if (uid_map.size() && !utils::saveFileContent(uid_map_path, uid_map)) {
@@ -66,11 +66,11 @@ void SetupUserNS::execute()
 
     std::string gid_map;
     for (const auto map : mUserNSConfig.mGIDMaps) {
-        gid_map.append(std::to_string(map.min));
+        gid_map.append(std::to_string(std::get<0>(map)));
         gid_map.append(" ");
-        gid_map.append(std::to_string(map.max));
+        gid_map.append(std::to_string(std::get<1>(map)));
         gid_map.append(" ");
-        gid_map.append(std::to_string(map.num));
+        gid_map.append(std::to_string(std::get<2>(map)));
         gid_map.append("\n");
     }
     if (gid_map.size() && !utils::saveFileContent(gid_map_path, gid_map)) {

@@ -35,26 +35,9 @@ namespace lxcpp {
 
 
 struct UserNSConfig {
-    // TODO: Replace UserNSMap with std::tuple
-    struct UserNSMap {
-        unsigned min;
-        unsigned max;
-        unsigned num;
-
-        UserNSMap() = default;
-        UserNSMap(unsigned min, unsigned max, unsigned num)
-            : min(min), max(max), num(num) {}
-
-        CARGO_REGISTER
-        (
-            min,
-            max,
-            num
-        )
-    };
-
-    std::vector<UserNSMap> mUIDMaps;
-    std::vector<UserNSMap> mGIDMaps;
+    // container ID start, host ID start, number of IDs
+    std::vector<std::tuple<unsigned, unsigned, unsigned>> mUIDMaps;
+    std::vector<std::tuple<unsigned, unsigned, unsigned>> mGIDMaps;
 
     CARGO_REGISTER
     (

@@ -185,4 +185,63 @@ BOOST_AUTO_TEST_CASE(StopCallback)
     BOOST_REQUIRE(c->getState() == Container::State::STOPPED);
 }
 
+BOOST_AUTO_TEST_CASE(UIDGoodMapping)
+{
+    auto c = std::unique_ptr<Container>(createContainer("UIDGoodMapping", "/", WORK_DIR));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_NULL, logger::LogLevel::DEBUG));
+
+    c->addUIDMap(0, 1000, 1);
+    c->addUIDMap(1000, 0, 999);
+
+    BOOST_CHECK_NO_THROW(c->start());
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
+
+    BOOST_CHECK_NO_THROW(c->stop());
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
+}
+
+BOOST_AUTO_TEST_CASE(GIDGoodMapping)
+{
+    auto c = std::unique_ptr<Container>(createContainer("GIDGoodMapping", "/", WORK_DIR));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_NULL, logger::LogLevel::DEBUG));
+
+    c->addGIDMap(0, 1000, 1);
+    c->addGIDMap(1000, 0, 999);
+
+    BOOST_CHECK_NO_THROW(c->start());
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
+
+    BOOST_CHECK_NO_THROW(c->stop());
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
+}
+
+BOOST_AUTO_TEST_CASE(UIDBadMapping)
+{
+    auto c = std::unique_ptr<Container>(createContainer("UIDBadMapping", "/", WORK_DIR));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_NULL, logger::LogLevel::DEBUG));
+
+    // At most 5 mappings allowed
+    for(int i = 0; i < 5; ++i) {
+        c->addUIDMap(0, 1000, 1);
+    }
+
+    BOOST_REQUIRE_THROW(c->addUIDMap(0, 1000, 1),ConfigureException);
+}
+
+BOOST_AUTO_TEST_CASE(GIDBadMapping)
+{
+    auto c = std::unique_ptr<Container>(createContainer("GIDBadMapping", "/", WORK_DIR));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_NULL, logger::LogLevel::DEBUG));
+
+    for(int i = 0; i < 5; ++i) {
+        c->addGIDMap(0, 1000, 1);
+    }
+
+    BOOST_REQUIRE_THROW(c->addGIDMap(0, 1000, 1),ConfigureException);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
