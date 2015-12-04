@@ -30,11 +30,14 @@
 #include "cargo/is-visitable.hpp"
 #include "cargo/is-like-tuple.hpp"
 #include "cargo/is-streamable.hpp"
+#include "cargo/visit-fields.hpp"
 #include "cargo/exception.hpp"
 
 #include <map>
 
 namespace cargo {
+
+namespace internals {
 
 class ToKVStoreVisitor {
 
@@ -163,6 +166,8 @@ private:
         size_t idx = 0;
     };
 };
+
+} // namespace internals
 
 } // namespace cargo
 

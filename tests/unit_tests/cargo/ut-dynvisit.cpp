@@ -35,6 +35,7 @@ namespace {
 
 using namespace utils;
 using namespace cargo;
+using namespace cargo::internals;
 
 const std::string UT_PATH = "/tmp/ut-config/";
 

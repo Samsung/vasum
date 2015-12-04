@@ -46,9 +46,9 @@ void loadFromKVStore(const std::string& filename, Cargo& visitable, const std::s
 {
     static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
-    KVStore store(filename);
-    KVStore::Transaction transaction(store);
-    FromKVStoreVisitor visitor(store, visitableName);
+    internals::KVStore store(filename);
+    internals::KVStore::Transaction transaction(store);
+    internals::FromKVStoreVisitor visitor(store, visitableName);
     visitable.accept(visitor);
     transaction.commit();
 }
@@ -65,9 +65,9 @@ void saveToKVStore(const std::string& filename, const Cargo& visitable, const st
 {
     static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
-    KVStore store(filename);
-    KVStore::Transaction transaction(store);
-    ToKVStoreVisitor visitor(store, visitableName);
+    internals::KVStore store(filename);
+    internals::KVStore::Transaction transaction(store);
+    internals::ToKVStoreVisitor visitor(store, visitableName);
     visitable.accept(visitor);
     transaction.commit();
 }

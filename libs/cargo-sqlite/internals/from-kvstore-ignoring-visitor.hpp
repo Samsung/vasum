@@ -30,6 +30,8 @@
 
 namespace cargo {
 
+namespace internals {
+
 /**
  * A variant of KVStoreVisitor that ignore non-existing fields.
  *
@@ -91,6 +93,8 @@ private:
 
     friend class FromKVStoreVisitorBase;
 };
+
+} // namespace internals
 
 } // namespace cargo
 

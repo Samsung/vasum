@@ -36,6 +36,8 @@
 
 namespace cargo {
 
+namespace internals {
+
 namespace {
 
 const int ERROR_MESSAGE_BUFFER_CAPACITY = 256;
@@ -291,5 +293,7 @@ int FDStore::receiveFD(const unsigned int timeoutMS)
 
     return *(reinterpret_cast<int*>(CMSG_DATA(cmhp)));
 }
+
+} // namespace internals
 
 } // namespace cargo

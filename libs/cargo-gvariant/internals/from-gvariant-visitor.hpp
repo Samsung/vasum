@@ -44,6 +44,8 @@
 
 namespace cargo {
 
+namespace internals {
+
 class FromGVariantVisitor {
 public:
     explicit FromGVariantVisitor(GVariant* variant)
@@ -269,6 +271,8 @@ private:
     }
 
 };
+
+} // namespace internals
 
 } // namespace cargo
 

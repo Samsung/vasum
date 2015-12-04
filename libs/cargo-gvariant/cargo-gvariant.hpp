@@ -45,7 +45,7 @@ void loadFromGVariant(GVariant* gvariant, Cargo& visitable)
     static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
     static_assert(!isUnion<Cargo>::value, "Don't use CARGO_DECLARE_UNION in top level visitable");
 
-    FromGVariantVisitor visitor(gvariant);
+    internals::FromGVariantVisitor visitor(gvariant);
     visitable.accept(visitor);
 }
 
@@ -60,7 +60,7 @@ GVariant* saveToGVariant(const Cargo& visitable)
     static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
     static_assert(!isUnion<Cargo>::value, "Don't use CARGO_DECLARE_UNION in top level visitable");
 
-    ToGVariantVisitor visitor;
+    internals::ToGVariantVisitor visitor;
     visitable.accept(visitor);
     return visitor.toVariant();
 }

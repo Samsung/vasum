@@ -40,6 +40,8 @@
 
 namespace cargo {
 
+namespace internals {
+
 class KVStore {
 
 public:
@@ -146,6 +148,8 @@ private:
     void prepareStatements();
     void createFunctions();
 };
+
+} // namespace internals
 
 } // namespace cargo
 

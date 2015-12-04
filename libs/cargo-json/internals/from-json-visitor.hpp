@@ -40,6 +40,8 @@
 
 namespace cargo {
 
+namespace internals {
+
 class FromJsonVisitor {
 public:
     explicit FromJsonVisitor(const std::string& jsonString)
@@ -196,6 +198,8 @@ private:
         value.accept(visitor);
     }
 };
+
+} // namespace internals
 
 } // namespace cargo
 

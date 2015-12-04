@@ -28,6 +28,7 @@
 #include <string>
 
 namespace cargo {
+namespace internals {
 namespace fsutils {
 
 bool readFileContent(const std::string& path, std::string& result);
@@ -38,6 +39,7 @@ inline std::string readFileContent(const std::string& path) {
     return readFileContent(path, content) ? content : std::string();
 }
 } // namespace fsutils
+} // namespace internals
 } // namespace cargo
 
 #endif // CARGO_JSON_INTERNALS_FS_UTILS_HPP

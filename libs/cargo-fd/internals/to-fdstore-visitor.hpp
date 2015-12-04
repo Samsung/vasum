@@ -41,6 +41,8 @@
 
 namespace cargo {
 
+namespace internals {
+
 class ToFDStoreVisitor {
 
 public:
@@ -132,6 +134,8 @@ private:
     }
 
 };
+
+} // namespace internals
 
 } // namespace cargo
 

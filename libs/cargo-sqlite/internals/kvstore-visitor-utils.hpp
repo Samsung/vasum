@@ -31,6 +31,8 @@
 
 namespace cargo {
 
+namespace internals {
+
 template<typename T>
 T fromString(const std::string& strValue)
 {
@@ -79,6 +81,8 @@ std::string key()
 {
     return std::string();
 }
+
+} // namespace internals
 
 } // namespace cargo
 

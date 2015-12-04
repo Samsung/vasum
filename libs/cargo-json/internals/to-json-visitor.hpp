@@ -40,6 +40,8 @@
 
 namespace cargo {
 
+namespace internals {
+
 class ToJsonVisitor {
 
 public:
@@ -188,6 +190,8 @@ private:
     }
 
 };
+
+} // namespace internals
 
 } // namespace cargo
 

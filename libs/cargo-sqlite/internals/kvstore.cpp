@@ -36,6 +36,8 @@
 
 namespace cargo {
 
+namespace internals {
+
 namespace {
 
 const int AUTO_DETERM_SIZE = -1;
@@ -308,5 +310,7 @@ std::vector<std::string> KVStore::getKeys()
     transaction.commit();
     return result;
 }
+
+} // namespace internals
 
 } // namespace cargo

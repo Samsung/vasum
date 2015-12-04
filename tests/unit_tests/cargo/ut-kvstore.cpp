@@ -38,6 +38,7 @@
 
 using namespace cargo;
 using namespace utils;
+using namespace cargo::internals;
 namespace fs = boost::filesystem;
 
 namespace {

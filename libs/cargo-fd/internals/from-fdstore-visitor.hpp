@@ -37,6 +37,8 @@
 
 namespace cargo {
 
+namespace internals {
+
 class FromFDStoreVisitor {
 public:
     explicit FromFDStoreVisitor(int fd)
@@ -138,6 +140,8 @@ private:
         visitFields(values, this, std::string());
     }
 };
+
+} // namespace internals
 
 } // namespace cargo
 

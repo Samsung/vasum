@@ -30,6 +30,8 @@
 
 namespace cargo {
 
+namespace internals {
+
 /**
  * Default KVStore visitor.
  */
@@ -46,6 +48,8 @@ public:
     {
     }
 };
+
+} // namespace internals
 
 } // namespace cargo
 

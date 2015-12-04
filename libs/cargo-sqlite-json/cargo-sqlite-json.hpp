@@ -54,10 +54,10 @@ void loadFromKVStoreWithJson(const std::string& kvfile,
 {
     static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
-    KVStore store(kvfile);
-    KVStore::Transaction transaction(store);
-    FromJsonVisitor fromJsonVisitor(json);
-    FromKVStoreIgnoringVisitor fromKVStoreVisitor(store, kvVisitableName);
+    internals::KVStore store(kvfile);
+    internals::KVStore::Transaction transaction(store);
+    internals::FromJsonVisitor fromJsonVisitor(json);
+    internals::FromKVStoreIgnoringVisitor fromKVStoreVisitor(store, kvVisitableName);
     visitable.accept(fromJsonVisitor);
     visitable.accept(fromKVStoreVisitor);
     transaction.commit();
@@ -78,7 +78,7 @@ void loadFromKVStoreWithJsonFile(const std::string& kvfile,
                                  const std::string& kvVisitableName)
 {
     std::string content;
-    if (!fsutils::readFileContent(jsonfile, content)) {
+    if (!internals::fsutils::readFileContent(jsonfile, content)) {
         throw CargoException("Could not load " + jsonfile);
     }
     try {

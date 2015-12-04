@@ -29,6 +29,7 @@
 
 
 namespace cargo {
+namespace internals {
 namespace fsutils {
 
 bool readFileContent(const std::string& path, std::string& result)
@@ -70,4 +71,5 @@ bool saveFileContent(const std::string& path, const std::string& content)
 }
 
 } // namespace fsutils
+} // namespace internals
 } // namespace cargo

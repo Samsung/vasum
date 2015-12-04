@@ -45,7 +45,7 @@ void loadFromFD(const int fd, Cargo& visitable)
 {
     static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
-    FromFDStoreVisitor visitor(fd);
+    internals::FromFDStoreVisitor visitor(fd);
     visitable.accept(visitor);
 }
 
@@ -60,7 +60,7 @@ void saveToFD(const int fd, const Cargo& visitable)
 {
     static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
-    ToFDStoreVisitor visitor(fd);
+    internals::ToFDStoreVisitor visitor(fd);
     visitable.accept(visitor);
 }
 

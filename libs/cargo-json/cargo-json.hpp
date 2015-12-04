@@ -46,7 +46,7 @@ void loadFromJsonString(const std::string& jsonString, Cargo& visitable)
 {
     static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
-    FromJsonVisitor visitor(jsonString);
+    internals::FromJsonVisitor visitor(jsonString);
     visitable.accept(visitor);
 }
 
@@ -60,7 +60,7 @@ std::string saveToJsonString(const Cargo& visitable)
 {
     static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
-    ToJsonVisitor visitor;
+    internals::ToJsonVisitor visitor;
     visitable.accept(visitor);
     return visitor.toString();
 }
@@ -75,7 +75,7 @@ template <class Cargo>
 void loadFromJsonFile(const std::string& filename, Cargo& visitable)
 {
     std::string content;
-    if (!fsutils::readFileContent(filename, content)) {
+    if (!internals::fsutils::readFileContent(filename, content)) {
         const std::string& msg = "Could not load " + filename;
         LOGE(msg);
         throw CargoException(msg);
@@ -99,7 +99,7 @@ template <class Cargo>
 void saveToJsonFile(const std::string& filename, const Cargo& visitable)
 {
     const std::string content = saveToJsonString(visitable);
-    if (!fsutils::saveFileContent(filename, content)) {
+    if (!internals::fsutils::saveFileContent(filename, content)) {
         throw CargoException("Could not save " + filename);
     }
 }

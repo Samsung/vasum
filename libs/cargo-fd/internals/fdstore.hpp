@@ -33,6 +33,8 @@ const unsigned int maxTimeout = 5000;
 
 namespace cargo {
 
+namespace internals {
+
 class FDStore {
 
 public:
@@ -72,6 +74,8 @@ public:
 private:
     int mFD;
 };
+
+} // namespace internals
 
 } // namespace cargo
 

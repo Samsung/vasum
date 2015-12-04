@@ -40,6 +40,8 @@
 
 namespace cargo {
 
+namespace internals {
+
 class ToGVariantVisitor {
 
 public:
@@ -200,6 +202,8 @@ private:
         g_variant_builder_add(mBuilder, type, value);
     }
 };
+
+} // namespace internals
 
 } // namespace cargo
 

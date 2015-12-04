@@ -40,6 +40,7 @@ namespace {
 
 using namespace utils;
 using namespace cargo;
+using namespace cargo::internals;
 
 const std::string UT_PATH = "/tmp/ut-config/";
 const std::string DB_PATH = UT_PATH + "kvstore.db3";

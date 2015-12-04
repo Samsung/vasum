@@ -38,6 +38,8 @@
 
 namespace cargo {
 
+namespace internals {
+
 /**
  * Base class for KVStore visitors.
  *
@@ -196,6 +198,8 @@ private:
         size_t idx = 0;
     };
 };
+
+} // namespace internals
 
 } // namespace cargo
 
