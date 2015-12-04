@@ -218,6 +218,11 @@ private:
                                                  cargo::ipc::MethodResult::Pointer);
 
     /**
+     * Configuration has been set in guard
+     */
+    void onConfigSet(cargo::ipc::Result<api::Void>&& result);
+
+    /**
      * Guards just started Init and passes its PID
      */
     void onInitStarted(cargo::ipc::Result<api::Pid>&& result);

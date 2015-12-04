@@ -28,6 +28,7 @@
 #include <functional>
 #include <exception>
 #include <memory>
+#include "cargo-ipc/exception.hpp"
 
 namespace cargo {
 namespace ipc {
@@ -47,9 +48,13 @@ public:
 
     void rethrow() const
     {
+        if (isValid()) {
+            return;
+        }
         if (mExceptionPtr) {
             std::rethrow_exception(mExceptionPtr);
         }
+        throw IPCInvalidResultException("Invalid result received. Details unknown.");
     }
 
     std::shared_ptr<Data> get() const
@@ -58,9 +63,14 @@ public:
         return mData;
     }
 
+    bool isSet() const
+    {
+        return static_cast<bool>(mExceptionPtr) || static_cast<bool>(mData);
+    }
+
     bool isValid() const
     {
-        return (bool)mExceptionPtr || (bool)mData;
+        return static_cast<bool>(mData);
     }
 
 private:

@@ -674,7 +674,7 @@ std::shared_ptr<ReceivedDataType> Processor::callSync(const MethodID methodID,
                                                                             process);
 
     auto isResultInitialized = [&result]() {
-        return result.isValid();
+        return result.isSet();
     };
 
     LOGT(mLogPrefix + "Waiting for the response...");

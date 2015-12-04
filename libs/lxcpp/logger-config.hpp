@@ -36,6 +36,8 @@ namespace lxcpp {
  */
 struct LoggerConfig
 {
+    LoggerConfig() : mType(logger::LogType::LOG_NULL) {}
+
     logger::LogType mType;
     logger::LogLevel mLevel;
     std::string mArg;

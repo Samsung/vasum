@@ -56,6 +56,9 @@ namespace ipc {
  * auto asyncResult = [result](cargo::ipc::Result<api::Void>&& out) {
  *      if (out.isValid()) {
  *          // got successful response!
+ *      } else {
+ *          // throw expection - one that came back or default
+ *          out.rethrow()
  *      }
  * };
  * std::string id = "example_zone_id";

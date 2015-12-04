@@ -61,7 +61,7 @@ const std::string TEST_CMD_LIST_RET   = "/tmp/list_files_ret.txt";
 const std::vector<std::string> COMMAND = {"/bin/bash",
                                           "-c", "trap exit SIGTERM; while true; do sleep 0.1; done"
                                          };
-// const int TIMEOUT = 3000; //ms
+const int TIMEOUT = 3000; //ms
 
 struct Fixture {
     Fixture() : mTestPath(TEST_DIR), mWork(WORK_DIR)
@@ -137,9 +137,6 @@ struct MountFixture : Fixture {
 
 
 BOOST_FIXTURE_TEST_SUITE(LxcppProvisioningSuite, Fixture)
-
-// FIXME: Uncomment
-# if 0
 
 BOOST_AUTO_TEST_CASE(ListProvisionsEmptyContainer)
 {
@@ -343,8 +340,5 @@ BOOST_AUTO_TEST_CASE(LinkFileWhileRunning)
     BOOST_REQUIRE_NO_THROW(c->stop());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
 }
-
-# endif
-
 
 BOOST_AUTO_TEST_SUITE_END()

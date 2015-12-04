@@ -283,6 +283,14 @@ void ContainerImpl::start()
 }
 
 
+void ContainerImpl::onConfigSet(cargo::ipc::Result<api::Void>&& result)
+{
+    if (!result.isValid()) {
+        LOGE("Failed to set container configuration");
+        result.rethrow();
+    }
+}
+
 void ContainerImpl::onInitStarted(cargo::ipc::Result<api::Pid>&& result)
 {
     Lock lock(mStateMutex);
@@ -315,7 +323,9 @@ cargo::ipc::HandlerExitCode ContainerImpl::onGuardReady(const cargo::ipc::PeerID
 
     // Guard is up and Init needs to be started
     using namespace std::placeholders;
-    mClient->callAsyncFromCallback<ContainerConfig, api::Void>(api::METHOD_SET_CONFIG, mConfig);
+    mClient->callAsyncFromCallback<ContainerConfig, api::Void>(api::METHOD_SET_CONFIG,
+            mConfig,
+            std::bind(&ContainerImpl::onConfigSet, this, _1));
     mClient->callAsyncFromCallback<api::Void, api::Pid>(api::METHOD_START,
             std::shared_ptr<api::Void>(),
             std::bind(&ContainerImpl::onInitStarted, this, _1));

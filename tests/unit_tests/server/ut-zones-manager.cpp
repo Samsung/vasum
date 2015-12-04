@@ -497,7 +497,7 @@ public:
                                    const VoidResultCallback& result)
     {
         auto asyncResult = [result](cargo::ipc::Result<api::Void>&& out) {
-            if (out.isValid()) {
+            if (out.isSet()) {
                 result();
             }
         };
@@ -510,7 +510,7 @@ public:
                                     const VoidResultCallback& result)
     {
         auto asyncResult = [result](cargo::ipc::Result<api::Void>&& out) {
-            if (out.isValid()) {
+            if (out.isSet()) {
                 result();
             }
         };
@@ -523,7 +523,7 @@ public:
                                      const VoidResultCallback& result)
     {
         auto asyncResult = [result](cargo::ipc::Result<api::Void>&& out) {
-            if (out.isValid()) {
+            if (out.isSet()) {
                 result();
             }
         };
@@ -536,7 +536,7 @@ public:
                                   const VoidResultCallback& result)
     {
         auto asyncResult = [result](cargo::ipc::Result<api::Void>&& out) {
-            if (out.isValid()) {
+            if (out.isSet()) {
                 result();
             }
         };

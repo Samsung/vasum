@@ -105,6 +105,15 @@ struct IPCTimeoutException: public IPCException {
 };
 
 /**
+ * Exception to indicate invalid result error
+ * @ingroup IPCException
+ */
+struct IPCInvalidResultException: public IPCException {
+    explicit IPCInvalidResultException(const std::string& message)
+        : IPCException(message) {}
+};
+
+/**
  * Exception to indicate socket error
  * @ingroup IPCException
  */

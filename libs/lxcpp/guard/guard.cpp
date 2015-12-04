@@ -162,20 +162,15 @@ cargo::ipc::HandlerExitCode Guard::onSetConfig(const cargo::ipc::PeerID,
 
     mConfig = data;
 
-    // TODO: We might use this command elsewhere, not only for a start
-    logger::setupLogger(mConfig->mLogger.mType,
-                        mConfig->mLogger.mLevel,
-                        mConfig->mLogger.mArg);
-
-    LOGD("Config & logging restored");
-
     try {
-        LOGD("Setting the guard process title");
-        const std::string title = "[LXCPP] " + mConfig->mName + " " + mConfig->mRootPath;
-        setProcTitle(title);
-    } catch (std::exception &e) {
-        // Ignore, this is optional
-        LOGW("Failed to set the guard process title: " << e.what());
+        logger::setupLogger(mConfig->mLogger.mType,
+                            mConfig->mLogger.mLevel,
+                            mConfig->mLogger.mArg);
+        LOGD("Config & logging restored");
+    }
+    catch(const std::exception& e) {
+        result->setError(api::GUARD_SET_CONFIG_ERROR, e.what());
+        return cargo::ipc::HandlerExitCode::SUCCESS;
     }
 
     result->setVoid();
@@ -200,8 +195,16 @@ cargo::ipc::HandlerExitCode Guard::onStart(const cargo::ipc::PeerID,
 
     mConfig->mState = Container::State::STARTING;
 
-    // TODO: container preparation part 1: things to do before clone
+    try {
+        LOGD("Setting the guard process title");
+        const std::string title = "[LXCPP] " + mConfig->mName + " " + mConfig->mRootPath;
+        setProcTitle(title);
+    } catch (std::exception &e) {
+        // Ignore, this is optional
+        LOGW("Failed to set the guard configuration: " << e.what());
+    }
 
+    // TODO: container preparation part 1: things to do before clone
     CGroupMakeAll cgroups(mConfig->mCgroups);
     cgroups.execute();
 
