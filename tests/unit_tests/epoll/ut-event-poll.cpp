@@ -37,6 +37,7 @@
 using namespace utils;
 using namespace cargo::ipc;
 using namespace cargo::ipc::epoll;
+using namespace cargo::ipc::internals;
 
 namespace {
 

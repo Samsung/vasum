@@ -221,7 +221,7 @@ public:
 private:
     epoll::EventPoll& mEventPoll;
     PeerID mServiceID;
-    Processor mProcessor;
+    internals::Processor mProcessor;
     std::string mSocketPath;
 
     void handle(const FileDescriptor fd, const epoll::Events pollEvents);

@@ -34,6 +34,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 class MethodRequest {
 public:
@@ -99,6 +100,7 @@ std::shared_ptr<MethodRequest> MethodRequest::create(const MethodID methodID,
     return request;
 }
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo
 

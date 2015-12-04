@@ -35,6 +35,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 /**
  * Accepts new connections and passes the new socket to a callback.
@@ -71,6 +72,7 @@ private:
     void handleConnection();
 };
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo
 

@@ -58,6 +58,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
 /**
@@ -736,6 +737,7 @@ void Processor::signal(const MethodID methodID,
 
 
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo
 

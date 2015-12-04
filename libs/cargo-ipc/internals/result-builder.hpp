@@ -32,6 +32,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 class ResultBuilder {
 public:
@@ -66,6 +67,7 @@ private:
 typedef std::function<void(ResultBuilder&)> ResultBuilderHandler;
 
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo
 

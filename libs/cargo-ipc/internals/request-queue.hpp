@@ -36,6 +36,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 /**
 * Class for managing a queue of Requests carrying any data
@@ -184,6 +185,7 @@ bool RequestQueue<RequestIdType>::removeIf(Predicate predicate)
 
     return true;
 }
+} // namespace internals
 } // namespace ipc
 } // namespace cargo
 

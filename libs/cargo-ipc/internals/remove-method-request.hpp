@@ -29,6 +29,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 class RemoveMethodRequest {
 public:
@@ -42,6 +43,7 @@ public:
     MethodID methodID;
 };
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo
 

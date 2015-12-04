@@ -29,6 +29,7 @@
 #include "socket-test.hpp"
 
 using namespace cargo::ipc;
+using namespace cargo::ipc::internals;
 
 BOOST_AUTO_TEST_SUITE(SocketSuite)
 

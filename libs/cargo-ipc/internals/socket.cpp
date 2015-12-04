@@ -46,6 +46,7 @@ using namespace utils;
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 namespace {
 const int MAX_QUEUE_LENGTH = 1000;
@@ -270,5 +271,6 @@ Socket Socket::connectSocket(const std::string& path, const int timeoutMs)
     return Socket(fd);
 }
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo

@@ -42,6 +42,7 @@ using namespace utils;
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 #define IGNORE_EXCEPTIONS(expr)                        \
     try                                                \
@@ -799,5 +800,6 @@ std::ostream& operator<<(std::ostream& os, const Processor::Event& event)
     return os;
 }
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo

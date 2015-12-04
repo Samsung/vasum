@@ -239,8 +239,8 @@ public:
                 const std::shared_ptr<SentDataType>& data);
 private:
     epoll::EventPoll& mEventPoll;
-    Processor mProcessor;
-    Acceptor mAcceptor;
+    internals::Processor mProcessor;
+    internals::Acceptor mAcceptor;
 
     void handle(const FileDescriptor fd, const epoll::Events pollEvents);
 };

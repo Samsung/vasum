@@ -29,6 +29,7 @@
 #include "logger/logger.hpp"
 
 using namespace std::placeholders;
+using namespace cargo::ipc::internals;
 
 namespace cargo {
 namespace ipc {

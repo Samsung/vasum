@@ -32,6 +32,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 class RemovePeerRequest {
 public:
@@ -49,6 +50,7 @@ public:
     std::shared_ptr<std::condition_variable> conditionPtr;
 };
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo
 

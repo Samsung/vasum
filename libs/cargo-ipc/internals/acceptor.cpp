@@ -31,6 +31,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 Acceptor::Acceptor(epoll::EventPoll& eventPoll,
                    const std::string& socketPath,
@@ -55,5 +56,6 @@ void Acceptor::handleConnection()
     mNewConnectionCallback(tmpSocket);
 }
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo

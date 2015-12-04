@@ -30,6 +30,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 class SignalRequest {
 public:
@@ -73,6 +74,7 @@ std::shared_ptr<SignalRequest> SignalRequest::create(const MethodID methodID,
     return request;
 }
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo
 

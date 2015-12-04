@@ -30,6 +30,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 class AddPeerRequest {
 public:
@@ -46,6 +47,7 @@ public:
     PeerID peerID;
 };
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo
 

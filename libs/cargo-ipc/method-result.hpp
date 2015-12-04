@@ -32,7 +32,11 @@
 namespace cargo {
 namespace ipc {
 
+namespace internals {
+
 class Processor;
+
+}
 
 /**
  * Class used to obtain method call result code.
@@ -46,7 +50,7 @@ class MethodResult {
 public:
     typedef std::shared_ptr<MethodResult> Pointer;
 
-    MethodResult(Processor& processor,
+    MethodResult(internals::Processor& processor,
                  const MethodID methodID,
                  const MessageID& messageID,
                  const PeerID& peerID);
@@ -63,7 +67,7 @@ public:
     PeerID getPeerID() const;
 
 private:
-    Processor& mProcessor;
+    internals::Processor& mProcessor;
     MethodID mMethodID;
     PeerID mPeerID;
     MessageID mMessageID;

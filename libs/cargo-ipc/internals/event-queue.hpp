@@ -35,6 +35,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 
 /**
@@ -118,6 +119,7 @@ bool EventQueue<MessageType>::isEmpty()
     return mMessages.empty();
 }
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo
 

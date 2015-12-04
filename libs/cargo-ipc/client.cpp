@@ -31,6 +31,8 @@
 namespace cargo {
 namespace ipc {
 
+using namespace internals;
+
 Client::Client(epoll::EventPoll& eventPoll, const std::string& socketPath)
     : mEventPoll(eventPoll),
       mServiceID(),

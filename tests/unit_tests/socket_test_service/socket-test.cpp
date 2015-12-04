@@ -34,6 +34,7 @@
 
 using namespace vasum::socket_test;
 using namespace cargo::ipc;
+using namespace cargo::ipc::internals;
 using namespace logger;
 
 // NOTE this is a single-usage program, only meant to test vasum::cargo::ipc::Socket module.

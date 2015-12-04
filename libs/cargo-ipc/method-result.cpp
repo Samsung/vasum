@@ -30,6 +30,8 @@
 namespace cargo {
 namespace ipc {
 
+using namespace internals;
+
 MethodResult::MethodResult(Processor& processor,
                            const MethodID methodID,
                            const MessageID& messageID,

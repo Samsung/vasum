@@ -31,6 +31,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 /**
  * This class wraps all operations possible to do with a socket.
@@ -113,6 +114,7 @@ private:
     static int getSystemdSocketInternal(const std::string& path);
 };
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo
 

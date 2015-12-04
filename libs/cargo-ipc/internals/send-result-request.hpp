@@ -30,6 +30,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 class SendResultRequest {
 public:
@@ -52,6 +53,7 @@ public:
     std::shared_ptr<void> data;
 };
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo
 

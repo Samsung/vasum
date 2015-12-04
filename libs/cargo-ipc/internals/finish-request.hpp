@@ -29,6 +29,7 @@
 
 namespace cargo {
 namespace ipc {
+namespace internals {
 
 class FinishRequest {
 public:
@@ -42,6 +43,7 @@ public:
     std::shared_ptr<std::condition_variable> conditionPtr;
 };
 
+} // namespace internals
 } // namespace ipc
 } // namespace cargo
 
