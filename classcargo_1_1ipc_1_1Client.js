@@ -1,0 +1,25 @@
+var classcargo_1_1ipc_1_1Client =
+[
+    [ "Client", "classcargo_1_1ipc_1_1Client.html#ab0a8cecdf2bf82d3a409dc71142576cc", null ],
+    [ "~Client", "classcargo_1_1ipc_1_1Client.html#a840e519ca781888cbd54181572ebe3a7", null ],
+    [ "Client", "classcargo_1_1ipc_1_1Client.html#a425f663d622a7be67d14330474d290f3", null ],
+    [ "callAsync", "classcargo_1_1ipc_1_1Client.html#a2a305b8fa149109e1a340e5d6645dd38", null ],
+    [ "callAsyncFromCallback", "classcargo_1_1ipc_1_1Client.html#ab896ffb8f52d51a20884f59dc884629a", null ],
+    [ "callSync", "classcargo_1_1ipc_1_1Client.html#ad4f446e82318bc3eeb098bdd48304bba", null ],
+    [ "handle", "classcargo_1_1ipc_1_1Client.html#a8974c08e69b053954c1e1736c7323cfe", null ],
+    [ "isHandled", "classcargo_1_1ipc_1_1Client.html#a42cd815bfa0ce255c5f49f6e741fbfd5", null ],
+    [ "isStarted", "classcargo_1_1ipc_1_1Client.html#aedf367aafaf0247b2a35fafa232dd644", null ],
+    [ "operator=", "classcargo_1_1ipc_1_1Client.html#a2c20286beacfe5588320bfcd707d68e2", null ],
+    [ "removeMethod", "classcargo_1_1ipc_1_1Client.html#aba2cfd4a491d80676a5b11422f3b4443", null ],
+    [ "setMethodHandler", "classcargo_1_1ipc_1_1Client.html#aeaf2bcd1aee9380f012624afe2d981d7", null ],
+    [ "setNewPeerCallback", "classcargo_1_1ipc_1_1Client.html#a8a2234447578ac4fc30f45513ddfdc30", null ],
+    [ "setRemovedPeerCallback", "classcargo_1_1ipc_1_1Client.html#aed3b752fb97eac0c4fd51582272daadd", null ],
+    [ "setSignalHandler", "classcargo_1_1ipc_1_1Client.html#acc3a3fa5c72d513b5cd0b4fefe23bb35", null ],
+    [ "signal", "classcargo_1_1ipc_1_1Client.html#a5ecb8fb89385af81686eb5388ef6fdb0", null ],
+    [ "start", "classcargo_1_1ipc_1_1Client.html#a742373e08a80d993d2651b6fff76f5b9", null ],
+    [ "stop", "classcargo_1_1ipc_1_1Client.html#ab82b00175172daa928646eaeed415253", null ],
+    [ "mEventPoll", "classcargo_1_1ipc_1_1Client.html#ae6ad6a5c2a68c672b2c61243ba423081", null ],
+    [ "mProcessor", "classcargo_1_1ipc_1_1Client.html#a3b2f4f4b0be9eba4520a1b5785c4afb4", null ],
+    [ "mServiceID", "classcargo_1_1ipc_1_1Client.html#a8f03523bdc14b3782a306796efe91f2f", null ],
+    [ "mSocketPath", "classcargo_1_1ipc_1_1Client.html#aa4a6bb460e60a7d392836d2231c9382a", null ]
+];

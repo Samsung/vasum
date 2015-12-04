@@ -1,0 +1,36 @@
+var namespacecargo =
+[
+    [ "fsutils", "namespacecargo_1_1fsutils.html", null ],
+    [ "ipc", "namespacecargo_1_1ipc.html", "namespacecargo_1_1ipc" ],
+    [ "sqlite3", "namespacecargo_1_1sqlite3.html", "namespacecargo_1_1sqlite3" ],
+    [ "CargoException", "structcargo_1_1CargoException.html", "structcargo_1_1CargoException" ],
+    [ "NoKeyException", "structcargo_1_1NoKeyException.html", "structcargo_1_1NoKeyException" ],
+    [ "InternalIntegrityException", "structcargo_1_1InternalIntegrityException.html", "structcargo_1_1InternalIntegrityException" ],
+    [ "ContainerSizeException", "structcargo_1_1ContainerSizeException.html", "structcargo_1_1ContainerSizeException" ],
+    [ "isLikeTuple", "structcargo_1_1isLikeTuple.html", "structcargo_1_1isLikeTuple" ],
+    [ "isLikeTuple< std::tuple< R...> >", "structcargo_1_1isLikeTuple_3_01std_1_1tuple_3_01R_8_8_8_4_01_4.html", "structcargo_1_1isLikeTuple_3_01std_1_1tuple_3_01R_8_8_8_4_01_4" ],
+    [ "isLikeTuple< std::pair< R...> >", "structcargo_1_1isLikeTuple_3_01std_1_1pair_3_01R_8_8_8_4_01_4.html", "structcargo_1_1isLikeTuple_3_01std_1_1pair_3_01R_8_8_8_4_01_4" ],
+    [ "isStreamableIn", "structcargo_1_1isStreamableIn.html", "structcargo_1_1isStreamableIn" ],
+    [ "isStreamableOut", "structcargo_1_1isStreamableOut.html", "structcargo_1_1isStreamableOut" ],
+    [ "has_member_impl", "structcargo_1_1has__member__impl.html", "structcargo_1_1has__member__impl" ],
+    [ "has_member", "structcargo_1_1has__member.html", null ],
+    [ "check_union", "structcargo_1_1check__union.html", [
+      [ "checker__", "structcargo_1_1check__union_1_1checker____.html", null ]
+    ] ],
+    [ "isUnion", "structcargo_1_1isUnion.html", null ],
+    [ "isVisitableHelper__", "structcargo_1_1isVisitableHelper____.html", "structcargo_1_1isVisitableHelper____" ],
+    [ "isVisitable", "structcargo_1_1isVisitable.html", null ],
+    [ "FileDescriptor", "structcargo_1_1FileDescriptor.html", "structcargo_1_1FileDescriptor" ],
+    [ "FDStore", "classcargo_1_1FDStore.html", "classcargo_1_1FDStore" ],
+    [ "FromFDStoreVisitor", "classcargo_1_1FromFDStoreVisitor.html", "classcargo_1_1FromFDStoreVisitor" ],
+    [ "ToFDStoreVisitor", "classcargo_1_1ToFDStoreVisitor.html", "classcargo_1_1ToFDStoreVisitor" ],
+    [ "FromGVariantVisitor", "classcargo_1_1FromGVariantVisitor.html", "classcargo_1_1FromGVariantVisitor" ],
+    [ "ToGVariantVisitor", "classcargo_1_1ToGVariantVisitor.html", "classcargo_1_1ToGVariantVisitor" ],
+    [ "FromJsonVisitor", "classcargo_1_1FromJsonVisitor.html", "classcargo_1_1FromJsonVisitor" ],
+    [ "ToJsonVisitor", "classcargo_1_1ToJsonVisitor.html", "classcargo_1_1ToJsonVisitor" ],
+    [ "FromKVStoreIgnoringVisitor", "classcargo_1_1FromKVStoreIgnoringVisitor.html", "classcargo_1_1FromKVStoreIgnoringVisitor" ],
+    [ "FromKVStoreVisitorBase", "classcargo_1_1FromKVStoreVisitorBase.html", "classcargo_1_1FromKVStoreVisitorBase" ],
+    [ "FromKVStoreVisitor", "classcargo_1_1FromKVStoreVisitor.html", "classcargo_1_1FromKVStoreVisitor" ],
+    [ "KVStore", "classcargo_1_1KVStore.html", "classcargo_1_1KVStore" ],
+    [ "ToKVStoreVisitor", "classcargo_1_1ToKVStoreVisitor.html", "classcargo_1_1ToKVStoreVisitor" ]
+];
