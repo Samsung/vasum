@@ -158,17 +158,31 @@ int waitpid(const pid_t pid)
 
 void unshare(const int ns)
 {
-    if(-1 == ::unshare(ns)) {
+    if (-1 == ::unshare(ns)) {
         const std::string msg = "unshare() failed: " + utils::getSystemErrorMessage();
         LOGE(msg);
         throw ProcessSetupException(msg);
     }
 }
 
+void execv(const utils::CArgsBuilder& argv)
+{
+    // Run user's binary
+    ::execv(argv[0], const_cast<char *const*>(argv.c_array()));
+
+    const std::string msg = "execv() failed: " + utils::getSystemErrorMessage();
+    LOGE(msg);
+    throw ProcessSetupException(msg);
+}
+
 void execve(const utils::CArgsBuilder& argv)
 {
     // Run user's binary
     ::execve(argv[0], const_cast<char *const*>(argv.c_array()), nullptr);
+
+    const std::string msg = "execve() failed: " + utils::getSystemErrorMessage();
+    LOGE(msg);
+    throw ProcessSetupException(msg);
 }
 
 } // namespace lxcpp

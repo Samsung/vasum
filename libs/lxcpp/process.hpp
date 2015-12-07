@@ -44,6 +44,8 @@ int waitpid(const pid_t pid);
 
 void unshare(const int ns);
 
+void execv(const utils::CArgsBuilder& argv);
+
 void execve(const utils::CArgsBuilder& argv);
 
 } // namespace lxcpp

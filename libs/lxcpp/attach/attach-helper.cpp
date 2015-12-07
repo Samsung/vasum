@@ -74,7 +74,7 @@ int child(void* data)
 
     // TODO: build args in parent process
     utils::CArgsBuilder args;
-    lxcpp::execve(args.add(config.argv));
+    lxcpp::execv(args.add(config.argv));
 
     return EXIT_FAILURE;
 }

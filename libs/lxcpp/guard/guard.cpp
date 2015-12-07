@@ -31,6 +31,7 @@
 #include "lxcpp/rlimit.hpp"
 #include "lxcpp/sysctl.hpp"
 #include "lxcpp/capability.hpp"
+#include "lxcpp/environment.hpp"
 #include "lxcpp/commands/prep-guest-terminal.hpp"
 #include "lxcpp/commands/provision.hpp"
 #include "lxcpp/commands/setup-userns.hpp"
@@ -89,8 +90,11 @@ int Guard::startContainer(void* data)
 
     lxcpp::dropCapsFromBoundingExcept(config.mCapsToKeep);
 
+    lxcpp::clearenv();
+    lxcpp::setenv(config.mEnvToSet);
+
     utils::CArgsBuilder args;
-    lxcpp::execve(args.add(config.mInit));
+    lxcpp::execv(args.add(config.mInit));
 
     return EXIT_FAILURE;
 }

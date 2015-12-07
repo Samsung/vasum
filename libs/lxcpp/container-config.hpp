@@ -184,6 +184,11 @@ struct ContainerConfig {
     unsigned long long mCapsToKeep;
 
     /**
+     * Environment variables that will be set
+     */
+    std::vector<std::pair<std::string, std::string>> mEnvToSet;
+
+    /**
      * Rlimits configuration
      * rlimit type, rlimit soft, rlimit hard
      */
@@ -218,6 +223,7 @@ struct ContainerConfig {
         mUserNSConfig,
         mCgroups,
         mCapsToKeep,
+        mEnvToSet,
         mRlimits,
         mKernelParameters
     )

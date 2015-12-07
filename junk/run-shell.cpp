@@ -81,6 +81,7 @@ int main(int argc, char *argv[])
         Container* c = createContainer("test", "/", "/tmp");
         c->setHostName("junk");
         c->setInit(args);
+        c->setEnv({{"TEST_VAR", "test_value"}, {"_TEST_VAR_", "_test_value_"}});
         c->setLogger(logger::LogType::LOG_FILE, logger::LogLevel::TRACE, "/tmp/lxcpp-shell.txt");
         c->setTerminalCount(4);
         // make my own user root in a new namespace
@@ -106,6 +107,8 @@ int main(int argc, char *argv[])
         c->console();
         // You could run the console for the second time to see if it can be reattached
         //c->console();
+
+        //c->attach({"/usr/bin/sleep", "60"}, 0, 0, "", {}, 0, "/tmp", {}, {{"TEST_VAR","test_value"}});
 
         delete c;
     }

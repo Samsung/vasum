@@ -701,9 +701,11 @@ void ContainerImpl::addCGroup(const std::string& subsys,
     mConfig->mCgroups.cgroups.push_back(CGroupConfig{subsys, grpname, comm, params});
 }
 
-void ContainerImpl::setEnv(const std::vector<std::pair<std::string, std::string>>& /*variables*/)
+void ContainerImpl::setEnv(const std::vector<std::pair<std::string, std::string>>& variables)
 {
-    throw NotImplementedException();
+    Lock lock(mStateMutex);
+
+    mConfig->mEnvToSet = variables;
 }
 
 void ContainerImpl::setCaps(const unsigned long long caps)
