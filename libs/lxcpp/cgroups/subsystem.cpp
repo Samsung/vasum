@@ -39,7 +39,7 @@
 
 namespace lxcpp {
 
-Subsystem::Subsystem(const std::string& name) : mName(name)
+Subsystem::Subsystem(const std::string& name, const std::string& mountPoint) : mName(name)
 {
     if (mName.empty()) {
         const std::string msg = "CGroup name is empty";
@@ -61,6 +61,9 @@ Subsystem::Subsystem(const std::string& name) : mName(name)
         auto it = std::istream_iterator<std::string>(iss);
         it++; //skip device name (fake for cgroup filesystem type)
         std::string path = *it++;       //mount point
+        if (!mountPoint.empty() && mountPoint != path) {
+            continue;
+        }
         if (it->compare("cgroup") != 0) {    //filesystem type
             continue;
         }
@@ -115,9 +118,23 @@ void Subsystem::attach(const std::string& path, const std::vector<std::string>& 
 
 void Subsystem::detach(const std::string& path)
 {
-    if (!utils::umount(path)) {
-         throw CGroupException("Can't umount cgroup: " + path + ", " + utils::getSystemErrorMessage());
+    LOGI("Subsystem::detach " + path);
+    // if happens (1/100) umount fails with EBUSY
+    // in fact I don't know why this filesystem (subsystem hierarchy) can be busy
+    // probably modyfying sth in hierarchy by other process in the system
+    // following can be considered as workarround
+    for (int retry = 10; retry > 0; ) {
+        if (utils::umount(path)) {
+            if (retry != 10) {
+                LOGW("umount done afer " << (10 - retry) << " tries");
+            }
+            return ;
+        }
+        LOGW("umount retry...");
+        --retry;
+        usleep(1);
     }
+    throw CGroupException("Can't umount cgroup: " + path + ", " + utils::getSystemErrorMessage());
 }
 
 std::vector<std::string> Subsystem::availableSubsystems()

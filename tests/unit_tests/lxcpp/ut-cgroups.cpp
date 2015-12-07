@@ -72,26 +72,23 @@ BOOST_AUTO_TEST_CASE(GetPidsByCGroup)
 
 BOOST_AUTO_TEST_CASE(SubsysAttach)
 {
-    Subsystem sub("freezer");
+    const std::string& mountPoint = "/tmp/freezer";
+    Subsystem sub("freezer", mountPoint);
 
-    BOOST_CHECK_MESSAGE(sub.isAvailable(), "freezer not found");
-
+    BOOST_CHECK_MESSAGE(sub.isAvailable(), "freezer not supported by kernel");
     if (!sub.isAvailable()) return ;
 
     if (sub.isAttached()) {
-        std::string mp = sub.getMountPoint();
-        BOOST_CHECK_NO_THROW(Subsystem::detach(mp));
-        BOOST_CHECK(Subsystem(sub.getName()).isAttached()==false);
-        BOOST_CHECK_NO_THROW(Subsystem::attach(mp, {sub.getName()}));
-        BOOST_CHECK(Subsystem(sub.getName()).isAttached()==true);
+        BOOST_CHECK_NO_THROW(Subsystem::detach(mountPoint));
+        BOOST_CHECK_MESSAGE(!sub.isAttached(), "can't detach " + mountPoint);
+        if (sub.isAttached()) return ;
     }
-    else {
-        std::string mp = "/sys/fs/cgroup/" + sub.getName();
-        BOOST_CHECK_NO_THROW(Subsystem::attach(mp, {sub.getName()}));
-        BOOST_CHECK(Subsystem(sub.getName()).isAttached()==true);
-        BOOST_CHECK_NO_THROW(Subsystem::detach(mp));
-        BOOST_CHECK(Subsystem(sub.getName()).isAttached()==false);
-    }
+
+    BOOST_CHECK_NO_THROW(Subsystem::attach(mountPoint, {sub.getName()}));
+    BOOST_CHECK(Subsystem(sub.getName(), mountPoint).isAttached() == true);
+    usleep(10);
+    BOOST_CHECK_NO_THROW(Subsystem::detach(mountPoint));
+    BOOST_CHECK(Subsystem(sub.getName(), mountPoint).isAttached() == false);
 }
 
 #define CHILD_CHECK_NO_THROW(passed,code) try{code;}catch(...){passed=0;}
@@ -179,11 +176,15 @@ BOOST_AUTO_TEST_CASE(CGroupConfigSerialization)
 
 BOOST_AUTO_TEST_CASE(CGroupCommands)
 {
+    const std::string& tmpMountPoint = "/tmp/cgroup/cpu";
+    Subsystem cpu("cpu");
+    const std::string& mountPoint = cpu.isAttached() ? "" : tmpMountPoint;
     CGroupsConfig cfg;
-    Subsystem sub("cpu");
-    std::string mp = sub.isAttached() ? sub.getMountPoint() : "/tmp/cgroup/cpu";
 
-    cfg.subsystems.push_back(SubsystemConfig{"cpu", mp});
+    //Note: kernel on target allows only one hierarchy mount point
+    //      mounting same hierarchy at sencond mount point gives error EBUSY
+
+    cfg.subsystems.push_back(SubsystemConfig{"cpu", mountPoint});
     CGroupConfig cpucfg = {"cpu", "/testcpu", {}, {}};
     cfg.cgroups.push_back(cpucfg);
 
@@ -192,6 +193,10 @@ BOOST_AUTO_TEST_CASE(CGroupCommands)
 
     CGroup cpugrp("cpu", "/testcpu");
     BOOST_CHECK_NO_THROW(cpugrp.destroy());
+
+    if (!mountPoint.empty()) {
+        BOOST_CHECK_NO_THROW(Subsystem::detach(mountPoint));
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

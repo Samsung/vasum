@@ -34,9 +34,11 @@ namespace lxcpp {
 class Subsystem {
 public:
     /**
-     * Define subsystem object
+     * Subsystem object constructor
+     * @param name subsystem name (e.g. cpu,memory,blkio,etc..)
+     * @param mountPoint required mount point in file system, if empty then choosen from mounts
      */
-    Subsystem(const std::string& name);
+    Subsystem(const std::string& name, const std::string& mountPoint = "");
 
     const std::string& getName() const
     {
@@ -65,6 +67,7 @@ public:
      * Attach subsystem hierarchy to filesystem
      * Equivalent of: mount -t cgroup -o subs(coma-sep) cgroup path
      * Note: cgroup root must be already mounted (eg. /sys/fs/cgroup) as tmpfs
+     * Note: one subsystem hierarchy can be mount to many mount points in filesystem
      */
     static void attach(const std::string& path, const std::vector<std::string>& subs);
 

@@ -43,14 +43,10 @@ void CGroupMakeAll::execute()
 
 void SubsystemMake::execute()
 {
-    Subsystem sub(mSubsys.name);
+    Subsystem sub(mSubsys.name, mSubsys.path);
 
     if (!sub.isAttached()) {
         sub.attach(mSubsys.path, {mSubsys.name});
-    } else if (sub.getMountPoint() != mSubsys.path) {
-        std::string msg = "Subsys " + mSubsys.name + " already mounted elsewhere";
-        LOGW(msg);
-        // no exception, usually subsystems are mounted
     }
 }
 
