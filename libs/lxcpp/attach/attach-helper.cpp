@@ -72,7 +72,9 @@ int child(void* data)
         ::_exit(EXIT_FAILURE);
     }
 
-    lxcpp::execve(config.argv);
+    // TODO: build args in parent process
+    utils::CArgsBuilder args;
+    lxcpp::execve(args.add(config.argv));
 
     return EXIT_FAILURE;
 }

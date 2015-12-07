@@ -39,7 +39,7 @@
 #include "utils/execute.hpp"
 #include "utils/fd-utils.hpp"
 #ifdef USE_EXEC
-#include "utils/c-array.hpp"
+#include "utils/c-args.hpp"
 #endif
 #include "utils/initctl.hpp"
 #include "utils/channel.hpp"
@@ -155,7 +155,7 @@ LxcZone::State LxcZone::getState()
 bool LxcZone::create(const std::string& templatePath, const char* const* argv)
 {
 #ifdef USE_EXEC
-    utils::CStringArrayBuilder args;
+    utils::CArgsBuilder args;
     args.add("lxc-create")
     .add("-n").add(mLxcContainer->name)
     .add("-t").add(templatePath.c_str())
@@ -205,7 +205,7 @@ bool LxcZone::start(const char* const* argv)
         return false;
     }
 
-    utils::CStringArrayBuilder args;
+    utils::CArgsBuilder args;
     args.add("lxc-start")
     .add("-d")
     .add("-n").add(mLxcContainer->name)
@@ -279,7 +279,7 @@ bool LxcZone::shutdown(int timeout)
     }
 
 #ifdef USE_EXEC
-    utils::CStringArrayBuilder args;
+    utils::CArgsBuilder args;
     std::string timeoutStr = std::to_string(timeout);
     args.add("lxc-stop")
     .add("-n").add(mLxcContainer->name)

@@ -25,6 +25,7 @@
 #define LXCPP_PROCESS_HPP
 
 #include "lxcpp/namespace.hpp"
+#include "utils/c-args.hpp"
 
 #include <sys/types.h>
 #include <vector>
@@ -43,7 +44,7 @@ int waitpid(const pid_t pid);
 
 void unshare(const int ns);
 
-void execve(const std::vector<std::string>& argv);
+void execve(const utils::CArgsBuilder& argv);
 
 } // namespace lxcpp
 

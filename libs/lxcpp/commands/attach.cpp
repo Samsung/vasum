@@ -76,6 +76,9 @@ void Attach::execute()
 {
     // Channels for passing configuration and synchronization
     const std::string mIntermChannelFDStr = std::to_string(mIntermChannel.getRightFD());
+    utils::CArgsBuilder argv;
+    argv.add(ATTACH_PATH)
+        .add(mIntermChannelFDStr.c_str());
 
     const pid_t interPid = lxcpp::fork();
     if (interPid > 0) {
@@ -86,11 +89,7 @@ void Attach::execute()
     } else {
         mIntermChannel.setRight();
 
-        const char *argv[] = {ATTACH_PATH,
-                              mIntermChannelFDStr.c_str(),
-                              NULL
-                             };
-        ::execve(argv[0], const_cast<char *const*>(argv), nullptr);
+        lxcpp::execve(argv);
         ::_exit(EXIT_FAILURE);
     }
 }

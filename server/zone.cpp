@@ -31,7 +31,7 @@
 #include "logger/logger.hpp"
 #include "utils/paths.hpp"
 #include "utils/vt.hpp"
-#include "utils/c-array.hpp"
+#include "utils/c-args.hpp"
 #include "lxc/cgroup.hpp"
 #include "cargo-sqlite/cargo-sqlite.hpp"
 #include "cargo-sqlite-json/cargo-sqlite-json.hpp"
@@ -87,7 +87,7 @@ Zone::Zone(const std::string& zoneId,
         const std::string zoneTemplate = utils::getAbsolutePath(mConfig.zoneTemplate,
                                                                 zoneTemplateDir);
         LOGI(mId << ": Creating zone from template: " << zoneTemplate);
-        utils::CStringArrayBuilder args;
+        utils::CArgsBuilder args;
         if (!mDynamicConfig.ipv4Gateway.empty()) {
             args.add("--ipv4-gateway");
             args.add(mDynamicConfig.ipv4Gateway.c_str());
@@ -196,7 +196,7 @@ void Zone::start()
         return;
     }
 
-    utils::CStringArrayBuilder args;
+    utils::CArgsBuilder args;
     for (const std::string& arg : mConfig.initWithArgs) {
         args.add(arg.c_str());
     }

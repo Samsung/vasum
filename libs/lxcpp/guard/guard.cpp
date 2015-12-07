@@ -72,7 +72,8 @@ int Guard::startContainer(void* data)
     NetConfigureAll network(config.mNetwork);
     network.execute();
 
-    lxcpp::execve(config.mInit);
+    utils::CArgsBuilder args;
+    lxcpp::execve(args.add(config.mInit));
 
     return EXIT_FAILURE;
 }

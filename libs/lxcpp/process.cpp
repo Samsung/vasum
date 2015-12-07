@@ -164,20 +164,11 @@ void unshare(const int ns)
         throw ProcessSetupException(msg);
     }
 }
-// TODO move to common/utils/execute.cpp
-void execve(const std::vector<std::string>& argv)
+
+void execve(const utils::CArgsBuilder& argv)
 {
-    // Prepare the arguments
-    std::vector<char const *> tmpArgv;
-    tmpArgv.reserve(argv.size() + 1);
-
-    for (auto const &str : argv) {
-        tmpArgv.push_back(str.c_str());
-    }
-    tmpArgv.push_back(nullptr);
-
     // Run user's binary
-    ::execve(tmpArgv[0], const_cast<char *const*>(tmpArgv.data()), nullptr);
+    ::execve(argv[0], const_cast<char *const*>(argv.c_array()), nullptr);
 }
 
 } // namespace lxcpp

@@ -82,7 +82,7 @@ bool executeAndWait(const std::function<void()>& func, int& status)
     }
     if (pid == 0) {
         func();
-        _exit(EXIT_SUCCESS);
+        ::_exit(EXIT_SUCCESS);
     }
     return waitPid(pid, status);
 }

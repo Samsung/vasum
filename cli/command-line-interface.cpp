@@ -26,7 +26,7 @@
 
 #include "command-line-interface.hpp"
 #include "vasum-client.h"
-#include "utils/c-array.hpp"
+#include "utils/c-args.hpp"
 #include "cli-exception.hpp"
 
 #include <map>
@@ -381,7 +381,7 @@ void console_zone(const Args& argv)
 
     vsm_zone_free(zone);
 
-    utils::CStringArrayBuilder args;
+    utils::CArgsBuilder args;
     args.add("lxc-console")
         .add("-t 0")
         .add("-n").add(argv[1].c_str())
