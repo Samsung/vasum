@@ -186,6 +186,7 @@ struct ContainerConfig {
         mInitPid,
         mInit,
         mLogger,
+        mState,
         mTerminals,
         mNetwork,
         mNamespaces,

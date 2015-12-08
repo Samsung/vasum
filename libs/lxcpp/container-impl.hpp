@@ -73,6 +73,7 @@ public:
     void freeze();
     void unfreeze();
     void reboot();
+    bool connect();
 
     // State
     Container::State getState();
@@ -197,13 +198,27 @@ private:
     void onWorkFileEvent(const std::string& name, const uint32_t mask);
 
     /**
-     * Guards tells that it's ready to receive commands.
+     * Guard was just started and tells that it's ready to receive commands.
      *
      * This is a method handler, not signal to avoid races.
      */
     bool onGuardReady(const cargo::ipc::PeerID,
                       std::shared_ptr<api::Void>&,
                       cargo::ipc::MethodResult::Pointer);
+
+    /**
+     * Host connected to an existing Guard.
+     * Guard was previously started by another instance of ContainerImpl.
+     * Guard sends back its configuration.
+     */
+    bool onGuardConnected(const cargo::ipc::PeerID,
+                          std::shared_ptr<ContainerConfig>& data,
+                          cargo::ipc::MethodResult::Pointer);
+
+    /**
+     * Guards just started Init and passes its PID
+     */
+    void onInitStarted(cargo::ipc::Result<api::Pid>&& result);
 
     /**
      * Guards tells that Init exited with some status.

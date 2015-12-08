@@ -35,12 +35,13 @@
 namespace lxcpp {
 namespace api {
 
-const ::cargo::ipc::MethodID METHOD_SET_CONFIG   = 1;
-const ::cargo::ipc::MethodID METHOD_GET_CONFIG   = 2;
-const ::cargo::ipc::MethodID METHOD_START        = 3;
-const ::cargo::ipc::MethodID METHOD_STOP         = 4;
-const ::cargo::ipc::MethodID METHOD_GUARD_READY  = 5;
-const ::cargo::ipc::MethodID METHOD_INIT_STOPPED = 6;
+const ::cargo::ipc::MethodID METHOD_SET_CONFIG      = 1;
+const ::cargo::ipc::MethodID METHOD_GET_CONFIG      = 2;
+const ::cargo::ipc::MethodID METHOD_START           = 3;
+const ::cargo::ipc::MethodID METHOD_STOP            = 4;
+const ::cargo::ipc::MethodID METHOD_GUARD_READY     = 5;
+const ::cargo::ipc::MethodID METHOD_INIT_STOPPED    = 6;
+const ::cargo::ipc::MethodID METHOD_GUARD_CONNECTED = 7;
 
 struct Void {
     CARGO_REGISTER_EMPTY

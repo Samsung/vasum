@@ -60,11 +60,11 @@ void Client::start()
         return;
     }
     LOGS("Client start");
+    LOGD("Connecting to " + mSocketPath);
+    auto socketPtr = std::make_shared<Socket>(Socket::connectSocket(mSocketPath));
 
     mProcessor.start();
 
-    LOGD("Connecting to " + mSocketPath);
-    auto socketPtr = std::make_shared<Socket>(Socket::connectSocket(mSocketPath));
     mServiceID = mProcessor.addPeer(socketPtr);
 }
 

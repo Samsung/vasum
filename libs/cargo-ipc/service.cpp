@@ -66,7 +66,6 @@ void Service::start()
     LOGS("Service start");
 
     mProcessor.start();
-
 }
 
 bool Service::isStarted()

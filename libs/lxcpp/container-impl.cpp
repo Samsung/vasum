@@ -74,24 +74,15 @@ ContainerImpl::ContainerImpl(const std::string &name,
     mConfig->mNamespaces = CLONE_NEWIPC | CLONE_NEWNS | CLONE_NEWPID | CLONE_NEWUTS;
     mConfig->mSocketPath = utils::createFilePath(workPath, name, ".socket");
 
-    using namespace std::placeholders;
-
     // IPC with the Guard process
+    using namespace std::placeholders;
     mClient.reset(new cargo::ipc::Client(mDispatcher.getPoll(), mConfig->mSocketPath));
     mClient->setMethodHandler<api::Void, api::ExitStatus>(api::METHOD_INIT_STOPPED,
             std::bind(&ContainerImpl::onInitStopped, this, _1, _2, _3));
     mClient->setMethodHandler<api::Void, api::Void>(api::METHOD_GUARD_READY,
             std::bind(&ContainerImpl::onGuardReady, this, _1, _2, _3));
-
-    // TODO: Connect to a running Guard with something like this:
-    // try {
-    //     // If there's a container running try to connect.
-    //     // TODO: this might need some named semaphore to prevent races between two processes using this library.
-    //     mClient->start();
-    //     // TODO: Get the configuration from the running Guard
-    // } catch(const cargo::ipc::IPCException&) {
-    //     // It's OK, container isn't yet started.
-    // }
+    mClient->setMethodHandler<api::Void, ContainerConfig>(api::METHOD_GUARD_CONNECTED,
+            std::bind(&ContainerImpl::onGuardConnected, this, _1, _2, _3));
 
     // Watch the workdir for filesystem events
     mInotify.setHandler(workPath, IN_CREATE | IN_DELETE | IN_ISDIR, std::bind(&ContainerImpl::onWorkFileEvent, this, _1, _2));
@@ -99,12 +90,37 @@ ContainerImpl::ContainerImpl(const std::string &name,
 
 ContainerImpl::~ContainerImpl()
 {
-    try {
-        stop();
-    } catch(std::exception& e) {
-        LOGW("Discarding an error during stopping: " << e.what());
-    }
     mClient->stop(true);
+}
+
+bool ContainerImpl::connect()
+{
+    // Try to connect to a running Guard:
+    try {
+        // If there's a container running it has a Guard's socket. Try to connect.
+        // If more than one process is trying to connect then the first will succeed.
+        Lock lock(mStateMutex);
+        mClient->start();
+        mConfig->mState = Container::State::CONNECTING;
+        return true;
+    } catch(const cargo::ipc::IPCException&) {
+        // It's OK, container isn't yet started
+        LOGD("No container to connect");
+        return false;
+    }
+}
+
+bool ContainerImpl::onGuardConnected(const cargo::ipc::PeerID,
+                                     std::shared_ptr<ContainerConfig>& data,
+                                     cargo::ipc::MethodResult::Pointer result)
+{
+    Lock lock(mStateMutex);
+
+    // Init's PID and Status are saved.
+    mConfig = data;
+
+    result->setVoid();
+    return true;
 }
 
 void ContainerImpl::onWorkFileEvent(const std::string& name, const uint32_t mask)
@@ -253,43 +269,45 @@ void ContainerImpl::start()
     start.execute();
 }
 
+
+void ContainerImpl::onInitStarted(cargo::ipc::Result<api::Pid>&& result)
+{
+    Lock lock(mStateMutex);
+
+    if (!result.isValid()) {
+        LOGE("Failed to get init's PID");
+        result.rethrow();
+    }
+
+    auto initPid = result.get();
+    mConfig->mInitPid = initPid->value;
+    LOGI("Init PID: " << initPid->value);
+    if (mConfig->mInitPid <= 0) {
+        // TODO: Handle the error
+        LOGE("Bad Init PID");
+        return;
+    }
+
+    mConfig->mState = Container::State::RUNNING;
+    if (mStartedCallback) {
+        mStartedCallback();
+    }
+}
+
 bool ContainerImpl::onGuardReady(const cargo::ipc::PeerID,
                                  std::shared_ptr<api::Void>&,
                                  cargo::ipc::MethodResult::Pointer methodResult)
 {
     Lock lock(mStateMutex);
 
-    // Guard is up
-
+    // Guard is up and Init needs to be started
+    using namespace std::placeholders;
     mClient->callAsyncFromCallback<ContainerConfig, api::Void>(api::METHOD_SET_CONFIG, mConfig);
-
-    auto initStarted = [this](cargo::ipc::Result<api::Pid>&& result) {
-        Lock lock(mStateMutex);
-
-        if (!result.isValid()) {
-            LOGE("Failed to get init's PID");
-            result.rethrow();
-        }
-
-        auto initPid = result.get();
-        mConfig->mInitPid = initPid->value;
-        LOGI("Init PID: " << initPid->value);
-        if (mConfig->mInitPid <= 0) {
-            // TODO: Handle the error
-            LOGE("Bad Init PID");
-            return;
-        }
-
-        mConfig->mState = Container::State::RUNNING;
-        if (mStartedCallback) {
-            mStartedCallback();
-        }
-    };
-
-    mClient->callAsyncFromCallback<api::Void, api::Pid>(api::METHOD_START, std::shared_ptr<api::Void>(), initStarted);
+    mClient->callAsyncFromCallback<api::Void, api::Pid>(api::METHOD_START,
+            std::shared_ptr<api::Void>(),
+            std::bind(&ContainerImpl::onInitStarted, this, _1));
 
     methodResult->setVoid();
-
     return true;
 }
 

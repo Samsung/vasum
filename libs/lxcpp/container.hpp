@@ -50,11 +50,12 @@ class Container {
 public:
     typedef std::function<void(void)> Callback;
 
-    enum class State {
-        STOPPED,
-        STOPPING,
-        STARTING,
-        RUNNING
+    enum class State: int {
+        STOPPED,   //< Init isn't running
+        STOPPING,  //< Init's stop is triggered
+        STARTING,  //< Container is being set up
+        RUNNING,   //< Init in container is running
+        CONNECTING //< Synchronizing with existing Guard
     };
 
     virtual ~Container() {};
@@ -89,6 +90,7 @@ public:
     virtual void freeze() = 0;
     virtual void unfreeze() = 0;
     virtual void reboot() = 0;
+    virtual bool connect() = 0;
 
     /**
      * States

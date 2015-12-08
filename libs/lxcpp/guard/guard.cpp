@@ -81,12 +81,12 @@ Guard::Guard(const std::string& socketPath)
     // Setup socket communication
     mService.reset(new cargo::ipc::Service(mEventPoll, socketPath));
 
-    mService->setNewPeerCallback(std::bind(&Guard::onConnection, this, _1, _2));
     mService->setRemovedPeerCallback(std::bind(&Guard::onDisconnection, this, _1, _2));
+    mService->setNewPeerCallback(std::bind(&Guard::onConnection, this, _1, _2));
 
     mService->setMethodHandler<api::Pid, api::Void>(api::METHOD_START,
             std::bind(&Guard::onStart, this, _1, _2, _3));
-    mService->setMethodHandler<api::Pid, api::Void>(api::METHOD_STOP,
+    mService->setMethodHandler<api::Void, api::Void>(api::METHOD_STOP,
             std::bind(&Guard::onStop, this, _1, _2, _3));
     mService->setMethodHandler<api::Void, ContainerConfig>(api::METHOD_SET_CONFIG,
             std::bind(&Guard::onSetConfig, this, _1, _2, _3));
@@ -102,16 +102,29 @@ Guard::~Guard()
 
 void Guard::onConnection(const cargo::ipc::PeerID& peerID, const cargo::ipc::FileDescriptor)
 {
+    LOGT("onConnection");
+
     if (!mPeerID.empty()) {
         // FIXME: Refuse connection
         LOGW("New Peer connected, but previous not disconnected");
     }
     mPeerID = peerID;
-    mService->callAsyncFromCallback<api::Void, api::Void>(api::METHOD_GUARD_READY, mPeerID, std::shared_ptr<api::Void>());
+
+    if (!mConfig) {
+        // Host is connecting to a STOPPED container,
+        // it needs to s setup and start it
+        mService->callAsyncFromCallback<api::Void, api::Void>(api::METHOD_GUARD_READY, mPeerID, std::shared_ptr<api::Void>());
+    } else {
+        // Host is connecting to a RUNNING container
+        // Guard passes info about the started Init
+        mService->callAsyncFromCallback<ContainerConfig, api::Void>(api::METHOD_GUARD_CONNECTED, mPeerID, mConfig);
+    }
 }
 
 void Guard::onDisconnection(const cargo::ipc::PeerID& peerID, const cargo::ipc::FileDescriptor)
 {
+    LOGT("onDisconnection");
+
     if(mPeerID != peerID) {
         LOGE("Unknown peerID: " << peerID);
     }
@@ -120,11 +133,14 @@ void Guard::onDisconnection(const cargo::ipc::PeerID& peerID, const cargo::ipc::
 
 void Guard::onInitExit(struct ::signalfd_siginfo& sigInfo)
 {
+    LOGT("onInitExit");
+
     if(mConfig->mInitPid != static_cast<int>(sigInfo.ssi_pid)) {
         return;
     }
 
     LOGD("Init died");
+    mConfig->mState = Container::State::STOPPED;
 
     auto data = std::make_shared<api::ExitStatus>(sigInfo.ssi_status);
     mService->callAsync<api::ExitStatus, api::Void>(api::METHOD_INIT_STOPPED, mPeerID, data);
@@ -134,6 +150,8 @@ void Guard::onInitExit(struct ::signalfd_siginfo& sigInfo)
 
 bool Guard::onSetConfig(const cargo::ipc::PeerID, std::shared_ptr<ContainerConfig>& data, cargo::ipc::MethodResult::Pointer result)
 {
+    LOGT("onSetConfig");
+
     mConfig = data;
 
     // TODO: We might use this command elsewhere, not only for a start
@@ -158,14 +176,17 @@ bool Guard::onSetConfig(const cargo::ipc::PeerID, std::shared_ptr<ContainerConfi
 
 bool Guard::onGetConfig(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
 {
-    LOGD("Sending out the config");
+    LOGT("onGetConfig");
+
     result->set(mConfig);
     return true;
 }
 
 bool Guard::onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
 {
-    LOGI("Starting...");
+    LOGT("onStart");
+
+    mConfig->mState = Container::State::STARTING;
 
     // TODO: container preparation part 1: things to do before clone
 
@@ -195,19 +216,26 @@ bool Guard::onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo
     channel.write(true);
     channel.shutdown();
 
+    // Init started, change state
+    mConfig->mState = Container::State::RUNNING;
+
     // Configuration succeed, return the init's PID
     auto ret = std::make_shared<api::Pid>(mConfig->mInitPid);
     result->set(ret);
     return true;
 }
 
-bool Guard::onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer)
+bool Guard::onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
 {
+    LOGT("onStop");
     LOGI("Stopping...");
+
+    mConfig->mState = Container::State::STOPPING;
 
     // TODO: Use initctl/systemd-initctl if available in container
     utils::sendSignal(mConfig->mInitPid, SIGTERM);
 
+    result->setVoid();
     return true;
 }
 
