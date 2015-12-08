@@ -179,6 +179,11 @@ struct ContainerConfig {
     CGroupsConfig mCgroups;
 
     /**
+     * Linux capabilities
+     */
+    unsigned long long mCapsToKeep;
+
+    /**
      * Rlimits configuration
      * rlimit type, rlimit soft, rlimit hard
      */
@@ -212,6 +217,7 @@ struct ContainerConfig {
         mProvisions,
         mUserNSConfig,
         mCgroups,
+        mCapsToKeep,
         mRlimits,
         mKernelParameters
     )

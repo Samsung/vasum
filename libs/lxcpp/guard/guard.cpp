@@ -30,6 +30,7 @@
 #include "lxcpp/hostname.hpp"
 #include "lxcpp/rlimit.hpp"
 #include "lxcpp/sysctl.hpp"
+#include "lxcpp/capability.hpp"
 #include "lxcpp/commands/prep-guest-terminal.hpp"
 #include "lxcpp/commands/provision.hpp"
 #include "lxcpp/commands/setup-userns.hpp"
@@ -85,6 +86,8 @@ int Guard::startContainer(void* data)
             lxcpp::writeKernelParameter(sysctl.first, sysctl.second);
         }
     }
+
+    lxcpp::dropCapsFromBoundingExcept(config.mCapsToKeep);
 
     utils::CArgsBuilder args;
     lxcpp::execve(args.add(config.mInit));

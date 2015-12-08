@@ -426,7 +426,7 @@ int ContainerImpl::attach(const std::vector<std::string>& argv,
                           const gid_t gid,
                           const std::string& ttyPath,
                           const std::vector<gid_t>& supplementaryGids,
-                          const int capsToKeep,
+                          const unsigned long long capsToKeep,
                           const std::string& workDirInContainer,
                           const std::vector<std::string>& envToKeep,
                           const std::vector<std::pair<std::string, std::string>>& envToSet)
@@ -706,9 +706,11 @@ void ContainerImpl::setEnv(const std::vector<std::pair<std::string, std::string>
     throw NotImplementedException();
 }
 
-void ContainerImpl::setCaps(const int /*caps*/)
+void ContainerImpl::setCaps(const unsigned long long caps)
 {
-    throw NotImplementedException();
+    Lock lock(mStateMutex);
+
+    mConfig->mCapsToKeep = caps;
 }
 
 void ContainerImpl::setKernelParameter(const std::string& name, const std::string& value)

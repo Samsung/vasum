@@ -62,7 +62,7 @@ public:
            const gid_t gid,
            const std::string& ttyPath,
            const std::vector<gid_t>& supplementaryGids,
-           const int capsToKeep,
+           const unsigned long long capsToKeep,
            const std::string& workDirInContainer,
            const std::vector<std::string>& envToKeep,
            const std::vector<std::pair<std::string, std::string>>& envToSet,

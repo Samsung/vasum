@@ -59,7 +59,7 @@ struct AttachConfig {
     std::vector<gid_t> supplementaryGids;
 
     /// Mask of capabilities that will be available
-    int capsToKeep;
+    unsigned long long capsToKeep;
 
     /// Work directory for the attached process
     std::string workDirInContainer;
@@ -81,7 +81,7 @@ struct AttachConfig {
                  const uid_t uid,
                  const gid_t gid,
                  const std::vector<gid_t>& supplementaryGids,
-                 const int capsToKeep,
+                 const unsigned long long capsToKeep,
                  const std::string& workDirInContainer,
                  const std::vector<std::string>& envToKeep,
                  const std::vector<std::pair<std::string, std::string>>& envToSet,

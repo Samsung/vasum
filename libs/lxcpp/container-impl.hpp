@@ -87,7 +87,7 @@ public:
                const gid_t gid,
                const std::string& ttyPath,
                const std::vector<gid_t>& supplementaryGids,
-               const int capsToKeep,
+               const unsigned long long capsToKeep,
                const std::string& workDirInContainer,
                const std::vector<std::string>& envToKeep,
                const std::vector<std::pair<std::string, std::string>>& envToSet);
@@ -151,7 +151,7 @@ public:
     void setEnv(const std::vector<std::pair<std::string, std::string>>& variables);
 
     // Linux capabilities
-    void setCaps(const int caps);
+    void setCaps(const unsigned long long caps);
 
     // Kernel parameter (sysctl)
     void setKernelParameter(const std::string& name, const std::string& value);
