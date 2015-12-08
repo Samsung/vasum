@@ -22,24 +22,30 @@
  * @brief   Socket IPC module tests
  */
 
-#ifdef HAVE_SYSTEMD
 #include "config.hpp"
 
 #include "ut.hpp"
+#include "logger/logger.hpp"
 #include "cargo-ipc/internals/socket.hpp"
-#include "socket-test.hpp"
+
+#include <thread>
 
 using namespace cargo::ipc;
 using namespace cargo::ipc::internals;
 
+const std::string SOCKET_PATH = "/tmp/test.socket";
+
 BOOST_AUTO_TEST_SUITE(SocketSuite)
+
+#ifdef HAVE_SYSTEMD
+#include "socket-test.hpp"
 
 BOOST_AUTO_TEST_CASE(SystemdSocket)
 {
     std::string readMessage;
 
     {
-        Socket socket = Socket::connectSocket(vasum::socket_test::SOCKET_PATH);
+        Socket socket = Socket::connectUNIX(vasum::socket_test::SOCKET_PATH);
         BOOST_REQUIRE_GT(socket.getFD(), -1);
 
         readMessage.resize(vasum::socket_test::TEST_MESSAGE.size());
@@ -48,6 +54,55 @@ BOOST_AUTO_TEST_CASE(SystemdSocket)
 
     BOOST_REQUIRE_EQUAL(readMessage, vasum::socket_test::TEST_MESSAGE);
 }
+#endif // HAVE_SYSTEMD
+
+BOOST_AUTO_TEST_CASE(GetSocketType)
+{
+    {
+        Socket socket;
+        BOOST_CHECK(socket.getType() == Socket::Type::INVALID);
+    }
+
+    {
+        Socket socket = Socket::createINET("localhost", "");
+        BOOST_CHECK(socket.getType() == Socket::Type::INET);
+    }
+
+    {
+        Socket socket = Socket::createUNIX(SOCKET_PATH);
+        BOOST_CHECK(socket.getType() == Socket::Type::UNIX);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(InternetSocket)
+{
+    const char msg[] = "MESSAGE";
+    const std::string host = "127.0.0.1";
+
+    Socket server = Socket::createINET(host, "");
+    const unsigned short port = server.getPort();
+
+    BOOST_CHECK(server.getType() == Socket::Type::INET);
+
+    auto clientThread = std::thread([&] {
+        Socket client = Socket::connectINET(host, std::to_string(port));
+        BOOST_CHECK(client.getType() == Socket::Type::INET);
+        client.write(msg, sizeof(msg));
+
+        char buffer[sizeof(msg)];
+        client.read(buffer, sizeof(msg));
+        BOOST_CHECK_EQUAL(buffer, msg);
+    });
+
+    auto connection = server.accept();
+    char buffer[sizeof(msg)];
+
+    connection->read(buffer, sizeof(msg));
+    BOOST_CHECK_EQUAL(buffer, msg);
+
+    connection->write(msg, sizeof(msg));
+
+    clientThread.join();
+}
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif // HAVE_SYSTEMD

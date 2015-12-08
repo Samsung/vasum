@@ -117,7 +117,7 @@ void doSocketTest(EventPoll& poll)
         }
     };
 
-    Socket listenSocket = Socket::createSocket(PATH);
+    Socket listenSocket = Socket::createUNIX(PATH);
     CallbackGuard serverSocketsGuard;
 
     auto listenCallback = [&](int /*fd*/, Events events) {
@@ -171,7 +171,7 @@ void doSocketTest(EventPoll& poll)
     // Scenario 1
     LOGD("Scerario 1");
     {
-        Socket client = Socket::connectSocket(PATH);
+        Socket client = Socket::connectUNIX(PATH);
         ValueLatch<std::string> response;
 
         poll.addFD(client.getFD(),
@@ -191,7 +191,7 @@ void doSocketTest(EventPoll& poll)
     // Scenario 2
     LOGD("Scerario 2");
     {
-        Socket client = Socket::connectSocket(PATH);
+        Socket client = Socket::connectUNIX(PATH);
         ValueLatch<std::string> response;
 
         poll.addFD(client.getFD(),

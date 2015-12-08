@@ -28,6 +28,7 @@
 #include <string>
 #include <mutex>
 #include <memory>
+#include <netdb.h>
 
 namespace cargo {
 namespace ipc {
@@ -40,6 +41,11 @@ namespace internals {
  */
 class Socket {
 public:
+    enum class Type : int8_t {
+        INVALID,
+        UNIX,
+        INET
+    };
 
     typedef std::unique_lock<std::recursive_mutex> Guard;
 
@@ -82,33 +88,59 @@ public:
      * Accepts connection. Used by a server application.
      * Blocking, called by a server.
      */
-    std::shared_ptr<Socket> accept() ;
+    std::shared_ptr<Socket> accept();
 
     /**
+     * Returns the socket type based on it's domain.
      */
-    Socket::Guard getGuard() const;
-
+    Type getType() const;
 
     /**
-     * Prepares socket for accepting connections.
+     * Returns a port associated with the socket.
+     */
+    unsigned short getPort() const;
+
+    /**
+     * Prepares UNIX socket for accepting connections.
      * Called by a server.
      *
      * @param path path to the socket
      * @return created socket
      */
-    static Socket createSocket(const std::string& path);
+    static Socket createUNIX(const std::string& path);
 
     /**
-     * Connects to a socket. Called as a client.
+     * Prepares INET socket for accepting connections.
+     * Called by a server.
+     *
+     * @param host hostname or ip address
+     * @param service port number or service name
+     * @return created socket
+     */
+    static Socket createINET(const std::string& host, const std::string& service);
+
+    /**
+     * Connects to an UNIX socket. Called as a client.
      *
      * @param path path to the socket
      * @return connected socket
      */
-    static Socket connectSocket(const std::string& path, const int timeoutMs = 1000);
+    static Socket connectUNIX(const std::string& path, const int timeoutMs = 1000);
+
+    /**
+     * Connects to an INET socket. Called as a client.
+     *
+     * @param host hostname or ip address
+     * @param service port number or service name
+     * @return connected socket
+     */
+    static Socket connectINET(const std::string& host,
+                              const std::string& service,
+                              const int timeoutMs = 1000);
 
 private:
     int mFD;
-    mutable std::recursive_mutex  mCommunicationMutex;
+    mutable std::recursive_mutex mCommunicationMutex;
 
     static int createSocketInternal(const std::string& path);
     static int getSystemdSocketInternal(const std::string& path);

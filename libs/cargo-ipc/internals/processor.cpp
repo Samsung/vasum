@@ -305,7 +305,6 @@ void Processor::handleInput(const FileDescriptor fd)
         try {
             // Read information about the incoming data
             Socket& socket = *peerIt->socketPtr;
-            Socket::Guard guard = socket.getGuard();
             cargo::loadFromFD<MessageHeader>(socket.getFD(), hdr);
         } catch (const cargo::CargoException& e) {
             LOGE(mLogPrefix + "Error during reading the socket");
@@ -542,7 +541,6 @@ void Processor::onMethodRequest(MethodRequest& request)
     try {
         // Send the call with the socket
         Socket& socket = *peerIt->socketPtr;
-        Socket::Guard guard = socket.getGuard();
         hdr.methodID = request.methodID;
         hdr.messageID = request.messageID;
         cargo::saveToFD<MessageHeader>(socket.getFD(), hdr);
@@ -577,7 +575,6 @@ void Processor::onSignalRequest(SignalRequest& request)
     try {
         // Send the call with the socket
         Socket& socket = *peerIt->socketPtr;
-        Socket::Guard guard = socket.getGuard();
         hdr.methodID = request.methodID;
         hdr.messageID = request.messageID;
         cargo::saveToFD<MessageHeader>(socket.getFD(), hdr);
@@ -660,7 +657,6 @@ void Processor::onSendResultRequest(SendResultRequest& request)
     try {
         // Send the call with the socket
         Socket& socket = *peerIt->socketPtr;
-        Socket::Guard guard = socket.getGuard();
         hdr.methodID = RETURN_METHOD_ID;
         hdr.messageID = request.messageID;
         cargo::saveToFD<MessageHeader>(socket.getFD(), hdr);

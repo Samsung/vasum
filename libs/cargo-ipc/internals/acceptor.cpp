@@ -38,7 +38,7 @@ Acceptor::Acceptor(epoll::EventPoll& eventPoll,
                    const NewConnectionCallback& newConnectionCallback)
     : mEventPoll(eventPoll),
       mNewConnectionCallback(newConnectionCallback),
-      mSocket(Socket::createSocket(socketPath))
+      mSocket(Socket::createUNIX(socketPath))
 {
     LOGT("Creating Acceptor for socket " << socketPath);
     mEventPoll.addFD(mSocket.getFD(), EPOLLIN, std::bind(&Acceptor::handleConnection, this));

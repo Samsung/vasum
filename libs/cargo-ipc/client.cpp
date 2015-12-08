@@ -61,7 +61,7 @@ void Client::start()
     }
     LOGS("Client start");
     LOGD("Connecting to " + mSocketPath);
-    auto socketPtr = std::make_shared<Socket>(Socket::connectSocket(mSocketPath));
+    auto socketPtr = std::make_shared<Socket>(Socket::connectUNIX(mSocketPath));
 
     mProcessor.start();
 

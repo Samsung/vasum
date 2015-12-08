@@ -48,7 +48,7 @@ int main()
     Logger::setLogBackend(new SystemdJournalBackend());
 
     try {
-        Socket listeningSocket(Socket::createSocket(SOCKET_PATH));
+        Socket listeningSocket(Socket::createUNIX(SOCKET_PATH));
         if (listeningSocket.getFD() < 0) {
             LOGE("Failed to connect to socket!");
             return 1;
