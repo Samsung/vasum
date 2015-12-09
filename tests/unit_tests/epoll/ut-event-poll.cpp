@@ -69,7 +69,6 @@ void doSocketTest(EventPoll& poll)
 {
     using namespace std::placeholders;
 
-    //TODO don't use ipc socket
     const std::string PATH = "/tmp/ut-poll.sock";
     const size_t REQUEST_LEN = 5;
     const std::string REQUEST_GOOD = "GET 1";

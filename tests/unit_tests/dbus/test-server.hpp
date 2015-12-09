@@ -25,7 +25,7 @@
 #ifndef UNIT_TESTS_DBUS_TEST_SERVER_HPP
 #define UNIT_TESTS_DBUS_TEST_SERVER_HPP
 
-#include "dbus/connection.hpp" // TODO dbus-connection-iface.h
+#include "dbus/connection.hpp"
 
 #include <string>
 #include <memory>

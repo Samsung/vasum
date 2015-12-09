@@ -37,8 +37,10 @@ using namespace cargo::ipc;
 using namespace cargo::ipc::internals;
 using namespace logger;
 
-// NOTE this is a single-usage program, only meant to test vasum::cargo::ipc::Socket module.
-//      It's purpose is to be activated when needed by systemd socket activation mechanism.
+/**
+ * This is a single-usage program, only meant to test vasum::cargo::ipc::Socket module.
+ * It's purpose is to be activated when needed by systemd socket activation mechanism.
+ */
 int main()
 {
     Logger::setLogLevel(LogLevel::TRACE);

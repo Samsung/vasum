@@ -43,7 +43,6 @@
 #include <mutex>
 #include <condition_variable>
 
-//TODO: BOOST_* macros aren't thread-safe. Remove it from callbacks
 
 BOOST_AUTO_TEST_SUITE(DbusSuite)
 

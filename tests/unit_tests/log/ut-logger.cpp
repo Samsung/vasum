@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(StringLogLevelSetAndGet)
 
     BOOST_REQUIRE_EXCEPTION(Logger::setLogLevel("UNKNOWN"),
                             std::runtime_error,
-                            WhatEquals("Invalid LogLevel to parse")); //TODO change message
+                            WhatEquals("Invalid LogLevel to parse"));
 }
 
 BOOST_AUTO_TEST_CASE(LogsLevelError)
