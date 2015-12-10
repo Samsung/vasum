@@ -51,11 +51,11 @@ public:
     typedef std::function<void(void)> Callback;
 
     enum class State: int {
-        STOPPED,   //< Init isn't running
-        STOPPING,  //< Init's stop is triggered
-        STARTING,  //< Container is being set up
-        RUNNING,   //< Init in container is running
-        CONNECTING //< Synchronizing with existing Guard
+        STOPPED,   ///< Init isn't running
+        STOPPING,  ///< Init's stop is triggered
+        STARTING,  ///< Container is being set up
+        RUNNING,   ///< Init in container is running
+        CONNECTING ///< Synchronizing with existing Guard
     };
 
     virtual ~Container() {};
