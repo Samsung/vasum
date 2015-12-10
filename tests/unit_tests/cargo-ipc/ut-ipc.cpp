@@ -850,7 +850,7 @@ MULTI_FIXTURE_TEST_CASE(OneShotSignalHandler, F, ThreadedFixture, GlibFixture)
 BOOST_AUTO_TEST_CASE(ConnectionLimit)
 {
     const unsigned oldLimit = utils::getMaxFDNumber();
-    const unsigned newLimit = 32;
+    const unsigned newLimit = 128;
     ScopedDir scopedDir(TEST_DIR);
 
     Channel c;
@@ -879,7 +879,6 @@ BOOST_AUTO_TEST_CASE(ConnectionLimit)
         BOOST_CHECK_EQUAL(status, EXIT_SUCCESS);
     } else {
         int ret = EXIT_FAILURE;
-        utils::setMaxFDNumber(newLimit);
 
         c.setRight();
         try {
@@ -889,9 +888,12 @@ BOOST_AUTO_TEST_CASE(ConnectionLimit)
             ::_exit(EXIT_FAILURE);
         }
 
-        // Setup Clients
         ThreadDispatcher td;
         std::list<Client> clients;
+
+        utils::setMaxFDNumber(newLimit);
+
+        // Setup Clients
         try {
             for (unsigned i = 0; i < 2 * newLimit; ++i) {
                 clients.emplace_back(td.getPoll(), SOCKET_PATH);
