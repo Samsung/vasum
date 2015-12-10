@@ -137,6 +137,29 @@ BOOST_AUTO_TEST_CASE(StartStop)
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
 }
 
+BOOST_AUTO_TEST_CASE(ConnectRunning)
+{
+    {
+        auto c = std::unique_ptr<Container>(createContainer("ConnectRunning", "/", WORK_DIR));
+        BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+        BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                          logger::LogLevel::TRACE,
+                                          LOGGER_FILE));
+
+        BOOST_CHECK_NO_THROW(c->start());
+        BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
+
+        // Remove Container class, but don't stop the container
+    }
+    // Connect to a running container
+    auto c = std::unique_ptr<Container>(createContainer("ConnectRunning", "/", WORK_DIR));
+    BOOST_CHECK_NO_THROW(c->connect());
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
+
+    BOOST_CHECK_NO_THROW(c->stop());
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
+}
+
 BOOST_AUTO_TEST_CASE(StartCallback)
 {
     auto c = std::unique_ptr<Container>(createContainer("StartCallback", "/", WORK_DIR));
@@ -185,6 +208,35 @@ BOOST_AUTO_TEST_CASE(StopCallback)
     BOOST_REQUIRE(latch.wait(TIMEOUT));
     BOOST_REQUIRE(c->getState() == Container::State::STOPPED);
 }
+
+BOOST_AUTO_TEST_CASE(ConnectCallback)
+{
+    {
+        auto c = std::unique_ptr<Container>(createContainer("ConnectCallback", "/", WORK_DIR));
+        BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+        BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                          logger::LogLevel::TRACE,
+                                          LOGGER_FILE));
+
+        BOOST_CHECK_NO_THROW(c->start());
+        BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
+
+        // Remove Container class, but don't stop the container
+    }
+    // Connect to a running container
+    auto c = std::unique_ptr<Container>(createContainer("ConnectCallback", "/", WORK_DIR));
+
+    utils::Latch latch;
+    auto call = [&latch]() {
+        latch.set();
+    };
+    c->setConnectedCallback(call);
+
+    BOOST_CHECK_NO_THROW(c->connect());
+    BOOST_REQUIRE(latch.wait(TIMEOUT));
+    BOOST_REQUIRE(c->getState() == Container::State::RUNNING);
+}
+
 
 BOOST_AUTO_TEST_CASE(UIDGoodMapping)
 {
@@ -244,29 +296,5 @@ BOOST_AUTO_TEST_CASE(GIDBadMapping)
 
     BOOST_REQUIRE_THROW(c->addGIDMap(0, 1000, 1),ConfigureException);
 }
-
-BOOST_AUTO_TEST_CASE(ConnectRunning)
-{
-    {
-        auto c = std::unique_ptr<Container>(createContainer("ConnectRunning", "/", WORK_DIR));
-        BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
-        BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
-                                          logger::LogLevel::TRACE,
-                                          LOGGER_FILE));
-
-        BOOST_CHECK_NO_THROW(c->start());
-        BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
-
-        // Remove Container class, but don't stop the container
-    }
-    // Connect to a running container
-    auto c = std::unique_ptr<Container>(createContainer("ConnectRunning", "/", WORK_DIR));
-    BOOST_CHECK_NO_THROW(c->connect());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
-
-    BOOST_CHECK_NO_THROW(c->stop());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
-}
-
 
 BOOST_AUTO_TEST_SUITE_END()

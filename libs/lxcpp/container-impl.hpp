@@ -79,6 +79,7 @@ public:
     Container::State getState();
     void setStartedCallback(const Container::Callback& callback);
     void setStoppedCallback(const Container::Callback& callback);
+    void setConnectedCallback(const Container::Callback& callback);
 
     // Other
     int attach(const std::vector<std::string>& argv,
@@ -194,6 +195,7 @@ private:
     // Callbacks
     Container::Callback mStartedCallback;
     Container::Callback mStoppedCallback;
+    Container::Callback mConnectedCallback;
 
     void onWorkFileEvent(const std::string& name, const uint32_t mask);
 

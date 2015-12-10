@@ -121,6 +121,10 @@ bool ContainerImpl::onGuardConnected(const cargo::ipc::PeerID,
     // Init's PID and Status are saved.
     mConfig = data;
 
+    if (mConnectedCallback) {
+        mConnectedCallback();
+    }
+
     result->setVoid();
     return true;
 }
@@ -399,6 +403,13 @@ void ContainerImpl::setStoppedCallback(const Container::Callback& callback)
     Lock lock(mStateMutex);
 
     mStoppedCallback = callback;
+}
+
+void ContainerImpl::setConnectedCallback(const Container::Callback& callback)
+{
+    Lock lock(mStateMutex);
+
+    mConnectedCallback = callback;
 }
 
 int ContainerImpl::attach(const std::vector<std::string>& argv,

@@ -98,6 +98,7 @@ public:
     virtual State getState() = 0;
     virtual void setStartedCallback(const Callback& callback) = 0;
     virtual void setStoppedCallback(const Callback& callback) = 0;
+    virtual void setConnectedCallback(const Callback& callback) = 0;
 
     /**
      * Other
