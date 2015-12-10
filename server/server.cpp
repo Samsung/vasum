@@ -155,7 +155,7 @@ bool Server::checkEnvironment()
     else
         std::cout << "kernel " << u.release << " [OK]" << std::endl;
 
-    // check lxc (TODO check if running on broken ABI version)
+    // check lxc (check if running on broken ABI version)
     if (::strcmp(lxc_get_version(), LXC_VERSION)!=0) {
         // versions that matters:
         // 1.1.0 added function ptr 'in-the-middle' destroy_with_snapshots, snapshot_destroy_all (breaks ABI)

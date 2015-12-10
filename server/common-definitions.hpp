@@ -34,7 +34,6 @@ namespace api {
 /**
  * Error codes that can be set in API handlers
  */
-//TODO: Errors should use exception handling mechanism
 ///@{
 const std::string ERROR_FORBIDDEN          = "org.tizen.vasum.Error.Forbidden";
 const std::string ERROR_FORWARDED          = "org.tizen.vasum.Error.Forwarded";

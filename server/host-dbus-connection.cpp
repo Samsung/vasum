@@ -116,7 +116,7 @@ void HostDbusConnection::onNameLost()
 
     if (mNameAcquired) {
         // TODO implement reconnecting
-        LOGE("TODO Reconnect !!!");
+        LOGE("Reconnect!!!");
     }
 }
 

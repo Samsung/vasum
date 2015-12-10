@@ -285,7 +285,6 @@ void ZonesManager::saveDynamicConfig()
 
 void ZonesManager::updateDefaultId()
 {
-    // TODO add an api to change defaultId
     if (mZones.empty() && mDynamicConfig.defaultId.empty()) {
         LOGT("Keep empty defaultId");
         return;

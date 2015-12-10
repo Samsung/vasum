@@ -265,13 +265,12 @@ public:
     void setSchedulerLevel(SchedulerLevel sched);
 
     /**
-     * @return Scheduler CFS quota,
-     * TODO: this function is only for UNIT TESTS
+     * @return Scheduler CFS quota
      */
     std::int64_t getSchedulerQuota();
 
 private:
-    ZoneConfig mConfig;
+    ZoneConfig mConfig; // TODO: Make mConfig const
     ZoneDynamicConfig mDynamicConfig;
     std::unique_ptr<ZoneProvision> mProvision;
     mutable std::recursive_mutex mReconnectMutex;
