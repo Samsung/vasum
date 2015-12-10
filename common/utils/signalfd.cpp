@@ -22,6 +22,8 @@
  * @brief   Eventfd wrapper
  */
 
+#include "config.hpp"
+
 #include "utils/signalfd.hpp"
 #include "utils/signal.hpp"
 #include "utils/fd-utils.hpp"

@@ -21,6 +21,8 @@
  * @brief   Provisioning configuration
  */
 
+#include "config.hpp"
+
 #include <vector>
 #include <string>
 #include "lxcpp/container-config.hpp"

@@ -22,6 +22,8 @@
  * @brief   Class for sending the result of a method
  */
 
+#include "config.hpp"
+
 #include "api/ipc-method-result-builder.hpp"
 
 namespace vasum {

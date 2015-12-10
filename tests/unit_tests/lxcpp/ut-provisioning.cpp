@@ -22,8 +22,9 @@
  * @brief   Unit tests of lxcpp provisioning
  */
 
-#include "ut.hpp"
 #include "config.hpp"
+
+#include "ut.hpp"
 #include "cargo-json/cargo-json.hpp"
 #include "lxcpp/lxcpp.hpp"
 #include "lxcpp/container.hpp"

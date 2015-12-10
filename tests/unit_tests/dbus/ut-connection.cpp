@@ -24,6 +24,7 @@
 
 #ifdef DBUS_CONNECTION
 #include "config.hpp"
+
 #include "ut.hpp"
 #include "dbus/test-server.hpp"
 #include "dbus/test-client.hpp"

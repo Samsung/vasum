@@ -21,6 +21,8 @@
  * @brief   CGroups configuration command
  */
 
+#include "config.hpp"
+
 #include "lxcpp/commands/cgroups.hpp"
 #include "lxcpp/cgroups/cgroup.hpp"
 #include "lxcpp/exception.hpp"

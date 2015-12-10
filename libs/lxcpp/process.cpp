@@ -21,6 +21,8 @@
  * @brief   process handling routines
  */
 
+#include "config.hpp"
+
 #include "lxcpp/process.hpp"
 #include "lxcpp/exception.hpp"
 

@@ -25,7 +25,6 @@
 #ifndef MOUNTS_CONFIG_HPP
 #define MOUNTS_CONFIG_HPP
 
-#include "config.hpp"
 #include "cargo/fields.hpp"
 
 #include <map>

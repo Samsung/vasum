@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "utils/worker.hpp"
 #include "utils/latch.hpp"
 #include "utils/counting-map.hpp"

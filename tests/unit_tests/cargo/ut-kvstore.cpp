@@ -24,6 +24,7 @@
  */
 
 #include "config.hpp"
+
 #include "ut.hpp"
 
 #include "cargo-sqlite/internals/kvstore.hpp"

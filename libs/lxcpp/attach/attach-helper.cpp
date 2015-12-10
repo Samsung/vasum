@@ -21,6 +21,8 @@
  * @brief   Implementation of attaching to a container
  */
 
+#include "config.hpp"
+
 #include "lxcpp/attach/attach-helper.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"

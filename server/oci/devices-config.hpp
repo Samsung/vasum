@@ -25,7 +25,6 @@
 #ifndef DEVICES_CONFIG_HPP
 #define DEVICES_CONFIG_HPP
 
-#include "config.hpp"
 #include "cargo/fields.hpp"
 
 #include <string>

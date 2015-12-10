@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "socket-test.hpp"
 #include "logger/logger.hpp"
 #include "logger/backend-journal.hpp"

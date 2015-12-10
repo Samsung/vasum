@@ -25,7 +25,6 @@
 #ifndef NAMESPACES_CONFIG_HPP
 #define NAMESPACES_CONFIG_HPP
 
-#include "config.hpp"
 #include "cargo/fields.hpp"
 
 #include <string>

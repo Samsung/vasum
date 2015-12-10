@@ -25,7 +25,6 @@
 #ifndef HOOKS_CONFIG_HPP
 #define HOOKS_CONFIG_HPP
 
-#include "config.hpp"
 #include "cargo/fields.hpp"
 
 #include <string>

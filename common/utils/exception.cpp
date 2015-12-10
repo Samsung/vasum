@@ -22,6 +22,8 @@
  * @brief   Utils base exception helper implementation
  */
 
+#include "config.hpp"
+
 #include "utils/exception.hpp"
 
 #include <string>

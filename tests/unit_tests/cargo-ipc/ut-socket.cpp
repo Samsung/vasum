@@ -24,6 +24,7 @@
 
 #ifdef HAVE_SYSTEMD
 #include "config.hpp"
+
 #include "ut.hpp"
 #include "cargo-ipc/internals/socket.hpp"
 #include "socket-test.hpp"

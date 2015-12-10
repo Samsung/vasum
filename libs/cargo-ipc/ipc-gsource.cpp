@@ -22,7 +22,6 @@
  * @brief   Class for creating a dedicated GSource
  */
 
-
 #include "config.hpp"
 
 #include "cargo-ipc/ipc-gsource.hpp"

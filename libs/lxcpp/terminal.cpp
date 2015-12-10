@@ -21,6 +21,8 @@
  * @brief   Terminal helpers implementation
  */
 
+#include "config.hpp"
+
 #include "lxcpp/exception.hpp"
 #include "lxcpp/credentials.hpp"
 

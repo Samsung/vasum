@@ -22,6 +22,8 @@
  * @brief   Text related utility
  */
 
+#include "config.hpp"
+
 #include "utils/text.hpp"
 
 namespace utils {

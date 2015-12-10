@@ -21,6 +21,8 @@
  * @brief   Network configuration command
  */
 
+#include "config.hpp"
+
 #include "lxcpp/commands/netcreate.hpp"
 #include "lxcpp/network.hpp"
 
@@ -108,8 +110,8 @@ void NetConfigureAll::execute()
                 if (gw.prefix == 0 && addr.type == InetAddrType::IPV4 && addr.prefix < 31) {
                     gw = addr;
                     unsigned mask = ((1 << addr.prefix) - 1) << (32 - addr.prefix);
-                    unsigned net = ::ntohl(gw.getAddr<in_addr>().s_addr) & mask;
-                    gw.getAddr<in_addr>().s_addr = ::htonl(net + 1);
+                    unsigned net = ntohl(gw.getAddr<in_addr>().s_addr) & mask;
+                    gw.getAddr<in_addr>().s_addr = htonl(net + 1);
                 }
             }
 

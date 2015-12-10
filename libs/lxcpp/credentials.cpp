@@ -21,6 +21,8 @@
  * @brief   Process credentials handling
  */
 
+#include "config.hpp"
+
 #include "lxcpp/credentials.hpp"
 #include "lxcpp/exception.hpp"
 

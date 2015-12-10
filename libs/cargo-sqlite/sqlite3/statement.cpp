@@ -22,6 +22,8 @@
  * @brief  Definition of the class managing a sqlite3 statement
  */
 
+#include "config.hpp"
+
 #include "cargo-sqlite/sqlite3/statement.hpp"
 #include "cargo/exception.hpp"
 

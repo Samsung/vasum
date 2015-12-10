@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "utils/latch.hpp"
 
 #include <cassert>

@@ -26,7 +26,6 @@
 #ifndef SERVER_INPUT_MONITOR_CONFIG_HPP
 #define SERVER_INPUT_MONITOR_CONFIG_HPP
 
-
 #include "cargo/fields.hpp"
 
 #include <string>

@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "netlink-message.hpp"
 #include "netlink.hpp"
 #include "base-exception.hpp"

@@ -22,6 +22,8 @@
  * @brief   Declaration of CommandLineInterface class
  */
 
+#include "config.hpp"
+
 #include "command-line-interface.hpp"
 #include "cli-exception.hpp"
 #include "utils/ccolor.hpp"

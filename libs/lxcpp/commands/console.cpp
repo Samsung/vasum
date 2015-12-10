@@ -21,6 +21,8 @@
  * @brief   Implementation of the console
  */
 
+#include "config.hpp"
+
 #include "lxcpp/commands/console.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/terminal.hpp"

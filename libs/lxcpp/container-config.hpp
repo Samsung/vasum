@@ -32,7 +32,6 @@
 #include "lxcpp/userns-config.hpp"
 #include "lxcpp/cgroups/cgroup-config.hpp"
 
-#include "config.hpp"
 #include <cargo/fields.hpp>
 
 #include <string>

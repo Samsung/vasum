@@ -26,7 +26,6 @@
 #ifndef SERVER_PROXY_CALL_CONFIG_HPP
 #define SERVER_PROXY_CALL_CONFIG_HPP
 
-
 #include "cargo/fields.hpp"
 
 #include <string>

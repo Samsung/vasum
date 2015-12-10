@@ -24,6 +24,7 @@
  */
 
 #include "config.hpp"
+
 #include "ut.hpp"
 
 #include "utils/scoped-dir.hpp"

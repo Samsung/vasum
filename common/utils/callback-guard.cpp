@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "utils/callback-guard.hpp"
 #include "logger/logger.hpp"
 

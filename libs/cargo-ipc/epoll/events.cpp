@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "cargo-ipc/epoll/events.hpp"
 
 #include <sstream>

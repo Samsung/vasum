@@ -24,6 +24,7 @@
 
 #ifdef HAVE_SYSTEMD
 #include "config.hpp"
+
 #include "logger/backend-journal.hpp"
 
 #define SD_JOURNAL_SUPPRESS_LOCATION

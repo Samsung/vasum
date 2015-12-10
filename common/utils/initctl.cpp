@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "utils/initctl.hpp"
 
 #include <unistd.h>

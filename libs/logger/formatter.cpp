@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "logger/formatter.hpp"
 #include "utils/ccolor.hpp"
 

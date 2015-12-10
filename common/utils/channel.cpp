@@ -22,6 +22,8 @@
  * @brief   IPC implementation for related processes
  */
 
+#include "config.hpp"
+
 #include "utils/channel.hpp"
 #include "utils/exception.hpp"
 

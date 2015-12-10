@@ -21,6 +21,8 @@
  * @brief   Implementation of guest terminal preparation
  */
 
+#include "config.hpp"
+
 #include "lxcpp/commands/prep-guest-terminal.hpp"
 #include "lxcpp/terminal.hpp"
 

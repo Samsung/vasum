@@ -21,6 +21,8 @@
  * @brief   Actions on network interace in the container
  */
 
+#include "config.hpp"
+
 #include "lxcpp/network.hpp"
 #include "lxcpp/container.hpp"
 #include "lxcpp/exception.hpp"

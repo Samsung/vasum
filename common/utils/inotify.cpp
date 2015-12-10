@@ -22,6 +22,8 @@
  * @brief   Inotify wrapper
  */
 
+#include "config.hpp"
+
 #include "utils/inotify.hpp"
 #include "utils/paths.hpp"
 #include "utils/fs.hpp"

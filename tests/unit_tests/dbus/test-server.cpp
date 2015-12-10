@@ -23,6 +23,7 @@
  */
 
 #ifdef DBUS_CONNECTION
+
 #include "config.hpp"
 
 #include "dbus/test-server.hpp"

@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "utils/exception.hpp"
 #include "utils/execute.hpp"
 #include "logger/logger.hpp"

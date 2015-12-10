@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "logger/logger.hpp"
 #include "utils/img.hpp"
 #include "utils/fs.hpp"

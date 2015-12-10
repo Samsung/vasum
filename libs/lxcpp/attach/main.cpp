@@ -21,6 +21,8 @@
  * @brief   Main file for the Intermediate process (libexec)
  */
 
+#include "config.hpp"
+
 #include "lxcpp/attach/attach-helper.hpp"
 
 #include "utils/fd-utils.hpp"

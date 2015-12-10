@@ -26,8 +26,6 @@
 #ifndef COMMON_RESULT_IPC_METHOD_RESULT_BUILDER_HPP
 #define COMMON_RESULT_IPC_METHOD_RESULT_BUILDER_HPP
 
-#include "config.hpp"
-
 #include "api/method-result-builder.hpp"
 #include "cargo-ipc/method-result.hpp"
 

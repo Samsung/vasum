@@ -22,6 +22,8 @@
  * @brief  Test compilation and linking with lxcpp library
  */
 
+#include "config.hpp"
+
 #include "lxcpp/lxcpp.hpp"
 
 using namespace lxcpp;

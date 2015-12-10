@@ -21,6 +21,8 @@
  * @brief   Main file for the Guard process (libexec)
  */
 
+#include "config.hpp"
+
 #include "lxcpp/guard/guard.hpp"
 
 #include "utils/fd-utils.hpp"

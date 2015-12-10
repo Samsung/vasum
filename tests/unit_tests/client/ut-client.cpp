@@ -24,6 +24,7 @@
  */
 
 #include "config.hpp"
+
 #include "ut.hpp"
 #include "vasum-client.h"
 #include "utils/latch.hpp"

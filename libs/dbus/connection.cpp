@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "dbus/connection.hpp"
 #include "dbus/exception.hpp"
 #include "utils/callback-wrapper.hpp"

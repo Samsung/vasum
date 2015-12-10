@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "utils/same-thread-guard.hpp"
 
 #ifdef ENABLE_SAME_THREAD_GUARD

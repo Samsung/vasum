@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "utils/glib-utils.hpp"
 #include "utils/callback-wrapper.hpp"
 

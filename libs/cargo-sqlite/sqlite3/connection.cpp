@@ -22,6 +22,7 @@
  * @brief  Definition of the class managing a sqlite3 database connection
  */
 
+#include "config.hpp"
 
 #include "cargo-sqlite/sqlite3/connection.hpp"
 #include "cargo/exception.hpp"

@@ -24,7 +24,6 @@
 #ifndef LXCPP_TERMINAL_CONFIG_HPP
 #define LXCPP_TERMINAL_CONFIG_HPP
 
-#include "config.hpp"
 #include "cargo/fields.hpp"
 
 #include <vector>

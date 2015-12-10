@@ -21,6 +21,8 @@
  * @brief   Implementation of starting a container
  */
 
+#include "config.hpp"
+
 #include "lxcpp/commands/start.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"

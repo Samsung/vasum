@@ -21,6 +21,8 @@
  * @brief   Implementation of stopping a container
  */
 
+#include "config.hpp"
+
 #include "lxcpp/commands/stop.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"

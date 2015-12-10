@@ -25,7 +25,6 @@
 #ifndef RESOURCES_CONFIG_HPP
 #define RESOURCES_CONFIG_HPP
 
-#include "config.hpp"
 #include "cargo/fields.hpp"
 
 #include "cgroups-config.hpp"

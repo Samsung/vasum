@@ -25,6 +25,8 @@
 #define _GNU_SOURCE
 #endif
 
+#include "config.hpp"
+
 #include "lxcpp/exception.hpp"
 #include "lxcpp/namespace.hpp"
 #include "lxcpp/filesystem.hpp"

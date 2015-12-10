@@ -24,7 +24,6 @@
 #ifndef LXCPP_GUARD_GUARD_HPP
 #define LXCPP_GUARD_GUARD_HPP
 
-
 #include "lxcpp/container-config.hpp"
 #include "lxcpp/guard/api.hpp"
 

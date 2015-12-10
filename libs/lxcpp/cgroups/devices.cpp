@@ -21,6 +21,8 @@
  * @brief   Control-groups management, devices
  */
 
+#include "config.hpp"
+
 #include "lxcpp/cgroups/devices.hpp"
 #include "lxcpp/exception.hpp"
 #include "utils/text.hpp"

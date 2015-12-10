@@ -24,7 +24,6 @@
 #ifndef LXCPP_PROVISION_CONFIG_HPP
 #define LXCPP_PROVISION_CONFIG_HPP
 
-#include "config.hpp"
 #include "cargo/fields.hpp"
 #include "cargo/fields-union.hpp"
 

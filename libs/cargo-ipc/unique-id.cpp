@@ -22,6 +22,8 @@
  * @brief   Unique ID type definition
  */
 
+#include "config.hpp"
+
 #include "unique-id.hpp"
 
 namespace cargo {

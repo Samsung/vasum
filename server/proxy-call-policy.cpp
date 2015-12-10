@@ -22,7 +22,6 @@
  * @brief   Implementation of a class for checking permissions of proxy calls
  */
 
-
 #include "config.hpp"
 
 #include "proxy-call-policy.hpp"

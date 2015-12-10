@@ -22,6 +22,8 @@
  * @brief   Network configuration classes
  */
 
+#include "config.hpp"
+
 #include "lxcpp/network-config.hpp"
 #include "lxcpp/exception.hpp"
 #include "logger/logger.hpp"

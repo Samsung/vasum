@@ -21,6 +21,8 @@
  * @brief   LXCPP guard process implementation
  */
 
+#include "config.hpp"
+
 #include "lxcpp/utils.hpp"
 #include "lxcpp/guard/guard.hpp"
 #include "lxcpp/process.hpp"

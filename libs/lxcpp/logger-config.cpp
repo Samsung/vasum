@@ -21,6 +21,8 @@
  * @brief   Logger configuration
  */
 
+#include "config.hpp"
+
 #include "lxcpp/logger-config.hpp"
 #include "lxcpp/exception.hpp"
 

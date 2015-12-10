@@ -25,8 +25,6 @@
 #ifndef CARGO_IPC_INTERNALS_ACCEPTOR_HPP
 #define CARGO_IPC_INTERNALS_ACCEPTOR_HPP
 
-#include "config.hpp"
-
 #include "cargo-ipc/internals/socket.hpp"
 #include "cargo-ipc/epoll/event-poll.hpp"
 #include "cargo-ipc/types.hpp"

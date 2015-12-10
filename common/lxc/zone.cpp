@@ -31,6 +31,7 @@
 //      - fork + unshare does not work with traced process (e.g. under valgrind)
 
 #include "config.hpp"
+
 #include "logger/logger.hpp"
 #include "lxc/zone.hpp"
 #include "lxc/exception.hpp"

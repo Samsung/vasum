@@ -26,7 +26,6 @@
 
 #include "lxcpp/namespace.hpp"
 
-#include "config.hpp"
 #include <cargo/fields.hpp>
 #include "lxcpp/logger-config.hpp"
 #include <sys/types.h>

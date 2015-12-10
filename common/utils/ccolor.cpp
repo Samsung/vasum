@@ -22,6 +22,8 @@
  * @brief   Console colors utility
  */
 
+#include "config.hpp"
+
 #include "utils/ccolor.hpp"
 
 #include <stdio.h>

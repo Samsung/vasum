@@ -25,7 +25,6 @@
 #ifndef COMMON_UTILS_CALLBACK_GUARD_HPP
 #define COMMON_UTILS_CALLBACK_GUARD_HPP
 
-
 #include <memory>
 
 

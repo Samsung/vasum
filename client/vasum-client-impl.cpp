@@ -29,6 +29,7 @@
 //TODO: Make vsm_get_status_message thread-safe version (vsm_get_status_message_r)
 
 #include "config.hpp"
+
 #include "vasum-client-impl.hpp"
 #include "utils.hpp"
 #include "exception.hpp"

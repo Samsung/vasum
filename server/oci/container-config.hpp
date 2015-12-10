@@ -25,7 +25,6 @@
 #ifndef CONTAINER_CONFIG_HPP
 #define CONTAINER_CONFIG_HPP
 
-#include "config.hpp"
 #include "cargo/fields.hpp"
 
 #include "devices-config.hpp"

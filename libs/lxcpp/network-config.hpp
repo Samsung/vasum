@@ -24,7 +24,6 @@
 #ifndef LXCPP_NETWORK_CONFIG_HPP
 #define LXCPP_NETWORK_CONFIG_HPP
 
-#include "config.hpp"
 #include "cargo/fields.hpp"
 #include "lxcpp/network.hpp"
 #include "lxcpp/exception.hpp"

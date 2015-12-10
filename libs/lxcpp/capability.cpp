@@ -21,6 +21,8 @@
  * @brief   Linux capabilities handling routines
  */
 
+#include "config.hpp"
+
 #include "lxcpp/capability.hpp"
 #include "lxcpp/exception.hpp"
 

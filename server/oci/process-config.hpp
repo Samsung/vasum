@@ -25,7 +25,6 @@
 #ifndef PROCESS_CONFIG_HPP
 #define PROCESS_CONFIG_HPP
 
-#include "config.hpp"
 #include "cargo/fields.hpp"
 
 #include <string>

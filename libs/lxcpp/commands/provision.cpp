@@ -21,6 +21,8 @@
  * @brief   Add new provisioned file/dir/link/mount command
  */
 
+#include "config.hpp"
+
 #include "lxcpp/commands/provision.hpp"
 #include "lxcpp/container.hpp"
 #include "lxcpp/provision-config.hpp"

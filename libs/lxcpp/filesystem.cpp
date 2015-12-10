@@ -21,6 +21,8 @@
  * @brief   file system handling routines
  */
 
+#include "config.hpp"
+
 #include "lxcpp/filesystem.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"

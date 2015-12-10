@@ -24,6 +24,7 @@
  */
 
 #include "config.hpp"
+
 #include "ut.hpp"
 #include "logger/logger.hpp"
 #include "logger/logger-scope.hpp"

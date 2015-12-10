@@ -21,6 +21,8 @@
  * @brief   lxcpp container factory definition
  */
 
+#include "config.hpp"
+
 #include "lxcpp/namespace.hpp"
 #include "lxcpp/exception.hpp"
 #include "logger/logger.hpp"

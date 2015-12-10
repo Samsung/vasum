@@ -22,6 +22,8 @@
  * @brief   Scope logger class implementation
  */
 
+#include "config.hpp"
+
 #include "logger/logger-scope.hpp"
 #include "logger/logger.hpp"
 

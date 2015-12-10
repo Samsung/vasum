@@ -24,6 +24,7 @@
  */
 
 #include "config.hpp"
+
 #include "ut.hpp"
 #include "testconfig-example.hpp"
 #include "cargo-gvariant/cargo-gvariant.hpp"

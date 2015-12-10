@@ -24,7 +24,6 @@
 #ifndef LXCPP_LOGGER_CONFIG_HPP
 #define LXCPP_LOGGER_CONFIG_HPP
 
-#include "config.hpp"
 #include "cargo/fields.hpp"
 #include "logger/logger.hpp"
 

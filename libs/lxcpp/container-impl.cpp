@@ -21,6 +21,8 @@
  * @brief   ContainerImpl definition
  */
 
+#include "config.hpp"
+
 #include "lxcpp/container-impl.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"

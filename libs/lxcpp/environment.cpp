@@ -21,6 +21,8 @@
  * @brief   Handling environment variables
  */
 
+#include "config.hpp"
+
 #include "lxcpp/environment.hpp"
 #include "lxcpp/exception.hpp"
 

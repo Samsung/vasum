@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "utils.hpp"
 
 #include <boost/algorithm/string.hpp>

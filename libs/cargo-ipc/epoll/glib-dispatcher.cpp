@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "cargo-ipc/epoll/glib-dispatcher.hpp"
 #include "utils/callback-wrapper.hpp"
 

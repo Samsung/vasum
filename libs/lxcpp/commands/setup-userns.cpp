@@ -21,6 +21,8 @@
  * @brief   Implementation of user namespace setup
  */
 
+#include "config.hpp"
+
 #include "lxcpp/commands/setup-userns.hpp"
 
 #include "logger/logger.hpp"

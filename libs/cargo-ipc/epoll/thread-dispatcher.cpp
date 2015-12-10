@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "cargo-ipc/epoll/thread-dispatcher.hpp"
 
 namespace cargo {

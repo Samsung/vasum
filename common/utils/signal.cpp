@@ -22,6 +22,8 @@
  * @brief   Signal related functions
  */
 
+#include "config.hpp"
+
 #include "utils/signal.hpp"
 #include "utils/exception.hpp"
 #include "logger/logger.hpp"

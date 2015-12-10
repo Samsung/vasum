@@ -22,8 +22,8 @@
  * @brief   Lxc cgroup stuff
  */
 
-
 #include "config.hpp"
+
 #include "lxc/cgroup.hpp"
 #include "logger/logger.hpp"
 #include "utils/fs.hpp"

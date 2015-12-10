@@ -23,6 +23,7 @@
  */
 
 #include "config.hpp"
+
 #include "command-line-interface.hpp"
 #include "vasum-client.h"
 #include "utils/c-array.hpp"

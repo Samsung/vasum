@@ -22,6 +22,8 @@
  * @brief   Filesystem helper functions
  */
 
+#include "config.hpp"
+
 #include "cargo-json/internals/fs-utils.hpp"
 
 #include <fstream>

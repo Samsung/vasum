@@ -24,6 +24,7 @@
  */
 
 #include "config.hpp"
+
 #include "vasum-client.h"
 #include "vasum-client-impl.hpp"
 

@@ -21,6 +21,8 @@
  * @brief   Control-groups management
  */
 
+#include "config.hpp"
+
 #include "lxcpp/cgroups/subsystem.hpp"
 #include "lxcpp/exception.hpp"
 

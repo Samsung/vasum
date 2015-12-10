@@ -21,6 +21,8 @@
  * @brief   Implementation of host terminal preparation
  */
 
+#include "config.hpp"
+
 #include "lxcpp/commands/prep-host-terminal.hpp"
 #include "lxcpp/terminal.hpp"
 

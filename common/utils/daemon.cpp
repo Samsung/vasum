@@ -22,6 +22,8 @@
  * @brief   Run a process as a daemon
  */
 
+#include "config.hpp"
+
 #include "fd-utils.hpp"
 
 #include <sys/stat.h>
