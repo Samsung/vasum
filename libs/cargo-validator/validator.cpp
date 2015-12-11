@@ -22,6 +22,8 @@
  * @brief  Pre-defined validation check functions
 */
 
+#include "config.hpp"
+
 #include "cargo-validator/validator.hpp"
 #include "utils/fs.hpp"
 #include "utils/exception.hpp"

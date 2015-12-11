@@ -26,7 +26,7 @@
 #define CARGO_VALIDATOR_INTERNALS_VALIDATOR_VISITOR_HPP
 
 #include "cargo-validator/exception.hpp"
-#include "cargo/visit-fields.hpp"
+#include "cargo/internals/visit-fields.hpp"
 
 #include <string>
 #include <functional>

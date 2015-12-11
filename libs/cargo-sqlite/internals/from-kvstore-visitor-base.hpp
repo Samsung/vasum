@@ -28,11 +28,11 @@
 #include "cargo-sqlite/internals/kvstore.hpp"
 #include "cargo-sqlite/internals/kvstore-visitor-utils.hpp"
 #include "cargo/exception.hpp"
-#include "cargo/is-visitable.hpp"
-#include "cargo/is-like-tuple.hpp"
-#include "cargo/is-streamable.hpp"
-#include "cargo/is-union.hpp"
-#include "cargo/visit-fields.hpp"
+#include "cargo/internals/is-visitable.hpp"
+#include "cargo/internals/is-like-tuple.hpp"
+#include "cargo/internals/is-streamable.hpp"
+#include "cargo/internals/is-union.hpp"
+#include "cargo/internals/visit-fields.hpp"
 #include <map>
 
 

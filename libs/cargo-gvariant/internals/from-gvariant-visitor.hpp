@@ -25,12 +25,12 @@
 #ifndef CARGO_GVARIANT_INTERNALS_FROM_GVARIANT_VISITOR_HPP
 #define CARGO_GVARIANT_INTERNALS_FROM_GVARIANT_VISITOR_HPP
 
-#include "cargo/is-visitable.hpp"
-#include "cargo/is-like-tuple.hpp"
+#include "cargo/internals/is-visitable.hpp"
+#include "cargo/internals/is-like-tuple.hpp"
 #include "cargo/exception.hpp"
-#include "cargo/is-union.hpp"
+#include "cargo/internals/is-union.hpp"
 #include "cargo/types.hpp"
-#include "cargo/visit-fields.hpp"
+#include "cargo/internals/visit-fields.hpp"
 
 #include <string>
 #include <vector>

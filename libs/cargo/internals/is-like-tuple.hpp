@@ -28,6 +28,7 @@
 #include <tuple>
 
 namespace cargo {
+namespace internals {
 
 template<typename T>
 struct isLikeTuple {
@@ -44,6 +45,7 @@ struct isLikeTuple<std::pair<R...>> {
     static constexpr bool value = std::true_type::value;
 };
 
+} // namespace internals
 } // namespace cargo
 
 #endif // CARGO_IS_LIKE_TUPLE_HPP

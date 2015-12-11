@@ -25,9 +25,10 @@
 #ifndef CARGO_IS_UNION_HPP
 #define CARGO_IS_UNION_HPP
 
-#include "cargo/is-visitable.hpp"
+#include "cargo/internals/is-visitable.hpp"
 
 namespace cargo {
+namespace internals {
 
 // generic member checker, start
 template <typename T, typename F>
@@ -64,6 +65,7 @@ struct isUnion : has_member<T, check_union<T>> {};
 // because Vistable need 'accept' OR 'accept const', while has_member make exect match
 // e.g accept AND accept const
 
+} // namespace internals
 } // namespace cargo
 
 #endif // CARGO_IS_UNION_HPP

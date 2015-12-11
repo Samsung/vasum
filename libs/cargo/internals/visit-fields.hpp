@@ -53,6 +53,7 @@ struct visitImpl<0, T, F, A...>
 } // namespace
 
 namespace cargo {
+namespace internals {
 
 template<class T, class F, typename ... A>
 void visitFields(T& t, F f, A ... args)
@@ -60,6 +61,7 @@ void visitFields(T& t, F f, A ... args)
     visitImpl<std::tuple_size<T>::value - 1, T, F, A...>::visit(t, f, std::forward<A>(args)...);
 }
 
+} // namespace internals
 } // namespace cargo
 
 #endif // CARGO_VISIT_FIELDS_HPP

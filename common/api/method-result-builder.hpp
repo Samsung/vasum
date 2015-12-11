@@ -28,7 +28,7 @@
 
 #include <memory>
 
-#include "cargo/is-union.hpp"
+#include "cargo/internals/is-union.hpp"
 
 namespace vasum {
 namespace api {
@@ -48,7 +48,7 @@ public:
     template<typename Data>
     void set(const std::shared_ptr<Data>& data)
     {
-        static_assert(cargo::isVisitable<Data>::value, "Use only Cargo's structures");
+        static_assert(cargo::internals::isVisitable<Data>::value, "Use only Cargo's structures");
         setImpl(data);
     }
 

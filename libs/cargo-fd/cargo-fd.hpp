@@ -43,7 +43,7 @@ namespace cargo {
 template <class Cargo>
 void loadFromFD(const int fd, Cargo& visitable)
 {
-    static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
+    static_assert(internals::isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
     internals::FromFDStoreVisitor visitor(fd);
     visitable.accept(visitor);
@@ -58,7 +58,7 @@ void loadFromFD(const int fd, Cargo& visitable)
 template <class Cargo>
 void saveToFD(const int fd, const Cargo& visitable)
 {
-    static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
+    static_assert(internals::isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
     internals::ToFDStoreVisitor visitor(fd);
     visitable.accept(visitor);

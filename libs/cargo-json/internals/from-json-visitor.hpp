@@ -25,10 +25,10 @@
 #ifndef CARGO_JSON_INTERNALS_FROM_JSON_VISITOR_HPP
 #define CARGO_JSON_INTERNALS_FROM_JSON_VISITOR_HPP
 
-#include "cargo/is-visitable.hpp"
-#include "cargo/is-like-tuple.hpp"
+#include "cargo/internals/is-visitable.hpp"
+#include "cargo/internals/is-like-tuple.hpp"
 #include "cargo/exception.hpp"
-#include "cargo/visit-fields.hpp"
+#include "cargo/internals/visit-fields.hpp"
 
 #include <json.h>
 #include <string>

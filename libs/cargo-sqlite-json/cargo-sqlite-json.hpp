@@ -52,7 +52,7 @@ void loadFromKVStoreWithJson(const std::string& kvfile,
                              Cargo& visitable,
                              const std::string& kvVisitableName)
 {
-    static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
+    static_assert(internals::isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
     internals::KVStore store(kvfile);
     internals::KVStore::Transaction transaction(store);

@@ -44,7 +44,7 @@ namespace cargo {
 template <class Cargo>
 void loadFromKVStore(const std::string& filename, Cargo& visitable, const std::string& visitableName)
 {
-    static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
+    static_assert(internals::isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
     internals::KVStore store(filename);
     internals::KVStore::Transaction transaction(store);
@@ -63,7 +63,7 @@ void loadFromKVStore(const std::string& filename, Cargo& visitable, const std::s
 template <class Cargo>
 void saveToKVStore(const std::string& filename, const Cargo& visitable, const std::string& visitableName)
 {
-    static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
+    static_assert(internals::isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
     internals::KVStore store(filename);
     internals::KVStore::Transaction transaction(store);

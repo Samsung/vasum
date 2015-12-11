@@ -28,6 +28,7 @@
 #include <sstream>
 
 namespace cargo {
+namespace internals {
 
 template<typename T>
 struct isStreamableIn {
@@ -55,6 +56,7 @@ struct isStreamableOut {
     static constexpr bool value = std::is_same<decltype(test<T>(stream)), std::true_type>::value;
 };
 
+} // internals
 } // namespace cargo
 
 #endif // CARGO_IS_STREAMABLE_HPP

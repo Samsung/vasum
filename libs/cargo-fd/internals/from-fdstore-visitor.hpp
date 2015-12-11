@@ -26,9 +26,9 @@
 #define CARGO_FD_INTERNALS_FROM_FDSTORE_VISITOR_HPP
 
 #include "cargo-fd/internals/fdstore.hpp"
-#include "cargo/is-visitable.hpp"
+#include "cargo/internals/is-visitable.hpp"
 #include "cargo/types.hpp"
-#include "cargo/visit-fields.hpp"
+#include "cargo/internals/visit-fields.hpp"
 
 #include <array>
 #include <string>

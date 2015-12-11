@@ -44,7 +44,7 @@ namespace cargo {
 template <class Cargo>
 void loadFromJsonString(const std::string& jsonString, Cargo& visitable)
 {
-    static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
+    static_assert(internals::isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
     internals::FromJsonVisitor visitor(jsonString);
     visitable.accept(visitor);
@@ -58,7 +58,7 @@ void loadFromJsonString(const std::string& jsonString, Cargo& visitable)
 template <class Cargo>
 std::string saveToJsonString(const Cargo& visitable)
 {
-    static_assert(isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
+    static_assert(internals::isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
     internals::ToJsonVisitor visitor;
     visitable.accept(visitor);

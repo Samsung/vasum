@@ -28,6 +28,7 @@
 #include <type_traits>
 
 namespace cargo {
+namespace internals {
 
 template <typename T>
 struct isVisitableHelper__ {
@@ -48,6 +49,7 @@ struct isVisitableHelper__ {
 template <typename T>
 struct isVisitable : public std::integral_constant<bool, isVisitableHelper__<T>::value> {};
 
+} // namespace internals
 } // namespace cargo
 
 #endif // CARGO_IS_VISITABLE_HPP
