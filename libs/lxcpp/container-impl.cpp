@@ -94,6 +94,13 @@ ContainerImpl::~ContainerImpl()
     mClient->stop(true);
 }
 
+void ContainerImpl::setState(const Container::State state)
+{
+    // Used with the mStateMutex locked
+    mConfig->mState = state;
+    mStateCondition.notify_one();
+}
+
 bool ContainerImpl::connect()
 {
     // Try to connect to a running Guard:
@@ -102,7 +109,7 @@ bool ContainerImpl::connect()
         // If more than one process is trying to connect then the first will succeed.
         Lock lock(mStateMutex);
         mClient->start();
-        mConfig->mState = Container::State::CONNECTING;
+        setState(Container::State::CONNECTING);
         return true;
     } catch(const cargo::ipc::IPCException&) {
         // It's OK, container isn't yet started
@@ -152,7 +159,6 @@ const std::string& ContainerImpl::getName() const
 
 const std::string& ContainerImpl::getRootPath() const
 {
-
     Lock lock(mStateMutex);
 
     return mConfig->mRootPath;
@@ -265,15 +271,25 @@ void ContainerImpl::addGIDMap(unsigned min, unsigned max, unsigned num)
     mConfig->mUserNSConfig.mGIDMaps.emplace_back(min, max, num);
 }
 
-void ContainerImpl::start()
+void ContainerImpl::start(const unsigned int timeoutMS)
 {
     Lock lock(mStateMutex);
 
     // TODO: check config consistency and completeness somehow
-    if(mConfig->mState != Container::State::STOPPED) {
-        throw ForbiddenActionException("Container isn't stopped, can't start");
+
+    // Wait for the right state before starting
+    auto isStopped = [this]() {
+        return mConfig->mState == Container::State::STOPPED;
+    };
+
+    if(!mStateCondition.wait_for(lock, std::chrono::milliseconds(timeoutMS), isStopped)) {
+        const std::string msg = "Container isn't stopped, can't start";
+        LOGE(msg);
+        throw ForbiddenActionException(msg);
     }
-    mConfig->mState = Container::State::STARTING;
+
+    // Begin starting
+    setState(Container::State::STARTING);
 
     PrepHostTerminal terminal(mConfig->mTerminals);
     terminal.execute();
@@ -309,7 +325,7 @@ void ContainerImpl::onInitStarted(cargo::ipc::Result<api::Pid>&& result)
         return;
     }
 
-    mConfig->mState = Container::State::RUNNING;
+    setState(Container::State::RUNNING);
     if (mStartedCallback) {
         mStartedCallback();
     }
@@ -334,17 +350,25 @@ cargo::ipc::HandlerExitCode ContainerImpl::onGuardReady(const cargo::ipc::PeerID
     return cargo::ipc::HandlerExitCode::SUCCESS;
 }
 
-void ContainerImpl::stop()
+void ContainerImpl::stop(const unsigned int timeoutMS)
 {
     {
         Lock lock(mStateMutex);
 
+        // Wait for the right state before starting
+        auto isRunning = [this]() {
+            return mConfig->mState == Container::State::RUNNING;
+        };
+
+        if(!mStateCondition.wait_for(lock, std::chrono::milliseconds(timeoutMS), isRunning)) {
+            const std::string msg = "Container isn't running, can't stop";
+            LOGE(msg);
+            throw ForbiddenActionException(msg);
+        }
+
         // TODO: things to do when shutting down the container:
         // - close PTY master FDs from the config so we won't keep PTYs open
-        if(mConfig->mState != Container::State::RUNNING) {
-            throw ForbiddenActionException("Container isn't running, can't stop");
-        }
-        mConfig->mState = Container::State::STOPPING;
+        setState(Container::State::STOPPING);
     }
 
     Stop stop(mConfig, mClient);
@@ -361,7 +385,7 @@ cargo::ipc::HandlerExitCode ContainerImpl::onInitStopped(const cargo::ipc::PeerI
     mConfig->mExitStatus = data->value;
     LOGI("STOPPED " << mConfig->mName << " Exit status: " << mConfig->mExitStatus);
 
-    mConfig->mState = Container::State::STOPPED;
+    setState(Container::State::STOPPED);
     if (mStoppedCallback) {
         mStoppedCallback();
     }

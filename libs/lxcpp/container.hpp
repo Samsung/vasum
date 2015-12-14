@@ -85,8 +85,8 @@ public:
     /**
      * Execution actions
      */
-    virtual void start() = 0;
-    virtual void stop() = 0;
+    virtual void start(const unsigned int timeoutMS = 500) = 0;
+    virtual void stop(const unsigned int timeoutMS = 500) = 0;
     virtual void freeze() = 0;
     virtual void unfreeze() = 0;
     virtual void reboot() = 0;

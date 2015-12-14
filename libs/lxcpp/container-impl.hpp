@@ -39,7 +39,14 @@
 #include "cargo-ipc/exception.hpp"
 
 namespace lxcpp {
-
+/**
+ * Implementation of the Container interface.
+ *
+ * Implementation notes:
+ *
+ * ContainerImpl and cargo::ipc have lock mutexes.
+ * To avoid deadlocks don't make ipc calls when ContainerImpl::mStateMutex is locked.
+ */
 class ContainerImpl : public virtual Container {
 public:
     ContainerImpl(const std::string &name,
@@ -68,8 +75,8 @@ public:
     void addGIDMap(unsigned min, unsigned max, unsigned num);
 
     // Execution actions
-    void start();
-    void stop();
+    void start(const unsigned int timeoutMS);
+    void stop(const unsigned int timeoutMS);
     void freeze();
     void unfreeze();
     void reboot();
@@ -184,6 +191,7 @@ public:
 private:
     typedef std::unique_lock<std::mutex> Lock;
     mutable std::mutex mStateMutex;
+    std::condition_variable mStateCondition;
 
     std::shared_ptr<ContainerConfig> mConfig;
 
@@ -197,6 +205,11 @@ private:
     Container::Callback mStoppedCallback;
     Container::Callback mConnectedCallback;
 
+    void setState(const Container::State state);
+
+    /**
+     * File was created/removed from the working directory
+     */
     void onWorkFileEvent(const std::string& name, const uint32_t mask);
 
     /**

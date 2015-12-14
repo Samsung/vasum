@@ -271,7 +271,8 @@ cargo::ipc::HandlerExitCode Guard::onStop(const cargo::ipc::PeerID,
     mConfig->mState = Container::State::STOPPING;
 
     // TODO: Use initctl/systemd-initctl if available in container
-    utils::sendSignal(mConfig->mInitPid, SIGTERM);
+    // TODO: Use SIGTERM instead of SIGKILL.
+    utils::sendSignal(mConfig->mInitPid, SIGKILL);
 
     result->setVoid();
     return cargo::ipc::HandlerExitCode::SUCCESS;

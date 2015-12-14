@@ -126,13 +126,11 @@ BOOST_AUTO_TEST_CASE(StartStop)
     auto c = std::unique_ptr<Container>(createContainer("StartStop", "/", WORK_DIR));
     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
     BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
-                                      logger::LogLevel::DEBUG,
+                                      logger::LogLevel::TRACE,
                                       LOGGER_FILE));
 
-    BOOST_CHECK_NO_THROW(c->start());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
-
-    BOOST_CHECK_NO_THROW(c->stop());
+    BOOST_CHECK_NO_THROW(c->start(TIMEOUT));
+    BOOST_CHECK_NO_THROW(c->stop(TIMEOUT));
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
 }
 
@@ -153,9 +151,7 @@ BOOST_AUTO_TEST_CASE(ConnectRunning)
     // Connect to a running container
     auto c = std::unique_ptr<Container>(createContainer("ConnectRunning", "/", WORK_DIR));
     BOOST_CHECK_NO_THROW(c->connect());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
-
-    BOOST_CHECK_NO_THROW(c->stop());
+    BOOST_CHECK_NO_THROW(c->stop(TIMEOUT));
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
 }
 
@@ -172,14 +168,11 @@ BOOST_AUTO_TEST_CASE(StartCallback)
         latch.set();
     };
     c->setStartedCallback(call);
-    BOOST_CHECK_NO_THROW(c->start());
+    BOOST_CHECK_NO_THROW(c->start(TIMEOUT));
 
     BOOST_REQUIRE(latch.wait(TIMEOUT));
 
-    auto pred = [&] {return c->getState() == Container::State::RUNNING;};
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, pred));
-
-    BOOST_CHECK_NO_THROW(c->stop());
+    BOOST_CHECK_NO_THROW(c->stop(TIMEOUT));
     BOOST_REQUIRE(c->getState() != Container::State::RUNNING);
 
     auto pred2 = [&] {return c->getState() == Container::State::STOPPING;};
@@ -194,8 +187,7 @@ BOOST_AUTO_TEST_CASE(StopCallback)
                                       logger::LogLevel::DEBUG,
                                       LOGGER_FILE));
 
-    BOOST_CHECK_NO_THROW(c->start());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
+    BOOST_CHECK_NO_THROW(c->start(TIMEOUT));
 
     utils::Latch latch;
     auto call = [&latch]() {
@@ -203,7 +195,7 @@ BOOST_AUTO_TEST_CASE(StopCallback)
     };
     c->setStoppedCallback(call);
 
-    BOOST_CHECK_NO_THROW(c->stop());
+    BOOST_CHECK_NO_THROW(c->stop(TIMEOUT));
     BOOST_REQUIRE(latch.wait(TIMEOUT));
     BOOST_REQUIRE(c->getState() == Container::State::STOPPED);
 }
@@ -217,7 +209,7 @@ BOOST_AUTO_TEST_CASE(ConnectCallback)
                                           logger::LogLevel::TRACE,
                                           LOGGER_FILE));
 
-        BOOST_CHECK_NO_THROW(c->start());
+        BOOST_CHECK_NO_THROW(c->start(TIMEOUT));
         BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
 
         // Remove Container class, but don't stop the container
@@ -246,10 +238,8 @@ BOOST_AUTO_TEST_CASE(UIDGoodMapping)
     c->addUIDMap(0, 1000, 1);
     c->addUIDMap(1000, 0, 999);
 
-    BOOST_CHECK_NO_THROW(c->start());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
-
-    BOOST_CHECK_NO_THROW(c->stop());
+    BOOST_CHECK_NO_THROW(c->start(TIMEOUT));
+    BOOST_CHECK_NO_THROW(c->stop(TIMEOUT));
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
 }
 
@@ -262,10 +252,8 @@ BOOST_AUTO_TEST_CASE(GIDGoodMapping)
     c->addGIDMap(0, 1000, 1);
     c->addGIDMap(1000, 0, 999);
 
-    BOOST_CHECK_NO_THROW(c->start());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
-
-    BOOST_CHECK_NO_THROW(c->stop());
+    BOOST_CHECK_NO_THROW(c->start(TIMEOUT));
+    BOOST_CHECK_NO_THROW(c->stop(TIMEOUT));
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
 }
 

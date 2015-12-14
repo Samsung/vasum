@@ -29,7 +29,6 @@
 #include "lxcpp/guard/api.hpp"
 
 #include "logger/logger.hpp"
-#include "utils/signal.hpp"
 
 namespace lxcpp {
 

@@ -75,10 +75,6 @@ struct Fixture {
         utils::signalUnblock(SIGCHLD);
     }
 
-    void setMask(sigset_t mask) {
-        BOOST_REQUIRE_EQUAL(sigprocmask(SIG_SETMASK, &mask, NULL), 0);
-    }
-
     int attach(const std::vector<std::string>& args,
                const std::string& cwdInContainer)
     {
