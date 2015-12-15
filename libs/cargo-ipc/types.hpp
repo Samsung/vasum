@@ -87,6 +87,15 @@ MessageID getNextMessageID();
  */
 PeerID getNextPeerID();
 
+/**
+ * method/signal handler return code, used to tell the processor
+ * what to do with the handler after its execution.
+ * @ingroup Types
+ */
+enum class HandlerExitCode : int {
+    SUCCESS,            ///< do nothing
+    REMOVE_HANDLER      ///< remove handler from the processor
+};
 
 /**
  * Generic type used as a callback function for handling signals.
@@ -95,8 +104,8 @@ PeerID getNextPeerID();
  */
 template<typename ReceivedDataType>
 struct SignalHandler {
-    typedef std::function<bool(PeerID peerID,
-                               std::shared_ptr<ReceivedDataType>& data)> type;
+    typedef std::function<HandlerExitCode(PeerID peerID,
+                                          std::shared_ptr<ReceivedDataType>& data)> type;
 };
 
 } // namespace ipc

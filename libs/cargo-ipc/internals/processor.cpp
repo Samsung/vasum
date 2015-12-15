@@ -279,16 +279,15 @@ void Processor::removePeerInternal(Peers::iterator peerIt, const std::exception_
     mPeerInfo.erase(peerIt);
 }
 
-bool Processor::handleLostConnection(const FileDescriptor fd)
+void Processor::handleLostConnection(const FileDescriptor fd)
 {
     Lock lock(mStateMutex);
     auto peerIt = getPeerInfoIterator(fd);
     removePeerInternal(peerIt,
                        std::make_exception_ptr(IPCPeerDisconnectedException()));
-    return true;
 }
 
-bool Processor::handleInput(const FileDescriptor fd)
+void Processor::handleInput(const FileDescriptor fd)
 {
     LOGS(mLogPrefix + "Processor handleInput fd: " << fd);
 
@@ -298,7 +297,7 @@ bool Processor::handleInput(const FileDescriptor fd)
 
     if (peerIt == mPeerInfo.end()) {
         LOGE(mLogPrefix + "No peer for fd: " << fd);
-        return false;
+        return;
     }
 
     MessageHeader hdr;
@@ -312,34 +311,32 @@ bool Processor::handleInput(const FileDescriptor fd)
             LOGE(mLogPrefix + "Error during reading the socket");
             removePeerInternal(peerIt,
                                std::make_exception_ptr(IPCNaughtyPeerException()));
-            return true;
+            return;
         }
 
         if (hdr.methodID == RETURN_METHOD_ID) {
-            return onReturnValue(peerIt, hdr.messageID);
-
+            onReturnValue(peerIt, hdr.messageID);
+            return;
         } else {
             if (mMethodsCallbacks.count(hdr.methodID)) {
                 // Method
                 std::shared_ptr<MethodHandlers> methodCallbacks = mMethodsCallbacks.at(hdr.methodID);
-                return onRemoteMethod(peerIt, hdr.methodID, hdr.messageID, methodCallbacks);
-
+                onRemoteMethod(peerIt, hdr.methodID, hdr.messageID, methodCallbacks);
             } else if (mSignalsCallbacks.count(hdr.methodID)) {
                 // Signal
                 std::shared_ptr<SignalHandlers> signalCallbacks = mSignalsCallbacks.at(hdr.methodID);
-                return onRemoteSignal(peerIt, hdr.methodID, hdr.messageID, signalCallbacks);
+                onRemoteSignal(peerIt, hdr.methodID, hdr.messageID, signalCallbacks);
 
             } else {
                 LOGW(mLogPrefix + "No method or signal callback for methodID: " << hdr.methodID);
                 removePeerInternal(peerIt,
                                    std::make_exception_ptr(IPCNaughtyPeerException()));
-                return true;
             }
         }
     }
 }
 
-bool Processor::onNewSignals(const PeerID& peerID, std::shared_ptr<RegisterSignalsProtocolMessage>& data)
+ipc::HandlerExitCode Processor::onNewSignals(const PeerID& peerID, std::shared_ptr<RegisterSignalsProtocolMessage>& data)
 {
     LOGS(mLogPrefix + "Processor onNewSignals peerID: " << peerID);
 
@@ -347,10 +344,10 @@ bool Processor::onNewSignals(const PeerID& peerID, std::shared_ptr<RegisterSigna
         mSignalsPeers[methodID].push_back(peerID);
     }
 
-    return true;
+    return ipc::HandlerExitCode::SUCCESS;
 }
 
-bool Processor::onErrorSignal(const PeerID&, std::shared_ptr<ErrorProtocolMessage>& data)
+ipc::HandlerExitCode Processor::onErrorSignal(const PeerID&, std::shared_ptr<ErrorProtocolMessage>& data)
 {
     LOGS(mLogPrefix + "Processor onErrorSignal messageID: " << data->messageID);
 
@@ -361,10 +358,10 @@ bool Processor::onErrorSignal(const PeerID&, std::shared_ptr<ErrorProtocolMessag
     ResultBuilder resultBuilder(std::make_exception_ptr(IPCUserException(data->code, data->message)));
     IGNORE_EXCEPTIONS(returnCallbacks.process(resultBuilder));
 
-    return true;
+    return ipc::HandlerExitCode::SUCCESS;
 }
 
-bool Processor::onReturnValue(Peers::iterator& peerIt,
+void Processor::onReturnValue(Peers::iterator& peerIt,
                               const MessageID& messageID)
 {
     LOGS(mLogPrefix + "Processor onReturnValue messageID: " << messageID);
@@ -378,7 +375,7 @@ bool Processor::onReturnValue(Peers::iterator& peerIt,
         LOGW(mLogPrefix + "No return callback for messageID: " << messageID);
         removePeerInternal(peerIt,
                            std::make_exception_ptr(IPCNaughtyPeerException()));
-        return true;
+        return;
     }
 
     std::shared_ptr<void> data;
@@ -391,16 +388,14 @@ bool Processor::onReturnValue(Peers::iterator& peerIt,
         IGNORE_EXCEPTIONS(returnCallbacks.process(resultBuilder));
         removePeerInternal(peerIt,
                            std::make_exception_ptr(IPCParsingException()));
-        return true;
+        return;
     }
 
     ResultBuilder resultBuilder(data);
     IGNORE_EXCEPTIONS(returnCallbacks.process(resultBuilder));
-
-    return false;
 }
 
-bool Processor::onRemoteSignal(Peers::iterator& peerIt,
+void Processor::onRemoteSignal(Peers::iterator& peerIt,
                                __attribute__((unused)) const MethodID methodID,
                                __attribute__((unused)) const MessageID& messageID,
                                std::shared_ptr<SignalHandlers> signalCallbacks)
@@ -415,33 +410,28 @@ bool Processor::onRemoteSignal(Peers::iterator& peerIt,
         LOGE(mLogPrefix + "Exception during parsing: " << e.what());
         removePeerInternal(peerIt,
                            std::make_exception_ptr(IPCParsingException()));
-        return true;
+        return;
     }
 
     try {
-        bool leaveHandler = signalCallbacks->signal(peerIt->peerID, data);
+        auto leaveHandler = signalCallbacks->signal(peerIt->peerID, data);
 
-        if(!leaveHandler) {
-            LOGI("Signal handler requested deletion (returned false): " << methodID);
+        if(leaveHandler == HandlerExitCode::REMOVE_HANDLER) {
+            LOGI("Signal handler requested deletion (returned REMOVE_HANDLER): " << methodID);
             mSignalsCallbacks.erase(methodID);
         }
-
-        return false;
     } catch (const IPCUserException& e) {
         LOGW("Discarded user's exception");
-        return false;
+        return;
     } catch (const std::exception& e) {
         LOGE(mLogPrefix + "Exception in method handler: " << e.what());
         removePeerInternal(peerIt,
                            std::make_exception_ptr(IPCNaughtyPeerException()));
-
-        return true;
+        return;
     }
-
-    return false;
 }
 
-bool Processor::onRemoteMethod(Peers::iterator& peerIt,
+void Processor::onRemoteMethod(Peers::iterator& peerIt,
                                const MethodID methodID,
                                const MessageID& messageID,
                                std::shared_ptr<MethodHandlers> methodCallbacks)
@@ -456,20 +446,20 @@ bool Processor::onRemoteMethod(Peers::iterator& peerIt,
         LOGE(mLogPrefix + "Exception during parsing: " << e.what());
         removePeerInternal(peerIt,
                            std::make_exception_ptr(IPCParsingException()));
-        return true;
+        return;
     }
 
     LOGT(mLogPrefix + "Process callback for methodID: " << methodID << "; messageID: " << messageID);
     try {
         auto methodResultPtr = std::make_shared<MethodResult>(*this, methodID, messageID, peerIt->peerID);
-        bool leaveHandler = methodCallbacks->method(peerIt->peerID, data, methodResultPtr);
+        auto leaveHandler = methodCallbacks->method(peerIt->peerID, data, methodResultPtr);
 
-        if(leaveHandler) {
+        if(leaveHandler == HandlerExitCode::SUCCESS) {
             // Leave the handler
-            return false;
+            return;
         }
 
-        LOGI("Method handler requested deletion (returned false): " << methodID);
+        LOGI("Method handler requested deletion (returned REMOVE_HANDLER): " << methodID);
         if(!methodResultPtr.unique()) {
             LOGE("There is a MethodResult object referencing this method, can't delete: " << methodID);
         }
@@ -479,21 +469,19 @@ bool Processor::onRemoteMethod(Peers::iterator& peerIt,
         // TODO: There can be another request for this method
         auto requestPtr = std::make_shared<RemoveMethodRequest>(methodID);
         mRequestQueue.pushBack(Event::REMOVE_METHOD, requestPtr);
-
-        return false;
     } catch (const IPCUserException& e) {
         LOGW("User's exception");
         sendError(peerIt->peerID, messageID, e.getCode(), e.what());
-        return false;
+        return;
     } catch (const std::exception& e) {
         LOGE(mLogPrefix + "Exception in method handler: " << e.what());
         removePeerInternal(peerIt,
                            std::make_exception_ptr(IPCNaughtyPeerException()));
-        return true;
+        return;
     }
 }
 
-bool Processor::handleEvent()
+void Processor::handleEvent()
 {
     LOGS(mLogPrefix + "Processor handleEvent");
 
@@ -504,25 +492,30 @@ bool Processor::handleEvent()
 
     switch (request.requestID) {
     case Event::METHOD:
-        return onMethodRequest(*request.get<MethodRequest>());
+        onMethodRequest(*request.get<MethodRequest>());
+        break;
     case Event::SIGNAL:
-        return onSignalRequest(*request.get<SignalRequest>());
+        onSignalRequest(*request.get<SignalRequest>());
+        break;
     case Event::ADD_PEER:
-        return onAddPeerRequest(*request.get<AddPeerRequest>());
+        onAddPeerRequest(*request.get<AddPeerRequest>());
+        break;
     case Event::REMOVE_PEER:
-        return onRemovePeerRequest(*request.get<RemovePeerRequest>());
+        onRemovePeerRequest(*request.get<RemovePeerRequest>());
+        break;
     case Event::SEND_RESULT:
-        return onSendResultRequest(*request.get<SendResultRequest>());
+        onSendResultRequest(*request.get<SendResultRequest>());
+        break;
     case Event::REMOVE_METHOD:
-        return onRemoveMethodRequest(*request.get<RemoveMethodRequest>());
+        onRemoveMethodRequest(*request.get<RemoveMethodRequest>());
+        break;
     case Event::FINISH:
-        return onFinishRequest(*request.get<FinishRequest>());
+        onFinishRequest(*request.get<FinishRequest>());
+        break;
     }
-
-    return false;
 }
 
-bool Processor::onMethodRequest(MethodRequest& request)
+void Processor::onMethodRequest(MethodRequest& request)
 {
     LOGS(mLogPrefix + "Processor onMethodRequest");
 
@@ -535,7 +528,7 @@ bool Processor::onMethodRequest(MethodRequest& request)
         ResultBuilder resultBuilder(std::make_exception_ptr(IPCPeerDisconnectedException()));
         IGNORE_EXCEPTIONS(request.process(resultBuilder));
 
-        return false;
+        return;
     }
 
     if (mReturnCallbacks.count(request.messageID) != 0) {
@@ -566,14 +559,10 @@ bool Processor::onMethodRequest(MethodRequest& request)
         mReturnCallbacks.erase(request.messageID);
         removePeerInternal(peerIt,
                            std::make_exception_ptr(IPCSerializationException()));
-        return true;
-
     }
-
-    return false;
 }
 
-bool Processor::onSignalRequest(SignalRequest& request)
+void Processor::onSignalRequest(SignalRequest& request)
 {
     LOGS(mLogPrefix + "Processor onSignalRequest");
 
@@ -581,7 +570,7 @@ bool Processor::onSignalRequest(SignalRequest& request)
 
     if (peerIt == mPeerInfo.end()) {
         LOGE(mLogPrefix + "Peer disconnected. No user for peerID: " << request.peerID);
-        return false;
+        return;
     }
 
     MessageHeader hdr;
@@ -598,24 +587,21 @@ bool Processor::onSignalRequest(SignalRequest& request)
 
         removePeerInternal(peerIt,
                            std::make_exception_ptr(IPCSerializationException()));
-        return true;
     }
-
-    return false;
 }
 
-bool Processor::onAddPeerRequest(AddPeerRequest& request)
+void Processor::onAddPeerRequest(AddPeerRequest& request)
 {
     LOGS(mLogPrefix + "Processor onAddPeerRequest");
 
     if (mPeerInfo.size() > mMaxNumberOfPeers) {
         LOGE(mLogPrefix + "There are too many peers. I don't accept the connection with " << request.peerID);
-        return false;
+        return;
     }
 
     if (getPeerInfoIterator(request.peerID) != mPeerInfo.end()) {
         LOGE(mLogPrefix + "There already was a socket for peerID: " << request.peerID);
-        return false;
+        return;
     }
 
     PeerInfo peerInfo(request.peerID, request.socketPtr);
@@ -639,10 +625,9 @@ bool Processor::onAddPeerRequest(AddPeerRequest& request)
     }
 
     LOGI(mLogPrefix + "New peerID: " << request.peerID);
-    return true;
 }
 
-bool Processor::onRemovePeerRequest(RemovePeerRequest& request)
+void Processor::onRemovePeerRequest(RemovePeerRequest& request)
 {
     LOGS(mLogPrefix + "Processor onRemovePeer");
 
@@ -650,11 +635,9 @@ bool Processor::onRemovePeerRequest(RemovePeerRequest& request)
                        std::make_exception_ptr(IPCRemovedPeerException()));
 
     request.conditionPtr->notify_all();
-
-    return true;
 }
 
-bool Processor::onSendResultRequest(SendResultRequest& request)
+void Processor::onSendResultRequest(SendResultRequest& request)
 {
     LOGS(mLogPrefix + "Processor onMethodRequest");
 
@@ -662,7 +645,7 @@ bool Processor::onSendResultRequest(SendResultRequest& request)
 
     if (peerIt == mPeerInfo.end()) {
         LOGE(mLogPrefix + "Peer disconnected, no result is sent. No user with a peerID: " << request.peerID);
-        return false;
+        return;
     }
 
     std::shared_ptr<MethodHandlers> methodCallbacks;
@@ -670,7 +653,7 @@ bool Processor::onSendResultRequest(SendResultRequest& request)
         methodCallbacks = mMethodsCallbacks.at(request.methodID);
     } catch (const std::out_of_range&) {
         LOGW(mLogPrefix + "No method, might have been deleted. methodID: " << request.methodID);
-        return true;
+        return;
     }
 
     MessageHeader hdr;
@@ -694,20 +677,15 @@ bool Processor::onSendResultRequest(SendResultRequest& request)
         mReturnCallbacks.erase(request.messageID);
         removePeerInternal(peerIt,
                            std::make_exception_ptr(IPCSerializationException()));
-        return true;
-
     }
-
-    return false;
 }
 
-bool Processor::onRemoveMethodRequest(RemoveMethodRequest& request)
+void Processor::onRemoveMethodRequest(RemoveMethodRequest& request)
 {
     mMethodsCallbacks.erase(request.methodID);
-    return false;
 }
 
-bool Processor::onFinishRequest(FinishRequest& requestFinisher)
+void Processor::onFinishRequest(FinishRequest& requestFinisher)
 {
     LOGS(mLogPrefix + "Processor onFinishRequest");
 
@@ -754,7 +732,6 @@ bool Processor::onFinishRequest(FinishRequest& requestFinisher)
     for(auto & c : remainingFinishRequests) {
         c->conditionPtr->notify_all();
     }
-    return true;
 }
 
 std::ostream& operator<<(std::ostream& os, const Processor::Event& event)

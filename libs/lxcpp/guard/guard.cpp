@@ -154,7 +154,9 @@ void Guard::onInitExit(struct ::signalfd_siginfo& sigInfo)
     mService->stop(false);
 }
 
-bool Guard::onSetConfig(const cargo::ipc::PeerID, std::shared_ptr<ContainerConfig>& data, cargo::ipc::MethodResult::Pointer result)
+cargo::ipc::HandlerExitCode Guard::onSetConfig(const cargo::ipc::PeerID,
+                                               std::shared_ptr<ContainerConfig>& data,
+                                               cargo::ipc::MethodResult::Pointer result)
 {
     LOGT("onSetConfig");
 
@@ -177,18 +179,22 @@ bool Guard::onSetConfig(const cargo::ipc::PeerID, std::shared_ptr<ContainerConfi
     }
 
     result->setVoid();
-    return true;
+    return cargo::ipc::HandlerExitCode::SUCCESS;
 }
 
-bool Guard::onGetConfig(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
+cargo::ipc::HandlerExitCode Guard::onGetConfig(const cargo::ipc::PeerID,
+                                               std::shared_ptr<api::Void>&,
+                                               cargo::ipc::MethodResult::Pointer result)
 {
     LOGT("onGetConfig");
 
     result->set(mConfig);
-    return true;
+    return cargo::ipc::HandlerExitCode::SUCCESS;
 }
 
-bool Guard::onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
+cargo::ipc::HandlerExitCode Guard::onStart(const cargo::ipc::PeerID,
+                                           std::shared_ptr<api::Void>&,
+                                           cargo::ipc::MethodResult::Pointer result)
 {
     LOGT("onStart");
 
@@ -228,10 +234,12 @@ bool Guard::onStart(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo
     // Configuration succeed, return the init's PID
     auto ret = std::make_shared<api::Pid>(mConfig->mInitPid);
     result->set(ret);
-    return true;
+    return cargo::ipc::HandlerExitCode::SUCCESS;
 }
 
-bool Guard::onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo::ipc::MethodResult::Pointer result)
+cargo::ipc::HandlerExitCode Guard::onStop(const cargo::ipc::PeerID,
+                                          std::shared_ptr<api::Void>&,
+                                          cargo::ipc::MethodResult::Pointer result)
 {
     LOGT("onStop");
     LOGI("Stopping...");
@@ -242,7 +250,7 @@ bool Guard::onStop(const cargo::ipc::PeerID, std::shared_ptr<api::Void>&, cargo:
     utils::sendSignal(mConfig->mInitPid, SIGTERM);
 
     result->setVoid();
-    return true;
+    return cargo::ipc::HandlerExitCode::SUCCESS;
 }
 
 int Guard::execute()

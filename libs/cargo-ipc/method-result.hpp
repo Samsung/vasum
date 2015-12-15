@@ -77,9 +77,9 @@ private:
 
 template<typename SentDataType, typename ReceivedDataType>
 struct MethodHandler {
-    typedef std::function <bool(PeerID peerID,
-                                std::shared_ptr<ReceivedDataType>& data,
-                                MethodResult::Pointer methodResult) > type;
+    typedef std::function <HandlerExitCode(PeerID peerID,
+                                           std::shared_ptr<ReceivedDataType>& data,
+                                           MethodResult::Pointer methodResult) > type;
 };
 
 } // namespace ipc

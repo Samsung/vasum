@@ -204,18 +204,18 @@ private:
      *
      * This is a method handler, not signal to avoid races.
      */
-    bool onGuardReady(const cargo::ipc::PeerID,
-                      std::shared_ptr<api::Void>&,
-                      cargo::ipc::MethodResult::Pointer);
+    cargo::ipc::HandlerExitCode onGuardReady(const cargo::ipc::PeerID,
+                                             std::shared_ptr<api::Void>&,
+                                             cargo::ipc::MethodResult::Pointer);
 
     /**
      * Host connected to an existing Guard.
      * Guard was previously started by another instance of ContainerImpl.
      * Guard sends back its configuration.
      */
-    bool onGuardConnected(const cargo::ipc::PeerID,
-                          std::shared_ptr<ContainerConfig>& data,
-                          cargo::ipc::MethodResult::Pointer);
+    cargo::ipc::HandlerExitCode onGuardConnected(const cargo::ipc::PeerID,
+                                                 std::shared_ptr<ContainerConfig>& data,
+                                                 cargo::ipc::MethodResult::Pointer);
 
     /**
      * Guards just started Init and passes its PID
@@ -228,9 +228,9 @@ private:
      * - stopped with stop()
      * - exited by itself
      */
-    bool onInitStopped(const cargo::ipc::PeerID,
-                       std::shared_ptr<api::ExitStatus>& data,
-                       cargo::ipc::MethodResult::Pointer);
+    cargo::ipc::HandlerExitCode onInitStopped(const cargo::ipc::PeerID,
+                                              std::shared_ptr<api::ExitStatus>& data,
+                                              cargo::ipc::MethodResult::Pointer);
 };
 
 } // namespace lxcpp

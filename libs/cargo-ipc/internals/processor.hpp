@@ -332,25 +332,21 @@ public:
      * Handler used in external polling.
      *
      * @param fd file description identifying the peer
-     * @return should the polling structure be rebuild
      */
-    bool handleLostConnection(const FileDescriptor fd);
+    void handleLostConnection(const FileDescriptor fd);
 
     /**
      * Handles input from one peer.
      * Handler used in external polling.
      *
      * @param fd file description identifying the peer
-     * @return should the polling structure be rebuild
      */
-    bool handleInput(const FileDescriptor fd);
+    void handleInput(const FileDescriptor fd);
 
     /**
      * Handle one event from the internal event's queue
-     *
-     * @return should the polling structure be rebuild
      */
-    bool handleEvent();
+    void handleEvent();
 
     /**
      * @return file descriptor for the internal event's queue
@@ -499,21 +495,21 @@ private:
                         const std::shared_ptr<SentDataType>& data);
 
     // Request handlers
-    bool onMethodRequest(MethodRequest& request);
-    bool onSignalRequest(SignalRequest& request);
-    bool onAddPeerRequest(AddPeerRequest& request);
-    bool onRemovePeerRequest(RemovePeerRequest& request);
-    bool onSendResultRequest(SendResultRequest& request);
-    bool onRemoveMethodRequest(RemoveMethodRequest& request);
-    bool onFinishRequest(FinishRequest& request);
+    void onMethodRequest(MethodRequest& request);
+    void onSignalRequest(SignalRequest& request);
+    void onAddPeerRequest(AddPeerRequest& request);
+    void onRemovePeerRequest(RemovePeerRequest& request);
+    void onSendResultRequest(SendResultRequest& request);
+    void onRemoveMethodRequest(RemoveMethodRequest& request);
+    void onFinishRequest(FinishRequest& request);
 
-    bool onReturnValue(Peers::iterator& peerIt,
+    void onReturnValue(Peers::iterator& peerIt,
                        const MessageID& messageID);
-    bool onRemoteMethod(Peers::iterator& peerIt,
+    void onRemoteMethod(Peers::iterator& peerIt,
                         const MethodID methodID,
                         const MessageID& messageID,
                         std::shared_ptr<MethodHandlers> methodCallbacks);
-    bool onRemoteSignal(Peers::iterator& peerIt,
+    void onRemoteSignal(Peers::iterator& peerIt,
                         const MethodID methodID,
                         const MessageID& messageID,
                         std::shared_ptr<SignalHandlers> signalCallbacks);
@@ -522,11 +518,11 @@ private:
                             const std::exception_ptr& exceptionPtr);
     void removePeerSyncInternal(const PeerID& peerID, Lock& lock);
 
-    bool onNewSignals(const PeerID& peerID,
-                      std::shared_ptr<RegisterSignalsProtocolMessage>& data);
+    HandlerExitCode onNewSignals(const PeerID& peerID,
+                                 std::shared_ptr<RegisterSignalsProtocolMessage>& data);
 
-    bool onErrorSignal(const PeerID& peerID,
-                       std::shared_ptr<ErrorProtocolMessage>& data);
+    HandlerExitCode onErrorSignal(const PeerID& peerID,
+                                  std::shared_ptr<ErrorProtocolMessage>& data);
 
     Peers::iterator getPeerInfoIterator(const FileDescriptor fd);
     Peers::iterator getPeerInfoIterator(const PeerID& peerID);

@@ -50,7 +50,6 @@
 #include <iostream>
 #include <stdio.h>
 
-
 namespace lxcpp {
 
 ContainerImpl::ContainerImpl(const std::string &name,
@@ -112,9 +111,9 @@ bool ContainerImpl::connect()
     }
 }
 
-bool ContainerImpl::onGuardConnected(const cargo::ipc::PeerID,
-                                     std::shared_ptr<ContainerConfig>& data,
-                                     cargo::ipc::MethodResult::Pointer result)
+cargo::ipc::HandlerExitCode ContainerImpl::onGuardConnected(const cargo::ipc::PeerID,
+                                                            std::shared_ptr<ContainerConfig>& data,
+                                                            cargo::ipc::MethodResult::Pointer result)
 {
     Lock lock(mStateMutex);
 
@@ -126,7 +125,7 @@ bool ContainerImpl::onGuardConnected(const cargo::ipc::PeerID,
     }
 
     result->setVoid();
-    return true;
+    return cargo::ipc::HandlerExitCode::SUCCESS;
 }
 
 void ContainerImpl::onWorkFileEvent(const std::string& name, const uint32_t mask)
@@ -308,9 +307,9 @@ void ContainerImpl::onInitStarted(cargo::ipc::Result<api::Pid>&& result)
     }
 }
 
-bool ContainerImpl::onGuardReady(const cargo::ipc::PeerID,
-                                 std::shared_ptr<api::Void>&,
-                                 cargo::ipc::MethodResult::Pointer methodResult)
+cargo::ipc::HandlerExitCode ContainerImpl::onGuardReady(const cargo::ipc::PeerID,
+                                                        std::shared_ptr<api::Void>&,
+                                                        cargo::ipc::MethodResult::Pointer methodResult)
 {
     Lock lock(mStateMutex);
 
@@ -322,7 +321,7 @@ bool ContainerImpl::onGuardReady(const cargo::ipc::PeerID,
             std::bind(&ContainerImpl::onInitStarted, this, _1));
 
     methodResult->setVoid();
-    return true;
+    return cargo::ipc::HandlerExitCode::SUCCESS;
 }
 
 void ContainerImpl::stop()
@@ -342,9 +341,9 @@ void ContainerImpl::stop()
     stop.execute();
 }
 
-bool ContainerImpl::onInitStopped(const cargo::ipc::PeerID,
-                                  std::shared_ptr<api::ExitStatus>& data,
-                                  cargo::ipc::MethodResult::Pointer methodResult)
+cargo::ipc::HandlerExitCode ContainerImpl::onInitStopped(const cargo::ipc::PeerID,
+                                                         std::shared_ptr<api::ExitStatus>& data,
+                                                         cargo::ipc::MethodResult::Pointer methodResult)
 {
     Lock lock(mStateMutex);
 
@@ -358,7 +357,7 @@ bool ContainerImpl::onInitStopped(const cargo::ipc::PeerID,
     }
 
     methodResult->setVoid();
-    return true;
+    return cargo::ipc::HandlerExitCode::SUCCESS;
 }
 
 void ContainerImpl::freeze()

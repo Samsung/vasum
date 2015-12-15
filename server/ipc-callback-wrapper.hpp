@@ -45,7 +45,7 @@ public:
         return [callback](const cargo::ipc::PeerID, const std::shared_ptr<in>& argIn)
         {
             callback(*argIn);
-            return true;
+            return cargo::ipc::HandlerExitCode::SUCCESS;
         };
     }
 };
@@ -61,7 +61,7 @@ public:
         return [callback](const cargo::ipc::PeerID, const std::shared_ptr<in>& /* argIn */)
         {
             callback();
-            return true;
+            return cargo::ipc::HandlerExitCode::SUCCESS;
         };
     }
 };
@@ -81,7 +81,7 @@ public:
         {
             auto rb = std::make_shared<api::IPCMethodResultBuilder>(argOut);
             callback(*argIn, rb);
-            return true;
+            return cargo::ipc::HandlerExitCode::SUCCESS;
         };
     }
 };
@@ -101,7 +101,7 @@ public:
         {
             auto rb = std::make_shared<api::IPCMethodResultBuilder>(argOut);
             callback(rb);
-            return true;
+            return cargo::ipc::HandlerExitCode::SUCCESS;
         };
     }
 };
