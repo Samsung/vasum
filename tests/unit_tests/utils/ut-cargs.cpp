@@ -57,11 +57,17 @@ BOOST_AUTO_TEST_CASE(CArgsBuilderTest2)
 {
     CArgsBuilder args;
     for (int i = 0; i < 10; ++i) {
-        args.add(std::to_string(i + 10));
+        args.add(i + 10);
     }
 
     for (int i = 0; i < 10; ++i) {
         int t = std::stoi(args[i]);
+        BOOST_CHECK(t == i + 10);
+    }
+
+    const char * const * c_array = args.c_array();
+    for (int i = 0; i < 10; ++i) {
+        int t = std::stoi(std::string(c_array[i]));
         BOOST_CHECK(t == i + 10);
     }
 }

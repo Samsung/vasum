@@ -32,7 +32,7 @@ namespace utils {
 
 class CArgsBuilder {
 public:
-    CArgsBuilder(): mArray(1, nullptr) {}
+    CArgsBuilder() { }
 
     template<typename T>
     CArgsBuilder& add(T v) {
@@ -40,34 +40,31 @@ public:
     }
 
     CArgsBuilder& add(const std::vector<std::string>& v) {
-        mArray.reserve(v.size() + 1);
-        for (const auto& a : v) {
-            add(a.c_str());
-        }
+        mArray.reserve(size() + v.size());
+        mArray.insert(mArray.end(), v.begin(), v.end());
         return *this;
     }
 
     CArgsBuilder& add(const std::string& v) {
-        mCached.push_back(v);
-        return add(mCached.back().c_str());
-    }
-
-    CArgsBuilder& add(char *v) {
-        return add(const_cast<const char *>(v));
-    }
-
-    CArgsBuilder& add(const char *v) {
-        mArray.back() = v;
-        mArray.push_back(nullptr);
+        mArray.push_back(v);
         return *this;
     }
 
+    CArgsBuilder& add(char *v) {
+        return add(std::string(v));
+    }
+
+    CArgsBuilder& add(const char *v) {
+        return add(std::string(v));
+    }
+
     const char* const* c_array() const {
-        return mArray.data();
+        regenerate();
+        return mArgs.data();
     }
 
     size_t size() const {
-        return mArray.size() - 1;
+        return mArray.size();
     }
 
     bool empty() const {
@@ -75,19 +72,23 @@ public:
     }
 
     const char *operator[](int i) const {
-        return mArray[i];
+        return mArray[i].c_str();
     }
 
-    const char* const* begin() const {
-        return &*mArray.begin();
-    }
-
-    const char* const* end() const {
-        return &*(mArray.end() - 1);
-    }
 private:
-    std::vector<const char *> mArray;
-    std::vector<std::string> mCached;
+    void regenerate() const
+    {
+        std::vector<const char*>& args = *const_cast<std::vector<const char*>*>(&mArgs);
+        args.clear();
+        args.reserve(mArray.size() + 1);
+        for (const auto& a : mArray) {
+            args.push_back(a.c_str());
+        }
+        args.push_back(nullptr);
+    }
+
+    std::vector<std::string> mArray;
+    std::vector<const char*> mArgs;
 };
 
 } // namespace utils
