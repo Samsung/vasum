@@ -23,30 +23,20 @@
  */
 
 #include "config.hpp"
+#include "ut.hpp"
 
 #include "cargo-json/cargo-json.hpp"
-#include "ut.hpp"
 #include "logger/logger.hpp"
 
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"
 #include "lxcpp/cgroups/devices.hpp"
 #include "lxcpp/cgroups/cgroup-config.hpp"
-
 #include "lxcpp/commands/cgroups.hpp"
 
 #include "utils/text.hpp"
 
-namespace {
-
-struct Fixture {
-    Fixture() {}
-    ~Fixture() {}
-};
-
-} // namespace
-
-BOOST_FIXTURE_TEST_SUITE(LxcppCGroupsSuite, Fixture)
+BOOST_AUTO_TEST_SUITE(LxcppCGroupsSuite)
 
 using namespace lxcpp;
 

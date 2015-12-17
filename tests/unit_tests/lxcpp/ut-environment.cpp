@@ -23,7 +23,6 @@
  */
 
 #include "config.hpp"
-
 #include "ut.hpp"
 
 #include "lxcpp/environment.hpp"
@@ -31,18 +30,11 @@
 #include "lxcpp/namespace.hpp"
 #include "lxcpp/process.hpp"
 
-#include "utils/execute.hpp"
-
 #include <iostream>
 #include <sched.h>
 #include <stdlib.h>
 
 namespace {
-
-struct Fixture {
-    Fixture() {}
-    ~Fixture() {}
-};
 
 const int TEST_PASSED = 0;
 const int ERROR = 1;
@@ -55,7 +47,7 @@ const std::string TEST_VALUE_REMOVED = "TEST_VALUE_REMOVED";
 
 } // namespace
 
-BOOST_FIXTURE_TEST_SUITE(LxcppEnvironmentSuite, Fixture)
+BOOST_AUTO_TEST_SUITE(LxcppEnvironmentSuite)
 
 using namespace lxcpp;
 
@@ -73,11 +65,9 @@ BOOST_AUTO_TEST_CASE(SetGetEnv)
         } catch(...) {
             ::_exit(ERROR);
         }
-    } else if (pid >  0) {
-        int status = -1;
-        BOOST_REQUIRE(utils::waitPid(pid, status));
-        BOOST_REQUIRE(status == TEST_PASSED);
     }
+
+    BOOST_REQUIRE(lxcpp::waitpid(pid) == TEST_PASSED);
 }
 
 BOOST_AUTO_TEST_CASE(ClearEnvExcept)
@@ -101,11 +91,9 @@ BOOST_AUTO_TEST_CASE(ClearEnvExcept)
         } catch(...) {
             ::_exit(ERROR);
         }
-    } else if (pid >  0) {
-        int status = -1;
-        BOOST_REQUIRE(utils::waitPid(pid, status));
-        BOOST_REQUIRE(status == TEST_PASSED);
     }
+
+    BOOST_REQUIRE(lxcpp::waitpid(pid) == TEST_PASSED);
 }
 
 BOOST_AUTO_TEST_CASE(ClearEnv)
@@ -130,11 +118,9 @@ BOOST_AUTO_TEST_CASE(ClearEnv)
         } catch(...) {
             ::_exit(ERROR);
         }
-    } else if (pid >  0) {
-        int status = -1;
-        BOOST_REQUIRE(utils::waitPid(pid, status));
-        BOOST_REQUIRE(status == TEST_PASSED);
     }
+
+    BOOST_REQUIRE(lxcpp::waitpid(pid) == TEST_PASSED);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

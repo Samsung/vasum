@@ -23,23 +23,14 @@
  */
 
 #include "config.hpp"
-
 #include "ut.hpp"
 
 #include "lxcpp/namespace.hpp"
+
 #include <iostream>
 #include <sched.h>
 
-namespace {
-
-struct Fixture {
-    Fixture() {}
-    ~Fixture() {}
-};
-
-} // namespace
-
-BOOST_FIXTURE_TEST_SUITE(LxcppNamespaceSuite, Fixture)
+BOOST_AUTO_TEST_SUITE(LxcppNamespaceSuite)
 
 using namespace lxcpp;
 

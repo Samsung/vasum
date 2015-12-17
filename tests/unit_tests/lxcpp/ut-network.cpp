@@ -23,16 +23,17 @@
  */
 
 #include "config.hpp"
+#include "ut.hpp"
 
 #include "cargo-json/cargo-json.hpp"
 #include "logger/logger.hpp"
+
 #include "lxcpp/network-config.hpp"
 #include "lxcpp/process.hpp"
+
 #include "utils/execute.hpp"
-#include "ut.hpp"
 
 #include <iostream>
-
 #include <net/if.h>
 
 using namespace lxcpp;

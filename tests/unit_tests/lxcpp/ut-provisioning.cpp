@@ -23,9 +23,10 @@
  */
 
 #include "config.hpp"
-
 #include "ut.hpp"
+
 #include "cargo-json/cargo-json.hpp"
+
 #include "lxcpp/lxcpp.hpp"
 #include "lxcpp/container.hpp"
 #include "lxcpp/container-config.hpp"
@@ -35,6 +36,7 @@
 #include "utils/exception.hpp"
 #include "utils/fs.hpp"
 #include "utils/spin-wait-for.hpp"
+
 #include <sys/mount.h>
 #include <iostream>
 

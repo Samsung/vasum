@@ -23,7 +23,6 @@
  */
 
 #include "config.hpp"
-
 #include "ut.hpp"
 
 #include "lxcpp/lxcpp.hpp"

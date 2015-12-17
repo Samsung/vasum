@@ -23,13 +23,10 @@
  */
 
 #include "config.hpp"
-
 #include "ut.hpp"
 
 #include "lxcpp/process.hpp"
 #include "lxcpp/exception.hpp"
-#include "utils/exception.hpp"
-#include "utils/execute.hpp"
 
 #include <iostream>
 #include <sched.h>
@@ -37,10 +34,8 @@
 
 namespace {
 
-struct Fixture {
-    Fixture() {}
-    ~Fixture() {}
-};
+const int TEST_PASSED = 0;
+const int ERROR = 1;
 
 int clonefn(void*) {
     return 0;
@@ -48,7 +43,7 @@ int clonefn(void*) {
 
 } // namespace
 
-BOOST_FIXTURE_TEST_SUITE(LxcppProcessSuite, Fixture)
+BOOST_AUTO_TEST_SUITE(LxcppProcessSuite)
 
 using namespace lxcpp;
 
@@ -62,9 +57,6 @@ BOOST_AUTO_TEST_CASE(Clone)
 
 BOOST_AUTO_TEST_CASE(Setns)
 {
-    const int TEST_PASSED = 0;
-    const int ERROR = 1;
-
     pid_t pid = lxcpp::fork();
     if (pid == 0) {
         try {
@@ -74,18 +66,13 @@ BOOST_AUTO_TEST_CASE(Setns)
         } catch(...) {
             ::_exit(ERROR);
         }
-    } else if (pid >  0) {
-        int status = -1;
-        BOOST_REQUIRE(utils::waitPid(pid, status));
-        BOOST_REQUIRE(status == TEST_PASSED);
     }
+
+    BOOST_REQUIRE(lxcpp::waitpid(pid) == TEST_PASSED);
 }
 
 BOOST_AUTO_TEST_CASE(SetnsUserNamespace)
 {
-    const int TEST_PASSED = 0;
-    const int ERROR = -1;
-
     pid_t pid = lxcpp::fork();
     if (pid == 0) {
         try {
@@ -96,11 +83,9 @@ BOOST_AUTO_TEST_CASE(SetnsUserNamespace)
         } catch(...) {
             ::_exit(ERROR);
         }
-    } else if (pid > 0) {
-        int status;
-        BOOST_REQUIRE(utils::waitPid(pid, status));
-        BOOST_REQUIRE(status == TEST_PASSED);
     }
+
+    BOOST_REQUIRE(lxcpp::waitpid(pid) == TEST_PASSED);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
