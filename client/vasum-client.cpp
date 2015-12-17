@@ -179,11 +179,6 @@ API VsmStatus vsm_get_status(VsmClient client)
     return getClient(client).vsm_get_status();
 }
 
-API VsmStatus vsm_get_zone_dbuses(VsmClient client, VsmArrayString* keys, VsmArrayString* values)
-{
-    return getClient(client).vsm_get_zone_dbuses(keys, values);
-}
-
 API VsmStatus vsm_get_zone_ids(VsmClient client, VsmArrayString* array)
 {
     return getClient(client).vsm_get_zone_ids(array);

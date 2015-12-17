@@ -461,18 +461,6 @@ VsmStatus vsm_lock_queue(VsmClient client);
 VsmStatus vsm_unlock_queue(VsmClient client);
 
 /**
- * Get dbus address of each zone.
- *
- * @param[in] client vasum-server's client
- * @param[out] keys array of zones name
- * @param[out] values array of zones dbus address
- * @return status of this function call
- * @post keys[i] corresponds to values[i]
- * @remark Use vsm_array_string_free() to free memory occupied by @p keys and @p values.
- */
-VsmStatus vsm_get_zone_dbuses(VsmClient client, VsmArrayString* keys, VsmArrayString* values);
-
-/**
  * Get zones name.
  *
  * @param[in] client vasum-server's client

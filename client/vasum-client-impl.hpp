@@ -137,11 +137,6 @@ public:
     VsmStatus vsm_get_status() const noexcept;
 
     /**
-     *  @see ::vsm_get_zone_dbuses
-     */
-    VsmStatus vsm_get_zone_dbuses(VsmArrayString* keys, VsmArrayString* values) noexcept;
-
-    /**
      *  @see ::vsm_lock_queue
      */
     VsmStatus vsm_lock_queue() noexcept;

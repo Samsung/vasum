@@ -299,14 +299,6 @@ VsmStatus Client::vsm_get_status() const noexcept
     return mStatus.mVsmStatus;
 }
 
-VsmStatus Client::vsm_get_zone_dbuses(VsmArrayString* /*keys*/, VsmArrayString* /*values*/) noexcept
-{
-    return coverException([&] {
-        //TODO: Remove vsm_get_zone_dbuses from API
-        throw OperationFailedException("Not implemented");
-    });
-}
-
 VsmStatus Client::vsm_lock_queue() noexcept
 {
     return coverException([&] {
