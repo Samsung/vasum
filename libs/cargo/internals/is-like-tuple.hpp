@@ -22,8 +22,8 @@
  * @brief   Tuple or pair checker
  */
 
-#ifndef CARGO_IS_LIKE_TUPLE_HPP
-#define CARGO_IS_LIKE_TUPLE_HPP
+#ifndef CARGO_INTERNALS_IS_LIKE_TUPLE_HPP
+#define CARGO_INTERNALS_IS_LIKE_TUPLE_HPP
 
 #include <tuple>
 
@@ -48,5 +48,5 @@ struct isLikeTuple<std::pair<R...>> {
 } // namespace internals
 } // namespace cargo
 
-#endif // CARGO_IS_LIKE_TUPLE_HPP
+#endif // CARGO_INTERNALS_IS_LIKE_TUPLE_HPP
 

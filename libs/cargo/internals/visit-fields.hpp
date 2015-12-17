@@ -23,8 +23,8 @@
  */
 
 
-#ifndef CARGO_VISIT_FIELDS_HPP
-#define CARGO_VISIT_FIELDS_HPP
+#ifndef CARGO_INTERNALS_VISIT_FIELDS_HPP
+#define CARGO_INTERNALS_VISIT_FIELDS_HPP
 
 #include <string>
 #include <tuple>
@@ -64,4 +64,4 @@ void visitFields(T& t, F f, A ... args)
 } // namespace internals
 } // namespace cargo
 
-#endif // CARGO_VISIT_FIELDS_HPP
+#endif // CARGO_INTERNALS_VISIT_FIELDS_HPP

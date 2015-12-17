@@ -22,8 +22,8 @@
  * @brief   Check whether type is accepted by streaming operators
  */
 
-#ifndef CARGO_IS_STREAMABLE_HPP
-#define CARGO_IS_STREAMABLE_HPP
+#ifndef CARGO_INTERNALS_IS_STREAMABLE_HPP
+#define CARGO_INTERNALS_IS_STREAMABLE_HPP
 
 #include <sstream>
 
@@ -59,5 +59,5 @@ struct isStreamableOut {
 } // internals
 } // namespace cargo
 
-#endif // CARGO_IS_STREAMABLE_HPP
+#endif // CARGO_INTERNALS_IS_STREAMABLE_HPP
 

@@ -22,8 +22,8 @@
  * @brief   Internal configuration helper
  */
 
-#ifndef CARGO_IS_VISITABLE_HPP
-#define CARGO_IS_VISITABLE_HPP
+#ifndef CARGO_INTERNALS_IS_VISITABLE_HPP
+#define CARGO_INTERNALS_IS_VISITABLE_HPP
 
 #include <type_traits>
 
@@ -52,4 +52,4 @@ struct isVisitable : public std::integral_constant<bool, isVisitableHelper__<T>:
 } // namespace internals
 } // namespace cargo
 
-#endif // CARGO_IS_VISITABLE_HPP
+#endif // CARGO_INTERNALS_IS_VISITABLE_HPP
