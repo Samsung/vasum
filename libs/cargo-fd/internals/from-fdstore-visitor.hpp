@@ -1,7 +1,7 @@
 /*
- *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
- *  Contact: Jan Olszak (j.olszak@samsung.com)
+ *  Contact: Pawel Kubik (p.kubik@samsung.com)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,126 +18,51 @@
 
 /**
  * @file
- * @author  Jan Olszak (j.olszak@samsung.com)
- * @brief   Visitor for loading from FDStore
+ * @author  Pawel Kubik (p.kubik@samsung.com)
+ * @brief   Default visitor for reading from a file descriptor
  */
 
 #ifndef CARGO_FD_INTERNALS_FROM_FDSTORE_VISITOR_HPP
 #define CARGO_FD_INTERNALS_FROM_FDSTORE_VISITOR_HPP
 
-#include "cargo-fd/internals/fdstore.hpp"
-#include "cargo/internals/is-visitable.hpp"
+#include "cargo-fd/internals/from-fdstore-visitor-base.hpp"
 #include "cargo/types.hpp"
-#include "cargo/internals/visit-fields.hpp"
-
-#include <array>
-#include <string>
-#include <utility>
-#include <vector>
 
 namespace cargo {
 
 namespace internals {
 
-class FromFDStoreVisitor {
+/**
+ * Default file descriptor reading visitor.
+ */
+class FromFDStoreVisitor : public FromFDStoreVisitorBase<FromFDStoreVisitor> {
 public:
     explicit FromFDStoreVisitor(int fd)
-        : mStore(fd)
+        : FromFDStoreVisitorBase(fd)
     {
     }
 
-    FromFDStoreVisitor(const FromFDStoreVisitor&) = default;
-
-    FromFDStoreVisitor& operator=(const FromFDStoreVisitor&) = delete;
+    FromFDStoreVisitor(FromFDStoreVisitorBase<FromFDStoreVisitor>& visitor)
+        : FromFDStoreVisitorBase<FromFDStoreVisitor>(visitor)
+    {
+    }
 
     template<typename T>
-    void visit(const std::string&, T& value)
+    void visitImpl(T& value)
     {
         readInternal(value);
     }
 
 private:
-    FDStore mStore;
-
-    void readInternal(std::string& value)
-    {
-        size_t size;
-        readInternal(size);
-        value.resize(size);
-        mStore.read(&value.front(), size);
-    }
-
-    void readInternal(char* &value)
-    {
-        size_t size;
-        readInternal(size);
-
-        value = new char[size + 1];
-        mStore.read(value, size);
-        value[size] = '\0';
-    }
-
     void readInternal(cargo::FileDescriptor& fd)
     {
         fd = mStore.receiveFD();
     }
 
-    template<typename T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>
-    void readInternal(T& value)
-    {
-        mStore.read(&value, sizeof(T));
-    }
-
-    template<typename T, typename std::enable_if<isVisitable<T>::value, int>::type = 0>
-    void readInternal(T& value)
-    {
-        FromFDStoreVisitor visitor(*this);
-        value.accept(visitor);
-    }
-
-    template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-    void readInternal(T& value)
-    {
-        readInternal(*reinterpret_cast<typename std::underlying_type<T>::type*>(&value));
-    }
-
     template<typename T>
-    void readInternal(std::vector<T>& values)
+    void readInternal(T& v)
     {
-        size_t vectorSize;
-        readInternal(vectorSize);
-        values.resize(vectorSize);
-
-        for (T& value : values) {
-            readInternal(value);
-        }
-    }
-
-    template<typename T, std::size_t N>
-    void readInternal(std::array<T, N>& values)
-    {
-        for (T& value : values) {
-            readInternal(value);
-        }
-    }
-
-    template<typename V>
-    void readInternal(std::map<std::string, V>& values)
-    {
-        size_t mapSize;
-        readInternal(mapSize);
-
-        for (size_t i = 0; i < mapSize; ++i) {
-            std::pair<std::string, V> val;
-            readInternal(val);
-            values.insert(std::move(val));
-        }
-    }
-
-    template<typename T, typename std::enable_if<isLikeTuple<T>::value, int>::type = 0>
-    void readInternal(T& values)
-    {
-        visitFields(values, this, std::string());
+        FromFDStoreVisitorBase<FromFDStoreVisitor>::visitImpl(v);
     }
 };
 
