@@ -74,16 +74,10 @@ const unsigned int DEFAULT_MAX_NUMBER_OF_PEERS = 500;
 * - MessageID - unique id of a message exchange sent by this object instance. Used to identify reply messages.
 * - Rest: The data written in a callback. One type per method.ReturnCallbacks
 *
-* TODO:
-*  - synchronous call to many peers
-*  - implement HandlerStore class for storing both signals and methods
-*  - API for removing signals
-*  - implement CallbackStore - thread safe calling/setting callbacks
-*  - helper function for removing from unordered map
-*  - callbacks for serialization/parsing
-*  - store Sockets in a vector, maybe SocketStore?
-*  - waiting till the EventQueue is empty before leaving stop()
-*  - no new events added after stop() called
+* TODO: API for removing signals
+* TODO: Implement HandlerStore class for storing/handling handlers. This will simplify Processor.
+* TODO: Implement CallbackStore class for storing/handling ReturnCallbacks. This will simplify Processor.
+* TODO: Adding requests after stop() should fail
 *
 */
 class Processor {

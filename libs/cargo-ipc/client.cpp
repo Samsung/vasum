@@ -84,7 +84,6 @@ void Client::stop(bool wait)
 
 void Client::handle(const FileDescriptor fd, const epoll::Events pollEvents)
 {
-    //TODO remove handle method
     LOGS("Client handle");
 
     if (!isStarted()) {

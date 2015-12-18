@@ -542,7 +542,6 @@ bool createEmptyDir(const std::string& path)
 
 bool createFile(const std::string& path, int flags, mode_t mode)
 {
-    // TODO: Check if we really need *flags* in the API
     int ret = ::open(path.c_str(), flags, mode);
     if (ret < 0) {
         LOGE("Failed to create file: path=host:"

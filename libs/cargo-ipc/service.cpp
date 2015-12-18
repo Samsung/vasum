@@ -84,7 +84,6 @@ void Service::stop(bool wait)
 
 void Service::handle(const FileDescriptor fd, const epoll::Events pollEvents)
 {
-    //TODO remove handle method
     LOGS("Service handle");
 
     if (!isStarted()) {
