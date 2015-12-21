@@ -51,48 +51,55 @@ int Guard::startContainer(void* data)
     ContainerConfig& config = static_cast<ContainerData*>(data)->mConfig;
     utils::Channel& channel = static_cast<ContainerData*>(data)->mChannel;
 
-    // wait for continue sync from guard
-    channel.setRight();
-    channel.read<bool>();
-    channel.shutdown();
+    // Brackets are here to call destructors before execv.
+    {
+        // Wait for continue sync from guard
+        channel.setRight();
+        channel.read<bool>();
 
-    // TODO: container preparation part 3: things to do in the container process
+        // TODO: container preparation part 3: things to do in the container process
 
-    lxcpp::setHostName(config.mHostName);
+        lxcpp::setHostName(config.mHostName);
 
-    Provisions provisions(config);
-    provisions.execute();
+        Provisions provisions(config);
+        provisions.execute();
 
-    PrepGuestTerminal terminals(config.mTerminals);
-    terminals.execute();
+        PrepGuestTerminal terminals(config.mTerminals);
+        terminals.execute();
 
-    if (!config.mUserNSConfig.mUIDMaps.empty()) {
-        lxcpp::setreuid(0, 0);
-    }
-    if (!config.mUserNSConfig.mGIDMaps.empty()) {
-        lxcpp::setregid(0, 0);
-    }
-
-    NetConfigureAll network(config.mNetwork);
-    network.execute();
-
-    if (!config.mRlimits.empty()) {
-        for (const auto& limit : config.mRlimits) {
-            lxcpp::setRlimit(std::get<0>(limit), std::get<1>(limit),std::get<2>(limit));
+        if (!config.mUserNSConfig.mUIDMaps.empty()) {
+            lxcpp::setreuid(0, 0);
         }
-    }
-
-    if (!config.mKernelParameters.empty()) {
-        for (const auto& sysctl : config.mKernelParameters) {
-            lxcpp::writeKernelParameter(sysctl.first, sysctl.second);
+        if (!config.mUserNSConfig.mGIDMaps.empty()) {
+            lxcpp::setregid(0, 0);
         }
+
+        NetConfigureAll network(config.mNetwork);
+        network.execute();
+
+        if (!config.mRlimits.empty()) {
+            for (const auto& limit : config.mRlimits) {
+                lxcpp::setRlimit(std::get<0>(limit), std::get<1>(limit),std::get<2>(limit));
+            }
+        }
+
+        if (!config.mKernelParameters.empty()) {
+            for (const auto& sysctl : config.mKernelParameters) {
+                lxcpp::writeKernelParameter(sysctl.first, sysctl.second);
+            }
+        }
+
+        lxcpp::dropCapsFromBoundingExcept(config.mCapsToKeep);
+
+        lxcpp::clearenv();
+        lxcpp::setenv(config.mEnvToSet);
+
+        // Notify that Init's preparation is done
+        channel.write(true);
+        channel.shutdown();
     }
 
-    lxcpp::dropCapsFromBoundingExcept(config.mCapsToKeep);
-
-    lxcpp::clearenv();
-    lxcpp::setenv(config.mEnvToSet);
-
+    // Execute Init
     utils::CArgsBuilder args;
     lxcpp::execv(args.add(config.mInit));
 
@@ -250,6 +257,9 @@ cargo::ipc::HandlerExitCode Guard::onStart(const cargo::ipc::PeerID,
     // send continue sync to container once userns, netns, cgroups, etc, are configured
     channel.setLeft();
     channel.write(true);
+
+    // Wait till Init is executed
+    channel.read<bool>();
     channel.shutdown();
 
     // Init started, change state
