@@ -269,7 +269,7 @@ std::shared_ptr<ReceivedDataType> Service::callSync(const MethodID methodID,
                                                     unsigned int timeoutMS)
 {
     LOGS("Service callSync, methodID: " << methodID
-         << ", peerID: " << peerID
+         << ", peerID: " << shortenPeerID(peerID)
          << ", timeoutMS: " << timeoutMS);
     return mProcessor.callSync<SentDataType, ReceivedDataType>(methodID, peerID, data, timeoutMS);
 }
@@ -280,7 +280,7 @@ void Service::callAsync(const MethodID methodID,
                         const std::shared_ptr<SentDataType>& data,
                         const typename ResultHandler<ReceivedDataType>::type& resultCallback)
 {
-    LOGS("Service callAsync, methodID: " << methodID << ", peerID: " << peerID);
+    LOGS("Service callAsync, methodID: " << methodID << ", peerID: " << shortenPeerID(peerID));
     mProcessor.callAsync<SentDataType,
                          ReceivedDataType>(methodID,
                                            peerID,
@@ -294,7 +294,8 @@ void Service::callAsyncFromCallback(const MethodID methodID,
                                     const std::shared_ptr<SentDataType>& data,
                                     const typename ResultHandler<ReceivedDataType>::type& resultCallback)
 {
-    LOGS("Service callAsyncFromCallback, methodID: " << methodID << ", peerID: " << peerID);
+    LOGS("Service callAsyncFromCallback, methodID: " << methodID
+                                     << ", peerID: " << shortenPeerID(peerID));
     mProcessor.callAsyncNonBlock<SentDataType,
                                  ReceivedDataType>(methodID,
                                                    peerID,

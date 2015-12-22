@@ -41,6 +41,8 @@ PeerID gLastPeerID;
 
 std::mutex gMessageIDMutex;
 std::mutex gPeerIDMutex;
+
+const size_t ID_TRIM_LENGTH = 6;
 } // namespace
 
 MessageID getNextMessageID()
@@ -52,6 +54,11 @@ MessageID getNextMessageID()
     return gLastMessageID;
 }
 
+MessageID shortenMessageID(const MessageID& id)
+{
+    return id.substr(0, ID_TRIM_LENGTH) + "..." + id.substr(id.length() - ID_TRIM_LENGTH);
+}
+
 PeerID getNextPeerID()
 {
     std::unique_lock<std::mutex> lock(gPeerIDMutex);
@@ -59,6 +66,11 @@ PeerID getNextPeerID()
     uid.generate();
     gLastPeerID = uid;
     return gLastPeerID;
+}
+
+PeerID shortenPeerID(const PeerID& id)
+{
+    return id.substr(0, ID_TRIM_LENGTH) + "..." + id.substr(id.length() - ID_TRIM_LENGTH);
 }
 
 

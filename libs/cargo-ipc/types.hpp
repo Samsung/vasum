@@ -80,12 +80,34 @@ typedef std::function<std::shared_ptr<void>(cargo::ipc::FileDescriptor fd)> Pars
 MessageID getNextMessageID();
 
 /**
+ * Shorten the message ID for logging purposes.
+ *
+ * @param id ID to shorten
+ * @return shortened ID
+ *
+ * @remarks The function does not return full ID. It is only a subset of it, so resulting ID should
+ *          be used only for logging.
+ */
+MessageID shortenMessageID(const MessageID& id);
+
+/**
  * Generate an unique peer id.
  *
  * @return new, unique PeerID
  * @ingroup Types
  */
 PeerID getNextPeerID();
+
+/**
+ * Shorten the peer ID for logging purposes.
+ *
+ * @param id ID to shorten
+ * @return shortened ID
+ *
+ * @remarks The function does not return full ID. It is only a subset of it, so resulting ID should
+ *          be used only for logging.
+ */
+PeerID shortenPeerID(const PeerID& id);
 
 /**
  * method/signal handler return code, used to tell the processor

@@ -212,15 +212,15 @@ PeerID Processor::addPeer(const std::shared_ptr<Socket>& socketPtr)
     auto requestPtr = std::make_shared<AddPeerRequest>(socketPtr);
     mRequestQueue.pushBack(Event::ADD_PEER, requestPtr);
 
-    LOGI(mLogPrefix + "Add Peer Request. Id: " << requestPtr->peerID
-         << ", fd: " << socketPtr->getFD());
+    LOGI(mLogPrefix + "Add Peer Request. Id: " << shortenPeerID(requestPtr->peerID)
+                                   << ", fd: " << socketPtr->getFD());
 
     return requestPtr->peerID;
 }
 
 void Processor::removePeerSyncInternal(const PeerID& peerID, Lock& lock)
 {
-    LOGS(mLogPrefix + "Processor removePeer peerID: " << peerID);
+    LOGS(mLogPrefix + "Processor removePeer peerID: " << shortenPeerID(peerID));
 
     auto isPeerDeleted = [&peerID, this]()->bool {
         return getPeerInfoIterator(peerID) == mPeerInfo.end();
@@ -247,8 +247,8 @@ void Processor::removePeerInternal(Peers::iterator peerIt, const std::exception_
         return;
     }
 
-    LOGS(mLogPrefix + "Processor removePeerInternal peerID: " << peerIt->peerID);
-    LOGI(mLogPrefix + "Removing peer. peerID: " << peerIt->peerID);
+    LOGS(mLogPrefix + "Processor removePeerInternal peerID: " << shortenPeerID(peerIt->peerID));
+    LOGI(mLogPrefix + "Removing peer. peerID: " << shortenPeerID(peerIt->peerID));
 
     // Remove from signal addressees
     for (auto it = mSignalsPeers.begin(); it != mSignalsPeers.end();) {
@@ -337,7 +337,7 @@ void Processor::handleInput(const FileDescriptor fd)
 
 ipc::HandlerExitCode Processor::onNewSignals(const PeerID& peerID, std::shared_ptr<RegisterSignalsProtocolMessage>& data)
 {
-    LOGS(mLogPrefix + "Processor onNewSignals peerID: " << peerID);
+    LOGS(mLogPrefix + "Processor onNewSignals peerID: " << shortenPeerID(peerID));
 
     for (const MethodID methodID : data->ids) {
         mSignalsPeers[methodID].push_back(peerID);
@@ -348,7 +348,7 @@ ipc::HandlerExitCode Processor::onNewSignals(const PeerID& peerID, std::shared_p
 
 ipc::HandlerExitCode Processor::onErrorSignal(const PeerID&, std::shared_ptr<ErrorProtocolMessage>& data)
 {
-    LOGS(mLogPrefix + "Processor onErrorSignal messageID: " << data->messageID);
+    LOGS(mLogPrefix + "Processor onErrorSignal messageID: " << shortenMessageID(data->messageID));
 
     // If there is no return callback an out_of_range error will be thrown and peer will be removed
     ReturnCallbacks returnCallbacks = std::move(mReturnCallbacks.at(data->messageID));
@@ -363,7 +363,7 @@ ipc::HandlerExitCode Processor::onErrorSignal(const PeerID&, std::shared_ptr<Err
 void Processor::onReturnValue(Peers::iterator& peerIt,
                               const MessageID& messageID)
 {
-    LOGS(mLogPrefix + "Processor onReturnValue messageID: " << messageID);
+    LOGS(mLogPrefix + "Processor onReturnValue messageID: " << shortenMessageID(messageID));
 
     ReturnCallbacks returnCallbacks;
     try {
@@ -371,7 +371,7 @@ void Processor::onReturnValue(Peers::iterator& peerIt,
         returnCallbacks = std::move(mReturnCallbacks.at(messageID));
         mReturnCallbacks.erase(messageID);
     } catch (const std::out_of_range&) {
-        LOGW(mLogPrefix + "No return callback for messageID: " << messageID);
+        LOGW(mLogPrefix + "No return callback for messageID: " << shortenMessageID(messageID));
         removePeerInternal(peerIt,
                            std::make_exception_ptr(IPCNaughtyPeerException()));
         return;
@@ -399,7 +399,8 @@ void Processor::onRemoteSignal(Peers::iterator& peerIt,
                                __attribute__((unused)) const MessageID& messageID,
                                std::shared_ptr<SignalHandlers> signalCallbacks)
 {
-    LOGS(mLogPrefix + "Processor onRemoteSignal; methodID: " << methodID << " messageID: " << messageID);
+    LOGS(mLogPrefix + "Processor onRemoteSignal; methodID: " << methodID
+                                           << " messageID: " << shortenMessageID(messageID));
 
     std::shared_ptr<void> data;
     try {
@@ -435,7 +436,8 @@ void Processor::onRemoteMethod(Peers::iterator& peerIt,
                                const MessageID& messageID,
                                std::shared_ptr<MethodHandlers> methodCallbacks)
 {
-    LOGS(mLogPrefix + "Processor onRemoteMethod; methodID: " << methodID << " messageID: " << messageID);
+    LOGS(mLogPrefix + "Processor onRemoteMethod; methodID: " << methodID
+                                           << " messageID: " << shortenMessageID(messageID));
 
     std::shared_ptr<void> data;
     try {
@@ -448,7 +450,8 @@ void Processor::onRemoteMethod(Peers::iterator& peerIt,
         return;
     }
 
-    LOGT(mLogPrefix + "Process callback for methodID: " << methodID << "; messageID: " << messageID);
+    LOGT(mLogPrefix + "Process callback for methodID: " << methodID
+                                     << "; messageID: " << shortenMessageID(messageID));
     try {
         auto methodResultPtr = std::make_shared<MethodResult>(*this, methodID, messageID, peerIt->peerID);
         auto leaveHandler = methodCallbacks->method(peerIt->peerID, data, methodResultPtr);
@@ -521,7 +524,8 @@ void Processor::onMethodRequest(MethodRequest& request)
     auto peerIt = getPeerInfoIterator(request.peerID);
 
     if (peerIt == mPeerInfo.end()) {
-        LOGE(mLogPrefix + "Peer disconnected. No user with a peerID: " << request.peerID);
+        LOGE(mLogPrefix + "Peer disconnected. No user with a peerID: "
+             << shortenPeerID(request.peerID));
 
         // Pass the error to the processing callback
         ResultBuilder resultBuilder(std::make_exception_ptr(IPCPeerDisconnectedException()));
@@ -531,7 +535,8 @@ void Processor::onMethodRequest(MethodRequest& request)
     }
 
     if (mReturnCallbacks.count(request.messageID) != 0) {
-        LOGE(mLogPrefix + "There already was a return callback for messageID: " << request.messageID);
+        LOGE(mLogPrefix + "There already was a return callback for messageID: "
+             << shortenMessageID(request.messageID));
     }
     mReturnCallbacks[request.messageID] = ReturnCallbacks(peerIt->peerID,
                                                           std::move(request.parse),
@@ -567,7 +572,8 @@ void Processor::onSignalRequest(SignalRequest& request)
     auto peerIt = getPeerInfoIterator(request.peerID);
 
     if (peerIt == mPeerInfo.end()) {
-        LOGE(mLogPrefix + "Peer disconnected. No user for peerID: " << request.peerID);
+        LOGE(mLogPrefix + "Peer disconnected. No user for peerID: "
+             << shortenPeerID(request.peerID));
         return;
     }
 
@@ -592,12 +598,14 @@ void Processor::onAddPeerRequest(AddPeerRequest& request)
     LOGS(mLogPrefix + "Processor onAddPeerRequest");
 
     if (mPeerInfo.size() > mMaxNumberOfPeers) {
-        LOGE(mLogPrefix + "There are too many peers. I don't accept the connection with " << request.peerID);
+        LOGE(mLogPrefix + "There are too many peers. I don't accept the connection with "
+             << shortenPeerID(request.peerID));
         return;
     }
 
     if (getPeerInfoIterator(request.peerID) != mPeerInfo.end()) {
-        LOGE(mLogPrefix + "There already was a socket for peerID: " << request.peerID);
+        LOGE(mLogPrefix + "There already was a socket for peerID: "
+             << shortenPeerID(request.peerID));
         return;
     }
 
@@ -621,7 +629,7 @@ void Processor::onAddPeerRequest(AddPeerRequest& request)
         mNewPeerCallback(request.peerID, request.socketPtr->getFD());
     }
 
-    LOGI(mLogPrefix + "New peerID: " << request.peerID);
+    LOGI(mLogPrefix + "New peerID: " << shortenPeerID(request.peerID));
 }
 
 void Processor::onRemovePeerRequest(RemovePeerRequest& request)
@@ -641,7 +649,8 @@ void Processor::onSendResultRequest(SendResultRequest& request)
     auto peerIt = getPeerInfoIterator(request.peerID);
 
     if (peerIt == mPeerInfo.end()) {
-        LOGE(mLogPrefix + "Peer disconnected, no result is sent. No user with a peerID: " << request.peerID);
+        LOGE(mLogPrefix + "Peer disconnected, no result is sent. No user with a peerID: "
+             << shortenPeerID(request.peerID));
         return;
     }
 

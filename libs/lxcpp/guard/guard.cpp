@@ -160,7 +160,7 @@ void Guard::onDisconnection(const cargo::ipc::PeerID& peerID, const cargo::ipc::
     LOGT("onDisconnection");
 
     if(mPeerID != peerID) {
-        LOGE("Unknown peerID: " << peerID);
+        LOGE("Unknown peerID: " << cargo::ipc::shortenPeerID(peerID));
     }
     mPeerID.clear();
 }
