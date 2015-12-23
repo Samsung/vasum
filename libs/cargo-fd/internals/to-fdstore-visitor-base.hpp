@@ -129,7 +129,7 @@ private:
     void writeInternal(const std::array<T, N>& values)
     {
         for (const T& value: values) {
-            writeInternal(value);
+            visit(value);
         }
     }
 

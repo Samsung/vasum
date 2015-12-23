@@ -27,7 +27,9 @@
 #define CARGO_FD_CARGO_FD_HPP
 
 #include "cargo-fd/internals/to-fdstore-visitor.hpp"
+#include "cargo-fd/internals/to-fdstore-internet-visitor.hpp"
 #include "cargo-fd/internals/from-fdstore-visitor.hpp"
+#include "cargo-fd/internals/from-fdstore-internet-visitor.hpp"
 
 
 namespace cargo {
@@ -61,6 +63,36 @@ void saveToFD(const int fd, const Cargo& visitable)
     static_assert(internals::isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
 
     internals::ToFDStoreVisitor visitor(fd);
+    visitable.accept(visitor);
+}
+
+/**
+ * Load binary data from an internet socket represented by the fd
+ *
+ * @param fd        file descriptor
+ * @param visitable visitable structure to load
+ */
+template <class Cargo>
+void loadFromInternetFD(const int fd, Cargo& visitable)
+{
+    static_assert(internals::isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
+
+    internals::FromFDStoreInternetVisitor visitor(fd);
+    visitable.accept(visitor);
+}
+
+/**
+ * Save binary data to an internet socket represented by the fd
+ *
+ * @param fd        file descriptor
+ * @param visitable visitable structure to save
+ */
+template <class Cargo>
+void saveToInternetFD(const int fd, const Cargo& visitable)
+{
+    static_assert(internals::isVisitable<Cargo>::value, "Use CARGO_REGISTER macro");
+
+    internals::ToFDStoreInternetVisitor visitor(fd);
     visitable.accept(visitor);
 }
 

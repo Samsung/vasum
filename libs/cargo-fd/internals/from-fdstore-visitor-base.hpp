@@ -126,7 +126,7 @@ private:
         values.resize(vectorSize);
 
         for (T& value : values) {
-            readInternal(value);
+            visit(value);
         }
     }
 

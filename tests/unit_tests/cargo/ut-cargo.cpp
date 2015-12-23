@@ -350,6 +350,27 @@ BOOST_AUTO_TEST_CASE(FromToFD)
     BOOST_CHECK(::close(fd) >= 0);
 }
 
+BOOST_AUTO_TEST_CASE(FromToInternetFD)
+{
+    TestConfig config;
+    loadFromJsonString(jsonTestString, config);
+    // Setup fd
+    std::string fifoPath = UT_PATH + "fdstore";
+    BOOST_CHECK(::mkfifo(fifoPath.c_str(), S_IWUSR | S_IRUSR) >= 0);
+    int fd = ::open(fifoPath.c_str(), O_RDWR);
+    BOOST_REQUIRE(fd >= 0);
+
+    // The test
+    saveToInternetFD(fd, config);
+    TestConfig outConfig;
+    loadFromInternetFD(fd, outConfig);
+    std::string out = saveToJsonString(outConfig);
+    BOOST_CHECK_EQUAL(out, jsonTestString);
+
+    // Cleanup
+    BOOST_CHECK(::close(fd) >= 0);
+}
+
 BOOST_AUTO_TEST_CASE(FromKVWithDefaults)
 {
     TestConfig config;
