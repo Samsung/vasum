@@ -18,7 +18,6 @@
 #
 
 SET(UNIT_TESTS_FOLDER ${TESTS_FOLDER}/unit_tests)
-SET(SOCKET_TEST_FOLDER ${UNIT_TESTS_FOLDER}/socket_test_service)
 
 ADD_SUBDIRECTORY(scripts)
 ADD_SUBDIRECTORY(integration_tests)

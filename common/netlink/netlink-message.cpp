@@ -180,7 +180,7 @@ bool NetlinkResponse::isNestedAttribute() const
 void NetlinkResponse::skipAttribute()
 {
     const rtattr *rta = asAttr(get(RTA_LENGTH(0)));
-    if (size() < mPosition + RTA_ALIGN(rta->rta_len)) {
+    if (size() < mPosition + (int) RTA_ALIGN(rta->rta_len)) {
         LOGE("Skipping out of buffer:"
                 << " to: " << mPosition + RTA_ALIGN(rta->rta_len)
                 << ", buf size: " << size());

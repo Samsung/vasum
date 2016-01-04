@@ -19,23 +19,25 @@
 
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Generating makefile for the Server...")
-FILE(GLOB               project_SRCS *.cpp *.hpp)
+FILE(GLOB   project_SRCS    *.cpp *.hpp
+                            ${COMMON_FOLDER}/netlink/*.cpp ${COMMON_FOLDER}/netlink/*.hpp
+                            ${COMMON_FOLDER}/lxc/*.cpp ${COMMON_FOLDER}/lxc/*.hpp
+                            ${COMMON_FOLDER}/api/*.cpp ${COMMON_FOLDER}/api/*.hpp)
 
 ## Setup target ################################################################
 SET(SERVER_CODENAME "${PROJECT_NAME}-server")
 SET(LAUNCHER_CODENAME "${PROJECT_NAME}-launcher")
 ADD_EXECUTABLE(${SERVER_CODENAME} ${project_SRCS})
 
-ADD_DEPENDENCIES(${SERVER_CODENAME} Common Logger cargo-json cargo-sqlite cargo-ipc)
-
 ## Link libraries ##############################################################
-FIND_PACKAGE(Boost COMPONENTS program_options system filesystem iostreams ${USE_BOOST_REGEX})
-PKG_CHECK_MODULES(SERVER_DEPS REQUIRED lxc glib-2.0 gio-2.0)
+FIND_PACKAGE(Boost REQUIRED COMPONENTS program_options system filesystem iostreams ${USE_BOOST_REGEX})
+PKG_CHECK_MODULES(SERVER_DEPS REQUIRED lxc glib-2.0 libLogger libcargo-json libcargo-sqlite
+                                       libcargo-ipc libcargo-fd libcargo-sqlite-json libcargo-gvariant)
 
-INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(${LIBS_FOLDER})
+INCLUDE_DIRECTORIES(${COMMON_FOLDER})
 INCLUDE_DIRECTORIES(${CLIENT_FOLDER})
-INCLUDE_DIRECTORIES(SYSTEM ${SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${JSON_C_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(SYSTEM ${CARGO_UTILS_INCLUDE_DIRS} ${DBUS_DEPS_INCLUDE_DIRS} ${SERVER_DEPS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 SET_TARGET_PROPERTIES(${SERVER_CODENAME} PROPERTIES
     COMPILE_FLAGS "-pthread"
@@ -47,8 +49,7 @@ TARGET_COMPILE_DEFINITIONS(${SERVER_CODENAME}
     PRIVATE LAUNCHER_PATH="${LIBEXEC_DIR}/${LAUNCHER_CODENAME}"
 )
 
-TARGET_LINK_LIBRARIES(${SERVER_CODENAME} Common ${SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES}
-                      Logger ${CARGO_GVARIANT_DEPS_LIBRARIES} cargo-json cargo-sqlite cargo-ipc)
+TARGET_LINK_LIBRARIES(${SERVER_CODENAME} ${CARGO_UTILS_LIBRARIES} ${SERVER_DEPS_LIBRARIES} ${Boost_LIBRARIES})
 
 IF(NOT WITHOUT_DBUS)
 TARGET_LINK_LIBRARIES(${SERVER_CODENAME} SimpleDbus)

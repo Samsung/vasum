@@ -18,18 +18,19 @@
 #
 
 MESSAGE(STATUS "")
-MESSAGE(STATUS "Generating makefile for the common launcher...")
+MESSAGE(STATUS "Generating makefile for the launcher...")
+SET(LAUNCHER_CODENAME "${PROJECT_NAME}-launcher")
 
 ## Setup target ################################################################
 ADD_EXECUTABLE(${LAUNCHER_CODENAME} launcher.cpp)
 
 ## Link libraries ##############################################################
-FIND_PACKAGE(Boost COMPONENTS system filesystem)
+FIND_PACKAGE(Boost REQUIRED COMPONENTS system filesystem)
 PKG_CHECK_MODULES(LAUNCHER_DEPS REQUIRED glib-2.0)
-INCLUDE_DIRECTORIES(${LIBS_FOLDER} ${COMMON_FOLDER})
-INCLUDE_DIRECTORIES(SYSTEM ${LAUNCHER_DEPS_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${COMMON_FOLDER})
+INCLUDE_DIRECTORIES(SYSTEM ${CARGO_UTILS_INCLUDE_DIRS} ${LAUNCHER_DEPS_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(${LAUNCHER_CODENAME} ${CARGO_UTILS_LIBRARIES} ${Boost_LIBRARIES} ${LAUNCHER_DEPS_LIBRARIES} lxcpp)
 
-TARGET_LINK_LIBRARIES(${LAUNCHER_CODENAME} Common ${Boost_LIBRARIES} lxcpp ${LAUNCHER_DEPS_LIBRARIES})
 
 ## Install #####################################################################
 INSTALL(TARGETS ${LAUNCHER_CODENAME} DESTINATION ${LIBEXEC_DIR})

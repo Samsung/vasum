@@ -32,7 +32,7 @@
 
 #include "logger/logger.hpp"
 #include "utils/file-wait.hpp"
-#include "cargo-ipc/epoll/thread-dispatcher.cpp"
+#include "cargo-ipc/epoll/thread-dispatcher.hpp"
 
 #include <unistd.h>
 #include <stdio.h>

@@ -12,6 +12,4 @@ OPT+=" -I libs"
 OPT+=" -I client"
 OPT+=" -I server"
 OPT+=" -I tests/unit_tests"
-OPT+=" -I tests/unit_tests/socket_test_service"
-OPT+=" -U__NR_capset"
 cppcheck ${OPT} --template=gcc $@ ./ 1>/dev/null

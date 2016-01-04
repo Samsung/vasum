@@ -1,9 +1,0 @@
-[Socket]
-ListenStream=/run/vasum-socket-test.socket
-SocketMode=0755
-SmackLabelIPIn=*
-SmackLabelIPOut=@
-Service=vasum-socket-test.service
-
-[Install]
-WantedBy=sockets.target

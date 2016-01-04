@@ -38,7 +38,7 @@
 
 
 # Vasum
-[Vasum](https://wiki.tizen.org/wiki/Security:Vasum) is a Linux daemon and a set of utilities used for managing para-virtualization. It uses Linux Containers to create separate, graphical environments called *zones*. One can concurrently run several zones on one physical device. Vasum exports a rich C/Dbus API that the application frameworks can use to interact with zones. 
+[Vasum](https://wiki.tizen.org/wiki/Security:Vasum) is a Linux daemon and a set of utilities used for managing para-virtualization. It uses Linux Containers to create separate, graphical environments called *zones*. One can concurrently run several zones on one physical device. Vasum exports a rich C/Dbus API that the application frameworks can use to interact with zones.
 
 For now Vasum uses [LXC](https://linuxcontainers.org/lxc/introduction/) for Linux Containers management. The project is mostly written in modern C++, is [well tested](https://wiki.tizen.org/wiki/Weekly_test_results_for_Tizen_3.X_security_framework).
 
