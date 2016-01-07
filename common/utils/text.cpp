@@ -52,10 +52,13 @@ std::vector<std::string> split(const std::string& str, const std::string& delim)
 
     for (std::string::size_type startPos = 0; ; ) {
         std::string::size_type endPos = str.find_first_of(delim, startPos);
-        tokens.push_back(str.substr(startPos, endPos));
+
         if (endPos == std::string::npos) {
+            tokens.push_back(str.substr(startPos, endPos));
             break;
         }
+        tokens.push_back(str.substr(startPos, endPos - startPos));
+
         startPos = endPos + 1;
     }
     return tokens;
