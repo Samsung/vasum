@@ -30,6 +30,7 @@
 #include "lxcpp/terminal-config.hpp"
 #include "lxcpp/provision-config.hpp"
 #include "lxcpp/userns-config.hpp"
+#include "lxcpp/smackns-config.hpp"
 #include "lxcpp/cgroups/cgroup-config.hpp"
 
 #include <cargo/fields.hpp>
@@ -190,6 +191,14 @@ struct ContainerConfig {
     UserNSConfig mUserNSConfig;
 
     /**
+     * Smack namespace config (mapping from original label to a new one).
+     *
+     * Set: addSmackLabelMap()
+     * Get: none
+     */
+    SmackNSConfig mSmackNSConfig;
+
+    /**
      * CGropus configuration
      */
     CGroupsConfig mCgroups;
@@ -241,6 +250,7 @@ struct ContainerConfig {
         mNamespaces,
         mProvisions,
         mUserNSConfig,
+        mSmackNSConfig,
         mCgroups,
         mCapsToKeep,
         mEnvToSet,

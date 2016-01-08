@@ -292,6 +292,14 @@ void ContainerImpl::addGIDMap(gid_t contID, gid_t hostID, unsigned num)
     mConfig->mUserNSConfig.mGIDMaps.emplace_back(contID, hostID, num);
 }
 
+void ContainerImpl::addSmackLabelMap(const std::string &originalLabel,
+                                     const std::string &mappedLabel)
+{
+    Lock lock(mStateMutex);
+
+    mConfig->mSmackNSConfig.mLabelMap.emplace_back(originalLabel, mappedLabel);
+}
+
 void ContainerImpl::start(const unsigned int timeoutMS)
 {
     Lock lock(mStateMutex);

@@ -47,6 +47,7 @@ enum class SmackLabelType : int {
 };
 
 bool isSmackActive();
+bool isSmackNamespaceActive();
 std::string smackXattrName(SmackLabelType type);
 std::string smackGetSelfLabel();
 std::string smackGetFileLabel(const std::string &path,

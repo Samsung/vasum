@@ -56,6 +56,11 @@ bool isSmackActive()
     return false;
 }
 
+bool isSmackNamespaceActive()
+{
+    return utils::exists("/proc/self/attr/label_map");
+}
+
 std::string smackXattrName(SmackLabelType type)
 {
     switch (type) {

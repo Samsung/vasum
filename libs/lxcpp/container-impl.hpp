@@ -76,6 +76,8 @@ public:
     void addUIDMap(uid_t contID, uid_t hostID, unsigned num);
     void addGIDMap(gid_t contID, gid_t hostID, unsigned num);
 
+    void addSmackLabelMap(const std::string& originalLabel, const std::string& mappedLabel);
+
     // Execution actions
     void start(const unsigned int timeoutMS);
     void stop(const unsigned int timeoutMS);

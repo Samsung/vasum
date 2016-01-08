@@ -84,6 +84,9 @@ public:
     virtual void addUIDMap(uid_t contID, uid_t hostID, unsigned num) = 0;
     virtual void addGIDMap(gid_t contID, gid_t hostID, unsigned num) = 0;
 
+    virtual void addSmackLabelMap(const std::string &originalLabel,
+                                  const std::string &mappedLabel) = 0;
+
     /**
      * Execution actions
      */

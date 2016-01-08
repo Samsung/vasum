@@ -28,6 +28,7 @@
 #include "lxcpp/lxcpp.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/filesystem.hpp"
+#include "lxcpp/smack.hpp"
 
 #include "utils/scoped-dir.hpp"
 #include "utils/fs.hpp"
@@ -297,5 +298,25 @@ BOOST_AUTO_TEST_CASE(GIDBadMapping)
     BOOST_REQUIRE_THROW(c->addGIDMap(0, 1000, 1),ConfigureException);
 }
 
+BOOST_AUTO_TEST_CASE(SmackMapping)
+{
+    // below test should be executed only when Smack Namespace is available
+    if (!isSmackNamespaceActive()) {
+        return;
+    }
+
+    auto c = std::unique_ptr<Container>(createContainer("SmackMapping", ROOT_DIR, WORK_DIR));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
+
+    c->addSmackLabelMap("original", "mapped");
+    c->addSmackLabelMap("second", "secondMapped");
+
+    BOOST_CHECK_NO_THROW(c->start(TIMEOUT));
+    BOOST_CHECK_NO_THROW(c->stop(TIMEOUT));
+    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
+}
 
 BOOST_AUTO_TEST_SUITE_END()

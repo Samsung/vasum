@@ -36,6 +36,7 @@
 #include "lxcpp/commands/prep-guest-terminal.hpp"
 #include "lxcpp/commands/provision.hpp"
 #include "lxcpp/commands/setup-userns.hpp"
+#include "lxcpp/commands/setup-smackns.hpp"
 #include "lxcpp/commands/cgroups.hpp"
 #include "lxcpp/commands/netcreate.hpp"
 #include "lxcpp/commands/prep-dev-fs.hpp"
@@ -269,6 +270,9 @@ cargo::ipc::HandlerExitCode Guard::onStart(const cargo::ipc::PeerID,
 
     NetCreateAll network(mConfig->mNetwork, mConfig->mInitPid);
     network.execute();
+
+    SetupSmackNS smackNS(mConfig->mSmackNSConfig, mConfig->mInitPid);
+    smackNS.execute();
 
     CGroupAssignPidAll cgroupAssignPid(mConfig->mCgroups, mConfig->mInitPid);
     cgroupAssignPid.execute();

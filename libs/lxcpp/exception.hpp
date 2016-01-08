@@ -116,6 +116,11 @@ struct UserNSException: public Exception {
         : Exception(message) {}
 };
 
+struct SmackNSException: public Exception {
+    explicit SmackNSException(const std::string& message = "Smack namespace error")
+        : Exception(message) {}
+};
+
 struct ForbiddenActionException: public Exception {
     explicit ForbiddenActionException(const std::string& message = "Forbidden action")
         : Exception(message) {}
