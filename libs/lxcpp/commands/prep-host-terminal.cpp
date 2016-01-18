@@ -26,6 +26,7 @@
 #include "lxcpp/commands/prep-host-terminal.hpp"
 #include "lxcpp/terminal.hpp"
 
+#include "utils/fd-utils.hpp"
 #include "logger/logger.hpp"
 
 
@@ -49,6 +50,15 @@ void PrepHostTerminal::execute()
         const auto pty = lxcpp::openPty(false);
         LOGD(pty.second << " has been created");
         mTerminals.PTYs.emplace_back(pty.first, pty.second);
+    }
+}
+
+void PrepHostTerminal::revert()
+{
+    LOGD("Closing " << mTerminals.count << " pseudoterminal(s) on the host side.");
+
+    for (const auto it : mTerminals.PTYs) {
+        utils::close(it.masterFD.value);
     }
 }
 

@@ -45,6 +45,7 @@ public:
     ~PrepHostTerminal();
 
     void execute();
+    void revert();
 
 private:
     TerminalsConfig &mTerminals;

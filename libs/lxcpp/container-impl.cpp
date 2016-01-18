@@ -367,8 +367,6 @@ void ContainerImpl::stop(const unsigned int timeoutMS)
             throw ForbiddenActionException(msg);
         }
 
-        // TODO: things to do when shutting down the container:
-        // - close PTY master FDs from the config so we won't keep PTYs open
         setState(Container::State::STOPPING);
     }
 
@@ -390,6 +388,9 @@ cargo::ipc::HandlerExitCode ContainerImpl::onInitStopped(const cargo::ipc::PeerI
     if (mStoppedCallback) {
         mStoppedCallback();
     }
+
+    PrepHostTerminal terminal(mConfig->mTerminals);
+    terminal.revert();
 
     methodResult->setVoid();
     return cargo::ipc::HandlerExitCode::SUCCESS;
