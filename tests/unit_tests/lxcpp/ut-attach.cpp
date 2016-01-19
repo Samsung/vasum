@@ -39,30 +39,33 @@
 
 namespace {
 
-const std::string ROOT_DIR                  = "/";
+const std::string SIMPLE_INIT               = "/simple_init";
+const std::string SIMPLE_RAND               = "/simple_rand";
 const std::string TEST_DIR                  = "/tmp/ut-attach";
+const std::string ROOT_DIR                  = TEST_DIR + "/root";
 const std::string WORK_DIR                  = TEST_DIR + "/work";
 const std::string LOGGER_FILE               = TEST_DIR + "/loggerFile";
 
 const std::string TESTS_CMD_ROOT            = VSM_TEST_CONFIG_INSTALL_DIR "/utils/";
-const std::string TEST_CMD_RANDOM           = "random.sh";
 const std::string TEST_CMD_RANDOM_PRODUCT   = "random_product.txt";
-const std::string TEST_CMD_FAILURE          = "failure.sh";
 
 const int TIMEOUT = 3000; //ms
 
-const std::vector<std::string> COMMAND = {"/bin/bash",
-                                          "-c", "trap exit SIGTERM; while true; do sleep 0.1; done"
-                                         };
+const std::vector<std::string> COMMAND = {SIMPLE_INIT};
 
 struct Fixture {
     utils::ScopedDir mTestDir;
+    utils::ScopedDir mRootDir;
     utils::ScopedDir mWork;
 
     Fixture()
         :mTestDir(TEST_DIR),
+         mRootDir(ROOT_DIR),
          mWork(WORK_DIR)
     {
+        BOOST_REQUIRE(utils::copyFile(SIMPLE_INIT_PATH, ROOT_DIR + SIMPLE_INIT));
+        BOOST_REQUIRE(utils::copyFile(SIMPLE_RAND_PATH, ROOT_DIR + SIMPLE_RAND));
+
         container = std::unique_ptr<lxcpp::Container>(lxcpp::createContainer("Attach", ROOT_DIR, WORK_DIR));
         BOOST_CHECK_NO_THROW(container->setInit(COMMAND));
         BOOST_CHECK_NO_THROW(container->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
@@ -113,12 +116,12 @@ BOOST_AUTO_TEST_CASE(Attach)
 {
     BOOST_REQUIRE_NO_THROW(container->start());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return container->getState() == Container::State::RUNNING;}));
-    attach({TESTS_CMD_ROOT + TEST_CMD_RANDOM, TEST_CMD_RANDOM_PRODUCT}, TEST_DIR);
+    attach({SIMPLE_RAND, "16", TEST_CMD_RANDOM_PRODUCT}, "/");
     BOOST_REQUIRE_NO_THROW(container->stop());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return container->getState() == Container::State::STOPPED;}));
 
     std::string random;
-    BOOST_REQUIRE_NO_THROW(utils::readFileContent(TEST_DIR + "/" + TEST_CMD_RANDOM_PRODUCT, random));
+    BOOST_REQUIRE_NO_THROW(utils::readFileContent(ROOT_DIR + "/" + TEST_CMD_RANDOM_PRODUCT, random));
     BOOST_REQUIRE_GT(random.size(), 0);
 }
 
@@ -126,8 +129,7 @@ BOOST_AUTO_TEST_CASE(AttachGetResponseCode)
 {
     BOOST_REQUIRE_NO_THROW(container->start());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return container->getState() == Container::State::RUNNING;}));
-    BOOST_REQUIRE_EQUAL(attach({TESTS_CMD_ROOT + TEST_CMD_FAILURE, "0"}, TEST_DIR), 167);
-    BOOST_REQUIRE_EQUAL(attach({TESTS_CMD_ROOT + TEST_CMD_FAILURE, "2"}, TEST_DIR), 167);
+    BOOST_REQUIRE(attach({SIMPLE_RAND}, "/") != 0);
     BOOST_REQUIRE_NO_THROW(container->stop());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return container->getState() == Container::State::STOPPED;}));
 }

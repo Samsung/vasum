@@ -46,27 +46,30 @@ using namespace lxcpp;
 using namespace cargo;
 using namespace provision;
 
-// TODO: create tests with ROOT_DIR != "/"
-const std::string ROOT_DIR            = "/";
+const std::string SIMPLE_INIT         = "/simple_init";
+const std::string SIMPLE_LS           = "/simple_ls";
 const std::string TEST_DIR            = "/tmp/ut-provisioning/";
+const std::string ROOT_DIR            = TEST_DIR + "/root/";
 const std::string WORK_DIR            = "/tmp/ut-work/";
 const std::string EXTERNAL_DIR        = "/tmp/ut-temporary/";
-const std::string USR_BIN_DIR         = "/usr/bin/";
-const std::string TEST_MOUNT_VIRT_DIR = TEST_DIR + "bin";
+const std::string BIN_DIR             = "/bin/";
+const std::string TEST_MOUNT_VIRT_DIR = "bin";
 const std::string LOGGER_FILE         = TEST_DIR + "provision.log";
 const std::string TEST_FILE           = "test_file";
 const std::string TEST_EXT_FILE       = "bash";
 
 const std::string TESTS_CMD_ROOT      = VSM_TEST_CONFIG_INSTALL_DIR "/utils/";
-const std::string TEST_CMD_LIST       = "list_files.sh";
-const std::string TEST_CMD_LIST_RET   = "/tmp/list_files_ret.txt";
+const std::string TEST_CMD_LIST_RET   = "list_files_ret.txt";
 
-const std::vector<std::string> COMMAND = {SIMPLE_INIT_PATH};
-const int TIMEOUT = 3000; //ms
+const std::vector<std::string> COMMAND = {SIMPLE_INIT};
+const int TIMEOUT = 5000; //ms
 
 struct Fixture {
-    Fixture() : mTestPath(TEST_DIR), mWork(WORK_DIR)
+    Fixture() : mTestPath(TEST_DIR), mRoot(ROOT_DIR), mWork(WORK_DIR)
     {
+        BOOST_REQUIRE(utils::copyFile(SIMPLE_INIT_PATH, ROOT_DIR + SIMPLE_INIT));
+        BOOST_REQUIRE(utils::copyFile(SIMPLE_LS_PATH, ROOT_DIR + SIMPLE_LS));
+
         // setup test
         c = std::unique_ptr<Container>(createContainer("ProvisioningTester", ROOT_DIR, WORK_DIR));
         c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
@@ -75,12 +78,12 @@ struct Fixture {
         c->setInit(COMMAND);
 
         // cleanup
-        utils::removeFile(TEST_DIR + TEST_FILE);
+        utils::removeFile(ROOT_DIR + TEST_FILE);
     }
 
     ~Fixture()
     {
-        //grab log file
+        // grab log file
         std::string log = LOGGER_FILE;
         if (utils::exists(log)) {
             RELOG(std::ifstream(log));
@@ -91,18 +94,19 @@ struct Fixture {
     bool attachListFiles(const std::string& dir, const std::string& lookupItem) {
         bool found = false;
 
-        c->attach({TESTS_CMD_ROOT + TEST_CMD_LIST, dir, TEST_CMD_LIST_RET},
+        c->attach({SIMPLE_LS, dir, TEST_CMD_LIST_RET},
                   0, 0,  // uid, gid
                   std::string(), // ttyPath
                   {},    // supplementaryGids
                   0,     // capsToKeep
-                  TEST_DIR,
+                  "/",
                   {},    // envToKeep
                   {}     // envToSet
                   );
-        std::string file_list = utils::readFileContent(TEST_CMD_LIST_RET);
-        if(file_list.find(lookupItem) != std::string::npos)
+        std::string file_list = utils::readFileContent(ROOT_DIR + TEST_CMD_LIST_RET);
+        if(file_list.find(lookupItem) != std::string::npos) {
             found = true;
+        }
         utils::removeFile(TEST_CMD_LIST_RET);
         return found;
     }
@@ -110,13 +114,14 @@ struct Fixture {
     std::unique_ptr<Container> c;
 
     utils::ScopedDir mTestPath;
+    utils::ScopedDir mRoot;
     utils::ScopedDir mWork;
 };
 
 struct MountFixture : Fixture {
     MountFixture() :  mExternalPath(EXTERNAL_DIR),
         mItem( {
-        EXTERNAL_DIR, TEST_MOUNT_VIRT_DIR, "tmpfs", MS_BIND | MS_RDONLY, ""
+        EXTERNAL_DIR, ROOT_DIR + TEST_MOUNT_VIRT_DIR, "tmpfs", MS_BIND | MS_RDONLY, ""
     })
     {
         // cleanup
@@ -124,7 +129,7 @@ struct MountFixture : Fixture {
 
         // setup test
         utils::createDirs(mItem.target, 0777);
-        utils::copyFile(USR_BIN_DIR + TEST_EXT_FILE, EXTERNAL_DIR + TEST_EXT_FILE);
+        utils::copyFile(BIN_DIR + TEST_EXT_FILE, EXTERNAL_DIR + TEST_EXT_FILE);
     }
     ~MountFixture() {
         // race: who does the umount first? stopping container or test?
@@ -256,15 +261,15 @@ BOOST_AUTO_TEST_CASE(ConfigSerialization)
 
 BOOST_AUTO_TEST_CASE(CreateFileOnStartup)
 {
-    BOOST_REQUIRE_THROW(utils::readFileContent(TEST_DIR + TEST_FILE), utils::UtilsException);
+    BOOST_REQUIRE_THROW(utils::readFileContent(ROOT_DIR + TEST_FILE), utils::UtilsException);
 
-    c->declareFile(File::Type::REGULAR, TEST_DIR + TEST_FILE, 0747, 0777);
+    c->declareFile(File::Type::REGULAR, ROOT_DIR + TEST_FILE, 0747, 0777);
     std::vector<File> fileList = c->getFiles();
     BOOST_REQUIRE_EQUAL(fileList.size(), 1);
 
     BOOST_REQUIRE_NO_THROW(c->start());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
-    BOOST_ASSERT(attachListFiles(TEST_DIR, TEST_FILE));
+    BOOST_ASSERT(attachListFiles("/", TEST_FILE));
     BOOST_REQUIRE_NO_THROW(c->stop());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
 
@@ -276,26 +281,8 @@ BOOST_AUTO_TEST_CASE(CreateFileOnStartup)
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return helper->getState() == Container::State::RUNNING;}));
     BOOST_REQUIRE_NO_THROW(helper->stop());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return helper->getState() == Container::State::STOPPED;}));
-    BOOST_REQUIRE_NO_THROW(utils::readFileContent(TEST_DIR + TEST_FILE));
+    BOOST_REQUIRE_NO_THROW(utils::readFileContent(ROOT_DIR + TEST_FILE));
 }
-
-// TODO: rethink this functionality, it might not be possible at all
-#if 0
-BOOST_AUTO_TEST_CASE(CreateFileWhileRunning)
-{
-    BOOST_REQUIRE_THROW(utils::readFileContent(TEST_DIR + TEST_FILE), utils::UtilsException);
-    BOOST_REQUIRE_EQUAL(c->getFiles().size(), 0);
-
-    BOOST_REQUIRE_NO_THROW(c->start());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
-    BOOST_ASSERT(attachListFiles(TEST_DIR, TEST_FILE) == false);
-    c->declareFile(File::Type::REGULAR, TEST_DIR + TEST_FILE, 0747, 0777);
-    BOOST_REQUIRE_EQUAL(c->getFiles().size(), 1);
-    BOOST_ASSERT(attachListFiles(TEST_DIR, TEST_FILE));
-    BOOST_REQUIRE_NO_THROW(c->stop());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
-}
-#endif
 
 BOOST_FIXTURE_TEST_CASE(MountDirectory, MountFixture)
 {
@@ -307,57 +294,16 @@ BOOST_FIXTURE_TEST_CASE(MountDirectory, MountFixture)
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
 }
 
-// TODO: rethink this functionality, it might not be possible at all
-#if 0
-BOOST_FIXTURE_TEST_CASE(MountUnmountDirectoryWhileRunning, MountFixture)
-{
-    std::vector<Mount> mountList = c->getMounts();
-    BOOST_REQUIRE_EQUAL(mountList.size(), 0);
-
-    BOOST_REQUIRE_NO_THROW(c->start());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
-
-    // mount
-    BOOST_REQUIRE_NO_THROW(declareMount());
-    BOOST_REQUIRE(attachListFiles(TEST_MOUNT_VIRT_DIR, TEST_EXT_FILE));
-
-    // unmount
-    BOOST_REQUIRE_NO_THROW(c->removeMount(mItem));
-    BOOST_REQUIRE(attachListFiles(TEST_MOUNT_VIRT_DIR, TEST_EXT_FILE) == false);
-
-    BOOST_REQUIRE_NO_THROW(c->stop());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
-}
-#endif
-
 BOOST_FIXTURE_TEST_CASE(LinkFile, Fixture)
 {
-    c->declareFile(File::Type::REGULAR, TEST_DIR + TEST_FILE, 0747, 0777);
-    BOOST_REQUIRE_NO_THROW(c->declareLink(TEST_DIR + TEST_FILE,
-                                          TEST_DIR + TEST_EXT_FILE));
+    c->declareFile(File::Type::REGULAR, ROOT_DIR + TEST_FILE, 0747, 0777);
+    BOOST_REQUIRE_NO_THROW(c->declareLink(ROOT_DIR + TEST_FILE,
+                                          ROOT_DIR + TEST_EXT_FILE));
     BOOST_REQUIRE_NO_THROW(c->start());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
-    BOOST_ASSERT(attachListFiles(TEST_DIR, TEST_EXT_FILE));
+    BOOST_ASSERT(attachListFiles("/", TEST_EXT_FILE));
     BOOST_REQUIRE_NO_THROW(c->stop());
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
 }
-
-// TODO: rethink this functionality, it might not be possible at all
-#if 0
-BOOST_AUTO_TEST_CASE(LinkFileWhileRunning)
-{
-    std::vector<Link> linkList = c->getLinks();
-    BOOST_REQUIRE_EQUAL(linkList.size(), 0);
-
-    BOOST_REQUIRE_NO_THROW(c->start());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::RUNNING;}));
-    c->declareFile(File::Type::REGULAR, TEST_DIR + TEST_FILE, 0747, 0777);
-    BOOST_REQUIRE_NO_THROW(c->declareLink(TEST_DIR + TEST_FILE,
-                                          TEST_DIR + TEST_EXT_FILE));
-    BOOST_ASSERT(attachListFiles(TEST_DIR, TEST_EXT_FILE));
-    BOOST_REQUIRE_NO_THROW(c->stop());
-    BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
-}
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

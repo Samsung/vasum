@@ -85,6 +85,8 @@ int main(int argc, char *argv[])
     args.push_back("/bin/bash");
     //args.push_back("/usr/lib/systemd/systemd");
     //args.push_back("/usr/local/libexec/lxcpp-simple-init");
+    //args.push_back("/usr/local/libexec/lxcpp-simple-ls");
+    //args.push_back("/usr/local/libexec/lxcpp-simple-rand");
 
     mkdir(WORK_DIR, 0755);
 

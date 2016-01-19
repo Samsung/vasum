@@ -304,6 +304,8 @@ systemctl daemon-reload || :
 %attr(755,root,root) %{script_dir}/vsm_int_tests.py
 %attr(755,root,root) %{script_dir}/vsm_launch_test.py
 %attr(755,root,root) %{_libexecdir}/lxcpp-simple-init
+%attr(755,root,root) %{_libexecdir}/lxcpp-simple-ls
+%attr(755,root,root) %{_libexecdir}/lxcpp-simple-rand
 %{script_dir}/vsm_test_parser.py
 %config /etc/vasum/tests/*.conf
 %if !%{without_dbus}
@@ -315,7 +317,6 @@ systemctl daemon-reload || :
 %attr(755,root,root) /etc/vasum/tests/templates/*.sh
 %dir /etc/vasum/tests/utils
 %config /etc/vasum/tests/utils/*.txt
-%attr(755,root,root) /etc/vasum/tests/utils/*.sh
 %{python_sitelib}/vsm_integration_tests
 %if !%{without_systemd}
 %{_unitdir}/vasum-socket-test.socket
