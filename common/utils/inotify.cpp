@@ -67,6 +67,7 @@ Inotify::~Inotify()
     }
 
     mEventPoll.removeFD(mFD);
+    utils::close(mFD);
 }
 
 int Inotify::getFD() const
