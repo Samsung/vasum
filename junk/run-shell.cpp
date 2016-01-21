@@ -16,6 +16,7 @@
 #include <string.h>
 
 #define WORK_DIR "/run/lxcpp"
+#define CONT_DIR "/var/lib/lxc/lxcpp/rootfs"
 
 
 using namespace lxcpp;
@@ -93,7 +94,7 @@ int main(int argc, char *argv[])
     try
     {
         //Container *c = createContainer("test", "/", WORK_DIR);
-        Container *c = createContainer("test", "/var/cache/lxc/fedora/x86_64/22/rootfs", WORK_DIR);
+        Container *c = createContainer("test", CONT_DIR, WORK_DIR);
 
         c->setHostName("junk");
         c->setInit(args);
@@ -115,8 +116,8 @@ int main(int argc, char *argv[])
         c->addInterfaceConfig(InterfaceConfigType::VETH_BRIDGED, "lxcpp-br0", "veth0", {InetAddr("10.0.0.2", 24)});
 
         // configure resource limits and kernel parameters
-        c->setRlimit(RLIMIT_CPU, 1024, 102400);
-        c->setRlimit(RLIMIT_DATA, 1024, 102400);
+        c->setRlimit(RLIMIT_CPU, RLIM_INFINITY, RLIM_INFINITY);
+        c->setRlimit(RLIMIT_DATA, 512 * 1024, 1024 * 1024);
         c->setKernelParameter("net.ipv6.conf.veth0.disable_ipv6", "1");
 
         c->start();
@@ -129,7 +130,7 @@ int main(int argc, char *argv[])
         //c->attach({"/usr/bin/sleep", "60"}, 0, 0, "", {}, 0, "/tmp", {}, {{"TEST_VAR","test_value"}});
 
         // Test reconnect
-        c = createContainer("test", "/var/cache/lxc/fedora/x86_64/22/rootfs", WORK_DIR);
+        c = createContainer("test", CONT_DIR, WORK_DIR);
         c->connect();
         sleep(1);
         c->console();
