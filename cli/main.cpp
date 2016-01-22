@@ -41,7 +41,6 @@
 #include <iomanip>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -49,7 +48,6 @@
 using namespace vasum::cli;
 
 namespace fs = boost::filesystem;
-namespace po = boost::program_options;
 
 namespace {
 
