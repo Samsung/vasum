@@ -25,9 +25,10 @@
 #define LXCPP_COMMANDS_CONSOLE_HPP
 
 #include "lxcpp/commands/command.hpp"
-#include "lxcpp/terminal-config.hpp"
+#include "lxcpp/pty-config.hpp"
 #include "lxcpp/terminal.hpp"
 
+#include "cargo-ipc/client.hpp"
 #include "cargo-ipc/epoll/event-poll.hpp"
 #include "utils/signalfd.hpp"
 
@@ -44,9 +45,10 @@ public:
      * Launches the console on the current terminal
      *
      * @param terminals    container's terminals config
+     * @param client       container's IPC client
      * @param terminalNum  initial terminal to attach to
      */
-    Console(TerminalsConfig &terminals, unsigned int terminalNum = 0);
+    Console(PTYsConfig &terminals, cargo::ipc::Client &client, unsigned int terminalNum = 0);
     ~Console();
 
     void execute();
@@ -64,8 +66,10 @@ private:
     };
     static const int IO_BUFFER_SIZE = 1024;
 
-    TerminalsConfig &mTerminals;
+    PTYsConfig &mTerminals;
     int mTerminalNum;
+    cargo::ipc::Client &mClient;
+
     bool mServiceMode;
     ConsoleQuitReason mQuitReason;
     cargo::ipc::epoll::EventPoll mEventPoll;
@@ -73,10 +77,10 @@ private:
     std::vector<std::pair<int, struct ::sigaction>> mSignalStates;
     struct termios mTTYState;
 
-    char appToTerm[IO_BUFFER_SIZE];
-    int appToTermOffset;
-    char termToApp[IO_BUFFER_SIZE];
-    int termToAppOffset;
+    char mAppToTerm[IO_BUFFER_SIZE];
+    int mAppToTermOffset;
+    char mTermToApp[IO_BUFFER_SIZE];
+    int mTermToAppOffset;
 
     void setupTTY();
     void restoreTTY();

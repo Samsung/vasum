@@ -27,7 +27,7 @@
 #include "lxcpp/container.hpp"
 #include "lxcpp/logger-config.hpp"
 #include "lxcpp/network-config.hpp"
-#include "lxcpp/terminal-config.hpp"
+#include "lxcpp/pty-config.hpp"
 #include "lxcpp/provision-config.hpp"
 #include "lxcpp/userns-config.hpp"
 #include "lxcpp/smackns-config.hpp"
@@ -164,7 +164,7 @@ struct ContainerConfig {
      * Set: setTerminalCount()
      * Get: none
      */
-    TerminalsConfig mTerminals;
+    PTYsConfig mTerminals;
 
     /**
      * Namespace types used to create the container
@@ -173,6 +173,16 @@ struct ContainerConfig {
      * Get: getNamespaces()
      */
     int mNamespaces;
+
+    /**
+     * GID to be used in the container for PTY slaves.
+     * It should be 5 in most modern distros. This is just to make
+     * it easy to extend the configuration in the future.
+     *
+     * Set: none for now
+     * Get: none for now
+     */
+    gid_t mPtsGID;
 
     /**
      * available files/dirs/mounts/links
@@ -231,6 +241,7 @@ struct ContainerConfig {
         mState(Container::State::STOPPED),
         mExitStatus(DEFAULT_EXIT_STATUS),
         mNamespaces(0),
+        mPtsGID(5),
         mCapsToKeep(UINT64_MAX) {}
 
     CARGO_REGISTER
@@ -248,6 +259,7 @@ struct ContainerConfig {
         mTerminals,
         mNetwork,
         mNamespaces,
+        mPtsGID,
         mProvisions,
         mUserNSConfig,
         mSmackNSConfig,

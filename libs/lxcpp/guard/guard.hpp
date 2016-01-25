@@ -25,6 +25,7 @@
 #define LXCPP_GUARD_GUARD_HPP
 
 #include "lxcpp/container-config.hpp"
+#include "lxcpp/pty-config.hpp"
 #include "lxcpp/guard/api.hpp"
 
 #include "utils/channel.hpp"
@@ -66,6 +67,15 @@ private:
     std::unique_ptr<cargo::ipc::Service> mService;
 
     std::shared_ptr<ContainerConfig> mConfig;
+
+    std::vector<int> mImplSlaveFDs;
+    PTYsConfig mGuardPTYs;
+
+    static const int IO_BUFFER_SIZE = 1024;
+    std::vector<std::array<char, IO_BUFFER_SIZE>> mContToImpl;
+    std::vector<std::array<char, IO_BUFFER_SIZE>> mImplToCont;
+    std::vector<int> mContToImplOffset;
+    std::vector<int> mImplToContOffset;
 
     /**
      * Setups the init process and executes the init.
@@ -129,6 +139,19 @@ private:
                                        std::shared_ptr<api::Void>&,
                                        cargo::ipc::MethodResult::Pointer result);
 
+    cargo::ipc::HandlerExitCode onResizeTerm(const cargo::ipc::PeerID,
+                                             std::shared_ptr<api::Int> &data,
+                                             cargo::ipc::MethodResult::Pointer result);
+
+    /**
+     * A callback for container terminal PTY master
+     */
+    void onContTerminal(unsigned int i, int fd, cargo::ipc::epoll::Events events);
+
+    /**
+     * A callback for implementation (container-impl.cpp) terminal PTY slave
+     */
+    void onImplTerminal(unsigned int i, int fd, cargo::ipc::epoll::Events events);
 };
 
 } // namespace lxcpp

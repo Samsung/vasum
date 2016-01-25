@@ -102,7 +102,7 @@ public:
                const std::string& workDirInContainer,
                const std::vector<std::string>& envToKeep,
                const std::vector<std::pair<std::string, std::string>>& envToSet);
-    void console();
+    void console(unsigned int terminalNum = 0);
 
     // Network interfaces setup/config
     /**

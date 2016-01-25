@@ -33,6 +33,8 @@
 #include "lxcpp/capability.hpp"
 #include "lxcpp/environment.hpp"
 #include "lxcpp/filesystem.hpp"
+#include "lxcpp/terminal.hpp"
+#include "lxcpp/commands/prep-pty-terminal.hpp"
 #include "lxcpp/commands/prep-guest-terminal.hpp"
 #include "lxcpp/commands/provision.hpp"
 #include "lxcpp/commands/setup-userns.hpp"
@@ -44,8 +46,10 @@
 
 #include "logger/logger.hpp"
 #include "utils/signal.hpp"
+#include "utils/paths.hpp"
 
 #include <unistd.h>
+#include <sys/ioctl.h>
 #include <sys/wait.h>
 
 namespace lxcpp {
@@ -131,6 +135,8 @@ Guard::Guard(const std::string& socketPath)
             std::bind(&Guard::onSetConfig, this, _1, _2, _3));
     mService->setMethodHandler<ContainerConfig, api::Void>(api::METHOD_GET_CONFIG,
             std::bind(&Guard::onGetConfig, this, _1, _2, _3));
+    mService->setMethodHandler<api::Void, api::Int>(api::METHOD_RESIZE_TERM,
+            std::bind(&Guard::onResizeTerm, this, _1, _2, _3));
 
     mService->start();
 }
@@ -182,8 +188,19 @@ void Guard::onInitExit(struct ::signalfd_siginfo& sigInfo)
 
     // TODO: container (de)preparation part 4: cleanup after container quits
 
+    for (unsigned i = 0; i < mGuardPTYs.mPTYs.size(); ++i) {
+        int contFD = mGuardPTYs.mPTYs[i].mMasterFD.value;
+        int implFD = mImplSlaveFDs[i];
+
+        mEventPoll.removeFD(contFD);
+        mEventPoll.removeFD(implFD);
+    }
+
     Provisions provisions(*mConfig);
     provisions.revert();
+
+    PrepPTYTerminal ptys(mGuardPTYs);
+    ptys.revert();
 
     PrepDevFS devFS(*mConfig);
     devFS.revert();
@@ -202,6 +219,10 @@ cargo::ipc::HandlerExitCode Guard::onSetConfig(const cargo::ipc::PeerID,
     LOGT("onSetConfig");
 
     mConfig = data;
+    mGuardPTYs.mCount = mConfig->mTerminals.mCount;
+    mGuardPTYs.mUID = mConfig->mUserNSConfig.getContainerRootUID();
+    mGuardPTYs.mDevptsPath = utils::createFilePath(mConfig->mWorkPath,
+                                                   mConfig->mName + ".devpts");
 
     try {
         logger::setupLogger(mConfig->mLogger.mType,
@@ -250,6 +271,9 @@ cargo::ipc::HandlerExitCode Guard::onStart(const cargo::ipc::PeerID,
     PrepDevFS devFS(*mConfig);
     devFS.execute();
 
+    PrepPTYTerminal ptys(mGuardPTYs);
+    ptys.execute();
+
     Provisions provisions(*mConfig);
     provisions.execute();
 
@@ -258,6 +282,24 @@ cargo::ipc::HandlerExitCode Guard::onStart(const cargo::ipc::PeerID,
 
     utils::Channel channel;
     ContainerData data(*mConfig, channel);
+
+    mContToImpl.resize(mGuardPTYs.mCount);
+    mImplToCont.resize(mGuardPTYs.mCount);
+    mContToImplOffset.resize(mGuardPTYs.mCount);
+    mImplToContOffset.resize(mGuardPTYs.mCount);
+
+    using namespace std::placeholders;
+    for (unsigned i = 0; i < mGuardPTYs.mPTYs.size(); ++i) {
+        int contFD = mGuardPTYs.mPTYs[i].mMasterFD.value;
+        int implFD = utils::open(mConfig->mTerminals.mPTYs[i].mPtsName, O_RDWR|O_NOCTTY|O_NONBLOCK|O_CLOEXEC);
+        mImplSlaveFDs.push_back(implFD);
+
+        mContToImplOffset[i] = 0;
+        mImplToContOffset[i] = 0;
+
+        mEventPoll.addFD(contFD, EPOLLIN, std::bind(&Guard::onContTerminal, this, i, _1, _2));
+        mEventPoll.addFD(implFD, EPOLLIN, std::bind(&Guard::onImplTerminal, this, i, _1, _2));
+    }
 
     mConfig->mInitPid = lxcpp::clone(startContainer,
                                      &data,
@@ -328,5 +370,85 @@ int Guard::execute()
 
     return status;
 }
+
+void Guard::onContTerminal(unsigned int i, int fd, cargo::ipc::epoll::Events events)
+{
+    if ((events & EPOLLIN) == EPOLLIN) {
+        const size_t avail = IO_BUFFER_SIZE - mContToImplOffset[i];
+        char *buf = mContToImpl[i].data() + mContToImplOffset[i];
+
+        const ssize_t read = ::read(fd, buf, avail);
+
+        if (read > 0) {
+            mContToImplOffset[i] += read;
+
+            if (mContToImplOffset[i]) {
+                int oppositeFD = mImplSlaveFDs[i];
+                mEventPoll.modifyFD(oppositeFD, EPOLLOUT);
+            }
+        }
+    }
+
+    if ((events & EPOLLOUT) == EPOLLOUT && mImplToContOffset[i]) {
+        const ssize_t written = ::write(fd, mImplToCont[i].data(), mImplToContOffset[i]);
+
+        if (written > 0) {
+            ::memmove(mImplToCont[i].data(), mImplToCont[i].data() + written, mImplToContOffset[i] - written);
+            mImplToContOffset[i] -= written;
+
+            if (mImplToContOffset[i] == 0) {
+                mEventPoll.modifyFD(fd, EPOLLIN);
+            }
+        }
+    }
+}
+
+void Guard::onImplTerminal(unsigned int i, int fd, cargo::ipc::epoll::Events events)
+{
+    if ((events & EPOLLIN) == EPOLLIN) {
+        const size_t avail = IO_BUFFER_SIZE - mImplToContOffset[i];
+        char *buf = mImplToCont[i].data() + mImplToContOffset[i];
+
+        const ssize_t read = ::read(fd, buf, avail);
+
+        if (read > 0) {
+            mImplToContOffset[i] += read;
+
+            if (mImplToContOffset[i]) {
+                int oppositeFD = mGuardPTYs.mPTYs[i].mMasterFD.value;
+                mEventPoll.modifyFD(oppositeFD, EPOLLOUT);
+            }
+        }
+    }
+
+    if ((events & EPOLLOUT) == EPOLLOUT && mContToImplOffset[i]) {
+        const ssize_t written = ::write(fd, mContToImpl[i].data(), mContToImplOffset[i]);
+
+        if (written > 0) {
+            ::memmove(mContToImpl[i].data(), mContToImpl[i].data() + written, mContToImplOffset[i] - written);
+            mContToImplOffset[i] -= written;
+
+            if (mContToImplOffset[i] == 0) {
+                mEventPoll.modifyFD(fd, EPOLLIN);
+            }
+        }
+    }
+}
+
+cargo::ipc::HandlerExitCode Guard::onResizeTerm(const cargo::ipc::PeerID,
+                                                std::shared_ptr<api::Int> &data,
+                                                cargo::ipc::MethodResult::Pointer result)
+{
+    int implFD = mImplSlaveFDs[data->value];
+    int contFD = mGuardPTYs.mPTYs[data->value].mMasterFD.value;
+    struct winsize wsz;
+
+    utils::ioctl(implFD, TIOCGWINSZ, &wsz);
+    utils::ioctl(contFD, TIOCSWINSZ, &wsz);
+
+    result->setVoid();
+    return cargo::ipc::HandlerExitCode::SUCCESS;
+}
+
 
 } // namespace lxcpp

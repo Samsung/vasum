@@ -31,6 +31,7 @@
 #include "utils/paths.hpp"
 #include "utils/text.hpp"
 #include "utils/exception.hpp"
+#include "utils/fd-utils.hpp"
 #include "logger/logger.hpp"
 
 #include <algorithm>
@@ -155,6 +156,14 @@ bool isMountPointShared(const std::string& path)
     return false;
 }
 
+void bindMountFile(const std::string &source, const std::string &target)
+{
+    LOGD("Bind mounting: " << source << " to: " << target);
+
+    lxcpp::touch(target, 0666);
+    lxcpp::mount(source, target, "", MS_BIND, "");
+}
+
 FILE *setmntent(const std::string& filename, const std::string& type)
 {
     FILE *ret = ::setmntent(filename.c_str(), type.c_str());
@@ -268,15 +277,6 @@ void chown(const std::string& path, uid_t owner, gid_t group)
     }
 }
 
-void touch(const std::string& path, mode_t mode)
-{
-    if (::open(path.c_str(), O_WRONLY | O_CREAT, mode) < 0) {
-        const std::string msg = "open() failed: " + path + ": "  + utils::getSystemErrorMessage();
-        LOGE(msg);
-        throw FileSystemSetupException(msg);
-    }
-}
-
 void symlink(const std::string& target, const std::string& linkpath)
 {
     if (::symlink(target.c_str(), linkpath.c_str()) < 0) {
@@ -284,6 +284,12 @@ void symlink(const std::string& target, const std::string& linkpath)
         LOGE(msg);
         throw FileSystemSetupException(msg);
     }
+}
+
+void touch(const std::string& path, mode_t mode)
+{
+    int fd = utils::open(path.c_str(), O_WRONLY | O_CREAT, mode);
+    utils::close(fd);
 }
 
 void makeNode(const std::string& path, mode_t mode, dev_t dev)

@@ -117,7 +117,7 @@ public:
                        const std::string& workDirInContainer,
                        const std::vector<std::string>& envToKeep,
                        const std::vector<std::pair<std::string, std::string>>& envToSet) = 0;
-    virtual void console() = 0;
+    virtual void console(unsigned int terminalNum = 0) = 0;
 
     // Network interfaces setup/config
     virtual void addInterfaceConfig(InterfaceConfigType type,

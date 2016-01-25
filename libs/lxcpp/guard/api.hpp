@@ -42,6 +42,7 @@ const ::cargo::ipc::MethodID METHOD_STOP            = 4;
 const ::cargo::ipc::MethodID METHOD_GUARD_READY     = 5;
 const ::cargo::ipc::MethodID METHOD_INIT_STOPPED    = 6;
 const ::cargo::ipc::MethodID METHOD_GUARD_CONNECTED = 7;
+const ::cargo::ipc::MethodID METHOD_RESIZE_TERM     = 8;
 
 
 const int GUARD_SET_CONFIG_ERROR                    = -1;

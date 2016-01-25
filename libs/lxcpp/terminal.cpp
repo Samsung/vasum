@@ -119,7 +119,7 @@ bool isatty(int fd)
     throw TerminalException(msg);
 }
 
-void tcgetattr(const int fd, struct termios *termios_p)
+void tcgetattr(const int fd, struct ::termios *termios_p)
 {
     if (-1 == ::tcgetattr(fd, termios_p)) {
         const std::string msg = "tcgetattr() failed: " + utils::getSystemErrorMessage();
@@ -128,7 +128,7 @@ void tcgetattr(const int fd, struct termios *termios_p)
     }
 }
 
-void tcsetattr(const int fd, const int optional_actions, const struct termios *termios_p)
+void tcsetattr(const int fd, const int optional_actions, const struct ::termios *termios_p)
 {
     if (-1 == ::tcsetattr(fd, optional_actions, termios_p)) {
         const std::string msg = "tcsetattr() failed: " + utils::getSystemErrorMessage();
@@ -136,6 +136,20 @@ void tcsetattr(const int fd, const int optional_actions, const struct termios *t
         throw TerminalException(msg);
     }
 }
+
+struct ::termios makeRawTerm(int fd)
+{
+    struct termios ttyAttr, ret;
+
+    lxcpp::tcgetattr(fd, &ttyAttr);
+    ret = ttyAttr;
+
+    ::cfmakeraw(&ttyAttr);
+    lxcpp::tcsetattr(fd, TCSADRAIN, &ttyAttr);
+
+    return ret;
+}
+
 
 void setupIOControlTTY(const int ttyFD)
 {
@@ -165,11 +179,7 @@ std::pair<int, std::string> openPty(bool rawMode)
         utils::setNonBlocking(master, true);
 
         if (rawMode) {
-            struct termios ttyAttr;
-
-            lxcpp::tcgetattr(slave, &ttyAttr);
-            ::cfmakeraw(&ttyAttr);
-            lxcpp::tcsetattr(slave, TCSADRAIN, &ttyAttr);
+            makeRawTerm(slave);
         }
 
         ptsName = lxcpp::ttyname_r(slave);
@@ -182,6 +192,20 @@ std::pair<int, std::string> openPty(bool rawMode)
     }
 
     utils::close(slave);
+    return std::pair<int, std::string>(master, ptsName);
+}
+
+std::pair<int, std::string> openPty(const std::string &ptmx)
+{
+    int ptyNo;
+    int unlock = 0;
+
+    int master = utils::open(ptmx, O_RDWR|O_NOCTTY|O_NONBLOCK|O_CLOEXEC);
+    utils::ioctl(master, TIOCSPTLCK, &unlock);
+    utils::ioctl(master, TIOCGPTN, &ptyNo);
+
+    std::string ptsName = std::to_string(ptyNo);
+
     return std::pair<int, std::string>(master, ptsName);
 }
 

@@ -64,17 +64,6 @@ const struct link {
     { "/proc/self/fd", "/dev/fd" },
 };
 
-void bindMountDevice(const std::string &source, const std::string &target)
-{
-    LOGD("Bind mounting: " << source << " to: " << target);
-
-    lxcpp::touch(target, 0666);
-    lxcpp::mount(source, target, "", MS_BIND, "");
-    // FIXME: remove this after we properly namespace /dev/pts
-    // FIXME: This breaks files on the host!
-    lxcpp::chmod(target, 0666);
-}
-
 } // namespace
 
 
@@ -111,10 +100,10 @@ void PivotAndPrepRoot::pivotRoot()
     // Create a tmpfs and a directory for the new root as it has
     // to be on a separate mount point than the current one.
 
-    lxcpp::mkdir(oldRootPath, 0777);
+    lxcpp::mkdir(oldRootPath, 0755);
     lxcpp::mount("tmprootfs", oldRootPath, "tmpfs", 0, "");
 
-    lxcpp::mkdir(newRootPath, 0777);
+    lxcpp::mkdir(newRootPath, 0755);
     lxcpp::mount(mConfig.mRootPath, newRootPath, "", MS_BIND|MS_REC, "");
 
     lxcpp::chdir(newRootPath);
@@ -134,10 +123,10 @@ void PivotAndPrepRoot::cleanUpRoot()
     // Clean up the remounted "/" so it's ready to be reused.
     LOGD("Reusing '/' filesystem, umounting everything first");
 
-    const std::string devPath = utils::createFilePath(mConfig.mWorkPath,
-                                                      mConfig.mName + ".dev");
+    const std::string devPrepared = utils::createFilePath(mConfig.mWorkPath,
+                                                          mConfig.mName + ".dev");
 
-    lxcpp::umount(devPath);
+    lxcpp::umount(devPrepared);
 
     umountSubtree("/sys");
     umountSubtree("/dev");
@@ -170,42 +159,29 @@ void PivotAndPrepRoot::mountStatic()
         }
 
         LOGD("Mounting: " << m.src << " on: " << m.dst << " type: " << m.type);
-        lxcpp::mkdir(m.dst, 0777);
+        lxcpp::mkdir(m.dst, 0755);
         lxcpp::mount(m.src, m.dst, m.type, m.flags, "");
     }
 }
 
 void PivotAndPrepRoot::prepDev()
 {
+    int devFlags = mIsUserNamespace ? MS_BIND : MS_MOVE;
+
     // Use previously prepared dev as new /dev
     const std::string devPrepared = utils::createFilePath(mConfig.mOldRoot,
                                                           mConfig.mWorkPath,
                                                           mConfig.mName + ".dev");
 
-    int devFlags = mIsUserNamespace ? MS_BIND : MS_MOVE;
-
-    lxcpp::mkdir("/dev", 0777);
+    lxcpp::mkdir("/dev", 0755);
     lxcpp::mount(devPrepared, "/dev", "", devFlags, "");
 
     // Use previously prepared devpts as new /dev/pts
-    //const std::string devPtsPrepared = utils::createFilePath(mConfig.mOldRoot,
-    //                                                         mConfig.mWorkPath,
-    //                                                         mConfig.mName + ".devpts");
-    // FIXME: do the same with devpts as above (BIND/MOVE from prepared location)
-    // For now we bind devpts from the host
-    lxcpp::mkdir("/dev/pts", 0777);
-    lxcpp::mount(mConfig.mOldRoot + "/dev/pts", "/dev/pts", "", MS_BIND, "");
-
-    // Bind mount some terminal devices from /dev/pts to /dev that are expected by applications.
-    bindMountDevice("/dev/pts/ptmx", "/dev/ptmx");
-    bindMountDevice(mConfig.mTerminals.PTYs.begin()->ptsName, "/dev/console");
-
-    int t = 1;
-    for (const auto &it : mConfig.mTerminals.PTYs) {
-        const std::string ttyPath = "/dev/tty" + std::to_string(t++);
-
-        bindMountDevice(it.ptsName, ttyPath);
-    }
+    const std::string devPtsPrepared = utils::createFilePath(mConfig.mOldRoot,
+                                                             mConfig.mWorkPath,
+                                                             mConfig.mName + ".devpts");
+    lxcpp::mkdir("/dev/pts", 0755);
+    lxcpp::mount(devPtsPrepared, "/dev/pts", "", devFlags, "");
 }
 
 void PivotAndPrepRoot::symlinkStatic()

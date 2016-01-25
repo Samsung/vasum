@@ -25,13 +25,13 @@
 #define LXCPP_COMMANDS_PREP_HOST_TERMINAL_HPP
 
 #include "lxcpp/commands/command.hpp"
-#include "lxcpp/terminal-config.hpp"
+#include "lxcpp/pty-config.hpp"
 
 
 namespace lxcpp {
 
 
-class PrepHostTerminal final: Command {
+class PrepPTYTerminal final: Command {
 public:
     /**
      * Prepares the terminal on the host side.
@@ -41,14 +41,14 @@ public:
      *
      * @param terminals  container's terminals config
      */
-    PrepHostTerminal(TerminalsConfig &terminals);
-    ~PrepHostTerminal();
+    PrepPTYTerminal(PTYsConfig &terminals);
+    ~PrepPTYTerminal();
 
     void execute();
     void revert();
 
 private:
-    TerminalsConfig &mTerminals;
+    PTYsConfig &mTerminals;
 };
 
 

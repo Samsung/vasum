@@ -32,7 +32,7 @@
 #include "lxcpp/commands/console.hpp"
 #include "lxcpp/commands/start.hpp"
 #include "lxcpp/commands/stop.hpp"
-#include "lxcpp/commands/prep-host-terminal.hpp"
+#include "lxcpp/commands/prep-pty-terminal.hpp"
 #include "lxcpp/commands/provision.hpp"
 
 #include "logger/logger.hpp"
@@ -259,7 +259,7 @@ void ContainerImpl::setTerminalCount(const unsigned int count)
         throw ConfigureException(msg);
     }
 
-    mConfig->mTerminals.count = count;
+    mConfig->mTerminals.mCount = count;
 }
 
 void ContainerImpl::addUIDMap(uid_t contID, uid_t hostID, unsigned num)
@@ -341,7 +341,7 @@ void ContainerImpl::start(const unsigned int timeoutMS)
 
     // TODO: container preparation part 0: things to do on the host side
 
-    PrepHostTerminal terminal(mConfig->mTerminals);
+    PrepPTYTerminal terminal(mConfig->mTerminals);
     terminal.execute();
 
     Start start(mConfig);
@@ -433,13 +433,15 @@ cargo::ipc::HandlerExitCode ContainerImpl::onInitStopped(const cargo::ipc::PeerI
     mConfig->mExitStatus = data->value;
     LOGI("STOPPED " << mConfig->mName << " Exit status: " << mConfig->mExitStatus);
 
+    // TODO: container (de)preparation part 5: cleanup on the host side
+
+    PrepPTYTerminal terminal(mConfig->mTerminals);
+    terminal.revert();
+
     setState(Container::State::STOPPED);
     if (mStoppedCallback) {
         mStoppedCallback();
     }
-
-    PrepHostTerminal terminal(mConfig->mTerminals);
-    terminal.revert();
 
     methodResult->setVoid();
     return cargo::ipc::HandlerExitCode::SUCCESS;
@@ -531,11 +533,11 @@ int ContainerImpl::attach(const std::vector<std::string>& argv,
     return attach.getExitCode();
 }
 
-void ContainerImpl::console()
+void ContainerImpl::console(unsigned int terminalNum)
 {
     Lock lock(mStateMutex);
 
-    Console console(mConfig->mTerminals);
+    Console console(mConfig->mTerminals, *mClient, terminalNum);
     console.execute();
 }
 

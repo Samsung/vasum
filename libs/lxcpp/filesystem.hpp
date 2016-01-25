@@ -52,6 +52,8 @@ bool isMountPoint(const std::string& path);
  */
 bool isMountPointShared(const std::string& path);
 
+void bindMountFile(const std::string &source, const std::string &target);
+
 FILE *setmntent(const std::string& filename, const std::string& type);
 
 void umountSubtree(const std::string& prefix);
@@ -70,9 +72,9 @@ void chmod(const std::string& path, mode_t mode);
 
 void chown(const std::string& path, uid_t owner, gid_t group);
 
-void touch(const std::string& path, mode_t mode);
-
 void symlink(const std::string& target, const std::string& linkpath);
+
+void touch(const std::string& path, mode_t mode);
 
 void makeNode(const std::string& path, mode_t mode, dev_t dev);
 

@@ -49,12 +49,19 @@ bool isatty(int fd);
 /**
  * Get terminal attributes.
  */
-void tcgetattr(const int fd, struct termios *termios_p);
+void tcgetattr(const int fd, struct ::termios *termios_p);
 
 /**
  * Set terminal attributes.
  */
-void tcsetattr(const int fd, const int optional_actions, const struct termios *termios_p);
+void tcsetattr(const int fd, const int optional_actions, const struct ::termios *termios_p);
+
+/**
+ * Set the terminal in the raw mode (termios(2))
+ *
+ * @returns the previous state of the termios before the operation
+ */
+struct ::termios makeRawTerm(int fd);
 
 /**
  * Setups the passed fd as a new control and IO (in, out, err) terminal
@@ -63,15 +70,27 @@ void setupIOControlTTY(const int ttyFD);
 
 /**
  * This function creates a new pair of virtual character devices
- * using a pseudtoreminal interface. It also configures as much as it
+ * using a pseudo terminal interface. It also configures as much as it
  * can so the devices are immediately usable.
  *
  * @param rawMode  Whether to set the terminal in the raw mode (termios(2))
  *
- * @returns file descriptor to the master device and the path/name of
- *          the pts slace device.
+ * @returns file descriptor to the master device and the pathname of
+ *          the pts slave device.
  */
 std::pair<int, std::string> openPty(bool rawMode);
+
+/**
+ * This function creates a new pair of virtual character devices
+ * using a pseudo terminal interface. It also configures as much as it
+ * can so the devices are immediately usable.
+ *
+ * @param ptmx  The path to the ptmx interface to use instead of the default
+ *
+ * @returns file descriptor to the master device and the filename of
+ *          the pts slave device.
+ */
+std::pair<int, std::string> openPty(const std::string &ptmx);
 
 
 } // namespace lxcpp

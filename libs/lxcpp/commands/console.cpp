@@ -27,6 +27,7 @@
 #include "lxcpp/exception.hpp"
 #include "lxcpp/terminal.hpp"
 #include "lxcpp/credentials.hpp"
+#include "lxcpp/guard/api.hpp"
 
 #include "cargo-ipc/epoll/event-poll.hpp"
 #include "logger/logger.hpp"
@@ -43,17 +44,18 @@
 namespace lxcpp {
 
 
-Console::Console(TerminalsConfig &terminals, unsigned int terminalNum)
+Console::Console(PTYsConfig &terminals, cargo::ipc::Client &client, unsigned int terminalNum)
     : mTerminals(terminals),
       mTerminalNum(terminalNum),
+      mClient(client),
       mServiceMode(false),
       mQuitReason(ConsoleQuitReason::NONE),
       mEventPoll(),
       mSignalFD(mEventPoll),
-      appToTermOffset(0),
-      termToAppOffset(0)
+      mAppToTermOffset(0),
+      mTermToAppOffset(0)
 {
-    if (terminalNum >= terminals.count) {
+    if (terminalNum >= terminals.mCount) {
         const std::string msg = "Requested terminal number does not exist";
         LOGE(msg);
         throw TerminalException(msg);
@@ -72,7 +74,7 @@ void Console::execute()
         throw TerminalException(msg);
     }
 
-    LOGD("Launching the console with: " << mTerminals.count << " pseudoterminal(s) on the guest side.");
+    LOGD("Launching the console with: " << mTerminals.mCount << " pseudoterminal(s) on the guest side.");
     std::cout << "Connected to the zone, escape characted is ^] or ^a q." << std::endl;
     std::cout << "If the container has just a shell remember to set TERM to be equal to the one of your own terminal." << std::endl;
     std::cout << "Terminal number: " << mTerminalNum << ", use ^a n/p to switch between them." << std::endl;
@@ -121,13 +123,8 @@ void Console::setupTTY()
     mSignalStates = utils::signalIgnore({SIGQUIT, SIGTERM, SIGINT, SIGHUP, SIGPIPE, SIGWINCH});
     mSignalFD.setHandler(SIGWINCH, std::bind(&Console::resizePTY, this));
 
-    // save terminal state
-    lxcpp::tcgetattr(STDIN_FILENO, &mTTYState);
-
-    // set the current terminal in raw mode:
-    struct termios newTTY = mTTYState;
-    ::cfmakeraw(&newTTY);
-    lxcpp::tcsetattr(STDIN_FILENO, TCSAFLUSH, &newTTY);
+    // save the current terminal state and set it in raw mode:
+    mTTYState = makeRawTerm(STDIN_FILENO);
 }
 
 void Console::resizePTY()
@@ -136,6 +133,10 @@ void Console::resizePTY()
     struct winsize wsz;
     utils::ioctl(STDIN_FILENO, TIOCGWINSZ, &wsz);
     utils::ioctl(getCurrentFD(), TIOCSWINSZ, &wsz);
+
+    // Notify the guard so it can resize its internal PTY
+    mClient.callAsync<api::Int, api::Void>(api::METHOD_RESIZE_TERM,
+                                           std::make_shared<api::Int>(mTerminalNum));
 }
 
 void Console::restoreTTY()
@@ -152,24 +153,30 @@ void Console::restoreTTY()
 void Console::onPTY(int fd, cargo::ipc::epoll::Events events)
 {
     if ((events & EPOLLIN) == EPOLLIN) {
-        const size_t avail = IO_BUFFER_SIZE - appToTermOffset;
-        char *buf = appToTerm + appToTermOffset;
+        const size_t avail = IO_BUFFER_SIZE - mAppToTermOffset;
+        char *buf = mAppToTerm + mAppToTermOffset;
 
         const ssize_t read = ::read(fd, buf, avail);
-        appToTermOffset += read;
 
-        if (appToTermOffset) {
-            mEventPoll.modifyFD(STDOUT_FILENO, EPOLLOUT);
+        if (read > 0) {
+            mAppToTermOffset += read;
+
+            if (mAppToTermOffset) {
+                mEventPoll.modifyFD(STDOUT_FILENO, EPOLLOUT);
+            }
         }
     }
 
-    if ((events & EPOLLOUT) == EPOLLOUT && termToAppOffset) {
-        const ssize_t written = ::write(fd, termToApp, termToAppOffset);
-        ::memmove(termToApp, termToApp + written, termToAppOffset - written);
-        termToAppOffset -= written;
+    if ((events & EPOLLOUT) == EPOLLOUT && mTermToAppOffset) {
+        const ssize_t written = ::write(fd, mTermToApp, mTermToAppOffset);
 
-        if (termToAppOffset == 0) {
-            mEventPoll.modifyFD(fd, EPOLLIN);
+        if (written > 0) {
+            ::memmove(mTermToApp, mTermToApp + written, mTermToAppOffset - written);
+            mTermToAppOffset -= written;
+
+            if (mTermToAppOffset == 0) {
+                mEventPoll.modifyFD(fd, EPOLLIN);
+            }
         }
     }
 
@@ -179,18 +186,20 @@ void Console::onPTY(int fd, cargo::ipc::epoll::Events events)
 void Console::onStdInput(int fd, cargo::ipc::epoll::Events events)
 {
     if ((events & EPOLLIN) == EPOLLIN) {
-        const size_t avail = IO_BUFFER_SIZE - termToAppOffset;
-        char *buf = termToApp + termToAppOffset;
+        const size_t avail = IO_BUFFER_SIZE - mTermToAppOffset;
+        char *buf = mTermToApp + mTermToAppOffset;
         const ssize_t read = ::read(fd, buf, avail);
 
         if (read == 1 && handleSpecial(buf[0])) {
             return;
         }
 
-        termToAppOffset += read;
+        if (read > 0) {
+            mTermToAppOffset += read;
 
-        if (termToAppOffset) {
-            mEventPoll.modifyFD(getCurrentFD(), EPOLLIN | EPOLLOUT);
+            if (mTermToAppOffset) {
+                mEventPoll.modifyFD(getCurrentFD(), EPOLLIN | EPOLLOUT);
+            }
         }
     }
 
@@ -199,13 +208,16 @@ void Console::onStdInput(int fd, cargo::ipc::epoll::Events events)
 
 void Console::onStdOutput(int fd, cargo::ipc::epoll::Events events)
 {
-    if ((events & EPOLLOUT) == EPOLLOUT && appToTermOffset) {
-        const ssize_t written = ::write(fd, appToTerm, appToTermOffset);
-        ::memmove(appToTerm, appToTerm + written, appToTermOffset - written);
-        appToTermOffset -= written;
+    if ((events & EPOLLOUT) == EPOLLOUT && mAppToTermOffset) {
+        const ssize_t written = ::write(fd, mAppToTerm, mAppToTermOffset);
 
-        if (appToTermOffset == 0) {
-            mEventPoll.modifyFD(fd, 0);
+        if (written > 0) {
+            ::memmove(mAppToTerm, mAppToTerm + written, mAppToTermOffset - written);
+            mAppToTermOffset -= written;
+
+            if (mAppToTermOffset == 0) {
+                mEventPoll.modifyFD(fd, 0);
+            }
         }
     }
 
@@ -214,14 +226,9 @@ void Console::onStdOutput(int fd, cargo::ipc::epoll::Events events)
 
 void Console::checkForError(cargo::ipc::epoll::Events events)
 {
-    // TODO: ignore EPOLLHUP for now, this allows us to cycle through not
-    // connected terminals. When we can handle full containers with getty()
-    // processes we'll decide what to do about that.
-#if 0
     if ((events & EPOLLHUP) == EPOLLHUP) {
         mQuitReason = ConsoleQuitReason::HUP;
     }
-#endif
     if ((events & EPOLLERR) == EPOLLERR) {
         mQuitReason = ConsoleQuitReason::ERR;
     }
@@ -263,17 +270,23 @@ void Console::consoleChange(ConsoleChange direction)
 {
     mEventPoll.removeFD(getCurrentFD());
 
-    if (direction == ConsoleChange::NEXT) {
+    switch(direction) {
+    case ConsoleChange::NEXT:
         ++mTerminalNum;
-    } else if (direction == ConsoleChange::PREV) {
+        break;
+    case ConsoleChange::PREV:
         --mTerminalNum;
+        break;
+    default:
+        LOGW("Unknown ConsoleChange direction");
+        return;
     }
 
-    mTerminalNum = (mTerminalNum + mTerminals.count) % mTerminals.count;
+    mTerminalNum = (mTerminalNum + mTerminals.mCount) % mTerminals.mCount;
 
     int mode = EPOLLIN;
-    if (termToAppOffset) {
-        mode &= EPOLLOUT;
+    if (mTermToAppOffset) {
+        mode |= EPOLLOUT;
     }
 
     restoreTTY();
@@ -287,7 +300,7 @@ void Console::consoleChange(ConsoleChange direction)
 
 int Console::getCurrentFD() const
 {
-    return mTerminals.PTYs[mTerminalNum].masterFD.value;
+    return mTerminals.mPTYs[mTerminalNum].mMasterFD.value;
 }
 
 

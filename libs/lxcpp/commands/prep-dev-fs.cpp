@@ -84,22 +84,14 @@ void PrepDevFS::execute()
     lxcpp::unshare(CLONE_NEWNS);
     lxcpp::mount("", "/", "", MS_SLAVE|MS_REC, "");
 
+    // Future /dev
     const std::string devPath = utils::createFilePath(mConfig.mWorkPath,
                                                       mConfig.mName + ".dev");
     const std::string devOpts = "mode=755,size=65536";
 
-    lxcpp::mkdir(devPath, 0777);
+    lxcpp::mkdir(devPath, 0755);
     lxcpp::mount("devfs", devPath, "tmpfs", MS_NOSUID, devOpts);
     containerChownRoot(devPath, mConfig.mUserNSConfig);
-
-    // Workaround for kernel bug/inconsistency. The root of the devfs mounted above
-    // has floor label instead of the label of the process that mounted it.
-    if (lxcpp::isSmackActive()) {
-        const std::string label = lxcpp::smackGetSelfLabel();
-
-        LOGD("Settings SMACK label of: " << devPath << " to: " << label);
-        lxcpp::smackSetFileLabel(devPath, label, SmackLabelType::SMACK_LABEL_ACCESS, false);
-    }
 
     for (unsigned i = 0; i < ARRAY_SIZE(static_devs); ++i) {
         dev_t dev = ::makedev(static_devs[i].major, static_devs[i].minor);
@@ -109,9 +101,34 @@ void PrepDevFS::execute()
         containerChownRoot(path, mConfig.mUserNSConfig);
     }
 
-    // TODO: create $NAME.devpts as a separate devpts mount as well
-    // not to leak ptys between host and the container and setup in-between
-    // console passing between host ptys and container ptys
+    // Future /dev/pts
+    const std::string devPtsPath = utils::createFilePath(mConfig.mWorkPath,
+                                                         mConfig.mName + ".devpts");
+    const std::string devPtsPtmx = utils::createFilePath(devPtsPath, "ptmx");
+
+    // FIXME: A little bit hacky, root and tty GID can be disjoint.
+    // A proper interface for recalculating namespaced UIDs/GIDs
+    // should be provided in mUserNSConfig.
+    const gid_t ptsGID = mConfig.mUserNSConfig.getContainerRootGID()
+        + mConfig.mPtsGID;
+    const std::string devPtsOpts = "newinstance,ptmxmode=0666,mode=0620,gid="
+        + std::to_string(ptsGID);
+
+    lxcpp::mkdir(devPtsPath, 0755);
+    lxcpp::mount("devpts", devPtsPath, "devpts", MS_NOSUID, devPtsOpts);
+    containerChownRoot(devPtsPath, mConfig.mUserNSConfig);
+    containerChownRoot(devPtsPtmx, mConfig.mUserNSConfig);
+
+    // Workaround for kernel bug/inconsistency. The root of the devfs mounted above
+    // has floor label instead of the label of the process that mounted it.
+    if (lxcpp::isSmackActive()) {
+        const std::string label = lxcpp::smackGetSelfLabel();
+
+        LOGD("Settings SMACK label of: " << devPath << " to: " << label);
+        lxcpp::smackSetFileLabel(devPath, label, SmackLabelType::SMACK_LABEL_ACCESS, false);
+        LOGD("Settings SMACK label of: " << devPtsPath << " to: " << label);
+        lxcpp::smackSetFileLabel(devPtsPath, label, SmackLabelType::SMACK_LABEL_ACCESS, false);
+    }
 }
 
 void PrepDevFS::revert()
@@ -119,6 +136,10 @@ void PrepDevFS::revert()
     const std::string devPath = utils::createFilePath(mConfig.mWorkPath,
                                                       mConfig.mName + ".dev");
     lxcpp::umount(devPath);
+
+    const std::string devPtsPath = utils::createFilePath(mConfig.mWorkPath,
+                                                         mConfig.mName + ".devpts");
+    lxcpp::umount(devPtsPath);
 }
 
 } // namespace lxcpp

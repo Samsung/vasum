@@ -36,8 +36,9 @@ void sighandler(int signal)
         {
             if (initPid > 0)
                 ::kill(initPid, SIGTERM);
-            sleep(11);
-            ::unlink("/tmp/lxcpp-shell.txt");
+            sleep(20);
+            ::unlink("/tmp/lxcpp-impl.txt");
+            ::unlink("/tmp/lxcpp-guard.txt");
 
             exit(0);
         }
@@ -56,11 +57,12 @@ void sighandler(int signal)
 // For the example container configured in this file:
 // --------------------------------------------------
 // The commands issued on host to have internet access from container (masquarade)
-// iptables -P FORWARD ACCEPT
+// iptables -A FORWARD -j ACCEPT -s 10.0.0.0/24
 // iptables -A POSTROUTING -t nat -j MASQUERADE -s 10.0.0.0/24
 // --------------------------------------------------
 // The commands issued on host to cleanup masquarade
 // iptables -D POSTROUTING -t nat -j MASQUERADE -s 10.0.0.0/24
+// iptables -D FORWARD -j ACCEPT -s 10.0.0.0/24
 
 int main(int argc, char *argv[])
 {
@@ -79,36 +81,27 @@ int main(int argc, char *argv[])
     LOGE("Color test: ERROR");
 
     logger::setupLogger(logger::LogType::LOG_STDERR, logger::LogLevel::DEBUG);
-    // logger::setupLogger(logger::LogType::LOG_STDERR, logger::LogLevel::TRACE);
-    // logger::setupLogger(logger::LogType::LOG_FILE, logger::LogLevel::TRACE, "/tmp/lxcpp-shell.txt");
+    //logger::setupLogger(logger::LogType::LOG_FILE, logger::LogLevel::DEBUG, "/tmp/lxcpp-impl.txt");
 
     std::vector<std::string> args;
     args.push_back("/bin/bash");
     //args.push_back("/usr/lib/systemd/systemd");
-    //args.push_back("/usr/local/libexec/lxcpp-simple-init");
-    //args.push_back("/usr/local/libexec/lxcpp-simple-ls");
-    //args.push_back("/usr/local/libexec/lxcpp-simple-rand");
 
     mkdir(WORK_DIR, 0755);
 
     try
     {
-        //Container *c = createContainer("test", "/", WORK_DIR);
         Container *c = createContainer("test", CONT_DIR, WORK_DIR);
 
         c->setHostName("junk");
         c->setInit(args);
         c->setEnv({{"TEST_VAR", "test_value"}, {"_TEST_VAR_", "_test_value_"}});
-        c->setLogger(logger::LogType::LOG_PERSISTENT_FILE, logger::LogLevel::DEBUG, "/tmp/lxcpp-shell.txt");
+        c->setLogger(logger::LogType::LOG_PERSISTENT_FILE, logger::LogLevel::DEBUG, "/tmp/lxcpp-guard.txt");
         c->setTerminalCount(4);
 
         // make my own user root in a new namespace
         c->addUIDMap(0, 1000, 1000);
         c->addGIDMap(0, 1000, 1000);
-        // if using USERNS this is a workaround to have host IDs mapped for /dev/pts
-        // This will not be needed after proper /dev/pts namespacing is implemented
-        c->addUIDMap(1000, 0, 999);
-        c->addGIDMap(1000, 0, 999);
 
         // configure network
         c->addInterfaceConfig(InterfaceConfigType::LOOPBACK, "lo");
@@ -123,20 +116,29 @@ int main(int argc, char *argv[])
         c->start();
         // not needed per se, but let things settle for a second, e.g. the logs
         sleep(1);
-        c->console();
-        // You could run the console for the second time to see if it can be reattached
-        //c->console();
+
+        if (c->getState() == Container::State::RUNNING) {
+            c->console();
+
+            // You could run the console for the second time to see if it can be reattached
+            //c->console();
+        }
 
         //c->attach({"/usr/bin/sleep", "60"}, 0, 0, "", {}, 0, "/tmp", {}, {{"TEST_VAR","test_value"}});
+
+        delete c;
 
         // Test reconnect
         c = createContainer("test", CONT_DIR, WORK_DIR);
         c->connect();
         sleep(1);
-        c->console();
 
-        // Stop it now, as it doesn't automatically on destructor
-        c->stop();
+        if (c->getState() == Container::State::RUNNING) {
+            c->console();
+
+            // Stop it now, as it doesn't automatically on destructor
+            c->stop();
+        }
 
         delete c;
     }

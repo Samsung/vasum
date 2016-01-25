@@ -25,7 +25,7 @@
 #define LXCPP_COMMANDS_PREP_GUEST_TERMINAL_HPP
 
 #include "lxcpp/commands/command.hpp"
-#include "lxcpp/terminal-config.hpp"
+#include "lxcpp/pty-config.hpp"
 
 
 namespace lxcpp {
@@ -42,13 +42,13 @@ public:
      *
      * @param config container's config
      */
-    PrepGuestTerminal(TerminalsConfig &config);
+    PrepGuestTerminal(PTYsConfig &config);
     ~PrepGuestTerminal();
 
     void execute();
 
 private:
-    TerminalsConfig &mTerminals;
+    PTYsConfig &mTerminals;
 };
 
 

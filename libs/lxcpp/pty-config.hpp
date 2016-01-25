@@ -18,11 +18,11 @@
 /**
  * @file
  * @author  Lukasz Pawelczyk (l.pawelczyk@samsumg.com)
- * @brief   Terminal configuration
+ * @brief   PTY terminal configuration
  */
 
-#ifndef LXCPP_TERMINAL_CONFIG_HPP
-#define LXCPP_TERMINAL_CONFIG_HPP
+#ifndef LXCPP_PTY_CONFIG_HPP
+#define LXCPP_PTY_CONFIG_HPP
 
 #include "cargo/fields.hpp"
 
@@ -33,38 +33,43 @@
 namespace lxcpp {
 
 
-struct TerminalConfig {
-    cargo::FileDescriptor masterFD;
-    std::string ptsName;
+struct PTYConfig {
+    cargo::FileDescriptor mMasterFD;
+    std::string mPtsName;
 
-    TerminalConfig()
-        : masterFD(-1)
+    PTYConfig()
+        : mMasterFD(-1)
     {}
 
-    TerminalConfig(const int masterFD, const std::string &ptsName)
-        : masterFD(masterFD),
-          ptsName(ptsName)
+    PTYConfig(const int masterFD, const std::string &ptsName)
+        : mMasterFD(masterFD),
+          mPtsName(ptsName)
     {}
 
     CARGO_REGISTER
     (
-        masterFD,
-        ptsName
+        mMasterFD,
+        mPtsName
     )
 };
 
-struct TerminalsConfig {
-    unsigned int count;
-    std::vector<TerminalConfig> PTYs;
+struct PTYsConfig {
+    unsigned int mCount;
+    uid_t mUID;
+    std::string mDevptsPath;
+    std::vector<PTYConfig> mPTYs;
 
-    TerminalsConfig(const unsigned int count = 1)
-        : count(count)
+    PTYsConfig(const unsigned int count = 1, const uid_t UID = 0, const std::string &devptsPath = "")
+        : mCount(count),
+          mUID(UID),
+          mDevptsPath(devptsPath)
     {}
 
     CARGO_REGISTER
     (
-        count,
-        PTYs
+        mCount,
+        mDevptsPath,
+        mPTYs
     )
 };
 
@@ -72,4 +77,4 @@ struct TerminalsConfig {
 } //namespace lxcpp
 
 
-#endif // LXCPP_TERMINAL_CONFIG_HPP
+#endif // LXCPP_PTY_CONFIG_HPP
