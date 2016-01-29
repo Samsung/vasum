@@ -221,7 +221,8 @@ struct ContainerConfig {
         mInitPid(-1),
         mState(Container::State::STOPPED),
         mExitStatus(DEFAULT_EXIT_STATUS),
-        mNamespaces(0) {}
+        mNamespaces(0),
+        mCapsToKeep(UINT64_MAX) {}
 
     CARGO_REGISTER
     (
