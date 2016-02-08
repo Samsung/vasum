@@ -209,6 +209,23 @@ private:
     Container::Callback mStoppedCallback;
     Container::Callback mConnectedCallback;
 
+    /**
+     * Container preparation on the application side.
+     * All the things that needs to be done before guard starts.
+     * Those things might need to be cleaned up/reverted.
+     */
+    void containerPrep();
+
+    /**
+     * Container cleanup on the application side.
+     * This cleans up things done by the cointainerPrep() function.
+     * This happens after the container's init and the guard died.
+     */
+    void containerCleanup();
+
+    /**
+     * Set the state of the container.
+     */
     void setState(const Container::State state);
 
     /**

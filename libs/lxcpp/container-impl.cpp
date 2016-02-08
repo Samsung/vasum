@@ -107,6 +107,18 @@ ContainerImpl::~ContainerImpl()
     mClient->stop(true);
 }
 
+void ContainerImpl::containerPrep()
+{
+    PrepPTYTerminal terminal(mConfig->mTerminals);
+    terminal.execute();
+}
+
+void ContainerImpl::containerCleanup()
+{
+    PrepPTYTerminal terminal(mConfig->mTerminals);
+    terminal.revert();
+}
+
 void ContainerImpl::setState(const Container::State state)
 {
     // Used with the mStateMutex locked
@@ -339,10 +351,7 @@ void ContainerImpl::start(const unsigned int timeoutMS)
         throw ConfigureException(msg);
     }
 
-    // TODO: container preparation part 0: things to do on the host side
-
-    PrepPTYTerminal terminal(mConfig->mTerminals);
-    terminal.execute();
+    containerPrep();
 
     Start start(mConfig);
     start.execute();
@@ -433,10 +442,7 @@ cargo::ipc::HandlerExitCode ContainerImpl::onInitStopped(const cargo::ipc::PeerI
     mConfig->mExitStatus = data->value;
     LOGI("STOPPED " << mConfig->mName << " Exit status: " << mConfig->mExitStatus);
 
-    // TODO: container (de)preparation part 5: cleanup on the host side
-
-    PrepPTYTerminal terminal(mConfig->mTerminals);
-    terminal.revert();
+    containerCleanup();
 
     setState(Container::State::STOPPED);
     if (mStoppedCallback) {

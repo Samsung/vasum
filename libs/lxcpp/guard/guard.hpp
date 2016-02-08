@@ -78,6 +78,44 @@ private:
     std::vector<int> mImplToContOffset;
 
     /**
+     * Container preparation part 1.
+     *
+     * All things that can and/or have to be done before the clone.
+     * They run in the guard's context.
+     * Some of the things made here might need to be cleaned up/reversed.
+     */
+    void containerPrepPreClone();
+
+    /**
+     * Container preparation part 2.
+     *
+     * All the things that has to be done immediately after clone.
+     * Things that need to be done from the guard's context, but require
+     * the container's init process to be already created.
+     * Most of the things will not have to be reversed. They'll disappear
+     * together with the container's init process and its namespaces.
+     */
+    void containerPrepPostClone();
+
+    /**
+     * Container preparation part 3.
+     *
+     * Things to do inside the container's process.
+     *
+     * @param config  container's config
+     */
+    static void containerPrepInClone(ContainerConfig &config);
+
+    /**
+     * Container cleanup.
+     *
+     * Cleanups and commands' reverses. Mostly from the things that has
+     * been configured inside the containerPrepPreClone() function.
+     * This happens after the container's init and the guard has died.
+     */
+    void containerCleanup();
+
+    /**
      * Setups the init process and executes the init.
      */
     static int startContainer(void *data);

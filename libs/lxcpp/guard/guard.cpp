@@ -54,6 +54,110 @@
 
 namespace lxcpp {
 
+void Guard::containerPrepPreClone()
+{
+    PrepDevFS devFS(*mConfig);
+    devFS.execute();
+
+    PrepPTYTerminal ptys(mGuardPTYs);
+    ptys.execute();
+
+    Provisions provisions(*mConfig);
+    provisions.execute();
+
+    CGroupMakeAll cgroups(mConfig->mCgroups);
+    cgroups.execute();
+
+    mContToImpl.resize(mGuardPTYs.mCount);
+    mImplToCont.resize(mGuardPTYs.mCount);
+    mContToImplOffset.resize(mGuardPTYs.mCount);
+    mImplToContOffset.resize(mGuardPTYs.mCount);
+
+    using namespace std::placeholders;
+    for (unsigned i = 0; i < mGuardPTYs.mPTYs.size(); ++i) {
+        int contFD = mGuardPTYs.mPTYs[i].mMasterFD.value;
+        int implFD = utils::open(mConfig->mTerminals.mPTYs[i].mPtsName, O_RDWR|O_NOCTTY|O_NONBLOCK|O_CLOEXEC);
+        mImplSlaveFDs.push_back(implFD);
+
+        mContToImplOffset[i] = 0;
+        mImplToContOffset[i] = 0;
+
+        mEventPoll.addFD(contFD, EPOLLIN, std::bind(&Guard::onContTerminal, this, i, _1, _2));
+        mEventPoll.addFD(implFD, EPOLLIN, std::bind(&Guard::onImplTerminal, this, i, _1, _2));
+    }
+}
+
+void Guard::containerPrepPostClone()
+{
+    SetupUserNS userNS(mConfig->mUserNSConfig, mConfig->mInitPid);
+    userNS.execute();
+
+    NetCreateAll network(mConfig->mNetwork, mConfig->mInitPid);
+    network.execute();
+
+    SetupSmackNS smackNS(mConfig->mSmackNSConfig, mConfig->mInitPid);
+    smackNS.execute();
+
+    CGroupAssignPidAll cgroupAssignPid(mConfig->mCgroups, mConfig->mInitPid);
+    cgroupAssignPid.execute();
+}
+
+void Guard::containerPrepInClone(ContainerConfig &config)
+{
+    lxcpp::setHostName(config.mHostName);
+
+    // After this command the previous root FS is still mounted in /.oldroot
+    PivotAndPrepRoot root(config);
+    root.execute();
+
+    PrepGuestTerminal terminals(config.mTerminals);
+    terminals.execute();
+
+    NetConfigureAll network(config.mNetwork);
+    network.execute();
+
+    if (!config.mRlimits.empty()) {
+        for (const auto& limit : config.mRlimits) {
+            lxcpp::setRlimit(std::get<0>(limit), std::get<1>(limit),std::get<2>(limit));
+        }
+    }
+
+    if (!config.mKernelParameters.empty()) {
+        for (const auto& sysctl : config.mKernelParameters) {
+            lxcpp::writeKernelParameter(sysctl.first, sysctl.second);
+        }
+    }
+
+    lxcpp::dropCapsFromBoundingExcept(config.mCapsToKeep);
+
+    lxcpp::clearenv();
+    lxcpp::setenv(config.mEnvToSet);
+
+    // Remove /.oldroot only after all the commands have finished, they might've needed it
+    lxcpp::umountSubtree(config.mOldRoot);
+    lxcpp::rmdir(config.mOldRoot);
+}
+
+void Guard::containerCleanup()
+{
+    for (unsigned i = 0; i < mGuardPTYs.mPTYs.size(); ++i) {
+        int contFD = mGuardPTYs.mPTYs[i].mMasterFD.value;
+        int implFD = mImplSlaveFDs[i];
+
+        mEventPoll.removeFD(contFD);
+        mEventPoll.removeFD(implFD);
+    }
+
+    Provisions provisions(*mConfig);
+    provisions.revert();
+
+    PrepPTYTerminal ptys(mGuardPTYs);
+    ptys.revert();
+
+    PrepDevFS devFS(*mConfig);
+    devFS.revert();
+}
+
 int Guard::startContainer(void* data)
 {
     ContainerConfig& config = static_cast<ContainerData*>(data)->mConfig;
@@ -69,40 +173,7 @@ int Guard::startContainer(void* data)
         lxcpp::setgroups(std::vector<gid_t>());
         lxcpp::setreuid(0, 0);
 
-        // TODO: container preparation part 3: things to do in the container process
-
-        lxcpp::setHostName(config.mHostName);
-
-        // After this command the previous root FS is still mounted in /.oldroot
-        PivotAndPrepRoot root(config);
-        root.execute();
-
-        PrepGuestTerminal terminals(config.mTerminals);
-        terminals.execute();
-
-        NetConfigureAll network(config.mNetwork);
-        network.execute();
-
-        if (!config.mRlimits.empty()) {
-            for (const auto& limit : config.mRlimits) {
-                lxcpp::setRlimit(std::get<0>(limit), std::get<1>(limit),std::get<2>(limit));
-            }
-        }
-
-        if (!config.mKernelParameters.empty()) {
-            for (const auto& sysctl : config.mKernelParameters) {
-                lxcpp::writeKernelParameter(sysctl.first, sysctl.second);
-            }
-        }
-
-        lxcpp::dropCapsFromBoundingExcept(config.mCapsToKeep);
-
-        lxcpp::clearenv();
-        lxcpp::setenv(config.mEnvToSet);
-
-        // Remove /.oldroot only after all the commands have finished, they might've needed it
-        lxcpp::umountSubtree(config.mOldRoot);
-        lxcpp::rmdir(config.mOldRoot);
+        containerPrepInClone(config);
 
         // Notify that Init's preparation is done
         channel.write(true);
@@ -186,24 +257,7 @@ void Guard::onInitExit(struct ::signalfd_siginfo& sigInfo)
 
     LOGD("Init died, cleaning up");
 
-    // TODO: container (de)preparation part 4: cleanup after container quits
-
-    for (unsigned i = 0; i < mGuardPTYs.mPTYs.size(); ++i) {
-        int contFD = mGuardPTYs.mPTYs[i].mMasterFD.value;
-        int implFD = mImplSlaveFDs[i];
-
-        mEventPoll.removeFD(contFD);
-        mEventPoll.removeFD(implFD);
-    }
-
-    Provisions provisions(*mConfig);
-    provisions.revert();
-
-    PrepPTYTerminal ptys(mGuardPTYs);
-    ptys.revert();
-
-    PrepDevFS devFS(*mConfig);
-    devFS.revert();
+    containerCleanup();
 
     mConfig->mState = Container::State::STOPPED;
     auto data = std::make_shared<api::ExitStatus>(sigInfo.ssi_status);
@@ -255,6 +309,9 @@ cargo::ipc::HandlerExitCode Guard::onStart(const cargo::ipc::PeerID,
 {
     LOGT("onStart");
 
+    utils::Channel channel;
+    ContainerData data(*mConfig, channel);
+
     mConfig->mState = Container::State::STARTING;
 
     try {
@@ -266,58 +323,13 @@ cargo::ipc::HandlerExitCode Guard::onStart(const cargo::ipc::PeerID,
         LOGW("Failed to set the guard configuration: " << e.what());
     }
 
-    // TODO: container preparation part 1: things to do before clone
-
-    PrepDevFS devFS(*mConfig);
-    devFS.execute();
-
-    PrepPTYTerminal ptys(mGuardPTYs);
-    ptys.execute();
-
-    Provisions provisions(*mConfig);
-    provisions.execute();
-
-    CGroupMakeAll cgroups(mConfig->mCgroups);
-    cgroups.execute();
-
-    utils::Channel channel;
-    ContainerData data(*mConfig, channel);
-
-    mContToImpl.resize(mGuardPTYs.mCount);
-    mImplToCont.resize(mGuardPTYs.mCount);
-    mContToImplOffset.resize(mGuardPTYs.mCount);
-    mImplToContOffset.resize(mGuardPTYs.mCount);
-
-    using namespace std::placeholders;
-    for (unsigned i = 0; i < mGuardPTYs.mPTYs.size(); ++i) {
-        int contFD = mGuardPTYs.mPTYs[i].mMasterFD.value;
-        int implFD = utils::open(mConfig->mTerminals.mPTYs[i].mPtsName, O_RDWR|O_NOCTTY|O_NONBLOCK|O_CLOEXEC);
-        mImplSlaveFDs.push_back(implFD);
-
-        mContToImplOffset[i] = 0;
-        mImplToContOffset[i] = 0;
-
-        mEventPoll.addFD(contFD, EPOLLIN, std::bind(&Guard::onContTerminal, this, i, _1, _2));
-        mEventPoll.addFD(implFD, EPOLLIN, std::bind(&Guard::onImplTerminal, this, i, _1, _2));
-    }
+    containerPrepPreClone();
 
     mConfig->mInitPid = lxcpp::clone(startContainer,
                                      &data,
                                      mConfig->mNamespaces);
 
-    // TODO: container preparation part 2: things to do immediately after clone
-
-    SetupUserNS userNS(mConfig->mUserNSConfig, mConfig->mInitPid);
-    userNS.execute();
-
-    NetCreateAll network(mConfig->mNetwork, mConfig->mInitPid);
-    network.execute();
-
-    SetupSmackNS smackNS(mConfig->mSmackNSConfig, mConfig->mInitPid);
-    smackNS.execute();
-
-    CGroupAssignPidAll cgroupAssignPid(mConfig->mCgroups, mConfig->mInitPid);
-    cgroupAssignPid.execute();
+    containerPrepPostClone();
 
     // send continue sync to container once userns, netns, cgroups, etc, are configured
     channel.setLeft();
