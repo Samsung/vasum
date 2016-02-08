@@ -48,14 +48,14 @@ void PrepGuestTerminal::execute()
     LOGD("Preparing " << mTerminals.mCount << " pseudoterminal(s) on the guest side.");
 
     // Bind mount some terminal devices from /dev/pts to /dev that are expected by applications.
-    bindMountFile("/dev/pts/ptmx", "/dev/ptmx");
-    bindMountFile("/dev/pts/0", "/dev/console");
+    lxcpp::bindMountFile("/dev/pts/ptmx", "/dev/ptmx");
+    lxcpp::bindMountFile("/dev/pts/0", "/dev/console");
 
     for (unsigned t = 0; t < mTerminals.mCount; ++t) {
         const std::string ptsPath = "/dev/pts/" + std::to_string(t);
         const std::string ttyPath = "/dev/tty" + std::to_string(t + 1);
 
-        bindMountFile(ptsPath, ttyPath);
+        lxcpp::bindMountFile(ptsPath, ttyPath);
     }
 
     // Setup first PTY as a controlling terminal (/dev/console).

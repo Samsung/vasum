@@ -333,10 +333,7 @@ void ZonesManager::insertZone(const std::string& zoneId, const std::string& zone
 
     // after zone is created successfully, put a file informing that zones are enabled
     if (mZones.size() == 1) {
-        if (!utils::saveFileContent(
-                utils::createFilePath(mConfig.zonesPath, ENABLED_FILE_NAME), "")) {
-            throw ZoneOperationException(ENABLED_FILE_NAME + ": cannot create.");
-        }
+        utils::saveFileContent(utils::createFilePath(mConfig.zonesPath, ENABLED_FILE_NAME), "");
     }
 }
 
@@ -374,7 +371,9 @@ void ZonesManager::destroyZone(const std::string& zoneId)
     mZones.erase(iter);
 
     if (mZones.empty()) {
-        if (!utils::removeFile(utils::createFilePath(mConfig.zonesPath, ENABLED_FILE_NAME))) {
+        try {
+            utils::remove(utils::createFilePath(mConfig.zonesPath, ENABLED_FILE_NAME));
+        } catch(...) {
             LOGE("Failed to remove enabled file.");
         }
     }

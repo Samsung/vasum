@@ -60,10 +60,8 @@ void SetupUserNS::execute()
         uid_map.append(std::to_string(std::get<2>(map)));
         uid_map.append("\n");
     }
-    if (uid_map.size() && !utils::saveFileContent(uid_map_path, uid_map)) {
-        const std::string msg = "Failed to write the uid_map";
-        LOGE(msg);
-        throw UserNSException(msg);
+    if (uid_map.size()) {
+        utils::saveFileContent(uid_map_path, uid_map);
     }
 
     std::string gid_map;
@@ -75,10 +73,8 @@ void SetupUserNS::execute()
         gid_map.append(std::to_string(std::get<2>(map)));
         gid_map.append("\n");
     }
-    if (gid_map.size() && !utils::saveFileContent(gid_map_path, gid_map)) {
-        const std::string msg = "Failed to write the gid_map";
-        LOGE(msg);
-        throw UserNSException(msg);
+    if (gid_map.size()) {
+        utils::saveFileContent(gid_map_path, gid_map);
     }
 }
 

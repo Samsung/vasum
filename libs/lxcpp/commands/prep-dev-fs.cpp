@@ -24,9 +24,10 @@
 #include "lxcpp/commands/prep-dev-fs.hpp"
 #include "lxcpp/process.hpp"
 #include "lxcpp/filesystem.hpp"
-#include "lxcpp/smack.hpp"
 
 #include "logger/logger.hpp"
+#include "utils/fs.hpp"
+#include "utils/smack.hpp"
 #include "utils/paths.hpp"
 
 #include <sys/mount.h>
@@ -82,15 +83,15 @@ void PrepDevFS::execute()
 {
     // Make sure the /dev/ and /dev/pts mounts we create below are invisible to the host
     lxcpp::unshare(CLONE_NEWNS);
-    lxcpp::mount("", "/", "", MS_SLAVE|MS_REC, "");
+    utils::mount("", "/", "", MS_SLAVE|MS_REC, "");
 
     // Future /dev
     const std::string devPath = utils::createFilePath(mConfig.mWorkPath,
                                                       mConfig.mName + ".dev");
     const std::string devOpts = "mode=755,size=65536";
 
-    lxcpp::mkdir(devPath, 0755);
-    lxcpp::mount("devfs", devPath, "tmpfs", MS_NOSUID, devOpts);
+    utils::mkdir(devPath, 0755);
+    utils::mount("devfs", devPath, "tmpfs", MS_NOSUID, devOpts);
     containerChownRoot(devPath, mConfig.mUserNSConfig);
 
     for (unsigned i = 0; i < ARRAY_SIZE(static_devs); ++i) {
@@ -114,20 +115,20 @@ void PrepDevFS::execute()
     const std::string devPtsOpts = "newinstance,ptmxmode=0666,mode=0620,gid="
         + std::to_string(ptsGID);
 
-    lxcpp::mkdir(devPtsPath, 0755);
-    lxcpp::mount("devpts", devPtsPath, "devpts", MS_NOSUID, devPtsOpts);
+    utils::mkdir(devPtsPath, 0755);
+    utils::mount("devpts", devPtsPath, "devpts", MS_NOSUID, devPtsOpts);
     containerChownRoot(devPtsPath, mConfig.mUserNSConfig);
     containerChownRoot(devPtsPtmx, mConfig.mUserNSConfig);
 
     // Workaround for kernel bug/inconsistency. The root of the devfs mounted above
     // has floor label instead of the label of the process that mounted it.
-    if (lxcpp::isSmackActive()) {
-        const std::string label = lxcpp::smackGetSelfLabel();
+    if (utils::isSmackActive()) {
+        const std::string label = utils::smackGetSelfLabel();
 
         LOGD("Settings SMACK label of: " << devPath << " to: " << label);
-        lxcpp::smackSetFileLabel(devPath, label, SmackLabelType::SMACK_LABEL_ACCESS, false);
+        utils::smackSetFileLabel(devPath, label, utils::SmackLabelType::SMACK_LABEL_ACCESS, false);
         LOGD("Settings SMACK label of: " << devPtsPath << " to: " << label);
-        lxcpp::smackSetFileLabel(devPtsPath, label, SmackLabelType::SMACK_LABEL_ACCESS, false);
+        utils::smackSetFileLabel(devPtsPath, label, utils::SmackLabelType::SMACK_LABEL_ACCESS, false);
     }
 }
 
@@ -135,11 +136,11 @@ void PrepDevFS::revert()
 {
     const std::string devPath = utils::createFilePath(mConfig.mWorkPath,
                                                       mConfig.mName + ".dev");
-    lxcpp::umount(devPath);
+    utils::umount(devPath);
 
     const std::string devPtsPath = utils::createFilePath(mConfig.mWorkPath,
                                                          mConfig.mName + ".devpts");
-    lxcpp::umount(devPtsPath);
+    utils::umount(devPtsPath);
 }
 
 } // namespace lxcpp

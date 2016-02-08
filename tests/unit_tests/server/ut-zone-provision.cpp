@@ -27,9 +27,11 @@
 
 #include "ut.hpp"
 
+#include "lxcpp/exception.hpp"
 #include "utils/scoped-dir.hpp"
 #include "utils/exception.hpp"
 #include "utils/fs.hpp"
+#include "lxcpp/exception.hpp"
 #include "cargo-json/cargo-json.hpp"
 #include "cargo-sqlite/cargo-sqlite.hpp"
 #include "cargo-sqlite-json/cargo-sqlite-json.hpp"
@@ -69,7 +71,7 @@ struct Fixture {
         : mZonesPathGuard(ZONES_PATH.string())
         , mRootfsPath(ROOTFS_PATH.string())
     {
-        BOOST_REQUIRE(utils::saveFileContent(SOME_FILE_PATH.string(), "text"));
+        BOOST_REQUIRE_NO_THROW(utils::saveFileContent(SOME_FILE_PATH.string(), "text"));
     }
 
     static ZoneProvision create(const std::vector<std::string>& validLinkPrefixes)
@@ -261,7 +263,7 @@ BOOST_AUTO_TEST_CASE(DeclareMount)
     zoneProvision.declareMount("/fake/path1", "/fake/path2", "tmpfs", 077, "fake");
     zoneProvision.declareMount("/fake/path2", "/fake/path2", "tmpfs", 077, "fake");
     BOOST_CHECK_THROW(zoneProvision.declareMount("/fake/path2", "/fake/path2", "tmpfs", 077, "fake"),
-                      ProvisionExistsException);
+                      lxcpp::ProvisionExistsException);
 
     ZoneProvisioningConfig config;
     load(config);
@@ -392,8 +394,8 @@ BOOST_AUTO_TEST_CASE(Remove)
     zoneProvision.remove("mount /fake/path1 /fake/path2 tmpfs " + std::to_string(077) + " fake2");
     zoneProvision.remove("link /fake/path2 /fake/path4");
     BOOST_CHECK_EXCEPTION(zoneProvision.remove("link /fake/path_fake /fake/path2"),
-                          UtilsException,
-                          WhatEquals("Can't find provision"));
+                          lxcpp::ProvisionNotFoundException,
+                          WhatEquals("Can't remove provision: not found."));
 
     const std::vector<std::string> provisions = zoneProvision.list();
     BOOST_REQUIRE_EQUAL(provisions.size(), expected.size());

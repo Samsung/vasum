@@ -28,6 +28,7 @@
 #include "lxcpp/terminal.hpp"
 
 #include "utils/fd-utils.hpp"
+#include "utils/fs.hpp"
 #include "utils/paths.hpp"
 #include "logger/logger.hpp"
 
@@ -58,7 +59,7 @@ void PrepPTYTerminal::execute()
 
             const std::string slavePath = utils::createFilePath(mTerminals.mDevptsPath,
                                                                 pty.second);
-            lxcpp::chown(slavePath, mTerminals.mUID, -1);
+            utils::chown(slavePath, mTerminals.mUID, -1);
         } else {
             pty = lxcpp::openPty(true);
         }

@@ -25,6 +25,7 @@
 #include "config.hpp"
 
 #include "netlink/netlink.hpp"
+#include "utils/fd-utils.hpp"
 #include "utils/exception.hpp"
 #include "utils/make-clean.hpp"
 #include "utils/environment.hpp"
@@ -128,7 +129,7 @@ void Netlink::open(int netNsPid)
 void Netlink::close()
 {
     if (mFd != -1) {
-        ::close(mFd);
+        utils::close(mFd);
         mFd = -1;
     }
 }

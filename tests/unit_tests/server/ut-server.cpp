@@ -33,6 +33,7 @@
 #include "cargo/exception.hpp"
 #include "utils/glib-loop.hpp"
 #include "utils/scoped-dir.hpp"
+#include "utils/exception.hpp"
 #include "logger/logger.hpp"
 #include "cargo-ipc/epoll/thread-dispatcher.hpp"
 
@@ -91,8 +92,8 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 BOOST_AUTO_TEST_CASE(MissingConfig)
 {
     BOOST_REQUIRE_EXCEPTION(Server(MISSING_CONFIG_PATH).run(AS_ROOT),
-                            CargoException,
-                            WhatEquals("Could not load " + MISSING_CONFIG_PATH));
+                            UtilsException,
+                            WhatEquals(MISSING_CONFIG_PATH + ": could not open for reading"));
 }
 
 BOOST_AUTO_TEST_CASE(Terminate)

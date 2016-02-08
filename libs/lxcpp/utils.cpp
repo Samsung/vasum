@@ -29,10 +29,10 @@
 
 #include "lxcpp/exception.hpp"
 #include "lxcpp/namespace.hpp"
-#include "lxcpp/filesystem.hpp"
 #include "lxcpp/process.hpp"
 
 #include "logger/logger.hpp"
+#include "utils/fs.hpp"
 #include "utils/fd-utils.hpp"
 #include "utils/exception.hpp"
 
@@ -99,17 +99,17 @@ void setupMountPoints()
 
     if (isMountPointShared("/")) {
         // TODO: Handle case when the container rootfs or mount location is MS_SHARED, but not '/'
-        lxcpp::mount(nullptr, "/", nullptr, MS_SLAVE | MS_REC, nullptr);
+        utils::mount(nullptr, "/", nullptr, MS_SLAVE | MS_REC, nullptr);
     }
 
     if(isMountPoint("/proc")) {
-        lxcpp::umount("/proc", MNT_DETACH);
-        lxcpp::mount("none", "/proc", "proc", 0, nullptr);
+        utils::umount("/proc", MNT_DETACH);
+        utils::mount("none", "/proc", "proc", 0, nullptr);
     }
 
     if(isMountPoint("/sys")) {
-        lxcpp::umount("/sys", MNT_DETACH);
-        lxcpp::mount("none", "/sys", "sysfs", 0, nullptr);
+        utils::umount("/sys", MNT_DETACH);
+        utils::mount("none", "/sys", "sysfs", 0, nullptr);
     }
 #endif
 }

@@ -28,11 +28,12 @@
 #include "lxcpp/lxcpp.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/filesystem.hpp"
-#include "lxcpp/smack.hpp"
 
 #include "utils/scoped-dir.hpp"
 #include "utils/fs.hpp"
 #include "utils/latch.hpp"
+#include "utils/smack.hpp"
+#include "utils/exception.hpp"
 #include "utils/spin-wait-for.hpp"
 
 #include <memory>
@@ -68,7 +69,7 @@ struct Fixture {
          mRoot(ROOT_DIR),
          mWork(WORK_DIR)
     {
-        BOOST_REQUIRE(utils::copyFile(SIMPLE_INIT_PATH, ROOT_DIR + SIMPLE_INIT));
+        BOOST_REQUIRE_NO_THROW(utils::copyFile(SIMPLE_INIT_PATH, ROOT_DIR + SIMPLE_INIT));
     }
 
     ~Fixture()
@@ -77,7 +78,7 @@ struct Fixture {
         std::string log = LOGGER_FILE;
         if (utils::exists(log)) {
             RELOG(std::ifstream(log));
-            utils::removeFile(log);
+            utils::remove(log);
         }
     }
 };
@@ -100,7 +101,7 @@ BOOST_AUTO_TEST_CASE(SetInit)
 
     BOOST_CHECK_THROW(c->setInit({""}), ConfigureException);
     BOOST_CHECK_THROW(c->setInit({}), ConfigureException);
-    BOOST_CHECK_THROW(c->setInit({NON_EXISTENT_BINARY}), ConfigureException);
+    BOOST_CHECK_THROW(c->setInit({NON_EXISTENT_BINARY}), utils::UtilsException);
 
     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
 }
@@ -249,7 +250,7 @@ BOOST_AUTO_TEST_CASE(ConnectCallback)
 
 BOOST_AUTO_TEST_CASE(UIDGIDGoodMapping)
 {
-    BOOST_CHECK_NO_THROW(lxcpp::chown(ROOT_DIR, 1000, 1000));
+    BOOST_CHECK_NO_THROW(utils::chown(ROOT_DIR, 1000, 1000));
 
     auto c = std::unique_ptr<Container>(createContainer("UIDGIDGoodMapping", ROOT_DIR, WORK_DIR));
     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
@@ -301,7 +302,7 @@ BOOST_AUTO_TEST_CASE(GIDBadMapping)
 BOOST_AUTO_TEST_CASE(SmackMapping)
 {
     // below test should be executed only when Smack Namespace is available
-    if (!isSmackNamespaceActive()) {
+    if (!utils::isSmackNamespaceActive()) {
         return;
     }
 

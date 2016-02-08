@@ -274,7 +274,6 @@ Requires:         python-xml
 Requires:         boost-test
 Requires:         libLogger
 Requires:         libcargo-ipc
-Requires:         libcargo-json
 Requires:         libcargo-sqlite
 
 %description tests

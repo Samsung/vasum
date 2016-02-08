@@ -31,6 +31,7 @@
 #include "logger/logger.hpp"
 #include "utils/fs.hpp"
 #include "utils/exception.hpp"
+#include "lxcpp/exception.hpp"
 #include "cargo-sqlite/cargo-sqlite.hpp"
 #include "cargo-sqlite-json/cargo-sqlite-json.hpp"
 #include "vasum-client.h"
@@ -81,7 +82,7 @@ std::string ZoneProvision::declareProvision(ZoneProvisioningConfig::Provision&& 
     if (it != mProvisioningConfig.provisions.end()) {
         const std::string msg = "Can't add provision. It already exists: " + id;
         LOGE(msg);
-        throw ProvisionExistsException(msg);
+        throw lxcpp::ProvisionExistsException(msg);
     }
     mProvisioningConfig.provisions.push_back(std::move(provision));
     saveProvisioningConfig();
@@ -173,7 +174,9 @@ void ZoneProvision::remove(const std::string& item)
                                     return getId(provision) == item;
                                  });
     if (it == mProvisioningConfig.provisions.end()) {
-        throw UtilsException("Can't find provision");
+        const std::string msg = "Can't remove provision: not found.";
+        LOGE(msg);
+        throw lxcpp::ProvisionNotFoundException(msg);
     }
 
     mProvisioningConfig.provisions.erase(it);
@@ -182,34 +185,21 @@ void ZoneProvision::remove(const std::string& item)
 
 void ZoneProvision::file(const ZoneProvisioningConfig::File& config)
 {
-    bool ret = false;
     const fs::path hostPath = fs::path(mRootPath) / fs::path(config.path);
     switch (config.type) {
         case VSMFILE_DIRECTORY:
-            ret = utils::createDirs(hostPath.string(), config.mode);
-            if (!ret) {
-                throw UtilsException("Can't create dir: " + hostPath.string());
-            }
+            utils::createDirs(hostPath.string(), config.mode);
             break;
 
         case VSMFILE_FIFO:
-            ret = utils::createFifo(hostPath.string(), config.mode);
-            if (!ret) {
-                throw UtilsException("Failed to make fifo: " + config.path);
-            }
+            utils::createFifo(hostPath.string(), config.mode);
             break;
 
         case VSMFILE_REGULAR:
             if ((config.flags & O_CREAT)) {
-                ret = utils::createFile(hostPath.string(), config.flags, config.mode);
-                if (!ret) {
-                    throw UtilsException("Failed to create file: " + config.path);
-                }
+                utils::createFile(hostPath.string(), config.flags, config.mode);
             } else {
-                ret = utils::copyFile(config.path, hostPath.string());
-                if (!ret) {
-                    throw UtilsException("Failed to copy file: " + config.path);
-                }
+                utils::copyFile(config.path, hostPath.string());
             }
             break;
     }
@@ -218,23 +208,13 @@ void ZoneProvision::file(const ZoneProvisioningConfig::File& config)
 void ZoneProvision::mount(const ZoneProvisioningConfig::Mount& config)
 {
     const fs::path hostPath = fs::path(mRootPath) / fs::path(config.target);
-    bool ret = utils::mount(config.source,
-                            hostPath.string(),
-                            config.type,
-                            config.flags,
-                            config.data);
-    if (!ret) {
-        throw UtilsException("Mount operation failure - source : " + config.source);
-    }
+    utils::mount(config.source, hostPath.string(), config.type, config.flags, config.data);
 }
 
 void ZoneProvision::umount(const ZoneProvisioningConfig::Mount& config)
 {
     const fs::path hostPath = fs::path(mRootPath) / fs::path(config.target);
-    bool ret = utils::umount(hostPath.string());
-    if (!ret) {
-        throw UtilsException("Umount operation failure - path : " + config.target);
-    }
+    utils::umount(hostPath.string());
 }
 
 void ZoneProvision::link(const ZoneProvisioningConfig::Link& config)
@@ -245,17 +225,12 @@ void ZoneProvision::link(const ZoneProvisioningConfig::Link& config)
             && srcHostPath.compare(0, prefix.length(), prefix) == 0) {
 
             const fs::path destHostPath = fs::path(mRootPath) / fs::path(config.target);
-            bool ret = utils::createLink(srcHostPath, destHostPath.string());
-            if (!ret) {
-                throw UtilsException("Failed to create hard link: " +  config.source);
-            }
+            utils::createLink(srcHostPath, destHostPath.string());
             return;
         }
     }
-    const std::string msg = "Failed to create hard link: path=host: " +
-                            srcHostPath + ", msg: Path prefix is not valid path";
-    LOGE(msg);
-    throw UtilsException(msg);
+    THROW_UTILS_EXCEPTION_E("Failed to create hard link: path=host: " +
+                            srcHostPath + ", msg: Path prefix is not valid path");
 }
 
 std::string ZoneProvision::getId(const ZoneProvisioningConfig::File& file)
@@ -294,7 +269,10 @@ std::string ZoneProvision::getId(const ZoneProvisioningConfig::Provision& provis
     } else if (provision.is<ZoneProvisioningConfig::Link>()) {
         return getId(provision.as<ZoneProvisioningConfig::Link>());
     }
-    throw UtilsException("Unknown provision type");
+    const std::string msg = "Provision type not supported";
+    LOGE(msg);
+    throw lxcpp::ProvisionNotSupportedException(msg);
+
 }
 
 } // namespace vasum

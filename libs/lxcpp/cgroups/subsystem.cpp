@@ -104,35 +104,33 @@ const std::string& Subsystem::getMountPoint() const
 void Subsystem::attach(const std::string& path, const std::vector<std::string>& subs)
 {
     if (path.empty()) {
-        const std::string msg = "Trying attach to emtpy path";
+        const std::string msg = "Trying attach to empty path";
         LOGE(msg);
         throw CGroupException(msg);
     }
-    if (!utils::createDirs(path,0777)) {
-         throw CGroupException("Can't create mount point: " + path + ", " + utils::getSystemErrorMessage());
-    }
-    if (!utils::mount("cgroup", path, "cgroup", 0, utils::join(subs,","))) {
-         throw CGroupException("Can't mount cgroup: " + path + ", " + utils::getSystemErrorMessage());
-    }
+    utils::createDirs(path, 0777);
+    utils::mount("cgroup", path, "cgroup", 0, utils::join(subs,","));
 }
 
 void Subsystem::detach(const std::string& path)
 {
     LOGI("Subsystem::detach " + path);
-    // if happens (1/100) umount fails with EBUSY
+    // TODO: if happens (1/100) umount fails with EBUSY
     // in fact I don't know why this filesystem (subsystem hierarchy) can be busy
     // probably modyfying sth in hierarchy by other process in the system
     // following can be considered as workarround
     for (int retry = 10; retry > 0; ) {
-        if (utils::umount(path)) {
+        try {
+            utils::umount(path);
             if (retry != 10) {
                 LOGW("umount done afer " << (10 - retry) << " tries");
             }
             return ;
+        } catch(...) {
+            LOGW("umount retry...");
+            --retry;
+            usleep(1);
         }
-        LOGW("umount retry...");
-        --retry;
-        usleep(1);
     }
     throw CGroupException("Can't umount cgroup: " + path + ", " + utils::getSystemErrorMessage());
 }

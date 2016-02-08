@@ -7,7 +7,6 @@
 #include <logger/logger.hpp>
 #include <sys/resource.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/mount.h>
 #include <unistd.h>
 #include <signal.h>

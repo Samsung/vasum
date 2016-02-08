@@ -28,8 +28,8 @@
 #include "logger/logger.hpp"
 #include "utils/fs.hpp"
 #include "utils/paths.hpp"
+#include "utils/exception.hpp"
 
-#include <sys/stat.h>
 #include <fcntl.h>
 
 
@@ -68,32 +68,29 @@ std::string getCgroupPath(const std::string& zoneName,
 
 } // namespace
 
-bool setCgroup(const std::string& zoneName,
+void setCgroup(const std::string& zoneName,
                const std::string& cgroupController,
                const std::string& cgroupName,
                const std::string& value)
 {
     const std::string path = getCgroupPath(zoneName, cgroupController, cgroupName);
     LOGD("Set '" << value << "' to " << path);
-    return utils::saveFileContent(path, value);
+    utils::saveFileContent(path, value);
 }
 
-bool getCgroup(const std::string& zoneName,
-               const std::string& cgroupController,
-               const std::string& cgroupName,
-               std::string& value)
+std::string getCgroup(const std::string& zoneName,
+                      const std::string& cgroupController,
+                      const std::string& cgroupName)
 {
+    std::string retval;
     const std::string path = getCgroupPath(zoneName, cgroupController, cgroupName);
-    return utils::readFirstLineOfFile(path, value);
+    utils::readFirstLineOfFile(path, retval);
+    return retval;
 }
 
 bool isDevice(const std::string& device)
 {
-    struct stat devStat;
-    if (::stat(device.c_str(), &devStat) == -1) {
-        LOGD("Cannot access: " << device);
-        return false;
-    }
+    struct stat devStat = utils::stat(device);
     if (!S_ISCHR(devStat.st_mode) && !S_ISBLK(devStat.st_mode)) {
         LOGD("Not a device: " << device);
         return false;
@@ -106,11 +103,7 @@ bool setDeviceAccess(const std::string& zoneName,
                      bool grant,
                      uint32_t flags)
 {
-    struct stat devStat;
-    if (::stat(device.c_str(), &devStat) == -1) {
-        LOGD("Cannot access: " << device);
-        return false;
-    }
+    struct stat devStat = utils::stat(device);
 
     char type;
     if (S_ISCHR(devStat.st_mode)) {
@@ -135,7 +128,8 @@ bool setDeviceAccess(const std::string& zoneName,
     snprintf(value, sizeof(value), "%c %u:%u %s", type, major, minor, perm.c_str());
 
     std::string name = grant ? "devices.allow" : "devices.deny";
-    return setCgroup(zoneName, "devices", name, value);
+    setCgroup(zoneName, "devices", name, value);
+    return true;
 }
 
 

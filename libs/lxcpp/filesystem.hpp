@@ -31,26 +31,6 @@
 
 namespace lxcpp {
 
-void mount(const std::string& source,
-           const std::string& target,
-           const std::string& filesystemtype,
-           unsigned long mountflags,
-           const std::string& data);
-
-void umount(const std::string& path, const int flags = 0);
-
-bool exists(const std::string& path, mode_t mode = 0);
-
-bool isMountPoint(const std::string& path);
-
-/**
- * Detect whether path is mounted as MS_SHARED.
- * Parses /proc/self/mountinfo
- *
- * @param path mount point
- * @return is the mount point shared
- */
-bool isMountPointShared(const std::string& path);
 
 void bindMountFile(const std::string &source, const std::string &target);
 
@@ -58,27 +38,7 @@ FILE *setmntent(const std::string& filename, const std::string& type);
 
 void umountSubtree(const std::string& prefix);
 
-void fchdir(int fd);
-
-void chdir(const std::string& path);
-
-void mkdir(const std::string& path, mode_t mode);
-
-void rmdir(const std::string& path);
-
-void mknod(const std::string& path, mode_t mode, dev_t dev);
-
-void chmod(const std::string& path, mode_t mode);
-
-void chown(const std::string& path, uid_t owner, gid_t group);
-
-void symlink(const std::string& target, const std::string& linkpath);
-
-void touch(const std::string& path, mode_t mode);
-
 void makeNode(const std::string& path, mode_t mode, dev_t dev);
-
-void pivotRoot(const std::string& new_root, const std::string& put_old);
 
 void containerChownRoot(const std::string& path, const struct UserNSConfig& config);
 

@@ -33,6 +33,7 @@
 #include "vasum-client-impl.hpp"
 #include "utils.hpp"
 #include "exception.hpp"
+#include "utils/fs.hpp"
 #include "utils/exception.hpp"
 #include "logger/logger.hpp"
 #include "host-ipc-definitions.hpp"
@@ -121,17 +122,6 @@ std::string toString(const in6_addr* addr)
         throw InvalidArgumentException(getSystemErrorMessage());
     }
     return ret;
-}
-
-bool readFirstLineOfFile(const std::string& path, std::string& ret)
-{
-    std::ifstream file(path);
-    if (!file) {
-        return false;
-    }
-
-    getline(file, ret);
-    return true;
 }
 
 } //namespace
@@ -349,7 +339,10 @@ VsmStatus Client::vsm_lookup_zone_by_pid(int pid, VsmString* id) noexcept
         const std::string path = "/proc/" + std::to_string(pid) + "/cpuset";
 
         std::string cpuset;
-        if (!readFirstLineOfFile(path, cpuset)) {
+        try {
+            utils::readFirstLineOfFile(path, cpuset);
+        }
+        catch(...) {
             throw InvalidArgumentException("Process not found");
         }
 

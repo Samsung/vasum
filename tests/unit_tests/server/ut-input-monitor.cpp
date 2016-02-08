@@ -33,6 +33,7 @@
 #include "zones-manager.hpp"
 
 #include "utils/glib-loop.hpp"
+#include "utils/fs.hpp"
 #include "utils/latch.hpp"
 #include "utils/scoped-dir.hpp"
 #include "cargo-ipc/epoll/thread-dispatcher.hpp"
@@ -92,7 +93,7 @@ struct Fixture {
         ie.code = EVENT_CODE;
         ie.value = EVENT_BUTTON_RELEASED;
 
-        BOOST_CHECK(::mkfifo(TEST_INPUT_DEVICE.c_str(), S_IWUSR | S_IRUSR) >= 0);
+        BOOST_CHECK_NO_THROW(utils::mkfifo(TEST_INPUT_DEVICE, S_IWUSR | S_IRUSR));
     }
 
     cargo::ipc::epoll::EventPoll& getPoll() {

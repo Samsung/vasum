@@ -24,11 +24,11 @@
 #include "config.hpp"
 
 #include "lxcpp/exception.hpp"
-#include "lxcpp/credentials.hpp"
 
 #include "logger/logger.hpp"
 #include "utils/exception.hpp"
 #include "utils/fd-utils.hpp"
+#include "utils/credentials.hpp"
 
 #include <string>
 #include <pty.h>
@@ -159,7 +159,7 @@ void setupIOControlTTY(const int ttyFD)
         throw TerminalException(msg);
     }
 
-    lxcpp::setsid();
+    utils::setsid();
     utils::ioctl(ttyFD, TIOCSCTTY, NULL);
 
     utils::dup2(ttyFD, STDIN_FILENO);

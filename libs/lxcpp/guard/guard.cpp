@@ -26,7 +26,6 @@
 #include "lxcpp/utils.hpp"
 #include "lxcpp/guard/guard.hpp"
 #include "lxcpp/process.hpp"
-#include "lxcpp/credentials.hpp"
 #include "lxcpp/hostname.hpp"
 #include "lxcpp/rlimit.hpp"
 #include "lxcpp/sysctl.hpp"
@@ -45,8 +44,10 @@
 #include "lxcpp/commands/pivot-and-prep-root.hpp"
 
 #include "logger/logger.hpp"
+#include "utils/fs.hpp"
 #include "utils/signal.hpp"
 #include "utils/paths.hpp"
+#include "utils/credentials.hpp"
 
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -135,7 +136,7 @@ void Guard::containerPrepInClone(ContainerConfig &config)
 
     // Remove /.oldroot only after all the commands have finished, they might've needed it
     lxcpp::umountSubtree(config.mOldRoot);
-    lxcpp::rmdir(config.mOldRoot);
+    utils::rmdir(config.mOldRoot);
 }
 
 void Guard::containerCleanup()
@@ -169,9 +170,9 @@ int Guard::startContainer(void* data)
         channel.setRight();
         channel.read<bool>();
 
-        lxcpp::setregid(0, 0);
-        lxcpp::setgroups(std::vector<gid_t>());
-        lxcpp::setreuid(0, 0);
+        utils::setregid(0, 0);
+        utils::setgroups(std::vector<gid_t>());
+        utils::setreuid(0, 0);
 
         containerPrepInClone(config);
 

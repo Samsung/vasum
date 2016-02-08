@@ -29,6 +29,7 @@
 #include "exception.hpp"
 
 #include "logger/logger.hpp"
+#include "utils/exception.hpp"
 #include "utils/paths.hpp"
 #include "utils/vt.hpp"
 #include "utils/c-args.hpp"
@@ -448,12 +449,12 @@ void Zone::deleteNetdevIpAddress(const std::string& netdev, const std::string& i
 
 std::int64_t Zone::getSchedulerQuota()
 {
-    std::string ret;
-    if (!lxc::getCgroup(mId, "cpu", "cpu.cfs_quota_us", ret)) {
+    try {
+        return std::stoll(lxc::getCgroup(mId, "cpu", "cpu.cfs_quota_us"));
+    } catch(const utils::UtilsException & e) {
         LOGE(mId << ": Error while getting the zone's scheduler quota param");
-        throw ZoneOperationException("Could not get scheduler quota param");
     }
-    return std::stoll(ret);
+    throw ZoneOperationException("Could not get scheduler quota param");
 }
 
 void Zone::setSchedulerLevel(SchedulerLevel sched)
@@ -479,17 +480,18 @@ void Zone::setSchedulerLevel(SchedulerLevel sched)
 }
 
 void Zone::setSchedulerParams(std::uint64_t cpuShares,
-                                   std::uint64_t vcpuPeriod,
-                                   std::int64_t vcpuQuota)
+                              std::uint64_t vcpuPeriod,
+                              std::int64_t vcpuQuota)
 {
     assert(vcpuPeriod >= 1000 && vcpuPeriod <= 1000000);
     assert(vcpuQuota == -1 ||
            (vcpuQuota >= 1000 && vcpuQuota <= static_cast<std::int64_t>(ULLONG_MAX / 1000)));
 
-    if (!lxc::setCgroup(mId, "cpu", "cpu.shares", std::to_string(cpuShares)) ||
-        !lxc::setCgroup(mId, "cpu", "cpu.cfs_period_us", std::to_string(vcpuPeriod)) ||
-        !lxc::setCgroup(mId, "cpu", "cpu.cfs_quota_us", std::to_string(vcpuQuota))) {
-
+    try {
+        lxc::setCgroup(mId, "cpu", "cpu.shares", std::to_string(cpuShares));
+        lxc::setCgroup(mId, "cpu", "cpu.cfs_period_us", std::to_string(vcpuPeriod));
+        lxc::setCgroup(mId, "cpu", "cpu.cfs_quota_us", std::to_string(vcpuQuota));
+    } catch(const utils::UtilsException & e) {
         LOGE(mId << ": Error while setting the zone's scheduler params");
         throw ZoneOperationException("Could not set scheduler params");
     }

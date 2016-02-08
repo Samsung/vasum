@@ -27,7 +27,8 @@
 
 #include "cargo-json/cargo-json.hpp"
 #include "logger/logger.hpp"
-
+#include "utils/fs.hpp"
+#include "utils/exception.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"
 #include "lxcpp/cgroups/devices.hpp"
@@ -120,8 +121,8 @@ BOOST_AUTO_TEST_CASE(ModifyCGroupParams)
 
             CHILD_CHECK_NO_THROW(status, memg.setValue("limit_in_bytes", "256k"));
             CHILD_CHECK_NO_THROW(status, memg.setValue("soft_limit_in_bytes", "32k"));
-            CHILD_CHECK_THROW(status, memg.getValue("non-existing-name"), CGroupException);
-            CHILD_CHECK_THROW(status, memg.setValue("non-existing-name", "xxx"), CGroupException);
+            CHILD_CHECK_THROW(status, memg.getValue("non-existing-name"), utils::UtilsException);
+            CHILD_CHECK_THROW(status, memg.setValue("non-existing-name", "xxx"), utils::UtilsException);
 
             LOGD("limit_in_bytes = " + memg.getValue("limit_in_bytes"));
             LOGD("soft_limit_in_bytes = " + memg.getValue("soft_limit_in_bytes"));

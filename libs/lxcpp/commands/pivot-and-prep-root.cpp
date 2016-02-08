@@ -23,9 +23,9 @@
 
 #include "lxcpp/commands/pivot-and-prep-root.hpp"
 #include "lxcpp/filesystem.hpp"
-#include "lxcpp/smack.hpp"
-
 #include "logger/logger.hpp"
+#include "utils/fs.hpp"
+#include "utils/smack.hpp"
 #include "utils/paths.hpp"
 
 #include <sys/mount.h>
@@ -92,7 +92,7 @@ void PivotAndPrepRoot::execute()
 
 void PivotAndPrepRoot::pivotRoot()
 {
-    lxcpp::mount("", "/", "", MS_PRIVATE|MS_REC, "");
+    utils::mount("", "/", "", MS_PRIVATE|MS_REC, "");
 
     const std::string oldRootPath = utils::createFilePath(mConfig.mRootPath, mConfig.mOldRoot);
     const std::string newRootPath = utils::createFilePath(oldRootPath, "/newroot");
@@ -100,15 +100,15 @@ void PivotAndPrepRoot::pivotRoot()
     // Create a tmpfs and a directory for the new root as it has
     // to be on a separate mount point than the current one.
 
-    lxcpp::mkdir(oldRootPath, 0755);
-    lxcpp::mount("tmprootfs", oldRootPath, "tmpfs", 0, "");
+    utils::mkdir(oldRootPath, 0755);
+    utils::mount("tmprootfs", oldRootPath, "tmpfs", 0, "");
 
-    lxcpp::mkdir(newRootPath, 0755);
-    lxcpp::mount(mConfig.mRootPath, newRootPath, "", MS_BIND|MS_REC, "");
+    utils::mkdir(newRootPath, 0755);
+    utils::mount(mConfig.mRootPath, newRootPath, "", MS_BIND|MS_REC, "");
 
-    lxcpp::chdir(newRootPath);
-    lxcpp::pivotRoot(".", "." + mConfig.mOldRoot);
-    lxcpp::chdir("/");
+    utils::chdir(newRootPath);
+    utils::pivot_root(".", "." + mConfig.mOldRoot);
+    utils::chdir("/");
 }
 
 void PivotAndPrepRoot::cleanUpRoot()
@@ -126,11 +126,11 @@ void PivotAndPrepRoot::cleanUpRoot()
     const std::string devPrepared = utils::createFilePath(mConfig.mWorkPath,
                                                           mConfig.mName + ".dev");
 
-    lxcpp::umount(devPrepared);
+    utils::umount(devPrepared);
 
-    umountSubtree("/sys");
-    umountSubtree("/dev");
-    umountSubtree("/proc");
+    lxcpp::umountSubtree("/sys");
+    lxcpp::umountSubtree("/dev");
+    lxcpp::umountSubtree("/proc");
 }
 
 void PivotAndPrepRoot::mountStatic()
@@ -150,17 +150,17 @@ void PivotAndPrepRoot::mountStatic()
 
         if (m.skipUnmounted) {
             const std::string hostPath = mConfig.mOldRoot + std::string(m.dst);
-            bool existsDir = lxcpp::exists(hostPath, S_IFDIR);
+            bool existsDir = utils::exists(hostPath, S_IFDIR);
 
-            if (!existsDir || !lxcpp::isMountPoint(hostPath)) {
+            if (!existsDir || !utils::isMountPoint(hostPath)) {
                 LOGD("Not mounting " << m.dst << " it's not mounted on the host");
                 continue;
             }
         }
 
         LOGD("Mounting: " << m.src << " on: " << m.dst << " type: " << m.type);
-        lxcpp::mkdir(m.dst, 0755);
-        lxcpp::mount(m.src, m.dst, m.type, m.flags, "");
+        utils::mkdir(m.dst, 0755);
+        utils::mount(m.src, m.dst, m.type, m.flags, "");
     }
 }
 
@@ -173,22 +173,22 @@ void PivotAndPrepRoot::prepDev()
                                                           mConfig.mWorkPath,
                                                           mConfig.mName + ".dev");
 
-    lxcpp::mkdir("/dev", 0755);
-    lxcpp::mount(devPrepared, "/dev", "", devFlags, "");
+    utils::mkdir("/dev", 0755);
+    utils::mount(devPrepared, "/dev", "", devFlags, "");
 
     // Use previously prepared devpts as new /dev/pts
     const std::string devPtsPrepared = utils::createFilePath(mConfig.mOldRoot,
                                                              mConfig.mWorkPath,
                                                              mConfig.mName + ".devpts");
-    lxcpp::mkdir("/dev/pts", 0755);
-    lxcpp::mount(devPtsPrepared, "/dev/pts", "", devFlags, "");
+    utils::mkdir("/dev/pts", 0755);
+    utils::mount(devPtsPrepared, "/dev/pts", "", devFlags, "");
 }
 
 void PivotAndPrepRoot::symlinkStatic()
 {
     for (unsigned i = 0; i < ARRAY_SIZE(staticLinks); ++i) {
         LOGD("Symlinking: " << staticLinks[i].src << " to: " << staticLinks[i].dst);
-        lxcpp::symlink(staticLinks[i].src, staticLinks[i].dst);
+        utils::symlink(staticLinks[i].src, staticLinks[i].dst);
     }
 }
 

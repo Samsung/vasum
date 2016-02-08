@@ -60,10 +60,8 @@ void SetupSmackNS::execute()
     for (const auto &mapping : mSmackNSConfig.mLabelMap) {
         labelMap.append(std::get<0>(mapping) + " " + std::get<1>(mapping) + "\n");
     }
-    if (!labelMap.empty() && !utils::saveFileContent(labelMapPath, labelMap)) {
-        const std::string msg = "Failed to write the Smack label map";
-        LOGE(msg);
-        throw SmackNSException(msg);
+    if (!labelMap.empty()) {
+        utils::saveFileContent(labelMapPath, labelMap);
     }
 }
 

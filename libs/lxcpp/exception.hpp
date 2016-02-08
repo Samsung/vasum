@@ -56,11 +56,6 @@ struct EnvironmentSetupException: public Exception {
         : Exception(message) {}
 };
 
-struct CredentialSetupException: public Exception {
-    explicit CredentialSetupException(const std::string& message = "Error during handling environment variables")
-        : Exception(message) {}
-};
-
 struct CapabilitySetupException: public Exception {
     explicit CapabilitySetupException(const std::string& message = "Error during a capability operation")
         : Exception(message) {}
@@ -123,6 +118,21 @@ struct SmackNSException: public Exception {
 
 struct ForbiddenActionException: public Exception {
     explicit ForbiddenActionException(const std::string& message = "Forbidden action")
+        : Exception(message) {}
+};
+
+struct ProvisionExistsException: public Exception {
+    explicit ProvisionExistsException(const std::string& message = "Declared provision already exists")
+        : Exception(message) {}
+};
+
+struct ProvisionNotFoundException: public Exception {
+    explicit ProvisionNotFoundException(const std::string& message = "Provision not found")
+        : Exception(message) {}
+};
+
+struct ProvisionNotSupportedException: public Exception {
+    explicit ProvisionNotSupportedException(const std::string& message = "Provision not supported")
         : Exception(message) {}
 };
 

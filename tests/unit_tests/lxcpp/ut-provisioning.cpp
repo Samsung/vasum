@@ -67,8 +67,8 @@ const int TIMEOUT = 5000; //ms
 struct Fixture {
     Fixture() : mTestPath(TEST_DIR), mRoot(ROOT_DIR), mWork(WORK_DIR)
     {
-        BOOST_REQUIRE(utils::copyFile(SIMPLE_INIT_PATH, ROOT_DIR + SIMPLE_INIT));
-        BOOST_REQUIRE(utils::copyFile(SIMPLE_LS_PATH, ROOT_DIR + SIMPLE_LS));
+        BOOST_REQUIRE_NO_THROW(utils::copyFile(SIMPLE_INIT_PATH, ROOT_DIR + SIMPLE_INIT));
+        BOOST_REQUIRE_NO_THROW(utils::copyFile(SIMPLE_LS_PATH, ROOT_DIR + SIMPLE_LS));
 
         // setup test
         c = std::unique_ptr<Container>(createContainer("ProvisioningTester", ROOT_DIR, WORK_DIR));
@@ -78,7 +78,7 @@ struct Fixture {
         c->setInit(COMMAND);
 
         // cleanup
-        utils::removeFile(ROOT_DIR + TEST_FILE);
+        utils::remove(ROOT_DIR + TEST_FILE);
     }
 
     ~Fixture()
@@ -87,7 +87,7 @@ struct Fixture {
         std::string log = LOGGER_FILE;
         if (utils::exists(log)) {
             RELOG(std::ifstream(log));
-            utils::removeFile(log);
+            utils::remove(log);
         }
     }
 
@@ -107,7 +107,7 @@ struct Fixture {
         if(file_list.find(lookupItem) != std::string::npos) {
             found = true;
         }
-        utils::removeFile(TEST_CMD_LIST_RET);
+        utils::remove(TEST_CMD_LIST_RET);
         return found;
     }
 
@@ -125,16 +125,18 @@ struct MountFixture : Fixture {
     })
     {
         // cleanup
-        utils::removeFile(TEST_DIR + TEST_EXT_FILE);
+        utils::remove(TEST_DIR + TEST_EXT_FILE);
 
         // setup test
         utils::createDirs(mItem.target, 0777);
         utils::copyFile(BIN_DIR + TEST_EXT_FILE, EXTERNAL_DIR + TEST_EXT_FILE);
     }
     ~MountFixture() {
-        // race: who does the umount first? stopping container or test?
-        // no matter who - we have to have it unmounted before ScopedDir is deleted.
-        utils::umount(mItem.target);
+        try {
+            // race: who does the umount first? stopping container or test?
+            // no matter who - we have to have it unmounted before ScopedDir is deleted.
+            utils::umount(mItem.target);
+        } catch(...) {}
     }
 
     void declareMount() {

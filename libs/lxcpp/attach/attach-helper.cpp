@@ -26,15 +26,15 @@
 #include "lxcpp/attach/attach-helper.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"
-#include "lxcpp/filesystem.hpp"
 #include "lxcpp/namespace.hpp"
 #include "lxcpp/capability.hpp"
 #include "lxcpp/environment.hpp"
-#include "lxcpp/credentials.hpp"
 #include "lxcpp/utils.hpp"
 
 #include "utils/exception.hpp"
+#include "utils/fs.hpp"
 #include "utils/fd-utils.hpp"
+#include "utils/credentials.hpp"
 #include "logger/logger.hpp"
 #include "cargo-fd/cargo-fd.hpp"
 
@@ -63,9 +63,9 @@ int child(void* data)
     setenv(config.envToSet);
 
     // Set uid/gids
-    lxcpp::setregid(config.gid, config.gid);
-    setgroups(config.supplementaryGids);
-    lxcpp::setreuid(config.uid, config.uid);
+    utils::setregid(config.gid, config.gid);
+    utils::setgroups(config.supplementaryGids);
+    utils::setreuid(config.uid, config.uid);
 
     // Set control TTY
     if(!setupControlTTY(config.ttyFD)) {
@@ -104,7 +104,7 @@ void AttachHelper::execute()
 
     // Change the current work directory
     // workDirInContainer is a path relative to the container's root
-    lxcpp::chdir(mConfig.workDirInContainer);
+    utils::chdir(mConfig.workDirInContainer);
 
     // Unsharing PID namespace won't affect the returned childPid
     // CLONE_PARENT: Child's PPID == Caller's PID

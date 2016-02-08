@@ -26,13 +26,13 @@
 #include "lxcpp/commands/console.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/terminal.hpp"
-#include "lxcpp/credentials.hpp"
 #include "lxcpp/guard/api.hpp"
 
 #include "cargo-ipc/epoll/event-poll.hpp"
 #include "logger/logger.hpp"
 #include "utils/fd-utils.hpp"
 #include "utils/signal.hpp"
+#include "utils/credentials.hpp"
 
 #include <unistd.h>
 #include <functional>

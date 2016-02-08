@@ -158,7 +158,6 @@ int main(int argc, char** argv)
 #define VASUM_CLIENT_H
 
 #include <stdint.h>
-#include <sys/stat.h>
 #include <netinet/ip.h>
 #include <linux/if_link.h>
 

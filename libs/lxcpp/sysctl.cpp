@@ -58,11 +58,7 @@ void writeKernelParameter(const std::string& name, const std::string& value)
         throw BadArgument(msg);
     }
 
-    if (!utils::saveFileContent(namePath, value)) {
-        const std::string msg = "Failed to write value: " + value + " to kernel parameter: " + namePath;
-        LOGE(msg);
-        throw UtilityException(msg);
-    }
+    utils::saveFileContent(namePath, value);
 }
 
 std::string readKernelParameterValue(const std::string& name)
@@ -82,12 +78,7 @@ std::string readKernelParameterValue(const std::string& name)
     }
 
     std::string value;
-    if (!utils::readFirstLineOfFile(namePath, value)) {
-        const std::string msg = "Failed to read kernel parameter: " + namePath;
-        LOGE(msg);
-        throw UtilityException(msg);
-    }
-
+    utils::readFirstLineOfFile(namePath, value);
     return value;
 }
 

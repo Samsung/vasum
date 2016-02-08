@@ -48,7 +48,6 @@
 #include <boost/iostreams/stream.hpp>
 
 #include <lxc/lxccontainer.h>
-#include <sys/stat.h>
 #include <sys/wait.h>
 
 #include <map>

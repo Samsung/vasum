@@ -26,7 +26,6 @@
 #include "lxcpp/container-impl.hpp"
 #include "lxcpp/exception.hpp"
 #include "lxcpp/process.hpp"
-#include "lxcpp/filesystem.hpp"
 #include "lxcpp/capability.hpp"
 #include "lxcpp/commands/attach.hpp"
 #include "lxcpp/commands/console.hpp"
@@ -229,7 +228,7 @@ void ContainerImpl::setInit(const std::vector<std::string> &init)
 
     std::string path = mConfig->mRootPath + "/" + init[0];
 
-    if (::access(path.c_str(), X_OK) < 0) {
+    if (!utils::access(path, X_OK)) {
         const std::string msg = "Init path must point to an executable file";
         LOGE(msg);
         throw ConfigureException(msg);

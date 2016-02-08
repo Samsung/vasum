@@ -47,6 +47,7 @@
 #include "utils/img.hpp"
 #include "utils/scoped-dir.hpp"
 #include "utils/spin-wait-for.hpp"
+#include "utils/exception.hpp"
 #include "logger/logger.hpp"
 
 #include <vector>
@@ -642,8 +643,8 @@ BOOST_AUTO_TEST_CASE(ConstructorDestructor)
 BOOST_AUTO_TEST_CASE(MissingConfig)
 {
     BOOST_REQUIRE_EXCEPTION((ZonesManager(dispatcher.getPoll(), MISSING_CONFIG_PATH)),
-                            CargoException,
-                            WhatEquals("Could not load " + MISSING_CONFIG_PATH));
+                             utils::UtilsException,
+                             WhatEquals(MISSING_CONFIG_PATH + ": could not open for reading"));
 }
 
 BOOST_AUTO_TEST_CASE(Create)

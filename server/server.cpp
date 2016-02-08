@@ -42,12 +42,10 @@
 #include <cstring>
 #include <unistd.h>
 #include <pwd.h>
-#include <sys/stat.h>
 #include <boost/filesystem.hpp>
 #include <linux/capability.h>
 
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/utsname.h>
 #include <lxc/lxccontainer.h>
@@ -192,7 +190,7 @@ bool Server::checkEnvironment()
 
     // check namespaces
     std::string nsCheck = "/proc/self/ns";
-    if (::access(nsCheck.c_str(), R_OK|X_OK)  == -1) {
+    if (!utils::access(nsCheck, R_OK|X_OK)) {
         std::cout << "no namespace support (can't access " << nsCheck << "), run vasum-check-config" << std::endl;
         return false;
     }
@@ -223,10 +221,13 @@ bool Server::prepareEnvironment(const std::string& configPath, bool runAsRoot)
 
     // create directory for dbus socket (if needed)
     if (!config.runMountPointPrefix.empty()) {
-        if (!utils::createDir(config.runMountPointPrefix, uid, gid,
-                              fs::perms::owner_all |
-                              fs::perms::group_read | fs::perms::group_exe |
-                              fs::perms::others_read | fs::perms::others_exe)) {
+        try {
+            utils::createDir(config.runMountPointPrefix, uid, gid,
+                             fs::perms::owner_all |
+                             fs::perms::group_read | fs::perms::group_exe |
+                             fs::perms::others_read | fs::perms::others_exe);
+        }
+        catch(const utils::UtilsException & e) {
             return false;
         }
     }

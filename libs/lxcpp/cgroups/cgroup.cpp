@@ -91,48 +91,28 @@ void CGroup::setCommonValue(const std::string& param, const std::string& value)
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / ("cgroup." + param);
 
-    if (!utils::saveFileContent(path.string(), value)) {
-        const std::string msg = "Invalid param " + param;
-        LOGE(msg);
-        throw CGroupException(msg);
-    }
+    utils::saveFileContent(path.string(), value);
 }
 
 std::string CGroup::getCommonValue(const std::string& param) const
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / ("cgroup." + param);
 
-    try {
-        return utils::readFileStream(path.string());
-    } catch (const utils::UtilsException& e) {
-        const std::string msg = "Invalid param " + param;
-        LOGE(msg);
-        throw CGroupException(msg);
-    }
+    return utils::readFileStream(path.string());
 }
 
 void CGroup::setValue(const std::string& param, const std::string& value)
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / (mSubsys.getName() + "." + param);
 
-    if (!utils::saveFileContent(path.string(), value)) {
-        const std::string msg = "Invalid param " + param;
-        LOGE(msg);
-        throw CGroupException(msg);
-    }
+    utils::saveFileContent(path.string(), value);
 }
 
 std::string CGroup::getValue(const std::string& param) const
 {
     const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / (mSubsys.getName() + "." + param);
 
-    try {
-        return utils::readFileStream(path.string());
-    } catch (const utils::UtilsException& e) {
-        const std::string msg = "Invalid param " + param;
-        LOGE(msg);
-        throw CGroupException(msg);
-    }
+    return utils::readFileStream(path.string());
 }
 
 void CGroup::assignGroup(pid_t pid)

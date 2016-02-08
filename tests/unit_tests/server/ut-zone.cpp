@@ -134,8 +134,8 @@ BOOST_AUTO_TEST_CASE(BuggyConfig)
 BOOST_AUTO_TEST_CASE(MissingConfig)
 {
     BOOST_REQUIRE_EXCEPTION(create(MISSING_CONFIG_PATH),
-                            CargoException,
-                            WhatEquals("Could not load " + MISSING_CONFIG_PATH));
+                            UtilsException,
+                            WhatEquals(MISSING_CONFIG_PATH + ": could not open for reading"));
 }
 
 BOOST_AUTO_TEST_CASE(StartStop)

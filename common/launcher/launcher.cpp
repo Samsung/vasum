@@ -53,13 +53,16 @@ void createFile(int argc, const char *argv[])
     const char *path = argv[3];
     int flags = std::stoi(argv[4]);
     int mode = std::stoi(argv[5]);
+    int fd = -1;
 
-    int fd = ::open(path, O_CREAT | O_EXCL | flags, mode);
-    if (fd < 0) {
+    try {
+        fd = utils::open(path, O_CREAT | O_EXCL | flags, mode);
+        utils::fdSend(socket, fd);
+    } catch(...) {
         utils::close(socket);
-        throw std::runtime_error(std::string("File creation: ") + utils::getSystemErrorMessage());
+        utils::close(fd);
+        throw;
     }
-    utils::fdSend(socket, fd);
     utils::close(fd);
 }
 

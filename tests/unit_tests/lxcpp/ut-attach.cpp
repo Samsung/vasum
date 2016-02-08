@@ -63,8 +63,8 @@ struct Fixture {
          mRootDir(ROOT_DIR),
          mWork(WORK_DIR)
     {
-        BOOST_REQUIRE(utils::copyFile(SIMPLE_INIT_PATH, ROOT_DIR + SIMPLE_INIT));
-        BOOST_REQUIRE(utils::copyFile(SIMPLE_RAND_PATH, ROOT_DIR + SIMPLE_RAND));
+        BOOST_REQUIRE_NO_THROW(utils::copyFile(SIMPLE_INIT_PATH, ROOT_DIR + SIMPLE_INIT));
+        BOOST_REQUIRE_NO_THROW(utils::copyFile(SIMPLE_RAND_PATH, ROOT_DIR + SIMPLE_RAND));
 
         container = std::unique_ptr<lxcpp::Container>(lxcpp::createContainer("Attach", ROOT_DIR, WORK_DIR));
         BOOST_CHECK_NO_THROW(container->setInit(COMMAND));
@@ -81,7 +81,7 @@ struct Fixture {
         std::string log = LOGGER_FILE;
         if (utils::exists(log)) {
             RELOG(std::ifstream(log));
-            utils::removeFile(log);
+            utils::remove(log);
         }
         utils::signalUnblock(SIGCHLD);
     }
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(Attach)
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return container->getState() == Container::State::STOPPED;}));
 
     std::string random;
-    BOOST_REQUIRE_NO_THROW(utils::readFileContent(ROOT_DIR + "/" + TEST_CMD_RANDOM_PRODUCT, random));
+    BOOST_REQUIRE_NO_THROW(random = utils::readFileContent(ROOT_DIR + "/" + TEST_CMD_RANDOM_PRODUCT));
     BOOST_REQUIRE_GT(random.size(), 0);
 }
 
