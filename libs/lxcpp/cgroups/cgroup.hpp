@@ -66,6 +66,16 @@ public:
     void destroy();
 
     /**
+     * Get absolute path for this cgroup
+     */
+    std::string getPath() const;
+
+    /**
+     * Get subsystem name
+     */
+    const std::string& getSubsystemName() const;
+
+    /**
      * Set common 'cgroup' parameter.
      * Equivalent of: echo value > mSubsys_path/mName/cgroup.param
      */

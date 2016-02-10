@@ -339,18 +339,12 @@ VsmStatus Client::vsm_lookup_zone_by_pid(int pid, VsmString* id) noexcept
         const std::string path = "/proc/" + std::to_string(pid) + "/cpuset";
 
         std::string cpuset;
-        try {
-            utils::readFirstLineOfFile(path, cpuset);
-        }
-        catch(...) {
-            throw InvalidArgumentException("Process not found");
-        }
+        utils::readFirstLineOfFile(path, cpuset);
 
         std::string zoneId;
         if (!parseZoneIdFromCpuSet(cpuset, zoneId)) {
-            throw OperationFailedException("unknown format of cpuset");
+            throw OperationFailedException("unknown format of [" + std::to_string(pid) + "] cpuset '" + cpuset + "'");
         }
-
         *id = ::strdup(zoneId.c_str());
     });
 }
@@ -528,11 +522,11 @@ VsmStatus Client::vsm_netdev_get_ip_addr(const char* id,
             InetAddr addr;
             if (attr.first == "ipv4") {
                 addr.type = AF_INET;
-            }
-            else if (attr.first == "ipv6") {
+            } else if (attr.first == "ipv6") {
                 addr.type = AF_INET6;
+            } else {
+                continue;
             }
-            else continue;
 
             std::vector<std::string> addrAttrs;
             for(const auto& addrAttr : split(addrAttrs, attr.second, is_any_of(","))) {

@@ -4,6 +4,7 @@
 #include <lxcpp/lxcpp.hpp>
 #include <lxcpp/logger-config.hpp>
 #include <lxcpp/network-config.hpp>
+#include <lxcpp/cgroups/cgroup.hpp>
 #include <logger/logger.hpp>
 #include <sys/resource.h>
 #include <sys/stat.h>
@@ -110,6 +111,15 @@ int main(int argc, char *argv[])
         c->addInterfaceConfig(InterfaceConfigType::LOOPBACK, "lo");
         c->addInterfaceConfig(InterfaceConfigType::BRIDGE, "lxcpp-br0", "", {InetAddr("10.0.0.1", 24)});
         c->addInterfaceConfig(InterfaceConfigType::VETH_BRIDGED, "lxcpp-br0", "veth0", {InetAddr("10.0.0.2", 24)});
+
+        // configure cgroups
+        if (Subsystem("systemd").isAttached()) {
+            c->addCGroup("systemd", "lxcpp/" + c->getName(), {}, {});
+        }
+        std::vector<std::string> subsystems = lxcpp::Subsystem::availableSubsystems();
+        for (const auto &subsystem : subsystems) {
+            c->addCGroup(subsystem, "lxcpp/" + c->getName(), {}, {});
+        }
 
         // configure resource limits and kernel parameters
         c->setRlimit(RLIMIT_CPU, RLIM_INFINITY, RLIM_INFINITY);

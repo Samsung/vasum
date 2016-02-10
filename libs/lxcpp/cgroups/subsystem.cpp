@@ -61,7 +61,7 @@ Subsystem::Subsystem(const std::string& name, const std::string& mountPoint) : m
         auto it = std::istream_iterator<std::string>(iss);
         it++; //skip device name (fake for cgroup filesystem type)
         std::string path = *it++;       //mount point
-        if (!mountPoint.empty() && mountPoint != path) {
+        if (!mountPoint.empty() && !utils::beginsWith(path, mountPoint)) {
             continue;
         }
         if (it->compare("cgroup") != 0) {    //filesystem type
@@ -108,7 +108,7 @@ void Subsystem::attach(const std::string& path, const std::vector<std::string>& 
         LOGE(msg);
         throw CGroupException(msg);
     }
-    utils::createDirs(path, 0777);
+    utils::createDirs(path, 0755);
     utils::mount("cgroup", path, "cgroup", 0, utils::join(subs,","));
 }
 
@@ -127,7 +127,6 @@ void Subsystem::detach(const std::string& path)
             }
             return ;
         } catch(...) {
-            LOGW("umount retry...");
             --retry;
             usleep(1);
         }

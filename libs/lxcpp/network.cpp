@@ -670,19 +670,21 @@ void NetworkInterface::addRoute(const Route& route, const RoutingTable rt)
     nlm.put(msg);
 
     if (type == InetAddrType::IPV6) {
-        if (route.dst.prefix == 0)
+        if (route.dst.prefix == 0) {
             nlm.put(RTA_GATEWAY, route.dst.getAddr<in6_addr>());
-        else
+        } else {
             nlm.put(RTA_DST, route.dst.getAddr<in6_addr>());
+        }
 
         if (route.src.prefix == 128) {
             nlm.put(RTA_PREFSRC, route.src.getAddr<in6_addr>());
         }
     } else if (type == InetAddrType::IPV4) {
-        if (route.dst.prefix == 0)
+        if (route.dst.prefix == 0) {
             nlm.put(RTA_GATEWAY, route.dst.getAddr<in_addr>());
-        else
+        } else {
             nlm.put(RTA_DST, route.dst.getAddr<in_addr>());
+        }
 
         if (route.src.prefix == 32) {
             nlm.put(RTA_PREFSRC, route.src.getAddr<in_addr>());

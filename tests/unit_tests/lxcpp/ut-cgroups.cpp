@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(GetPidsByCGroup)
 
 BOOST_AUTO_TEST_CASE(SubsysAttach)
 {
-    const std::string& mountPoint = "/tmp/freezer";
+    const std::string& mountPoint = "/tmp/ut-cgroups/freezer";
     Subsystem sub("freezer", mountPoint);
 
     BOOST_CHECK_MESSAGE(sub.isAvailable(), "freezer not supported by kernel");
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(CGroupConfigSerialization)
 
 BOOST_AUTO_TEST_CASE(CGroupCommands)
 {
-    const std::string& tmpMountPoint = "/tmp/cgroup/cpu";
+    const std::string& tmpMountPoint = "/tmp/ut-cgroups/cpu";
     Subsystem cpu("cpu");
     const std::string& mountPoint = cpu.isAttached() ? "" : tmpMountPoint;
     CGroupsConfig cfg;
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(CGroupCommands)
     CGroupConfig cpucfg = {"cpu", "/testcpu", {}, {}};
     cfg.cgroups.push_back(cpucfg);
 
-    CGroupMakeAll cmd(cfg);
+    CGroupMakeAll cmd(cfg, UserNSConfig());
     BOOST_CHECK_NO_THROW(cmd.execute());
 
     CGroup cpugrp("cpu", "/testcpu");

@@ -27,8 +27,6 @@
 #include "logger/logger.hpp"
 #include "utils/fs.hpp"
 
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
 #ifdef USE_BOOST_REGEX
 #include <boost/regex.hpp>
 namespace rgx = boost;
@@ -52,7 +50,7 @@ void writeKernelParameter(const std::string& name, const std::string& value)
 
     std::string namePath = "/proc/sys/" + rgx::regex_replace(name, rgx::regex("\\."), "/");
 
-    if (!fs::exists(namePath)) {
+    if (!utils::exists(namePath)) {
         const std::string msg = "Kernel parameter: " + namePath + " does not exist";
         LOGE(msg);
         throw BadArgument(msg);
@@ -71,7 +69,7 @@ std::string readKernelParameterValue(const std::string& name)
 
     std::string namePath = "/proc/sys/" + rgx::regex_replace(name, rgx::regex("\\."), "/");
 
-    if (!fs::exists(namePath)) {
+    if (!utils::exists(namePath)) {
         const std::string msg = "Kernel parameter: " + namePath + " does not exist";
         LOGE(msg);
         throw BadArgument(msg);

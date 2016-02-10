@@ -39,6 +39,9 @@
 #include "utils/glib-loop.hpp"
 #endif //DBUS_CONNECTION
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+
 #include <map>
 #include <string>
 #include <utility>
@@ -51,6 +54,8 @@
 
 using namespace vasum;
 using namespace utils;
+
+namespace fs = boost::filesystem;
 
 namespace {
 
@@ -343,10 +348,24 @@ BOOST_AUTO_TEST_CASE(GetZoneIdByPidTestSingle)
 
 BOOST_AUTO_TEST_CASE(GetZoneIdByPidTestMultiple)
 {
-    std::set<std::string> ids;
+    std::vector<int> pids;
+    fs::directory_iterator end_iter;
 
+    for (fs::directory_iterator iter("/proc"); iter != end_iter; ++iter) {
+        const std::string name = iter->path().filename().string();
+        try {
+            if (fs::is_directory(iter->status()) && std::isdigit(name[0])) {
+                pids.push_back(std::stoi(name));
+            }
+        } catch (...) {
+            LOGE(name << "is not a process ");
+        }
+    }
+
+    std::set<std::string> ids;
     VsmClient client = vsm_client_create();
-    for (int n = 0; n < 100000; ++n) {
+
+    for (int n : pids) {
         VsmString zone;
         VsmStatus status = vsm_lookup_zone_by_pid(client, n, &zone);
         if (status == VSMCLIENT_SUCCESS) {
@@ -360,8 +379,8 @@ BOOST_AUTO_TEST_CASE(GetZoneIdByPidTestMultiple)
 
     BOOST_CHECK(ids.count("host") == 1);
 
-    for (const auto& dbus : EXPECTED_ZONES) {
-        BOOST_CHECK(ids.count(dbus) == 1);
+    for (const auto& zone : EXPECTED_ZONES) {
+        BOOST_CHECK_MESSAGE(ids.count(zone) == 1, zone + ".count=" + std::to_string(ids.count(zone)));
     }
 }
 

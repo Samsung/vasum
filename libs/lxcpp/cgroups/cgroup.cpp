@@ -28,9 +28,8 @@
 #include "utils/exception.hpp"
 #include "utils/fs.hpp"
 #include "utils/text.hpp"
+#include "utils/paths.hpp"
 #include "logger/logger.hpp"
-
-namespace fs = boost::filesystem;
 
 namespace lxcpp {
 
@@ -69,50 +68,55 @@ CGroup::CGroup(const std::string& subsysAndCgroup) :
 
 bool CGroup::exists() const
 {
-    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName;
-
-    return fs::is_directory(path);
+    return utils::isDir(getPath());
 }
 
 void CGroup::create()
 {
-    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName;
-    fs::create_directory(path);
+    utils::createDirs(getPath());
 }
 
 void CGroup::destroy()
 {
-    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName;
-    //remove_all is not good for cgroup filesystem
-    fs::remove(path);
+    utils::removeDir(getPath());
+}
+
+std::string CGroup::getPath() const
+{
+    return utils::createFilePath(mSubsys.getMountPoint(), mName);
+}
+
+const std::string& CGroup::getSubsystemName() const
+{
+    return mSubsys.getName();
 }
 
 void CGroup::setCommonValue(const std::string& param, const std::string& value)
 {
-    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / ("cgroup." + param);
+    const std::string path = utils::createFilePath(getPath(), "cgroup." + param);
 
-    utils::saveFileContent(path.string(), value);
+    utils::saveFileContent(path, value);
 }
 
 std::string CGroup::getCommonValue(const std::string& param) const
 {
-    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / ("cgroup." + param);
+    const std::string path = utils::createFilePath(getPath(), "cgroup." + param);
 
-    return utils::readFileStream(path.string());
+    return utils::readFileStream(path);
 }
 
 void CGroup::setValue(const std::string& param, const std::string& value)
 {
-    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / (mSubsys.getName() + "." + param);
+    const std::string path = utils::createFilePath(getPath(), mSubsys.getName() + "." + param);
 
-    utils::saveFileContent(path.string(), value);
+    utils::saveFileContent(path, value);
 }
 
 std::string CGroup::getValue(const std::string& param) const
 {
-    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / (mSubsys.getName() + "." + param);
+    const std::string path = utils::createFilePath(getPath(), mSubsys.getName() + "." + param);
 
-    return utils::readFileStream(path.string());
+    return utils::readFileStream(path);
 }
 
 void CGroup::assignGroup(pid_t pid)
@@ -122,17 +126,18 @@ void CGroup::assignGroup(pid_t pid)
 
 void CGroup::assignPid(pid_t pid)
 {
-    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / "tasks";
-    utils::saveFileContent(path.string(),  std::to_string(pid));
+    const std::string path = utils::createFilePath(getPath(), "tasks");
+
+    utils::saveFileContent(path,  std::to_string(pid));
 }
 
 std::vector<pid_t> CGroup::getPids() const
 {
-    const fs::path path = fs::path(mSubsys.getMountPoint()) / mName / "tasks";
-    std::ifstream fileStream(path.string());
+    const std::string path = utils::createFilePath(getPath(), "tasks");
+    std::ifstream fileStream(path);
 
     if (!fileStream.good()) {
-        const std::string msg = "Failed to open " + path.string();
+        const std::string msg = "Failed to open " + path;
         LOGE(msg);
         throw CGroupException(msg);
     }

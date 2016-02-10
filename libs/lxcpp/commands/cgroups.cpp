@@ -28,7 +28,19 @@
 #include "lxcpp/exception.hpp"
 #include "logger/logger.hpp"
 
+#include "utils/fs.hpp"
+#include "utils/paths.hpp"
+
+#include <sys/mount.h>
+
 namespace lxcpp {
+
+namespace {
+
+const std::string& CGROUP_DEFAULT_PATH  = "/sys/fs/cgroup";
+const std::string& INTERNAL_SYS_CGROUP = "internal";
+
+}
 
 void CGroupMakeAll::execute()
 {
@@ -37,7 +49,7 @@ void CGroupMakeAll::execute()
     }
 
     for (const auto i : mCgroups.cgroups) {
-        CGroupMake(i).execute();
+        CGroupMake(i, mUserNS).execute();
     }
 }
 
@@ -52,12 +64,20 @@ void SubsystemMake::execute()
 
 void CGroupMake::execute()
 {
-    CGroup cgroup(mCgroup.subsystem, mCgroup.name);
+    CGroup intCGroup(mCgroup.subsystem, mCgroup.name + "/" + INTERNAL_SYS_CGROUP);
 
-    if (!cgroup.exists()) {
-        cgroup.create();
+    if (!intCGroup.exists()) {
+        intCGroup.create();
     }
 
+    if (mCgroup.subsystem == "systemd") {
+        uid_t rootUID = mUserNS.convContToHostUID(0);
+        gid_t rootGID = mUserNS.convContToHostGID(0);
+
+        utils::chownDir(intCGroup.getPath(), rootUID, rootGID);
+    }
+
+    CGroup cgroup(mCgroup.subsystem, mCgroup.name);
     for (const auto& p : mCgroup.common) {
         cgroup.setCommonValue(p.name, p.value);
     }
@@ -80,6 +100,27 @@ void CGroupAssignPid::execute()
     CGroup cgroup(mSubsysName, mCgroupName);
 
     cgroup.assignPid(mPid);
+}
+
+void PrepCGroupSysFs::execute()
+{
+    utils::createDirs(CGROUP_DEFAULT_PATH, 0755);
+    utils::mount("none", CGROUP_DEFAULT_PATH, "tmpfs", 0, "mode=755,size=65536");
+
+    std::vector<std::string> subsystems;
+    for (const auto& cgroup : mConfig.mCgroups.cgroups) {
+        subsystems.push_back(cgroup.subsystem);
+    }
+
+    for (const auto &subsystem : subsystems) {
+        Subsystem sub(subsystem, mConfig.mOldRoot);
+        //TODO get "lxcpp" name from config or better from cgroups config
+        const std::string& source = utils::createFilePath(sub.getMountPoint(), "lxcpp", mConfig.mName, INTERNAL_SYS_CGROUP);
+        const std::string& target = utils::createFilePath(CGROUP_DEFAULT_PATH, sub.getName());
+
+        utils::createDirs(target, 0755);
+        utils::mount(source, target, "", MS_BIND, "");
+    }
 }
 
 } // namespace lxcpp

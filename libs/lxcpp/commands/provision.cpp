@@ -27,14 +27,11 @@
 #include "lxcpp/container.hpp"
 #include "lxcpp/provision-config.hpp"
 #include "utils/fs.hpp"
-#include <boost/filesystem.hpp>
 #include <sys/mount.h>
 
 // TODO: Cleanup file/path handling
 
 namespace lxcpp {
-
-namespace fs = boost::filesystem;
 
 void Provisions::execute()
 {
@@ -123,9 +120,7 @@ ProvisionLink::ProvisionLink(const provision::Link &link)
 
 void ProvisionLink::execute()
 {
-    const std::string srcHostPath = fs::path(mLink.source).normalize().string();
-
-    utils::createLink(srcHostPath, mLink.target);
+    utils::createLink(mLink.source, mLink.target);
 }
 void ProvisionLink::revert()
 {

@@ -263,6 +263,7 @@ BOOST_AUTO_TEST_CASE(NetworkAddDelRoute)
     };
 
     NetworkInterface ni("lo");
+    ni.up(); // make sure lo is up on the system (it should be up!!!)
 
     BOOST_CHECK_NO_THROW(ni.addRoute(route));
     BOOST_CHECK_NO_THROW(routes = ni.getRoutes());

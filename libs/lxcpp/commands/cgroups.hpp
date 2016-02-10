@@ -25,6 +25,7 @@
 #define LXCPP_COMMANDS_CGROUPS_HPP
 
 #include "lxcpp/commands/command.hpp"
+#include "lxcpp/container-config.hpp"
 #include "lxcpp/cgroups/cgroup-config.hpp"
 
 
@@ -35,8 +36,9 @@ public:
    /**
     * Creates and configures cgroups.
     */
-    CGroupMakeAll(const CGroupsConfig& cfg) :
-        mCgroups(cfg)
+    CGroupMakeAll(const CGroupsConfig& cfg, const UserNSConfig& uns) :
+        mCgroups(cfg),
+        mUserNS(uns)
     {
     }
 
@@ -44,6 +46,7 @@ public:
 
 private:
     const CGroupsConfig& mCgroups;
+    const UserNSConfig& mUserNS;
 };
 
 class SubsystemMake final: Command {
@@ -67,8 +70,9 @@ public:
    /**
     * Creates and configures cgroup.
     */
-    CGroupMake(const CGroupConfig& cfg) :
-        mCgroup(cfg)
+    CGroupMake(const CGroupConfig& cfg, const UserNSConfig& uns) :
+        mCgroup(cfg),
+        mUserNS(uns)
     {
     }
 
@@ -76,6 +80,7 @@ public:
 
 private:
     const CGroupConfig& mCgroup;
+    const UserNSConfig& mUserNS;
 };
 
 class CGroupAssignPidAll final: Command {
@@ -114,6 +119,22 @@ private:
     std::string mSubsysName;
     std::string mCgroupName;
     pid_t mPid;
+};
+
+class PrepCGroupSysFs final: Command {
+public:
+   /**
+    * Prepare cgroups sysfs hierarchy
+    */
+    PrepCGroupSysFs(const ContainerConfig& config) :
+        mConfig(config)
+    {
+    }
+
+    void execute();
+
+private:
+    const ContainerConfig& mConfig;
 };
 
 } // namespace lxcpp

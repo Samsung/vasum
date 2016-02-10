@@ -97,10 +97,11 @@ static inline bool operator==(const in6_addr& a, const in6_addr& b)
 static inline bool operator==(const InetAddr& a, const InetAddr& b)
 {
     if (a.type == b.type && a.prefix == b.prefix) {
-        if (a.type == InetAddrType::IPV6)
+        if (a.type == InetAddrType::IPV6) {
             return a.getAddr<in6_addr>() == b.getAddr<in6_addr>();
-        else
+        } else {
             return a.getAddr<in_addr>() == b.getAddr<in_addr>();
+        }
     }
     return false;
 }

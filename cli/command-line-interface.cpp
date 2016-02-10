@@ -538,8 +538,9 @@ void create_netdev(const Args& argv)
                   argv[4].c_str(),
                   macvlanFromString(argv[5].c_str())));
     }
-    else
+    else {
         throw std::runtime_error("Wrong nettype option " + nettype);
+    }
 }
 
 void destroy_netdev(const Args& argv)

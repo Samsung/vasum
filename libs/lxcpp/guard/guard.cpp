@@ -66,7 +66,7 @@ void Guard::containerPrepPreClone()
     Provisions provisions(*mConfig);
     provisions.execute();
 
-    CGroupMakeAll cgroups(mConfig->mCgroups);
+    CGroupMakeAll cgroups(mConfig->mCgroups, mConfig->mUserNSConfig);
     cgroups.execute();
 
     mContToImpl.resize(mGuardPTYs.mCount);
@@ -116,6 +116,9 @@ void Guard::containerPrepInClone(ContainerConfig &config)
 
     NetConfigureAll network(config.mNetwork);
     network.execute();
+
+    PrepCGroupSysFs cgroups(config);
+    cgroups.execute();
 
     if (!config.mRlimits.empty()) {
         for (const auto& limit : config.mRlimits) {
