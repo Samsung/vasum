@@ -6,6 +6,7 @@
 #include <lxcpp/network-config.hpp>
 #include <logger/logger.hpp>
 #include <sys/resource.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/mount.h>
 #include <unistd.h>
@@ -25,28 +26,28 @@ pid_t initPid = -1;
 void sighandler(int signal)
 {
     // remove the log in a deffered manner
-    pid_t pid = fork();
+    pid_t pid = ::fork();
 
     if (pid == 0)
     {
-        pid_t pid = fork();
+        pid_t pid = ::fork();
 
         if (pid == 0)
         {
             if (initPid > 0)
                 ::kill(initPid, SIGTERM);
-            sleep(20);
+            ::sleep(20);
             ::unlink("/tmp/lxcpp-impl.txt");
             ::unlink("/tmp/lxcpp-guard.txt");
 
-            exit(0);
+            ::exit(0);
         }
 
-        exit(0);
+        ::exit(0);
     }
 
-    wait();
-    exit(0);
+    ::wait();
+    ::exit(0);
 }
 
 // NOTE: to enable connecting outside the host from container (to be configured in upper layer):
@@ -65,12 +66,12 @@ void sighandler(int signal)
 
 int main(int argc, char *argv[])
 {
-    if (getuid() != 0) {
-        printf("Due to user namespace this program has to be run as root.\n");
+    if (::getuid() != 0) {
+        ::printf("Due to user namespace this program has to be run as root.\n");
         return 1;
     }
 
-    signal(SIGINT, &sighandler);
+    ::signal(SIGINT, &sighandler);
 
     logger::setupLogger(logger::LogType::LOG_STDERR, logger::LogLevel::TRACE);
     LOGT("Color test: TRACE");
@@ -83,10 +84,11 @@ int main(int argc, char *argv[])
     //logger::setupLogger(logger::LogType::LOG_FILE, logger::LogLevel::DEBUG, "/tmp/lxcpp-impl.txt");
 
     std::vector<std::string> args;
-    args.push_back("/bin/bash");
+    args.push_back("/bin/bash"); args.push_back("--login");
+    //args.push_back("/bin/login"); args.push_back("root");
     //args.push_back("/usr/lib/systemd/systemd");
 
-    mkdir(WORK_DIR, 0755);
+    ::mkdir(WORK_DIR, 0755);
 
     try
     {
@@ -94,7 +96,9 @@ int main(int argc, char *argv[])
 
         c->setHostName("junk");
         c->setInit(args);
-        c->setEnv({{"TEST_VAR", "test_value"}, {"_TEST_VAR_", "_test_value_"}});
+        c->setEnv({{"TEST_VAR", "test_value"}, {"_TEST_VAR_", "_test_value_"}, {"TERM", "xterm"}});
+                  //{"LIBVIRT_LXC_UUID", "94e491f6-a13a-4871-abd9-362b999b3928"}, {"container_uuid", "94e491f6-a13a-4871-abd9-362b999b3928"},
+                  //{"LIBVIRT_LXC_NAME", "test"}, {"container", "lxc-libvirt"}});
         c->setLogger(logger::LogType::LOG_PERSISTENT_FILE, logger::LogLevel::DEBUG, "/tmp/lxcpp-guard.txt");
         c->setTerminalCount(4);
 
@@ -114,7 +118,7 @@ int main(int argc, char *argv[])
 
         c->start();
         // not needed per se, but let things settle for a second, e.g. the logs
-        sleep(1);
+        ::sleep(1);
 
         if (c->getState() == Container::State::RUNNING) {
             c->console();
@@ -130,7 +134,7 @@ int main(int argc, char *argv[])
         // Test reconnect
         c = createContainer("test", CONT_DIR, WORK_DIR);
         c->connect();
-        sleep(1);
+        ::sleep(1);
 
         if (c->getState() == Container::State::RUNNING) {
             c->console();
@@ -146,7 +150,7 @@ int main(int argc, char *argv[])
         std::cout << "EXCEPTION: " << e.what() << std::endl;
     }
 
-    sighandler(3);
+    ::sighandler(3);
 
     return 0;
 }

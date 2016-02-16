@@ -275,7 +275,7 @@ cargo::ipc::HandlerExitCode Guard::onSetConfig(const cargo::ipc::PeerID,
 
     mConfig = data;
     mGuardPTYs.mCount = mConfig->mTerminals.mCount;
-    mGuardPTYs.mUID = mConfig->mUserNSConfig.getContainerRootUID();
+    mGuardPTYs.mUID = mConfig->mUserNSConfig.convContToHostUID(0);
     mGuardPTYs.mDevptsPath = utils::createFilePath(mConfig->mWorkPath,
                                                    mConfig->mName + ".devpts");
 

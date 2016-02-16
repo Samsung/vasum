@@ -27,15 +27,20 @@
 #include "cargo/fields.hpp"
 
 #include <vector>
+#include <string>
+#include <sys/types.h>
 
 
 namespace lxcpp {
 
 
-struct UserNSConfig {
+struct UserNSConfig
+{
     // container ID start, host ID start, number of IDs
-    std::vector<std::tuple<unsigned, unsigned, unsigned>> mUIDMaps;
-    std::vector<std::tuple<unsigned, unsigned, unsigned>> mGIDMaps;
+    typedef std::vector<std::tuple<unsigned, unsigned, unsigned>> IDMap;
+
+    IDMap mUIDMaps;
+    IDMap mGIDMaps;
 
     CARGO_REGISTER
     (
@@ -43,8 +48,16 @@ struct UserNSConfig {
         mGIDMaps
     )
 
-    unsigned getContainerRootUID() const;
-    unsigned getContainerRootGID() const;
+    void addUIDMap(uid_t contID, uid_t hostID, unsigned num);
+    void addGIDMap(gid_t contID, gid_t hostID, unsigned num);
+    uid_t convContToHostUID(uid_t contID) const;
+    gid_t convContToHostGID(gid_t contID) const;
+
+private:
+    void assertMapCorrect(const IDMap &map, const std::string &ID,
+                          unsigned contID, unsigned hostID, unsigned num) const;
+    unsigned convContToHostID(const IDMap &map, const std::string &ID,
+                              unsigned contID) const;
 };
 
 

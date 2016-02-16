@@ -278,14 +278,7 @@ void ContainerImpl::addUIDMap(uid_t contID, uid_t hostID, unsigned num)
     Lock lock(mStateMutex);
 
     mConfig->mNamespaces |= CLONE_NEWUSER;
-
-    if (mConfig->mUserNSConfig.mUIDMaps.size() >= 5) {
-        const std::string msg = "Max number of 5 UID mappings has been already reached";
-        LOGE(msg);
-        throw ConfigureException(msg);
-    }
-
-    mConfig->mUserNSConfig.mUIDMaps.emplace_back(contID, hostID, num);
+    mConfig->mUserNSConfig.addUIDMap(contID, hostID, num);
 }
 
 void ContainerImpl::addGIDMap(gid_t contID, gid_t hostID, unsigned num)
@@ -293,14 +286,7 @@ void ContainerImpl::addGIDMap(gid_t contID, gid_t hostID, unsigned num)
     Lock lock(mStateMutex);
 
     mConfig->mNamespaces |= CLONE_NEWUSER;
-
-    if (mConfig->mUserNSConfig.mGIDMaps.size() >= 5) {
-        const std::string msg = "Max number of 5 GID mappings has been already reached";
-        LOGE(msg);
-        throw ConfigureException(msg);
-    }
-
-    mConfig->mUserNSConfig.mGIDMaps.emplace_back(contID, hostID, num);
+    mConfig->mUserNSConfig.addGIDMap(contID, hostID, num);
 }
 
 void ContainerImpl::addSmackLabelMap(const std::string &originalLabel,
@@ -339,9 +325,10 @@ void ContainerImpl::start(const unsigned int timeoutMS)
         throw ConfigureException(msg);
     }
 
-    // The following two functions throw in case the root is not mapped
-    __attribute__((unused)) uid_t rootUID = mConfig->mUserNSConfig.getContainerRootUID();
-    __attribute__((unused)) gid_t rootGID = mConfig->mUserNSConfig.getContainerRootGID();
+    // The following two functions throw in case the required UIDS/GIDS are not mapped
+    __attribute__((unused)) uid_t rootUID = mConfig->mUserNSConfig.convContToHostUID(0);
+    __attribute__((unused)) gid_t rootGID = mConfig->mUserNSConfig.convContToHostGID(0);
+    __attribute__((unused)) gid_t ttyGID = mConfig->mUserNSConfig.convContToHostGID(mConfig->mPtsGID);
     LOGD("The root user in the container is UID: " << rootUID << " GID: " << rootGID);
 
     if ((mConfig->mNamespaces & CLONE_NEWUSER) && (utils::dirName(mConfig->mRootPath).compare("/") == 0)) {

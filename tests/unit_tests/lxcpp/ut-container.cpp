@@ -268,35 +268,85 @@ BOOST_AUTO_TEST_CASE(UIDGIDGoodMapping)
     BOOST_REQUIRE(utils::spinWaitFor(TIMEOUT, [&] {return c->getState() == Container::State::STOPPED;}));
 }
 
-BOOST_AUTO_TEST_CASE(UIDBadMapping)
+BOOST_AUTO_TEST_CASE(UIDBadMappingLimit)
 {
-    auto c = std::unique_ptr<Container>(createContainer("UIDBadMapping", ROOT_DIR, WORK_DIR));
+    auto c = std::unique_ptr<Container>(createContainer("UIDBadMappingLimit", ROOT_DIR, WORK_DIR));
     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
     BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
                                       logger::LogLevel::DEBUG,
                                       LOGGER_FILE));
 
     // At most 5 mappings allowed
-    for(int i = 0; i < 5; ++i) {
-        c->addUIDMap(0, 1000, 1);
+    int i;
+    for(i = 0; i < 5; ++i) {
+        BOOST_REQUIRE_NO_THROW(c->addUIDMap(i, i + 1000, 1));
     }
 
-    BOOST_REQUIRE_THROW(c->addUIDMap(0, 1000, 1),ConfigureException);
+    BOOST_REQUIRE_THROW(c->addUIDMap(i, i + 1000, 1), ConfigureException);
 }
 
-BOOST_AUTO_TEST_CASE(GIDBadMapping)
+BOOST_AUTO_TEST_CASE(UIDBadMappingValues)
 {
-    auto c = std::unique_ptr<Container>(createContainer("GIDBadMapping", ROOT_DIR, WORK_DIR));
+    auto c = std::unique_ptr<Container>(createContainer("UIDBadMappingValues", ROOT_DIR, WORK_DIR));
     BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
     BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
                                       logger::LogLevel::DEBUG,
                                       LOGGER_FILE));
 
-    for(int i = 0; i < 5; ++i) {
-        c->addGIDMap(0, 1000, 1);
+    BOOST_REQUIRE_THROW(c->addUIDMap(0, (uid_t)-1, 1), ConfigureException);
+    BOOST_REQUIRE_THROW(c->addUIDMap(0, (uid_t)-2, 2), ConfigureException);
+}
+
+BOOST_AUTO_TEST_CASE(UIDBadMappingOverlap)
+{
+    auto c = std::unique_ptr<Container>(createContainer("UIDBadMappingOverlap", ROOT_DIR, WORK_DIR));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
+
+    BOOST_REQUIRE_NO_THROW(c->addUIDMap(0, 1000, 1001));
+    BOOST_REQUIRE_THROW(c->addUIDMap(1000, 2000, 1000), ConfigureException);
+}
+
+BOOST_AUTO_TEST_CASE(GIDBadMappingLimit)
+{
+    auto c = std::unique_ptr<Container>(createContainer("GIDBadMappingLimit", ROOT_DIR, WORK_DIR));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
+
+    int i;
+    for(i = 0; i < 5; ++i) {
+        BOOST_REQUIRE_NO_THROW(c->addGIDMap(i, i + 1000, 1));
     }
 
-    BOOST_REQUIRE_THROW(c->addGIDMap(0, 1000, 1),ConfigureException);
+    BOOST_REQUIRE_THROW(c->addGIDMap(i, i + 1000, 1), ConfigureException);
+}
+
+BOOST_AUTO_TEST_CASE(GIDBadMappingValues)
+{
+    auto c = std::unique_ptr<Container>(createContainer("GIDBadMappingValues", ROOT_DIR, WORK_DIR));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
+
+    BOOST_REQUIRE_THROW(c->addGIDMap(0, (uid_t)-1, 1), ConfigureException);
+    BOOST_REQUIRE_THROW(c->addGIDMap(0, (uid_t)-2, 2), ConfigureException);
+}
+
+BOOST_AUTO_TEST_CASE(GIDBadMappingOverlap)
+{
+    auto c = std::unique_ptr<Container>(createContainer("GIDBadMappingOverlap", ROOT_DIR, WORK_DIR));
+    BOOST_CHECK_NO_THROW(c->setInit(COMMAND));
+    BOOST_CHECK_NO_THROW(c->setLogger(logger::LogType::LOG_PERSISTENT_FILE,
+                                      logger::LogLevel::DEBUG,
+                                      LOGGER_FILE));
+
+    BOOST_REQUIRE_NO_THROW(c->addGIDMap(0, 1000, 1001));
+    BOOST_REQUIRE_THROW(c->addGIDMap(1000, 2000, 1000), ConfigureException);
 }
 
 BOOST_AUTO_TEST_CASE(SmackMapping)

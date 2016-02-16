@@ -110,8 +110,7 @@ void PrepDevFS::execute()
     // FIXME: A little bit hacky, root and tty GID can be disjoint.
     // A proper interface for recalculating namespaced UIDs/GIDs
     // should be provided in mUserNSConfig.
-    const gid_t ptsGID = mConfig.mUserNSConfig.getContainerRootGID()
-        + mConfig.mPtsGID;
+    const gid_t ptsGID = mConfig.mUserNSConfig.convContToHostGID(mConfig.mPtsGID);
     const std::string devPtsOpts = "newinstance,ptmxmode=0666,mode=0620,gid="
         + std::to_string(ptsGID);
 

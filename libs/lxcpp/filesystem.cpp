@@ -112,8 +112,8 @@ void makeNode(const std::string& path, mode_t mode, dev_t dev)
 
 void containerChownRoot(const std::string& path, const struct UserNSConfig& config)
 {
-    uid_t rootUID = config.getContainerRootUID();
-    gid_t rootGID = config.getContainerRootGID();
+    uid_t rootUID = config.convContToHostUID(0);
+    gid_t rootGID = config.convContToHostGID(0);
 
     utils::chown(path, rootUID, rootGID);
 }
