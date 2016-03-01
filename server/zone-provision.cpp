@@ -229,8 +229,8 @@ void ZoneProvision::link(const ZoneProvisioningConfig::Link& config)
             return;
         }
     }
-    THROW_UTILS_EXCEPTION_E("Failed to create hard link: path=host: " +
-                            srcHostPath + ", msg: Path prefix is not valid path");
+    THROW_EXCEPTION(UtilsException, "Failed to create hard link: path=host: " +
+                    srcHostPath + ", msg: Path prefix is not valid path");
 }
 
 std::string ZoneProvision::getId(const ZoneProvisioningConfig::File& file)
